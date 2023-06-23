@@ -4,10 +4,14 @@
 #include <unistd.h>
 #include <cerrno>
 #include <cstring>
+#include <tuple>
 #include "pid.h"
 
 struct SharedMem {
     std::array<AddressStruct, addressRegisterSize> addrRegisterPtr;
+    bool commandReady{false};
+    std::variant<int*, double*> commandAddr;
+    std::variant<int, double> commandVal;
 };
 
 int main() {
@@ -30,7 +34,7 @@ int main() {
     }
 
     // Map the shared memory region into the address space
-    void* sharedMem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, shmFd, 0);
+    void* sharedMem = mmap(NULL, size, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, shmFd, 0);
     if (sharedMem == MAP_FAILED) {
         std::cerr << "Failed to map shared memory" << std::endl;
         close(shmFd);
@@ -38,32 +42,30 @@ int main() {
         return 1;
     }
 
-    std::cout << "Going to create PIDs" << "\n";
     // Create and initialize a couple of PIDs
     PID::PID pid1 = PID::PID("pid_1", 1,1,1);
     PID::PID pid2 = PID::PID("pid_2", 2,2,2);
     PID::PID pid3 = PID::PID("pid_3", 3,3,3); 
-    std::cout << "Registered all" << "\n";
 
     // Create and initialize the shared data structure
     SharedMem* sharedMemRegister = static_cast<SharedMem*>(sharedMem);
-    std::cout << "Assign shared memory to the addressRegister" << "\n";
-    // sharedMemRegister->addrRegisterPtr.resize(addressRegister.size());
-    std::cout << sharedMemRegister->addrRegisterPtr.size() << std::endl;
     sharedMemRegister->addrRegisterPtr = std::move(addressRegister);
-
-   for (auto id=0; id<6; id++) {
-        std::cout << "Shared memory before loop\n";
-        std::string name = std::string(sharedMemRegister->addrRegisterPtr[id].m_name.data()); 
-        std::cout << name  << " " << std::get<double*>(sharedMemRegister->addrRegisterPtr[id].m_addr) << " " << sharedMemRegister->addrRegisterPtr[id].m_type << "\n";
-    }
 
     int counter=0;
     while (true) {
         std::cout << "Thread 1 counter: " << counter++ << "\n";
+        // TEST CODE, verbose parameters signalling on thread 1
         std::cout << "PID1: " << pid1.getP() << " " << pid1.getI() << " " << pid1.getD() << "\n";
         std::cout << "PID2: " << pid2.getP() << " " << pid2.getI() << " " << pid2.getD() << "\n";
         std::cout << "PID3: " << pid3.getP() << " " << pid3.getI() << " " << pid3.getD() << "\n";
+        // END TEST CODE
+        // TEST CODE, extremely basic verbose execution of commands received from a remote thread
+        if(sharedMemRegister->commandReady) {
+            std::cout << "Command? " << std::get<double*>(sharedMemRegister->commandAddr) << " " << std::get<double>(sharedMemRegister->commandVal) << "\n";
+            sharedMemRegister->commandReady = false;
+            memcpy(std::get<double*>(sharedMemRegister->commandAddr), &std::get<double>(sharedMemRegister->commandVal), sizeof(std::get<double>(sharedMemRegister->commandVal)));
+        }
+        // END TEST CODE
         // Add some delay to simulate work
         usleep(2000000);
         if (counter == 10)

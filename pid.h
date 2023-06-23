@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <string>
 #include <variant>
 
 // global constants defining variable sizes
@@ -56,7 +57,7 @@ class PID {
 
 void PID::registerObject() {
     if ((registerCounter+3) >= addressRegisterSize) {
-        registerCounter = 0; // start over and begin overwriting, raise a warning/error?
+        registerCounter = 0; // start over and begin overwriting or raise a warning/error?
     }
     addressRegister[registerCounter] = AddressStruct(this->m_name + ".p", this->getAddressP(), TYPE::Float32);
     addressRegister[registerCounter+1] = AddressStruct(this->m_name + ".i", this->getAddressI(), TYPE::Float32);

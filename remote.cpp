@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
+#include <tuple>
 #include <variant>
 #include <vector>
 
@@ -29,6 +30,9 @@ struct AddressStruct {
 
 struct SharedMem {
     std::array<AddressStruct, addressRegisterSize> addrRegisterPtr;
+    bool commandReady{false};
+    std::variant<int*, double*> commandAddr;
+    std::variant<int, double> commandVal;
 };
 
 int main() {
@@ -45,7 +49,7 @@ int main() {
     // Calculate the size of shared memory region
     size_t size = sizeof(SharedMem) + (sizeof(AddressStruct) * addressRegisterSize);
     // Map the shared memory region into the address space
-    void* sharedMem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, shmFd, 0);
+    void* sharedMem = mmap(NULL, size, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, shmFd, 0);
     if (sharedMem == MAP_FAILED) {
         std::cerr << "Failed to map shared memory" << std::endl;
         close(shmFd);
@@ -55,13 +59,21 @@ int main() {
 
     // Create and initialize the shared data structure
     SharedMem* sharedMemRegister = static_cast<SharedMem*>(sharedMem);
-    auto const addressRegister = sharedMemRegister->addrRegisterPtr;
+    auto addressRegister = sharedMemRegister->addrRegisterPtr;
 
     // Access the shared data from a different core
     // In this example, we'll simply increment the value
     int counter=0;
     while (true) {
+        // TEST CODE FOR TRANSFERRING COMMANDS
         std::cout << "Thread2 counter: " << counter++ << "\n";
+        double val = static_cast<double>(counter)*3.14159;
+        double *addr = std::get<double*>(addressRegister[counter % 9].m_addr); // there are 3 PID with 9 params total in the example
+        sharedMemRegister->commandAddr = addr;
+        sharedMemRegister->commandVal = val;
+        sharedMemRegister->commandReady = true;
+        // END OF TEST CODE
+
         // Add some delay to simulate work
         usleep(1000000);
         if (counter == 10)
