@@ -30,7 +30,6 @@ int main()
 
     // Set the size of shared memory region
     size_t size = sizeof(SharedMem) + (sizeof(AddressStruct) * addressRegisterSize);
-    std::cout << size << "\n";
     if (ftruncate(shmFd, size) == -1)
     {
         std::cerr << "Failed to set the size of shared memory" << std::endl;
@@ -70,8 +69,6 @@ int main()
         // TEST CODE, extremely basic verbose execution of commands received from a remote thread
         if (sharedMemRegister->transmissionCntr > sharedMemRegister->acknowledgeCntr)
         {
-            std::cout << "Command? " << std::get<double*>(sharedMemRegister->commandAddr) << " "
-                      << std::get<double>(sharedMemRegister->commandVal) << "\n";
             memcpy(
                 std::get<double*>(sharedMemRegister->commandAddr), &std::get<double>(sharedMemRegister->commandVal),
                 sizeof(std::get<double>(sharedMemRegister->commandVal))
