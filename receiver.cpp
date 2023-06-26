@@ -11,7 +11,8 @@
 struct SharedMem
 {
     std::array<AddressStruct, addressRegisterSize> addrRegisterPtr;
-    bool                                           commandReady{false};
+    int                                            acknowledgeCntr{0};
+    int                                            transmissionCntr{0};
     std::variant<int*, double*>                    commandAddr;
     std::variant<int, double>                      commandVal;
 };
@@ -67,15 +68,15 @@ int main()
         std::cout << "PID3: " << pid3.getP() << " " << pid3.getI() << " " << pid3.getD() << "\n";
         // END TEST CODE
         // TEST CODE, extremely basic verbose execution of commands received from a remote thread
-        if (sharedMemRegister->commandReady)
+        if (sharedMemRegister->transmissionCntr > sharedMemRegister->acknowledgeCntr)
         {
             std::cout << "Command? " << std::get<double*>(sharedMemRegister->commandAddr) << " "
                       << std::get<double>(sharedMemRegister->commandVal) << "\n";
-            sharedMemRegister->commandReady = false;
             memcpy(
                 std::get<double*>(sharedMemRegister->commandAddr), &std::get<double>(sharedMemRegister->commandVal),
                 sizeof(std::get<double>(sharedMemRegister->commandVal))
             );
+            sharedMemRegister->acknowledgeCntr++;
         }
         // END TEST CODE
         // Add some delay to simulate work

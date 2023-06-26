@@ -39,7 +39,8 @@ struct AddressStruct
 struct SharedMem
 {
     std::array<AddressStruct, addressRegisterSize> addrRegisterPtr;
-    bool                                           commandReady{false};
+    int                                            acknowledgeCntr{0};
+    int                                            transmissionCntr{0};
     std::variant<int*, double*>                    commandAddr;
     std::variant<int, double>                      commandVal;
 };
@@ -80,12 +81,12 @@ int main()
     {
         // TEST CODE FOR TRANSFERRING COMMANDS
         std::cout << "Thread2 counter: " << counter++ << "\n";
-        double  val                     = static_cast<double>(counter) * 3.14159;
-        double* addr                    = std::get<double*>(addressRegister[counter % 9].m_addr
+        double  val                    = static_cast<double>(counter) * 3.14159;
+        double* addr                   = std::get<double*>(addressRegister[counter % 9].m_addr
         );   // there are 3 PID with 9 params total in the example
-        sharedMemRegister->commandAddr  = addr;
-        sharedMemRegister->commandVal   = val;
-        sharedMemRegister->commandReady = true;
+        sharedMemRegister->commandAddr = addr;
+        sharedMemRegister->commandVal  = val;
+        sharedMemRegister->transmissionCntr++;
         // END OF TEST CODE
 
         // Add some delay to simulate work
