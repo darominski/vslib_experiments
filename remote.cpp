@@ -47,9 +47,9 @@ int main()
     {
         // TEST CODE FOR TRANSFERRING COMMANDS
         std::cout << "Thread2 counter: " << counter++ << "\n";
-        double  val                    = static_cast<double>(counter) * 3.14159;
-        double* addr                   = std::get<double*>(addressRegister[counter % 9].m_addr
-        );   // there are 3 PID with 9 params total in the example
+        double const val               = static_cast<double>(counter) * 3.14159;
+        // there are 3 PID with 9 params total in the example, modulo prevents setting not used fields
+        intptr_t const addr            = addressRegister[counter % 9].m_addr;
         sharedMemRegister->commandAddr = addr;
         sharedMemRegister->commandVal  = val;
         sharedMemRegister->commandSize = sizeof(val);

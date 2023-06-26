@@ -17,7 +17,7 @@ enum TYPE
 struct AddressStruct
 {
     AddressStruct(){};
-    AddressStruct(const std::string& name, std::variant<int*, double*> addr, TYPE type)
+    AddressStruct(const std::string& name, intptr_t addr, TYPE type)
         : m_addr(addr),
           m_type(type)
     {
@@ -26,9 +26,9 @@ struct AddressStruct
         std::copy(name.begin(), name.begin() + length, m_name.begin());
         m_name[length] = '\0';
     };
-    std::array<char, 128>       m_name{};
-    std::variant<int*, double*> m_addr;
-    TYPE                        m_type;
+    std::array<char, 128> m_name{};
+    intptr_t              m_addr;
+    TYPE                  m_type;
 };
 
 std::array<AddressStruct, addressRegisterSize> addressRegister;
@@ -97,9 +97,12 @@ namespace PID
         {
             registerCounter = 0;   // start over and begin overwriting or raise a warning/error?
         }
-        addressRegister[registerCounter]     = AddressStruct(this->m_name + ".p", this->getAddressP(), TYPE::Float32);
-        addressRegister[registerCounter + 1] = AddressStruct(this->m_name + ".i", this->getAddressI(), TYPE::Float32);
-        addressRegister[registerCounter + 2] = AddressStruct(this->m_name + ".d", this->getAddressD(), TYPE::Float32);
-        registerCounter                      += 3;
+        addressRegister[registerCounter]
+            = AddressStruct(this->m_name + ".p", reinterpret_cast<intptr_t>(this->getAddressP()), TYPE::Float32);
+        addressRegister[registerCounter + 1]
+            = AddressStruct(this->m_name + ".i", reinterpret_cast<intptr_t>(this->getAddressI()), TYPE::Float32);
+        addressRegister[registerCounter + 2]
+            = AddressStruct(this->m_name + ".d", reinterpret_cast<intptr_t>(this->getAddressD()), TYPE::Float32);
+        registerCounter += 3;
     }
 }   // PID namespace

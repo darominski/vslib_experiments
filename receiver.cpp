@@ -62,8 +62,8 @@ int main()
         if (sharedMemRegister->transmissionCntr > sharedMemRegister->acknowledgeCntr)
         {
             memcpy(
-                std::get<double*>(sharedMemRegister->commandAddr), &std::get<double>(sharedMemRegister->commandVal),
-                sharedMemRegister->commandSize
+                reinterpret_cast<void*>(sharedMemRegister->commandAddr),
+                &std::get<double>(sharedMemRegister->commandVal), sharedMemRegister->commandSize
             );
             sharedMemRegister->acknowledgeCntr++;
         }
