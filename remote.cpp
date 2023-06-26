@@ -17,6 +17,7 @@ struct SharedMem
     int                                            transmissionCntr{0};
     std::variant<int*, double*>                    commandAddr;
     std::variant<int, double>                      commandVal;
+    size_t                                         commandSize;
 };
 
 int main()
@@ -60,6 +61,7 @@ int main()
         );   // there are 3 PID with 9 params total in the example
         sharedMemRegister->commandAddr = addr;
         sharedMemRegister->commandVal  = val;
+        sharedMemRegister->commandSize = sizeof(val);
         sharedMemRegister->transmissionCntr++;
         // END OF TEST CODE
 

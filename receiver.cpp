@@ -15,6 +15,7 @@ struct SharedMem
     int                                            transmissionCntr{0};
     std::variant<int*, double*>                    commandAddr;
     std::variant<int, double>                      commandVal;
+    size_t                                         commandSize;
 };
 
 int main()
@@ -71,7 +72,7 @@ int main()
         {
             memcpy(
                 std::get<double*>(sharedMemRegister->commandAddr), &std::get<double>(sharedMemRegister->commandVal),
-                sizeof(std::get<double>(sharedMemRegister->commandVal))
+                sharedMemRegister->commandSize
             );
             sharedMemRegister->acknowledgeCntr++;
         }
