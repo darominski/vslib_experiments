@@ -38,7 +38,7 @@ struct AddressStruct
 
 struct SharedMem
 {
-    std::array<AddressStruct, addressRegisterSize> addrRegisterPtr;
+    std::array<AddressStruct, addressRegisterSize> addrRegister;
     int                                            acknowledgeCntr{0};
     int                                            transmissionCntr{0};
     std::variant<int*, double*>                    commandAddr;
@@ -72,7 +72,7 @@ int main()
 
     // Create and initialize the shared data structure
     SharedMem* sharedMemRegister = static_cast<SharedMem*>(sharedMem);
-    auto       addressRegister   = sharedMemRegister->addrRegisterPtr;
+    auto const addressRegister   = sharedMemRegister->addrRegister;
 
     // Access the shared data from a different core
     // In this example, we'll simply increment the value
