@@ -79,7 +79,7 @@ int main()
         }
         // END TEST CODE
         // Add some delay to simulate work
-        usleep(2000000);
+        usleep(1000000);
         if (counter == 10) break;
     }
 
