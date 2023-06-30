@@ -9,7 +9,7 @@ namespace addressRegistry
 
     // global constants defining variable sizes
     constexpr short  maxNameLength       = 128;   // max length of component name, in characters
-    constexpr size_t addressRegisterSize = 100;   // max number of possible settings
+    constexpr size_t addressRegistrySize = 100;   // max number of possible settings
 
     enum TYPE
     {
@@ -34,7 +34,7 @@ namespace addressRegistry
         TYPE                  m_type;
     };
 
-    std::array<AddressStruct, addressRegisterSize> addressRegister;
+    std::array<AddressStruct, addressRegistrySize> addrRegistry;
     static int                                     registerCounter = 0;
 
 }

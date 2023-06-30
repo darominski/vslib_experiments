@@ -26,7 +26,7 @@ int main()
     }
 
     // Calculate the size of shared memory region
-    size_t size = sizeof(SharedMem) + (sizeof(addressRegistry::AddressStruct) * addressRegistry::addressRegisterSize);
+    size_t size = sizeof(SharedMem) + (sizeof(addressRegistry::AddressStruct) * addressRegistry::addressRegistrySize);
     // Map the shared memory region into the address space
     void* sharedMem = mmap(NULL, size, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, shmFd, 0);
     if (sharedMem == MAP_FAILED)
@@ -39,7 +39,7 @@ int main()
 
     // Create and initialize the shared data structure
     SharedMem* sharedMemRegister = static_cast<SharedMem*>(sharedMem);
-    auto const addressRegister   = sharedMemRegister->addrRegister;
+    auto const addressRegister   = sharedMemRegister->addrRegistry;
 
     // Access the shared data from a different core
     // In this example, we'll simply increment the value
