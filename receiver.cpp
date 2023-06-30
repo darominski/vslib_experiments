@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <iostream>
 #include <sys/mman.h>
-#include <tuple>
 #include <unistd.h>
 
 #include "addressRegistry.h"
