@@ -7,6 +7,7 @@ Known possible improvements:
 2. There could be two shared memory maps: one for the address array, the other for commands.
 3. Enable setting of more than one command per iteration of the receiver main loop.
 4. `sys/mmap.h` is available on Linux BSPs, so a different solution would be needed to map shared memory on a bare metal core's side.
+5. There is no mechanism to ensure that component names are unique.
 
 How to use this repository:
 1. Clone it.
