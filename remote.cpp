@@ -8,6 +8,7 @@
 #include <variant>
 #include <vector>
 
+#include "addressRegistry.h"
 #include "pid.h"
 #include "shared_mem.h"
 
@@ -25,7 +26,7 @@ int main()
     }
 
     // Calculate the size of shared memory region
-    size_t size     = sizeof(SharedMem) + (sizeof(AddressStruct) * addressRegisterSize);
+    size_t size = sizeof(SharedMem) + (sizeof(addressRegistry::AddressStruct) * addressRegistry::addressRegisterSize);
     // Map the shared memory region into the address space
     void* sharedMem = mmap(NULL, size, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, shmFd, 0);
     if (sharedMem == MAP_FAILED)

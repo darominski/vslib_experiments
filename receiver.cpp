@@ -6,6 +6,7 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "addressRegistry.h"
 #include "pid.h"
 #include "shared_mem.h"
 
@@ -21,7 +22,7 @@ int main()
     }
 
     // Set the size of shared memory region
-    size_t size = sizeof(SharedMem) + (sizeof(AddressStruct) * addressRegisterSize);
+    size_t size = sizeof(SharedMem) + (sizeof(addressRegistry::AddressStruct) * addressRegistry::addressRegisterSize);
     if (ftruncate(shmFd, size) == -1)
     {
         std::cerr << "Failed to set the size of shared memory" << std::endl;
@@ -47,7 +48,7 @@ int main()
 
     // Create and initialize the shared data structure
     SharedMem* sharedMemRegister    = static_cast<SharedMem*>(sharedMem);
-    sharedMemRegister->addrRegister = std::move(addressRegister);
+    sharedMemRegister->addrRegister = std::move(addressRegistry::addressRegister);
 
     int counter = 0;
     while (true)

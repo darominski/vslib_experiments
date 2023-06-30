@@ -4,35 +4,7 @@
 #include <string>
 #include <variant>
 
-// global constants defining variable sizes
-constexpr short  maxNameLength       = 128;   // max length of component name, in characters
-constexpr size_t addressRegisterSize = 100;   // max number of possible settings
-
-enum TYPE
-{
-    Int32,
-    Float32
-};
-
-struct AddressStruct
-{
-    AddressStruct(){};
-    AddressStruct(const std::string& name, intptr_t addr, TYPE type)
-        : m_addr(addr),
-          m_type(type)
-    {
-        size_t length = name.size();
-        length        = length < name.size() ? length : maxNameLength - 1;
-        std::copy(name.begin(), name.begin() + length, m_name.begin());
-        m_name[length] = '\0';
-    };
-    std::array<char, 128> m_name{};
-    intptr_t              m_addr;
-    TYPE                  m_type;
-};
-
-std::array<AddressStruct, addressRegisterSize> addressRegister;
-static int                                     registerCounter = 0;
+#include "addressRegistry.h"
 
 namespace PID
 {
@@ -93,16 +65,19 @@ namespace PID
 
     void PID::registerObject()
     {
-        if ((registerCounter + 3) >= addressRegisterSize)
+        if ((addressRegistry::registerCounter + 3) >= addressRegistry::addressRegisterSize)
         {
-            registerCounter = 0;   // start over and begin overwriting or raise a warning/error?
+            addressRegistry::registerCounter = 0;   // start over and begin overwriting or raise a warning/error?
         }
-        addressRegister[registerCounter]
-            = AddressStruct(this->m_name + ".p", reinterpret_cast<intptr_t>(this->getAddressP()), TYPE::Float32);
-        addressRegister[registerCounter + 1]
-            = AddressStruct(this->m_name + ".i", reinterpret_cast<intptr_t>(this->getAddressI()), TYPE::Float32);
-        addressRegister[registerCounter + 2]
-            = AddressStruct(this->m_name + ".d", reinterpret_cast<intptr_t>(this->getAddressD()), TYPE::Float32);
-        registerCounter += 3;
+        addressRegistry::addressRegister[addressRegistry::registerCounter] = addressRegistry::AddressStruct(
+            this->m_name + ".p", reinterpret_cast<intptr_t>(this->getAddressP()), addressRegistry::TYPE::Float32
+        );
+        addressRegistry::addressRegister[addressRegistry::registerCounter + 1] = addressRegistry::AddressStruct(
+            this->m_name + ".i", reinterpret_cast<intptr_t>(this->getAddressI()), addressRegistry::TYPE::Float32
+        );
+        addressRegistry::addressRegister[addressRegistry::registerCounter + 2] = addressRegistry::AddressStruct(
+            this->m_name + ".d", reinterpret_cast<intptr_t>(this->getAddressD()), addressRegistry::TYPE::Float32
+        );
+        addressRegistry::registerCounter += 3;
     }
 }   // PID namespace
