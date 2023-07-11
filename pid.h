@@ -65,19 +65,9 @@ namespace PID
 
     void PID::registerObject()
     {
-        if ((addressRegistry::registerCounter + 3) >= addressRegistry::addressRegistrySize)
-        {
-            addressRegistry::registerCounter = 0;   // start over and begin overwriting or raise a warning/error?
-        }
-        addressRegistry::addrRegistry[addressRegistry::registerCounter] = addressRegistry::AddressStruct(
-            this->m_name + ".p", reinterpret_cast<intptr_t>(this->getAddressP()), addressRegistry::TYPE::Float32
-        );
-        addressRegistry::addrRegistry[addressRegistry::registerCounter + 1] = addressRegistry::AddressStruct(
-            this->m_name + ".i", reinterpret_cast<intptr_t>(this->getAddressI()), addressRegistry::TYPE::Float32
-        );
-        addressRegistry::addrRegistry[addressRegistry::registerCounter + 2] = addressRegistry::AddressStruct(
-            this->m_name + ".d", reinterpret_cast<intptr_t>(this->getAddressD()), addressRegistry::TYPE::Float32
-        );
-        addressRegistry::registerCounter += 3;
+        addressRegistry::AddressRegistry &addrRegistry = addressRegistry::AddressRegistry::instance();
+        addrRegistry.addToRegistry(this->m_name + ".p", reinterpret_cast<intptr_t>(this->getAddressP()), addressRegistry::TYPE::Float32);
+        addrRegistry.addToRegistry(this->m_name + ".i", reinterpret_cast<intptr_t>(this->getAddressI()), addressRegistry::TYPE::Float32);
+        addrRegistry.addToRegistry(this->m_name + ".d", reinterpret_cast<intptr_t>(this->getAddressD()), addressRegistry::TYPE::Float32);
     }
 }   // PID namespace

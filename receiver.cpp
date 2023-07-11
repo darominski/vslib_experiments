@@ -47,8 +47,9 @@ int main()
 
     // Create and initialize the shared data structure
     SharedMem* sharedMemRegister    = static_cast<SharedMem*>(sharedMem);
-    sharedMemRegister->addrRegistry = std::move(addressRegistry::addrRegistry);
-
+    sharedMemRegister->addrRegistry = std::move(addressRegistry::AddressRegistry::instance().m_addrRegistry);
+    // after this point, the global singleton state is invalid as it was moved to the shared memory
+    // however, it is never intended to be used again
     int counter = 0;
     while (true)
     {
