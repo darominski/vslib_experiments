@@ -34,16 +34,19 @@ namespace addressRegistry
 
     class AddressRegistry {
         public:
+            // the registry shall not be assignable nor clonable
+            AddressRegistry(AddressRegistry &other) = delete;
+            void operator=(const AddressRegistry &) = delete;
             static AddressRegistry & instance() {
-                //constructed on first access
+                // Registry is constructed on first access
                 static AddressRegistry m_instance;
                 return m_instance;
             }
             void addToRegistry(const std::string&, intptr_t, TYPE);
-
-        std::array<AddressStruct, addressRegistrySize> m_addrRegistry;
+            auto const & getAddrArray() { return m_addrRegistry;}
         private:
             AddressRegistry() {};
+            std::array<AddressStruct, addressRegistrySize> m_addrRegistry;
             int m_registerCounter{0};
     };
 
