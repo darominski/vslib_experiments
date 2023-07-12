@@ -41,19 +41,6 @@ namespace PID
             return m_d.value();
         }
 
-        [[nodiscard]] const double* getAddressP() const
-        {
-            return m_p.address();
-        }
-        [[nodiscard]] const double* getAddressI() const
-        {
-            return m_i.address();
-        }
-        [[nodiscard]] const double* getAddressD() const
-        {
-            return m_d.address();
-        }
-
       private:
         const std::string         m_name;
         Parameters::Param<double> m_p;
