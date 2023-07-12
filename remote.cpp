@@ -40,14 +40,16 @@ int main()
 
     // Access the shared data from a different core
     // In this example, we'll simply increment the value
-    int counter = 0;
+    int counter  = 0;
+    int bufferId = 0;   // buffer switch starts at 1 and flips at each command
     while (true)
     {
         // TEST CODE FOR TRANSFERRING COMMANDS
-        std::cout << "Thread2 counter: " << counter++ << "\n";
-        double const val               = static_cast<double>(counter) * 3.14159;
+        bufferId            ^= 1;
+        double const val    = static_cast<double>(counter) * 3.14159;
         // there are 3 PID with 9 params total in the example, modulo prevents setting not used fields
-        intptr_t const addr            = addressRegister[counter % 9].m_addr;
+        intptr_t const addr = addressRegister[2 * counter + bufferId].m_addr;
+        std::cout << "Thread2 counter: " << counter++ << "\n";
         sharedMemRegister->commandAddr = addr;
         sharedMemRegister->commandVal  = val;
         sharedMemRegister->commandSize = sizeof(val);

@@ -46,11 +46,10 @@ int main()
     PID::PID pid3 = PID::PID("pid_3", 3, 3, 3);
 
     // Create and initialize the shared data structure
-    SharedMem* sharedMemRegister    = static_cast<SharedMem*>(sharedMem);
-    sharedMemRegister->addrRegistry = std::move(addressRegistry::AddressRegistry::instance().getAddrArray());
-    // after this point, the global singleton state is invalid as it was moved to the shared memory
-    // however, it is never intended to be used again
-    int counter                     = 0;
+    SharedMem* sharedMemRegister = static_cast<SharedMem*>(sharedMem);
+    sharedMemRegister->addrRegistry
+        = addressRegistry::AddressRegistry::instance().getAddrArray();   // copies the address array to shared
+    int counter = 0;
     while (true)
     {
         std::cout << "Thread 1 counter: " << counter++ << "\n";
@@ -66,6 +65,17 @@ int main()
                 reinterpret_cast<void*>(sharedMemRegister->commandAddr), &sharedMemRegister->commandVal,
                 sharedMemRegister->commandSize
             );
+            bufferSwitch ^= 1;   // flip the buffer pointer of all variables
+            // synchronise the memory between buffers
+            // for(auto iter=(bufferSwitch^1); iter<addressRegistry::addressRegistrySize; iter+=2)
+            for (auto iter = 2 * (bufferSwitch ^ 1); iter < 18; iter += 2)
+            {
+                memcpy(
+                    reinterpret_cast<void*>(sharedMemRegister->addrRegistry[iter + bufferSwitch ^ 1].m_addr),
+                    reinterpret_cast<void*>(sharedMemRegister->addrRegistry[iter + bufferSwitch].m_addr),
+                    sizeof(reinterpret_cast<void*>(sharedMemRegister->addrRegistry[iter + bufferSwitch].m_addr))
+                );
+            }
             sharedMemRegister->acknowledgeCntr++;
         }
         // END TEST CODE
