@@ -67,7 +67,6 @@ int main()
             );
             bufferSwitch ^= 1;   // flip the buffer pointer of all variables
             // synchronise the memory between buffers
-            // for(auto iter=(bufferSwitch^1); iter<addressRegistry::addressRegistrySize; iter+=2)
             for (auto iter = 2 * (bufferSwitch ^ 1); iter < 18; iter += 2)
             {
                 memcpy(
