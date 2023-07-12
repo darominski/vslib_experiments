@@ -18,12 +18,11 @@ namespace PID
 
         PID(const std::string& name, double p = 0.0, double i = 0.0, double d = 0.0)
             : m_name(name),
-              m_p(p),
-              m_i(i),
-              m_d(d)
+              m_p(name + ".p", p),
+              m_i(name + ".i", i),
+              m_d(name + ".d", d)
         {
-            this->registerObject();
-        };
+        }
 
         [[nodiscard]] const std::string& getName() const
         {
@@ -56,25 +55,9 @@ namespace PID
         }
 
       private:
-        const std::string m_name;
-        Param<double>     m_p{0.0};
-        Param<double>     m_i{0.0};
-        Param<double>     m_d{0.0};
-
-        void registerObject();
+        const std::string         m_name;
+        Parameters::Param<double> m_p;
+        Parameters::Param<double> m_i;
+        Parameters::Param<double> m_d;
     };
-
-    void PID::registerObject()
-    {
-        addressRegistry::AddressRegistry& addrRegistry = addressRegistry::AddressRegistry::instance();
-        addrRegistry.addToRegistry(
-            this->m_name + ".p", reinterpret_cast<intptr_t>(this->getAddressP()), addressRegistry::TYPE::Float32
-        );
-        addrRegistry.addToRegistry(
-            this->m_name + ".i", reinterpret_cast<intptr_t>(this->getAddressI()), addressRegistry::TYPE::Float32
-        );
-        addrRegistry.addToRegistry(
-            this->m_name + ".d", reinterpret_cast<intptr_t>(this->getAddressD()), addressRegistry::TYPE::Float32
-        );
-    }
 }   // PID namespace

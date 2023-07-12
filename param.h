@@ -12,10 +12,12 @@ namespace Parameters
     class Param
     {
       public:
-        Param(T value)
-            : m_value(value)
+        Param(const std::string& name, T value)
+            : m_name(name),
+              m_value(value)
         {
-        }
+            registerParam();
+        };
         // cannot assign nor clone Params
         Param& param(Param&)           = delete;
         void   operator=(const Param&) = delete;
@@ -30,7 +32,31 @@ namespace Parameters
         }
 
       private:
-        T m_value;
+        const std::string m_name;
+        T                 m_value;
+
+        void registerParam();
     };
 
+    template<typename T>
+    void Param<T>::registerParam()
+    {
+        const auto            typeId = typeid(this->value()).name();
+        addressRegistry::TYPE type;
+        if (type == 'd')
+        {
+            type = addressRegistry::TYPE::Float32;
+        }
+        else if (type == 'i')
+        {
+            type = addressRegistry::TYPE::Int32;
+        }
+        else
+        {
+            // ERR...
+        }
+        addressRegistry::AddressRegistry::instance().addToRegistry(
+            this->m_name, reinterpret_cast<intptr_t>(this->address()), type
+        );
+    }
 }   // Parameters namespace
