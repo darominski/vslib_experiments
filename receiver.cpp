@@ -50,7 +50,7 @@ int main()
     sharedMemRegister->addrRegistry = std::move(addressRegistry::AddressRegistry::instance().getAddrArray());
     // after this point, the global singleton state is invalid as it was moved to the shared memory
     // however, it is never intended to be used again
-    int counter = 0;
+    int counter                     = 0;
     while (true)
     {
         std::cout << "Thread 1 counter: " << counter++ << "\n";
@@ -59,12 +59,12 @@ int main()
         std::cout << "PID2: " << pid2.getP() << " " << pid2.getI() << " " << pid2.getD() << "\n";
         std::cout << "PID3: " << pid3.getP() << " " << pid3.getI() << " " << pid3.getD() << "\n";
         // END TEST CODE
-        // TEST CODE, extremely basic verbose execution of commands received from a remote thread
+        // TEST CODE, extremely basic execution of commands received from a remote thread
         if (sharedMemRegister->transmissionCntr > sharedMemRegister->acknowledgeCntr)
         {
             memcpy(
-                reinterpret_cast<void*>(sharedMemRegister->commandAddr),
-                &std::get<double>(sharedMemRegister->commandVal), sharedMemRegister->commandSize
+                reinterpret_cast<void*>(sharedMemRegister->commandAddr), &sharedMemRegister->commandVal,
+                sharedMemRegister->commandSize
             );
             sharedMemRegister->acknowledgeCntr++;
         }
