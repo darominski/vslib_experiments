@@ -21,7 +21,7 @@ int main()
     }
 
     // Set the size of shared memory region
-    size_t size = sizeof(SharedMem) + (sizeof(addressRegistry::AddressStruct) * addressRegistry::addressRegistrySize);
+    size_t size = sizeof(SharedMem) + (sizeof(addressRegistry::AddressStruct) * addressRegistry::max_registry_size);
     if (ftruncate(shmFd, size) == -1)
     {
         std::cerr << "Failed to set the size of shared memory" << std::endl;
