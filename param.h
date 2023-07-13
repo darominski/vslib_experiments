@@ -5,7 +5,7 @@
 
 #include "addressRegistry.h"
 
-int static bufferSwitch = 0;
+inline int bufferSwitch = 0;
 
 namespace Parameters
 {

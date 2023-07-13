@@ -67,14 +67,7 @@ int main()
             );
             bufferSwitch ^= 1;   // flip the buffer pointer of all variables
             // synchronise the memory between buffers
-            for (auto iter = 2 * (bufferSwitch ^ 1); iter < 18; iter += 2)
-            {
-                memcpy(
-                    reinterpret_cast<void*>(sharedMemRegister->addrRegistry[iter + bufferSwitch ^ 1].m_addr),
-                    reinterpret_cast<void*>(sharedMemRegister->addrRegistry[iter + bufferSwitch].m_addr),
-                    sizeof(reinterpret_cast<void*>(sharedMemRegister->addrRegistry[iter + bufferSwitch].m_addr))
-                );
-            }
+            addressRegistry::AddressRegistry::instance().swapBuffers();
             sharedMemRegister->acknowledgeCntr++;
         }
         // END TEST CODE

@@ -3,6 +3,8 @@
 #include <array>
 #include <string>
 
+extern int bufferSwitch;
+
 namespace addressRegistry
 {
     // global constants defining variable sizes
@@ -50,6 +52,8 @@ namespace addressRegistry
             return m_addrRegistry;
         }
 
+        void swapBuffers();
+
       private:
         AddressRegistry(){};
         std::array<AddressStruct, max_registry_size> m_addrRegistry;
@@ -64,5 +68,17 @@ namespace addressRegistry
         }
         m_addrRegistry[m_registerCounter] = AddressStruct(name, addr, type);
         m_registerCounter++;
+    }
+
+    void AddressRegistry::swapBuffers()
+    {
+        for (auto iter = 2 * (bufferSwitch ^ 1); iter < m_registerCounter; iter += 2)
+        {
+            memcpy(
+                reinterpret_cast<void*>(this->m_addrRegistry[iter + bufferSwitch ^ 1].m_addr),
+                reinterpret_cast<void*>(this->m_addrRegistry[iter + bufferSwitch].m_addr),
+                sizeof(reinterpret_cast<void*>(this->m_addrRegistry[iter + bufferSwitch].m_addr))
+            );
+        }
     }
 }
