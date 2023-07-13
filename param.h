@@ -44,11 +44,11 @@ namespace Parameters
     {
         const auto            typeId = typeid(this->value()).name();
         addressRegistry::TYPE type;
-        if (type == 'd')
+        if (typeId == "d")
         {
             type = addressRegistry::TYPE::Float32;
         }
-        else if (type == 'i')
+        else if (typeId == "i")
         {
             type = addressRegistry::TYPE::Int32;
         }
