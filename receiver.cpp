@@ -9,6 +9,23 @@
 #include "pid.h"
 #include "shared_mem.h"
 
+namespace bkgTask
+{
+    void synchroniseBuffers()
+    {
+        auto const& addrRegistrySize = addressRegistry::AddressRegistry::instance().getRegisterCounter();
+        auto const& addressRegistry  = addressRegistry::AddressRegistry::instance().getAddrArray();
+        for (auto iter = 2 * (bufferSwitch ^ 1); iter < addrRegistrySize; iter += 2)
+        {
+            memcpy(
+                reinterpret_cast<void*>(addressRegistry[iter + bufferSwitch ^ 1].m_addr),
+                reinterpret_cast<void*>(addressRegistry[iter + bufferSwitch].m_addr),
+                sizeof(reinterpret_cast<void*>(addressRegistry[iter + bufferSwitch].m_addr))
+            );
+        }
+    }
+}
+
 int main()
 {
     // Create shared memory region
@@ -67,7 +84,7 @@ int main()
             );
             bufferSwitch ^= 1;   // flip the buffer pointer of all variables
             // synchronise the memory between buffers
-            addressRegistry::AddressRegistry::instance().swapBuffers();
+            bkgTask::synchroniseBuffers();
             sharedMemRegister->acknowledgeCntr++;
         }
         // END TEST CODE
