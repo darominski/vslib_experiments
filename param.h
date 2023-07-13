@@ -7,7 +7,7 @@
 
 inline int bufferSwitch = 0;
 
-namespace Parameters
+namespace parameters
 {
     template<typename T>
     class Param

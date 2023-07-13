@@ -7,7 +7,7 @@
 #include "addressRegistry.h"
 #include "param.h"
 
-namespace PID
+namespace pid
 {
     class PID
     {
@@ -43,8 +43,8 @@ namespace PID
 
       private:
         const std::string         m_name;
-        Parameters::Param<double> m_p;
-        Parameters::Param<double> m_i;
-        Parameters::Param<double> m_d;
+        parameters::Param<double> m_p;
+        parameters::Param<double> m_i;
+        parameters::Param<double> m_d;
     };
 }   // PID namespace

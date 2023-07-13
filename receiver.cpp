@@ -58,9 +58,9 @@ int main()
     }
 
     // Create and initialize a couple of PIDs
-    PID::PID pid1 = PID::PID("pid_1", 1, 1, 1);
-    PID::PID pid2 = PID::PID("pid_2", 2, 2, 2);
-    PID::PID pid3 = PID::PID("pid_3", 3, 3, 3);
+    pid::PID pid1 = pid::PID("pid_1", 1, 1, 1);
+    pid::PID pid2 = pid::PID("pid_2", 2, 2, 2);
+    pid::PID pid3 = pid::PID("pid_3", 3, 3, 3);
 
     // Create and initialize the shared data structure
     SharedMem* sharedMemRegister = static_cast<SharedMem*>(sharedMem);
