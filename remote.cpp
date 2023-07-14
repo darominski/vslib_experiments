@@ -25,7 +25,7 @@ int main()
     // Calculate the size of shared memory region
     size_t size     = sizeof(SharedMem) + (sizeof(addressRegistry::AddressStruct) * addressRegistry::max_registry_size);
     // Map the shared memory region into the address space
-    void* sharedMem = mmap(NULL, size, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, shmFd, 0);
+    void* sharedMem = mmap(NULL, size, PROT_WRITE | PROT_READ, MAP_SHARED, shmFd, 0);
     if (sharedMem == MAP_FAILED)
     {
         std::cerr << "Failed to map shared memory" << std::endl;
@@ -50,18 +50,25 @@ int main()
             continue;
         }
         // TEST CODE FOR TRANSFERRING COMMANDS
-        double const val    = static_cast<double>(counter) * 3.14159;
-        // there are 3 PID with 9 params total in the example, modulo prevents setting not used fields
-        intptr_t const addr = addressRegister[counter].m_addr;
+        double val          = static_cast<double>(counter) * 3.14159;
+        // there are 3 PID with 9 params + RST with 1 parameter, so 10 in total,
+        // modulo prevents setting not used fields
+        intptr_t const addr = addressRegister[counter % 10].m_addr;
         std::cout << "Thread2 counter: " << counter++ << "\n";
         sharedMemRegister->commandAddr = addr;
         sharedMemRegister->commandVal  = val;
         sharedMemRegister->commandSize = sizeof(val);
+        if (counter == 10)
+        {
+            std::array<double, 4> newR{5.5, 6.6, 7.7, 8.8};
+            sharedMemRegister->commandVal  = newR;
+            sharedMemRegister->commandSize = sizeof(newR);
+        }
         sharedMemRegister->transmissionCntr++;
         // END OF TEST CODE
 
         // Add some delay to simulate work
-        usleep(1000000);   // 1 s
+        usleep(500000);   // 1 s
         if (counter == 10) break;
     }
 

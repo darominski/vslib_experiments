@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cerrno>
 #include <cstring>
 #include <fcntl.h>
@@ -8,6 +9,7 @@
 #include "addressRegistry.h"
 #include "background.h"
 #include "pid.h"
+#include "rst.h"
 #include "shared_mem.h"
 
 int main()
@@ -42,9 +44,11 @@ int main()
     }
 
     // Create and initialize a couple of PIDs
-    pid::PID pid1 = pid::PID("pid_1", 1, 1, 1);
-    pid::PID pid2 = pid::PID("pid_2", 2, 2, 2);
-    pid::PID pid3 = pid::PID("pid_3", 3, 3, 3);
+    pid::PID pid1("pid_1", 1, 1, 1);
+    pid::PID pid2("pid_2", 2, 2, 2);
+    pid::PID pid3("pid_3", 3, 3, 3);
+
+    rst::RST rst1("rst_1", {1.1, 2.2, 3.3, 4.4});
 
     // Create and initialize the shared data structure
     SharedMem* sharedMemRegister = static_cast<SharedMem*>(sharedMem);
@@ -58,8 +62,18 @@ int main()
         std::cout << "PID1: " << pid1.getP() << " " << pid1.getI() << " " << pid1.getD() << "\n";
         std::cout << "PID2: " << pid2.getP() << " " << pid2.getI() << " " << pid2.getD() << "\n";
         std::cout << "PID3: " << pid3.getP() << " " << pid3.getI() << " " << pid3.getD() << "\n";
+        std::cout << "RST1: ";
+        std::for_each(
+            rst1.getR().cbegin(), rst1.getR().cend(),
+            [](const auto& val)
+            {
+                std::cout << val << " ";
+            }
+        );
+        std::cout << "\n";
         // END TEST CODE
-        // TEST CODE, extremely basic execution of commands received from a remote thread
+        // TEST CODE, extremely basic execution of commands received from a remote thread, will be part of background
+        // task
         if (sharedMemRegister->transmissionCntr > sharedMemRegister->acknowledgeCntr)
         {
             // copy the command into the write buffer
@@ -77,7 +91,7 @@ int main()
         // END TEST CODE
         // Add some delay to simulate work
         usleep(1000000);
-        if (counter == 10) break;
+        if (counter == 16) break;
     }
 
     // Unmap the shared memory region
