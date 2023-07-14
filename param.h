@@ -55,6 +55,7 @@ namespace parameters
         else
         {
             std::cerr << "Type: " << typeId << " not supported.\n";
+            exit(0);
         }
         // both read buffers to be written into the registry
         addressRegistry::AddressRegistry::instance().addToReadBufferRegistry(
