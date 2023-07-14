@@ -11,14 +11,14 @@ namespace bkgTask
      */
     void synchroniseReadBuffers()
     {
-        auto const& addrRegistrySize = addressRegistry::AddressRegistry::instance().getReadBufferSize();
-        auto const& addressRegistry  = addressRegistry::AddressRegistry::instance().getBufferAddrArray();
-        for (size_t iter = 2 * (bufferSwitch ^ 1); iter < addrRegistrySize; iter += 2)
+        auto const& addrRegSize = addressRegistry::AddressRegistry::instance().getReadBufferSize();
+        auto const& addressReg  = addressRegistry::AddressRegistry::instance().getBufferAddrArray();
+        for (size_t iter = 2 * (bufferSwitch ^ 1); iter < addrRegSize; iter += 2)
         {
             memcpy(
-                reinterpret_cast<void*>(addressRegistry[iter + (bufferSwitch ^ 1)].m_addr),
-                reinterpret_cast<void*>(addressRegistry[iter + bufferSwitch].m_addr),
-                sizeof(addressRegistry[iter + bufferSwitch].m_addr)
+                reinterpret_cast<void*>(addressReg[iter + (bufferSwitch ^ 1)].m_addr),
+                reinterpret_cast<void*>(addressReg[iter + bufferSwitch].m_addr),
+                sizeof(addressReg[iter + bufferSwitch].m_addr)
                 // TODO: better way to get a size of this memory block, currently fetching intptr_t pointer size
             );
         }
