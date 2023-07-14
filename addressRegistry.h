@@ -91,6 +91,15 @@ namespace addressRegistry
         {
             m_writeBufferSize = 0;   // start over and begin overwriting or raise a warning/error?
         }
+        // there should be no repeated names in the address structure communicated to a separate process
+        for (int registerIndex = 0; registerIndex < m_writeBufferSize; registerIndex++)
+        {
+            if (std::string(m_writeRegistry[registerIndex].m_name.data()) == name)
+            {
+                std::cerr << "ERROR! Name: " << name << " already defined.\n";
+                exit(1);
+            }
+        }
         m_writeRegistry[m_writeBufferSize] = AddressStruct(name, addr, type);
         m_writeBufferSize++;
     }
