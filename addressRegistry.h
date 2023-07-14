@@ -17,27 +17,16 @@ namespace addressRegistry
         Float32
     };
 
-    inline size_t typeSize(TYPE type)
+    struct Variable
     {
-        size_t typeSize;
-        switch (type)
-        {
-            case Int32:
-                typeSize = sizeof(int);
-                break;
-            case Float32:
-                typeSize = sizeof(double);
-                break;
-            default:
-                typeSize = 0;
-        }
-        return typeSize;
-    }
+        TYPE   type;
+        size_t size;
+    };
 
     struct AddressStruct
     {
         AddressStruct(){};
-        AddressStruct(const std::string& name, intptr_t addr, TYPE type)
+        AddressStruct(const std::string& name, intptr_t addr, Variable type)
             : m_addr(addr),
               m_type(type)
         {
@@ -48,7 +37,7 @@ namespace addressRegistry
         };
         std::array<char, max_name_length> m_name{};
         intptr_t                          m_addr;
-        TYPE                              m_type;
+        Variable                          m_type;
     };
 
     class AddressRegistry
@@ -64,8 +53,8 @@ namespace addressRegistry
             return m_instance;
         }
 
-        void addToReadBufferRegistry(const std::string&, intptr_t, TYPE);
-        void addToWriteBufferRegistry(const std::string&, intptr_t, TYPE);
+        void addToReadBufferRegistry(const std::string&, intptr_t, Variable);
+        void addToWriteBufferRegistry(const std::string&, intptr_t, Variable);
 
         auto const& getBufferAddrArray()
         {
@@ -92,7 +81,7 @@ namespace addressRegistry
         size_t                                       m_writeBufferSize{0};
     };
 
-    void AddressRegistry::addToReadBufferRegistry(const std::string& name, intptr_t addr, TYPE type)
+    void AddressRegistry::addToReadBufferRegistry(const std::string& name, intptr_t addr, Variable type)
     {
         if (m_readBufferSize >= max_registry_size)
         {
@@ -102,7 +91,7 @@ namespace addressRegistry
         m_readBufferSize++;
     }
 
-    void AddressRegistry::addToWriteBufferRegistry(const std::string& name, intptr_t addr, TYPE type)
+    void AddressRegistry::addToWriteBufferRegistry(const std::string& name, intptr_t addr, Variable type)
     {
         if (m_writeBufferSize >= max_registry_size)
         {

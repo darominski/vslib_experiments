@@ -18,11 +18,10 @@ namespace bkgTask
             memcpy(
                 reinterpret_cast<void*>(addressReg[iter + (bufferSwitch ^ 1)].m_addr),
                 reinterpret_cast<void*>(addressReg[iter + bufferSwitch].m_addr),
-                addressRegistry::typeSize(addressReg[iter + bufferSwitch].m_type)
+                addressReg[iter + bufferSwitch].m_type.size
             );
         }
     }
-
 
     /**
      * Copies all contents of a write buffer to the background buffer, which is not currently used.
@@ -40,7 +39,7 @@ namespace bkgTask
             auto const& writeBufferAddr = writeBufferRegistry[iter].m_addr;   // each write buffer element is visited
             memcpy(
                 reinterpret_cast<void*>(targetBufferAddr), reinterpret_cast<void*>(writeBufferAddr),
-                addressRegistry::typeSize(bkgBufferRegistry[2 * iter + (bufferSwitch ^ 1)].m_type)
+                bkgBufferRegistry[2 * iter + (bufferSwitch ^ 1)].m_type.size
             );
         }
     }

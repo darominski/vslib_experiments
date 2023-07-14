@@ -59,14 +59,14 @@ namespace parameters
         }
         // both read buffers to be written into the registry
         addressRegistry::AddressRegistry::instance().addToReadBufferRegistry(
-            this->m_name, reinterpret_cast<intptr_t>(this->address(0)), type
+            this->m_name, reinterpret_cast<intptr_t>(this->address(0)), addressRegistry::Variable(type, sizeof(T))
         );
         addressRegistry::AddressRegistry::instance().addToReadBufferRegistry(
-            this->m_name, reinterpret_cast<intptr_t>(this->address(1)), type
+            this->m_name, reinterpret_cast<intptr_t>(this->address(1)), addressRegistry::Variable(type, sizeof(T))
         );
         // and a write buffer
         addressRegistry::AddressRegistry::instance().addToWriteBufferRegistry(
-            this->m_name, reinterpret_cast<intptr_t>(this->address(2)), type
+            this->m_name, reinterpret_cast<intptr_t>(this->address(2)), addressRegistry::Variable(type, sizeof(T))
         );
     }
 }   // Parameters namespace
