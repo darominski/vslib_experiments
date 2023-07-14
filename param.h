@@ -52,6 +52,10 @@ namespace parameters
         {
             type = addressRegistry::TYPE::Int32;
         }
+        else if (typeId == "St5arrayIdLm4EE")
+        {
+            type = addressRegistry::TYPE::ArrayFloat32;
+        }
         else
         {
             std::cerr << "Type: " << typeId << " not supported.\n";

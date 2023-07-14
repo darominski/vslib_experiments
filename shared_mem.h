@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <variant>
 
 #include "addressRegistry.h"
@@ -11,6 +12,6 @@ struct SharedMem
     int                                                                            acknowledgeCntr{0};
     int                                                                            transmissionCntr{0};
     intptr_t                                                                       commandAddr;
-    std::variant<int, double>                                                      commandVal;
+    std::variant<int, double, std::array<double, 4>>                               commandVal;
     size_t                                                                         commandSize;
 };
