@@ -58,11 +58,11 @@ namespace addressRegistry
         {
             return m_writeRegistry;
         }
-        int getReadBufferSize() const
+        auto const getReadBufferSize() const
         {
             return m_readBufferSize;
         }
-        int getWriteBufferSize() const
+        auto const getWriteBufferSize() const
         {
             return m_writeBufferSize;
         }
@@ -71,8 +71,8 @@ namespace addressRegistry
         AddressRegistry(){};
         std::array<AddressStruct, max_registry_size> m_bufferRegistry;
         std::array<AddressStruct, max_registry_size> m_writeRegistry;
-        int                                          m_readBufferSize{0};
-        int                                          m_writeBufferSize{0};
+        size_t                                       m_readBufferSize{0};
+        size_t                                       m_writeBufferSize{0};
     };
 
     void AddressRegistry::addToReadBufferRegistry(const std::string& name, intptr_t addr, TYPE type)
@@ -92,7 +92,7 @@ namespace addressRegistry
             m_writeBufferSize = 0;   // start over and begin overwriting or raise a warning/error?
         }
         // there should be no repeated names in the address structure communicated to a separate process
-        for (int registerIndex = 0; registerIndex < m_writeBufferSize; registerIndex++)
+        for (size_t registerIndex = 0; registerIndex < m_writeBufferSize; registerIndex++)
         {
             if (std::string(m_writeRegistry[registerIndex].m_name.data()) == name)
             {

@@ -13,7 +13,7 @@ namespace bkgTask
     {
         auto const& addrRegistrySize = addressRegistry::AddressRegistry::instance().getReadBufferSize();
         auto const& addressRegistry  = addressRegistry::AddressRegistry::instance().getBufferAddrArray();
-        for (auto iter = 2 * (bufferSwitch ^ 1); iter < addrRegistrySize; iter += 2)
+        for (size_t iter = 2 * (bufferSwitch ^ 1); iter < addrRegistrySize; iter += 2)
         {
             memcpy(
                 reinterpret_cast<void*>(addressRegistry[iter + bufferSwitch ^ 1].m_addr),
@@ -33,7 +33,7 @@ namespace bkgTask
         auto const& writeBufferRegistry = addressRegistry::AddressRegistry::instance().getWriteAddrArray();
         auto const& bkgBufferRegistry   = addressRegistry::AddressRegistry::instance().getBufferAddrArray();
 
-        for (auto iter = 0; iter < addrRegistrySize; iter++)
+        for (size_t iter = 0; iter < addrRegistrySize; iter++)
         {
             auto const& targetBufferAddr
                 = bkgBufferRegistry[2 * iter + (bufferSwitch ^ 1)].m_addr;    // only bkg buffer elements are modified
