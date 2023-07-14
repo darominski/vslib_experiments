@@ -17,6 +17,23 @@ namespace addressRegistry
         Float32
     };
 
+    inline size_t typeSize(TYPE type)
+    {
+        size_t typeSize;
+        switch (type)
+        {
+            case Int32:
+                typeSize = sizeof(int);
+                break;
+            case Float32:
+                typeSize = sizeof(double);
+                break;
+            default:
+                typeSize = 0;
+        }
+        return typeSize;
+    }
+
     struct AddressStruct
     {
         AddressStruct(){};
