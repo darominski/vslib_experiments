@@ -18,8 +18,8 @@ namespace bkgTask
             memcpy(
                 reinterpret_cast<void*>(addressRegistry[iter + (bufferSwitch ^ 1)].m_addr),
                 reinterpret_cast<void*>(addressRegistry[iter + bufferSwitch].m_addr),
-                sizeof(reinterpret_cast<void*>(addressRegistry[iter + bufferSwitch].m_addr))
-                // TODO: better way to get a size of this memory block, currently fetching void* pointer size
+                sizeof(addressRegistry[iter + bufferSwitch].m_addr)
+                // TODO: better way to get a size of this memory block, currently fetching intptr_t pointer size
             );
         }
     }
@@ -40,8 +40,8 @@ namespace bkgTask
             auto const& writeBufferAddr = writeBufferRegistry[iter].m_addr;   // each write buffer element is visited
             memcpy(
                 reinterpret_cast<void*>(targetBufferAddr), reinterpret_cast<void*>(writeBufferAddr),
-                sizeof(reinterpret_cast<void*>(writeBufferAddr))
-                // TODO: better way to get a size of this memory block, currently fetching void* pointer size
+                sizeof(writeBufferAddr)
+                // TODO: better way to get a size of this memory block, currently fetching intptr_t pointer size
             );
         }
     }
