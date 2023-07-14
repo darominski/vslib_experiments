@@ -42,7 +42,7 @@ namespace parameters
     template<typename T>
     void Param<T>::registerParam()
     {
-        const auto            typeId = typeid(this->value()).name();
+        const auto            typeId = std::string(typeid(this->value()).name());
         addressRegistry::TYPE type;
         if (typeId == "d")
         {
@@ -54,7 +54,7 @@ namespace parameters
         }
         else
         {
-            // ERR...
+            std::cerr << "Type: " << typeId << " not supported.\n";
         }
         // both addresses to be written into the registry
         addressRegistry::AddressRegistry::instance().addToRegistry(
