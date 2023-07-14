@@ -15,7 +15,7 @@ namespace parameters
       public:
         Param(const std::string& name, T value)
             : m_name(name),
-              m_value{value, value}
+              m_value{value, value, value}
         {
             registerParam();
         };
@@ -34,7 +34,7 @@ namespace parameters
 
       private:
         const std::string m_name;
-        T                 m_value[2];
+        T                 m_value[3];
 
         void registerParam();
     };
@@ -56,12 +56,16 @@ namespace parameters
         {
             std::cerr << "Type: " << typeId << " not supported.\n";
         }
-        // both addresses to be written into the registry
-        addressRegistry::AddressRegistry::instance().addToRegistry(
+        // both read buffers to be written into the registry
+        addressRegistry::AddressRegistry::instance().addToReadBufferRegistry(
             this->m_name, reinterpret_cast<intptr_t>(this->address(0)), type
         );
-        addressRegistry::AddressRegistry::instance().addToRegistry(
+        addressRegistry::AddressRegistry::instance().addToReadBufferRegistry(
             this->m_name, reinterpret_cast<intptr_t>(this->address(1)), type
+        );
+        // and a write buffer
+        addressRegistry::AddressRegistry::instance().addToWriteBufferRegistry(
+            this->m_name, reinterpret_cast<intptr_t>(this->address(2)), type
         );
     }
 }   // Parameters namespace

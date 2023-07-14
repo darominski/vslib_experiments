@@ -46,29 +46,52 @@ namespace addressRegistry
             static AddressRegistry m_instance;
             return m_instance;
         }
-        void        addToRegistry(const std::string&, intptr_t, TYPE);
-        auto const& getAddrArray()
+
+        void addToReadBufferRegistry(const std::string&, intptr_t, TYPE);
+        void addToWriteBufferRegistry(const std::string&, intptr_t, TYPE);
+
+        auto const& getBufferAddrArray()
         {
-            return m_addrRegistry;
+            return m_bufferRegistry;
         }
-        int getRegisterCounter() const
+        auto const& getWriteAddrArray()
         {
-            return m_registerCounter;
+            return m_writeRegistry;
+        }
+        int getReadBufferSize() const
+        {
+            return m_readBufferSize;
+        }
+        int getWriteBufferSize() const
+        {
+            return m_writeBufferSize;
         }
 
       private:
         AddressRegistry(){};
-        std::array<AddressStruct, max_registry_size> m_addrRegistry;
-        int                                          m_registerCounter{0};
+        std::array<AddressStruct, max_registry_size> m_bufferRegistry;
+        std::array<AddressStruct, max_registry_size> m_writeRegistry;
+        int                                          m_readBufferSize{0};
+        int                                          m_writeBufferSize{0};
     };
 
-    void AddressRegistry::addToRegistry(const std::string& name, intptr_t addr, TYPE type)
+    void AddressRegistry::addToReadBufferRegistry(const std::string& name, intptr_t addr, TYPE type)
     {
-        if (m_registerCounter >= max_registry_size)
+        if (m_readBufferSize >= max_registry_size)
         {
-            m_registerCounter = 0;   // start over and begin overwriting or raise a warning/error?
+            m_readBufferSize = 0;   // start over and begin overwriting or raise a warning/error?
         }
-        m_addrRegistry[m_registerCounter] = AddressStruct(name, addr, type);
-        m_registerCounter++;
+        m_bufferRegistry[m_readBufferSize] = AddressStruct(name, addr, type);
+        m_readBufferSize++;
+    }
+
+    void AddressRegistry::addToWriteBufferRegistry(const std::string& name, intptr_t addr, TYPE type)
+    {
+        if (m_writeBufferSize >= max_registry_size)
+        {
+            m_writeBufferSize = 0;   // start over and begin overwriting or raise a warning/error?
+        }
+        m_writeRegistry[m_writeBufferSize] = AddressStruct(name, addr, type);
+        m_writeBufferSize++;
     }
 }
