@@ -1,14 +1,14 @@
 CXX=g++
 
-all: receiver.o remote.o
-	$(CXX) -o receiver receiver.o
+all: main.o remote.o
+	$(CXX) -o main main.o
 	$(CXX) -o remote remote.o
 
-receiver: receiver.o
-	$(CXX) -o receiver receiver.o
+receiver: main.o
+	$(CXX) -o main main.o
 
 remote: remote.o
 	$(CXX) -o remote remote.o
 
 clean:
-	rm -f *.o remote receiver
+	rm -f *.o remote main
