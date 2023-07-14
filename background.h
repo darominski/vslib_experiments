@@ -16,7 +16,7 @@ namespace bkgTask
         for (size_t iter = 2 * (bufferSwitch ^ 1); iter < addrRegistrySize; iter += 2)
         {
             memcpy(
-                reinterpret_cast<void*>(addressRegistry[iter + bufferSwitch ^ 1].m_addr),
+                reinterpret_cast<void*>(addressRegistry[iter + (bufferSwitch ^ 1)].m_addr),
                 reinterpret_cast<void*>(addressRegistry[iter + bufferSwitch].m_addr),
                 sizeof(reinterpret_cast<void*>(addressRegistry[iter + bufferSwitch].m_addr))
                 // TODO: better way to get a size of this memory block, currently fetching void* pointer size
