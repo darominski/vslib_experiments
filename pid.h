@@ -2,7 +2,6 @@
 
 #include <array>
 #include <string>
-#include <variant>
 
 #include "addressRegistry.h"
 #include "param.h"
