@@ -66,7 +66,7 @@ int main()
         std::cout << "PID3: " << pid3.getP() << " " << pid3.getI() << " " << pid3.getD() << "\n";
         std::cout << "RST1: ";
         std::for_each(
-            rst1.getR().cbegin(), rst1.getR().cend(),
+            std::begin(rst1.getR()), std::end(rst1.getR()),
             [](const auto& val)
             {
                 std::cout << val << " ";
