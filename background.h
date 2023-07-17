@@ -20,7 +20,7 @@ namespace backgroundTask
             memcpy(
                 reinterpret_cast<void*>(addressRegistry[currentAddress + (bufferSwitch ^ 1)].m_address),
                 reinterpret_cast<void*>(addressRegistry[currentAddress + bufferSwitch].m_address),
-                addressRegistry[currentAddress + bufferSwitch].m_type.size
+                addressRegistry[currentAddress + bufferSwitch].m_memorySize
             );
         }
     }
@@ -43,7 +43,7 @@ namespace backgroundTask
                 = writeBufferRegistry[currentAddress].m_address;   // each write buffer element is visited
             memcpy(
                 reinterpret_cast<void*>(targetBufferAddress), reinterpret_cast<void*>(writeBufferAddress),
-                backgroundBufferRegistry[backgroundBufferAddress].m_type.size
+                backgroundBufferRegistry[backgroundBufferAddress].m_memorySize
             );
         }
     }

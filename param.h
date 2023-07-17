@@ -50,35 +50,16 @@ namespace parameters
     template<typename T>
     void Param<T>::registerParam()
     {
-        const auto            typeId = std::string(typeid(this->value()).name());
-        addressRegistry::Type type;
-        if (typeId == "d")
-        {
-            type = addressRegistry::Type::Float32;
-        }
-        else if (typeId == "i")
-        {
-            type = addressRegistry::Type::Int32;
-        }
-        else if (typeId == "St5arrayIdLm4EE")
-        {
-            type = addressRegistry::Type::ArrayFloat32;
-        }
-        else
-        {
-            std::cerr << "Type: " << typeId << " not supported.\n";
-            exit(0);
-        }
         // both read buffers to be written into the registry
         addressRegistry::AddressRegistry::instance().addToReadBufferRegistry(
-            this->m_name, reinterpret_cast<intptr_t>(this->address(0)), addressRegistry::Variable(type, sizeof(T))
+            this->m_name, reinterpret_cast<intptr_t>(this->address(0)), sizeof(T)
         );
         addressRegistry::AddressRegistry::instance().addToReadBufferRegistry(
-            this->m_name, reinterpret_cast<intptr_t>(this->address(1)), addressRegistry::Variable(type, sizeof(T))
+            this->m_name, reinterpret_cast<intptr_t>(this->address(1)), sizeof(T)
         );
         // and a write buffer
         addressRegistry::AddressRegistry::instance().addToWriteBufferRegistry(
-            this->m_name, reinterpret_cast<intptr_t>(this->address(2)), addressRegistry::Variable(type, sizeof(T))
+            this->m_name, reinterpret_cast<intptr_t>(this->address(2)), sizeof(T)
         );
     }
 }   // Parameters namespace
