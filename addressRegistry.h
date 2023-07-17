@@ -106,7 +106,8 @@ namespace addressRegistry
     {
         if (m_readBufferSize >= max_registry_size)
         {
-            m_readBufferSize = 0;   // start over and begin overwriting or raise a warning/error?
+            std::cerr << "ERROR! Read buffer overflow. Parameter: " << name << " discarted.\n";
+            return;
         }
         m_bufferRegistry[m_readBufferSize] = AddressStruct(name, addr, type);
         m_readBufferSize++;
@@ -124,7 +125,8 @@ namespace addressRegistry
     {
         if (m_writeBufferSize >= max_registry_size)
         {
-            m_writeBufferSize = 0;   // start over and begin overwriting or raise a warning/error?
+            std::cerr << "ERROR! Write buffer overflow. Parameter: " << name << " discarted.\n";
+            return;
         }
         // there should be no repeated names in the address structure communicated to a separate process
         for (size_t registerIndex = 0; registerIndex < m_writeBufferSize; registerIndex++)
