@@ -6,7 +6,7 @@
 #include "addressRegistry.h"
 #include "param.h"
 
-namespace rst
+namespace component
 {
     class RST
     {
@@ -34,4 +34,4 @@ namespace rst
         const std::string                        m_name;
         parameters::Param<std::array<double, 4>> m_r;
     };
-}   // RST namespace
+}   // component namespace

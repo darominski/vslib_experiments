@@ -46,11 +46,11 @@ int main()
     // ************************************************************
 
     // Create and initialize a couple of PIDs
-    pid::PID pid1("pid_1", 1, 1, 1);
-    pid::PID pid2("pid_2", 2, 2, 2);
-    pid::PID pid3("pid_3", 3, 3, 3);
+    component::PID pid1("pid_1", 1, 1, 1);
+    component::PID pid2("pid_2", 2, 2, 2);
+    component::PID pid3("pid_3", 3, 3, 3);
 
-    rst::RST rst1("rst_1", {1.1, 2.2, 3.3, 4.4});
+    component::RST rst1("rst_1", {1.1, 2.2, 3.3, 4.4});
 
     // Create and initialize the shared data structure
     SharedMemory* sharedMemoryRegister = static_cast<SharedMemory*>(sharedMemory);

@@ -9,7 +9,7 @@
 #include "addressRegistry.h"
 #include "param.h"
 
-namespace pid
+namespace component
 {
     class PID
     {
@@ -49,4 +49,4 @@ namespace pid
         parameters::Param<double> m_i;
         parameters::Param<double> m_d;
     };
-}   // PID namespace
+}   // component namespace
