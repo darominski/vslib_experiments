@@ -51,18 +51,18 @@ namespace parameters
     void Param<T>::registerParam()
     {
         const auto            typeId = std::string(typeid(this->value()).name());
-        addressRegistry::TYPE type;
+        addressRegistry::Type type;
         if (typeId == "d")
         {
-            type = addressRegistry::TYPE::Float32;
+            type = addressRegistry::Type::Float32;
         }
         else if (typeId == "i")
         {
-            type = addressRegistry::TYPE::Int32;
+            type = addressRegistry::Type::Int32;
         }
         else if (typeId == "St5arrayIdLm4EE")
         {
-            type = addressRegistry::TYPE::ArrayFloat32;
+            type = addressRegistry::Type::ArrayFloat32;
         }
         else
         {

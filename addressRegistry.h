@@ -17,7 +17,7 @@ namespace addressRegistry
 
     // ************************************************************
 
-    enum TYPE
+    enum class Type
     {
         Int32,
         Float32,
@@ -28,7 +28,7 @@ namespace addressRegistry
 
     struct Variable
     {
-        TYPE   type;
+        Type   type;
         size_t size;
     };
 
