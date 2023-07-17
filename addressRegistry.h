@@ -37,8 +37,8 @@ namespace addressRegistry
     struct AddressStruct
     {
         AddressStruct(){};
-        AddressStruct(const std::string& name, intptr_t addr, Variable type)
-            : m_addr(addr),
+        AddressStruct(const std::string& name, intptr_t address, Variable type)
+            : m_address(address),
               m_type(type)
         {
             size_t length = name.size();
@@ -47,7 +47,7 @@ namespace addressRegistry
             m_name[length] = '\0';
         };
         std::array<char, max_name_length> m_name{};
-        intptr_t                          m_addr;
+        intptr_t                          m_address;
         Variable                          m_type;
     };
 
@@ -100,16 +100,16 @@ namespace addressRegistry
     //! size.
     //!
     //! @param name Name of the new parameter.
-    //! @param addr Pointer containing the memory address of the parameter.
+    //! @param address Pointer containing the memory address of the parameter.
     //! @param type Variable structure containing type of the new parameter and its memory size.
-    void AddressRegistry::addToReadBufferRegistry(const std::string& name, intptr_t addr, Variable type)
+    void AddressRegistry::addToReadBufferRegistry(const std::string& name, intptr_t address, Variable type)
     {
         if (m_readBufferSize >= max_registry_size)
         {
             std::cerr << "ERROR! Read buffer overflow. Parameter: " << name << " discarted.\n";
             return;
         }
-        m_bufferRegistry[m_readBufferSize] = AddressStruct(name, addr, type);
+        m_bufferRegistry[m_readBufferSize] = AddressStruct(name, address, type);
         m_readBufferSize++;
     }
 
@@ -119,9 +119,9 @@ namespace addressRegistry
     //! size.
     //!
     //! @param name Name of the new parameter, needs to be unique.
-    //! @param addr Pointer containing the memory address of the parameter.
+    //! @param address Pointer containing the memory address of the parameter.
     //! @param type Variable structure containing type of the new parameter and its memory size.
-    void AddressRegistry::addToWriteBufferRegistry(const std::string& name, intptr_t addr, Variable type)
+    void AddressRegistry::addToWriteBufferRegistry(const std::string& name, intptr_t address, Variable type)
     {
         if (m_writeBufferSize >= max_registry_size)
         {
@@ -137,7 +137,7 @@ namespace addressRegistry
                 exit(1);
             }
         }
-        m_writeRegistry[m_writeBufferSize] = AddressStruct(name, addr, type);
+        m_writeRegistry[m_writeBufferSize] = AddressStruct(name, address, type);
         m_writeBufferSize++;
     }
 }

@@ -6,12 +6,12 @@
 #include "addressRegistry.h"
 #include "pid.h"
 
-struct SharedMem
+struct SharedMemory
 {
-    std::array<addressRegistry::AddressStruct, addressRegistry::max_registry_size> addrRegistry;
-    size_t                                                                         acknowledgeCntr{0};
-    size_t                                                                         transmissionCntr{0};
-    intptr_t                                                                       commandAddr;
+    std::array<addressRegistry::AddressStruct, addressRegistry::max_registry_size> addressList;
+    int                                                                            acknowledgeCounter{0};
+    int                                                                            transmissionCounter{0};
+    intptr_t                                                                       commandAddress;
     std::variant<int, double, std::array<double, 4>>                               commandVal;
     size_t                                                                         commandSize;
 };
