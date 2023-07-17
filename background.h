@@ -1,3 +1,7 @@
+//! @file
+//! @brief File containing background-task specific code for copying and synchronising parameter buffers.
+//! @author Dominik Arominski
+
 #pragma once
 
 #include <cstring>
@@ -6,9 +10,7 @@
 
 namespace bkgTask
 {
-    /**
-     * Copies all contents of the currently used buffer to the background buffer to synchronise them.
-     */
+    //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
     void synchroniseReadBuffers()
     {
         auto const& addrRegSize = addressRegistry::AddressRegistry::instance().getReadBufferSize();
@@ -23,9 +25,9 @@ namespace bkgTask
         }
     }
 
-    /**
-     * Copies all contents of a write buffer to the background buffer, which is not currently used.
-     */
+    // ************************************************************
+
+    //! Copies all contents of a write buffer to the background buffer, which is not currently used.
     void copyWriteBuffer()
     {
         auto const& addrRegistrySize    = addressRegistry::AddressRegistry::instance().getWriteBufferSize();

@@ -1,3 +1,7 @@
+//! @file
+//! @brief Simple class with three double-type parameters to simulate interactions with a future PID component.
+//! @author Dominik Arominski
+
 #pragma once
 
 #include <string>

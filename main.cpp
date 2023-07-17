@@ -43,6 +43,8 @@ int main()
         return 1;
     }
 
+    // ************************************************************
+
     // Create and initialize a couple of PIDs
     pid::PID pid1("pid_1", 1, 1, 1);
     pid::PID pid2("pid_2", 2, 2, 2);

@@ -1,3 +1,7 @@
+//! @file
+//! @brief Class defining self-registering parameters to define externally settable component parameters.
+//! @author Dominik Arominski
+
 #pragma once
 
 #include <iostream>
@@ -39,6 +43,10 @@ namespace parameters
         void registerParam();
     };
 
+    // ************************************************************
+
+    //! Registers parameters in the addressRegistry. It separates the buffer that is externally writable
+    //! from the read buffers which are not set externally but only synchronised with the write buffer.
     template<typename T>
     void Param<T>::registerParam()
     {

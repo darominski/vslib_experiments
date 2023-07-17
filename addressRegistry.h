@@ -1,3 +1,7 @@
+//! @file
+//! @brief File definining address registry singleton class and the structure of the memory address entries.
+//! @author Dominik Arominski
+
 #pragma once
 
 #include <array>
@@ -11,6 +15,8 @@ namespace addressRegistry
     constexpr short  max_name_length   = 128;   // max length of component name, in characters
     constexpr size_t max_registry_size = 100;   // max number of possible settings
 
+    // ************************************************************
+
     enum TYPE
     {
         Int32,
@@ -18,11 +24,15 @@ namespace addressRegistry
         ArrayFloat32
     };
 
+    // ************************************************************
+
     struct Variable
     {
         TYPE   type;
         size_t size;
     };
+
+    // ************************************************************
 
     struct AddressStruct
     {
@@ -40,6 +50,8 @@ namespace addressRegistry
         intptr_t                          m_addr;
         Variable                          m_type;
     };
+
+    // ************************************************************
 
     class AddressRegistry
     {
@@ -82,6 +94,14 @@ namespace addressRegistry
         size_t                                       m_writeBufferSize{0};
     };
 
+    // ************************************************************
+
+    //! Adds a new entry to the read buffer registry (m_bufferRegistry) and increments the read buffer
+    //! size.
+    //!
+    //! @param name Name of the new parameter.
+    //! @param addr Pointer containing the memory address of the parameter.
+    //! @param type Variable structure containing type of the new parameter and its memory size.
     void AddressRegistry::addToReadBufferRegistry(const std::string& name, intptr_t addr, Variable type)
     {
         if (m_readBufferSize >= max_registry_size)
@@ -92,6 +112,14 @@ namespace addressRegistry
         m_readBufferSize++;
     }
 
+    // ************************************************************
+
+    //! Adds a new entry to the write buffer registry (m_writeRegistry) and increments the write buffer
+    //! size.
+    //!
+    //! @param name Name of the new parameter, needs to be unique.
+    //! @param addr Pointer containing the memory address of the parameter.
+    //! @param type Variable structure containing type of the new parameter and its memory size.
     void AddressRegistry::addToWriteBufferRegistry(const std::string& name, intptr_t addr, Variable type)
     {
         if (m_writeBufferSize >= max_registry_size)
