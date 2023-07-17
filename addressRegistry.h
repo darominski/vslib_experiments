@@ -14,7 +14,8 @@ namespace addressRegistry
     enum TYPE
     {
         Int32,
-        Float32
+        Float32,
+        ArrayFloat32
     };
 
     struct Variable
