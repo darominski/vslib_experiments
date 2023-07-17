@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <iostream>
 #include <string>
 
 #include "addressRegistry.h"
@@ -33,6 +32,11 @@ namespace parameters
         }
         [[nodiscard]] const T* address(const short bufferId) const
         {
+            if (bufferId < 0 || bufferId > 2)
+            {
+                std::cerr << "Error! Incorrect bufferId: " << bufferId << ". Allowed values are: 0, 1, 2.\n";
+                return nullptr;
+            }
             return &m_value[bufferId];
         }
 
