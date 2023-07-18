@@ -3,11 +3,12 @@
 #include <array>
 #include <string>
 
+#include "baseComponent.h"
 #include "param.h"
 
 namespace component
 {
-    class RST
+    class RST : public BaseComponent
     {
       public:
         RST()                      = delete;   // disallow users from creating anonymous RSTs
@@ -15,15 +16,11 @@ namespace component
         void operator=(const RST&) = delete;   // as well as assigning
 
         RST(const std::string& name, std::array<double, 4> r)
-            : m_name(name),
+            : BaseComponent(name),
               m_r(name + ".r", r)
         {
         }
 
-        [[nodiscard]] const std::string& getName() const
-        {
-            return m_name;
-        }
         [[nodiscard]] auto const& getR() const
         {
             return m_r.value();
