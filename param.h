@@ -70,15 +70,15 @@ namespace parameters
     void Param<T>::registerParam()
     {
         // both read buffers to be written into the registry
-        addressRegistry::AddressRegistry::instance().addToReadBufferRegistry(
+        parameters::AddressRegistry::instance().addToReadBufferRegistry(
             this->m_name, reinterpret_cast<intptr_t>(this->address(0)), sizeof(T)
         );
-        addressRegistry::AddressRegistry::instance().addToReadBufferRegistry(
+        parameters::AddressRegistry::instance().addToReadBufferRegistry(
             this->m_name, reinterpret_cast<intptr_t>(this->address(1)), sizeof(T)
         );
         // and a write buffer
-        addressRegistry::AddressRegistry::instance().addToWriteBufferRegistry(
+        parameters::AddressRegistry::instance().addToWriteBufferRegistry(
             this->m_name, reinterpret_cast<intptr_t>(this->address(2)), sizeof(T)
         );
     }
-}   // Parameters namespace
+}   // parameters namespace

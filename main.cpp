@@ -24,7 +24,7 @@ int main()
     }
 
     // Set the size of shared memory region
-    size_t size = sizeof(SharedMemory) + (sizeof(addressRegistry::AddressStruct) * addressRegistry::max_registry_size);
+    size_t size = sizeof(SharedMemory) + (sizeof(parameters::AddressStruct) * parameters::max_registry_size);
     if (ftruncate(sharedMemoryField, size) == -1)
     {
         std::cerr << "Failed to set the size of shared memory" << std::endl;
@@ -57,7 +57,7 @@ int main()
     // Create and initialize the shared data structure
     SharedMemory* sharedMemoryRegister = static_cast<SharedMemory*>(sharedMemory);
     sharedMemoryRegister->addressList
-        = addressRegistry::AddressRegistry::instance().getWriteAddrArray();   // copies the address array to shared
+        = parameters::AddressRegistry::instance().getWriteAddrArray();   // copies the address array to shared
     int counter = 0;
     while (true)
     {

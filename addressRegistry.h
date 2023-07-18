@@ -9,7 +9,7 @@
 
 extern int bufferSwitch;
 
-namespace addressRegistry
+namespace parameters
 {
     // global constants defining variable sizes
     constexpr short  max_name_length   = 128;   // max length of component name, in characters
@@ -123,4 +123,4 @@ namespace addressRegistry
         m_writeRegistry[m_writeBufferSize] = AddressStruct(name, address, memorySize);
         m_writeBufferSize++;
     }
-}
+}   // namespace parameters

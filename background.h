@@ -13,8 +13,8 @@ namespace backgroundTask
     //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
     void synchroniseReadBuffers()
     {
-        auto const& addressRegistrySize = addressRegistry::AddressRegistry::instance().getReadBufferSize();
-        auto const& addressRegistry     = addressRegistry::AddressRegistry::instance().getBufferAddrArray();
+        auto const& addressRegistrySize = parameters::AddressRegistry::instance().getReadBufferSize();
+        auto const& addressRegistry     = parameters::AddressRegistry::instance().getBufferAddrArray();
         for (size_t currentAddress = 2 * (bufferSwitch ^ 1); currentAddress < addressRegistrySize; currentAddress += 2)
         {
             memcpy(
@@ -30,9 +30,9 @@ namespace backgroundTask
     //! Copies all contents of a write buffer to the background buffer, which is not currently used.
     void copyWriteBuffer()
     {
-        auto const& addressRegistrySize      = addressRegistry::AddressRegistry::instance().getWriteBufferSize();
-        auto const& writeBufferRegistry      = addressRegistry::AddressRegistry::instance().getWriteAddrArray();
-        auto const& backgroundBufferRegistry = addressRegistry::AddressRegistry::instance().getBufferAddrArray();
+        auto const& addressRegistrySize      = parameters::AddressRegistry::instance().getWriteBufferSize();
+        auto const& writeBufferRegistry      = parameters::AddressRegistry::instance().getWriteAddrArray();
+        auto const& backgroundBufferRegistry = parameters::AddressRegistry::instance().getBufferAddrArray();
 
         for (size_t currentAddress = 0; currentAddress < addressRegistrySize; currentAddress++)
         {
@@ -47,4 +47,4 @@ namespace backgroundTask
             );
         }
     }
-}
+}   // namespace backgroundTask
