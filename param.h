@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <compare>
 #include <string>
 
 #include "parameterRegistry.h"
@@ -54,6 +55,27 @@ namespace parameters
             std::copy(this->m_value, other.m_value);
         }
 
+        std::partial_ordering operator<=>(const Param& other) const
+        {
+            // parameters are compared based on the values stored
+            // in the currently active buffer
+            auto const& lhs = this->m_value[buffer_switch];
+            auto const& rhs = this.m_value[buffer_switch];
+            if (lhs == rhs)
+            {
+                return std::partial_ordering::equivalent;
+            }
+            if (lhs > rhs)
+            {
+                return std::partial_ordering::less;
+            }
+            if (lhs < rhs)
+            {
+                return std::partial_ordering::greater;
+            }
+            // comparison reaches here if lhs or rhs are NaN or similar
+            return std::partial_ordering::unordered;
+        }
 
       private:
         const std::string m_name;
