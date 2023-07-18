@@ -24,7 +24,7 @@ int main()
 
     // Calculate the size of shared memory region
     size_t total_memory_size
-        = sizeof(SharedMemory) + (sizeof(parameters::AddressStruct) * parameters::max_registry_size);
+        = sizeof(SharedMemory) + (sizeof(parameters::AddressEntry) * parameters::max_registry_size);
     // Map the shared memory region into the address space
     void* shared_memory = mmap(NULL, total_memory_size, PROT_WRITE | PROT_READ, MAP_SHARED, shared_memory_field, 0);
     if (shared_memory == MAP_FAILED)

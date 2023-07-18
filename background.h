@@ -6,15 +6,15 @@
 
 #include <cstring>
 
-#include "addressRegistry.h"
+#include "parameterRegistry.h"
 
 namespace backgroundTask
 {
     //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
     void synchroniseReadBuffers()
     {
-        auto const& address_registry_size = parameters::AddressRegistry::instance().getReadBufferSize();
-        auto const& address_registry      = parameters::AddressRegistry::instance().getBufferAddressArray();
+        auto const& address_registry_size = parameters::ParameterRegistry::instance().getReadBufferSize();
+        auto const& address_registry      = parameters::ParameterRegistry::instance().getBufferAddressArray();
         for (size_t current_address = 2 * (buffer_switch ^ 1); current_address < address_registry_size;
              current_address        += 2)
         {
@@ -31,9 +31,9 @@ namespace backgroundTask
     //! Copies all contents of a write buffer to the background buffer, which is not currently used.
     void copyWriteBuffer()
     {
-        auto const& address_registry_size      = parameters::AddressRegistry::instance().getWriteBufferSize();
-        auto const& write_buffer_registry      = parameters::AddressRegistry::instance().getWriteAddressArray();
-        auto const& background_buffer_registry = parameters::AddressRegistry::instance().getBufferAddressArray();
+        auto const& address_registry_size      = parameters::ParameterRegistry::instance().getWriteBufferSize();
+        auto const& write_buffer_registry      = parameters::ParameterRegistry::instance().getWriteAddressArray();
+        auto const& background_buffer_registry = parameters::ParameterRegistry::instance().getBufferAddressArray();
 
         for (size_t current_address = 0; current_address < address_registry_size; current_address++)
         {

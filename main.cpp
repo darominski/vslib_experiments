@@ -6,8 +6,8 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#include "addressRegistry.h"
 #include "background.h"
+#include "parameterRegistry.h"
 #include "pid.h"
 #include "rst.h"
 #include "sharedMemory.h"
@@ -25,7 +25,7 @@ int main()
 
     // Set the size of shared memory region
     size_t total_memory_size
-        = sizeof(SharedMemory) + (sizeof(parameters::AddressStruct) * parameters::max_registry_size);
+        = sizeof(SharedMemory) + (sizeof(parameters::AddressEntry) * parameters::max_registry_size);
     if (ftruncate(shared_memory_field, total_memory_size) == -1)
     {
         std::cerr << "Failed to set the size of shared memory" << std::endl;
@@ -58,7 +58,7 @@ int main()
     // Create and initialize the shared data structure
     SharedMemory* shared_memory_ptr = static_cast<SharedMemory*>(shared_memory);
     shared_memory_ptr->address_list
-        = parameters::AddressRegistry::instance().getWriteAddressArray();   // copies the address array to shared
+        = parameters::ParameterRegistry::instance().getWriteAddressArray();   // copies the address array to shared
     int counter = 0;
     while (true)
     {

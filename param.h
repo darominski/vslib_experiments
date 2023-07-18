@@ -6,7 +6,7 @@
 
 #include <string>
 
-#include "addressRegistry.h"
+#include "parameterRegistry.h"
 
 inline int buffer_switch = 0;
 
@@ -64,20 +64,20 @@ namespace parameters
 
     // ************************************************************
 
-    //! Registers parameters in the addressRegistry. It separates the buffer that is externally writable
+    //! Registers parameters in the parameter registry. It separates the buffer that is externally writable
     //! from the read buffers which are not set externally but only synchronised with the write buffer.
     template<typename T>
     void Param<T>::registerParam()
     {
         // both read buffers to be written into the registry
-        parameters::AddressRegistry::instance().addToReadBufferRegistry(
+        parameters::ParameterRegistry::instance().addToReadBufferRegistry(
             this->m_name, reinterpret_cast<intptr_t>(this->address(0)), sizeof(T)
         );
-        parameters::AddressRegistry::instance().addToReadBufferRegistry(
+        parameters::ParameterRegistry::instance().addToReadBufferRegistry(
             this->m_name, reinterpret_cast<intptr_t>(this->address(1)), sizeof(T)
         );
         // and a write buffer
-        parameters::AddressRegistry::instance().addToWriteBufferRegistry(
+        parameters::ParameterRegistry::instance().addToWriteBufferRegistry(
             this->m_name, reinterpret_cast<intptr_t>(this->address(2)), sizeof(T)
         );
     }
