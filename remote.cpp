@@ -1,12 +1,8 @@
-#include <cstring>
 #include <fcntl.h>
 #include <iostream>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <variant>
 
-#include "addressRegistry.h"
-#include "pid.h"
 #include "sharedMemory.h"
 
 int main()
