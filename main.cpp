@@ -15,31 +15,32 @@
 int main()
 {
     // Create shared memory region
-    const char* memoryAddress     = "/shared_mem";
-    int         sharedMemoryField = shm_open(memoryAddress, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-    if (sharedMemoryField == -1)
+    const char* memory_address      = "/shared_mem";
+    int         shared_memory_field = shm_open(memory_address, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+    if (shared_memory_field == -1)
     {
         std::cerr << "Failed to create shared memory." << std::endl;
         return 1;
     }
 
     // Set the size of shared memory region
-    size_t size = sizeof(SharedMemory) + (sizeof(parameters::AddressStruct) * parameters::max_registry_size);
-    if (ftruncate(sharedMemoryField, size) == -1)
+    size_t total_memory_size
+        = sizeof(SharedMemory) + (sizeof(parameters::AddressStruct) * parameters::max_registry_size);
+    if (ftruncate(shared_memory_field, total_memory_size) == -1)
     {
         std::cerr << "Failed to set the size of shared memory" << std::endl;
-        close(sharedMemoryField);
-        shm_unlink(memoryAddress);
+        close(shared_memory_field);
+        shm_unlink(memory_address);
         return 1;
     }
 
     // Map the shared memory region into the address space
-    void* sharedMemory = mmap(NULL, size, PROT_WRITE | PROT_READ, MAP_SHARED, sharedMemoryField, 0);
-    if (sharedMemory == MAP_FAILED)
+    void* shared_memory = mmap(NULL, total_memory_size, PROT_WRITE | PROT_READ, MAP_SHARED, shared_memory_field, 0);
+    if (shared_memory == MAP_FAILED)
     {
         std::cerr << "Failed to map shared memory" << std::endl;
-        close(sharedMemoryField);
-        shm_unlink(memoryAddress);
+        close(shared_memory_field);
+        shm_unlink(memory_address);
         return 1;
     }
 
@@ -55,9 +56,9 @@ int main()
     component::RST rst1("rst_1", {1.1, 2.2, 3.3, 4.4});
 
     // Create and initialize the shared data structure
-    SharedMemory* sharedMemoryRegister = static_cast<SharedMemory*>(sharedMemory);
-    sharedMemoryRegister->addressList
-        = parameters::AddressRegistry::instance().getWriteAddrArray();   // copies the address array to shared
+    SharedMemory* shared_memory_ptr = static_cast<SharedMemory*>(shared_memory);
+    shared_memory_ptr->address_list
+        = parameters::AddressRegistry::instance().getWriteAddressArray();   // copies the address array to shared
     int counter = 0;
     while (true)
     {
@@ -78,36 +79,36 @@ int main()
         // END TEST CODE
         // TEST CODE, extremely basic execution of commands received from a remote thread, will be part of background
         // task
-        if (sharedMemoryRegister->transmissionCounter > sharedMemoryRegister->acknowledgeCounter)
+        if (shared_memory_ptr->transmission_counter > shared_memory_ptr->acknowledge_counter)
         {
             // copy the command into the write buffer
-            auto const memoryAddress = reinterpret_cast<void*>(sharedMemoryRegister->commandAddress);
-            memcpy(memoryAddress, &sharedMemoryRegister->commandVal, sharedMemoryRegister->commandSize);
+            auto const memory_address = reinterpret_cast<void*>(shared_memory_ptr->command_address);
+            memcpy(memory_address, &shared_memory_ptr->command_value, shared_memory_ptr->command_size);
             // copy the entire write buffer into the background buffer
             backgroundTask::copyWriteBuffer();
             // switch buffers
-            bufferSwitch ^= 1;   // flip the buffer pointer of all variables
+            buffer_switch ^= 1;   // flip the buffer pointer of all variables
             // synchronise the memory between buffers
             backgroundTask::synchroniseReadBuffers();
             // acknowledge transaction
-            sharedMemoryRegister->acknowledgeCounter++;
+            shared_memory_ptr->acknowledge_counter++;
         }
         // END TEST CODE
         // Add some delay to simulate work
-        usleep(1000000);
-        if (counter == 16) break;
+        usleep(10);   // 10 us
+        if (counter == 100000) break;
     }
 
     // Unmap the shared memory region
-    if (munmap(sharedMemory, size) == -1)
+    if (munmap(shared_memory, total_memory_size) == -1)
     {
         std::cerr << "Failed to unmap shared memory" << std::endl;
         return 1;
     }
 
     // Close and unlink the shared memory object
-    close(sharedMemoryField);
-    shm_unlink(memoryAddress);
+    close(shared_memory_field);
+    shm_unlink(memory_address);
 
     return 0;
 }

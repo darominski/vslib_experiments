@@ -13,14 +13,15 @@ namespace backgroundTask
     //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
     void synchroniseReadBuffers()
     {
-        auto const& addressRegistrySize = parameters::AddressRegistry::instance().getReadBufferSize();
-        auto const& addressRegistry     = parameters::AddressRegistry::instance().getBufferAddrArray();
-        for (size_t currentAddress = 2 * (bufferSwitch ^ 1); currentAddress < addressRegistrySize; currentAddress += 2)
+        auto const& address_registry_size = parameters::AddressRegistry::instance().getReadBufferSize();
+        auto const& address_registry      = parameters::AddressRegistry::instance().getBufferAddressArray();
+        for (size_t current_address = 2 * (buffer_switch ^ 1); current_address < address_registry_size;
+             current_address        += 2)
         {
             memcpy(
-                reinterpret_cast<void*>(addressRegistry[currentAddress + (bufferSwitch ^ 1)].m_address),
-                reinterpret_cast<void*>(addressRegistry[currentAddress + bufferSwitch].m_address),
-                addressRegistry[currentAddress + bufferSwitch].m_memorySize
+                reinterpret_cast<void*>(address_registry[current_address + (buffer_switch ^ 1)].m_address),
+                reinterpret_cast<void*>(address_registry[current_address + buffer_switch].m_address),
+                address_registry[current_address + buffer_switch].m_memory_size
             );
         }
     }
@@ -30,20 +31,20 @@ namespace backgroundTask
     //! Copies all contents of a write buffer to the background buffer, which is not currently used.
     void copyWriteBuffer()
     {
-        auto const& addressRegistrySize      = parameters::AddressRegistry::instance().getWriteBufferSize();
-        auto const& writeBufferRegistry      = parameters::AddressRegistry::instance().getWriteAddrArray();
-        auto const& backgroundBufferRegistry = parameters::AddressRegistry::instance().getBufferAddrArray();
+        auto const& address_registry_size      = parameters::AddressRegistry::instance().getWriteBufferSize();
+        auto const& write_buffer_registry      = parameters::AddressRegistry::instance().getWriteAddressArray();
+        auto const& background_buffer_registry = parameters::AddressRegistry::instance().getBufferAddressArray();
 
-        for (size_t currentAddress = 0; currentAddress < addressRegistrySize; currentAddress++)
+        for (size_t current_address = 0; current_address < address_registry_size; current_address++)
         {
-            auto const  backgroundBufferAddress = 2 * currentAddress + (bufferSwitch ^ 1);
-            auto const& targetBufferAddress     = backgroundBufferRegistry[backgroundBufferAddress]
-                                                  .m_address;   // only bkg buffer elements are modified
-            auto const& writeBufferAddress
-                = writeBufferRegistry[currentAddress].m_address;   // each write buffer element is visited
+            auto const  background_buffer_address = 2 * current_address + (buffer_switch ^ 1);
+            auto const& target_buffer_address     = background_buffer_registry[background_buffer_address]
+                                                    .m_address;   // only bkg buffer elements are modified
+            auto const& write_buffer_address
+                = write_buffer_registry[current_address].m_address;   // each write buffer element is visited
             memcpy(
-                reinterpret_cast<void*>(targetBufferAddress), reinterpret_cast<void*>(writeBufferAddress),
-                backgroundBufferRegistry[backgroundBufferAddress].m_memorySize
+                reinterpret_cast<void*>(target_buffer_address), reinterpret_cast<void*>(write_buffer_address),
+                background_buffer_registry[background_buffer_address].m_memory_size
             );
         }
     }

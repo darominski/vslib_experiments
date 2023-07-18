@@ -8,10 +8,10 @@
 
 struct SharedMemory
 {
-    std::array<parameters::AddressStruct, parameters::max_registry_size> addressList;
-    int                                                                  acknowledgeCounter{0};
-    int                                                                  transmissionCounter{0};
-    intptr_t                                                             commandAddress;
-    std::variant<int, double, std::array<double, 4>>                     commandVal;
-    size_t                                                               commandSize;
+    std::array<parameters::AddressStruct, parameters::max_registry_size> address_list;
+    int                                                                  acknowledge_counter{0};
+    int                                                                  transmission_counter{0};
+    intptr_t                                                             command_address;
+    std::variant<int, double, std::array<double, 4>>                     command_value;
+    size_t                                                               command_size;
 };

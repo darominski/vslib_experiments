@@ -8,7 +8,7 @@
 
 #include "addressRegistry.h"
 
-inline int bufferSwitch = 0;
+inline int buffer_switch = 0;
 
 namespace parameters
 {
@@ -27,26 +27,26 @@ namespace parameters
 
         [[nodiscard]] const T& value() const
         {
-            return m_value[bufferSwitch];
+            return m_value[buffer_switch];
         }
-        [[nodiscard]] const T* address(const short bufferId) const
+        [[nodiscard]] const T* address(const short buffer_id) const
         {
-            if (bufferId < 0 || bufferId > 2)
+            if (buffer_id < 0 || buffer_id > 2)
             {
-                std::cerr << "Error! Incorrect bufferId: " << bufferId << ". Allowed values are: 0, 1, 2.\n";
+                std::cerr << "Error! Incorrect buffer_id: " << buffer_id << ". Allowed values are: 0, 1, 2.\n";
                 return nullptr;
             }
-            return &m_value[bufferId];
+            return &m_value[buffer_id];
         }
 
         operator T() const
         {
-            return m_value[bufferSwitch];
+            return m_value[buffer_switch];
         }
 
         operator T&()
         {
-            return m_value[bufferSwitch];
+            return m_value[buffer_switch];
         }
 
         void operator=(const Param& other)

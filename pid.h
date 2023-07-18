@@ -55,4 +55,4 @@ namespace component
         parameters::Param<double> m_i;
         parameters::Param<double> m_d;
     };
-}   // component namespace
+}   // namespace component

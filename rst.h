@@ -34,4 +34,4 @@ namespace component
         const std::string                        m_name;
         parameters::Param<std::array<double, 4>> m_r;
     };
-}   // component namespace
+}   // namespace component
