@@ -10,7 +10,7 @@
 #include "background.h"
 #include "pid.h"
 #include "rst.h"
-#include "shared_mem.h"
+#include "sharedMemory.h"
 
 int main()
 {

@@ -7,7 +7,7 @@
 
 #include "addressRegistry.h"
 #include "pid.h"
-#include "shared_mem.h"
+#include "sharedMemory.h"
 
 int main()
 {
