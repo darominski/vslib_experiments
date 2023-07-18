@@ -26,20 +26,6 @@ namespace parameters
         // cannot clone Params
         Param& param(Param&) = delete;
 
-        [[nodiscard]] const T& value() const
-        {
-            return m_value[buffer_switch];
-        }
-        [[nodiscard]] const T* address(const short buffer_id) const
-        {
-            if (buffer_id < 0 || buffer_id > 2)
-            {
-                std::cerr << "Error! Incorrect buffer_id: " << buffer_id << ". Allowed values are: 0, 1, 2.\n";
-                return nullptr;
-            }
-            return &m_value[buffer_id];
-        }
-
         operator T() const
         {
             return m_value[buffer_switch];
@@ -77,6 +63,11 @@ namespace parameters
             return std::partial_ordering::unordered;
         }
 
+        [[nodiscard]] const T& value() const
+        {
+            return m_value[buffer_switch];
+        }
+
       private:
         const std::string m_name;
         T                 m_value[3];
@@ -91,16 +82,19 @@ namespace parameters
     template<typename T>
     void Param<T>::registerParam()
     {
+        // it is sufficient to know only the address of the first element of the m_value buffer,
+        // since the size of T is known, and he memory is assigned continuously,
+        auto const first_address   = reinterpret_cast<intptr_t>(std::addressof(m_value[0]));
+        auto constexpr memory_size = sizeof(T);
+
         // both read buffers to be written into the registry
+        parameters::ParameterRegistry::instance().addToReadBufferRegistry(this->m_name, first_address, memory_size);
         parameters::ParameterRegistry::instance().addToReadBufferRegistry(
-            this->m_name, reinterpret_cast<intptr_t>(this->address(0)), sizeof(T)
-        );
-        parameters::ParameterRegistry::instance().addToReadBufferRegistry(
-            this->m_name, reinterpret_cast<intptr_t>(this->address(1)), sizeof(T)
+            this->m_name, first_address + memory_size, memory_size
         );
         // and a write buffer
         parameters::ParameterRegistry::instance().addToWriteBufferRegistry(
-            this->m_name, reinterpret_cast<intptr_t>(this->address(2)), sizeof(T)
+            this->m_name, first_address + memory_size * 2, memory_size
         );
     }
 }   // parameters namespace
