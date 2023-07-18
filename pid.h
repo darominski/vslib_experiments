@@ -36,15 +36,15 @@ namespace component
             return m_p;
         }
 
-        [[nodiscard]] double const getP() const
+        [[nodiscard]] auto const& getP() const
         {
             return m_p;
         }
-        [[nodiscard]] double const getI() const
+        [[nodiscard]] auto const& getI() const
         {
             return m_i;
         }
-        [[nodiscard]] double const getD() const
+        [[nodiscard]] auto const& getD() const
         {
             return m_d;
         }
