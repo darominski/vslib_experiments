@@ -22,9 +22,8 @@ namespace parameters
         {
             registerParam();
         };
-        // cannot assign nor clone Params
-        Param& param(Param&)           = delete;
-        void   operator=(const Param&) = delete;
+        // cannot clone Params
+        Param& param(Param&) = delete;
 
         [[nodiscard]] const T& value() const
         {
@@ -39,6 +38,22 @@ namespace parameters
             }
             return &m_value[bufferId];
         }
+
+        operator T() const
+        {
+            return m_value[bufferSwitch];
+        }
+
+        operator T&()
+        {
+            return m_value[bufferSwitch];
+        }
+
+        void operator=(const Param& other)
+        {
+            std::copy(this->m_value, other.m_value);
+        }
+
 
       private:
         const std::string m_name;

@@ -30,17 +30,23 @@ namespace component
         {
             return m_name;
         }
-        [[nodiscard]] double getP() const
+
+        double& p()
         {
-            return m_p.value();
+            return m_p;
         }
-        [[nodiscard]] double getI() const
+
+        [[nodiscard]] double const getP() const
         {
-            return m_i.value();
+            return m_p;
         }
-        [[nodiscard]] double getD() const
+        [[nodiscard]] double const getI() const
         {
-            return m_d.value();
+            return m_i;
+        }
+        [[nodiscard]] double const getD() const
+        {
+            return m_d;
         }
 
       private:

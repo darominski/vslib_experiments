@@ -50,6 +50,8 @@ int main()
     component::PID pid2("pid_2", 2, 2, 2);
     component::PID pid3("pid_3", 3, 3, 3);
 
+    pid1.p() = pid2.p();   // indirectly tests overloaded operators of Param class
+
     component::RST rst1("rst_1", {1.1, 2.2, 3.3, 4.4});
 
     // Create and initialize the shared data structure
