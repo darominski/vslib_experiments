@@ -11,17 +11,17 @@ namespace component
     class BaseComponent
     {
       public:
-        BaseComponent(const std::string& name)
+        BaseComponent(const std::string_view name)
             : m_name(name)
         {
         }
 
-        [[nodiscard]] const std::string& getName() const
+        [[nodiscard]] const auto& getName() const
         {
             return m_name;
         }
 
       private:
-        std::string m_name;
+        const std::string m_name;
     };
 }   // namespace component

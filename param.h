@@ -17,7 +17,7 @@ namespace parameters
     class Param
     {
       public:
-        Param(const std::string& name, T value)
+        Param(std::string_view name, T value)
             : m_name(name),
               m_value{value, value, value}
         {
