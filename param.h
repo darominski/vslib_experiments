@@ -38,7 +38,7 @@ namespace parameters
 
         void operator=(const Param& other)
         {
-            std::copy(this->m_value, other.m_value);
+            std::copy(std::begin(other.m_value), std::end(other.m_value), this->m_value);
         }
 
         std::partial_ordering operator<=>(const Param& other) const
