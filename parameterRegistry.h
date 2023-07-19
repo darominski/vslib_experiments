@@ -21,16 +21,17 @@ namespace parameters
     struct AddressEntry
     {
         AddressEntry(){};
-        AddressEntry(const std::string& name, intptr_t address, size_t memory_size)
+        AddressEntry(std::string_view name, intptr_t address, size_t memory_size)
             : m_address(address),
               m_memory_size(memory_size)
         {
+            std::fill(std::begin(m_name), std::end(m_name), '\0');
             size_t length = name.size();
-            length        = length < name.size() ? length : max_name_length - 1;
-            std::copy(name.begin(), name.begin() + length, m_name.begin());
+            length        = length < max_name_length ? length : max_name_length - 1;
+            std::copy(std::begin(name), std::begin(name) + length, std::begin(m_name));
             m_name[length] = '\0';
         };
-        std::array<char, max_name_length> m_name{};
+        std::array<char, max_name_length> m_name;
         intptr_t                          m_address;
         size_t                            m_memory_size;
     };
