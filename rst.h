@@ -16,8 +16,8 @@ namespace component
         void operator=(const RST&) = delete;   // as well as assigning
 
         RST(const std::string& name, std::array<double, 4> r)
-            : BaseComponent(name),
-              m_r(name + ".r", r)
+            : BaseComponent("rst", name),
+              m_r("rst." + name + ".r", r)
         {
         }
 

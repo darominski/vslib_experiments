@@ -11,8 +11,9 @@ namespace component
     class BaseComponent
     {
       public:
-        BaseComponent(const std::string_view name)
-            : m_name(name)
+        BaseComponent(std::string_view component_name, std::string_view name)
+            : m_component_name(component_name),
+              m_name(name)
         {
         }
 
@@ -22,6 +23,7 @@ namespace component
         }
 
       private:
+        const std::string m_component_name;   // alternative to enum class type for Param ID building
         const std::string m_name;
     };
 }   // namespace component

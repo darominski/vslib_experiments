@@ -19,10 +19,10 @@ namespace component
         void operator=(const PID&) = delete;   // as well as assigning
 
         PID(const std::string& name, double p = 0.0, double i = 0.0, double d = 0.0)
-            : BaseComponent(name),
-              m_p(name + ".p", p),
-              m_i(name + ".i", i),
-              m_d(name + ".d", d)
+            : BaseComponent("pid", name),
+              m_p("pid." + name + ".p", p),
+              m_i("pid." + name + ".i", i),
+              m_d("pid." + name + ".d", d)
         {
         }
 

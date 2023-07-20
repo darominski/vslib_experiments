@@ -69,8 +69,9 @@ namespace parameters
         }
 
       private:
-        const std::string m_name;
-        T                 m_value[3];
+        const std::string
+            m_name;   // Param ID indicating component type, its name and the variable name, should be unique
+        T   m_value[3];
 
         void registerParam();
     };
