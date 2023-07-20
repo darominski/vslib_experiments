@@ -43,7 +43,7 @@ int main()
         if (shared_memory_ptr->acknowledge_counter < shared_memory_ptr->transmission_counter)
         {
             // first process not ready to receive more commands, wait and skip to next iteration
-            usleep(500);   // 0.5 ms
+            usleep(500000);   // 0.5 s
             continue;
         }
         // TEST CODE FOR TRANSFERRING COMMANDS
@@ -65,7 +65,8 @@ int main()
         // END OF TEST CODE
 
         // Add some delay to simulate work
-        usleep(10);   // 100 us
+        if (counter == 10) break;
+        usleep(1000000);   // 1 s
     }
 
     // Unmap the shared memory region

@@ -45,15 +45,18 @@ int main()
     }
 
     // ************************************************************
-
-    // Create and initialize a couple of PIDs
+    // Create and initialize a couple of components: 3 PIDs and an RST
     component::PID pid1("pid_1", 1, 1, 1);
     component::PID pid2("pid_2", 2, 2, 2);
     component::PID pid3("pid_3", 3, 3, 3);
-
     pid1.p() = pid2.p();   // indirectly tests overloaded operators of Param class
 
     component::RST rst1("rst_1", {1.1, 2.2, 3.3, 4.4});
+
+    // ************************************************************
+
+    auto const jsonParameterRegistry = parameters::ParameterRegistry::instance().createManifest();
+    std::cout << std::setw(4) << jsonParameterRegistry.dump() << "\n";
 
     // Create and initialize the shared data structure
     SharedMemory* shared_memory_ptr = static_cast<SharedMemory*>(shared_memory);
@@ -95,8 +98,8 @@ int main()
         }
         // END TEST CODE
         // Add some delay to simulate work
-        usleep(10);   // 10 us
-        if (counter == 100000) break;
+        usleep(1000000);   // 1 s
+        if (counter == 15) break;
     }
 
     // Unmap the shared memory region

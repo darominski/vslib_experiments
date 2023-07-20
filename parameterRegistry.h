@@ -8,6 +8,8 @@
 #include <iostream>
 #include <string>
 
+#include "nlohmann/json.hpp"
+
 extern int buffer_switch;
 
 namespace parameters
@@ -71,6 +73,8 @@ namespace parameters
             return m_write_buffer_size;
         }
 
+        nlohmann::json createManifest();
+
       private:
         ParameterRegistry(){};
         std::array<AddressEntry, max_registry_size> m_buffer_registry;
@@ -78,51 +82,4 @@ namespace parameters
         size_t                                      m_read_buffer_size{0};
         size_t                                      m_write_buffer_size{0};
     };
-
-    // ************************************************************
-
-    //! Adds a new entry to the read buffer registry (m_bufferRegistry) and increments the read buffer
-    //! size.
-    //!
-    //! @param name Name of the new parameter.
-    //! @param address Pointer containing the memory address of the parameter.
-    //! @param memory_size Memory size of the new parameter.
-    void ParameterRegistry::addToReadBufferRegistry(const std::string& name, intptr_t address, size_t memory_size)
-    {
-        if (m_read_buffer_size >= max_registry_size)
-        {
-            std::cerr << "ERROR! Read buffer overflow. Parameter: " << name << " discarted.\n";
-            return;
-        }
-        m_buffer_registry[m_read_buffer_size] = AddressEntry(name, address, memory_size);
-        m_read_buffer_size++;
-    }
-
-    // ************************************************************
-
-    //! Adds a new entry to the write buffer registry (m_writeRegistry) and increments the write buffer
-    //! size.
-    //!
-    //! @param name Name of the new parameter, needs to be unique.
-    //! @param address Pointer containing the memory address of the parameter.
-    //! @param memory_size Variable structure containing type of the new parameter and its memory size.
-    void ParameterRegistry::addToWriteBufferRegistry(const std::string& name, intptr_t address, size_t memory_size)
-    {
-        if (m_write_buffer_size >= max_registry_size)
-        {
-            std::cerr << "ERROR! Write buffer overflow. Parameter: " << name << " discarted.\n";
-            return;
-        }
-        // there should be no repeated names in the address structure communicated to a separate process
-        for (size_t registry_index = 0; registry_index < m_write_buffer_size; registry_index++)
-        {
-            if (std::string(m_write_registry[registry_index].m_name.data()) == name)
-            {
-                std::cerr << "ERROR! Name: " << name << " already defined.\n";
-                exit(1);
-            }
-        }
-        m_write_registry[m_write_buffer_size] = AddressEntry(name, address, memory_size);
-        m_write_buffer_size++;
-    }
 }   // namespace parameters
