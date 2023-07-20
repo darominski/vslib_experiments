@@ -10,6 +10,9 @@
 
 namespace backgroundTask
 {
+    void synchroniseReadBuffers();
+    void copyWriteBuffer();
+
     //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
     void synchroniseReadBuffers()
     {
