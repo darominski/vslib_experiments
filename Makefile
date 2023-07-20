@@ -1,17 +1,21 @@
 CXX := g++
-CXXFLAGS := -std=c++20 -O2
 WARNINGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
-            -Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
-            -Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-            -Wconversion -Wstrict-prototypes
+            -Wwrite-strings -Wmissing-declarations \
+            -Wredundant-decls -Winline -Wno-long-long \
+            -Wconversion
+CXXFLAGS := -std=c++20 -O0 $(WARNINGS)
 
 all: main remote
 
 main: main.o
-	$(CXX) $(CXXFLAGS) ${WARNINGS} -o main main.o
+	$(CXX) $(CXXFLAGS) -o main main.o
 
 remote: remote.o
-	$(CXX) $(CXXFLAGS) ${WARNINGS} -o remote remote.o
+	$(CXX) $(CXXFLAGS) -o remote remote.o
+
+assembly:
+	$(CXX) $(CXXFLAGS) -S -o main.s main.cpp
+	$(CXX) $(CXXFLAGS) -S -o remote.s remote.cpp
 
 clean:
 	rm -f *.o remote main
