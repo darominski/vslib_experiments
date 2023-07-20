@@ -68,6 +68,11 @@ namespace parameters
             return m_value[buffer_switch];
         }
 
+        [[nodiscard]] const std::string& getName() const
+        {
+            return m_name;
+        }
+
       private:
         const std::string
             m_name;   // Param ID indicating component type, its name and the variable name, should be unique
