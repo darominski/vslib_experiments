@@ -82,8 +82,8 @@ int main()
         if (shared_memory_ptr->transmission_counter > shared_memory_ptr->acknowledge_counter)
         {
             // copy the command into the write buffer
-            auto const memory_address = reinterpret_cast<void*>(shared_memory_ptr->command_address);
-            memcpy(memory_address, &shared_memory_ptr->command_value, shared_memory_ptr->command_size);
+            auto const command_memory_address = reinterpret_cast<void*>(shared_memory_ptr->command_address);
+            memcpy(command_memory_address, &shared_memory_ptr->command_value, shared_memory_ptr->command_size);
             // copy the entire write buffer into the background buffer
             backgroundTask::copyWriteBuffer();
             // switch buffers
