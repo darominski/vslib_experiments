@@ -29,8 +29,7 @@ namespace parameters
     //! size.
     //!
     //! @param name Name of the new parameter.
-    //! @param address Pointer containing the memory address of the parameter.
-    //! @param memory_size Memory size of the new parameter.
+    //! @param variable_info Structure containing type of the new parameter and its memory size.
     void ParameterRegistry::addToReadBufferRegistry(const std::string& name, VariableInfo&& variable_info)
     {
         if (m_read_buffer_size >= max_registry_size)
@@ -48,8 +47,7 @@ namespace parameters
     //! size.
     //!
     //! @param name Name of the new parameter, needs to be unique.
-    //! @param address Pointer containing the memory address of the parameter.
-    //! @param memory_size Variable structure containing type of the new parameter and its memory size.
+    //! @param variable_info Structure containing type of the new parameter and its memory size.
     void ParameterRegistry::addToWriteBufferRegistry(const std::string& name, VariableInfo&& variable_info)
     {
         if (m_write_buffer_size >= max_registry_size)
