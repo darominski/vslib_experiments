@@ -37,6 +37,9 @@ namespace parameters
     {
     };
 
+    template<class... T>
+    constexpr bool always_false = false;
+
     // if the body of getType is in the cpp file, certain types (double, array)
     // are not created. Leaving here for now.
     //! Returns the type of the parameter added to the registry.
@@ -59,7 +62,10 @@ namespace parameters
                 return Type::Float32Array;
             }
         }
-        // static_asserts could be added if T is limited to a list of supported types
+        else
+        {
+            static_assert(always_false<T>, "Unsupported type.");
+        }
         // it should never reach here
         return Type::Unsupported;
     };
