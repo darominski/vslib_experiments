@@ -1,4 +1,8 @@
+//! @file
+//! @brief Method definitions for the ParameterRegistry class.
+//! @author Dominik Arominski
 
+#include <ranges>
 #include <type_traits>
 
 #include "parameterRegistry.h"
@@ -7,6 +11,20 @@ using json = nlohmann::json;
 
 namespace parameters
 {
+
+    using TypeToString = std::pair<Type, std::string_view>;
+    constexpr std::array typeNames
+        = {TypeToString{Type::Int32, "Int32"}, TypeToString{Type::Float32, "Float32"},
+           TypeToString{Type::Float32Array, "Float32Array"}};
+
+    static_assert(typeNames.size() == static_cast<size_t>(Type::Unsupported));
+
+    constexpr std::string_view toString(Type type)
+    {
+        return std::ranges::find(typeNames, type, &TypeToString::first)->second;
+    }
+
+
     //! Adds a new entry to the read buffer registry (m_bufferRegistry) and increments the read buffer
     //! size.
     //!
@@ -73,7 +91,8 @@ namespace parameters
                 json json_entry
                     = {{"name", name},
                        {"memory_address", addressElement.m_variable_info.memory_address},
-                       {"size", addressElement.m_variable_info.memory_size}};
+                       {"size", addressElement.m_variable_info.memory_size},
+                       {"type", toString(addressElement.m_variable_info.type)}};
                 manifest.push_back(json_entry);
             }
         );

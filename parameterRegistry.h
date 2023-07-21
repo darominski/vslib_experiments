@@ -22,8 +22,8 @@ namespace parameters
     {
         Int32,
         Float32,
-        FloatArray32,
-        Unsupported
+        Float32Array,
+        Unsupported   // must be last
     };
 
     // helper definitions for std::array types
@@ -56,13 +56,15 @@ namespace parameters
             using ElementType = typename T::value_type;
             if (std::is_floating_point_v<ElementType>)
             {
-                return Type::FloatArray32;
+                return Type::Float32Array;
             }
         }
         // static_asserts could be added if T is limited to a list of supported types
         // it should never reach here
         return Type::Unsupported;
     };
+
+    constexpr std::string_view toString(Type type);
 
     // ************************************************************
     // structure holding all information about a stored variable necessary for remote setting
