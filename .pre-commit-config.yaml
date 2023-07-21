@@ -17,4 +17,4 @@ repos:
     rev: v15.0.7
     hooks:
       - id: clang-format
-        exclude: ^(source/hal/|source/bsp/|source/bmboot/)
+        exclude: ^(lib)
