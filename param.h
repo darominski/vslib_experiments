@@ -92,15 +92,18 @@ namespace parameters
         // since the size of T is known, and he memory is assigned continuously,
         auto const first_address   = reinterpret_cast<intptr_t>(std::addressof(m_value[0]));
         auto constexpr memory_size = sizeof(T);
+        auto type                  = getType<T>();
 
         // both read buffers to be written into the registry
-        parameters::ParameterRegistry::instance().addToReadBufferRegistry(this->m_name, first_address, memory_size);
-        parameters::ParameterRegistry::instance().addToReadBufferRegistry(
-            this->m_name, first_address + memory_size, memory_size
+        ParameterRegistry::instance().addToReadBufferRegistry(
+            this->m_name, VariableInfo(type, first_address, memory_size)
+        );
+        ParameterRegistry::instance().addToReadBufferRegistry(
+            this->m_name, VariableInfo(type, first_address + memory_size, memory_size)
         );
         // and a write buffer
-        parameters::ParameterRegistry::instance().addToWriteBufferRegistry(
-            this->m_name, first_address + memory_size * 2, memory_size
+        ParameterRegistry::instance().addToWriteBufferRegistry(
+            this->m_name, VariableInfo(type, first_address + memory_size * 2, memory_size)
         );
     }
 }   // parameters namespace

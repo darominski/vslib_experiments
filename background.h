@@ -22,9 +22,12 @@ namespace backgroundTask
              current_address        += 2)
         {
             memcpy(
-                reinterpret_cast<void*>(address_registry[current_address + (buffer_switch ^ 1)].m_address),
-                reinterpret_cast<void*>(address_registry[current_address + buffer_switch].m_address),
-                address_registry[current_address + buffer_switch].m_memory_size
+                reinterpret_cast<void*>(
+                    address_registry[current_address + (buffer_switch ^ 1)].m_variable_info.memory_address
+                ),
+                reinterpret_cast<void*>(address_registry[current_address + buffer_switch].m_variable_info.memory_address
+                ),
+                address_registry[current_address + buffer_switch].m_variable_info.memory_size
             );
         }
     }
@@ -41,13 +44,15 @@ namespace backgroundTask
         for (size_t current_address = 0; current_address < address_registry_size; current_address++)
         {
             auto const  background_buffer_address = 2 * current_address + (buffer_switch ^ 1);
-            auto const& target_buffer_address     = background_buffer_registry[background_buffer_address]
-                                                    .m_address;   // only bkg buffer elements are modified
+            auto const& target_buffer_address
+                = background_buffer_registry[background_buffer_address]
+                      .m_variable_info.memory_address;   // only bkg buffer elements are modified
             auto const& write_buffer_address
-                = write_buffer_registry[current_address].m_address;   // each write buffer element is visited
+                = write_buffer_registry[current_address]
+                      .m_variable_info.memory_address;   // each write buffer element is visited
             memcpy(
                 reinterpret_cast<void*>(target_buffer_address), reinterpret_cast<void*>(write_buffer_address),
-                background_buffer_registry[background_buffer_address].m_memory_size
+                background_buffer_registry[background_buffer_address].m_variable_info.memory_size
             );
         }
     }

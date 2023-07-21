@@ -50,7 +50,7 @@ int main()
         double new_value       = static_cast<double>(counter) * 3.14159;
         // there are 3 PID with 9 params + RST with 1 parameter, so 10 in total,
         // modulo prevents setting not used fields
-        intptr_t const address = address_registry[counter % 10].m_address;
+        intptr_t const address = address_registry[counter % 10].m_variable_info.memory_address;
         std::cout << "Thread2 counter: " << counter++ << "\n";
         shared_memory_ptr->command_address = address;
         shared_memory_ptr->command_value   = new_value;

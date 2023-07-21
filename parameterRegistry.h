@@ -18,14 +18,68 @@ namespace parameters
     constexpr short  max_name_length   = 128;   // max length of component name, in characters
     constexpr size_t max_registry_size = 100;   // max number of possible settings
 
+    enum class Type
+    {
+        Int32,
+        Float32,
+        FloatArray32,
+        Unsupported
+    };
+
+    // helper definitions for std::array types
+    template<typename T>
+    struct is_std_array : std::false_type
+    {
+    };
+
+    template<typename T, std::size_t N>
+    struct is_std_array<std::array<T, N>> : std::true_type
+    {
+    };
+
+    // if the body of getType is in the cpp file, certain types (double, array)
+    // are not created. Leaving here for now.
+    //! Returns the type of the parameter added to the registry.
+    template<typename T>
+    constexpr Type getType()
+    {
+        if constexpr (std::is_floating_point_v<T>)
+        {
+            return Type::Float32;
+        }
+        else if constexpr (std::is_integral<T>::value)
+        {
+            return Type::Int32;
+        }
+        else if constexpr (is_std_array<T>::value)
+        {
+            using ElementType = typename T::value_type;
+            if (std::is_floating_point_v<ElementType>)
+            {
+                return Type::FloatArray32;
+            }
+        }
+        // static_asserts could be added if T is limited to a list of supported types
+        // it should never reach here
+        return Type::Unsupported;
+    };
+
+    // ************************************************************
+    // structure holding all information about a stored variable necessary for remote setting
+    struct VariableInfo
+    {
+        Type     type;
+        intptr_t memory_address;
+        size_t   memory_size;
+    };
+
     // ************************************************************
 
     struct AddressEntry
     {
         AddressEntry(){};
-        AddressEntry(std::string_view name, intptr_t address, size_t memory_size)
-            : m_address(address),
-              m_memory_size(memory_size)
+        AddressEntry(std::string_view name, VariableInfo variable_info)
+            : m_variable_info(variable_info)
         {
             std::fill(std::begin(m_name), std::end(m_name), '\0');
             size_t length = name.size();
@@ -34,8 +88,7 @@ namespace parameters
             m_name[length] = '\0';
         };
         std::array<char, max_name_length> m_name;
-        intptr_t                          m_address;
-        size_t                            m_memory_size;
+        VariableInfo                      m_variable_info;
     };
 
     // ************************************************************
@@ -53,8 +106,8 @@ namespace parameters
             return m_instance;
         }
 
-        void addToReadBufferRegistry(const std::string&, intptr_t, size_t);
-        void addToWriteBufferRegistry(const std::string&, intptr_t, size_t);
+        void addToReadBufferRegistry(const std::string&, VariableInfo&&);
+        void addToWriteBufferRegistry(const std::string&, VariableInfo&&);
 
         auto const& getBufferAddressArray()
         {

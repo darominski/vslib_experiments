@@ -1,24 +1,26 @@
+
+#include <type_traits>
+
 #include "parameterRegistry.h"
 
 using json = nlohmann::json;
 
 namespace parameters
 {
-
     //! Adds a new entry to the read buffer registry (m_bufferRegistry) and increments the read buffer
     //! size.
     //!
     //! @param name Name of the new parameter.
     //! @param address Pointer containing the memory address of the parameter.
     //! @param memory_size Memory size of the new parameter.
-    void ParameterRegistry::addToReadBufferRegistry(const std::string& name, intptr_t address, size_t memory_size)
+    void ParameterRegistry::addToReadBufferRegistry(const std::string& name, VariableInfo&& variable_info)
     {
         if (m_read_buffer_size >= max_registry_size)
         {
             std::cerr << "ERROR! Read buffer overflow. Parameter: " << name << " discarted.\n";
             return;
         }
-        m_buffer_registry[m_read_buffer_size] = AddressEntry(name, address, memory_size);
+        m_buffer_registry[m_read_buffer_size] = AddressEntry(name, std::move(variable_info));
         m_read_buffer_size++;
     }
 
@@ -30,7 +32,7 @@ namespace parameters
     //! @param name Name of the new parameter, needs to be unique.
     //! @param address Pointer containing the memory address of the parameter.
     //! @param memory_size Variable structure containing type of the new parameter and its memory size.
-    void ParameterRegistry::addToWriteBufferRegistry(const std::string& name, intptr_t address, size_t memory_size)
+    void ParameterRegistry::addToWriteBufferRegistry(const std::string& name, VariableInfo&& variable_info)
     {
         if (m_write_buffer_size >= max_registry_size)
         {
@@ -46,7 +48,7 @@ namespace parameters
                 exit(1);
             }
         }
-        m_write_registry[m_write_buffer_size] = AddressEntry(name, address, memory_size);
+        m_write_registry[m_write_buffer_size] = AddressEntry(name, std::move(variable_info));
         m_write_buffer_size++;
     }
 
@@ -70,8 +72,8 @@ namespace parameters
                 // each parameter registry becomes a JSON file entry
                 json json_entry
                     = {{"name", name},
-                       {"memory_address", addressElement.m_address},
-                       {"size", addressElement.m_memory_size}};
+                       {"memory_address", addressElement.m_variable_info.memory_address},
+                       {"size", addressElement.m_variable_info.memory_size}};
                 manifest.push_back(json_entry);
             }
         );
