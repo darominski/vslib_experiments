@@ -4,9 +4,11 @@
 
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <iostream>
 #include <string>
+#include <tuple>
 
 #include "nlohmann/json.hpp"
 
@@ -114,33 +116,38 @@ namespace parameters
             return m_instance;
         }
 
-        void addToReadBufferRegistry(const std::string&, VariableInfo&&);
-        void addToWriteBufferRegistry(const std::string&, VariableInfo&&);
+        void addToRegistry(std::string_view, std::tuple<VariableInfo, VariableInfo, VariableInfo>&&);
 
-        auto const& getBufferAddressArray()
+        auto const getWriteAddressArray() const
         {
-            return m_buffer_registry;
+            std::array<AddressEntry, max_registry_size> write_address_array;
+            int                                         element_counter = 0;
+            std::for_each(
+                std::cbegin(m_buffers), std::cend(m_buffers),
+                [&](const auto& map_element)
+                {
+                    write_address_array[element_counter]
+                        = AddressEntry(map_element.first, std::get<2>(map_element.second));
+                    element_counter++;
+                }
+            );
+            return write_address_array;
         }
-        auto const& getWriteAddressArray()
+
+        auto const getBufferSize() const
         {
-            return m_write_registry;
+            return m_buffers.size();
         }
-        auto const getReadBufferSize() const
+
+        auto const& getBuffers() const
         {
-            return m_read_buffer_size;
-        }
-        auto const getWriteBufferSize() const
-        {
-            return m_write_buffer_size;
+            return m_buffers;
         }
 
         nlohmann::json createManifest();
 
       private:
         ParameterRegistry(){};
-        std::array<AddressEntry, max_registry_size> m_buffer_registry;
-        std::array<AddressEntry, max_registry_size> m_write_registry;
-        size_t                                      m_read_buffer_size{0};
-        size_t                                      m_write_buffer_size{0};
+        std::map<std::string, std::tuple<VariableInfo, VariableInfo, VariableInfo>> m_buffers;
     };
 }   // namespace parameters

@@ -94,16 +94,13 @@ namespace parameters
         auto constexpr memory_size = sizeof(T);
         auto type                  = getType<T>();
 
-        // both read buffers to be written into the registry
-        ParameterRegistry::instance().addToReadBufferRegistry(
-            this->m_name, VariableInfo(type, first_address, memory_size)
-        );
-        ParameterRegistry::instance().addToReadBufferRegistry(
-            this->m_name, VariableInfo(type, first_address + memory_size, memory_size)
-        );
-        // and a write buffer
-        ParameterRegistry::instance().addToWriteBufferRegistry(
-            this->m_name, VariableInfo(type, first_address + memory_size * 2, memory_size)
+        ParameterRegistry::instance().addToRegistry(
+            m_name,
+            std::make_tuple(
+                VariableInfo(type, first_address, memory_size),
+                VariableInfo(type, first_address + memory_size, memory_size),
+                VariableInfo(type, first_address + memory_size * 2, memory_size)
+            )
         );
     }
 }   // parameters namespace

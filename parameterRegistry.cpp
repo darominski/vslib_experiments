@@ -24,48 +24,11 @@ namespace parameters
         return std::ranges::find(typeNames, type, &TypeToString::first)->second;
     }
 
-
-    //! Adds a new entry to the read buffer registry (m_bufferRegistry) and increments the read buffer
-    //! size.
-    //!
-    //! @param name Name of the new parameter.
-    //! @param variable_info Structure containing type of the new parameter and its memory size.
-    void ParameterRegistry::addToReadBufferRegistry(const std::string& name, VariableInfo&& variable_info)
+    void ParameterRegistry::addToRegistry(
+        std::string_view parameter_name, std::tuple<VariableInfo, VariableInfo, VariableInfo>&& variable_info
+    )
     {
-        if (m_read_buffer_size >= max_registry_size)
-        {
-            std::cerr << "ERROR! Read buffer overflow. Parameter: " << name << " discarted.\n";
-            return;
-        }
-        m_buffer_registry[m_read_buffer_size] = AddressEntry(name, std::move(variable_info));
-        m_read_buffer_size++;
-    }
-
-    // ************************************************************
-
-    //! Adds a new entry to the write buffer registry (m_writeRegistry) and increments the write buffer
-    //! size.
-    //!
-    //! @param name Name of the new parameter, needs to be unique.
-    //! @param variable_info Structure containing type of the new parameter and its memory size.
-    void ParameterRegistry::addToWriteBufferRegistry(const std::string& name, VariableInfo&& variable_info)
-    {
-        if (m_write_buffer_size >= max_registry_size)
-        {
-            std::cerr << "ERROR! Write buffer overflow. Parameter: " << name << " discarted.\n";
-            return;
-        }
-        // there should be no repeated names in the address structure communicated to a separate process
-        for (size_t registry_index = 0; registry_index < m_write_buffer_size; registry_index++)
-        {
-            if (std::string(m_write_registry[registry_index].m_name.data()) == name)
-            {
-                std::cerr << "ERROR! Name: " << name << " already defined.\n";
-                exit(1);
-            }
-        }
-        m_write_registry[m_write_buffer_size] = AddressEntry(name, std::move(variable_info));
-        m_write_buffer_size++;
+        m_buffers.emplace(parameter_name, std::move(variable_info));
     }
 
     // ************************************************************
@@ -74,23 +37,24 @@ namespace parameters
     //! and memory size, based on the information stored in the parameterRegistry.
     json ParameterRegistry::createManifest()
     {
-        json manifest;
-
+        json       manifest;
+        auto const write_registry    = this->getWriteAddressArray();
+        auto const write_buffer_size = this->getBufferSize();
         std::for_each(
-            std::cbegin(m_write_registry), std::cbegin(m_write_registry) + m_write_buffer_size,
-            [&](const auto& addressElement)
+            std::cbegin(write_registry), std::cbegin(write_registry) + write_buffer_size,
+            [&](const auto& address_element)
             {
                 // finds first end of string character to properly size the name held in a too large array of chars
                 auto const name = std::string(
-                    std::begin(addressElement.m_name),
-                    std::find(std::begin(addressElement.m_name), std::end(addressElement.m_name), '\0')
+                    std::begin(address_element.m_name),
+                    std::find(std::begin(address_element.m_name), std::end(address_element.m_name), '\0')
                 );
                 // each parameter registry becomes a JSON file entry
                 json json_entry
                     = {{"name", name},
-                       {"memory_address", addressElement.m_variable_info.memory_address},
-                       {"size", addressElement.m_variable_info.memory_size},
-                       {"type", toString(addressElement.m_variable_info.type)}};
+                       {"memory_address", address_element.m_variable_info.memory_address},
+                       {"size", address_element.m_variable_info.memory_size},
+                       {"type", toString(address_element.m_variable_info.type)}};
                 manifest.push_back(json_entry);
             }
         );
