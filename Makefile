@@ -8,8 +8,8 @@ CXXFLAGS := -std=c++20 -O0 $(WARNINGS) -I$(INCLUDES)
 
 all: main remote
 
-main: main.o parameterRegistry.o
-	$(CXX) $(CXXFLAGS) -o main main.o parameterRegistry.o
+main: main.o parameterRegistry.o background.o
+	$(CXX) $(CXXFLAGS) -o main main.o parameterRegistry.o background.o
 
 remote: remote.o
 	$(CXX) $(CXXFLAGS) -o remote remote.o
