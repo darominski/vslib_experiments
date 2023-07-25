@@ -63,21 +63,29 @@ namespace backgroundTask
 
     // ************************************************************
 
+    //! Executes a single JSON command by moving the received command value to the memory address
+    // specified in ParameterRegistry for the received parameter name.
     void executeJsonCommand(json command)
     {
         auto              parameter_registry = parameters::ParameterRegistry::instance().getBuffers();
-        std::string const parameter_name     = command["param_id"];
+        std::string const parameter_name     = command["name"];
         auto const        parameter          = parameter_registry.find(parameter_name);
         if (parameter == parameter_registry.end())
         {
             std::cerr << "Parameter ID: " << parameter_name << " not found! Command ignored.\n";
             return;
         }
-        auto const             address = std::get<2>(parameter_registry[parameter_name]).memory_address;
-        const parameters::Type type    = parameters::fromString(std::string(command["type"]));
+        auto const             address        = std::get<2>(parameter_registry[parameter_name]).memory_address;
+        std::string const      parameter_type = command["type"];
+        const parameters::Type type           = parameters::fromString(parameter_type);
         if (type == parameters::Type::Float32)
         {
-            double value = static_cast<double>(command["value"]);
+            double value = command["value"];
+            memcpy(reinterpret_cast<void*>(address), &value, sizeof(value));
+        }
+        else if (type == parameters::Type::Float32Array)
+        {
+            std::array<double, 4> value = command["value"];
             memcpy(reinterpret_cast<void*>(address), &value, sizeof(value));
         }
     }

@@ -7,10 +7,14 @@
 #include <unistd.h>
 
 #include "background.h"
+#include "nlohmann/json.hpp"
 #include "parameterRegistry.h"
 #include "pid.h"
 #include "rst.h"
 #include "sharedMemory.h"
+
+using namespace backgroundTask;
+using namespace nlohmann;
 
 int main()
 {
@@ -24,8 +28,7 @@ int main()
     }
 
     // Set the size of shared memory region
-    size_t total_memory_size
-        = sizeof(SharedMemory) + (sizeof(parameters::AddressEntry) * parameters::max_registry_size);
+    constexpr size_t total_memory_size = 1 * 1024 * 1024;   // 1 MB
     if (ftruncate(shared_memory_field, total_memory_size) == -1)
     {
         std::cerr << "Failed to set the size of shared memory" << std::endl;
@@ -44,6 +47,8 @@ int main()
         return 1;
     }
 
+    SharedMemory* shared_memory_counters = static_cast<SharedMemory*>(shared_memory);
+
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
     component::PID pid1("pid_1", 1, 1, 1);
@@ -55,13 +60,15 @@ int main()
 
     // ************************************************************
 
-    auto const jsonParameterRegistry = parameters::ParameterRegistry::instance().createManifest();
-    std::cout << std::setw(4) << jsonParameterRegistry.dump() << "\n";
+    auto const& json_parameter_registry = parameters::ParameterRegistry::instance().createManifest();
 
     // Create and initialize the shared data structure
-    SharedMemory* shared_memory_ptr = static_cast<SharedMemory*>(shared_memory);
-    shared_memory_ptr->address_list
-        = parameters::ParameterRegistry::instance().getWriteAddressArray();   // copies the address array to shared
+    size_t offset
+        = 2 * sizeof(size_t);   // Starting offset in the shared memory, size of two counters in the shared memory
+
+    writeJsonToSharedMemory(json_parameter_registry, shared_memory, offset, total_memory_size);
+    offset += json_parameter_registry.dump().size();   // no shared memory cleanup at this time
+
     int counter = 0;
     while (true)
     {
@@ -82,11 +89,14 @@ int main()
         // END TEST CODE
         // TEST CODE, extremely basic execution of commands received from a remote thread, will be part of background
         // task
-        if (shared_memory_ptr->transmission_counter > shared_memory_ptr->acknowledge_counter)
+        if (shared_memory_counters->transmitted_counter > shared_memory_counters->acknowledged_counter)
         {
-            // copy the command into the write buffer
-            auto const command_memory_address = reinterpret_cast<void*>(shared_memory_ptr->command_address);
-            memcpy(command_memory_address, &shared_memory_ptr->command_value, shared_memory_ptr->command_size);
+            auto json_object = readJsonFromSharedMemory(shared_memory, offset);
+            offset           += json_object.dump().size();
+
+            // execute the command in the incoming stream
+            backgroundTask::executeJsonCommand(json_object);
+
             // copy the entire write buffer into the background buffer
             backgroundTask::copyWriteBuffer();
             // switch buffers
@@ -94,7 +104,7 @@ int main()
             // synchronise the memory between buffers
             backgroundTask::synchroniseReadBuffers();
             // acknowledge transaction
-            shared_memory_ptr->acknowledge_counter++;
+            shared_memory_counters->acknowledged_counter++;
         }
         // END TEST CODE
         // Add some delay to simulate work
