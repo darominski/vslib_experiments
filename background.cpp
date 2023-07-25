@@ -1,5 +1,6 @@
 
 #include <cstring>
+#include <iostream>
 
 #include "background.h"
 #include "parameterRegistry.h"
