@@ -11,19 +11,6 @@ using json = nlohmann::json;
 
 namespace parameters
 {
-
-    using TypeToString = std::pair<Type, std::string_view>;
-    constexpr std::array typeNames
-        = {TypeToString{Type::Int32, "Int32"}, TypeToString{Type::Float32, "Float32"},
-           TypeToString{Type::Float32Array, "Float32Array"}};
-
-    static_assert(typeNames.size() == static_cast<size_t>(Type::Unsupported));
-
-    constexpr std::string_view toString(Type type)
-    {
-        return std::ranges::find(typeNames, type, &TypeToString::first)->second;
-    }
-
     void ParameterRegistry::addToRegistry(
         std::string_view parameter_name, std::tuple<VariableInfo, VariableInfo, VariableInfo>&& variable_info
     )

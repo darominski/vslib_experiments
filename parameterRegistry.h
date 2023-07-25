@@ -28,6 +28,8 @@ namespace parameters
         Unsupported   // must be last
     };
 
+    // ************************************************************
+
     // helper definitions for std::array types
     template<typename T>
     struct is_std_array : std::false_type
@@ -72,9 +74,25 @@ namespace parameters
         return Type::Unsupported;
     };
 
-    constexpr std::string_view toString(Type type);
+    using TypeToString = std::pair<Type, std::string_view>;
+    constexpr std::array type_names
+        = {TypeToString{Type::Int32, "Int32"}, TypeToString{Type::Float32, "Float32"},
+           TypeToString{Type::Float32Array, "Float32Array"}};
+
+    static_assert(type_names.size() == static_cast<size_t>(Type::Unsupported));
+
+    constexpr extern std::string_view toString(Type type)
+    {
+        return std::ranges::find(type_names, type, &TypeToString::first)->second;
+    }
+
+    constexpr extern Type fromString(std::string_view type_string)
+    {
+        return std::ranges::find(type_names, type_string, &TypeToString::second)->first;
+    }
 
     // ************************************************************
+
     // structure holding all information about a stored variable necessary for remote setting
     struct VariableInfo
     {
