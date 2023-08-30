@@ -1,0 +1,6 @@
+# ignore all binary and static library files
+*.o
+*.a
+
+# ignore all build directories
+*build*
