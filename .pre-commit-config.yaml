@@ -17,7 +17,7 @@ repos:
     rev: v15.0.7
     hooks:
       - id: clang-format
-        exclude: ^(lib)
+        exclude: ^(source/vloop/lib)
 
   - repo: https://gitlab.com/daverona/pre-commit/cpp
     rev: 0.8.0                 # use the most recent version
