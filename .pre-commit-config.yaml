@@ -17,10 +17,11 @@ repos:
     rev: v15.0.7
     hooks:
       - id: clang-format
-        exclude: ^(source/vloop/lib)
+        exclude: ^(source/vloop/lib)|^(source/bsp)|^(source/bmboot)
 
   - repo: https://gitlab.com/daverona/pre-commit/cpp
     rev: 0.8.0                 # use the most recent version
     hooks:
     # Hooks using native
       - id: cppcheck             # static analyzer for C/C++ code
+        exclude: ^(source/bsp)|^(source/bmboot)

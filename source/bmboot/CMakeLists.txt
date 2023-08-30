@@ -1,0 +1,287 @@
+cmake_minimum_required(VERSION 3.17)
+
+if (BUILD_MONITOR OR BMBOOT_BUILD_PAYLOAD)
+    if (CMAKE_SIZE STREQUAL "")
+        message(FATAL_ERROR "You must provide CMAKE_SIZE option")
+    endif()
+
+    set(CMAKE_SYSTEM_NAME Generic)
+    # SET(CMAKE_C_COMPILER_WORKS 1)
+    # SET(CMAKE_CXX_COMPILER_WORKS 1)
+    set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
+    add_compile_options(-O2 -Wall -mtune=cortex-a53 -ffunction-sections -fdata-sections)
+    add_compile_definitions(_DIOT=1)
+
+    add_link_options(
+            -Wall
+#            -ffreestanding                  # no reason to use this since we do have a libc
+            -specs=nosys.specs              # without this we don't get _exit, _sbrk and I/O functions
+            -Wl,--gc-sections
+    )
+endif()
+
+project(bmboot C CXX ASM)
+
+function(add_bmboot_payload_library BMBOOT_BSP_EL1_HOME BMBOOT_BSP_EL1_INCLUDE_DIR BMBOOT_BSP_EL1_LIBRARIES)
+    add_library(bmboot_payload_runtime STATIC
+            src/executor_domain/zynqmp/vectors.cpp
+            src/executor_domain/payload_runtime.cpp
+            src/executor_domain/syscalls.cpp
+            src/executor_domain/syscalls.h
+            src/executor_domain/executor_lowlevel.S        # TODO: only parts of this are useful, others will be linked in pointlessly
+
+            src/executor_domain/zynqmp/asm_vectors.S
+            )
+
+    target_compile_features(bmboot_payload_runtime PUBLIC cxx_std_20)
+
+    target_include_directories(bmboot_payload_runtime PUBLIC
+            include
+            ${BMBOOT_BSP_EL1_INCLUDE_DIR}
+            )
+
+    target_link_libraries(bmboot_payload_runtime PUBLIC
+            ${BMBOOT_BSP_EL1_LIBRARIES}
+            )
+
+    target_link_options(bmboot_payload_runtime PUBLIC
+            -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/src/executor_domain/zynqmp/cpu1/payload.ld
+
+            # These are necessary when syscalls.cpp is in a static library: https://stackoverflow.com/q/34986536
+            -Wl,--undefined=_close
+            -Wl,--undefined=_fstat
+            -Wl,--undefined=_isatty
+            -Wl,--undefined=_lseek
+            -Wl,--undefined=_read
+            -Wl,--undefined=_write
+            )
+endfunction()
+
+if (BMBOOT_BUILD_PAYLOAD)
+    # note that in this case we expect BSP paths to be provided from outside
+
+    if(NOT DEFINED BMBOOT_BSP_EL1_HOME)
+        message(FATAL_ERROR "BMBOOT_BSP_EL1_HOME must be set")
+    endif()
+
+    if(NOT DEFINED BMBOOT_BSP_EL1_INCLUDE_DIR)
+        message(FATAL_ERROR "BMBOOT_BSP_EL1_INCLUDE_DIR must be set")
+    endif()
+
+    if(NOT DEFINED BMBOOT_BSP_EL1_LIBRARIES)
+        message(FATAL_ERROR "BMBOOT_BSP_EL1_LIBRARIES must be set")
+    endif()
+
+    # -----------------------------------------------------------------------------------------------------------
+
+    add_bmboot_payload_library("${BMBOOT_BSP_EL1_HOME}" "${BMBOOT_BSP_EL1_INCLUDE_DIR}" "${BMBOOT_BSP_EL1_LIBRARIES}")
+
+    include(cmake/Bmboot.cmake)
+
+    add_executable(bmboot_example_payload.elf
+            src/payloads/hello_world.cpp
+            )
+
+    target_link_libraries(bmboot_example_payload.elf PRIVATE bmboot_payload_runtime)
+
+    Bmboot_PayloadPostBuild(bmboot_example_payload.elf)
+
+    # -----------------------------------------------------------------------------------------------------------
+elseif (BUILD_MONITOR)
+    # to be precise, what this configuration builds is the set of everything that bmboot_manager requires:
+    #   - monitor_zynqmp_cpu1
+    #   - test payloads
+
+    # not what we _should_ be doing, but something that works
+    include(../bsp/bsp.cmake)
+    MakeBsp(3)
+
+    if(NOT DEFINED BMBOOT_BSP_EL3_INCLUDE_DIR)
+        message(FATAL_ERROR "BMBOOT_BSP_EL3_INCLUDE_DIR must be set")
+    endif()
+
+    if(NOT DEFINED BMBOOT_BSP_EL3_LIBRARIES)
+        message(FATAL_ERROR "BMBOOT_BSP_EL3_LIBRARIES must be set")
+    endif()
+
+    add_executable(monitor_zynqmp_cpu1.elf
+            include/bmboot.hpp
+            include/bmboot/payload_runtime.hpp
+            src/mach/zynqmp_baremetal.cpp
+            src/executor_domain/executor_lowlevel.S
+            src/executor_domain/monitor.cpp
+            src/bmboot_internal.hpp
+            src/executor_domain/payload_runtime.cpp
+            src/utility/crc32.c
+
+            # slightly wrong as this will indicate crashedPayload even if the fault is in the monitor
+            src/executor_domain/zynqmp/vectors.cpp
+            src/executor_domain/zynqmp/asm_vectors.S
+            )
+
+    # -----------------------------------------------------------------------------------------------------------
+
+    target_include_directories(monitor_zynqmp_cpu1.elf PRIVATE
+            include
+            ${BMBOOT_BSP_EL3_INCLUDE_DIR}
+            )
+    target_compile_features(monitor_zynqmp_cpu1.elf PUBLIC cxx_std_20)
+    target_link_libraries(monitor_zynqmp_cpu1.elf PRIVATE
+            m
+            ${BMBOOT_BSP_EL3_LIBRARIES}
+            )
+    target_link_options(monitor_zynqmp_cpu1.elf PRIVATE
+            -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/src/executor_domain/zynqmp/cpu1/monitor.ld
+            )
+
+    add_custom_command(TARGET monitor_zynqmp_cpu1.elf POST_BUILD
+            COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:monitor_zynqmp_cpu1.elf> ${CMAKE_BINARY_DIR}/monitor_zynqmp_cpu1.bin
+            COMMAND ${CMAKE_OBJDUMP} -dt $<TARGET_FILE:monitor_zynqmp_cpu1.elf> > monitor_zynqmp_cpu1.txt
+            COMMENT "Building ${CMAKE_BINARY_DIR}/monitor_zynqmp_cpu1.bin")
+
+    add_custom_command(TARGET monitor_zynqmp_cpu1.elf POST_BUILD
+            COMMAND ${CMAKE_SIZE} $<TARGET_FILE:monitor_zynqmp_cpu1.elf>
+            )
+
+    # -----------------------------------------------------------------------------------------------------------
+
+    # use this opportunity to also build test payloads
+    # is it ok to trigger also EL1 BSP here? or is this all wrong? THIS NEEDS A LONG, HARD LOOK
+
+    MakeBsp(1)
+
+    if(NOT DEFINED BMBOOT_BSP_EL1_HOME)
+        message(FATAL_ERROR "BMBOOT_BSP_EL1_HOME must be set")
+    endif()
+
+    if(NOT DEFINED BMBOOT_BSP_EL1_INCLUDE_DIR)
+        message(FATAL_ERROR "BMBOOT_BSP_EL1_INCLUDE_DIR must be set")
+    endif()
+
+    if(NOT DEFINED BMBOOT_BSP_EL1_LIBRARIES)
+        message(FATAL_ERROR "BMBOOT_BSP_EL1_LIBRARIES must be set")
+    endif()
+
+    add_bmboot_payload_library("${BMBOOT_BSP_EL1_HOME}" "${BMBOOT_BSP_EL1_INCLUDE_DIR}" "${BMBOOT_BSP_EL1_LIBRARIES}")
+
+    include(cmake/Bmboot.cmake)
+
+    foreach(PAYLOAD access_violation hello_world timer_demo)
+        set(TARGET payload_${PAYLOAD}.elf)
+
+        add_executable(${TARGET}
+                src/payloads/${PAYLOAD}.cpp
+                )
+
+        target_link_libraries(${TARGET} PRIVATE bmboot_payload_runtime)
+
+        Bmboot_PayloadPostBuild(${TARGET})
+    endforeach()
+
+    # -----------------------------------------------------------------------------------------------------------
+else()
+    set(GENERATED_INCLUDE ${CMAKE_BINARY_DIR}/generated_include)
+    file(MAKE_DIRECTORY ${GENERATED_INCLUDE})
+
+    include(ExternalProject)
+
+    if(NOT DEFINED CMAKE_C_COMPILER_AARCH64_NONE_ELF)
+        message(FATAL_ERROR "CMAKE_C_COMPILER_AARCH64_NONE_ELF must be set")
+    endif()
+
+    if(NOT DEFINED CMAKE_CXX_COMPILER_AARCH64_NONE_ELF)
+        message(FATAL_ERROR "CMAKE_CXX_COMPILER_AARCH64_NONE_ELF must be set")
+    endif()
+
+    if(NOT DEFINED CMAKE_OBJCOPY_AARCH64_NONE_ELF)
+        message(FATAL_ERROR "CMAKE_OBJCOPY_AARCH64_NONE_ELF must be set")
+    endif()
+
+    if(NOT DEFINED CMAKE_OBJDUMP_AARCH64_NONE_ELF)
+        message(FATAL_ERROR "CMAKE_OBJDUMP_AARCH64_NONE_ELF must be set")
+    endif()
+
+    if(NOT DEFINED CMAKE_SIZE_AARCH64_NONE_ELF)
+        message(FATAL_ERROR "CMAKE_SIZE_AARCH64_NONE_ELF must be set")
+    endif()
+
+    # add executor code as ExternalProject
+    ExternalProject_Add(monitor_zynqmp
+            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+            CMAKE_ARGS
+                # TODO: can we do better than having to enumerate these one by one?
+                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER_AARCH64_NONE_ELF}
+                -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER_AARCH64_NONE_ELF}
+                -DCMAKE_OBJCOPY=${CMAKE_OBJCOPY_AARCH64_NONE_ELF}
+                -DCMAKE_OBJDUMP=${CMAKE_OBJDUMP_AARCH64_NONE_ELF}
+                -DCMAKE_SIZE=${CMAKE_SIZE_AARCH64_NONE_ELF}
+                -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
+                -DCMAKE_BUILD_TYPE=RelWithDebInfo
+                -DBUILD_MONITOR=ON
+                -DBMBOOT_BSP_EL3_INCLUDE_DIR=${BMBOOT_BSP_EL3_INCLUDE_DIR}
+                -DBMBOOT_BSP_EL3_LIBRARIES=${BMBOOT_BSP_EL3_LIBRARIES}
+            INSTALL_COMMAND ""
+            BUILD_ALWAYS ON
+            BUILD_BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/monitor_zynqmp-prefix/src/monitor_zynqmp-build/monitor_zynqmp_cpu1.bin"
+            )
+
+    # We need to convert monitor binary to a C++ header
+    include(cmake/FileEmbed.cmake)
+    set(MONITOR_ZYNQMP_CPU1_HPP ${GENERATED_INCLUDE}/monitor_zynqmp_cpu1.hpp)
+    ExternalProject_Get_Property(monitor_zynqmp BINARY_DIR)
+    FileEmbed_Add(${BINARY_DIR}/monitor_zynqmp_cpu1.bin ${MONITOR_ZYNQMP_CPU1_HPP} monitor_zynqmp_cpu1_payload)
+
+    add_library(bmboot_manager STATIC
+            include/bmboot.hpp
+            include/bmboot/domain.hpp
+            src/bmboot_internal.hpp
+            src/mach/zynqmp_linux.cpp
+            src/manager/coredump_linux.cpp
+            src/utility/crc32.c
+            src/manager/domain.cpp
+            src/manager/domain_helpers.cpp
+            src/utility/to_string.cpp
+
+            ${MONITOR_ZYNQMP_CPU1_HPP}
+            )
+
+    add_dependencies(bmboot_manager monitor_zynqmp)
+
+    target_include_directories(bmboot_manager PUBLIC include)
+    target_include_directories(bmboot_manager PRIVATE ${GENERATED_INCLUDE})
+
+#    target_compile_features(bmboot_manager cpp20)
+#    set_property(TARGET bmboot_manager PROPERTY CXX_STANDARD 20)
+    target_compile_features(bmboot_manager PUBLIC cxx_std_20)
+
+    add_executable(bmctl
+            src/tools/bmctl.cpp
+            )
+    target_link_libraries(bmctl PUBLIC bmboot_manager)
+
+    # Testing: currently disabled
+    # add_subdirectory("${LIBRARIES_HOME}/googletest-1.11.0" "${CMAKE_CURRENT_BINARY_DIR}/googletest")
+
+    # add_executable(bmtest
+    #         src/tests/tests.cpp
+    #         src/tools/bmtest.cpp
+    #         )
+    # target_link_libraries(bmtest PUBLIC bmboot_manager GTest::gtest pthread dl)
+    # target_link_options(bmtest PUBLIC  -Wl,-dynamic-linker,/my-lib/ld-2.33.so -Wl,-rpath,/my-lib)
+
+    add_executable(console src/tools/console.cpp)
+    target_link_libraries(console PUBLIC bmboot_manager)
+
+    add_executable(timer_demo
+            src/tools/timer_demo.cpp
+            )
+    target_link_libraries(timer_demo PUBLIC bmboot_manager)
+
+    foreach(TOOL bmctl console timer_demo)
+        # Make sure bmctl is linked fully statically
+        # TODO: the clean solution would be to use a toolchain that matches the target OS
+        target_link_options(${TOOL} PRIVATE -static -static-libgcc -static-libstdc++)
+    endforeach()
+
+endif()
