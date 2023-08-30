@@ -10,7 +10,11 @@ endif()
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-add_compile_options(-Wall -mtune=cortex-a53 -ffunction-sections -fdata-sections)
+add_compile_options(-Wall -mtune=cortex-a53 -ffunction-sections -fdata-sections
+    -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
+    -Wwrite-strings -Wmissing-declarations
+    -Wredundant-decls -Winline -Wno-long-long
+    -Wconversion)
 add_compile_definitions(_DIOT=1)
 
 add_link_options(
@@ -20,6 +24,8 @@ add_link_options(
   )
 
 project(${APP} C CXX ASM)
+
+set(CMAKE_CXX_STANDARD 20)
 
 ### BSP
 
@@ -47,9 +53,16 @@ set(BMBOOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../bmboot)
 
 include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
 
+# Include directories for headers
+include_directories(
+    ${CMAKE_SOURCE_DIR}/lib # all external libraries are stored in this directory
+)
+
+# VSLIB is treated as external library, as it would be in vloop applications
+add_subdirectory(vslib)
+
 add_executable(${APP}.elf
   main.cpp
-  src/Communication.cpp
 
   ../hal/inc/converter_interface.h
   ../hal/inc/peripheral_board.h
@@ -66,6 +79,7 @@ target_include_directories(${APP}.elf PRIVATE
 
 
 target_link_libraries(${APP}.elf PRIVATE
+  vslib
   bmboot_payload_runtime
   fgc4_bsp_el1
   )
