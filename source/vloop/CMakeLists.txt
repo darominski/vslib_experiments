@@ -64,11 +64,9 @@ target_include_directories(${APP}.elf PRIVATE
   ${FGC4_HAL_INCLUDE}
   )
 
-find_package(PropertyLib REQUIRED)
 
 target_link_libraries(${APP}.elf PRIVATE
   bmboot_payload_runtime
-  PropertyLib
   fgc4_bsp_el1
   )
 

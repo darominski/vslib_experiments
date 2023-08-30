@@ -1,5 +1,4 @@
 #include "Communication.h"
-#include "Property.h"
 
 namespace mexico
 {
@@ -14,8 +13,8 @@ namespace mexico
         return m_int_property;
     }
 
-    void Communication::setProperty()
+    void Communication::setProperty(int value)
     {
-        m_int_property = property::int_property();
+        m_int_property = value;
     }
 }

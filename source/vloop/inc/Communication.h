@@ -10,7 +10,7 @@ namespace mexico
       public:
         const std::string& getMessage() const;
         int                getProperty() const;
-        void               setProperty();
+        void               setProperty(int);
 
       private:
         std::string m_msg{"Hello Mexico!"};
