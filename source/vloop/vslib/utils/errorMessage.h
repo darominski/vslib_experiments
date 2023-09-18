@@ -1,0 +1,47 @@
+//! @file
+//! @brief File with definitions of Error message structure and a template specialization for its formatting
+//! with fmt library.
+//! @author Dominik Arominski
+
+#pragma once
+
+#include <fmt/format.h>
+#include <string>
+#include <utility>
+
+#include "logString.h"
+
+namespace vslib::utils
+{
+    struct Error
+    {
+        Error(std::string_view _error_msg, std::size_t _error_code)
+            : error_str{_error_msg},
+              error_code{_error_code}
+        {
+        }
+
+        explicit Error(std::string_view error_msg)
+            : Error{error_msg, 0U}
+        {
+        }
+
+        LogString   error_str;
+        std::size_t error_code;
+    };
+}
+
+template<>
+struct fmt::formatter<vslib::utils::Error>
+{
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+    template<typename FormatContext>
+    auto format(const vslib::utils::Error& error, FormatContext& ctx)
+    {
+        return fmt::format_to(ctx.out(), "Error [{}]: {}", error.error_code, error.error_str);
+    }
+};

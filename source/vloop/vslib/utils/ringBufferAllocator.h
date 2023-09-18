@@ -70,10 +70,6 @@ namespace vslib::utils
             constexpr auto alignment = alignof(T);
             return (alignment - (m_current_position % alignment)) % alignment;
         }
-
-      private:
-        static std::byte m_buffer[BufferSize];
-        static uint64_t  m_current_position;
     };
 
     // ************************************************************

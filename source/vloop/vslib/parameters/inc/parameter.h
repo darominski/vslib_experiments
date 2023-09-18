@@ -282,23 +282,17 @@ namespace vslib::parameters
                     std::cerr << fmt::format("{}", error_msg);
                     return error_msg;
                 }
-            );
-            if (found != std::end(command_value))
-            {
-                utils::LogString error_msg("At least one value in command value array is outside the limits!\n");
-                std::cerr << error_msg;
-                return error_msg;
             }
             return {};
-            }
+        }
 
-            //! Checks limits of all arithmetic types, if they are defined
-            //!
-            //! @param value New parameter value to be checked
-            //! @return Error with error information if check not successful, nothing otherwise
-            std::optional<utils::Error> checkLimits(T value) const noexcept
-                requires std::is_arithmetic_v<T>
-            {
+        //! Checks limits of all arithmetic types, if they are defined
+        //!
+        //! @param value New parameter value to be checked
+        //! @return Error with error information if check not successful, nothing otherwise
+        std::optional<utils::Error> checkLimits(T value) const noexcept
+            requires std::is_arithmetic_v<T>
+        {
             if (value < m_limit_min || value > m_limit_max)
             {
                 utils::Error error_msg(
@@ -308,123 +302,119 @@ namespace vslib::parameters
                 return error_msg;
             }
             return {};
-            }
+        }
 
-            //! Fallback of checking limits for cases not comparable directly with double type: strings,
-            //! enumerations, non-numerical arrays, etc.
-            //!
-            //! @return Empty optional return (success)
-            std::optional<utils::Error> checkLimits(T) const noexcept
-            {
+        //! Fallback of checking limits for cases not comparable directly with double type: strings,
+        //! enumerations, non-numerical arrays, etc.
+        //!
+        //! @return Empty optional return (success)
+        std::optional<utils::Error> checkLimits(T) const noexcept
+        {
             return {};
-            }
+        }
 
-            // ************************************************************
-            // The code setting new values coming from StaticJson may be really tricky to move to a visitor,
-            // as it would require accessing private data members of Parameter class, unless that visitor
-            // was a friend.
+        // ************************************************************
 
-            //! Sets the provided JSON-serialized value to the parameter-held value.
-            //!
-            //! @param json_value JSON-serialized value to be set
-            //! @return If not successful returns Error with error information, nothing otherwise
-            std::optional<utils::Error> setJsonValue(const utils::StaticJson& json_value) override
-            {
+        //! Sets the provided JSON-serialized value to the parameter-held value.
+        //!
+        //! @param json_value JSON-serialized value to be set
+        //! @return If not successful returns Error with error information, nothing otherwise
+        std::optional<utils::Error> setJsonValue(const utils::StaticJson& json_value) override
+        {
             auto const& maybe_error = setJsonValueImpl(json_value);
             if (!m_initialized && !maybe_error.has_value())
             {
                 m_initialized = true;
             }
             return maybe_error;
-            }
+        }
 
-            // ************************************************************
+        // ************************************************************
 
-            //! Copies all contents of a write buffer to the background buffer, which is not currently used.
-            void synchroniseWriteBuffer() override
-            {
+        //! Copies all contents of a write buffer to the background buffer, which is not currently used.
+        void synchroniseWriteBuffer() override
+        {
             auto*      background_buffer = &m_value[buffer_switch ^ 1];
             auto*      write_buffer      = &m_value[write_buffer_id];
             auto const memory_size       = sizeof(T);
             // always copy from the write buffer to the background buffer
             memcpy(reinterpret_cast<void*>(background_buffer), reinterpret_cast<void*>(write_buffer), memory_size);
-            }
+        }
 
-            // ************************************************************
+        // ************************************************************
 
-            //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
-            void synchroniseReadBuffers() override
-            {
+        //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
+        void synchroniseReadBuffers() override
+        {
             auto*      active_buffer     = &m_value[buffer_switch];
             auto*      background_buffer = &m_value[buffer_switch ^ 1];
             auto const memory_size       = sizeof(T);
             // always copy from active buffer to the background buffer
             memcpy(reinterpret_cast<void*>(background_buffer), reinterpret_cast<void*>(active_buffer), memory_size);
-            }
+        }
 
-          private:
-            std::array<T, number_buffers> m_value;
-            T                             m_default_value;
-            LimitType<T>                  m_limit_min;
-            LimitType<T>                  m_limit_max;
-            bool                          m_limit_min_defined{false};
-            bool                          m_limit_max_defined{false};
-            bool                          m_initialized{false};
+      private:
+        std::array<T, number_buffers> m_value;
+        T                             m_default_value;
+        LimitType<T>                  m_limit_min;
+        LimitType<T>                  m_limit_max;
+        bool                          m_limit_min_defined{false};
+        bool                          m_limit_max_defined{false};
+        bool                          m_initialized{false};
 
-            //! Serializes enumerations by providing number of objects of the type ('length') and enumeration values
-            //!
-            //! @return JSON object with information about the stored enumeration
-            [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json serializeImpl()
-                const noexcept
-                requires utils::Enumeration<T>
-            {
+        //! Serializes enumerations by providing number of objects of the type ('length') and enumeration values
+        //!
+        //! @return JSON object with information about the stored enumeration
+        [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
+        serializeImpl() const noexcept
+            requires utils::Enumeration<T>
+        {
             return {
                 {"length", magic_enum::enum_count<T>()},
                 {"fields", magic_enum::enum_names<T>()},
                 {"value", magic_enum::enum_name(m_value[buffer_switch])},
                 {"default_value", magic_enum::enum_name(m_default_value)}};
-            }
+        }
 
-            //! Serializes std::array type by exposing the length of the array
-            //!
-            //! @return JSON object with information about the stored std::array
-            [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json serializeImpl()
-                const noexcept
-                requires utils::StdArray<T>
-            {
+        //! Serializes std::array type by exposing the length of the array
+        //!
+        //! @return JSON object with information about the stored std::array
+        [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
+        serializeImpl() const noexcept
+            requires utils::StdArray<T>
+        {
             return {
                 {"length", std::tuple_size_v<T>},
                 {"value", m_value[buffer_switch]},
                 {"default_value", m_default_value}};
-            }
+        }
 
-            //! Serializes numeric types: integers and floating point numbers
-            //!
-            //! @return JSON object with informaton about the stored numerical values
-            [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json serializeImpl()
-                const noexcept
-                requires utils::NumericType<T>
-            {
+        //! Serializes numeric types: integers and floating point numbers
+        //!
+        //! @return JSON object with informaton about the stored numerical values
+        [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
+        serializeImpl() const noexcept
+            requires utils::NumericType<T>
+        {
             return {{"length", 1}, {"value", m_value[buffer_switch]}, {"default_value", m_default_value}};
-            }
+        }
 
-            //! Default overload for catching unsupported types. Blocks compilation for those types
-            //!
-            //! @return Empty JSON for unsupported type
-            [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json serializeImpl()
-                const noexcept
-            {
+        //! Default overload for catching unsupported types. Blocks compilation for those types
+        //!
+        //! @return Empty JSON for unsupported type
+        [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
+        serializeImpl() const noexcept
+        {
             static_assert(utils::always_false<T>, "Type currently not serializable.");
             return {};
-            }
+        }
 
-
-            //! Sets the provided JSON value to the write buffer.
-            //!
-            //! @param json_value JSON object containing new parameter value to be set
-            //! @return If not successful returns Error with error information, nothing otherwise
-            std::optional<utils::Error> setJsonValueImpl(const utils::StaticJson& json_value)
-            {
+        //! Sets the provided JSON value to the write buffer.
+        //!
+        //! @param json_value JSON object containing new parameter value to be set
+        //! @return If not successful returns Error with error information, nothing otherwise
+        std::optional<utils::Error> setJsonValueImpl(const utils::StaticJson& json_value)
+        {
             T command_value;
             try   // try to extract the value stored in json_value
             {
@@ -447,15 +437,15 @@ namespace vslib::parameters
                 m_value[write_buffer_id] = command_value;
                 return {};
             }
-            }
+        }
 
-            //! Sets the provided JSON value with enumeration element to the write buffer.
-            //!
-            //! @param json_value JSON object containing new parameter value to be set
-            //! @return If not successful returns Error with error information, nothing otherwise
-            std::optional<utils::Error> setJsonValueImpl(const utils::StaticJson& json_value)
-                requires utils::Enumeration<T>
-            {
+        //! Sets the provided JSON value with enumeration element to the write buffer.
+        //!
+        //! @param json_value JSON object containing new parameter value to be set
+        //! @return If not successful returns Error with error information, nothing otherwise
+        std::optional<utils::Error> setJsonValueImpl(const utils::StaticJson& json_value)
+            requires utils::Enumeration<T>
+        {
             // json_value is then a string, try to cast to that:
             auto const enum_element = magic_enum::enum_cast<T>(std::string(json_value));
             if (enum_element.has_value())
@@ -471,6 +461,6 @@ namespace vslib::parameters
                 return error_msg;
             }
             return {};
-            }
-        };
-    }   // parameters namespace
+        }
+    };
+}   // parameters namespace
