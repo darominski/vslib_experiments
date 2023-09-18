@@ -19,17 +19,7 @@ namespace vslib::utils
     using JsonAllocator = StaticRingBufferAllocator<T, StaticJsonFactory, constants::json_memory_pool_size>;
 
     using StaticJson = nlohmann::basic_json<
-        std::map, std::vector, std::string, bool, std::int64_t, std::uint64_t, double, JsonAllocator>;
-
-    // ************************************************************
-    // Initialization of static heaps for supported types
-
-    // Let's align the buffers to the largest type we want to have in our JSON
-    template<typename BufferType, size_t BufferSize>
-    alignas(std::max_align_t) std::byte RingBuffer<BufferType, BufferSize>::m_buffer[];
-
-    template<typename BufferType, size_t BufferSize>
-    size_t RingBuffer<BufferType, BufferSize>::m_current_position = 0;
+        nlohmann::ordered_map, std::vector, std::string, bool, std::int64_t, std::uint64_t, double, JsonAllocator>;
 
     // ************************************************************
 

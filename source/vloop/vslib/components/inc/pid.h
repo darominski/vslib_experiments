@@ -6,20 +6,16 @@
 
 #include <string>
 
-#include "baseComponent.h"
+#include "component.h"
 #include "parameter.h"
 
-namespace vslib::component
+namespace vslib::components
 {
-    class PID : public BaseComponent
+    class PID : public Component
     {
       public:
-        PID()                      = delete;   // anonymous PIDs are forbidden
-        PID(PID& other)            = delete;   // cloning objects is forbidden
-        PID& operator=(const PID&) = delete;   // copy-assignment is forbidden
-
-        PID(const std::string& name, double _p = 0.0, double _i = 0.0, double _d = 0.0)
-            : BaseComponent(constants::component_type_pid, name),
+        PID(std::string_view name, Component* parent = nullptr, double _p = 0.0, double _i = 0.0, double _d = 0.0)
+            : Component(constants::component_type_pid, name, parent),
               p(*this, "p", _p, -10.0, 10.0),
               i(*this, "i", _i, -10.0, 10.0),
               d(*this, "d", _d)   // default limits apply here
@@ -30,4 +26,4 @@ namespace vslib::component
         parameters::Parameter<double> i;
         parameters::Parameter<double> d;
     };
-}   // namespace component
+}   // namespace components

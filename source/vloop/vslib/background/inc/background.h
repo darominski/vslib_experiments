@@ -7,10 +7,10 @@
 #include "nlohmann/json.hpp"
 #include "staticJson.h"
 
-namespace vslib::background_task
+namespace vslib::backgroundTask
 {
     void executeJsonCommand(const utils::StaticJson&);
     void processJsonCommands(const utils::StaticJson&);
     void synchroniseReadBuffers();
     bool validateJsonCommand(const utils::StaticJson&);
-}   // namespace background_task
+}   // namespace backgroundTask

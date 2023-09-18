@@ -19,6 +19,9 @@ target_include_directories(vslib
     utils
     # Other vslib include directories go here
 )
+target_link_libraries(vslib PRIVATE
+  fmt::fmt
+  )
 
 ############################################################
 # Installation

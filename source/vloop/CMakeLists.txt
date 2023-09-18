@@ -60,6 +60,7 @@ include_directories(
 
 # VSLIB is treated as external library, as it would be in vloop applications
 add_subdirectory(vslib)
+add_subdirectory(lib/fmt)
 
 add_executable(${APP}.elf
   main.cpp
@@ -80,6 +81,7 @@ target_include_directories(${APP}.elf PRIVATE
 
 target_link_libraries(${APP}.elf PRIVATE
   vslib
+  fmt::fmt
   bmboot_payload_runtime
   fgc4_bsp_el1
   )

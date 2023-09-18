@@ -6,6 +6,8 @@
 #include <iostream>
 
 #include "background.h"
+#include "errorMessage.h"
+#include "fmt/format.h"
 #include "logString.h"
 #include "parameter.h"
 #include "parameterRegistry.h"
@@ -13,7 +15,7 @@
 using namespace nlohmann;
 using namespace vslib::utils;
 
-namespace vslib::background_task
+namespace vslib::backgroundTask
 {
     //! Validates the provided json command.
     //!
@@ -23,14 +25,14 @@ namespace vslib::background_task
         bool valid = true;
         if (!command.contains("name"))
         {
-            LogString error_msg("Command must contain 'name'.\n");
-            std::cerr << error_msg;
+            auto const error_msg = Error("Command must contain 'name'.\n", constants::error_json_missing_name);
+            std::cerr << fmt::format("{}", error_msg);
             valid = false;
         }
         else if (!command.contains("value"))
         {
-            LogString error_msg("Command must contain 'value' to be set.\n");
-            std::cerr << error_msg;
+            auto const error_msg = Error("Command must value 'name'.\n", constants::error_json_missing_value);
+            std::cerr << fmt::format("{}", error_msg);
             valid = false;
         }
         return valid;
@@ -65,8 +67,8 @@ namespace vslib::background_task
     {
         if (!validateJsonCommand(command))
         {
-            LogString error_msg("Command invalid, ignored.\n");
-            std::cerr << error_msg;
+            const Error error_msg("Command invalid, ignored.\n", constants::error_json_command_invalid);
+            std::cerr << fmt::format("{}", error_msg);
             return;
         }
         std::string const parameter_name     = command["name"];
@@ -74,16 +76,19 @@ namespace vslib::background_task
         auto const        parameter          = parameter_registry.find(parameter_name);
         if (parameter == parameter_registry.end())
         {
-            LogString error_msg("Parameter ID: " + parameter_name + " not found!\n Command ignored.\n");
-            std::cerr << error_msg;
+            const Error error_msg(
+                "Parameter ID: " + parameter_name + " not found. Command ignored.\n",
+                constants::error_json_parameter_id_invalid
+            );
+            std::cerr << fmt::format("{}", error_msg);
             return;
         }
 
         // execute the command, parameter will handle the validation of provided value.
         auto const result = (*parameter).second.get().setJsonValue(command["value"]);
-        if (result.has_value())
+        if (result.has_value())   // ERROR, need to capture the error message
         {
-            std::cerr << result.value();
+            std::cerr << fmt::format("{}", result.value());
         }
         else   // success
         {
@@ -105,4 +110,4 @@ namespace vslib::background_task
         );
     }
 
-}   // namespace background_task
+}   // namespace backgroundTask

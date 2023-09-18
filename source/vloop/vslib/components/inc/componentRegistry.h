@@ -11,9 +11,9 @@
 
 extern unsigned short buffer_switch;
 
-namespace vslib::component
+namespace vslib::components
 {
-    class BaseComponent;   // forward declaration
+    class Component;   // forward declaration
 
     class ComponentRegistry
     {
@@ -25,6 +25,9 @@ namespace vslib::component
         void operator=(const ComponentRegistry&&)    = delete;
         ~ComponentRegistry() = default;   // will never be called, lifetime equal to that of the program
 
+        //! Provides an instance of the singleton registry
+        //!
+        //! @return Singular instance of the component registry
         static ComponentRegistry& instance()
         {
             // Registry is constructed on first access
@@ -32,17 +35,20 @@ namespace vslib::component
             return m_instance;
         }
 
+        //! Provides map of all created component names and references to them
+        //!
+        //! @return Map with component names and their references
         auto const& getComponents() const
         {
             return m_components;
         }
 
-        void addToRegistry(std::string_view, BaseComponent&);
+        void addToRegistry(std::string_view, Component&);
 
         nlohmann::json createManifest() const;
 
       private:
         ComponentRegistry() = default;
-        std::map<std::string, std::reference_wrapper<BaseComponent>> m_components;
+        std::map<std::string, std::reference_wrapper<Component>> m_components;
     };
-}   // namespace parameters
+}   // namespace components

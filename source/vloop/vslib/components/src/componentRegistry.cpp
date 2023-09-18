@@ -2,19 +2,19 @@
 //! @brief File containing definitions of component registry methods to add to the registry and serialize it.
 //! @author Dominik Arominski
 
-#include "baseComponent.h"
+#include "component.h"
 #include "componentRegistry.h"
 
 using namespace nlohmann;
 
-namespace vslib::component
+namespace vslib::components
 {
 
-    //! Adds a new entry to the parameter registry
+    //! Adds a new entry to the component registry
     //!
-    //! @param component_name Name of the parameter to be added to the parameter registry
-    //! @param component_reference Reference to the parameter being added to the parameter registry
-    void ComponentRegistry::addToRegistry(std::string_view component_name, BaseComponent& component_reference)
+    //! @param component_name Name of the component to be added to the component registry
+    //! @param component_reference Reference to the component being added to the component registry
+    void ComponentRegistry::addToRegistry(std::string_view component_name, Component& component_reference)
     {
         m_components.emplace(component_name, component_reference);
     }
@@ -38,4 +38,4 @@ namespace vslib::component
         return manifest;
     }
 
-}   // namespace component
+}   // namespace components

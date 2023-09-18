@@ -3,12 +3,13 @@
 #include <array>
 #include <string>
 
-#include "baseComponent.h"
+#include "component.h"
 #include "magic_enum/magic_enum.hpp"
 #include "parameter.h"
 
-namespace vslib::component
+namespace vslib::components
 {
+    // Helper enumeration class for definition of all relevant statuses
     enum class Status
     {
         uninitialized,
@@ -17,21 +18,22 @@ namespace vslib::component
         fault
     };
 
-    class RST : public BaseComponent
+    // ************************************************************
+
+    class RST : public Component
     {
       public:
-        RST()                      = delete;   // disallow users from creating anonymous RSTs
-        RST(RST& other)            = delete;   // and cloning objects
-        void operator=(const RST&) = delete;   // as well as assigning
-
-        RST(const std::string& name, std::array<double, 4> _r, bool _flag)
-            : BaseComponent(constants::component_type_rst, name),
+        RST(std::string_view name, Component* parent, std::array<double, 4> _r, bool _flag)
+            : Component(constants::component_type_rst, name, parent),
               r(*this, "r", _r, -12.0, 10.0),
               status(*this, "status", Status::uninitialized),
               flag(*this, "flag", _flag)
         {
         }
 
+        //! Provides status value as a string
+        //!
+        //! @return String view of the status of this component
         [[nodiscard]] std::string_view getStatusAsStr() const
         {
             return magic_enum::enum_name(status.value());
@@ -41,4 +43,4 @@ namespace vslib::component
         parameters::Parameter<Status>                status;
         parameters::Parameter<bool>                  flag;
     };
-}   // namespace component
+}   // namespace components

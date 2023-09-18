@@ -1,7 +1,17 @@
+//! @file
+//! @brief File with constants namespace defining all constants used by the library that may be used by or be
+//! communicated to the Linux core or FGCD.
+//! @author Dominik Arominski
+
 #pragma once
 
 #include <cstdint>
 #include <string>
+
+namespace vslib::components
+{
+    class Component;   // fwd declaration
+}
 
 namespace vslib::constants
 {
@@ -9,7 +19,19 @@ namespace vslib::constants
     // Constants defined for static memory pools for supported use cases of the RingBuffer
 
     constexpr uint64_t json_memory_pool_size   = 1024 * 1024;   // 1 MB
-    constexpr uint64_t string_memory_pool_size = 1024 * 1024;   // 1 MB
+    constexpr uint64_t string_memory_pool_size = 1024;          // 1024 objects of type std::string, approximately 32 kb
+
+    // ************************************************************
+    // Constant error code numbers
+
+    // arbitrary numbers for testing purposes
+    constexpr uint32_t error_json_command_invalid              = 1000;
+    constexpr uint32_t error_json_missing_name                 = 1001;
+    constexpr uint32_t error_json_missing_value                = 1002;
+    constexpr uint32_t error_json_parameter_id_invalid         = 1003;
+    constexpr uint32_t error_json_command_value_outside_limits = 1004;
+    constexpr uint32_t error_json_command_value_type_invalid   = 1005;
+    constexpr uint32_t error_json_command_invalid_enum_value   = 1006;
 
     // ************************************************************
     // Predefined component names for use in FGC Configurator
@@ -44,4 +66,9 @@ namespace vslib::constants
     // for example a parameter of type T=std::array<double, 16> will have "ArrayFloat64" label
 
     constexpr std::string_view unsupported_type_label = "Unsupported";
+
+    // ************************************************************
+    // Constant for denoting that the component constructed is independent (has no parents)
+    constexpr components::Component* independent_component = nullptr;
+
 }

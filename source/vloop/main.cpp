@@ -28,8 +28,6 @@ int main()
 {
     bmboot::notifyPayloadStarted();
 
-    puts("");
-
     puts("Hello world from vloop running on cpu1!");
 
     // ************************************************************
@@ -61,7 +59,6 @@ int main()
         = 2 * sizeof(size_t);   // Starting offset in the shared memory, size of two counters in the shared memory
 
     // writeJsonToSharedMemory(json_component_registry, shared_memory, offset, total_memory_size);
-    // offset += json_component_registry.dump().size();   // no shared memory cleanup at this time
 
     bool received_new_data = false;
     int  counter           = 0;

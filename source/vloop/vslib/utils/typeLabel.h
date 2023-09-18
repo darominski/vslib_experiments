@@ -115,11 +115,11 @@ namespace vslib::utils
         std::string_view operator()(const T) const
         {
             // would it be nicer/more efficient to build the output string on the way?
-            if constexpr (std::is_same_v<int64_t, int64_t>)
+            if constexpr (std::is_same_v<T, int64_t>)
             {
                 return (constants::int64_type_label);
             }
-            else if constexpr (std::is_same_v<uint64_t, uint64_t>)
+            else if constexpr (std::is_same_v<T, uint64_t>)
             {
                 return (constants::uint64_type_label);
             }
@@ -133,11 +133,11 @@ namespace vslib::utils
             }
             else if constexpr (std::is_same_v<T, int16_t>)
             {
-                return (constants::uint16_type_label);
+                return (constants::int16_type_label);
             }
             else if constexpr (std::is_same_v<T, uint16_t>)
             {
-                return (constants::int16_type_label);
+                return (constants::uint16_type_label);
             }
             else if constexpr (std::is_same_v<T, int8_t>)
             {
