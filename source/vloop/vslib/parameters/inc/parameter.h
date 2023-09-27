@@ -256,8 +256,6 @@ namespace vslib::parameters
         }
 
         // ************************************************************
-        // The code checking limits could be a part of a visitor class, provided the limits are exposed
-        // to public interface.
 
         //! Checks whether the provided array values fall within the numerical limits specified for this
         //! Parameter.

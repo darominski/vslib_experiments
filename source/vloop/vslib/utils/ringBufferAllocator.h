@@ -6,8 +6,11 @@
 #pragma once
 
 #include <cstring>
+#include <iostream>
 #include <memory_resource>
 #include <type_traits>
+
+#include "fmt/format.h"
 
 namespace vslib::utils
 {
@@ -30,11 +33,7 @@ namespace vslib::utils
             m_current_position += adjustment;
 
             // Check if there is enough memory available
-            if (size + adjustment >= BufferSize)   // too big memory chunk required
-            {
-                throw std::bad_alloc();   // Which should trip the converter
-            }
-            else
+            if (size + adjustment < BufferSize)   // too big memory chunk required
             {
                 if (m_current_position + size >= BufferSize)
                 {
@@ -46,6 +45,11 @@ namespace vslib::utils
                 // Update the position inside memory
                 m_current_position += size;
                 return reinterpret_cast<T*>(ptr);
+            }
+            else
+            {
+                std::cerr << fmt::format("Buffer too small to allocate the requested object.\n");
+                throw std::bad_alloc();   // Which should trip the converter
             }
         }
 

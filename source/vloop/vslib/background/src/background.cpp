@@ -8,7 +8,6 @@
 #include "background.h"
 #include "errorMessage.h"
 #include "fmt/format.h"
-#include "logString.h"
 #include "parameter.h"
 #include "parameterRegistry.h"
 

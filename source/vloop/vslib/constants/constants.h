@@ -32,7 +32,7 @@ namespace vslib::constants
     constexpr uint32_t error_json_command_value_outside_limits = 1004;
     constexpr uint32_t error_json_command_value_type_invalid   = 1005;
     constexpr uint32_t error_json_command_invalid_enum_value   = 1006;
-
+    constexpr uint32_t error_allocation_buffer_overflow        = 2000;
     // ************************************************************
     // Predefined component names for use in FGC Configurator
 
