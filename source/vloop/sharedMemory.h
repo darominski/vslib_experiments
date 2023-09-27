@@ -23,10 +23,16 @@ namespace vslib
         std::array<std::byte, constants::json_memory_pool_size> json_buffer;
     };
 
+#define SHARED_MEMORY_ADDRESS 0x802000000
+#define SHARED_MEMORY_SIZE    0x40000000
+
+#define SHARED_MEMORY (*(struct SharedMemory* volatile)SHARED_MEMORY_ADDRESS)
+
+    // ************************************************************
+
     // definitions of I/O functions to silence -Wmissing-declarations warnings
     void           writeJsonToSharedMemory(const nlohmann::json&, SharedMemory*);
     nlohmann::json readJsonFromSharedMemory(SharedMemory*);
-
 
     //! Helper function to serialize JSON object and write to shared memory
     //!
