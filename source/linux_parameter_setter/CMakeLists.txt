@@ -1,0 +1,41 @@
+cmake_minimum_required(VERSION 3.12)
+
+if(NOT DEFINED CMAKE_CXX_COMPILER)
+  message(FATAL_ERROR "CMAKE_CXX_COMPILER must be set to linux-gnu compiler")
+endif()
+
+project(LinuxParameterSetting CXX)
+
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+set(CMAKE_CXX_STANDARD 20)
+
+# Compiler flags and warnings
+add_compile_options(-O2 -mtune=cortex-a53 -ffunction-sections -fdata-sections -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
+    -Wwrite-strings -Wmissing-declarations
+    -Wredundant-decls -Winline -Wno-long-long
+    -Wconversion)
+
+# Linker flags and warnings
+add_link_options(
+  -Wall
+  -Wl,--gc-sections
+)
+
+set(REMOTE_SOURCES
+    remote.cpp
+)
+
+# Create executables
+add_executable(remote
+  ${REMOTE_SOURCES}
+  )
+
+# Add external libraries
+include_directories(
+    ${CMAKE_SOURCE_DIR}/lib # all external libraries are stored in this directory
+    ${CMAKE_SOURCE_DIR}/../shared # all external libraries are stored in this directory
+)
+
+target_compile_features(remote PUBLIC cxx_std_20)
+target_link_options(remote PRIVATE -static -static-libgcc -static-libstdc++)
