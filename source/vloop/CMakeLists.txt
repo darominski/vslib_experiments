@@ -43,12 +43,6 @@ add_subdirectory(../bmboot ${CMAKE_CURRENT_BINARY_DIR}/bmboot)
 
 ### END bumbleboot
 
-### fgc4_hal
-
-set(FGC4_HAL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/../hal/inc)
-
-### END fgc4_hal
-
 set(BMBOOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../bmboot)
 
 include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
@@ -64,18 +58,11 @@ add_subdirectory(lib/fmt)
 
 add_executable(${APP}.elf
   main.cpp
-
-  ../hal/inc/converter_interface.h
-  ../hal/inc/peripheral_board.h
-  ../hal/inc/peripherals/adc_serial.h
-  ../hal/inc/peripherals/dac_serial.h
-  ../hal/inc/peripherals/in_out.h
   )
 
 target_include_directories(${APP}.elf PRIVATE
   inc
   public_include
-  ${FGC4_HAL_INCLUDE}
   )
 
 
