@@ -2,18 +2,20 @@
 //! @brief  Domain management
 //! @author Martin Cejp
 
+#include "../mach/mach_linux.hpp"
+#include "../bmboot_internal.hpp"
+#include "bmboot/domain.hpp"
+#include "coredump_linux.hpp"
+#include "../utility/mmap.hpp"
+
+#include "monitor_zynqmp_cpu1.hpp"
+
 #include <cstring>
+#include <variant>
+
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <variant>
-
-#include "../bmboot_internal.hpp"
-#include "../mach/mach_linux.hpp"
-#include "../utility/mmap.hpp"
-#include "bmboot/domain.hpp"
-#include "coredump_linux.hpp"
-#include "monitor_zynqmp_cpu1.hpp"
 
 using namespace bmboot;
 using namespace bmboot::internal;
@@ -27,8 +29,8 @@ enum class DomainGeneralState
 {
     inReset,
     unavailable,
-    //    monitorStartupRequested,
-    monitorStarted,   // *only in this case* is DomainState meaningful
+//    monitorStartupRequested,
+    monitorStarted,                 // *only in this case* is DomainState meaningful
 };
 
 // Maybe we should have a full state automaton on the manager side as well -- instead of just a boolean:
@@ -42,22 +44,18 @@ static DomainGeneralState domain_general_state[DomainIndex::max_domain];
 
 class Domain : public IDomain
 {
-  public:
-    Domain(DomainIndex domain, IpcBlock& ipc_block)
-        : m_domain(domain),
-          m_ipc_block(ipc_block)
-    {
-    }
+public:
+    Domain(DomainIndex domain, IpcBlock& ipc_block) : m_domain(domain), m_ipc_block(ipc_block) {}
 
-    MaybeError  dumpCore(char const* filename) final;
-    void        dumpDebugInfo() final;
-    MaybeError  ensureReadyToLoadPayload() final;
-    MaybeError  loadAndStartPayload(std::span<uint8_t const> payload_binary, uint32_t payload_crc32) final;
-    int         getchar() final;
-    CrashInfo   getCrashInfo() final;
+    MaybeError dumpCore(char const* filename) final;
+    void dumpDebugInfo() final;
+    MaybeError ensureReadyToLoadPayload() final;
+    MaybeError loadAndStartPayload(std::span<uint8_t const> payload_binary, uint32_t payload_crc32) final;
+    int getchar() final;
+    CrashInfo getCrashInfo() final;
     DomainState getState() final;
-    MaybeError  terminatePayload() final;
-    MaybeError  startup() final;
+    MaybeError terminatePayload() final;
+    MaybeError startup() final;
 
     void startDummyPayload() final
     {
@@ -65,15 +63,15 @@ class Domain : public IDomain
         startPayloadAt(0xbaadf00d, 0, 0);
     }
 
-  private:
+private:
     MaybeError awaitMonitorStartup();
     MaybeError startPayloadAt(uintptr_t entry_address, size_t payload_size, uint32_t payload_crc32);
     MaybeError startup(std::span<uint8_t const> monitor_binary);
 
-    //    volatile IpcBlock& getIpcBlock()
-    //    {
-    //        return (volatile IpcBlock&) m_ipc_block;
-    //    }
+//    volatile IpcBlock& getIpcBlock()
+//    {
+//        return (volatile IpcBlock&) m_ipc_block;
+//    }
 
     volatile const auto& getInbox()
     {
@@ -91,7 +89,7 @@ class Domain : public IDomain
     }
 
     DomainIndex m_domain;
-    IpcBlock&   m_ipc_block;
+    IpcBlock& m_ipc_block;
 };
 
 // ************************************************************
@@ -122,10 +120,15 @@ static MaybeError load_to_physical_memory(uintptr_t address, std::span<uint8_t c
     // TODO: assert that address is aligned
 
     // FIXME: assuming 4k pages
-    const auto alignment    = 4096;
-    auto       size_aligned = (binary.size() + alignment - 1) & ~(alignment - 1);
+    const auto alignment = 4096;
+    auto size_aligned = (binary.size() + alignment - 1) & ~(alignment - 1);
 
-    Mmap code_area(nullptr, size_aligned, PROT_READ | PROT_WRITE, MAP_SHARED, std::get<int>(devmem), address);
+    Mmap code_area(nullptr,
+                   size_aligned,
+                   PROT_READ | PROT_WRITE,
+                   MAP_SHARED,
+                   std::get<int>(devmem),
+                   address);
 
     if (!code_area)
     {
@@ -134,7 +137,7 @@ static MaybeError load_to_physical_memory(uintptr_t address, std::span<uint8_t c
 
     memcpy(code_area.data(), binary.data(), binary.size());
 
-    __clear_cache(code_area.data(), (uint8_t*)code_area.data() + MONITOR_CODE_SIZE);
+    __clear_cache(code_area.data(), (uint8_t*) code_area.data() + MONITOR_CODE_SIZE);
 
     code_area.unmap();
 
@@ -146,7 +149,7 @@ static MaybeError load_to_physical_memory(uintptr_t address, std::span<uint8_t c
 MaybeError Domain::awaitMonitorStartup()
 {
     // wait up to 0.5sec for monitor to come to life; should normally take around 130 ms
-    constexpr int timeout_msec     = 500;
+    constexpr int timeout_msec = 500;
     constexpr int poll_period_msec = 10;
 
     for (int i = 0; i < timeout_msec / poll_period_msec; i++)
@@ -179,7 +182,12 @@ MaybeError Domain::dumpCore(char const* filename)
         return std::get<ErrorCode>(devmem);
     }
 
-    Mmap code_area(nullptr, PAYLOAD_MAX_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, std::get<int>(devmem), PAYLOAD_START);
+    Mmap code_area(nullptr,
+                   PAYLOAD_MAX_SIZE,
+                   PROT_READ | PROT_WRITE,
+                   MAP_SHARED,
+                   std::get<int>(devmem),
+                   PAYLOAD_START);
 
     if (!code_area)
     {
@@ -188,11 +196,15 @@ MaybeError Domain::dumpCore(char const* filename)
 
     auto& inbox = getInboxNonvolatile();
 
-    static const MemorySegment segments[]{
-        {PAYLOAD_START, PAYLOAD_MAX_SIZE, code_area.data()},
+    static const MemorySegment segments[]
+    {
+            { PAYLOAD_START, PAYLOAD_MAX_SIZE, code_area.data() },
     };
 
-    writeCoreDump(filename, segments, inbox.regs, inbox.fpregs);
+    writeCoreDump(filename,
+                  segments,
+                  inbox.regs,
+                  inbox.fpregs);
 
     return {};
 }
@@ -201,7 +213,9 @@ MaybeError Domain::dumpCore(char const* filename)
 
 void Domain::dumpDebugInfo()
 {
-    fprintf(stderr, "debug: rdpos=%3zu wrpos=%3zu\n", getOutbox().stdout_rdpos, getInbox().stdout_wrpos);
+    fprintf(stderr, "debug: rdpos=%3zu wrpos=%3zu\n",
+            getOutbox().stdout_rdpos,
+            getInbox().stdout_wrpos);
 }
 
 // ************************************************************
@@ -218,7 +232,9 @@ MaybeError Domain::ensureReadyToLoadPayload()
     {
         return {};
     }
-    else if (state == DomainState::crashed_payload || state == DomainState::running_payload || state == DomainState::starting_payload)
+    else if (state == DomainState::crashed_payload ||
+             state == DomainState::running_payload ||
+             state == DomainState::starting_payload)
     {
         return terminatePayload();
     }
@@ -234,8 +250,7 @@ CrashInfo Domain::getCrashInfo()
 {
     auto& inbox = getInbox();
 
-    return CrashInfo{
-        .pc = inbox.fault_pc, .desc = std::string((char const*)inbox.fault_desc, sizeof(inbox.fault_desc))};
+    return CrashInfo { .pc = inbox.fault_pc, .desc = std::string((char const*) inbox.fault_desc, sizeof(inbox.fault_desc)) };
 }
 
 // ************************************************************
@@ -245,11 +260,16 @@ DomainState Domain::getState()
     // FIXME: domain_general_state must take precedence
     // otherwise, for example after a failed monitor start-up, in_reset state is being reported
 
+    if (domain_general_state[m_domain] == DomainGeneralState::inReset)
+    {
+        return DomainState::in_reset;
+    }
+
     auto state_raw = getInbox().state;
 
     if (state_raw <= (int)DomainState::invalid_state)
     {
-        return (DomainState)state_raw;
+        return (DomainState) state_raw;
     }
     else
     {
@@ -261,8 +281,8 @@ DomainState Domain::getState()
 
 int Domain::getchar()
 {
-    auto const& inbox  = getInbox();
-    auto&       outbox = getOutbox();
+    auto const& inbox = getInbox();
+    auto& outbox = getOutbox();
 
     if (outbox.stdout_rdpos >= sizeof(inbox.stdout_buf))
     {
@@ -272,7 +292,7 @@ int Domain::getchar()
 
     if (outbox.stdout_rdpos != inbox.stdout_wrpos)
     {
-        char c              = inbox.stdout_buf[outbox.stdout_rdpos];
+        char c = inbox.stdout_buf[outbox.stdout_rdpos];
         outbox.stdout_rdpos = (outbox.stdout_rdpos + 1) % sizeof(inbox.stdout_buf);
         return c;
     }
@@ -307,17 +327,23 @@ DomainInstanceOrErrorCode IDomain::open(DomainIndex domain)
         return std::get<ErrorCode>(devmem);
     }
 
-    auto ipc_block = (IpcBlock*)mmap(
-        nullptr, MONITOR_IPC_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, std::get<int>(devmem), MONITOR_IPC_START
-    );
+    auto ipc_block = (IpcBlock*) mmap(nullptr,
+                                      MONITOR_IPC_SIZE,
+                                      PROT_READ | PROT_WRITE,
+                                      MAP_SHARED,
+                                      std::get<int>(devmem),
+                                      MONITOR_IPC_START);
     if (ipc_block == nullptr)
     {
         return ErrorCode::mmap_failed;
     }
 
-    auto code_area = (uint8_t*)mmap(
-        nullptr, MONITOR_CODE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, std::get<int>(devmem), MONITOR_CODE_START
-    );
+    auto code_area = (uint8_t*) mmap(nullptr,
+                                     MONITOR_CODE_SIZE,
+                                     PROT_READ | PROT_WRITE,
+                                     MAP_SHARED,
+                                     std::get<int>(devmem),
+                                     MONITOR_CODE_START);
     if (code_area == nullptr)
     {
         return ErrorCode::mmap_failed;
@@ -368,8 +394,8 @@ MaybeError Domain::startPayloadAt(uintptr_t entry_address, size_t payload_size, 
         return ErrorCode::bad_domain_state;
     }
 
-    auto const& inbox  = getInbox();
-    auto&       outbox = getOutbox();
+    auto const& inbox = getInbox();
+    auto& outbox = getOutbox();
 
     if (inbox.cmd_ack != outbox.cmd_seq)
     {
@@ -380,14 +406,14 @@ MaybeError Domain::startPayloadAt(uintptr_t entry_address, size_t payload_size, 
     outbox.stdout_rdpos = inbox.stdout_wrpos;
 
     outbox.payload_entry_address = entry_address;
-    outbox.payload_size          = payload_size;
-    outbox.payload_crc           = payload_crc32;
-    outbox.cmd                   = Command::start_payload;
+    outbox.payload_size = payload_size;
+    outbox.payload_crc = payload_crc32;
+    outbox.cmd = Command::start_payload;
     memory_write_reorder_barrier();
     outbox.cmd_seq = (outbox.cmd_seq + 1);
 
     // wait up to 1sec for domain to come to life
-    constexpr int timeout_msec     = 1000;
+    constexpr int timeout_msec = 1000;
     constexpr int poll_period_msec = 10;
 
     for (int i = 0; i < timeout_msec / poll_period_msec; i++)
@@ -444,9 +470,12 @@ MaybeError Domain::startup(std::span<uint8_t const> monitor_binary)
         return std::get<ErrorCode>(devmem);
     }
 
-    auto code_area = (uint8_t*)mmap(
-        nullptr, MONITOR_CODE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, std::get<int>(devmem), MONITOR_CODE_START
-    );
+    auto code_area = (uint8_t*) mmap(nullptr,
+                                     MONITOR_CODE_SIZE,
+                                     PROT_READ | PROT_WRITE,
+                                     MAP_SHARED,
+                                     std::get<int>(devmem),
+                                     MONITOR_CODE_START);
     if (code_area == nullptr)
     {
         return ErrorCode::mmap_failed;
@@ -459,7 +488,7 @@ MaybeError Domain::startup(std::span<uint8_t const> monitor_binary)
         return ErrorCode::program_too_large;
     }
 
-    memcpy(code_area, monitor_binary.data(), monitor_binary.size());   // won't work without cache flush to L2/DDR
+    memcpy(code_area, monitor_binary.data(), monitor_binary.size());      // won't work without cache flush to L2/DDR
     memcpy(code_area + MONITOR_CODE_SIZE - sizeof(cookie), &cookie, sizeof(cookie));
 
     // flush the newly written code from L1 through to DDR (since CPUn will come up in uncached mode)
@@ -468,10 +497,10 @@ MaybeError Domain::startup(std::span<uint8_t const> monitor_binary)
     munmap(code_area, MONITOR_CODE_SIZE);
 
     // initialize IPC block
-    memset((void*)&m_ipc_block, 0, MONITOR_IPC_SIZE);
+    memset((void*) &m_ipc_block, 0, MONITOR_IPC_SIZE);
 
     // flush the IPC region to DDR (since the SCU is not in effect yet and CPUn will come up with cold caches)
-    __clear_cache(&m_ipc_block, (uint8_t*)&m_ipc_block + MONITOR_IPC_SIZE);
+    __clear_cache(&m_ipc_block, (uint8_t*) &m_ipc_block + MONITOR_IPC_SIZE);
 
     mach::bootZynqCpu1(std::get<int>(devmem), MONITOR_CODE_START);
 

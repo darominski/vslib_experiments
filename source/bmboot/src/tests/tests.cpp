@@ -1,11 +1,12 @@
-#include <fstream>
+#include "bmboot/domain.hpp"
+#include "../utility/crc32.hpp"
+
 #include <gtest/gtest.h>
+
+#include <fstream>
 #include <stdexcept>
 #include <thread>
 #include <vector>
-
-#include "../utility/crc32.hpp"
-#include "bmboot/domain.hpp"
 
 using namespace bmboot;
 using namespace std::chrono_literals;
@@ -79,7 +80,7 @@ struct BmbootFixture : public ::testing::Test
         }
 
         std::stringstream output_stream;
-        char              buffer[128];
+        char buffer[128];
         while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
         {
             output_stream << buffer;
@@ -103,7 +104,8 @@ struct BmbootFixture : public ::testing::Test
             throw std::runtime_error((std::string) "failed to open " + filename);
         }
 
-        std::vector<uint8_t> program((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        std::vector<uint8_t> program((std::istreambuf_iterator<char>(file)),
+                                     std::istreambuf_iterator<char>());
 
         throw_for_err(domain->loadAndStartPayload(program, crc32(0, program.data(), program.size())));
     }
@@ -143,8 +145,7 @@ TEST_F(BmbootFixture, access_violation)
 
     std::this_thread::sleep_for(50ms);
 
-    auto state = domain->getState();
-    ;
+    auto state = domain->getState();;
     ASSERT_EQ(state, DomainState::crashed_payload);
 
     // Save core dump
@@ -152,9 +153,7 @@ TEST_F(BmbootFixture, access_violation)
     ASSERT_FALSE(err.has_value());
 
     // Ensure the core dump was created
-    struct stat st
-    {
-    };
+    struct stat st {};
     ASSERT_EQ(stat("core", &st), 0);
     ASSERT_GT(st.st_size, 4096);
 

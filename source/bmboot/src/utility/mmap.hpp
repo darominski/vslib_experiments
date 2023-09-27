@@ -11,16 +11,16 @@ namespace bmboot
 {
     class Mmap
     {
-      public:
-        Mmap(void* addr, size_t len, int prot, int flags, int fd, off_t offset)
+    public:
+        Mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
         {
             this->base = mmap(addr, len, prot, flags, fd, offset);
-            this->len  = len;
+            this->len = len;
 
             if (this->base == MAP_FAILED)
             {
                 this->base = nullptr;
-                this->len  = 0;
+                this->len = 0;
             }
         }
 
@@ -58,8 +58,8 @@ namespace bmboot
             return base != nullptr;
         }
 
-      private:
-        void*  base;
+    private:
+        void* base;
         size_t len;
     };
 }

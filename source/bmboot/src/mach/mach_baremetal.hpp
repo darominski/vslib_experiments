@@ -4,35 +4,35 @@
 
 #pragma once
 
-#include <span>
-
 #include "bmboot.hpp"
 #include "mach_baremetal_defs.hpp"
+
+#include <span>
 
 namespace bmboot::mach
 {
 
-    void flushICache();
+void flushICache();
 
-    void sendIpiMessage(std::span<const std::byte> message);
+void sendIpiMessage(std::span<const std::byte> message);
 
-    void disablePrivatePeripheralInterrupt(int ch);
-    void enableCpuInterrupts();
-    void enableIpiReception(int src_channel);
+void disablePrivatePeripheralInterrupt(int ch);
+void enableCpuInterrupts();
+void enableIpiReception(int src_channel);
 
-    //! Unmask a given Private Peripheral Interrupt (PPI) for the current CPU.
-    //!
-    //! See ARM IHI 0048B.b for more details
-    //! \param ch
-    void enablePrivatePeripheralInterrupt(int ch);
+//! Unmask a given Private Peripheral Interrupt (PPI) for the current CPU.
+//!
+//! See ARM IHI 0048B.b for more details
+//! \param ch
+void enablePrivatePeripheralInterrupt(int ch);
 
-    //! Route a given Shared Peripheral Interrupt (SPI) to the given CPU and make sure it is not masked.
-    //!
-    //! See ARM IHI 0048B.b for more details
-    //! \param ch
-    //! \param target_cpu
-    void enableSharedPeripheralInterruptAndRouteToCpu(int ch, int target_cpu);
+//! Route a given Shared Peripheral Interrupt (SPI) to the given CPU and make sure it is not masked.
+//!
+//! See ARM IHI 0048B.b for more details
+//! \param ch
+//! \param target_cpu
+void enableSharedPeripheralInterruptAndRouteToCpu(int ch, int target_cpu);
 
-    void handleTimerIrq();
+void handleTimerIrq();
 
 }

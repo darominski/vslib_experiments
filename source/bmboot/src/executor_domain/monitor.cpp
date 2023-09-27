@@ -2,11 +2,12 @@
 //! @brief  Implements the bmboot monitor
 //! @author Martin Cejp
 
-#include "../bmboot_internal.hpp"
 #include "../mach/mach_baremetal.hpp"
-#include "../utility/crc32.hpp"
+#include "../bmboot_internal.hpp"
 #include "bmboot/payload_runtime.hpp"
 #include "executor_lowlevel.hpp"
+#include "../utility/crc32.hpp"
+
 #include "xpseudo_asm.h"
 
 using namespace bmboot;
@@ -18,9 +19,9 @@ static void dummy_payload();
 
 extern "C" int main()
 {
-    auto                 ipc_block = (volatile IpcBlock*)MONITOR_IPC_START;
-    volatile const auto& inbox     = ipc_block->manager_to_executor;
-    volatile auto&       outbox    = ipc_block->executor_to_manager;
+    auto ipc_block = (volatile IpcBlock *) MONITOR_IPC_START;
+    volatile const auto& inbox = ipc_block->manager_to_executor;
+    volatile auto& outbox = ipc_block->executor_to_manager;
 
     // disable timer IRQ before enabling interrupt handling, because this might be a warm reset
     // TODO: this should be done more systematically -- and also where? here or before the reset?
@@ -42,40 +43,40 @@ extern "C" int main()
 
             switch (inbox.cmd)
             {
-                case Command::noop:
+            case Command::noop:
+                outbox.cmd_ack = (outbox.cmd_ack + 1);
+                break;
+
+            case Command::start_payload:
+                outbox.state = DomainState::starting_payload;
+
+                // FLush all I-cache. Overkill? Should also flush D-cache?
+                mach::flushICache();
+
+                // TODO: legitimize this h_a_c_k
+                if (inbox.payload_entry_address == 0xbaadf00d)
+                {
+                    enterEL1Payload((uintptr_t) &dummy_payload);
+                }
+                else
+                {
+                    // Validate CRC-32
+                    auto crc_gotten = crc32(0, (void const*) inbox.payload_entry_address, inbox.payload_size);
+
+                    bool crc_match = (crc_gotten == inbox.payload_crc);
+
+                    outbox.cmd_resp = crc_match ? Response::crc_ok : Response::crc_mismatched;
+                    memory_write_reorder_barrier();
                     outbox.cmd_ack = (outbox.cmd_ack + 1);
-                    break;
 
-                case Command::start_payload:
-                    outbox.state = DomainState::starting_payload;
-
-                    // FLush all I-cache. Overkill? Should also flush D-cache?
-                    mach::flushICache();
-
-                    // TODO: legitimize this h_a_c_k
-                    if (inbox.payload_entry_address == 0xbaadf00d)
+                    if (crc_match)
                     {
-                        enterEL1Payload((uintptr_t)&dummy_payload);
+                        enterEL1Payload(inbox.payload_entry_address);
                     }
-                    else
-                    {
-                        // Validate CRC-32
-                        auto crc_gotten = crc32(0, (void const*)inbox.payload_entry_address, inbox.payload_size);
+                }
 
-                        bool crc_match = (crc_gotten == inbox.payload_crc);
-
-                        outbox.cmd_resp = crc_match ? Response::crc_ok : Response::crc_mismatched;
-                        memory_write_reorder_barrier();
-                        outbox.cmd_ack = (outbox.cmd_ack + 1);
-
-                        if (crc_match)
-                        {
-                            enterEL1Payload(inbox.payload_entry_address);
-                        }
-                    }
-
-                    outbox.state = DomainState::monitor_ready;
-                    break;
+                outbox.state = DomainState::monitor_ready;
+                break;
             }
         }
     }

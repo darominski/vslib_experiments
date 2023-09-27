@@ -10,9 +10,7 @@ int main(int argc, char** argv)
 
     bmboot::startPeriodicInterrupt(1'000'000, myHandler);
 
-    for (;;)
-    {
-    }
+    for (;;) {}
 }
 
 static void myHandler()
@@ -20,8 +18,7 @@ static void myHandler()
     static int cnt = 0;
     printf("%dth event\n", ++cnt);
 
-    if (cnt == 5)
-    {
+    if (cnt == 5) {
         bmboot::stopPeriodicInterrupt();
     }
 }

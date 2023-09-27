@@ -6,7 +6,5 @@ int main(int argc, char** argv)
 
     printf("Hello, world!\n");
 
-    for (;;)
-    {
-    }
+    for (;;) {}
 }

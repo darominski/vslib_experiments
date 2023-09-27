@@ -2,11 +2,11 @@
 //! @brief  bmctl utility
 //! @author Martin Cejp
 
-#include <cstdio>
-#include <cstring>
-
 #include "bmboot/domain.hpp"
 #include "bmboot/domain_helpers.hpp"
+
+#include <cstdio>
+#include <cstring>
 
 using namespace bmboot;
 

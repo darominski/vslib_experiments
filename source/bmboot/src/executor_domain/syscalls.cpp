@@ -2,16 +2,17 @@
 //! @brief  Retargeting functions for standard I/O
 //! @author Martin Cejp
 
+#include <bmboot/payload_runtime.hpp>
+
 #include <_ansi.h>
 #include <_syslist.h>
-#include <bmboot/payload_runtime.hpp>
 #include <errno.h>
+#include <sys/time.h>
+#include <sys/times.h>
 #include <limits.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <sys/time.h>
-#include <sys/times.h>
 
 #include "syscalls.h"
 
@@ -25,7 +26,8 @@ using namespace bmboot;
 
 extern "C" int _isatty(int fd)
 {
-    if (fd >= STDIN_FILENO && fd <= STDERR_FILENO) return 1;
+    if (fd >= STDIN_FILENO && fd <= STDERR_FILENO)
+        return 1;
 
     errno = EBADF;
     return 0;
@@ -33,7 +35,7 @@ extern "C" int _isatty(int fd)
 
 // **********************************************************
 
-extern "C" int _write(int fd, char* ptr, int len)
+extern "C" int _write(int fd, char *ptr, int len)
 {
     return writeToStdout(ptr, len);
 }
@@ -42,7 +44,8 @@ extern "C" int _write(int fd, char* ptr, int len)
 
 extern "C" int _close(int fd)
 {
-    if (fd >= STDIN_FILENO && fd <= STDERR_FILENO) return 0;
+    if (fd >= STDIN_FILENO && fd <= STDERR_FILENO)
+        return 0;
 
     errno = EBADF;
     return -1;
@@ -52,9 +55,9 @@ extern "C" int _close(int fd)
 
 extern "C" int _lseek(int fd, int ptr, int dir)
 {
-    (void)fd;
-    (void)ptr;
-    (void)dir;
+    (void) fd;
+    (void) ptr;
+    (void) dir;
 
     errno = EBADF;
     return -1;
@@ -88,9 +91,9 @@ extern "C" int _fstat(int fd, struct stat* st)
 
 // **********************************************************
 
-// extern "C" void _exit(int code)
+//extern "C" void _exit(int code)
 //{
-//     // TODO: inform manager before/instead of hanging
+//    // TODO: inform manager before/instead of hanging
 //
-//     while(1) ;
-// }
+//    while(1) ;
+//}

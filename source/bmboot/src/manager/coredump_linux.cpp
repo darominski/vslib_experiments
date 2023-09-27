@@ -36,12 +36,12 @@
  * Converted to C++ and modified for Aarch64 by Martin Cejp
  */
 
+#include "coredump_linux.hpp"
+
 #include <elf.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
-
-#include "coredump_linux.hpp"
 
 using namespace bmboot;
 using namespace bmboot::internal;
@@ -55,8 +55,8 @@ using std::span;
 template<size_t alignment>
 static auto make_padding_span(size_t length)
 {
-    static const byte zeros[alignment - 1]{};
-    auto              padding_needed = (length % alignment) == 0 ? 0 : (alignment - length % alignment);
+    static const byte zeros[alignment - 1] {};
+    auto padding_needed = (length % alignment) == 0 ? 0 : (alignment - length % alignment);
 
     return span{zeros, padding_needed};
 }
@@ -64,15 +64,16 @@ static auto make_padding_span(size_t length)
 static bool write_note(FILE* f, const char* name, Elf64_Word type, span<byte const> desc)
 {
     auto terminated_name_len = strlen(name) + 1;
-    auto nhdr
-        = Elf64_Nhdr{.n_namesz = (Elf64_Word)terminated_name_len, .n_descsz = (Elf64_Word)desc.size(), .n_type = type};
+    auto nhdr = Elf64_Nhdr { .n_namesz = (Elf64_Word) terminated_name_len,
+                             .n_descsz = (Elf64_Word) desc.size(),
+                             .n_type = type };
 
     auto name_padding = make_padding_span<4>(terminated_name_len);
 
     if (fwrite(&nhdr, 1, sizeof(nhdr), f) != sizeof(nhdr)
-        || fwrite(name, 1, terminated_name_len, f) != terminated_name_len
-        || fwrite(name_padding.data(), 1, name_padding.size(), f) != name_padding.size()
-        || fwrite(desc.data(), 1, desc.size(), f) != desc.size())
+            || fwrite(name, 1, terminated_name_len, f) != terminated_name_len
+            || fwrite(name_padding.data(), 1, name_padding.size(), f) != name_padding.size()
+            || fwrite(desc.data(), 1, desc.size(), f) != desc.size())
     {
         return false;
     }
@@ -82,38 +83,39 @@ static bool write_note(FILE* f, const char* name, Elf64_Word type, span<byte con
 
 // ************************************************************
 
-void internal::writeCoreDump(
-    char const* fn, span<MemorySegment const> segments, Aarch64_Regs const& the_regs, Aarch64_FpRegs const& fpregs
-)
+void internal::writeCoreDump(char const *fn,
+                             span<MemorySegment const> segments,
+                             Aarch64_Regs const& the_regs,
+                             Aarch64_FpRegs const& fpregs)
 {
     // Note: This code is derived from an older implementation by Google; it is quite fragile in how the offsets are
     //       computed and separate concerns are mixed together.
     //       A cleaner solution would be to prepare a high-level representation of the ELF structure in memory and then
     //       have separate code that serializes it to disk.
 
-    int const    NUM_THREADS = 1;
-    size_t const PAGESIZE    = 4096;   // TODO: can we make this assumption and does it matter?
+    int const NUM_THREADS = 1;
+    size_t const PAGESIZE = 4096;       // TODO: can we make this assumption and does it matter?
 
     FILE* f = fopen(fn, "wb");
 
     // Write out the ELF header
     Elf64_Ehdr ehdr;
     memset(&ehdr, 0, sizeof(ehdr));
-    ehdr.e_ident[0]  = ELFMAG0;
-    ehdr.e_ident[1]  = ELFMAG1;
-    ehdr.e_ident[2]  = ELFMAG2;
-    ehdr.e_ident[3]  = ELFMAG3;
-    ehdr.e_ident[4]  = ELFCLASS64;
-    ehdr.e_ident[5]  = ELFDATA2LSB;
-    ehdr.e_ident[6]  = EV_CURRENT;
-    ehdr.e_type      = ET_CORE;
-    ehdr.e_machine   = EM_AARCH64;
-    ehdr.e_version   = EV_CURRENT;
-    ehdr.e_phoff     = sizeof(ehdr);
-    ehdr.e_ehsize    = sizeof(ehdr);
-    ehdr.e_phentsize = sizeof(Elf64_Phdr);
-    ehdr.e_phnum     = segments.size() + 1;
-    ehdr.e_shentsize = sizeof(Elf64_Shdr);
+    ehdr.e_ident[0] = ELFMAG0;
+    ehdr.e_ident[1] = ELFMAG1;
+    ehdr.e_ident[2] = ELFMAG2;
+    ehdr.e_ident[3] = ELFMAG3;
+    ehdr.e_ident[4] = ELFCLASS64;
+    ehdr.e_ident[5] = ELFDATA2LSB;
+    ehdr.e_ident[6] = EV_CURRENT;
+    ehdr.e_type     = ET_CORE;
+    ehdr.e_machine  = EM_AARCH64;
+    ehdr.e_version  = EV_CURRENT;
+    ehdr.e_phoff    = sizeof(ehdr);
+    ehdr.e_ehsize   = sizeof(ehdr);
+    ehdr.e_phentsize= sizeof(Elf64_Phdr);
+    ehdr.e_phnum    = segments.size() + 1;
+    ehdr.e_shentsize= sizeof(Elf64_Shdr);
 
     if (fwrite(&ehdr, 1, sizeof(ehdr), f) != sizeof(ehdr))
     {
@@ -122,14 +124,15 @@ void internal::writeCoreDump(
 
     // Write program headers, starting with the PT_NOTE entry
     Elf64_Phdr phdr;
-    size_t     offset = sizeof(Elf64_Ehdr) + ehdr.e_phnum * sizeof(phdr);
-    size_t     filesz = sizeof(Elf64_Nhdr) + 8 + sizeof(elf_prpsinfo)
-        + NUM_THREADS * (sizeof(Elf64_Nhdr) + 8 + sizeof(elf_prstatus) + sizeof(Elf64_Nhdr) + 8 + sizeof(fpregs));
+    size_t offset   = sizeof(Elf64_Ehdr) + ehdr.e_phnum * sizeof(phdr);
+    size_t filesz   = sizeof(Elf64_Nhdr) + 8 + sizeof(elf_prpsinfo) + NUM_THREADS * (
+                        sizeof(Elf64_Nhdr) + 8 + sizeof(elf_prstatus) +
+                        sizeof(Elf64_Nhdr) + 8 + sizeof(fpregs));
 
     memset(&phdr, 0, sizeof(phdr));
-    phdr.p_type   = PT_NOTE;
-    phdr.p_offset = offset;
-    phdr.p_filesz = filesz;
+    phdr.p_type     = PT_NOTE;
+    phdr.p_offset   = offset;
+    phdr.p_filesz   = filesz;
 
     if (fwrite(&phdr, 1, sizeof(phdr), f) != sizeof(phdr))
     {
@@ -147,20 +150,20 @@ void internal::writeCoreDump(
         note_align = 0;
     }
 
-    offset += note_align;
+    offset         += note_align;
     for (const auto& seg : segments)
     {
-        offset        += filesz;
+        offset       += filesz;
         filesz        = seg.size;
         phdr.p_offset = offset;
         phdr.p_vaddr  = seg.start_address;
         phdr.p_memsz  = filesz;
 
         /* Do not write contents for memory segments that are read-only  */
-        //            if ((mappings[i].flags & PF_W) == 0)
-        //                filesz      = 0;
+//            if ((mappings[i].flags & PF_W) == 0)
+//                filesz      = 0;
         phdr.p_filesz = filesz;
-        phdr.p_flags  = PF_R | PF_X | PF_W;   // mappings[i].flags;
+        phdr.p_flags  = PF_R | PF_X | PF_W; //mappings[i].flags;
 
         if (fwrite(&phdr, 1, sizeof(phdr), f) != sizeof(phdr))
         {
@@ -179,7 +182,7 @@ void internal::writeCoreDump(
     }
 
     // Process status and integer registers
-    elf_prstatus prstatus{};
+    elf_prstatus prstatus {};
     prstatus.pr_pid = 1;
     static_assert(sizeof(prstatus.pr_reg) == sizeof(the_regs));
     memcpy(&prstatus.pr_reg, &the_regs, sizeof(the_regs));

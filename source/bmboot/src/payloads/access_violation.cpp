@@ -2,7 +2,8 @@
 
 #include "sleep.h"
 
-[[gnu::noinline]] [[noreturn]] static void access_invalid_memory()
+[[gnu::noinline]] [[noreturn]]
+static void access_invalid_memory()
 {
     *(volatile int*)0x00F0000000 = 123;
 }
@@ -15,8 +16,8 @@ int main(int argc, char** argv)
     usleep(10'000);
 
     // something to find in subsequent core dump
-    __asm__ volatile("fmov d0, #0.5");
-    __asm__ volatile("fmov d1, #0.25");
+    __asm__ volatile ("fmov d0, #0.5");
+    __asm__ volatile ("fmov d1, #0.25");
 
     // BOOM
     access_invalid_memory();

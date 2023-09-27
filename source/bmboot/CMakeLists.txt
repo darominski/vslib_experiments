@@ -260,7 +260,7 @@ else()
             )
     target_link_libraries(bmctl PUBLIC bmboot_manager)
 
-    # Testing: currently disabled
+    # # Testing
     # add_subdirectory("${LIBRARIES_HOME}/googletest-1.11.0" "${CMAKE_CURRENT_BINARY_DIR}/googletest")
 
     # add_executable(bmtest
