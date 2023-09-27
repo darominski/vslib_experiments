@@ -5,59 +5,83 @@
 
 #pragma once
 
+#include <array>
 #include <iostream>
 
+#include "constants.h"
+#include "errorMessage.h"
+#include "fmt/format.h"
 #include "nlohmann/json.hpp"
 
-struct SharedMemory
+namespace vslib
 {
-    size_t acknowledged_counter{0};
-    size_t transmitted_counter{0};
-};
-
-// definitions of I/O functions to silence -Wmissing-declarations warnings
-void           writeJsonToSharedMemory(const nlohmann::json&, void*, size_t, size_t);
-nlohmann::json readJsonFromSharedMemory(void*, size_t);
-
-
-//! Helper function to serialize JSON object and write to shared memory
-//!
-//! @param json_object JSON object to be copied to the shared memory
-//! @param shared_memory Pointer to the shared memory
-//! @param offset Memory offset (in bytes) for the write start point
-//! @param shared_memory_size Shared memory size (in bytes)
-void writeJsonToSharedMemory(
-    const nlohmann::json& json_object, void* shared_memory, size_t offset, size_t shared_memory_size
-)
-{
-    auto serialized = json_object.dump();
-    if (serialized.size() + offset <= shared_memory_size)
+    struct SharedMemory
     {
-        std::memcpy(static_cast<char*>(shared_memory) + offset, serialized.data(), serialized.size());
-    }
-    else
-    {
-        std::cerr << "Error writing JSON: run out of shared memory.\n";
-    }
-}
+        std::size_t                                             acknowledged_counter{0};
+        std::size_t                                             transmitted_counter{0};
+        std::size_t                                             message_length{0};
+        std::array<std::byte, constants::json_memory_pool_size> json_buffer;
+    };
 
-//! Helper function to read JSON object from shared memory and deserialize
-//!
-//! @param shared_memory Pointer to the shared memory
-//! @param offset Memory offset (in bytes) for the write start point
-//! @return JSON object parsed from shared memory
-nlohmann::json readJsonFromSharedMemory(void* shared_memory, size_t offset)
-{
-    nlohmann::json json_object;
-    auto const     serialized = std::string(static_cast<char*>(shared_memory) + offset);
-    try
+#define SHARED_MEMORY_ADDRESS 0x802000000
+#define SHARED_MEMORY_SIZE    constants::json_memory_pool_size
+
+#define SHARED_MEMORY (*(struct SharedMemory* volatile)SHARED_MEMORY_ADDRESS)
+
+    // ************************************************************
+
+    // definitions of I/O functions to silence -Wmissing-declarations warnings
+    void           writeJsonToSharedMemory(const nlohmann::json&, SharedMemory*);
+    nlohmann::json readJsonFromSharedMemory(SharedMemory*);
+
+    //! Helper function to serialize JSON object and write to shared memory
+    //!
+    //! @param json_object JSON object to be copied to the shared memory
+    //! @param shared_memory Reference to the shared memory object
+    void writeJsonToSharedMemory(const nlohmann::json& json_object, SharedMemory* shared_memory)
     {
-        json_object = nlohmann::json::parse(serialized);
+        auto serialized = json_object.dump();
+        if (serialized.size() < constants::json_memory_pool_size)
+        {
+            std::memcpy(
+                reinterpret_cast<char*>(shared_memory->json_buffer.begin()), serialized.data(), serialized.size()
+            );
+        }
+        else
+        {
+            std::cerr << fmt::format(
+                "{}",
+                utils::Error(
+                    "Error writing JSON: run out of shared memory.\n", constants::error_allocation_buffer_overflow
+                )
+            );
+            throw std::bad_alloc();
+        }
+        shared_memory->message_length = serialized.size();
     }
-    catch (const std::exception& e)
+
+    //! Helper function to read JSON object from shared memory and deserialize it
+    //!
+    //! @param shared_memory Reference to the shared memory object
+    //! @return JSON object parsed from shared memory
+    nlohmann::json readJsonFromSharedMemory(SharedMemory* shared_memory)
     {
-        // Handle parsing errors
-        std::cerr << "Error parsing JSON: " << e.what() << "\n";
+        nlohmann::json json_object;
+        try
+        {
+            json_object = nlohmann::json::parse(
+                shared_memory->json_buffer.begin(), shared_memory->json_buffer.begin() + shared_memory->message_length
+            );
+        }
+        catch (const std::exception& e)
+        {
+            // Handle parsing errors
+            utils::Error error_msg(
+                std::string("Error parsing JSON: ") + e.what() + std::string("\n"),
+                constants::error_json_command_invalid
+            );
+            std::cerr << fmt::format("{}", error_msg);
+        }
+        return json_object;
     }
-    return json_object;
-}
+}   // namespace vslib
