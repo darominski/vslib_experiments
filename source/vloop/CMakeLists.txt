@@ -49,12 +49,13 @@ include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
 
 # Include directories for headers
 include_directories(
-    ${CMAKE_SOURCE_DIR}/lib # all external libraries are stored in this directory
+    ${CMAKE_SOURCE_DIR}/../lib # all external libraries are stored in this directory
+    ${CMAKE_SOURCE_DIR}/../vslib # vslib library is stored in this directory
 )
 
 # VSLIB is treated as external library, as it would be in vloop applications
-add_subdirectory(vslib)
-add_subdirectory(lib/fmt)
+add_subdirectory(../vslib ${CMAKE_CURRENT_BINARY_DIR}/vslib)
+add_subdirectory(../lib/fmt ${CMAKE_CURRENT_BINARY_DIR}/fmt)
 
 add_executable(${APP}.elf
   main.cpp
