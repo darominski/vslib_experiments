@@ -11,6 +11,7 @@ endif()
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 add_compile_options(-Wall -O0 -mtune=cortex-a53 -ffunction-sections -fdata-sections
+    -fexceptions
     -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
     -Wwrite-strings -Wmissing-declarations
     -Wredundant-decls -Winline -Wno-long-long
@@ -21,6 +22,7 @@ add_link_options(
   -Wall
   -specs=nosys.specs
   -Wl,--gc-sections
+  -Wl,-Map=output.map
   )
 
 project(${APP} C CXX ASM)

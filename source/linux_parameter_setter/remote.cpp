@@ -44,6 +44,7 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
             // }
             // else
             // {
+            // invalid type throws an exception, which crashes the program at the moment
             // std::string value = "invalid";
             // command.push_back({"value", value});
             // }
