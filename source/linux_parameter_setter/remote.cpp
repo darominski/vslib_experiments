@@ -37,17 +37,16 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
         if (type == "Float64")
         {
             // half of the values will be invalid
-            // if (commands.size() % 2 == 0)
-            // {
-            double value = 3.14159 * static_cast<double>(commands.size());
-            command.push_back({"value", value});
-            // }
-            // else
-            // {
-            // invalid type throws an exception, which crashes the program at the moment
-            // std::string value = "invalid";
-            // command.push_back({"value", value});
-            // }
+            if (commands.size() % 2 == 0)
+            {
+                double value = 3.14159 * static_cast<double>(commands.size());
+                command.push_back({"value", value});
+            }
+            else
+            {
+                std::string value = "invalid";
+                command.push_back({"value", value});
+            }
         }
         else if (type == "Bool")
         {
@@ -65,8 +64,8 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
         }
         commands.push_back(command);
     }
-    // commands.push_back({"misformed", "command"});
-    // commands.push_back({{"name", "ComponentArray.brick_2.PID.brick_2_1.p"}, {"value", 0.2718}});
+    commands.push_back({"misformed", "command"});
+    commands.push_back({{"name", "ComponentArray.brick_2.PID.brick_2_1.p"}, {"value", 0.2718}});
     return commands;
 }
 

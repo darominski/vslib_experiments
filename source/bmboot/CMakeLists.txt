@@ -10,7 +10,7 @@ if (BUILD_MONITOR OR BMBOOT_BUILD_PAYLOAD)
     # SET(CMAKE_CXX_COMPILER_WORKS 1)
     set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-    add_compile_options(-O2 -Wall -mtune=cortex-a53 -ffunction-sections -fdata-sections)
+    add_compile_options(-O0 -Wall -mtune=cortex-a53 -ffunction-sections -fdata-sections)
     add_compile_definitions(_DIOT=1)
 
     add_link_options(
