@@ -23,7 +23,7 @@ wget https://cernbox.cern.ch/s/sLCfVKpyy5p2ZVt/download -O dependencies.zip
 unpack it in your /opt directory:
 
 ```
-sudo unzip dependencies.zip /opt 
+sudo unzip dependencies.zip /opt
 ```
 
 Add the compilers to your PATH:
@@ -110,3 +110,73 @@ d. Upload to the device
 ```
 scp -r build-remote root@fgc4-1:~/mylib
 ```
+
+III Testing on the hardware
+
+1. Connect to the board
+
+To test the parameter setting on the hardware, one needs to have two terminals opened and connected to the fgc4 board:
+
+```
+ssh root@fgc4-1
+```
+
+2. Navigate to the main source file
+
+```
+cd mylib
+```
+
+3. Check status of the bare-metal domain
+
+```
+./build-bmboot/bmctl status cpu1
+```
+
+The expected response should be `in_reset` if the board has been recently restarted.
+
+4. Startup the bare-metal domain
+
+If the `cpu1` is in `in_reset` state or any other state than `monitor_ready`, reset the `cpu1`:
+
+```
+./build-bmboot/bmctl reset cpu1
+```
+
+and check its status again:
+
+```
+./build-bmboot/bmctl status cpu1
+```
+
+5. Start the vloop payload
+
+Now, we are ready to start the vloop payload:
+
+```
+./build-bmboot/bmctl exec cpu1 ./build-vloop/vloop.bin
+```
+
+6. Check that vloop is running:
+
+```
+./build-bmboot/console cpu1
+```
+
+The console should output text with the manifest containing two PIDs and then periodically (once a second)
+output the current value of PIDs parameters.
+
+7. Remotely set the parameters
+
+Now, without exiting from the console, which will be useful for monitoring, and in a separate ssh connection, start
+the `remote` application:
+
+```
+./build-remote/remote
+```
+
+It should print to the terminal the manifest it read from the shared memory, with two PIDs, and then periodically
+output its thread counter.
+
+You can switch back to the bare-metal console and see how the parameter changing commands are received and eventually
+taken into account by the bare metal side.
