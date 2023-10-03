@@ -21,6 +21,7 @@ add_compile_definitions(_DIOT=1)
 add_link_options(
   -Wall
   -specs=nosys.specs
+  -Wl,-gc-sections
   -Wl,-Map=output.map
   )
 
