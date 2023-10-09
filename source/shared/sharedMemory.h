@@ -17,10 +17,10 @@ namespace vslib
 {
     struct SharedMemory
     {
-        std::size_t                                             acknowledged_counter{0};
-        std::size_t                                             transmitted_counter{0};
-        std::size_t                                             message_length{0};
-        std::array<std::byte, constants::json_memory_pool_size> json_buffer;
+        std::size_t                                                    acknowledged_counter{0};
+        std::size_t                                                    transmitted_counter{0};
+        std::size_t                                                    message_length{0};
+        std::array<std::byte, utils::constants::json_memory_pool_size> json_buffer;
     };
 
 #define SHARED_MEMORY_ADDRESS 0x802000000
@@ -41,7 +41,7 @@ namespace vslib
     void writeJsonToSharedMemory(const nlohmann::json& json_object, SharedMemory* shared_memory)
     {
         auto serialized = json_object.dump();
-        if (serialized.size() < constants::json_memory_pool_size)
+        if (serialized.size() < utils::constants::json_memory_pool_size)
         {
             std::memcpy(
                 reinterpret_cast<char*>(shared_memory->json_buffer.begin()), serialized.data(), serialized.size()
@@ -52,7 +52,8 @@ namespace vslib
             std::cerr << fmt::format(
                 "{}",
                 utils::Error(
-                    "Error writing JSON: run out of shared memory.\n", constants::error_allocation_buffer_overflow
+                    "Error writing JSON: run out of shared memory.\n",
+                    utils::constants::error_allocation_buffer_overflow
                 )
             );
             throw std::bad_alloc();
@@ -78,7 +79,7 @@ namespace vslib
             // Handle parsing errors
             utils::Error error_msg(
                 std::string("Error parsing JSON: ") + e.what() + std::string("\n"),
-                constants::error_json_command_invalid
+                utils::constants::error_json_command_invalid
             );
             std::cerr << fmt::format("{}", error_msg);
         }

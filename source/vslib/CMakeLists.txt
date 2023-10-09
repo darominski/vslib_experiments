@@ -1,3 +1,29 @@
+cmake_minimum_required(VERSION 3.17)
+
+set(LIB vslib)
+
+set(CMAKE_SYSTEM_NAME Generic)
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
+add_compile_options(-Wall -O0 -mtune=cortex-a53 -ffunction-sections -fdata-sections
+    -fexceptions
+    -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
+    -Wwrite-strings -Wmissing-declarations
+    -Wredundant-decls -Winline -Wno-long-long
+    -Wconversion)
+
+add_link_options(
+  -Wall
+  -specs=nosys.specs
+  -Wl,-gc-sections
+  -Wl,-Map=output.map
+  )
+
+project(${LIB} CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+
 # Collect source files for the vslib code
 set(VSLIB_SOURCES
     background/src/background.cpp
@@ -7,18 +33,19 @@ set(VSLIB_SOURCES
 )
 
 # Create a library from the vslib sources
-add_library(vslib ${VSLIB_SOURCES})
+add_library(${LIB} ${VSLIB_SOURCES})
 
 # Include directories for vslib
-target_include_directories(vslib
+target_include_directories(${LIB}
     PUBLIC
     background/inc
     components/inc
     parameters/inc
-    constants
     utils
+    ../lib
     # Other vslib include directories go here
 )
+
 target_link_libraries(vslib PRIVATE
   fmt::fmt
   )

@@ -8,12 +8,7 @@
 #include <cstdint>
 #include <string>
 
-namespace vslib::components
-{
-    class Component;   // fwd declaration
-}
-
-namespace vslib::constants
+namespace vslib::utils::constants
 {
     // ************************************************************
     // Constants defined for static memory pools for supported use cases of the RingBuffer
@@ -33,12 +28,6 @@ namespace vslib::constants
     constexpr uint32_t error_json_command_value_type_invalid   = 1005;
     constexpr uint32_t error_json_command_invalid_enum_value   = 1006;
     constexpr uint32_t error_allocation_buffer_overflow        = 2000;
-    // ************************************************************
-    // Predefined component names for use in FGC Configurator
-
-    constexpr std::string_view component_type_pid  = "PID";
-    constexpr std::string_view component_type_rst  = "RST";
-    constexpr std::string_view component_type_user = "User";
 
     // ************************************************************
     // Names of supported types for use in FGC Configurator
@@ -67,8 +56,4 @@ namespace vslib::constants
 
     constexpr std::string_view unsupported_type_label = "Unsupported";
 
-    // ************************************************************
-    // Constant for denoting that the component constructed is independent (has no parents)
-    constexpr components::Component* independent_component = nullptr;
-
-}
+}   // namespace utils::constants

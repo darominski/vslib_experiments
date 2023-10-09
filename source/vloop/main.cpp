@@ -31,12 +31,21 @@ int main()
 {
     bmboot::notifyPayloadStarted();
 
+    try
+    {
+        throw std::runtime_error("TEST");
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+
     puts("Hello world from vloop running on cpu1!");
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
-    components::PID pid1("pid_1", constants::independent_component, 1, 1, 1);
-    components::PID pid3("pid_3", constants::independent_component, 3, 30, 3);
+    components::PID pid1("pid_1", components::independent_component, 1, 1, 1);
+    components::PID pid3("pid_3", components::independent_component, 3, 30, 3);
 
     // No parameter declarations beyond this point!
     // ************************************************************

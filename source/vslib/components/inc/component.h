@@ -137,4 +137,9 @@ namespace vslib::components
         std::vector<std::tuple<std::string, std::reference_wrapper<parameters::IParameter>>> m_parameters;
         std::vector<std::reference_wrapper<Component>>                                       m_children;
     };
+
+    // ************************************************************
+    // Constant for denoting that the component constructed is independent (has no parents)
+    constexpr components::Component* independent_component = nullptr;
+
 }   // namespace component

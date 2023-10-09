@@ -24,7 +24,7 @@ namespace vslib::components
     {
       public:
         RST(std::string_view name, Component* parent, std::array<double, 4> _r, bool _flag)
-            : Component(constants::component_type_rst, name, parent),
+            : Component("RST", name, parent),
               r(*this, "r", _r, -12.0, 10.0),
               status(*this, "status", Status::uninitialized),
               flag(*this, "flag", _flag)

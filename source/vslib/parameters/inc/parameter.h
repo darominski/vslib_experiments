@@ -14,6 +14,7 @@
 #include <type_traits>
 
 #include "component.h"
+#include "constants.h"
 #include "errorMessage.h"
 #include "iparameter.h"
 #include "magic_enum/magic_enum.hpp"
@@ -275,7 +276,7 @@ namespace vslib::parameters
                             "Value in the provided array: {} is outside the limits: {}, {}!\n", value, m_limit_min,
                             m_limit_max
                         ),
-                        constants::error_json_command_value_outside_limits
+                        utils::constants::error_json_command_value_outside_limits
                     );
                     std::cerr << fmt::format("{}", error_msg);
                     return error_msg;
@@ -295,7 +296,7 @@ namespace vslib::parameters
             {
                 utils::Error error_msg(
                     fmt::format("Provided value: {} is outside the limits: {}, {}!\n", value, m_limit_min, m_limit_max),
-                    constants::error_json_command_value_outside_limits
+                    utils::constants::error_json_command_value_outside_limits
                 );
                 return error_msg;
             }
@@ -421,7 +422,8 @@ namespace vslib::parameters
             catch (nlohmann::json::exception& e)
             {
                 utils::Error error_msg(
-                    e.what() + std::string(".\nCommand ignored.\n"), constants::error_json_command_value_type_invalid
+                    e.what() + std::string(".\nCommand ignored.\n"),
+                    utils::constants::error_json_command_value_type_invalid
                 );
                 return error_msg;
             }
@@ -454,7 +456,7 @@ namespace vslib::parameters
             {
                 utils::Error error_msg(
                     "The provided enum value is not one of the allowed values.\nCommand ignored.\n",
-                    constants::error_json_command_invalid_enum_value
+                    utils::constants::error_json_command_invalid_enum_value
                 );
                 return error_msg;
             }

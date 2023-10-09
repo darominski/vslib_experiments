@@ -15,7 +15,7 @@ namespace vslib::components
     {
       public:
         PID(std::string_view name, Component* parent = nullptr, double _p = 0.0, double _i = 0.0, double _d = 0.0)
-            : Component(constants::component_type_pid, name, parent),
+            : Component("PID", name, parent),
               p(*this, "p", _p, -10.0, 10.0),
               i(*this, "i", _i, -10.0, 10.0),
               d(*this, "d", _d)   // default limits apply here
