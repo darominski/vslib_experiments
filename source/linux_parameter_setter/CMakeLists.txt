@@ -39,7 +39,7 @@ include_directories(
 )
 
 add_subdirectory(../vslib ${CMAKE_CURRENT_BINARY_DIR}/vslib)
-add_subdirectory(../lib/fmt ${CMAKE_CURRENT_BINARY_DIR}/fmt)
+add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
 
 target_compile_features(remote PUBLIC cxx_std_20)
 

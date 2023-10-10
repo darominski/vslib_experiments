@@ -24,7 +24,7 @@ project(${LIB} CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_subdirectory(../lib/fmt ${CMAKE_CURRENT_BINARY_DIR}/fmt)
+add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
 
 # Collect source files for the vslib code
 set(VSLIB_SOURCES

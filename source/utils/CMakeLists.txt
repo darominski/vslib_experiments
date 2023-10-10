@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.17)
 
 set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory("${LIBRARIES_HOME}/googletest-1.11.0" "${CMAKE_CURRENT_BINARY_DIR}/googletest")
 # FMT has to be recompiled here due to use of different compiler than in the upstream CMake
-add_subdirectory(${CMAKE_SOURCE_DIR}/../lib/fmt ${CMAKE_CURRENT_BINARY_DIR}/fmt)
+add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
 include(GoogleTest)
 
 add_executable(utilsTests
