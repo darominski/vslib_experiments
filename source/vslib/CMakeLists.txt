@@ -43,7 +43,7 @@ target_include_directories(${LIB}
     background/inc
     components/inc
     parameters/inc
-    utils
+    ../utils
     ../lib
     # Other vslib include directories go here
 )
