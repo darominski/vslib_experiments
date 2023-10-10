@@ -16,7 +16,7 @@
 #include "parameterRegistry.h"
 #include "pid.h"
 #include "rst.h"
-#include "sharedMemory.h"
+#include "sharedMemoryVslib.h"
 #include "staticJson.h"
 
 // This is one way to stop users from creating objects on the heap and explicit memory allocations

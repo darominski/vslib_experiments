@@ -5,7 +5,7 @@
 
 #include "Util_Mmap.h"
 #include "nlohmann/json.hpp"
-#include "sharedMemory.h"
+#include "sharedMemoryVslib.h"
 
 using Json = nlohmann::json;
 using namespace vslib;

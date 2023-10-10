@@ -35,7 +35,7 @@ add_executable(remote
 include_directories(
     ${CMAKE_SOURCE_DIR}/../lib # all external libraries are stored in this directory
     ${CMAKE_SOURCE_DIR}/../vslib # vslib library is stored in this directory
-    ${CMAKE_SOURCE_DIR}/../shared # all external libraries are stored in this directory
+    ${CMAKE_SOURCE_DIR}/../utils # all external libraries are stored in this directory
 )
 
 add_subdirectory(../vslib ${CMAKE_CURRENT_BINARY_DIR}/vslib)

@@ -53,7 +53,7 @@ include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
 include_directories(
     ${CMAKE_SOURCE_DIR}/../lib # all external libraries are stored in this directory
     ${CMAKE_SOURCE_DIR}/../vslib # vslib library is stored in this directory
-    ${CMAKE_SOURCE_DIR}/../shared # header files shared between bare-metal and linux are stored in this directory
+    ${CMAKE_SOURCE_DIR}/../utils # header files shared between fgc4 bare-metal applications
 )
 
 # VSLIB is treated as external library, as it would be in vloop applications
