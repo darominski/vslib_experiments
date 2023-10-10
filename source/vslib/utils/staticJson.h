@@ -8,7 +8,7 @@
 #include "nlohmann/json.hpp"
 #include "ringBufferAllocator.h"
 
-namespace vslib::utils
+namespace fgc4::utils
 {
     // ************************************************************
     // Helper definition for the verbose template names

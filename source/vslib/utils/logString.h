@@ -8,7 +8,7 @@
 #include "constants.h"
 #include "ringBufferAllocator.h"
 
-namespace vslib::utils
+namespace fgc4::utils
 {
     class LogStringType;   // empty class for defining dedicated HeapType
 

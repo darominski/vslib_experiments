@@ -58,7 +58,6 @@ include_directories(
 
 # VSLIB is treated as external library, as it would be in vloop applications
 add_subdirectory(../vslib ${CMAKE_CURRENT_BINARY_DIR}/vslib)
-add_subdirectory(../lib/fmt ${CMAKE_CURRENT_BINARY_DIR}/fmt)
 
 add_executable(${APP}.elf
   main.cpp

@@ -12,7 +12,7 @@
 
 #include "fmt/format.h"
 
-namespace vslib::utils
+namespace fgc4::utils
 {
     template<typename BufferType, uint64_t BufferSize>
     class RingBuffer

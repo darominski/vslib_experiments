@@ -12,7 +12,7 @@
 #include "parameterRegistry.h"
 
 using namespace nlohmann;
-using namespace vslib::utils;
+using namespace fgc4::utils;
 
 namespace vslib::backgroundTask
 {

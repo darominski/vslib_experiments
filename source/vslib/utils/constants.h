@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <string>
 
-namespace vslib::utils::constants
+namespace fgc4::utils::constants
 {
     // ************************************************************
     // Constants defined for static memory pools for supported use cases of the RingBuffer

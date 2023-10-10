@@ -13,7 +13,7 @@
 
 #include "constants.h"
 
-namespace vslib::utils
+namespace fgc4::utils
 {
 
     // Forward declaration of getTypeLabel function template

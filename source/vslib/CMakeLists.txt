@@ -24,6 +24,8 @@ project(${LIB} CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
+add_subdirectory(../lib/fmt ${CMAKE_CURRENT_BINARY_DIR}/fmt)
+
 # Collect source files for the vslib code
 set(VSLIB_SOURCES
     background/src/background.cpp
@@ -46,7 +48,7 @@ target_include_directories(${LIB}
     # Other vslib include directories go here
 )
 
-target_link_libraries(vslib PRIVATE
+target_link_libraries(${LIB} PRIVATE
   fmt::fmt
   )
 

@@ -9,8 +9,8 @@
 
 namespace vslib::backgroundTask
 {
-    void executeJsonCommand(const utils::StaticJson&);
-    void processJsonCommands(const utils::StaticJson&);
+    void executeJsonCommand(const fgc4::utils::StaticJson&);
+    void processJsonCommands(const fgc4::utils::StaticJson&);
     void synchroniseReadBuffers();
-    bool validateJsonCommand(const utils::StaticJson&);
+    bool validateJsonCommand(const fgc4::utils::StaticJson&);
 }   // namespace backgroundTask

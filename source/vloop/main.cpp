@@ -26,6 +26,7 @@
 #endif
 
 using namespace vslib;
+using namespace fgc4;
 
 int main()
 {

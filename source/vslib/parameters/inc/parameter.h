@@ -48,7 +48,7 @@ namespace vslib::parameters
     };
 
     template<typename T>
-    using LimitType = typename LimitTypeHelper<T, utils::StdArray<T>>::type;
+    using LimitType = typename LimitTypeHelper<T, fgc4::utils::StdArray<T>>::type;
 
     // ************************************************************
 
@@ -66,7 +66,7 @@ namespace vslib::parameters
 
         //! Constructor overload for non-numerical parameters with initial default value and no defined limits.
         Parameter(components::Component& parent, std::string_view name, T default_value)
-            requires(!utils::NumericType<T>)
+            requires(!fgc4::utils::NumericType<T>)
             : IParameter(name),
               m_value{default_value, default_value, default_value},
               m_default_value{default_value}
@@ -80,7 +80,7 @@ namespace vslib::parameters
             LimitType<T> limit_min = std::numeric_limits<LimitType<T>>::lowest(),
             LimitType<T> limit_max = std::numeric_limits<LimitType<T>>::max()
         )
-            requires utils::NumericType<T>
+            requires fgc4::utils::NumericType<T>
             : IParameter(name),
               m_value{default_value, default_value, default_value},
               m_default_value{default_value},
@@ -107,7 +107,7 @@ namespace vslib::parameters
             LimitType<T> limit_min = std::numeric_limits<LimitType<T>>::lowest(),
             LimitType<T> limit_max = std::numeric_limits<LimitType<T>>::max()
         )
-            requires utils::StdArray<T>
+            requires fgc4::utils::StdArray<T>
             : IParameter(name),
               m_value{default_value, default_value, default_value},
               m_default_value{default_value},
@@ -149,7 +149,7 @@ namespace vslib::parameters
         //!
         //! @return Value stored at the provided index
         auto& operator[](uint64_t index) const
-            requires utils::StdArray<T>
+            requires fgc4::utils::StdArray<T>
         {
             return m_value[buffer_switch][index];
         }
@@ -198,7 +198,7 @@ namespace vslib::parameters
         //!
         //! @return Mutable access to the beginning of the stored std::array
         auto begin()
-            requires utils::StdArray<T>
+            requires fgc4::utils::StdArray<T>
         {
             return m_value[buffer_switch].begin();
         }
@@ -207,7 +207,7 @@ namespace vslib::parameters
         //!
         //! @return Non-mutable access to the beginning of the stored std::array
         auto const cbegin() const
-            requires utils::StdArray<T>
+            requires fgc4::utils::StdArray<T>
         {
             return m_value[buffer_switch].cbegin();
         }
@@ -216,7 +216,7 @@ namespace vslib::parameters
         //!
         //! @return Mutable access to the end of the stored std::array
         auto end()
-            requires utils::StdArray<T>
+            requires fgc4::utils::StdArray<T>
         {
             return m_value[buffer_switch].end();
         }
@@ -225,7 +225,7 @@ namespace vslib::parameters
         //!
         //! @return Non-mutable access to the end of the stored std::array
         auto const cend() const
-            requires utils::StdArray<T>
+            requires fgc4::utils::StdArray<T>
         {
             return m_value[buffer_switch].cend();
         }
@@ -241,7 +241,7 @@ namespace vslib::parameters
         serialize() const noexcept override
         {
             // all parameters have a name and a type that can be fetched the same way
-            nlohmann::json serialized_parameter = {{"name", m_name}, {"type", utils::getTypeLabel<T>()}};
+            nlohmann::json serialized_parameter = {{"name", m_name}, {"type", fgc4::utils::getTypeLabel<T>()}};
             // other type-dependent properties, e.g. size of the stored type needs to be handled individually
             serialized_parameter.merge_patch(serializeImpl());
             // minimum and maximum numerical limits can be also be serialized, if set
@@ -263,20 +263,20 @@ namespace vslib::parameters
         //!
         //! @param value New parameter values to be checked
         //! @return Error with error information if check not successful, nothing otherwise
-        std::optional<utils::Error> checkLimits(T value) const noexcept
-            requires std::equality_comparable_with<T, double> && utils::StdArray<T>
+        std::optional<fgc4::utils::Error> checkLimits(T value) const noexcept
+            requires std::equality_comparable_with<T, double> && fgc4::utils::StdArray<T>
         {
             // check if all of the provided values fit in the limits
             for (auto const& element : value)
             {
                 if (m_limit_min > element || element > m_limit_max)
                 {
-                    utils::Error error_msg(
+                    fgc4::utils::Error error_msg(
                         fmt::format(
                             "Value in the provided array: {} is outside the limits: {}, {}!\n", value, m_limit_min,
                             m_limit_max
                         ),
-                        utils::constants::error_json_command_value_outside_limits
+                        fgc4::utils::constants::error_json_command_value_outside_limits
                     );
                     std::cerr << fmt::format("{}", error_msg);
                     return error_msg;
@@ -289,14 +289,14 @@ namespace vslib::parameters
         //!
         //! @param value New parameter value to be checked
         //! @return Error with error information if check not successful, nothing otherwise
-        std::optional<utils::Error> checkLimits(T value) const noexcept
+        std::optional<fgc4::utils::Error> checkLimits(T value) const noexcept
             requires std::is_arithmetic_v<T>
         {
             if (value < m_limit_min || value > m_limit_max)
             {
-                utils::Error error_msg(
+                fgc4::utils::Error error_msg(
                     fmt::format("Provided value: {} is outside the limits: {}, {}!\n", value, m_limit_min, m_limit_max),
-                    utils::constants::error_json_command_value_outside_limits
+                    fgc4::utils::constants::error_json_command_value_outside_limits
                 );
                 return error_msg;
             }
@@ -307,7 +307,7 @@ namespace vslib::parameters
         //! enumerations, non-numerical arrays, etc.
         //!
         //! @return Empty optional return (success)
-        std::optional<utils::Error> checkLimits(T) const noexcept
+        std::optional<fgc4::utils::Error> checkLimits(T) const noexcept
         {
             return {};
         }
@@ -318,7 +318,7 @@ namespace vslib::parameters
         //!
         //! @param json_value JSON-serialized value to be set
         //! @return If not successful returns Error with error information, nothing otherwise
-        std::optional<utils::Error> setJsonValue(const utils::StaticJson& json_value) override
+        std::optional<fgc4::utils::Error> setJsonValue(const fgc4::utils::StaticJson& json_value) override
         {
             auto const& maybe_error = setJsonValueImpl(json_value);
             if (!m_initialized && !maybe_error.has_value())
@@ -366,7 +366,7 @@ namespace vslib::parameters
         //! @return JSON object with information about the stored enumeration
         [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
         serializeImpl() const noexcept
-            requires utils::Enumeration<T>
+            requires fgc4::utils::Enumeration<T>
         {
             return {
                 {"length", magic_enum::enum_count<T>()},
@@ -380,7 +380,7 @@ namespace vslib::parameters
         //! @return JSON object with information about the stored std::array
         [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
         serializeImpl() const noexcept
-            requires utils::StdArray<T>
+            requires fgc4::utils::StdArray<T>
         {
             return {
                 {"length", std::tuple_size_v<T>},
@@ -393,7 +393,7 @@ namespace vslib::parameters
         //! @return JSON object with informaton about the stored numerical values
         [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
         serializeImpl() const noexcept
-            requires utils::NumericType<T>
+            requires fgc4::utils::NumericType<T>
         {
             return {{"length", 1}, {"value", m_value[buffer_switch]}, {"default_value", m_default_value}};
         }
@@ -404,7 +404,7 @@ namespace vslib::parameters
         [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
         serializeImpl() const noexcept
         {
-            static_assert(utils::always_false<T>, "Type currently not serializable.");
+            static_assert(fgc4::utils::always_false<T>, "Type currently not serializable.");
             return {};
         }
 
@@ -412,7 +412,7 @@ namespace vslib::parameters
         //!
         //! @param json_value JSON object containing new parameter value to be set
         //! @return If not successful returns Error with error information, nothing otherwise
-        std::optional<utils::Error> setJsonValueImpl(const utils::StaticJson& json_value)
+        std::optional<fgc4::utils::Error> setJsonValueImpl(const fgc4::utils::StaticJson& json_value)
         {
             T command_value;
             try   // try to extract the value stored in json_value
@@ -421,9 +421,9 @@ namespace vslib::parameters
             }
             catch (nlohmann::json::exception& e)
             {
-                utils::Error error_msg(
+                fgc4::utils::Error error_msg(
                     e.what() + std::string(".\nCommand ignored.\n"),
-                    utils::constants::error_json_command_value_type_invalid
+                    fgc4::utils::constants::error_json_command_value_type_invalid
                 );
                 return error_msg;
             }
@@ -443,8 +443,8 @@ namespace vslib::parameters
         //!
         //! @param json_value JSON object containing new parameter value to be set
         //! @return If not successful returns Error with error information, nothing otherwise
-        std::optional<utils::Error> setJsonValueImpl(const utils::StaticJson& json_value)
-            requires utils::Enumeration<T>
+        std::optional<fgc4::utils::Error> setJsonValueImpl(const fgc4::utils::StaticJson& json_value)
+            requires fgc4::utils::Enumeration<T>
         {
             // json_value is then a string, try to cast to that:
             auto const enum_element = magic_enum::enum_cast<T>(std::string(json_value));
@@ -454,9 +454,9 @@ namespace vslib::parameters
             }
             else
             {
-                utils::Error error_msg(
+                fgc4::utils::Error error_msg(
                     "The provided enum value is not one of the allowed values.\nCommand ignored.\n",
-                    utils::constants::error_json_command_invalid_enum_value
+                    fgc4::utils::constants::error_json_command_invalid_enum_value
                 );
                 return error_msg;
             }

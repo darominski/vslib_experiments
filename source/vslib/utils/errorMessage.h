@@ -11,7 +11,7 @@
 
 #include "logString.h"
 
-namespace vslib::utils
+namespace fgc4::utils
 {
     struct Error
     {
@@ -32,7 +32,7 @@ namespace vslib::utils
 }
 
 template<>
-struct fmt::formatter<vslib::utils::Error>
+struct fmt::formatter<fgc4::utils::Error>
 {
     template<typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -40,7 +40,7 @@ struct fmt::formatter<vslib::utils::Error>
         return ctx.begin();
     }
     template<typename FormatContext>
-    auto format(const vslib::utils::Error& error, FormatContext& ctx)
+    auto format(const fgc4::utils::Error& error, FormatContext& ctx)
     {
         return fmt::format_to(ctx.out(), "Error [{}]: {}", error.error_code, error.error_str);
     }
