@@ -10,7 +10,7 @@
 
 #include "componentRegistry.h"
 #include "iparameter.h"
-#include "nlohmann/json.hpp"
+#include "json/json.hpp"
 #include "parameterRegistry.h"
 
 namespace vslib::components

@@ -8,7 +8,7 @@
 #include <string>
 
 #include "errorMessage.h"
-#include "nlohmann/json.hpp"
+#include "json/json.hpp"
 #include "staticJson.h"
 
 namespace vslib::parameters

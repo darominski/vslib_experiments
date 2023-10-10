@@ -11,7 +11,7 @@
 #include "constants.h"
 #include "errorMessage.h"
 #include "fmt/format.h"
-#include "nlohmann/json.hpp"
+#include "json/json.hpp"
 
 namespace vslib
 {
@@ -24,7 +24,7 @@ namespace vslib
     };
 
 #define SHARED_MEMORY_ADDRESS 0x802000000
-#define SHARED_MEMORY_SIZE    constants::json_memory_pool_size
+#define SHARED_MEMORY_SIZE    fgc4::utils::constants::json_memory_pool_size
 
 #define SHARED_MEMORY (*(struct SharedMemory* volatile)SHARED_MEMORY_ADDRESS)
 

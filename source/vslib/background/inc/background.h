@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "nlohmann/json.hpp"
+#include "json/json.hpp"
 #include "staticJson.h"
 
 namespace vslib::backgroundTask

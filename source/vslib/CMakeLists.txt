@@ -45,6 +45,7 @@ target_include_directories(${LIB}
     parameters/inc
     ../utils
     ../lib
+    ${LIBRARIES_HOME}/json-3.11.2
     # Other vslib include directories go here
 )
 

@@ -11,7 +11,7 @@
 #include <string>
 
 #include "iparameter.h"
-#include "nlohmann/json.hpp"
+#include "json/json.hpp"
 
 extern unsigned short buffer_switch;   // used to define which is the read buffer in use, values: 0 or 1
 

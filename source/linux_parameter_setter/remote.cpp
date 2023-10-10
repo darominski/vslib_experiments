@@ -4,12 +4,13 @@
 #include <unistd.h>
 
 #include "Util_Mmap.h"
-#include "nlohmann/json.hpp"
+#include "json/json.hpp"
 #include "sharedMemoryVslib.h"
 
 using Json = nlohmann::json;
 using namespace vslib;
 using namespace fgcd;
+using namespace fgc4;
 
 auto parseManifest(const Json& manifest)
 {

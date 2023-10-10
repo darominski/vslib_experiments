@@ -19,7 +19,7 @@ add_executable(utilsTests
   tests/warningMessageTest.cpp
 )
 
-target_include_directories(utilsTests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/../lib)
+target_include_directories(utilsTests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${LIBRARIES_HOME}/json-3.11.2)
 
 target_link_libraries(utilsTests PUBLIC ${GTEST_LIBRARIES} GTest::gtest pthread dl fmt::fmt)
 target_link_options(utilsTests PUBLIC  -Wl,-dynamic-linker,/my-lib/ld-2.33.so -Wl,-rpath,/my-lib)

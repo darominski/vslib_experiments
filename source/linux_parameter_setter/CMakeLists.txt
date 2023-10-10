@@ -34,11 +34,10 @@ add_executable(remote
 # Add external libraries
 include_directories(
     ${CMAKE_SOURCE_DIR}/../lib # all external libraries are stored in this directory
-    ${CMAKE_SOURCE_DIR}/../vslib # vslib library is stored in this directory
+    ${LIBRARIES_HOME}/json-3.11.2
     ${CMAKE_SOURCE_DIR}/../utils # all external libraries are stored in this directory
 )
 
-add_subdirectory(../vslib ${CMAKE_CURRENT_BINARY_DIR}/vslib)
 add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
 
 target_compile_features(remote PUBLIC cxx_std_20)
@@ -46,6 +45,5 @@ target_compile_features(remote PUBLIC cxx_std_20)
 target_link_options(remote PRIVATE -static -static-libgcc -static-libstdc++)
 
 target_link_libraries(remote PRIVATE
-  vslib
   fmt::fmt
   )

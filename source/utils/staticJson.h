@@ -5,7 +5,7 @@
 #pragma once
 
 #include "constants.h"
-#include "nlohmann/json.hpp"
+#include "json/json.hpp"
 #include "ringBufferAllocator.h"
 
 namespace fgc4::utils

@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <string>
 
-#include "nlohmann/json.hpp"
+#include "json/json.hpp"
 
 extern unsigned short buffer_switch;
 
