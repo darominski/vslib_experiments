@@ -62,3 +62,29 @@ set(INSTALL_LIB_DIR ${CMAKE_BINARY_DIR}/lib)
 install(TARGETS vslib
     ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
 )
+
+############################################################
+# Tests
+############################################################
+
+if(BUILD_TESTS)
+
+  if(NOT DEFINED CMAKE_CXX_COMPILER_NONE_LINUX_GNU)
+  message(FATAL_ERROR "CMAKE_CXX_COMPILER_NONE_LINUX_GNU must be set")
+  endif()
+
+  enable_testing()
+
+  include(ExternalProject)
+
+  ExternalProject_Add(utilsTests
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../utils
+    CMAKE_ARGS
+        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER_NONE_LINUX_GNU}
+        -DLIBRARIES_HOME=${LIBRARIES_HOME}
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo
+    INSTALL_COMMAND ""
+    BUILD_ALWAYS ON
+  )
+
+endif()
