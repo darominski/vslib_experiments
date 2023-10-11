@@ -10,12 +10,49 @@
 #include "fmt/format.h"
 #include "parameter.h"
 #include "parameterRegistry.h"
+#include "sharedMemoryVslib.h"
 
 using namespace nlohmann;
 using namespace fgc4::utils;
 
 namespace vslib::backgroundTask
 {
+    //! Creates and uploads the component and parameter manifest to the shared memory (and standard output)
+    void uploadManifest()
+    {
+        auto const& json_component_registry = components::ComponentRegistry::instance().createManifest();
+        std::cout << json_component_registry.dump() << "\n";
+        writeJsonToSharedMemory(json_component_registry, &(SHARED_MEMORY));
+    }
+
+    static bool received_new_data = false;
+
+    //! Checks if a new command has arrived in shared memory, processes it, and when
+    //! new command has come previously switches buffers and calls to synchronise them
+    void receiveJsonCommand()
+    {
+        if (SHARED_MEMORY.transmitted_counter > SHARED_MEMORY.acknowledged_counter)
+        {
+            auto json_object = StaticJsonFactory::getJsonObject();
+            json_object      = readJsonFromSharedMemory(&(SHARED_MEMORY));
+            // execute the command from the incoming stream, synchronises write and background buffers
+            processJsonCommands(json_object);
+
+            // acknowledge transaction
+            SHARED_MEMORY.acknowledged_counter++;
+            received_new_data = true;
+        }
+        else if (received_new_data)
+        {
+            // if no new data came in the previous iteration, assume it is safe to switch the read buffers now and
+            // synchronise them
+            buffer_switch ^= 1;   // flip the buffer pointer of all settable parameters
+            // synchronise new background to new active buffer
+            synchroniseReadBuffers();
+            received_new_data = false;   // buffers updated, no new data available
+        }
+    }
+
     //! Validates the provided json command.
     //!
     //! @return True if the command contains all expected fields, false otherwise.

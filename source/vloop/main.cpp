@@ -16,7 +16,6 @@
 #include "parameterRegistry.h"
 #include "pid.h"
 #include "rst.h"
-#include "sharedMemoryVslib.h"
 #include "staticJson.h"
 
 // This is one way to stop users from creating objects on the heap and explicit memory allocations
@@ -52,13 +51,9 @@ int main()
     // ************************************************************
 
     puts("Component manifest:");
-    auto const& json_component_registry = components::ComponentRegistry::instance().createManifest();
-    std::cout << json_component_registry.dump() << "\n";
-    writeJsonToSharedMemory(json_component_registry, &(SHARED_MEMORY));
-    // Create and initialize the shared data structure
+    backgroundTask::uploadManifest();
 
-    bool received_new_data = false;
-    int  counter           = 0;
+    int counter = 0;
     while (true)
     {
         utils::LogString counter_message = "Thread 1 counter: ";
@@ -74,31 +69,7 @@ int main()
         puts(std::to_string(pid3.i).c_str());
         puts(std::to_string(pid3.d).c_str());
 
-        // END TEST CODE
-        // TEST CODE, extremely basic execution of commands received from a remote thread, will be part of background
-        // task
-        if (SHARED_MEMORY.transmitted_counter > SHARED_MEMORY.acknowledged_counter)
-        {
-            auto json_object = utils::StaticJsonFactory::getJsonObject();
-            json_object      = readJsonFromSharedMemory(&(SHARED_MEMORY));
-            // execute the command from the incoming stream, synchronises write and background buffers
-            backgroundTask::processJsonCommands(json_object);
-
-            // acknowledge transaction
-            SHARED_MEMORY.acknowledged_counter++;
-            received_new_data = true;
-        }
-        else if (received_new_data)
-        {
-            // if no new data came in the previous iteration, assume it is safe to switch the read buffers now and
-            // synchronise them
-            buffer_switch ^= 1;   // flip the buffer pointer of all settable parameters
-            // synchronise new background to new active buffer
-            backgroundTask::synchroniseReadBuffers();
-            received_new_data = false;   // buffers updated, no new data available
-        }
-        // END TEST CODE
-        // Add some delay to simulate work
+        backgroundTask::receiveJsonCommand();
         usleep(1000000);   // 1 s
     }
 
