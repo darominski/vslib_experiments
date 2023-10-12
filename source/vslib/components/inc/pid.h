@@ -14,11 +14,11 @@ namespace vslib::components
     class PID : public Component
     {
       public:
-        PID(std::string_view name, Component* parent = nullptr, double _p = 0.0, double _i = 0.0, double _d = 0.0)
+        PID(std::string_view name, Component* parent = nullptr)
             : Component("PID", name, parent),
-              p(*this, "p", _p, -10.0, 10.0),
-              i(*this, "i", _i, -10.0, 10.0),
-              d(*this, "d", _d)   // default limits apply here
+              p(*this, "p", -10.0, 10.0),   // min limit: -10, max limit: 10
+              i(*this, "i", -10.0, 10.0),
+              d(*this, "d")   // default limits apply here
         {
         }
 

@@ -44,8 +44,8 @@ int main()
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
-    components::PID pid1("pid_1", components::independent_component, 1, 1, 1);
-    components::PID pid3("pid_3", components::independent_component, 3, 30, 3);
+    components::PID pid1("pid_1", components::independent_component);
+    components::PID pid3("pid_3", components::independent_component);
 
     // No parameter declarations beyond this point!
     // ************************************************************

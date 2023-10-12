@@ -23,11 +23,11 @@ namespace vslib::components
     class RST : public Component
     {
       public:
-        RST(std::string_view name, Component* parent, std::array<double, 4> _r, bool _flag)
+        RST(std::string_view name, Component* parent)
             : Component("RST", name, parent),
-              r(*this, "r", _r, -12.0, 10.0),
-              status(*this, "status", Status::uninitialized),
-              flag(*this, "flag", _flag)
+              r(*this, "r", -12.0, 10.0),
+              status(*this, "status"),
+              flag(*this, "flag")
         {
         }
 

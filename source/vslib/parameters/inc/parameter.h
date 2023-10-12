@@ -59,69 +59,25 @@ namespace vslib::parameters
         //! Constructor for parameters without an initial default value and no limits.
         //! It will need to be initialized externally via JSON command.
         Parameter(components::Component& parent, std::string_view name) noexcept
+            requires(!fgc4::utils::NumericType<T> && !fgc4::utils::StdArray<T>)
             : IParameter(name)
         {
             parent.registerParameter(name, *this);
         }
 
-        //! Constructor overload for non-numerical parameters with initial default value and no defined limits.
-        Parameter(components::Component& parent, std::string_view name, T default_value)
-            requires(!fgc4::utils::NumericType<T>)
-            : IParameter(name),
-              m_value{default_value, default_value, default_value},
-              m_default_value{default_value}
-        {
-            parent.registerParameter(name, *this);
-        };
-
-        //! Constructor overload for parameters with initial default value and optionally numeric-type limits.
+        //! Constructor overload for parameters with optional numeric-type limits.
         Parameter(
-            components::Component& parent, std::string_view name, T default_value,
+            components::Component& parent, std::string_view name,
             LimitType<T> limit_min = std::numeric_limits<LimitType<T>>::lowest(),
             LimitType<T> limit_max = std::numeric_limits<LimitType<T>>::max()
         )
-            requires fgc4::utils::NumericType<T>
+            requires(fgc4::utils::NumericType<T> || fgc4::utils::StdArray<T>)
             : IParameter(name),
-              m_value{default_value, default_value, default_value},
-              m_default_value{default_value},
               m_limit_min{limit_min},
               m_limit_max{limit_max},
               m_limit_min_defined{limit_min != std::numeric_limits<LimitType<T>>::lowest()},
               m_limit_max_defined(limit_max != std::numeric_limits<LimitType<T>>::max())
         {
-            auto const maybe_error = checkLimits(m_default_value);
-            if (maybe_error.has_value())
-            {
-                // possible to inform the user that the program is ill-formed by specifying #error preprocessor
-                // directive here, e.g.: #error
-                std::cerr << fmt::format("{}", maybe_error.value());
-            }
-            // TODO: when FSM implemented, if error is returned, state should go to "CONFIGURATION_FAILURE"
-            parent.registerParameter(name, *this);
-        };
-
-        //! Constructor overload for parameters with initial default value and optionally numeric-type limits
-        //! if the type T is as std::array
-        Parameter(
-            components::Component& parent, std::string_view name, T default_value,
-            LimitType<T> limit_min = std::numeric_limits<LimitType<T>>::lowest(),
-            LimitType<T> limit_max = std::numeric_limits<LimitType<T>>::max()
-        )
-            requires fgc4::utils::StdArray<T>
-            : IParameter(name),
-              m_value{default_value, default_value, default_value},
-              m_default_value{default_value},
-              m_limit_min{limit_min},
-              m_limit_max{limit_max},
-              m_limit_min_defined{limit_min != std::numeric_limits<LimitType<T>>::lowest()},
-              m_limit_max_defined(limit_max != std::numeric_limits<LimitType<T>>::max())
-        {
-            auto const maybe_error = checkLimits(m_default_value);
-            if (maybe_error.has_value())
-            {
-                std::cerr << fmt::format("{}", maybe_error.value());
-            }
-            // TODO: when FSM implemented, if error is returned, state should go to "CONFIGURATION_FAILURE"
             parent.registerParameter(name, *this);
         };
 
@@ -354,12 +310,14 @@ namespace vslib::parameters
 
       private:
         std::array<T, number_buffers> m_value;
-        T                             m_default_value;
         LimitType<T>                  m_limit_min;
         LimitType<T>                  m_limit_max;
         bool                          m_limit_min_defined{false};
         bool                          m_limit_max_defined{false};
         bool                          m_initialized{false};
+
+        // ************************************************************
+        // Methods related to serialization
 
         //! Serializes enumerations by providing number of objects of the type ('length') and enumeration values
         //!
@@ -371,8 +329,7 @@ namespace vslib::parameters
             return {
                 {"length", magic_enum::enum_count<T>()},
                 {"fields", magic_enum::enum_names<T>()},
-                {"value", magic_enum::enum_name(m_value[buffer_switch])},
-                {"default_value", magic_enum::enum_name(m_default_value)}};
+                {"value", magic_enum::enum_name(m_value[buffer_switch])}};
         }
 
         //! Serializes std::array type by exposing the length of the array
@@ -382,10 +339,7 @@ namespace vslib::parameters
         serializeImpl() const noexcept
             requires fgc4::utils::StdArray<T>
         {
-            return {
-                {"length", std::tuple_size_v<T>},
-                {"value", m_value[buffer_switch]},
-                {"default_value", m_default_value}};
+            return {{"length", std::tuple_size_v<T>}, {"value", m_value[buffer_switch]}};
         }
 
         //! Serializes numeric types: integers and floating point numbers
@@ -395,7 +349,7 @@ namespace vslib::parameters
         serializeImpl() const noexcept
             requires fgc4::utils::NumericType<T>
         {
-            return {{"length", 1}, {"value", m_value[buffer_switch]}, {"default_value", m_default_value}};
+            return {{"length", 1}, {"value", m_value[buffer_switch]}};
         }
 
         //! Default overload for catching unsupported types. Blocks compilation for those types
