@@ -130,7 +130,7 @@ namespace vslib::components
             m_children.emplace_back(child);
         }
 
-      private:
+      protected:
         std::string const                                                                    m_component_type;
         std::string                                                                          m_parent_name{""};
         std::string const                                                                    m_name;
