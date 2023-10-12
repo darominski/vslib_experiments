@@ -1,5 +1,5 @@
 //! @file
-//! @brief File containing non-templated base class for Parameter.
+//! @brief File containing abstract interface for Parameter.
 //! @author Dominik Arominski
 
 #pragma once
@@ -7,9 +7,9 @@
 #include <optional>
 #include <string>
 
-#include "errorMessage.h"
 #include "json/json.hpp"
 #include "staticJson.h"
+#include "warningMessage.h"
 
 namespace vslib::parameters
 {
@@ -27,10 +27,10 @@ namespace vslib::parameters
         {
             return m_name;
         }
-        virtual std::optional<fgc4::utils::Error> setJsonValue(const fgc4::utils::StaticJson&) = 0;
-        virtual nlohmann::json                    serialize() const noexcept                   = 0;
-        virtual void                              synchroniseWriteBuffer()                     = 0;
-        virtual void                              synchroniseReadBuffers()                     = 0;
+        virtual std::optional<fgc4::utils::Warning> setJsonValue(const fgc4::utils::StaticJson&) = 0;
+        virtual nlohmann::json                      serialize() const noexcept                   = 0;
+        virtual void                                synchroniseWriteBuffer()                     = 0;
+        virtual void                                synchroniseReadBuffers()                     = 0;
 
       protected:
         const std::string m_name;   // Unique ID indicating component type, its name and the variable name

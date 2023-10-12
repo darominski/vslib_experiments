@@ -15,13 +15,13 @@
 
 #include "component.h"
 #include "constants.h"
-#include "errorMessage.h"
 #include "iparameter.h"
 #include "json/json.hpp"
 #include "magic_enum/magic_enum.hpp"
 #include "parameterRegistry.h"
 #include "staticJson.h"
 #include "typeLabel.h"
+#include "warningMessage.h"
 
 inline unsigned short buffer_switch = 0;   // used to define which is the read buffer in use, values: 0 or 1
 
@@ -217,15 +217,15 @@ namespace vslib::parameters
         //! Sets the provided JSON-serialized value to the parameter-held value.
         //!
         //! @param json_value JSON-serialized value to be set
-        //! @return If not successful returns Error with error information, nothing otherwise
-        std::optional<fgc4::utils::Error> setJsonValue(const fgc4::utils::StaticJson& json_value) override
+        //! @return If not successful, returns Warning with relevant information, nothing otherwise
+        std::optional<fgc4::utils::Warning> setJsonValue(const fgc4::utils::StaticJson& json_value) override
         {
-            auto const& maybe_error = setJsonValueImpl(json_value);
-            if (!m_initialized && !maybe_error.has_value())
+            auto const& maybe_warning = setJsonValueImpl(json_value);
+            if (!m_initialized && !maybe_warning.has_value())
             {
                 m_initialized = true;
             }
-            return maybe_error;
+            return maybe_warning;
         }
 
         // ************************************************************
@@ -267,8 +267,8 @@ namespace vslib::parameters
         //! Parameter.
         //!
         //! @param value New parameter values to be checked
-        //! @return Error with error information if check not successful, nothing otherwise
-        std::optional<fgc4::utils::Error> checkLimits(T value) const noexcept
+        //! @return Warning with relevant information if check not successful, nothing otherwise
+        std::optional<fgc4::utils::Warning> checkLimits(T value) const noexcept
             requires std::equality_comparable_with<T, double> && fgc4::utils::StdArray<T>
         {
             // check if all of the provided values fit in the limits
@@ -276,15 +276,12 @@ namespace vslib::parameters
             {
                 if (m_limit_min > element || element > m_limit_max)
                 {
-                    fgc4::utils::Error error_msg(
-                        fmt::format(
-                            "Value in the provided array: {} is outside the limits: {}, {}!\n", value, m_limit_min,
-                            m_limit_max
-                        ),
-                        fgc4::utils::constants::error_json_command_value_outside_limits
-                    );
-                    std::cerr << fmt::format("{}", error_msg);
-                    return error_msg;
+                    fgc4::utils::Warning message(fmt::format(
+                        "Value in the provided array: {} is outside the limits: {}, {}!\n", value, m_limit_min,
+                        m_limit_max
+                    ));
+                    std::cerr << fmt::format("{}", message);
+                    return message;
                 }
             }
             return {};
@@ -293,17 +290,16 @@ namespace vslib::parameters
         //! Checks limits of all arithmetic types, if they are defined
         //!
         //! @param value New parameter value to be checked
-        //! @return Error with error information if check not successful, nothing otherwise
-        std::optional<fgc4::utils::Error> checkLimits(T value) const noexcept
+        //! @return Warning with relevant information if check not successful, nothing otherwise
+        std::optional<fgc4::utils::Warning> checkLimits(T value) const noexcept
             requires std::is_arithmetic_v<T>
         {
             if (value < m_limit_min || value > m_limit_max)
             {
-                fgc4::utils::Error error_msg(
-                    fmt::format("Provided value: {} is outside the limits: {}, {}!\n", value, m_limit_min, m_limit_max),
-                    fgc4::utils::constants::error_json_command_value_outside_limits
+                fgc4::utils::Warning message(
+                    fmt::format("Provided value: {} is outside the limits: {}, {}!\n", value, m_limit_min, m_limit_max)
                 );
-                return error_msg;
+                return message;
             }
             return {};
         }
@@ -312,11 +308,10 @@ namespace vslib::parameters
         //! enumerations, non-numerical arrays, etc.
         //!
         //! @return Empty optional return (success)
-        std::optional<fgc4::utils::Error> checkLimits(T) const noexcept
+        std::optional<fgc4::utils::Warning> checkLimits(T) const noexcept
         {
             return {};
         }
-
 
         // ************************************************************
         // Methods related to serialization
@@ -370,8 +365,8 @@ namespace vslib::parameters
         //! Sets the provided JSON value to the write buffer.
         //!
         //! @param json_value JSON object containing new parameter value to be set
-        //! @return If not successful returns Error with error information, nothing otherwise
-        std::optional<fgc4::utils::Error> setJsonValueImpl(const fgc4::utils::StaticJson& json_value)
+        //! @return If not successful returns Warning with relevant information, nothing otherwise
+        std::optional<fgc4::utils::Warning> setJsonValueImpl(const fgc4::utils::StaticJson& json_value)
         {
             T command_value;
             try   // try to extract the value stored in json_value
@@ -380,11 +375,8 @@ namespace vslib::parameters
             }
             catch (nlohmann::json::exception& e)
             {
-                fgc4::utils::Error error_msg(
-                    e.what() + std::string(".\nCommand ignored.\n"),
-                    fgc4::utils::constants::error_json_command_value_type_invalid
-                );
-                return error_msg;
+                fgc4::utils::Warning message(e.what() + std::string(".\nCommand ignored.\n"));
+                return message;
             }
             auto const check_status = checkLimits(command_value);
             if (check_status.has_value())
@@ -401,8 +393,8 @@ namespace vslib::parameters
         //! Sets the provided JSON value with enumeration element to the write buffer.
         //!
         //! @param json_value JSON object containing new parameter value to be set
-        //! @return If not successful returns Error with error information, nothing otherwise
-        std::optional<fgc4::utils::Error> setJsonValueImpl(const fgc4::utils::StaticJson& json_value)
+        //! @return If not successful returns Warning with relevant information, nothing otherwise
+        std::optional<fgc4::utils::Warning> setJsonValueImpl(const fgc4::utils::StaticJson& json_value)
             requires fgc4::utils::Enumeration<T>
         {
             // json_value is then a string, try to cast to that:
@@ -413,11 +405,10 @@ namespace vslib::parameters
             }
             else
             {
-                fgc4::utils::Error error_msg(
-                    "The provided enum value is not one of the allowed values.\nCommand ignored.\n",
-                    fgc4::utils::constants::error_json_command_invalid_enum_value
+                fgc4::utils::Warning message(
+                    "The provided enum value is not one of the allowed values.\nCommand ignored.\n"
                 );
-                return error_msg;
+                return message;
             }
             return {};
         }
