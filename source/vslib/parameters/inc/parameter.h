@@ -214,6 +214,55 @@ namespace vslib::parameters
 
         // ************************************************************
 
+        //! Sets the provided JSON-serialized value to the parameter-held value.
+        //!
+        //! @param json_value JSON-serialized value to be set
+        //! @return If not successful returns Error with error information, nothing otherwise
+        std::optional<fgc4::utils::Error> setJsonValue(const fgc4::utils::StaticJson& json_value) override
+        {
+            auto const& maybe_error = setJsonValueImpl(json_value);
+            if (!m_initialized && !maybe_error.has_value())
+            {
+                m_initialized = true;
+            }
+            return maybe_error;
+        }
+
+        // ************************************************************
+
+        //! Copies all contents of a write buffer to the background buffer, which is not currently used.
+        void synchroniseWriteBuffer() override
+        {
+            auto*      background_buffer = &m_value[buffer_switch ^ 1];
+            auto*      write_buffer      = &m_value[write_buffer_id];
+            auto const memory_size       = sizeof(T);
+            // always copy from the write buffer to the background buffer
+            memcpy(reinterpret_cast<void*>(background_buffer), reinterpret_cast<void*>(write_buffer), memory_size);
+        }
+
+        // ************************************************************
+
+        //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
+        void synchroniseReadBuffers() override
+        {
+            auto*      active_buffer     = &m_value[buffer_switch];
+            auto*      background_buffer = &m_value[buffer_switch ^ 1];
+            auto const memory_size       = sizeof(T);
+            // always copy from active buffer to the background buffer
+            memcpy(reinterpret_cast<void*>(background_buffer), reinterpret_cast<void*>(active_buffer), memory_size);
+        }
+
+      private:
+        std::array<T, number_buffers> m_value;
+        LimitType<T>                  m_limit_min;
+        LimitType<T>                  m_limit_max;
+        bool                          m_limit_min_defined{false};
+        bool                          m_limit_max_defined{false};
+        bool                          m_initialized{false};
+
+        // ************************************************************
+        // Methods related to checking the numerical limits of the parameter during parameter setting
+
         //! Checks whether the provided array values fall within the numerical limits specified for this
         //! Parameter.
         //!
@@ -268,53 +317,6 @@ namespace vslib::parameters
             return {};
         }
 
-        // ************************************************************
-
-        //! Sets the provided JSON-serialized value to the parameter-held value.
-        //!
-        //! @param json_value JSON-serialized value to be set
-        //! @return If not successful returns Error with error information, nothing otherwise
-        std::optional<fgc4::utils::Error> setJsonValue(const fgc4::utils::StaticJson& json_value) override
-        {
-            auto const& maybe_error = setJsonValueImpl(json_value);
-            if (!m_initialized && !maybe_error.has_value())
-            {
-                m_initialized = true;
-            }
-            return maybe_error;
-        }
-
-        // ************************************************************
-
-        //! Copies all contents of a write buffer to the background buffer, which is not currently used.
-        void synchroniseWriteBuffer() override
-        {
-            auto*      background_buffer = &m_value[buffer_switch ^ 1];
-            auto*      write_buffer      = &m_value[write_buffer_id];
-            auto const memory_size       = sizeof(T);
-            // always copy from the write buffer to the background buffer
-            memcpy(reinterpret_cast<void*>(background_buffer), reinterpret_cast<void*>(write_buffer), memory_size);
-        }
-
-        // ************************************************************
-
-        //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
-        void synchroniseReadBuffers() override
-        {
-            auto*      active_buffer     = &m_value[buffer_switch];
-            auto*      background_buffer = &m_value[buffer_switch ^ 1];
-            auto const memory_size       = sizeof(T);
-            // always copy from active buffer to the background buffer
-            memcpy(reinterpret_cast<void*>(background_buffer), reinterpret_cast<void*>(active_buffer), memory_size);
-        }
-
-      private:
-        std::array<T, number_buffers> m_value;
-        LimitType<T>                  m_limit_min;
-        LimitType<T>                  m_limit_max;
-        bool                          m_limit_min_defined{false};
-        bool                          m_limit_max_defined{false};
-        bool                          m_initialized{false};
 
         // ************************************************************
         // Methods related to serialization
@@ -361,6 +363,9 @@ namespace vslib::parameters
             static_assert(fgc4::utils::always_false<T>, "Type currently not serializable.");
             return {};
         }
+
+        // ************************************************************
+        // Methods related to setting new parameter value based on the JSON input
 
         //! Sets the provided JSON value to the write buffer.
         //!
