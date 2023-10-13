@@ -53,6 +53,6 @@ namespace vslib::components
 
       private:
         ComponentRegistry() = default;
-        std::map<std::string, std::reference_wrapper<Component>> m_components;
+        std::map<std::string, std::reference_wrapper<Component>> m_components;   // holds all independent components
     };
 }   // namespace components

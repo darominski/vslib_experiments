@@ -61,7 +61,7 @@ namespace vslib::components
         //! Registers this component in the ComponentRegistry
         void registerComponent() noexcept
         {
-            ComponentRegistry::instance().addToRegistry(m_parent_name + m_name, (*this));
+            ComponentRegistry::instance().addToRegistry(this->getFullName(), (*this));
         }
 
         //! Serializes this component to JSON, including all children components and parameters
