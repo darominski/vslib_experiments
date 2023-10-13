@@ -323,10 +323,17 @@ namespace vslib::parameters
         serializeImpl() const noexcept
             requires fgc4::utils::Enumeration<T>
         {
-            return {
-                {"length", magic_enum::enum_count<T>()},
-                {"fields", magic_enum::enum_names<T>()},
-                {"value", magic_enum::enum_name(m_value[buffer_switch])}};
+            nlohmann::json serialized_parameter
+                = {{"length", magic_enum::enum_count<T>()}, {"fields", magic_enum::enum_names<T>()}};
+            if (m_initialized)
+            {
+                serialized_parameter["value"] = magic_enum::enum_name(m_value[buffer_switch]);
+            }
+            else
+            {
+                serialized_parameter["value"] = nlohmann::json::object();
+            }
+            return serialized_parameter;
         }
 
         //! Serializes std::array type by exposing the length of the array
@@ -336,7 +343,16 @@ namespace vslib::parameters
         serializeImpl() const noexcept
             requires fgc4::utils::StdArray<T>
         {
-            return {{"length", std::tuple_size_v<T>}, {"value", m_value[buffer_switch]}};
+            nlohmann::json serialized_parameter = {{"length", std::tuple_size_v<T>}};
+            if (m_initialized)
+            {
+                serialized_parameter["value"] = m_value[buffer_switch];
+            }
+            else
+            {
+                serialized_parameter["value"] = nlohmann::json::array();
+            }
+            return serialized_parameter;
         }
 
         //! Serializes numeric types: integers and floating point numbers
@@ -346,7 +362,16 @@ namespace vslib::parameters
         serializeImpl() const noexcept
             requires fgc4::utils::NumericType<T>
         {
-            return {{"length", 1}, {"value", m_value[buffer_switch]}};
+            nlohmann::json serialized_parameter = {{"length", 1}};
+            if (m_initialized)
+            {
+                serialized_parameter["value"] = m_value[buffer_switch];
+            }
+            else
+            {
+                serialized_parameter["value"] = nlohmann::json::object();
+            }
+            return serialized_parameter;
         }
 
         //! Default overload for catching unsupported types. Blocks compilation for those types

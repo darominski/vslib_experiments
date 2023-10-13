@@ -9,8 +9,10 @@ include(GoogleTest)
 
 add_executable(componentTests
   tests/componentTests.cpp
+  tests/componentTest.cpp
   tests/componentRegistryTest.cpp
   src/componentRegistry.cpp
+  ../parameters/src/parameterRegistry.cpp
 )
 
 # TODO: the messy include structure below could be avoided if the entire vslib was compiled
@@ -22,6 +24,7 @@ target_include_directories(componentTests PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../../utils
     ${LIBRARIES_HOME}/json-3.11.2
+    ${LIBRARIES_HOME}/magic_enum-0.9.3
 )
 
 target_link_libraries(componentTests PUBLIC ${GTEST_LIBRARIES} GTest::gtest pthread dl fmt::fmt)
