@@ -44,8 +44,8 @@ target_include_directories(${LIB}
     components/inc
     parameters/inc
     ../utils
-    ../lib
     ${LIBRARIES_HOME}/json-3.11.2
+    ${LIBRARIES_HOME}/magic_enum-0.9.3
     # Other vslib include directories go here
 )
 

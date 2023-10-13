@@ -17,7 +17,7 @@
 #include "constants.h"
 #include "iparameter.h"
 #include "json/json.hpp"
-#include "magic_enum/magic_enum.hpp"
+#include "magic_enum.hpp"
 #include "parameterRegistry.h"
 #include "staticJson.h"
 #include "typeLabel.h"
