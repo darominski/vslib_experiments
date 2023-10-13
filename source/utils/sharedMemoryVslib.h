@@ -77,11 +77,8 @@ namespace vslib
         catch (const std::exception& e)
         {
             // Handle parsing errors
-            fgc4::utils::Error error_msg(
-                std::string("Error parsing JSON: ") + e.what() + std::string("\n"),
-                fgc4::utils::constants::error_json_command_invalid
-            );
-            std::cerr << fmt::format("{}", error_msg);
+            fgc4::utils::Warning message(std::string("Error parsing JSON: ") + e.what() + std::string("\n"));
+            std::cerr << fmt::format("{}", message);
         }
         return json_object;
     }

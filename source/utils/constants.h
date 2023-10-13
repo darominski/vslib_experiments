@@ -20,14 +20,9 @@ namespace fgc4::utils::constants
     // Constant error code numbers
 
     // arbitrary numbers for testing purposes
-    constexpr uint32_t error_json_command_invalid              = 1000;
-    constexpr uint32_t error_json_missing_name                 = 1001;
-    constexpr uint32_t error_json_missing_value                = 1002;
-    constexpr uint32_t error_json_parameter_id_invalid         = 1003;
-    constexpr uint32_t error_json_command_value_outside_limits = 1004;
-    constexpr uint32_t error_json_command_value_type_invalid   = 1005;
-    constexpr uint32_t error_json_command_invalid_enum_value   = 1006;
-    constexpr uint32_t error_allocation_buffer_overflow        = 2000;
+    constexpr uint32_t error_allocation_buffer_overflow = 2000;
+
+    constexpr uint32_t error_name_already_used = 1000;
 
     // ************************************************************
     // Names of supported types for use in FGC Configurator
