@@ -33,7 +33,7 @@ namespace vslib::components
             : m_component_type(component_type),
               m_name(name)
         {
-            if (parent)
+            if (parent != nullptr)
             {
                 m_parent_name = std::string(parent->getFullName());
                 parent->addChild((*this));
