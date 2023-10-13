@@ -25,6 +25,7 @@ namespace vslib::components
         Component(Component&&)                  = delete;   // moving objects is forbidden
         Component& operator=(const Component&)  = delete;   // copy-assignment is forbidden
         Component& operator=(const Component&&) = delete;   // move-assignment is forbidden
+        virtual ~Component()                    = default;
 
         // ************************************************************
 
@@ -42,8 +43,6 @@ namespace vslib::components
                 registerComponent();
             }
         }
-
-        virtual ~Component() = default;
 
         //! Registers the parameter belonging to this component in the parameter registry, simultaneously adding it to
         //! the m_parameters vector.
