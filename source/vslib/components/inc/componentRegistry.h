@@ -23,7 +23,11 @@ namespace vslib::components
         ComponentRegistry(ComponentRegistry&& other) = delete;
         void operator=(const ComponentRegistry&)     = delete;
         void operator=(const ComponentRegistry&&)    = delete;
-        ~ComponentRegistry() = default;   // will never be called, lifetime equal to that of the program
+        ~ComponentRegistry()   // is not expected to be called, lifetime equal to that of the program
+        {
+            m_components.clear();
+        }
+
 
         //! Provides an instance of the singleton registry
         //!
