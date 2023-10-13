@@ -61,7 +61,8 @@ namespace vslib::components
         //! of the entire hierarchy.
         //!
         //! @return Returns a fully-serialized component as a JSON object
-        nlohmann::json serialize() const noexcept
+        [[nodiscard("Serialized component information should not be discarded")]] nlohmann::json
+        serialize() const noexcept
         {
             nlohmann::json serialized_parameters = nlohmann::json::array();
             std::for_each(
