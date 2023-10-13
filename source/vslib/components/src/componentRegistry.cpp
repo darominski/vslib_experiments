@@ -25,7 +25,7 @@ namespace vslib::components
     //! @returns JSON object with all initialized components and their settable parameters.
     [[nodiscard("Manifest should not be discarded.")]] json ComponentRegistry::createManifest() const
     {
-        json manifest;
+        json manifest = json::array();
         std::for_each(
             std::cbegin(this->m_components), std::cend(this->m_components),
             [&manifest](const auto& register_entry)
