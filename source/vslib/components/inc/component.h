@@ -58,12 +58,6 @@ namespace vslib::components
             m_parameters.emplace_back(parameter_name, parameter);
         }
 
-        //! Registers this component in the ComponentRegistry
-        void registerComponent() noexcept
-        {
-            ComponentRegistry::instance().addToRegistry(this->getFullName(), (*this));
-        }
-
         //! Serializes this component to JSON, including all children components and parameters
         //! of the entire hierarchy.
         //!
@@ -136,6 +130,12 @@ namespace vslib::components
         std::string const                                                                    m_name;
         std::vector<std::tuple<std::string, std::reference_wrapper<parameters::IParameter>>> m_parameters;
         std::vector<std::reference_wrapper<Component>>                                       m_children;
+
+        //! Registers this component in the ComponentRegistry
+        void registerComponent() noexcept
+        {
+            ComponentRegistry::instance().addToRegistry(this->getFullName(), (*this));
+        }
     };
 
     // ************************************************************
