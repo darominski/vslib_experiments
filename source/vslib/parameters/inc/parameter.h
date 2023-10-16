@@ -90,8 +90,6 @@ namespace vslib::parameters
         // move-assign is forbidden
         void operator=(const Parameter&&) = delete;
 
-        ~Parameter() override = default;
-
         // ************************************************************
         // Operator overloads to seamless interactions with held values
 
