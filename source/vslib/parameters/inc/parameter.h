@@ -353,6 +353,25 @@ namespace vslib::parameters
             return serialized_parameter;
         }
 
+        //! Serializes std::string type by exposing the length of the string
+        //!
+        //! @return JSON object with information about the stored std::array
+        [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
+        serializeImpl() const noexcept
+            requires fgc4::utils::is_string<T>::value
+        {
+            nlohmann::json serialized_parameter = {{"length", m_value[buffer_switch].size()}};
+            if (m_initialized)
+            {
+                serialized_parameter["value"] = m_value[buffer_switch];
+            }
+            else
+            {
+                serialized_parameter["value"] = nlohmann::json::object();
+            }
+            return serialized_parameter;
+        }
+
         //! Serializes numeric types: integers and floating point numbers
         //!
         //! @return JSON object with informaton about the stored numerical values
