@@ -6,6 +6,14 @@ set(CMAKE_SYSTEM_NAME Generic)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
+if (NOT DEFINED LIBRARIES_HOME)
+  message(FATAL_ERROR "LIBRARIES_HOME path needs to be defined.")
+endif()
+
+if (NOT DEFINED CMAKE_CXX_COMPILER)
+  message(FATAL_ERROR "CMAKE_CXX_COMPILER for bare-metal target needs to be defined.")
+endif()
+
 add_compile_options(-Wall -O0 -mtune=cortex-a53 -ffunction-sections -fdata-sections
     -fexceptions
     -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align

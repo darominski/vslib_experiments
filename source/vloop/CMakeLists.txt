@@ -8,6 +8,10 @@ if (CMAKE_SIZE STREQUAL "")
   message(FATAL_ERROR "You must provide CMAKE_SIZE option")
 endif()
 
+if (LIBRARIES_HOME STREQUAL "")
+  message(FATAL_ERROR "LIBRARIES_HOME path needs to be defined.")
+endif()
+
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 add_compile_options(-Wall -O0 -mtune=cortex-a53 -ffunction-sections -fdata-sections
