@@ -25,8 +25,10 @@ namespace vslib::parameters
         ParameterRegistry(ParameterRegistry&& other) = delete;
         void operator=(const ParameterRegistry&)     = delete;
         void operator=(const ParameterRegistry&&)    = delete;
-        ~ParameterRegistry() = default;   // will never be called, lifetime equal to that of the program
-
+        ~ParameterRegistry()   // is not expected to be called, lifetime equal to that of the program
+        {
+            m_parameters.clear();
+        }
         //! Provides an instance of the singleton registry
         //!
         //! @return Singular instance of the parameter registry
