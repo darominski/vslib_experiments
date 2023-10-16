@@ -11,6 +11,7 @@ add_executable(componentTests
   tests/componentTests.cpp
   tests/componentTest.cpp
   tests/componentRegistryTest.cpp
+  tests/componentArrayTest.cpp
   src/componentRegistry.cpp
   ../parameters/src/parameterRegistry.cpp
 )
