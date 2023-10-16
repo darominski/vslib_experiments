@@ -49,13 +49,13 @@ namespace fgc4::utils
                                      } -> std::same_as<std::string>;
                              };
 
-    template <typename T, typename = void>
+    template<typename T, typename = void>
     struct is_string
     {
         static const bool value = false;
     };
 
-    template <class T, class Traits, class Alloc>
+    template<class T, class Traits, class Alloc>
     struct is_string<std::basic_string<T, Traits, Alloc>, void>
     {
         static const bool value = true;
