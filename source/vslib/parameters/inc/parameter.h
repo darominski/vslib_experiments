@@ -56,10 +56,9 @@ namespace vslib::parameters
     class Parameter : public IParameter
     {
       public:
-        //! Constructor for parameters without an initial default value and no limits.
-        //! It will need to be initialized externally via JSON command.
+        //! Constructor for parameters of non-numeric types and thus with no limits.
         Parameter(components::Component& parent, std::string_view name) noexcept
-            requires(!fgc4::utils::NumericType<T> && !fgc4::utils::StdArray<T>)
+            requires(fgc4::utils::Enumeration<T> || !fgc4::utils::NumericType<T> && !(fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>))
             : IParameter(name)
         {
             parent.registerParameter(name, *this);
@@ -71,7 +70,7 @@ namespace vslib::parameters
             LimitType<T> limit_min = std::numeric_limits<LimitType<T>>::lowest(),
             LimitType<T> limit_max = std::numeric_limits<LimitType<T>>::max()
         )
-            requires(fgc4::utils::NumericType<T> || fgc4::utils::StdArray<T>)
+            requires(fgc4::utils::NumericType<T> || (fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>))
             : IParameter(name),
               m_limit_min{limit_min},
               m_limit_max{limit_max},
@@ -267,7 +266,7 @@ namespace vslib::parameters
         //! @param value New parameter values to be checked
         //! @return Warning with relevant information if check not successful, nothing otherwise
         std::optional<fgc4::utils::Warning> checkLimits(T value) const noexcept
-            requires std::equality_comparable_with<T, double> && fgc4::utils::StdArray<T>
+            requires (fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>)
         {
             // check if all of the provided values fit in the limits
             for (auto const& element : value)
