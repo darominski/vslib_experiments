@@ -235,11 +235,7 @@ namespace vslib::parameters
         //! Copies all contents of a write buffer to the background buffer, which is not currently used.
         void synchroniseWriteBuffer() override
         {
-            auto*      background_buffer = &m_value[buffer_switch ^ 1];
-            auto*      write_buffer      = &m_value[write_buffer_id];
-            auto const memory_size       = sizeof(T);
-            // always copy from the write buffer to the background buffer
-            memcpy(reinterpret_cast<void*>(background_buffer), reinterpret_cast<void*>(write_buffer), memory_size);
+            m_value[buffer_switch ^ 1] = m_value[write_buffer_id];
         }
 
         // ************************************************************
@@ -247,11 +243,7 @@ namespace vslib::parameters
         //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
         void synchroniseReadBuffers() override
         {
-            auto*      active_buffer     = &m_value[buffer_switch];
-            auto*      background_buffer = &m_value[buffer_switch ^ 1];
-            auto const memory_size       = sizeof(T);
-            // always copy from active buffer to the background buffer
-            memcpy(reinterpret_cast<void*>(background_buffer), reinterpret_cast<void*>(active_buffer), memory_size);
+            m_value[buffer_switch ^ 1] = m_value[buffer_switch];
         }
 
       private:
