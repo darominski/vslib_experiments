@@ -58,7 +58,11 @@ namespace vslib::parameters
       public:
         //! Constructor for parameters of non-numeric types and thus with no limits.
         Parameter(components::Component& parent, std::string_view name) noexcept
-            requires(fgc4::utils::Enumeration<T> || !fgc4::utils::NumericType<T> && !(fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>))
+            requires(
+                fgc4::utils::Enumeration<T>
+                || !fgc4::utils::NumericType<T>
+                    && !(fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>)
+            )
             : IParameter(name)
         {
             parent.registerParameter(name, *this);
@@ -70,7 +74,8 @@ namespace vslib::parameters
             LimitType<T> limit_min = std::numeric_limits<LimitType<T>>::lowest(),
             LimitType<T> limit_max = std::numeric_limits<LimitType<T>>::max()
         )
-            requires(fgc4::utils::NumericType<T> || (fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>))
+            requires(fgc4::utils::NumericType<T>
+                     || (fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>))
             : IParameter(name),
               m_limit_min{limit_min},
               m_limit_max{limit_max},
@@ -266,7 +271,7 @@ namespace vslib::parameters
         //! @param value New parameter values to be checked
         //! @return Warning with relevant information if check not successful, nothing otherwise
         std::optional<fgc4::utils::Warning> checkLimits(T value) const noexcept
-            requires (fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>)
+            requires(fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>)
         {
             // check if all of the provided values fit in the limits
             for (auto const& element : value)
@@ -274,7 +279,7 @@ namespace vslib::parameters
                 if (m_limit_min > element || element > m_limit_max)
                 {
                     fgc4::utils::Warning message(fmt::format(
-                        "Value in the provided array: {} is outside the limits: {}, {}!\n", value, m_limit_min,
+                        "Value in the provided array: {} is outside the limits: {}, {}!\n", element, m_limit_min,
                         m_limit_max
                     ));
                     std::cerr << fmt::format("{}", message);
