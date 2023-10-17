@@ -11,6 +11,7 @@ include(GoogleTest)
 
 add_executable(${APP}
   tests/parameterTests.cpp
+  tests/parameterTest.cpp
   tests/parameterRegistryTest.cpp
   ../src/parameterRegistry.cpp
 )

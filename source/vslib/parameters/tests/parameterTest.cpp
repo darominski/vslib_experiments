@@ -1,0 +1,773 @@
+//! @file
+//! @brief File with unit tests of Parameter class.
+//! @author Dominik Arominski
+
+#include <gtest/gtest.h>
+
+#include "component.h"
+#include "json/json.hpp"
+#include "parameter.h"
+#include "parameterRegistry.h"
+
+using namespace vslib;
+using namespace vslib::parameters;
+
+class ParameterTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override
+    {
+        // cleans up the registry so every test starts anew, otherwise
+        // the registry would persist between tests
+        ParameterRegistry& registry = ParameterRegistry::instance();
+        registry.~ParameterRegistry();
+        buffer_switch = 0;   // resets the global buffer switch to known state
+    }
+
+    void TearDown() override
+    {
+    }
+};
+
+class MockComponent : public components::Component
+{
+  public:
+    MockComponent()
+        : Component("mockType", "mockName", nullptr)
+    {
+    }
+};
+
+// ************************************************************
+// Tests of basic Parameter creation of all supported types
+
+//! Checks that boolean Parameter can be registered to a component
+TEST_F(ParameterTest, BoolParameterDefinition)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "bool";
+    Parameter<bool>   parameter(component, parameter_name);
+    EXPECT_EQ(parameter.getName(), parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+}
+
+//! Checks that integer Parameter can be registered to a component
+TEST_F(ParameterTest, IntParameterDefinition)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "int";
+    Parameter<int>    parameter(component, parameter_name);
+    EXPECT_EQ(parameter.getName(), parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+}
+
+//! Checks that float Parameter can be registered to a component
+TEST_F(ParameterTest, FloatParameterDefinition)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "float";
+    Parameter<float>  parameter(component, parameter_name);
+    EXPECT_EQ(parameter.getName(), parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+}
+
+//! Checks that std::string Parameter can be registered to a component
+TEST_F(ParameterTest, StringParameterDefinition)
+{
+    MockComponent          component;   // component to attach parameters to
+    const std::string      parameter_name = "string";
+    Parameter<std::string> parameter(component, parameter_name);
+    EXPECT_EQ(parameter.getName(), parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+}
+//! Checks that enum Parameter can be registered to a component
+TEST_F(ParameterTest, EnumParameterDefinition)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum class TestEnum
+    {
+        field1,
+        field2
+    };
+    Parameter<TestEnum> parameter(component, parameter_name);
+    EXPECT_EQ(parameter.getName(), parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+}
+
+//! Checks that double Parameter with limits can be attached to a component
+TEST_F(ParameterTest, DoubleParameterWithLimits)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "double";
+    Parameter<double> parameter(component, parameter_name, -10, 10);
+    EXPECT_EQ(parameter.getName(), parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+    EXPECT_TRUE((std::is_same_v<decltype(parameter.getLimitMin()), const double&>));
+    EXPECT_TRUE((std::is_same_v<decltype(parameter.getLimitMax()), const double&>));
+    EXPECT_EQ(parameter.getLimitMin(), -10);
+    EXPECT_EQ(parameter.getLimitMax(), 10);
+}
+
+//! Checks that array of int Parameter with limits can be attached to a component
+TEST_F(ParameterTest, IntArrayParameterWithLimits)
+{
+    MockComponent                      component;   // component to attach parameters to
+    const std::string                  parameter_name = "array_int";
+    Parameter<std::array<uint64_t, 5>> parameter(component, parameter_name, -1, 1);
+    EXPECT_EQ(parameter.getName(), parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+    EXPECT_TRUE((std::is_same_v<decltype(parameter.getLimitMin()), const uint64_t&>));
+    EXPECT_TRUE((std::is_same_v<decltype(parameter.getLimitMax()), const uint64_t&>));
+    EXPECT_EQ(parameter.getLimitMin(), -1);
+    EXPECT_EQ(parameter.getLimitMax(), 1);
+}
+
+//! Checks that array of std::string Parameter can be attached to a component
+TEST_F(ParameterTest, StringArrayParameter)
+{
+    MockComponent                         component;   // component to attach parameters to
+    const std::string                     parameter_name = "array_string";
+    Parameter<std::array<std::string, 5>> parameter(component, parameter_name);
+    EXPECT_EQ(parameter.getName(), parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+}
+
+// ************************************************************
+// Tests of serialization of various Parameter types
+
+// Basic boolean parameter serialization
+TEST_F(ParameterTest, BoolParameterSerialization)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "bool";
+    Parameter<bool>   parameter(component, parameter_name);
+
+    auto const& serialized_parameter = parameter.serialize();
+    EXPECT_TRUE(serialized_parameter.is_object());
+    EXPECT_TRUE(serialized_parameter.contains("length"));
+    EXPECT_TRUE(serialized_parameter.contains("value"));
+    EXPECT_TRUE(serialized_parameter.contains("name"));
+    EXPECT_TRUE(serialized_parameter.contains("type"));
+    EXPECT_EQ(serialized_parameter["length"], 1);
+    EXPECT_EQ(serialized_parameter["value"], nlohmann::json::object());
+    EXPECT_EQ(serialized_parameter["name"], parameter_name);
+    EXPECT_EQ(serialized_parameter["type"], "Bool");
+}
+
+// Basic integer parameter serialization
+TEST_F(ParameterTest, IntParameterSerialization)
+{
+    MockComponent       component;   // component to attach parameters to
+    const std::string   parameter_name = "int";
+    Parameter<uint32_t> parameter(component, parameter_name);
+
+    auto const& serialized_parameter = parameter.serialize();
+    EXPECT_TRUE(serialized_parameter.is_object());
+    EXPECT_TRUE(serialized_parameter.contains("length"));
+    EXPECT_TRUE(serialized_parameter.contains("value"));
+    EXPECT_TRUE(serialized_parameter.contains("name"));
+    EXPECT_TRUE(serialized_parameter.contains("type"));
+    EXPECT_EQ(serialized_parameter["length"], 1);
+    EXPECT_EQ(serialized_parameter["value"], nlohmann::json::object());
+    EXPECT_EQ(serialized_parameter["name"], parameter_name);
+    EXPECT_EQ(serialized_parameter["type"], "UInt32");
+}
+
+// Basic enum parameter serialization
+TEST_F(ParameterTest, EnumParameterSerialization)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum class TestEnum
+    {
+        field1,
+        field2,
+    };
+    Parameter<TestEnum> parameter(component, parameter_name);
+
+    auto const& serialized_parameter = parameter.serialize();
+    EXPECT_TRUE(serialized_parameter.is_object());
+    EXPECT_TRUE(serialized_parameter.contains("length"));
+    EXPECT_TRUE(serialized_parameter.contains("value"));
+    EXPECT_TRUE(serialized_parameter.contains("name"));
+    EXPECT_TRUE(serialized_parameter.contains("type"));
+    EXPECT_TRUE(serialized_parameter.contains("fields"));
+    EXPECT_EQ(serialized_parameter["length"], 2);
+    EXPECT_EQ(serialized_parameter["value"], nlohmann::json::object());
+    EXPECT_EQ(serialized_parameter["name"], parameter_name);
+    EXPECT_EQ(serialized_parameter["type"], "Enum");
+    EXPECT_TRUE(serialized_parameter["fields"].is_array());
+    nlohmann::json fields = {"field1", "field2"};
+    EXPECT_EQ(serialized_parameter["fields"], fields);
+}
+
+// Basic std::string parameter serialization
+TEST_F(ParameterTest, StringParameterSerialization)
+{
+    MockComponent          component;   // component to attach parameters to
+    const std::string      parameter_name = "string";
+    Parameter<std::string> parameter(component, parameter_name);
+
+    auto const& serialized_parameter = parameter.serialize();
+    EXPECT_TRUE(serialized_parameter.is_object());
+    EXPECT_TRUE(serialized_parameter.contains("length"));
+    EXPECT_TRUE(serialized_parameter.contains("value"));
+    EXPECT_TRUE(serialized_parameter.contains("name"));
+    EXPECT_TRUE(serialized_parameter.contains("type"));
+    EXPECT_EQ(serialized_parameter["length"], 0);
+    EXPECT_EQ(serialized_parameter["value"], nlohmann::json::object());
+    EXPECT_EQ(serialized_parameter["name"], parameter_name);
+    EXPECT_EQ(serialized_parameter["type"], "String");
+}
+
+// Basic float parameter serialization, with limits
+TEST_F(ParameterTest, FloatWithLimitsParameterSerialization)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "float";
+    Parameter<float>  parameter(component, parameter_name, -5, 10);
+
+    auto const& serialized_parameter = parameter.serialize();
+    EXPECT_TRUE(serialized_parameter.is_object());
+    EXPECT_TRUE(serialized_parameter.contains("length"));
+    EXPECT_TRUE(serialized_parameter.contains("value"));
+    EXPECT_TRUE(serialized_parameter.contains("name"));
+    EXPECT_TRUE(serialized_parameter.contains("type"));
+    EXPECT_TRUE(serialized_parameter.contains("limit_min"));
+    EXPECT_TRUE(serialized_parameter.contains("limit_max"));
+    EXPECT_EQ(serialized_parameter["length"], 1);
+    EXPECT_EQ(serialized_parameter["value"], nlohmann::json::object());
+    EXPECT_EQ(serialized_parameter["name"], parameter_name);
+    EXPECT_EQ(serialized_parameter["type"], "Float32");
+    EXPECT_EQ(serialized_parameter["limit_min"], -5);
+    EXPECT_EQ(serialized_parameter["limit_max"], 10);
+}
+
+// Basic int16 array parameter serialization, with limits
+TEST_F(ParameterTest, IntArrayWithLimitsParameterSerialization)
+{
+    MockComponent                              component;   // component to attach parameters to
+    const std::string                          parameter_name = "int16";
+    constexpr size_t                           array_size     = 5;
+    Parameter<std::array<int16_t, array_size>> parameter(component, parameter_name, -5, 10);
+
+    auto const& serialized_parameter = parameter.serialize();
+    EXPECT_TRUE(serialized_parameter.is_object());
+    EXPECT_TRUE(serialized_parameter.contains("length"));
+    EXPECT_TRUE(serialized_parameter.contains("value"));
+    EXPECT_TRUE(serialized_parameter.contains("name"));
+    EXPECT_TRUE(serialized_parameter.contains("type"));
+    EXPECT_TRUE(serialized_parameter.contains("limit_min"));
+    EXPECT_TRUE(serialized_parameter.contains("limit_max"));
+    EXPECT_EQ(serialized_parameter["length"], array_size);
+    EXPECT_EQ(serialized_parameter["value"], nlohmann::json::array());
+    EXPECT_EQ(serialized_parameter["name"], parameter_name);
+    EXPECT_EQ(serialized_parameter["type"], "ArrayInt16");
+    EXPECT_EQ(serialized_parameter["limit_min"], -5);
+    EXPECT_EQ(serialized_parameter["limit_max"], 10);
+}
+
+// ************************************************************
+// Tests of setting the Parameter's value via JSON
+
+// Tests setting value to int Parameter from a JSON command
+TEST_F(ParameterTest, BoolParameterSetValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "bool";
+    Parameter<bool>   parameter(component, parameter_name, -5, 10);
+    EXPECT_EQ(parameter.isInitialized(), false);
+
+    bool           new_value = true;
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+    buffer_switch = 2;   // allows accessing write buffer
+    EXPECT_EQ(parameter.value(), new_value);
+    EXPECT_EQ(parameter.isInitialized(), true);
+}
+
+// Tests setting value to int Parameter from a JSON command
+TEST_F(ParameterTest, IntParameterSetValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "int";
+    Parameter<int>    parameter(component, parameter_name, -5, 10);
+    EXPECT_EQ(parameter.isInitialized(), false);
+
+    int            new_value = 2;
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+    buffer_switch = 2;   // allows accessing write buffer
+    EXPECT_EQ(parameter.value(), new_value);
+    EXPECT_EQ(parameter.isInitialized(), true);
+}
+
+//! Tests setting value to double Parameter from a JSON command
+TEST_F(ParameterTest, DoubleParameterSetValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "double";
+    Parameter<double> parameter(component, parameter_name, -1, 5);
+    EXPECT_EQ(parameter.isInitialized(), false);
+
+    double         new_value = 3.14159;
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+    buffer_switch = 2;   // allows accessing write buffer
+    EXPECT_EQ(parameter.value(), new_value);
+    EXPECT_EQ(parameter, new_value);               // tests implicit conversion operator
+    EXPECT_EQ(parameter + 1.1, new_value + 1.1);   // tests access to parameter as if it was double
+    EXPECT_EQ(parameter.isInitialized(), true);
+}
+
+//! Tests setting value to std::string Parameter from a JSON command
+TEST_F(ParameterTest, StringParameterSetValue)
+{
+    MockComponent          component;   // component to attach parameters to
+    const std::string      parameter_name = "string";
+    Parameter<std::string> parameter(component, parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+
+    std::string    new_value = "text";
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+    buffer_switch = 2;   // allows accessing write buffer
+    EXPECT_EQ(parameter.value(), new_value);
+    EXPECT_EQ(parameter.isInitialized(), true);
+}
+
+//! Tests setting value to enum Parameter from a JSON command
+TEST_F(ParameterTest, EnumParameterSetValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum class TestEnum
+    {
+        field1,
+        field2,
+        field3
+    };
+    Parameter<TestEnum> parameter(component, parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+
+    std::string    new_value = "field2";   // enums are serialized as strings
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+    buffer_switch = 2;                                // allows accessing write buffer
+    EXPECT_EQ(parameter.value(), TestEnum::field2);   // tests explicit access
+    EXPECT_EQ(parameter.isInitialized(), true);
+}
+
+//! Tests setting value to array of double Parameter from a JSON command
+TEST_F(ParameterTest, DoubleArrayParameterSetValue)
+{
+    MockComponent                    component;   // component to attach parameters to
+    const std::string                parameter_name = "double_array";
+    Parameter<std::array<double, 3>> parameter(component, parameter_name, -5, 5);
+    EXPECT_EQ(parameter.isInitialized(), false);
+
+    std::array<double, 3> new_value = {0.1, 1.2, 2.3};
+    nlohmann::json        command   = {{"value", new_value}};
+    auto                  output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+    buffer_switch  = 2;   // allows accessing write buffer
+    size_t counter = 0;
+    // tests begin() and end() methods of Parameter
+    for (auto const& element : parameter.value())
+    {
+        EXPECT_EQ(element, new_value[counter++]);
+    }
+    // tests overloaded operator[]
+    EXPECT_EQ(parameter[2], new_value[2]);
+    EXPECT_EQ(parameter.isInitialized(), true);
+}
+
+// ************************************************************
+// Tests of attempting to set an invalid value via JSON
+
+//! Tests setting out-of-limits value to double Parameter from a JSON command
+TEST_F(ParameterTest, DoubleParameterSetInvalidValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "double";
+    Parameter<double> parameter(component, parameter_name, -1, 5);
+    EXPECT_EQ(parameter.isInitialized(), false);
+
+    double         new_value = 10;   // out of limits
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    ASSERT_EQ(output.has_value(), true);   // there is a warning message
+    EXPECT_EQ(fmt::format("{}", output.value()), "Warning: Provided value: 10 is outside the limits: -1, 5!\n");
+    buffer_switch = 2;   // allows accessing write buffer
+    EXPECT_NE(parameter.value(), new_value);
+    EXPECT_EQ(parameter.isInitialized(), false);
+}
+
+//! Tests setting value to enum Parameter from a JSON command
+TEST_F(ParameterTest, EnumParameterSetInvalidValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum class TestEnum
+    {
+        field1,
+        field2
+    };
+    Parameter<TestEnum> parameter(component, parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+
+    std::string    new_value = "field5";   // enums are serialized as strings
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    ASSERT_EQ(output.has_value(), true);   // there is a warning message
+    EXPECT_EQ(
+        fmt::format("{}", output.value()),
+        "Warning: The provided enum value is not one of the allowed values.\nCommand ignored.\n"
+    );
+    EXPECT_EQ(parameter.isInitialized(), false);
+}
+
+//! Tests setting out-of-limits value to array of double Parameter from a JSON command
+TEST_F(ParameterTest, DoubleArrayParameterInvalidSetValue)
+{
+    MockComponent                    component;   // component to attach parameters to
+    const std::string                parameter_name = "double_array";
+    Parameter<std::array<double, 3>> parameter(component, parameter_name, -1, 1);
+    EXPECT_EQ(parameter.isInitialized(), false);
+
+    std::array<double, 3> new_value = {0.1, 1.2, 2.3};
+    nlohmann::json        command   = {{"value", new_value}};
+    auto                  output    = parameter.setJsonValue(command["value"]);
+    ASSERT_EQ(output.has_value(), true);
+    buffer_switch  = 2;   // allows accessing write buffer
+    size_t counter = 0;
+    // implicitly tests begin() and end() methods of Parameter
+    for (auto const& element : parameter.value())
+    {
+        EXPECT_NE(element, new_value[counter++]);
+    }
+    // tests overloaded operator[]
+    EXPECT_NE(parameter[2], new_value[2]);
+    EXPECT_EQ(parameter.isInitialized(), false);
+}
+
+//! Tests setting wrong type value to double Parameter from a JSON command
+TEST_F(ParameterTest, ParameterSetInvalidTypeValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "double";
+    Parameter<double> parameter(component, parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+
+    std::string    new_value = "invalid";
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    ASSERT_EQ(output.has_value(), true);   // there is a warning message
+    EXPECT_EQ(
+        fmt::format("{}", output.value()),
+        "Warning: [json.exception.type_error.302] type must be number, but is string.\nCommand ignored.\n"
+    );
+    EXPECT_EQ(parameter.isInitialized(), false);
+}
+
+// ************************************************************
+// Test of serialization of Parameter when value was set via JSON
+
+//! Tests serialization of array of double Parameter when value has been set
+TEST_F(ParameterTest, BoolParameterSerializationWithValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "bool";
+    Parameter<bool>   parameter(component, parameter_name);
+
+    bool           new_value = false;
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    ASSERT_EQ(output.has_value(), false);
+    buffer_switch = 2;   // allows accessing write buffer as read buffer
+
+    auto const& serialized_parameter = parameter.serialize();
+    EXPECT_TRUE(serialized_parameter.is_object());
+    EXPECT_TRUE(serialized_parameter.contains("length"));
+    EXPECT_TRUE(serialized_parameter.contains("value"));
+    EXPECT_TRUE(serialized_parameter.contains("name"));
+    EXPECT_TRUE(serialized_parameter.contains("type"));
+    EXPECT_EQ(serialized_parameter["length"], 1);
+    EXPECT_EQ(serialized_parameter["value"], new_value);
+    EXPECT_EQ(serialized_parameter["name"], parameter_name);
+    EXPECT_EQ(serialized_parameter["type"], "Bool");
+}
+
+//! Tests serialization of array of double Parameter when value has been set
+TEST_F(ParameterTest, DoubleArrayParameterSerializationWithValue)
+{
+    MockComponent                    component;   // component to attach parameters to
+    const std::string                parameter_name = "double_array";
+    Parameter<std::array<double, 3>> parameter(component, parameter_name, -5, 5);
+
+    std::array<double, 3> new_value = {0.1, 1.2, 2.3};
+    nlohmann::json        command   = {{"value", new_value}};
+    auto                  output    = parameter.setJsonValue(command["value"]);
+    ASSERT_EQ(output.has_value(), false);
+    buffer_switch = 2;   // allows accessing write buffer as read buffer
+
+    auto const& serialized_parameter = parameter.serialize();
+    EXPECT_TRUE(serialized_parameter.is_object());
+    EXPECT_TRUE(serialized_parameter.contains("length"));
+    EXPECT_TRUE(serialized_parameter.contains("value"));
+    EXPECT_TRUE(serialized_parameter.contains("name"));
+    EXPECT_TRUE(serialized_parameter.contains("type"));
+    EXPECT_TRUE(serialized_parameter.contains("limit_min"));
+    EXPECT_TRUE(serialized_parameter.contains("limit_max"));
+    EXPECT_EQ(serialized_parameter["length"], 3);
+    EXPECT_EQ(serialized_parameter["value"], new_value);
+    EXPECT_EQ(serialized_parameter["name"], parameter_name);
+    EXPECT_EQ(serialized_parameter["type"], "ArrayFloat64");
+    EXPECT_EQ(serialized_parameter["limit_min"], -5);
+    EXPECT_EQ(serialized_parameter["limit_max"], 5);
+}
+
+//! Tests serialization of enum Parameter when value has been set
+TEST_F(ParameterTest, EnumParameterSerializationWithValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum class TestEnum
+    {
+        field1,
+        field2,
+        field3
+    };
+    Parameter<TestEnum> parameter(component, parameter_name);
+
+    std::string    new_value = "field2";   // enums are serialized as strings
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+    buffer_switch = 2;                                // allows accessing write buffer
+    EXPECT_EQ(parameter.value(), TestEnum::field2);   // tests explicit access
+
+    auto const& serialized_parameter = parameter.serialize();
+    EXPECT_TRUE(serialized_parameter.is_object());
+    EXPECT_TRUE(serialized_parameter.contains("length"));
+    EXPECT_TRUE(serialized_parameter.contains("value"));
+    EXPECT_TRUE(serialized_parameter.contains("name"));
+    EXPECT_TRUE(serialized_parameter.contains("type"));
+    EXPECT_TRUE(serialized_parameter.contains("fields"));
+    EXPECT_EQ(serialized_parameter["length"], 3);
+    EXPECT_EQ(serialized_parameter["value"], "field2");
+    EXPECT_EQ(serialized_parameter["name"], parameter_name);
+    EXPECT_EQ(serialized_parameter["type"], "Enum");
+    EXPECT_TRUE(serialized_parameter["fields"].is_array());
+    nlohmann::json fields = {"field1", "field2", "field3"};
+    EXPECT_EQ(serialized_parameter["fields"], fields);
+}
+
+// ************************************************************
+// Tests of methods synchronising buffers after a value has been set
+
+//! Tests synchronising buffers of uint64 Parameter when value has been set
+TEST_F(ParameterTest, IntParameterSynchronizeBuffers)
+{
+    MockComponent       component;   // component to attach parameters to
+    const std::string   parameter_name = "int";
+    Parameter<uint64_t> parameter(component, parameter_name);
+
+    uint64_t       new_value = 120500;
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+
+    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
+    buffer_switch ^= 1;                   // switches between read and background buffer
+    parameter.synchroniseReadBuffers();   // synchronises background buffer with read
+
+    EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
+    EXPECT_EQ(parameter, new_value);           // tests overloaded operator()
+}
+
+//! Tests synchronising buffers of float Parameter when value has been set
+TEST_F(ParameterTest, FloatParameterSynchronizeBuffers)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "float";
+    Parameter<float>  parameter(component, parameter_name);
+
+    float          new_value = 3.14159;
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+
+    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
+    buffer_switch ^= 1;                   // switches between read and background buffer
+    parameter.synchroniseReadBuffers();
+
+    EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
+    EXPECT_EQ(parameter, new_value);           // tests overloaded operator()
+}
+
+//! Tests synchronising buffers of std::string Parameter when value has been set
+TEST_F(ParameterTest, StringParameterSynchronizeBuffers)
+{
+    MockComponent          component;   // component to attach parameters to
+    const std::string      parameter_name = "string";
+    Parameter<std::string> parameter(component, parameter_name);
+
+    std::string    new_value = "new_text_parameter";
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+
+    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
+    buffer_switch ^= 1;                   // switches between read and background buffer
+    parameter.synchroniseReadBuffers();
+
+    EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
+}
+
+//! Tests synchronising buffers of array of double Parameter when value has been set
+TEST_F(ParameterTest, DoubleArrayParameterSynchronizeBuffers)
+{
+    MockComponent                    component;   // component to attach parameters to
+    const std::string                parameter_name = "array_double";
+    Parameter<std::array<double, 3>> parameter(component, parameter_name);
+
+    std::array<double, 4> new_value = {1.1, 2.2, 3.3, 4.4};
+    nlohmann::json        command   = {{"value", new_value}};
+    auto                  output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+
+    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
+    buffer_switch ^= 1;                   // switches between read and background buffer
+    parameter.synchroniseReadBuffers();
+
+    size_t counter = 0;
+    // implicitly tests begin() and end() methods of Parameter
+    for (auto const& element : parameter.value())
+    {
+        EXPECT_EQ(element, new_value[counter++]);
+    }
+    // tests overloaded operator[]
+    EXPECT_EQ(parameter[2], new_value[2]);
+}
+
+//! Tests synchronising buffers of array of std::string Parameter when value has been set
+TEST_F(ParameterTest, StringArrayParameterSynchronizeBuffers)
+{
+    MockComponent                         component;   // component to attach parameters to
+    const std::string                     parameter_name = "array_double";
+    Parameter<std::array<std::string, 3>> parameter(component, parameter_name);
+
+    std::array<std::string, 3> new_value = {"text1", "text2", "text3"};
+    nlohmann::json             command   = {{"value", new_value}};
+    auto                       output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+
+    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
+    buffer_switch ^= 1;                   // switches between read and background buffer
+    parameter.synchroniseReadBuffers();
+
+    size_t counter = 0;
+    // implicitly tests begin() and end() methods of Parameter
+    for (auto const& element : parameter.value())
+    {
+        EXPECT_EQ(element, new_value[counter++]);
+    }
+    // tests overloaded operator[]
+    EXPECT_EQ(parameter.value()[2], new_value[2]);
+}
+
+//! Tests synchronising buffers of enum Parameter when value has been set
+TEST_F(ParameterTest, EnumParameterSynchronizeBuffers)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum class TestEnum
+    {
+        field1,
+        field2,
+        field3
+    };
+    Parameter<TestEnum> parameter(component, parameter_name);
+
+    std::string    new_value = "field2";   // enums are serialized as strings
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+
+    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
+    buffer_switch ^= 1;                   // switches between read and background buffer
+    parameter.synchroniseReadBuffers();
+
+    EXPECT_EQ(parameter.value(), TestEnum::field2);   // tests explicit access
+}
+
+//! Tests providing a number of commands and synchronising buffers each time
+TEST_F(ParameterTest, FloatParameterSendManyCommands)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "float";
+    Parameter<float>  parameter(component, parameter_name);
+
+    for (size_t command_no = 0; command_no < 5; command_no++)
+    {
+        float          new_value = command_no * 3.14;   // enums are serialized as strings
+        nlohmann::json command   = {{"value", new_value}};
+        auto           output    = parameter.setJsonValue(command["value"]);
+        EXPECT_EQ(output.has_value(), false);
+
+        parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
+        buffer_switch ^= 1;                   // switches between read and background buffer
+        parameter.synchroniseReadBuffers();
+
+        EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
+        EXPECT_EQ(parameter, new_value);           // tests implicit access
+    }
+}
+
+// ************************************************************
+// Test of operations on Parameter with value set via JSON
+
+//! Tests spaceship operator of a double Parameter with value set via JSON command
+TEST_F(ParameterTest, DoubleParameterValueOperations)
+{
+    MockComponent     component;   // component to attach parameters to
+    Parameter<double> lhs(component, "lhs");
+    Parameter<double> rhs(component, "rhs");
+
+    double         new_lhs     = 3.14159;
+    nlohmann::json command_lhs = {{"value", new_lhs}};
+    auto           output_lhs  = lhs.setJsonValue(command_lhs["value"]);
+    EXPECT_EQ(output_lhs.has_value(), false);
+
+    double         new_rhs     = 2.71828;
+    nlohmann::json command_rhs = {{"name", "mockType.mockName.rhs"}, {"value", new_rhs}};
+    auto           output_rhs  = rhs.setJsonValue(command_rhs["value"]);
+    EXPECT_EQ(output_rhs.has_value(), false);
+
+    lhs.synchroniseWriteBuffer();   // synchronises write buffer with background
+    rhs.synchroniseWriteBuffer();
+    buffer_switch ^= 1;             // switches between read and background buffer
+    lhs.synchroniseReadBuffers();   // synchronises background buffer with read
+    rhs.synchroniseReadBuffers();
+
+    ASSERT_EQ(lhs.value(), new_lhs);
+    ASSERT_EQ(rhs.value(), new_rhs);
+
+    EXPECT_EQ(lhs == lhs, true);
+    EXPECT_EQ(rhs == rhs, true);
+    EXPECT_EQ(lhs != rhs, true);
+    EXPECT_EQ(lhs == rhs, false);
+    EXPECT_EQ(lhs > rhs, true);
+    EXPECT_EQ(lhs >= rhs, true);
+    EXPECT_EQ(lhs < rhs, false);
+    EXPECT_EQ(lhs <= rhs, false);
+    EXPECT_EQ(lhs < (rhs * 2), true);
+    EXPECT_EQ((lhs - 1) < rhs, true);
+}
