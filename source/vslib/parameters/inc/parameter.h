@@ -139,6 +139,7 @@ namespace vslib::parameters
         }
 
         // ************************************************************
+        // Various helper getters
 
         //! Explicit conversion value getter function. It removes issues with
         //! implicit conversion of a complex type, e.g. arrays, enums, etc.
@@ -147,6 +148,38 @@ namespace vslib::parameters
         [[nodiscard]] const T& value() const
         {
             return m_value[buffer_switch];
+        }
+
+        //! Getter for the initialization flag of the Parameter
+        //!
+        //! @return True if the Parameter has been initialized, false otherwise
+        [[nodiscard]] bool isInitialized() const
+        {
+            return m_initialized;
+        }
+
+        //! Getter for the lower limit of the held value
+        //!
+        //! @return Lower limit of allowed stored value
+        [[nodiscard]] const LimitType<T>& getLimitMin() const
+            requires(
+                fgc4::utils::NumericType<T>
+                || (fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>)
+            )
+        {
+            return m_limit_min;
+        }
+
+        //! Getter for the upper limit of the held value
+        //!
+        //! @return Upper limit of allowed stored value
+        [[nodiscard]] const LimitType<T>& getLimitMax() const
+            requires(
+                fgc4::utils::NumericType<T>
+                || (fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>)
+            )
+        {
+            return m_limit_max;
         }
 
         // ************************************************************
