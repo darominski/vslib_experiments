@@ -21,8 +21,6 @@ class ParameterRegistryTest : public ::testing::Test
         // the registry would persist between tests
         ParameterRegistry& registry = ParameterRegistry::instance();
         registry.~ParameterRegistry();
-        // ComponentRegistry& component_registry = ComponentRegistry::instance();
-        // component_registry.~ParameterRegistry();
     }
 
     void TearDown() override
@@ -52,6 +50,7 @@ TEST_F(ParameterRegistryTest, EmptyInstance)
     auto&              parameters = registry.getParameters();
     ASSERT_EQ(parameters.size(), 0);
 }
+
 //! Checks Parameter is correctly added to the registry when attached to a component
 TEST_F(ParameterRegistryTest, AutomaticParameterRegistration)
 {
