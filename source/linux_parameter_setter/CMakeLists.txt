@@ -26,9 +26,17 @@ set(REMOTE_SOURCES
     remote.cpp
 )
 
+set(REMOTE_USER_SOURCES
+    remote_user.cpp
+)
+
 # Create executables
 add_executable(remote
   ${REMOTE_SOURCES}
+  )
+
+  add_executable(remote_user
+  ${REMOTE_USER_SOURCES}
   )
 
 # Add external libraries
@@ -41,9 +49,10 @@ include_directories(
 add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
 
 target_compile_features(remote PUBLIC cxx_std_20)
+target_compile_features(remote_user PUBLIC cxx_std_20)
 
 target_link_options(remote PRIVATE -static -static-libgcc -static-libstdc++)
+target_link_options(remote_user PRIVATE -static -static-libgcc -static-libstdc++)
 
-target_link_libraries(remote PRIVATE
-  fmt::fmt
-  )
+target_link_libraries(remote PRIVATE fmt::fmt)
+target_link_libraries(remote_user PRIVATE fmt::fmt)
