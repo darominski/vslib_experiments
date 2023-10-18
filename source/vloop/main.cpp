@@ -46,6 +46,7 @@ int main()
     // Create and initialize a couple of components: 3 PIDs and an RST
     components::PID pid1("pid_1", components::independent_component);
     components::PID pid3("pid_3", components::independent_component);
+    components::RST rst("rst_1", components::independent_component);
 
     // No parameter declarations beyond this point!
     // ************************************************************
@@ -68,6 +69,12 @@ int main()
         puts(std::to_string(pid3.p).c_str());
         puts(std::to_string(pid3.i).c_str());
         puts(std::to_string(pid3.d).c_str());
+        puts("RST: ");
+        for (const auto& val : rst.r)
+        {
+            std::cout << val << " ";
+        }
+        puts("");
 
         backgroundTask::receiveJsonCommand();
         usleep(1000000);   // 1 s
