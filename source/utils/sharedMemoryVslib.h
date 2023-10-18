@@ -12,6 +12,7 @@
 #include "errorMessage.h"
 #include "fmt/format.h"
 #include "json/json.hpp"
+#include "warningMessage.h"
 
 namespace vslib
 {
