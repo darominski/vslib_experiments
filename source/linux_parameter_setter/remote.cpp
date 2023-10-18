@@ -3,9 +3,8 @@
 #include <string>
 #include <unistd.h>
 
-#include "Util_Mmap.h"
 #include "json/json.hpp"
-#include "sharedMemoryVslib.h"
+#include "shared_memory.h"
 
 using Json = nlohmann::json;
 using namespace vslib;
@@ -69,22 +68,6 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     commands.push_back({{"name", "ComponentArray.brick_2.PID.brick_2_1.p"}, {"value", 0.2718}});
     return commands;
 }
-
-class Fgc4Shmem
-{
-  public:
-    Fgc4Shmem()
-        : m_dev_mem("/dev/mem"),
-          m_shared_memory(
-              m_dev_mem, SHARED_MEMORY_ADDRESS, SHARED_MEMORY_SIZE, PROT_READ | PROT_WRITE, (void*)SHARED_MEMORY_ADDRESS
-          )
-    {
-    }
-
-  private:
-    File m_dev_mem;
-    Mmap m_shared_memory;
-};
 
 int main()
 {
