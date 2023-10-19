@@ -8,6 +8,7 @@
 #include "componentRegistry.h"
 #include "json/json.hpp"
 #include "parameter.h"
+#include "parameterRegistry.h"
 
 using namespace vslib;
 using namespace vslib::components;
@@ -17,10 +18,12 @@ class ComponentTest : public ::testing::Test
   protected:
     void SetUp() override
     {
-        // cleans up the registry so every test starts anew, otherwise
-        // the registry would persist between tests
-        ComponentRegistry& registry = ComponentRegistry::instance();
-        registry.~ComponentRegistry();
+        // cleans up the registries so every test starts anew, otherwise
+        // they would persist between tests
+        ComponentRegistry& component_registry = ComponentRegistry::instance();
+        component_registry.~ComponentRegistry();
+        parameters::ParameterRegistry& parameter_registry = parameters::ParameterRegistry::instance();
+        parameter_registry.~ParameterRegistry();
     }
 
     void TearDown() override
@@ -150,7 +153,7 @@ TEST_F(ComponentTest, DerivedComponentIntParameter)
     EXPECT_EQ(serialized_component["parameters"][0]["value"], nlohmann::json::object());
 }
 
-//! Checks derived component with a single integer parameter
+//! Checks derived component with many parameters of various types
 TEST_F(ComponentTest, DerivedComponentWithManyParameters)
 {
     const std::string                            component_type = "type";
