@@ -18,7 +18,7 @@ add_compile_options(-Wall -O0 -mtune=cortex-a53 -ffunction-sections -fdata-secti
   -fexceptions
   -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
   -Wwrite-strings -Wmissing-declarations
-  -Wredundant-decls -Winline -Wno-long-long
+  -Wredundant-decls -Wno-long-long
   -Wconversion
 )
 
