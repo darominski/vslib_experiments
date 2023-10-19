@@ -599,7 +599,7 @@ TEST_F(ParameterTest, FloatParameterSynchronizeBuffers)
     const std::string parameter_name = "float";
     Parameter<float>  parameter(component, parameter_name);
 
-    float          new_value = 3.14159;
+    float          new_value = (float)3.1415;
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
@@ -717,7 +717,7 @@ TEST_F(ParameterTest, FloatParameterSendManyCommands)
 
     for (size_t command_no = 0; command_no < 5; command_no++)
     {
-        float          new_value = command_no * 3.14;   // enums are serialized as strings
+        float          new_value = static_cast<float>(command_no) * (float)3.14;   // enums are serialized as strings
         nlohmann::json command   = {{"value", new_value}};
         auto           output    = parameter.setJsonValue(command["value"]);
         EXPECT_EQ(output.has_value(), false);
