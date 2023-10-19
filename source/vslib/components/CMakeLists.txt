@@ -1,19 +1,10 @@
-cmake_minimum_required(VERSION 3.17)
-
-set(CMAKE_CXX_STANDARD 20)
-
-add_subdirectory("${LIBRARIES_HOME}/googletest-1.11.0" "${CMAKE_CURRENT_BINARY_DIR}/googletest")
-# FMT has to be recompiled here due to use of different compiler than in the upstream CMake
-add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
-include(GoogleTest)
-
 add_executable(componentTests
-  tests/componentTests.cpp
-  tests/componentTest.cpp
-  tests/componentRegistryTest.cpp
-  tests/componentArrayTest.cpp
-  src/componentRegistry.cpp
-  ../parameters/src/parameterRegistry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentRegistryTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentArrayTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/componentRegistry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
 )
 
 # TODO: the messy include structure below could be avoided if the entire vslib was compiled
