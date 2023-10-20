@@ -35,26 +35,28 @@ namespace fgc4::utils
     template<class T>
     concept Enumeration = std::is_enum_v<T>;
 
-    template<typename T>
+    // helper definitions for std::string type
+    template<class T>
     concept ToStringable = requires(T t) {
                                {
                                    std::to_string(t)
                                    } -> std::same_as<std::string>;
                            };
 
-    template<typename T>
+    template<class T>
     concept StringCastable = requires(T t) {
                                  {
                                      std::string(t)
                                      } -> std::same_as<std::string>;
                              };
 
-    template<typename T, typename = void>
+    template<class T, typename = void>
     struct is_string
     {
         static const bool value = false;
     };
 
+    // Also covers strings with custom allocators
     template<class T, class Traits, class Alloc>
     struct is_string<std::basic_string<T, Traits, Alloc>, void>
     {
