@@ -18,16 +18,15 @@ namespace vslib::components
     class ComponentRegistry
     {
       public:
-        // the registry shall not be assignable, nor clonable, nor moveable
+        // The registry is a singleton, so it is not assignable, nor clonable, nor moveable
         ComponentRegistry(ComponentRegistry& other)  = delete;
         ComponentRegistry(ComponentRegistry&& other) = delete;
         void operator=(const ComponentRegistry&)     = delete;
         void operator=(const ComponentRegistry&&)    = delete;
-        ~ComponentRegistry()   // is not expected to be called, lifetime equal to that of the program
+        ~ComponentRegistry()   // is not expected to be called, lifetime equal to that of the application
         {
             m_components.clear();
         }
-
 
         //! Provides an instance of the singleton registry
         //!

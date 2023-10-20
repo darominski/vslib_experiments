@@ -1,5 +1,5 @@
 //! @file
-//! @brief File containing the common interface of all components to be reused.
+//! @brief File containing the common interface of all components.
 //! @author Dominik Arominski
 
 #pragma once
@@ -18,8 +18,8 @@ namespace vslib::components
     class Component
     {
       public:
-        // For consistency of behaviour around registration of Components and their Parameters,
-        // a number of constructors are explicitly deleted
+        // The registration of Components and their Parameters, requires that are runtime-immutable,
+        // and cannot be moved, copied, or assigned to in any way.
         Component()                             = delete;   // anonymous Components are forbidden
         Component(Component&)                   = delete;   // cloning objects is forbidden
         Component(Component&&)                  = delete;   // moving objects is forbidden
@@ -27,25 +27,28 @@ namespace vslib::components
         Component& operator=(const Component&&) = delete;   // move-assignment is forbidden
         virtual ~Component()                    = default;
 
-        // ************************************************************
-
+        //! Creates the Component object with the provided type, name, and inside the hierarchy specified by parent
+        //!
+        //! @param component_type Type of the Component
+        //! @param name Name of the Component, needs to be unique in the type
+        //! @param parent Possible parent of this Component, if Component is independent, the parent should be nullptr
         Component(std::string_view component_type, std::string_view name, Component* parent) noexcept
             : m_component_type(component_type),
               m_name(name)
         {
-            if (parent != nullptr)
+            if (parent == nullptr)   // independent Component
+            {
+                registerComponent();
+            }
+            else
             {
                 m_parent_name = std::string(parent->getFullName());
                 parent->addChild((*this));
             }
-            else
-            {
-                registerComponent();
-            }
         }
 
         //! Registers the parameter belonging to this component in the parameter registry, simultaneously adding it to
-        //! the m_parameters vector.
+        //! the parameters vector.
         //!
         //! @param parameter_name Name of the parameter to be added to the parameter registry
         //! @param parameter Reference to the parameter being added to the parameter registry

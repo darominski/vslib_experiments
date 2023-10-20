@@ -85,7 +85,7 @@ TEST_F(ComponentArrayTest, BasicArrayInteractions)
     EXPECT_EQ(component[2].getName(), "array_3");
 }
 
-//! Checks that a an array can hold an array
+//! Checks that ComponentArray can hold a ComponentArray
 TEST_F(ComponentArrayTest, HierarchicalArrayTest)
 {
     const std::string                             component_name = "array";

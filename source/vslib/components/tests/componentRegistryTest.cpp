@@ -56,7 +56,7 @@ TEST_F(ComponentRegistryTest, AddComponentAutomatically)
     ASSERT_NE(components.find(name_in_registry), components.end());
 }
 
-//! Checks the manifest created for automatically registered component in the ComponentRegistry
+//! Checks the manifest created for a component automatically registered in the ComponentRegistry
 TEST_F(ComponentRegistryTest, AutomaticComponentManifest)
 {
     ComponentRegistry&         registry       = ComponentRegistry::instance();

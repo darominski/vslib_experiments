@@ -1,5 +1,5 @@
 //! @file
-//! @brief File with unit tests of ComponentRegistry class.
+//! @brief File with unit tests of the Component class.
 //! @author Dominik Arominski
 
 #include <gtest/gtest.h>
@@ -52,7 +52,7 @@ class DerivedComponentIntParameter : public Component
     parameters::Parameter<uint32_t> parameter;
 };
 
-//! Checks that a basic component of base class can be created, and is registered
+//! Checks that a basic component of base class can be created, is registered, and can be serialized
 TEST_F(ComponentTest, BasicComponent)
 {
     const std::string component_type = "type";
@@ -96,8 +96,8 @@ TEST_F(ComponentTest, DerivedComponent)
     EXPECT_EQ(serialized_component["parameters"], nlohmann::json::array());
 }
 
-//! Checks that a hierarchical component with base class Component as parent can be created,
-//! and is correctly and serialized registered
+//! Checks that a hierarchical component with Component as the parent can be created,
+//! and is correctly registered and serialized
 TEST_F(ComponentTest, HierarchicalComponent)
 {
     const std::string parent_type = "type";
@@ -121,7 +121,7 @@ TEST_F(ComponentTest, HierarchicalComponent)
     EXPECT_EQ(serialized_component["type"], parent_type);
     EXPECT_EQ(serialized_component["parameters"], nlohmann::json::array());
     EXPECT_EQ(serialized_component["components"].size(), 1);
-    auto const child_components = serialized_component["components"][0];
+    const auto& child_components = serialized_component["components"][0];
     EXPECT_EQ(child_components["name"], child_name);
     EXPECT_EQ(child_components["type"], child_type);
     EXPECT_EQ(child_components["parameters"], nlohmann::json::array());

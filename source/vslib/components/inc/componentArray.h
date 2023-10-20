@@ -16,27 +16,36 @@ namespace vslib::components
     class ComponentArray : public Component
     {
       public:
+        //! Constructor for the ComponentArray component
+        //!
+        //! @param name Name of the object
+        //! @param parent Specifies whether a parent of this object exists, optional: object independent by default
+        //! @param settings All settings that are forwarded to construct Components held in the array
         template<typename... ComponentSettings>
         ComponentArray(const std::string& name, Component* parent = nullptr, ComponentSettings... settings)
             : Component("ComponentArray", name, parent)
         {
             static_assert(std::derived_from<ComponentType, Component>, "ComponentType must be derived from Component");
-            createComponents<ComponentSettings...>(name, 0, settings...);
+            createComponents<ComponentSettings...>(name, 0, settings...);   // 0-based indexing for the array
         }
 
         //! Provides seamless access to the value stored at the provided index
+        //!
+        //! @param index Index of the array element to be accessed
+        //! @return Reference to the Component at the specified address
         const ComponentType& operator[](size_t index) const
         {
             return *m_components[index];
         }
 
-        //! Provides an overloaded begin() to return iterators that automatically dereference shared pointers
+        //! Provides an overloaded begin() to return an iterator that automatically handles access to the held
+        //! Components
         auto begin()
         {
             return IteratorWrapper(m_components.begin());
         }
 
-        // Provides overloaded end() to return iterators that automatically dereference shared pointers
+        // Provides overloaded end() to return an iterator that automatically handles access to the held Components
         auto end()
         {
             return IteratorWrapper(m_components.end());
@@ -59,7 +68,7 @@ namespace vslib::components
         }
 
         // ************************************************************
-        //! Helper class for wrapping dereferencing of the std::unique_ptr stored in the std::array
+        //! Helper class for wrapping dereferencing of the pointers stored in the std::array
         class IteratorWrapper
         {
           public:
@@ -68,7 +77,7 @@ namespace vslib::components
             {
             }
 
-            // Overload operator* to automatically dereference the shared_ptr.
+            // Overload operator* to automatically dereference the pointer to the component.
             ComponentType& operator*()
             {
                 return *(*m_iter);
