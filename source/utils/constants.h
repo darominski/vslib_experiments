@@ -20,8 +20,6 @@ namespace fgc4::utils::constants
     // Constant error code numbers
 
     // arbitrary numbers for testing purposes
-    constexpr uint32_t error_allocation_buffer_overflow = 2000;
-
     constexpr uint32_t error_name_already_used = 1000;
 
     // ************************************************************
