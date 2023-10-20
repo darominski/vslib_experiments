@@ -2,9 +2,6 @@
 //! @brief Method definitions for the ParameterRegistry class.
 //! @author Dominik Arominski
 
-#include <ranges>
-#include <type_traits>
-
 #include "errorMessage.h"
 #include "fmt/format.h"
 #include "parameterRegistry.h"

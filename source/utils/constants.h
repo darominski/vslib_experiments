@@ -22,6 +22,8 @@ namespace fgc4::utils::constants
     // arbitrary numbers for testing purposes
     constexpr uint32_t error_name_already_used = 1000;
 
+    constexpr uint32_t error_allocation_buffer_overflow = 2000;
+
     // ************************************************************
     // Names of supported types for use in FGC Configurator
 

@@ -5,7 +5,6 @@
 #pragma once
 
 #include <algorithm>
-#include <array>
 #include <functional>
 #include <map>
 #include <string>
@@ -13,18 +12,16 @@
 #include "iparameter.h"
 #include "json/json.hpp"
 
-extern unsigned short buffer_switch;   // used to define which is the read buffer in use, values: 0 or 1
-
 namespace vslib::parameters
 {
     class ParameterRegistry
     {
       public:
-        // the registry shall not be assignable nor clonable
-        ParameterRegistry(ParameterRegistry& other)  = delete;
-        ParameterRegistry(ParameterRegistry&& other) = delete;
-        void operator=(const ParameterRegistry&)     = delete;
-        void operator=(const ParameterRegistry&&)    = delete;
+        // The registry is a singleton, thus it is meant to be copied, moved, or assigned to in any way
+        ParameterRegistry(ParameterRegistry&)     = delete;
+        ParameterRegistry(ParameterRegistry&&)    = delete;
+        void operator=(const ParameterRegistry&)  = delete;
+        void operator=(const ParameterRegistry&&) = delete;
         ~ParameterRegistry()   // is not expected to be called, lifetime equal to that of the program
         {
             m_parameters.clear();

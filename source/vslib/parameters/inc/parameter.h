@@ -56,7 +56,17 @@ namespace vslib::parameters
     class Parameter : public IParameter
     {
       public:
+        // The registration of Parameter requires that it cannot be moved, copied, or assigned to from another Parameter
+        // in any way.
+        Parameter(Parameter&)             = delete;   // copy construction is forbidden
+        Parameter(Parameter&&)            = delete;   // move construction is forbidden
+        void operator=(const Parameter&)  = delete;   // copy-assign is forbidden
+        void operator=(const Parameter&&) = delete;   // move-assign is forbidden
+
         //! Constructor for parameters of non-numeric types and thus with no limits.
+        //!
+        //! @param parent Component owning this Parameter
+        //! @param name Name of the Parameter
         Parameter(components::Component& parent, std::string_view name) noexcept
             requires(
                 fgc4::utils::Enumeration<T>
@@ -68,7 +78,10 @@ namespace vslib::parameters
             parent.registerParameter(name, *this);
         }
 
-        //! Constructor overload for parameters with optional numeric-type limits.
+        //! Constructor for parameters with optional numeric-type limits.
+        //!
+        //! @param parent Component owning this Parameter
+        //! @param name Name of the Parameter
         Parameter(
             components::Component& parent, std::string_view name,
             LimitType<T> limit_min = std::numeric_limits<LimitType<T>>::lowest(),
@@ -84,15 +97,6 @@ namespace vslib::parameters
         {
             parent.registerParameter(name, *this);
         };
-
-        // copy construction is forbidden
-        Parameter(Parameter&)             = delete;
-        // move construction is forbidden
-        Parameter(Parameter&&)            = delete;
-        // copy-assign is forbidden
-        void operator=(const Parameter&)  = delete;
-        // move-assign is forbidden
-        void operator=(const Parameter&&) = delete;
 
         // ************************************************************
         // Operator overloads to seamless interactions with held values
@@ -222,7 +226,6 @@ namespace vslib::parameters
         }
 
         // ************************************************************
-        // The code in this section could be a part of a serializing visitor
 
         //! Serializes the Parameter by exposing name, type, and in case of enumerations, all options
         //! applicable to this Parameter type. Calls serializeImpl to handle different types.
@@ -233,7 +236,7 @@ namespace vslib::parameters
         {
             // all parameters have a name and a type that can be fetched the same way
             nlohmann::json serialized_parameter = {{"name", m_name}, {"type", fgc4::utils::getTypeLabel<T>()}};
-            // other type-dependent properties, e.g. size of the stored type needs to be handled individually
+            // other type-dependent properties, e.g. length of the stored type needs to be handled individually
             serialized_parameter.merge_patch(serializeImpl());
             // minimum and maximum numerical limits can be also be serialized, if set
             if (m_limit_min_defined)
@@ -264,14 +267,13 @@ namespace vslib::parameters
         }
 
         // ************************************************************
+        // Methods for synchronizing buffers
 
         //! Copies all contents of a write buffer to the background buffer, which is not currently used.
         void synchroniseWriteBuffer() override
         {
             m_value[buffer_switch ^ 1] = m_value[write_buffer_id];
         }
-
-        // ************************************************************
 
         //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
         void synchroniseReadBuffers() override
@@ -341,7 +343,7 @@ namespace vslib::parameters
         }
 
         // ************************************************************
-        // Methods related to serialization
+        // Methods related to type-dependent serialization
 
         //! Serializes enumerations by providing number of objects of the type ('length') and enumeration values
         //!
