@@ -89,11 +89,10 @@ if(BUILD_TESTS)
   # FMT has to be recompiled here due to use of different compiler than in the upstream CMake
   add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
   include(GoogleTest)
+  enable_testing()
 
   # Include your components and parameters
   add_subdirectory(components)
   add_subdirectory(parameters)
-
-  enable_testing()
 
 endif()

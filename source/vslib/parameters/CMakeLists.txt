@@ -22,7 +22,3 @@ target_include_directories(${APP} PUBLIC
 target_link_libraries(${APP} PUBLIC ${GTEST_LIBRARIES} GTest::gtest pthread dl fmt::fmt)
 target_link_options(${APP} PUBLIC  -Wl,-dynamic-linker,/my-lib/ld-2.33.so -Wl,-rpath,/my-lib)
 target_link_options(${APP} PRIVATE -static -static-libgcc -static-libstdc++)
-
-if(DEFINED CMAKE_CXX_COMPILER)
-    set_target_properties(${APP} PROPERTIES CXX_COMPILER ${CMAKE_CXX_COMPILER})
-endif()
