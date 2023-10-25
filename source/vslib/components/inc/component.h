@@ -60,22 +60,16 @@ namespace vslib::components
         serialize() const noexcept
         {
             nlohmann::json serialized_parameters = nlohmann::json::array();
-            std::for_each(
-                std::cbegin(m_parameters), std::cend(m_parameters),
-                [&serialized_parameters](const auto& parameter)
-                {
-                    serialized_parameters.emplace_back(std::get<1>(parameter).get().serialize());
-                }
-            );
+            for (const auto& parameter : m_parameters)
+            {
+                serialized_parameters.emplace_back(std::get<1>(parameter).get().serialize());
+            }
 
             nlohmann::json serialized_children = nlohmann::json::array();
-            std::for_each(
-                std::cbegin(m_children), std::cend(m_children),
-                [&serialized_children](const auto& child)
-                {
-                    serialized_children.emplace_back(child.get().serialize());
-                }
-            );
+            for (const auto& child : m_children)
+            {
+                serialized_children.emplace_back(child.get().serialize());
+            }
 
             return {
                 {"name", m_name},

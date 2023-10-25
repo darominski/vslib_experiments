@@ -41,15 +41,10 @@ namespace vslib::components
     [[nodiscard("Manifest should not be discarded.")]] json ComponentRegistry::createManifest() const
     {
         json manifest = json::array();
-        std::for_each(
-            std::cbegin(this->m_components), std::cend(this->m_components),
-            [&manifest](const auto& register_entry)
-            {
-                // each component registry entry becomes a JSON entry
-                auto const& component = register_entry.second.get();
-                manifest.push_back(component.serialize());
-            }
-        );
+        for (const auto& component : m_components)
+        {
+            manifest.push_back(component.second.get().serialize());
+        }
         return manifest;
     }
 }   // namespace components

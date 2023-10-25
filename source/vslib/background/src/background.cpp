@@ -84,13 +84,10 @@ namespace vslib::backgroundTask
         }
         else if (commands.is_array())   // multiple commands
         {
-            std::for_each(
-                std::cbegin(commands), std::cend(commands),
-                [](const auto& command)
-                {
-                    executeJsonCommand(command);
-                }
-            );
+            for (const auto& command : commands)
+            {
+                executeJsonCommand(command);
+            }
         }
     }
 
@@ -133,14 +130,10 @@ namespace vslib::backgroundTask
     //! Calls each registered parameter to synchronise read buffers
     void synchroniseReadBuffers()
     {
-        auto const& parameters = parameters::ParameterRegistry::instance().getParameters();
-        std::for_each(
-            parameters.cbegin(), parameters.cend(),
-            [](const auto& parameter_entry)
-            {
-                parameter_entry.second.get().synchroniseReadBuffers();
-            }
-        );
+        for (const auto& parameter : parameters::ParameterRegistry::instance().getParameters())
+        {
+            parameter.second.get().synchroniseReadBuffers();
+        }
     }
 
 }   // namespace backgroundTask
