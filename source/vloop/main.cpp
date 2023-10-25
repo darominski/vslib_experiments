@@ -4,6 +4,7 @@
 #include <cerrno>
 #include <cstring>
 #include <fcntl.h>
+#include <functional>
 #include <iostream>
 #include <unistd.h>
 
@@ -11,6 +12,7 @@
 #include "componentArray.h"
 #include "componentRegistry.h"
 #include "compositePID.h"
+#include "interrupts.h"
 #include "json/json.hpp"
 #include "logString.h"
 #include "parameterRegistry.h"
@@ -27,19 +29,21 @@
 using namespace vslib;
 using namespace fgc4;
 
+namespace user
+{
+    static int counter = 0;
+    void       realTimeTask()
+    {
+        printf("%dth event\n", ++counter);
+
+        usleep(5);   // 5 us
+    }
+
+}   // namespace user
+
 int main()
 {
     bmboot::notifyPayloadStarted();
-
-    try
-    {
-        throw std::runtime_error("TEST");
-    }
-    catch (std::runtime_error& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-
     puts("Hello world from vloop running on cpu1!");
 
     // ************************************************************
@@ -54,30 +58,37 @@ int main()
     puts("Component manifest:");
     backgroundTask::uploadManifest();
 
+    TimerInterrupt timer(user::realTimeTask, 100);
+    timer.start();
+
     int counter = 0;
     while (true)
     {
-        utils::LogString counter_message = "Thread 1 counter: ";
-        puts(counter_message.c_str());
+        if (counter == 50)
+        {
+            timer.stop();
+            break;
+        }
         puts(std::to_string(counter++).c_str());
         // TEST CODE, verbose parameters signalling on thread 1
-        puts("PID1: ");
-        puts(std::to_string(pid1.p).c_str());
-        puts(std::to_string(pid1.i).c_str());
-        puts(std::to_string(pid1.d).c_str());
-        puts("PID3: ");
-        puts(std::to_string(pid3.p).c_str());
-        puts(std::to_string(pid3.i).c_str());
-        puts(std::to_string(pid3.d).c_str());
-        puts("RST: ");
-        for (const auto& val : rst.r)
-        {
-            std::cout << val << " ";
-        }
-        puts("");
+        // puts("PID1: ");
+        // puts(std::to_string(pid1.p).c_str());
+        // puts(std::to_string(pid1.i).c_str());
+        // puts(std::to_string(pid1.d).c_str());
+        // puts("PID3: ");
+        // puts(std::to_string(pid3.p).c_str());
+        // puts(std::to_string(pid3.i).c_str());
+        // puts(std::to_string(pid3.d).c_str());
+        // puts("RST: ");
+        // for (const auto& val : rst.r)
+        // {
+        //     std::cout << val << " ";
+        // }
+        // puts("");
 
         backgroundTask::receiveJsonCommand();
-        usleep(1000000);   // 1 s
+        usleep(500);   // 50 us
+        // usleep(1000000);   // 1 s
     }
 
     return 0;

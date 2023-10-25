@@ -4,13 +4,15 @@
 
 #pragma once
 
+#include <functional>
+
 #include "bmboot.hpp"
 
 namespace bmboot
 {
 
 //! Callback function for the periodic interrupt
-using InterruptHandler = void (*)();
+using InterruptHandler = std::function<void(void)>;
 
 //! Escalate to the monitor after a crash has been detected.
 //! This would not normally be called by user code.

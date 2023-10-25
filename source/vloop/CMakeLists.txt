@@ -18,7 +18,7 @@ add_compile_options(-Wall -O0 -mtune=cortex-a53 -ffunction-sections -fdata-secti
     -fexceptions
     -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
     -Wwrite-strings -Wmissing-declarations
-    -Wredundant-decls -Winline -Wno-long-long
+    -Wredundant-decls -Wno-long-long
     -Wconversion)
 add_compile_definitions(_DIOT=1)
 
@@ -28,6 +28,10 @@ add_link_options(
   -Wl,-gc-sections
   -Wl,-Map=output.map
   )
+
+if (PERFORMANCE_TESTS)
+  add_definitions(-DPERFORMANCE_TESTS)
+endif()
 
 project(${APP} C CXX ASM)
 
@@ -55,7 +59,6 @@ include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
 
 # Include directories for headers
 include_directories(
-    ${CMAKE_SOURCE_DIR}/../vslib # vslib library is stored in this directory
     ${CMAKE_SOURCE_DIR}/../utils # header files shared between fgc4 bare-metal applications
 )
 
