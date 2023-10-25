@@ -23,62 +23,62 @@ namespace fgc4::utils
     // ************************************************************
 
     // helper concept declarations
-    template<class T>
+    template<typename T>
     concept Integral = std::is_integral_v<T>;
 
-    template<class T>
+    template<typename T>
     concept Floating = std::is_floating_point_v<T>;
 
-    template<class T>
+    template<typename T>
     concept NumericType = Floating<T> || Integral<T>;
 
-    template<class T>
+    template<typename T>
     concept Enumeration = std::is_enum_v<T>;
 
     // helper definitions for std::string type
-    template<class T>
+    template<typename T>
     concept ToStringable = requires(T t) {
                                {
                                    std::to_string(t)
                                    } -> std::same_as<std::string>;
                            };
 
-    template<class T>
+    template<typename T>
     concept StringCastable = requires(T t) {
                                  {
                                      std::string(t)
                                      } -> std::same_as<std::string>;
                              };
 
-    template<class T, typename = void>
+    template<typename T, typename = void>
     struct is_string
     {
         static const bool value = false;
     };
 
     // Also covers strings with custom allocators
-    template<class T, class Traits, class Alloc>
+    template<typename T, class Traits, class Alloc>
     struct is_string<std::basic_string<T, Traits, Alloc>, void>
     {
         static const bool value = true;
     };
 
     // helper definitions for std::array parameter types
-    template<class T>
+    template<typename T>
     struct is_std_array : std::false_type
     {
     };
 
-    template<class T, std::size_t N>
+    template<typename T, std::size_t N>
     struct is_std_array<std::array<T, N>> : std::true_type
     {
     };
 
-    template<class T>
+    template<typename T>
     concept StdArray = is_std_array<T>::value;
 
     // helper declaration for static asserts
-    template<class... T>
+    template<typename... T>
     constexpr bool always_false = false;
 
     // ************************************************************
