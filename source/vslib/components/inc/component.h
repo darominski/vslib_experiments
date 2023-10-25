@@ -10,14 +10,20 @@
 
 #include "componentRegistry.h"
 #include "iparameter.h"
-#include "json/json.hpp"
 #include "nonCopyableNonMovable.h"
 #include "parameterRegistry.h"
+#include "staticJson.h"
 
 namespace vslib::components
 {
     class Component : public NonCopyableNonMovable
     {
+        using ParameterReference = std::reference_wrapper<parameters::IParameter>;
+        using ParameterList      = std::vector<std::tuple<std::string, ParameterReference>>;
+        using ComponentReference = std::reference_wrapper<Component>;
+        using ChildrenList       = std::vector<ComponentReference>;
+        using StaticJson         = fgc4::utils::StaticJson;
+
       public:
         //! Creates the Component object with the provided type, name, and inside the hierarchy specified by parent
         //!
@@ -114,11 +120,11 @@ namespace vslib::components
         }
 
       protected:
-        std::string const                                                                    m_component_type;
-        std::string                                                                          m_parent_name{""};
-        std::string const                                                                    m_name;
-        std::vector<std::tuple<std::string, std::reference_wrapper<parameters::IParameter>>> m_parameters;
-        std::vector<std::reference_wrapper<Component>>                                       m_children;
+        std::string const m_component_type;
+        std::string       m_parent_name{""};
+        std::string const m_name;
+        ParameterList     m_parameters;
+        ChildrenList      m_children;
 
         //! Registers this component in the ComponentRegistry
         void registerComponent() noexcept

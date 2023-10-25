@@ -41,9 +41,9 @@ namespace vslib::components
     [[nodiscard("Manifest should not be discarded.")]] json ComponentRegistry::createManifest() const
     {
         json manifest = json::array();
-        for (const auto& component : m_components)
+        for (const auto& [_, component] : m_components)
         {
-            manifest.push_back(component.second.get().serialize());
+            manifest.push_back(component.get().serialize());
         }
         return manifest;
     }
