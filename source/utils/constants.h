@@ -17,14 +17,6 @@ namespace fgc4::utils::constants
     constexpr uint64_t string_memory_pool_size = 1024;          // 1024 objects of type std::string, approximately 32 kb
 
     // ************************************************************
-    // Constant error code numbers
-
-    // arbitrary numbers for testing purposes
-    constexpr uint32_t error_name_already_used = 1000;
-
-    constexpr uint32_t error_allocation_buffer_overflow = 2000;
-
-    // ************************************************************
     // Names of supported types for use in FGC Configurator
 
     constexpr std::string_view bool_type_label = "Bool";

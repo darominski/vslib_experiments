@@ -5,10 +5,12 @@
 
 #include "component.h"
 #include "componentRegistry.h"
+#include "errorCodes.h"
 #include "errorMessage.h"
 #include "fmt/format.h"
 
 using namespace nlohmann;
+using namespace fgc4::utils;
 
 namespace vslib::components
 {
@@ -20,10 +22,10 @@ namespace vslib::components
     {
         if (m_components.find(std::string(component_name)) != m_components.end())
         {
-            fgc4::utils::Error error_message(
+            Error error_message(
                 std::string("Component name: ") + std::string(component_name)
                     + std::string(" already defined in the registry!\n"),
-                fgc4::utils::constants::error_name_already_used
+                errorCodes::name_already_used
             );
             std::cerr << fmt::format("{}", error_message);
             throw std::runtime_error("Component name already exists!");

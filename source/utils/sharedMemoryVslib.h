@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "constants.h"
+#include "errorCodes.h"
 #include "errorMessage.h"
 #include "fmt/format.h"
 #include "json/json.hpp"
@@ -54,7 +55,7 @@ namespace vslib
                 "{}",
                 fgc4::utils::Error(
                     "Error writing JSON: run out of shared memory.\n",
-                    fgc4::utils::constants::error_allocation_buffer_overflow
+                    fgc4::utils::errorCodes::allocation_buffer_overflow
                 )
             );
             throw std::bad_alloc();
