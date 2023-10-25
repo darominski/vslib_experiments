@@ -11,22 +11,14 @@
 #include "componentRegistry.h"
 #include "iparameter.h"
 #include "json/json.hpp"
+#include "nonCopyableNonMovable.h"
 #include "parameterRegistry.h"
 
 namespace vslib::components
 {
-    class Component
+    class Component : public NonCopyableNonMovable
     {
       public:
-        // The registration of Components and their Parameters, requires that are runtime-immutable,
-        // and cannot be moved, copied, or assigned to in any way.
-        Component()                             = delete;   // anonymous Components are forbidden
-        Component(Component&)                   = delete;   // cloning objects is forbidden
-        Component(Component&&)                  = delete;   // moving objects is forbidden
-        Component& operator=(const Component&)  = delete;   // copy-assignment is forbidden
-        Component& operator=(const Component&&) = delete;   // move-assignment is forbidden
-        virtual ~Component()                    = default;
-
         //! Creates the Component object with the provided type, name, and inside the hierarchy specified by parent
         //!
         //! @param component_type Type of the Component

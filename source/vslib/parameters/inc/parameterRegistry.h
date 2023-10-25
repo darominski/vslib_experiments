@@ -11,18 +11,14 @@
 
 #include "iparameter.h"
 #include "json/json.hpp"
+#include "nonCopyableNonMovable.h"
 
 namespace vslib::parameters
 {
-    class ParameterRegistry
+    class ParameterRegistry : public NonCopyableNonMovable
     {
       public:
-        // The registry is a singleton, thus it is meant to be copied, moved, or assigned to in any way
-        ParameterRegistry(ParameterRegistry&)     = delete;
-        ParameterRegistry(ParameterRegistry&&)    = delete;
-        void operator=(const ParameterRegistry&)  = delete;
-        void operator=(const ParameterRegistry&&) = delete;
-        ~ParameterRegistry()   // is not expected to be called, lifetime equal to that of the program
+        ~ParameterRegistry() override   // is not expected to be called, lifetime equal to that of the program
         {
             m_parameters.clear();
         }

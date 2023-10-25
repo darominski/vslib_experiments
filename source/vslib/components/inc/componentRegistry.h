@@ -8,6 +8,7 @@
 #include <string>
 
 #include "json/json.hpp"
+#include "nonCopyableNonMovable.h"
 
 extern unsigned short buffer_switch;
 
@@ -15,15 +16,10 @@ namespace vslib::components
 {
     class Component;   // forward declaration
 
-    class ComponentRegistry
+    class ComponentRegistry : public NonCopyableNonMovable
     {
       public:
-        // The registry is a singleton, so it is not assignable, nor clonable, nor moveable
-        ComponentRegistry(ComponentRegistry& other)  = delete;
-        ComponentRegistry(ComponentRegistry&& other) = delete;
-        void operator=(const ComponentRegistry&)     = delete;
-        void operator=(const ComponentRegistry&&)    = delete;
-        ~ComponentRegistry()   // is not expected to be called, lifetime equal to that of the application
+        ~ComponentRegistry() override   // is not expected to be called, lifetime equal to that of the application
         {
             m_components.clear();
         }

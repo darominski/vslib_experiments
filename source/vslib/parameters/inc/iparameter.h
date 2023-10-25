@@ -8,12 +8,14 @@
 #include <string>
 
 #include "json/json.hpp"
+#include "nonCopyableNonMovable.h"
 #include "staticJson.h"
 #include "warningMessage.h"
 
 namespace vslib::parameters
 {
-    class IParameter
+    class IParameter : public NonCopyableNonMovable
+
     {
       public:
         IParameter(std::string_view name)

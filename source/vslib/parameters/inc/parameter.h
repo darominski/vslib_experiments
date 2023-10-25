@@ -56,13 +56,6 @@ namespace vslib::parameters
     class Parameter : public IParameter
     {
       public:
-        // The registration of Parameter requires that it cannot be moved, copied, or assigned to from another Parameter
-        // in any way.
-        Parameter(Parameter&)             = delete;   // copy construction is forbidden
-        Parameter(Parameter&&)            = delete;   // move construction is forbidden
-        void operator=(const Parameter&)  = delete;   // copy-assign is forbidden
-        void operator=(const Parameter&&) = delete;   // move-assign is forbidden
-
         //! Constructor for parameters of non-numeric types and thus with no limits.
         //!
         //! @param parent Component owning this Parameter
