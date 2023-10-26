@@ -477,6 +477,20 @@ TEST_F(ParameterTest, ParameterSetInvalidTypeValue)
 }
 
 // ************************************************************
+
+//! Tests accessing out-of-bounds value of a array of ints Parameter
+TEST_F(ParameterTest, IntArrayParameterOutOfBounds)
+{
+    MockComponent                 component;   // component to attach parameters to
+    const std::string             parameter_name = "int_array";
+    Parameter<std::array<int, 5>> parameter(component, parameter_name);
+    EXPECT_EQ(parameter.isInitialized(), false);
+
+    // tests the correct exception is thrown from the overloaded operator[]
+    ASSERT_THROW(parameter[6], std::out_of_range);
+}
+
+// ************************************************************
 // Test of serialization of Parameter when value was set via JSON
 
 //! Tests serialization of array of double Parameter when value has been set

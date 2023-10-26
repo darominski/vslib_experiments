@@ -10,11 +10,14 @@
 #include <limits>
 #include <optional>
 #include <ranges>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 
 #include "component.h"
 #include "constants.h"
+#include "errorCodes.h"
+#include "errorMessage.h"
 #include "iparameter.h"
 #include "magic_enum.hpp"
 #include "parameterRegistry.h"
@@ -102,6 +105,16 @@ namespace vslib::parameters
         auto& operator[](uint64_t index) const
             requires fgc4::utils::StdArray<T>
         {
+            if (index >= std::tuple_size_v<T>)
+            {
+                fgc4::utils::Error message(
+                    fmt::
+                        format("Out of bounds access attempted at index: {}, array size: {}", index, std::tuple_size_v<T>),
+                    fgc4::utils::errorCodes::out_of_bounds_access
+                );
+                std::cerr << fmt::format("{}", message);
+                throw std::out_of_range(fmt::format("{}", message));
+            }
             return m_value[buffer_switch][index];
         }
 
