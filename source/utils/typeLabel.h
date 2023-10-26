@@ -6,12 +6,11 @@
 #pragma once
 
 #include <array>
-#include <concepts>
 #include <cstdint>
 #include <string>
-#include <type_traits>
 
 #include "constants.h"
+#include "typeTraits.h"
 
 namespace fgc4::utils
 {
@@ -19,67 +18,6 @@ namespace fgc4::utils
     // Forward declaration of getTypeLabel function template
     template<typename T>
     auto getTypeLabel();
-
-    // ************************************************************
-
-    // helper concept declarations
-    template<typename T>
-    concept Integral = std::is_integral_v<T>;
-
-    template<typename T>
-    concept Floating = std::is_floating_point_v<T>;
-
-    template<typename T>
-    concept NumericType = Floating<T> || Integral<T>;
-
-    template<typename T>
-    concept Enumeration = std::is_enum_v<T>;
-
-    // helper definitions for std::string type
-    template<typename T>
-    concept ToStringable = requires(T t) {
-                               {
-                                   std::to_string(t)
-                                   } -> std::same_as<std::string>;
-                           };
-
-    template<typename T>
-    concept StringCastable = requires(T t) {
-                                 {
-                                     std::string(t)
-                                     } -> std::same_as<std::string>;
-                             };
-
-    template<typename T, typename = void>
-    struct is_string
-    {
-        static const bool value = false;
-    };
-
-    // Also covers strings with custom allocators
-    template<typename T, class Traits, class Alloc>
-    struct is_string<std::basic_string<T, Traits, Alloc>, void>
-    {
-        static const bool value = true;
-    };
-
-    // helper definitions for std::array parameter types
-    template<typename T>
-    struct is_std_array : std::false_type
-    {
-    };
-
-    template<typename T, std::size_t N>
-    struct is_std_array<std::array<T, N>> : std::true_type
-    {
-    };
-
-    template<typename T>
-    concept StdArray = is_std_array<T>::value;
-
-    // helper declaration for static asserts
-    template<typename... T>
-    constexpr bool always_false = false;
 
     // ************************************************************
 

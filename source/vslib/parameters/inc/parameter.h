@@ -61,11 +61,7 @@ namespace vslib::parameters
         //! @param parent Component owning this Parameter
         //! @param name Name of the Parameter
         Parameter(components::Component& parent, std::string_view name) noexcept
-            requires(
-                fgc4::utils::Enumeration<T>
-                || !fgc4::utils::NumericType<T>
-                    && !(fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>)
-            )
+            requires fgc4::utils::NonNumeric<T>
             : IParameter(name)
         {
             parent.registerParameter(name, *this);
@@ -80,8 +76,7 @@ namespace vslib::parameters
             LimitType<T> limit_min = std::numeric_limits<LimitType<T>>::lowest(),
             LimitType<T> limit_max = std::numeric_limits<LimitType<T>>::max()
         )
-            requires(fgc4::utils::NumericType<T>
-                     || (fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>))
+            requires fgc4::utils::Numeric<T>
             : IParameter(name),
               m_limit_min{limit_min},
               m_limit_max{limit_max},
@@ -159,10 +154,7 @@ namespace vslib::parameters
         //!
         //! @return Lower limit of allowed stored value
         [[nodiscard]] const LimitType<T>& getLimitMin() const
-            requires(
-                fgc4::utils::NumericType<T>
-                || (fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>)
-            )
+            requires fgc4::utils::Numeric<T>
         {
             return m_limit_min;
         }
@@ -171,10 +163,7 @@ namespace vslib::parameters
         //!
         //! @return Upper limit of allowed stored value
         [[nodiscard]] const LimitType<T>& getLimitMax() const
-            requires(
-                fgc4::utils::NumericType<T>
-                || (fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>)
-            )
+            requires fgc4::utils::Numeric<T>
         {
             return m_limit_max;
         }
@@ -291,7 +280,7 @@ namespace vslib::parameters
         //! @param value New parameter values to be checked
         //! @return Warning with relevant information if check not successful, nothing otherwise
         std::optional<fgc4::utils::Warning> checkLimits(T value) const noexcept
-            requires(fgc4::utils::StdArray<T> && fgc4::utils::NumericType<typename T::value_type>)
+            requires fgc4::utils::NumericArray<T>
         {
             // check if all of the provided values fit in the limits
             for (auto const& element : value)
@@ -314,7 +303,7 @@ namespace vslib::parameters
         //! @param value New parameter value to be checked
         //! @return Warning with relevant information if check not successful, nothing otherwise
         std::optional<fgc4::utils::Warning> checkLimits(T value) const noexcept
-            requires std::is_arithmetic_v<T>
+            requires fgc4::utils::NumericScalar<T>
         {
             if (value < m_limit_min || value > m_limit_max)
             {
@@ -345,7 +334,7 @@ namespace vslib::parameters
         serializeImpl() const noexcept
             requires fgc4::utils::Enumeration<T>
         {
-            nlohmann::json serialized_parameter
+            StaticJson serialized_parameter
                 = {{"length", magic_enum::enum_count<T>()}, {"fields", magic_enum::enum_names<T>()}};
             if (m_initialized)
             {
@@ -365,7 +354,7 @@ namespace vslib::parameters
         serializeImpl() const noexcept
             requires fgc4::utils::StdArray<T>
         {
-            nlohmann::json serialized_parameter = {{"length", std::tuple_size_v<T>}};
+            StaticJson serialized_parameter = {{"length", std::tuple_size_v<T>}};
             if (m_initialized)
             {
                 serialized_parameter["value"] = m_value[buffer_switch];
@@ -382,7 +371,7 @@ namespace vslib::parameters
         //! @return JSON object with information about the stored std::array
         [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
         serializeImpl() const noexcept
-            requires fgc4::utils::is_string<T>::value
+            requires fgc4::utils::String<T>
         {
             nlohmann::json serialized_parameter = {{"length", m_value[buffer_switch].size()}};
             if (m_initialized)
@@ -401,7 +390,7 @@ namespace vslib::parameters
         //! @return JSON object with informaton about the stored numerical values
         [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
         serializeImpl() const noexcept
-            requires fgc4::utils::NumericType<T>
+            requires fgc4::utils::NumericScalar<T>
         {
             nlohmann::json serialized_parameter = {{"length", 1}};
             if (m_initialized)

@@ -12,4 +12,4 @@ namespace fgc4::utils::errorCodes
     constexpr uint32_t name_already_used = 1000;
 
     constexpr uint32_t allocation_buffer_overflow = 2000;
-}   // fgc4::utils::errorCodes
+}   // namespace fgc4::utils::errorCodes
