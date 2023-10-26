@@ -16,7 +16,8 @@ add_executable(${APP}
 target_include_directories(${APP} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/inc
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/../utils/inc # VSlib-only utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../utils  # FCG4-wide utils
     ${LIBRARIES_HOME}/json-3.11.2
     ${LIBRARIES_HOME}/magic_enum-0.9.3
 )
