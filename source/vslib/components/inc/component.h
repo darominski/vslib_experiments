@@ -138,4 +138,4 @@ namespace vslib::components
     // Constant for denoting that the component constructed is independent (has no parents)
     constexpr Component* independent_component = nullptr;
 
-}   // namespace component
+}   // namespace vslib::components

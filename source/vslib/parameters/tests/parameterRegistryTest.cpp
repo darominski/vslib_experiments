@@ -20,7 +20,7 @@ class ParameterRegistryTest : public ::testing::Test
         // cleans up the registry so every test starts anew, otherwise
         // the registry would persist between tests
         ParameterRegistry& registry = ParameterRegistry::instance();
-        registry.~ParameterRegistry();
+        registry.clearRegistry();
     }
 
     void TearDown() override

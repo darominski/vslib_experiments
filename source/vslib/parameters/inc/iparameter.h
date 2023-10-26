@@ -36,4 +36,4 @@ namespace vslib::parameters
       protected:
         const std::string m_name;   // Unique ID indicating component type, its name and the variable name
     };
-}
+}   // namespace vslib::parameters

@@ -18,12 +18,9 @@ namespace vslib::components
 
     class ComponentRegistry : public NonCopyableNonMovable
     {
-      public:
-        ~ComponentRegistry() override   // is not expected to be called, lifetime equal to that of the application
-        {
-            m_components.clear();
-        }
+        using ComponentReference = std::reference_wrapper<Component>;
 
+      public:
         //! Provides an instance of the singleton registry
         //!
         //! @return Singular instance of the component registry
@@ -44,10 +41,15 @@ namespace vslib::components
 
         void addToRegistry(std::string_view, Component&);
 
+        void clearRegistry() noexcept
+        {
+            m_components.clear();
+        }
+
         fgc4::utils::StaticJson createManifest() const;
 
       private:
         ComponentRegistry() = default;
-        std::map<std::string, std::reference_wrapper<Component>> m_components;   // holds all independent components
+        std::map<std::string, ComponentReference> m_components;   // holds all independent components
     };
-}   // namespace components
+}   // namespace vslib::components

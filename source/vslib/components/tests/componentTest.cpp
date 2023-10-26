@@ -21,9 +21,9 @@ class ComponentTest : public ::testing::Test
         // cleans up the registries so every test starts anew, otherwise
         // they would persist between tests
         ComponentRegistry& component_registry = ComponentRegistry::instance();
-        component_registry.~ComponentRegistry();
+        component_registry.clearRegistry();
         parameters::ParameterRegistry& parameter_registry = parameters::ParameterRegistry::instance();
-        parameter_registry.~ParameterRegistry();
+        parameter_registry.clearRegistry();
     }
 
     void TearDown() override

@@ -258,8 +258,6 @@ namespace vslib::parameters
             m_value[buffer_switch ^ 1] = m_value[write_buffer_id];
         }
 
-        // ************************************************************
-
         //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
         void synchroniseReadBuffers() override
         {
@@ -471,4 +469,4 @@ namespace vslib::parameters
             return {};
         }
     };
-}   // parameters namespace
+}   // namespace vslib::parameters

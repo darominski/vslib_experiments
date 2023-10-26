@@ -20,7 +20,7 @@ class ComponentArrayTest : public ::testing::Test
         // cleans up the registry so every test starts anew, otherwise
         // the registry would persist between tests
         ComponentRegistry& registry = ComponentRegistry::instance();
-        registry.~ComponentRegistry();
+        registry.clearRegistry();
     }
 
     void TearDown() override

@@ -17,6 +17,8 @@ namespace vslib::parameters
 {
     class ParameterRegistry : public NonCopyableNonMovable
     {
+        using ParameterReference = std::reference_wrapper<IParameter>;
+
       public:
         ~ParameterRegistry() override   // is not expected to be called, lifetime equal to that of the program
         {
@@ -42,8 +44,13 @@ namespace vslib::parameters
 
         void addToRegistry(std::string_view, IParameter&);
 
+        void clearRegistry() noexcept
+        {
+            m_parameters.clear();
+        }
+
       private:
         ParameterRegistry() = default;
-        std::map<std::string, std::reference_wrapper<IParameter>> m_parameters;
+        std::map<std::string, ParameterReference> m_parameters;
     };
 }   // namespace parameters

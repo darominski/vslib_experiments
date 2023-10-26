@@ -46,4 +46,4 @@ namespace vslib::components
         }
         return manifest;
     }
-}   // namespace components
+}   // namespace vslib::components
