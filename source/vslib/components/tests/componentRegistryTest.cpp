@@ -66,12 +66,13 @@ TEST_F(ComponentRegistryTest, AutomaticComponentManifest)
 
     auto& components = registry.getComponents();
     ASSERT_EQ(components.size(), 1);
-    nlohmann::json manifest
-        = {{{"components", nlohmann::json::array()},
-            {"name", "TestComponent"},
+    nlohmann::json expected_manifest
+        = {{{"name", "TestComponent"},
+            {"type", "TestComponentType"},
             {"parameters", nlohmann::json::array()},
-            {"type", "TestComponentType"}}};
-    EXPECT_EQ(registry.createManifest(), manifest);
+            {"components", nlohmann::json::array()}}};
+    nlohmann::json created_manifest = registry.createManifest();
+    EXPECT_EQ(created_manifest, expected_manifest);
 }
 
 //! Checks explicitly adding a component to the ComponentRegistry
