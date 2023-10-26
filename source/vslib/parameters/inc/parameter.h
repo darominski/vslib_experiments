@@ -66,7 +66,7 @@ namespace vslib::parameters
         //! @param name Name of the Parameter
         Parameter(components::Component& parent, std::string_view name) noexcept
             requires fgc4::utils::NonNumeric<T>
-            : IParameter(name)
+            : m_name{name}
         {
             parent.registerParameter(name, *this);
         }
@@ -81,7 +81,7 @@ namespace vslib::parameters
             LimitType<T> limit_max = std::numeric_limits<LimitType<T>>::max()
         )
             requires fgc4::utils::Numeric<T>
-            : IParameter(name),
+            : m_name{name},
               m_limit_min{limit_min},
               m_limit_max{limit_max},
               m_limit_min_defined{limit_min != std::numeric_limits<LimitType<T>>::lowest()},
@@ -162,6 +162,14 @@ namespace vslib::parameters
         [[nodiscard]] bool isInitialized() const
         {
             return m_initialized;
+        }
+
+        //! Getter for the Parameter name
+        //!
+        //! @return Parameter name
+        [[nodiscard]] std::string_view getName() const
+        {
+            return m_name;
         }
 
         //! Getter for the lower limit of the held value
@@ -278,6 +286,7 @@ namespace vslib::parameters
         }
 
       private:
+        const std::string             m_name;   // Unique ID indicating component type, its name and the variable name
         std::array<T, number_buffers> m_value;
         LimitType<T>                  m_limit_min;
         LimitType<T>                  m_limit_max;
