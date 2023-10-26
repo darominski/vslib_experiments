@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <string>
 
-#include "json/json.hpp"
 #include "nonCopyableNonMovable.h"
+#include "staticJson.h"
 
 extern unsigned short buffer_switch;
 
@@ -44,7 +44,7 @@ namespace vslib::components
 
         void addToRegistry(std::string_view, Component&);
 
-        nlohmann::json createManifest() const;
+        fgc4::utils::StaticJson createManifest() const;
 
       private:
         ComponentRegistry() = default;

@@ -7,7 +7,6 @@
 #include <optional>
 #include <string>
 
-#include "json/json.hpp"
 #include "nonCopyableNonMovable.h"
 #include "staticJson.h"
 #include "warningMessage.h"
@@ -30,7 +29,7 @@ namespace vslib::parameters
             return m_name;
         }
         virtual std::optional<fgc4::utils::Warning> setJsonValue(const fgc4::utils::StaticJson&) = 0;
-        virtual nlohmann::json                      serialize() const noexcept                   = 0;
+        virtual fgc4::utils::StaticJson             serialize() const noexcept                   = 0;
         virtual void                                synchroniseWriteBuffer()                     = 0;
         virtual void                                synchroniseReadBuffers()                     = 0;
 

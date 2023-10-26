@@ -62,26 +62,27 @@ namespace vslib::components
         //! of the entire hierarchy.
         //!
         //! @return Returns a fully-serialized component as a JSON object
-        [[nodiscard("Serialized component information should not be discarded")]] nlohmann::json
-        serialize() const noexcept
+        [[nodiscard("Serialized component information discarded")]] StaticJson serialize() const noexcept
         {
-            nlohmann::json serialized_parameters = nlohmann::json::array();
+            StaticJson serialized_component  = nlohmann::json::array();
+            StaticJson serialized_parameters = nlohmann::json::array();
             for (const auto& parameter : m_parameters)
             {
                 serialized_parameters.emplace_back(std::get<1>(parameter).get().serialize());
             }
 
-            nlohmann::json serialized_children = nlohmann::json::array();
+            StaticJson serialized_children = nlohmann::json::array();
             for (const auto& child : m_children)
             {
                 serialized_children.emplace_back(child.get().serialize());
             }
 
-            return {
-                {"name", m_name},
-                {"type", m_component_type},
-                {"parameters", serialized_parameters},
-                {"components", serialized_children}};
+            serialized_component
+                = {{"name", m_name},
+                   {"type", m_component_type},
+                   {"parameters", serialized_parameters},
+                   {"components", serialized_children}};
+            return serialized_component;
         }
 
         //! Provides the name of this component

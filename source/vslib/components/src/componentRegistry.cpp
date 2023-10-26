@@ -9,7 +9,6 @@
 #include "errorMessage.h"
 #include "fmt/format.h"
 
-using namespace nlohmann;
 using namespace fgc4::utils;
 
 namespace vslib::components
@@ -38,9 +37,9 @@ namespace vslib::components
     //! parameterRegistry.
     //!
     //! @returns JSON object with all initialized components and their settable parameters.
-    [[nodiscard("Manifest should not be discarded.")]] json ComponentRegistry::createManifest() const
+    [[nodiscard("Manifest should not be discarded.")]] StaticJson ComponentRegistry::createManifest() const
     {
-        json manifest = json::array();
+        StaticJson manifest = nlohmann::json::array();
         for (const auto& [_, component] : m_components)
         {
             manifest.push_back(component.get().serialize());

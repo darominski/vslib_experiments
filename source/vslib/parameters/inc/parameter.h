@@ -16,7 +16,6 @@
 #include "component.h"
 #include "constants.h"
 #include "iparameter.h"
-#include "json/json.hpp"
 #include "magic_enum.hpp"
 #include "parameterRegistry.h"
 #include "staticJson.h"
@@ -55,6 +54,8 @@ namespace vslib::parameters
     template<typename T>
     class Parameter : public IParameter
     {
+        using StaticJson = fgc4::utils::StaticJson;
+
       public:
         //! Constructor for parameters of non-numeric types and thus with no limits.
         //!
@@ -213,11 +214,11 @@ namespace vslib::parameters
         //! applicable to this Parameter type. Calls serializeImpl to handle different types.
         //!
         //! @return JSON object with fully-serialized parameter
-        [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
+        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
         serialize() const noexcept override
         {
             // all parameters have a name and a type that can be fetched the same way
-            nlohmann::json serialized_parameter = {{"name", m_name}, {"type", fgc4::utils::getTypeLabel<T>()}};
+            StaticJson serialized_parameter = {{"name", m_name}, {"type", fgc4::utils::getTypeLabel<T>()}};
             // other type-dependent properties, e.g. length of the stored type needs to be handled individually
             serialized_parameter.merge_patch(serializeImpl());
             // minimum and maximum numerical limits can be also be serialized, if set
@@ -238,7 +239,7 @@ namespace vslib::parameters
         //!
         //! @param json_value JSON-serialized value to be set
         //! @return If not successful, returns Warning with relevant information, nothing otherwise
-        std::optional<fgc4::utils::Warning> setJsonValue(const fgc4::utils::StaticJson& json_value) override
+        std::optional<fgc4::utils::Warning> setJsonValue(const StaticJson& json_value) override
         {
             auto const& maybe_warning = setJsonValueImpl(json_value);
             if (!m_initialized && !maybe_warning.has_value())
@@ -256,6 +257,8 @@ namespace vslib::parameters
         {
             m_value[buffer_switch ^ 1] = m_value[write_buffer_id];
         }
+
+        // ************************************************************
 
         //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
         void synchroniseReadBuffers() override
@@ -330,7 +333,7 @@ namespace vslib::parameters
         //! Serializes enumerations by providing number of objects of the type ('length') and enumeration values
         //!
         //! @return JSON object with information about the stored enumeration
-        [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
+        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
         serializeImpl() const noexcept
             requires fgc4::utils::Enumeration<T>
         {
@@ -350,7 +353,7 @@ namespace vslib::parameters
         //! Serializes std::array type by exposing the length of the array
         //!
         //! @return JSON object with information about the stored std::array
-        [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
+        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
         serializeImpl() const noexcept
             requires fgc4::utils::StdArray<T>
         {
@@ -369,11 +372,11 @@ namespace vslib::parameters
         //! Serializes std::string type by exposing the length of the string
         //!
         //! @return JSON object with information about the stored std::array
-        [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
+        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
         serializeImpl() const noexcept
             requires fgc4::utils::String<T>
         {
-            nlohmann::json serialized_parameter = {{"length", m_value[buffer_switch].size()}};
+            StaticJson serialized_parameter = {{"length", m_value[buffer_switch].size()}};
             if (m_initialized)
             {
                 serialized_parameter["value"] = m_value[buffer_switch];
@@ -388,11 +391,11 @@ namespace vslib::parameters
         //! Serializes numeric types: integers and floating point numbers
         //!
         //! @return JSON object with informaton about the stored numerical values
-        [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
+        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
         serializeImpl() const noexcept
             requires fgc4::utils::NumericScalar<T>
         {
-            nlohmann::json serialized_parameter = {{"length", 1}};
+            StaticJson serialized_parameter = {{"length", 1}};
             if (m_initialized)
             {
                 serialized_parameter["value"] = m_value[buffer_switch];
@@ -407,7 +410,7 @@ namespace vslib::parameters
         //! Default overload for catching unsupported types. Blocks compilation for those types
         //!
         //! @return Empty JSON for unsupported type
-        [[nodiscard("Serialization output of parameter should not be discarded")]] nlohmann::json
+        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
         serializeImpl() const noexcept
         {
             static_assert(fgc4::utils::always_false<T>, "Type currently not serializable.");
@@ -421,7 +424,7 @@ namespace vslib::parameters
         //!
         //! @param json_value JSON object containing new parameter value to be set
         //! @return If not successful returns Warning with relevant information, nothing otherwise
-        std::optional<fgc4::utils::Warning> setJsonValueImpl(const fgc4::utils::StaticJson& json_value)
+        std::optional<fgc4::utils::Warning> setJsonValueImpl(const StaticJson& json_value)
         {
             T command_value;
             try   // try to extract the value stored in json_value
@@ -449,7 +452,7 @@ namespace vslib::parameters
         //!
         //! @param json_value JSON object containing new parameter value to be set
         //! @return If not successful returns Warning with relevant information, nothing otherwise
-        std::optional<fgc4::utils::Warning> setJsonValueImpl(const fgc4::utils::StaticJson& json_value)
+        std::optional<fgc4::utils::Warning> setJsonValueImpl(const StaticJson& json_value)
             requires fgc4::utils::Enumeration<T>
         {
             // json_value is then a string, try to cast to that:

@@ -20,7 +20,8 @@ namespace vslib::backgroundTask
     //! Creates and uploads the component and parameter manifest to the shared memory (and standard output)
     void uploadManifest()
     {
-        auto const& json_component_registry = components::ComponentRegistry::instance().createManifest();
+        auto json_component_registry = StaticJsonFactory::getJsonObject();
+        json_component_registry      = components::ComponentRegistry::instance().createManifest();
         std::cout << json_component_registry.dump() << "\n";
         writeJsonToSharedMemory(json_component_registry, &(SHARED_MEMORY));
     }
