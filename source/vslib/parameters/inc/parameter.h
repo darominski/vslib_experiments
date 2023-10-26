@@ -232,7 +232,7 @@ namespace vslib::parameters
         // ************************************************************
 
         //! Serializes the Parameter by exposing name, type, and in case of enumerations, all options
-        //! applicable to this Parameter type. Calls serializeImpl to handle different types.
+        //! applicable to this Parameter type. Calls serializeSpecific to handle different types.
         //!
         //! @return JSON object with fully-serialized parameter
         [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
@@ -241,7 +241,7 @@ namespace vslib::parameters
             // all parameters have a name and a type that can be fetched the same way
             StaticJson serialized_parameter = {{"name", m_name}, {"type", fgc4::utils::getTypeLabel<T>()}};
             // other type-dependent properties, e.g. length of the stored type needs to be handled individually
-            serialized_parameter.merge_patch(serializeImpl());
+            serialized_parameter.merge_patch(serializeSpecific());
             // minimum and maximum numerical limits can be also be serialized, if set
             if (m_limit_min_defined)
             {
@@ -354,7 +354,7 @@ namespace vslib::parameters
         //!
         //! @return JSON object with information about the stored enumeration
         [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
-        serializeImpl() const noexcept
+        serializeSpecific() const noexcept
             requires fgc4::utils::Enumeration<T>
         {
             StaticJson serialized_parameter
@@ -374,7 +374,7 @@ namespace vslib::parameters
         //!
         //! @return JSON object with information about the stored std::array
         [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
-        serializeImpl() const noexcept
+        serializeSpecific() const noexcept
             requires fgc4::utils::StdArray<T>
         {
             StaticJson serialized_parameter = {{"length", std::tuple_size_v<T>}};
@@ -393,7 +393,7 @@ namespace vslib::parameters
         //!
         //! @return JSON object with information about the stored std::array
         [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
-        serializeImpl() const noexcept
+        serializeSpecific() const noexcept
             requires fgc4::utils::String<T>
         {
             StaticJson serialized_parameter = {{"length", m_value[buffer_switch].size()}};
@@ -412,7 +412,7 @@ namespace vslib::parameters
         //!
         //! @return JSON object with informaton about the stored numerical values
         [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
-        serializeImpl() const noexcept
+        serializeSpecific() const noexcept
             requires fgc4::utils::NumericScalar<T>
         {
             StaticJson serialized_parameter = {{"length", 1}};
@@ -431,7 +431,7 @@ namespace vslib::parameters
         //!
         //! @return Empty JSON for unsupported type
         [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
-        serializeImpl() const noexcept
+        serializeSpecific() const noexcept
         {
             static_assert(fgc4::utils::always_false<T>, "Type currently not serializable.");
             return {};
