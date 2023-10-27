@@ -10,8 +10,6 @@
 #include "nonCopyableNonMovable.h"
 #include "staticJson.h"
 
-extern unsigned short buffer_switch;
-
 namespace vslib::components
 {
     class Component;   // forward declaration

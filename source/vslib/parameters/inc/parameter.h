@@ -9,11 +9,11 @@
 #include <concepts>
 #include <limits>
 #include <optional>
-#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
 
+#include "bufferSwitch.h"
 #include "component.h"
 #include "constants.h"
 #include "errorCodes.h"
@@ -24,8 +24,6 @@
 #include "staticJson.h"
 #include "typeLabel.h"
 #include "warningMessage.h"
-
-inline unsigned short buffer_switch = 0;   // used to define which is the read buffer in use, values: 0 or 1
 
 namespace vslib::parameters
 {
@@ -96,7 +94,7 @@ namespace vslib::parameters
         //! Provides the access to the value and performs an implicit conversion to the desired type
         operator T() const
         {
-            return m_value[buffer_switch];
+            return m_value[BufferSwitch::getState()];
         }
 
         //! Provides element-access to the values stored in the value, provided the type stored is a std::array
@@ -115,7 +113,7 @@ namespace vslib::parameters
                 std::cerr << fmt::format("{}", message);
                 throw std::out_of_range(fmt::format("{}", message));
             }
-            return m_value[buffer_switch][index];
+            return m_value[BufferSwitch::getState()][index];
         }
 
         //! Provides ordering for the Parameters, allowing to compare them to interact as if they were of the stored
@@ -126,8 +124,9 @@ namespace vslib::parameters
         {
             // parameters are compared based on the values stored
             // in the currently active buffer
-            auto const& lhs = this->m_value[buffer_switch];
-            auto const& rhs = other.m_value[buffer_switch];
+            auto const& buffer_switch = BufferSwitch::getState();
+            auto const& lhs           = this->m_value[buffer_switch];
+            auto const& rhs           = other.m_value[buffer_switch];
             if (lhs == rhs)
             {
                 return std::partial_ordering::equivalent;
@@ -153,7 +152,7 @@ namespace vslib::parameters
         //! @return Value stored cast explictly to the underlying type
         [[nodiscard]] const T& value() const
         {
-            return m_value[buffer_switch];
+            return m_value[BufferSwitch::getState()];
         }
 
         //! Getter for the initialization flag of the Parameter
@@ -199,7 +198,7 @@ namespace vslib::parameters
         auto begin()
             requires fgc4::utils::StdArray<T>
         {
-            return m_value[buffer_switch].begin();
+            return m_value[BufferSwitch::getState()].begin();
         }
 
         //! Provides connection to cbegin() method of underlying container
@@ -208,7 +207,7 @@ namespace vslib::parameters
         auto const cbegin() const
             requires fgc4::utils::StdArray<T>
         {
-            return m_value[buffer_switch].cbegin();
+            return m_value[BufferSwitch::getState()].cbegin();
         }
 
         //! Provides connection to end() method of underlying container
@@ -217,7 +216,7 @@ namespace vslib::parameters
         auto end()
             requires fgc4::utils::StdArray<T>
         {
-            return m_value[buffer_switch].end();
+            return m_value[BufferSwitch::getState()].end();
         }
 
         //! Provides connection to cend() method of underlying container
@@ -226,7 +225,7 @@ namespace vslib::parameters
         auto const cend() const
             requires fgc4::utils::StdArray<T>
         {
-            return m_value[buffer_switch].cend();
+            return m_value[BufferSwitch::getState()].cend();
         }
 
         // ************************************************************
@@ -276,12 +275,13 @@ namespace vslib::parameters
         //! Copies all contents of a write buffer to the background buffer, which is not currently used.
         void synchroniseWriteBuffer() override
         {
-            m_value[buffer_switch ^ 1] = m_value[write_buffer_id];
+            m_value[BufferSwitch::getState() ^ 1] = m_value[write_buffer_id];
         }
 
         //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
         void synchroniseReadBuffers() override
         {
+            const auto& buffer_switch  = BufferSwitch::getState();
             m_value[buffer_switch ^ 1] = m_value[buffer_switch];
         }
 
@@ -361,7 +361,7 @@ namespace vslib::parameters
                 = {{"length", magic_enum::enum_count<T>()}, {"fields", magic_enum::enum_names<T>()}};
             if (m_initialized)
             {
-                serialized_parameter["value"] = magic_enum::enum_name(m_value[buffer_switch]);
+                serialized_parameter["value"] = magic_enum::enum_name(m_value[BufferSwitch::getState()]);
             }
             else
             {
@@ -380,7 +380,7 @@ namespace vslib::parameters
             StaticJson serialized_parameter = {{"length", std::tuple_size_v<T>}};
             if (m_initialized)
             {
-                serialized_parameter["value"] = m_value[buffer_switch];
+                serialized_parameter["value"] = m_value[BufferSwitch::getState()];
             }
             else
             {
@@ -396,10 +396,10 @@ namespace vslib::parameters
         serializeSpecific() const noexcept
             requires fgc4::utils::String<T>
         {
-            StaticJson serialized_parameter = {{"length", m_value[buffer_switch].size()}};
+            StaticJson serialized_parameter = {{"length", m_value[BufferSwitch::getState()].size()}};
             if (m_initialized)
             {
-                serialized_parameter["value"] = m_value[buffer_switch];
+                serialized_parameter["value"] = m_value[BufferSwitch::getState()];
             }
             else
             {
@@ -418,7 +418,7 @@ namespace vslib::parameters
             StaticJson serialized_parameter = {{"length", 1}};
             if (m_initialized)
             {
-                serialized_parameter["value"] = m_value[buffer_switch];
+                serialized_parameter["value"] = m_value[BufferSwitch::getState()];
             }
             else
             {

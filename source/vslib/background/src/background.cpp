@@ -6,13 +6,13 @@
 #include <iostream>
 
 #include "background.h"
+#include "bufferSwitch.h"
 #include "fmt/format.h"
 #include "parameter.h"
 #include "parameterRegistry.h"
 #include "sharedMemoryVslib.h"
 #include "warningMessage.h"
 
-using namespace nlohmann;
 using namespace fgc4::utils;
 
 namespace vslib::backgroundTask
@@ -47,7 +47,7 @@ namespace vslib::backgroundTask
         {
             // if no new data came in the previous iteration, assume it is safe to switch the read buffers now and
             // synchronise them
-            buffer_switch ^= 1;   // flip the buffer pointer of all settable parameters
+            parameters::BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
             // synchronise new background to new active buffer
             synchroniseReadBuffers();
             received_new_data = false;   // buffers updated, no new data available
