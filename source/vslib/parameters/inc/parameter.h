@@ -110,7 +110,6 @@ namespace vslib::parameters
                         format("Out of bounds access attempted at index: {}, array size: {}\n.", index, std::tuple_size_v<T>),
                     fgc4::utils::errorCodes::out_of_bounds_access
                 );
-                std::cerr << fmt::format("{}", message);
                 throw std::out_of_range(fmt::format("{}", message));
             }
             return m_value[BufferSwitch::getState()][index];
@@ -314,7 +313,6 @@ namespace vslib::parameters
                         "Value in the provided array: {} is outside the limits: {}, {}!\n", element, m_limit_min,
                         m_limit_max
                     ));
-                    std::cerr << fmt::format("{}", message);
                     return message;
                 }
             }

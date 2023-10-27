@@ -18,11 +18,15 @@ namespace fgc4::utils
         Warning(std::string_view _warning_message)
             : warning_str{_warning_message}
         {
+            std::cerr << fmt::format("Warning: {}", warning_str);
         }
 
         LogString warning_str;
     };
 }
+
+// ************************************************************
+// Convenience formatter for the Warning class
 
 template<>
 struct fmt::formatter<fgc4::utils::Warning>

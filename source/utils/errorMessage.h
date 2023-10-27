@@ -19,6 +19,7 @@ namespace fgc4::utils
             : error_str{_error_msg},
               error_code{_error_code}
         {
+            std::cerr << fmt::format("Error [{}]: {}", error_code, error_str);
         }
 
         explicit Error(std::string_view error_msg)
@@ -30,6 +31,9 @@ namespace fgc4::utils
         std::size_t error_code;
     };
 }
+
+// ************************************************************
+// Convenience formatter for the Error class
 
 template<>
 struct fmt::formatter<fgc4::utils::Error>

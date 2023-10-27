@@ -25,7 +25,6 @@ namespace vslib::parameters
                     + std::string(" already defined in the registry!\n"),
                 errorCodes::name_already_used
             );
-            std::cerr << fmt::format("{}", error_message);
             throw std::runtime_error("Parameter name already exists!");
         }
         m_parameters.emplace(parameter_name, parameter_reference);

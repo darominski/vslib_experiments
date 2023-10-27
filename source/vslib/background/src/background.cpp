@@ -7,7 +7,6 @@
 
 #include "background.h"
 #include "bufferSwitch.h"
-#include "fmt/format.h"
 #include "parameter.h"
 #include "parameterRegistry.h"
 #include "sharedMemoryVslib.h"
@@ -63,13 +62,11 @@ namespace vslib::backgroundTask
         if (!command.contains("name"))
         {
             const Warning message("Command must contain 'name'.\n");
-            std::cerr << fmt::format("{}", message);
             valid = false;
         }
         else if (!command.contains("value"))
         {
-            const Warning message("Command must value 'name'.\n");
-            std::cerr << fmt::format("{}", message);
+            const Warning message("Command must container 'value'.\n");
             valid = false;
         }
         return valid;
@@ -102,7 +99,6 @@ namespace vslib::backgroundTask
         if (!validateJsonCommand(command))
         {
             const Warning messsage("Command invalid, ignored.\n");
-            std::cerr << fmt::format("{}", messsage);
             return;
         }
         std::string const parameter_name     = command["name"];
@@ -111,17 +107,12 @@ namespace vslib::backgroundTask
         if (parameter == parameter_registry.end())
         {
             const Warning messsage("Parameter ID: " + parameter_name + " not found. Command ignored.\n");
-            std::cerr << fmt::format("{}", messsage);
             return;
         }
 
         // execute the command, parameter will handle the validation of provided value.
         auto const result = (*parameter).second.get().setJsonValue(command["value"]);
-        if (result.has_value())   // Warning, need to capture the message
-        {
-            std::cerr << fmt::format("{}", result.value());
-        }
-        else   // success
+        if (!result.has_value())   // success, otherwise: Warning message already logged
         {
             // synchronise the write buffer with the background buffer
             (*parameter).second.get().synchroniseWriteBuffer();
