@@ -17,11 +17,11 @@ using namespace fgc4::utils;
 
 namespace vslib::backgroundTask
 {
-    //! Creates and uploads the component and parameter manifest to the shared memory (and standard output)
-    void uploadManifest()
+    //! Creates and uploads the component and parameter map to the shared memory (and standard output)
+    void uploadParameterMap()
     {
         auto json_component_registry = StaticJsonFactory::getJsonObject();
-        json_component_registry      = components::ComponentRegistry::instance().createManifest();
+        json_component_registry      = components::ComponentRegistry::instance().createParameterMap();
         std::cout << json_component_registry.dump() << "\n";
         writeJsonToSharedMemory(json_component_registry, &(SHARED_MEMORY));
     }

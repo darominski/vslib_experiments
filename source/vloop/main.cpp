@@ -55,8 +55,8 @@ int main()
     // No parameter declarations beyond this point!
     // ************************************************************
 
-    puts("Component manifest:");
-    backgroundTask::uploadManifest();
+    puts("Parameter map:");
+    backgroundTask::uploadParameterMap();
 
     TimerInterrupt timer(user::realTimeTask, 100);
     timer.start();

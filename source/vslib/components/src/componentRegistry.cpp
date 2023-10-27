@@ -26,24 +26,23 @@ namespace vslib::components
                     + std::string(" already defined in the registry!\n"),
                 errorCodes::name_already_used
             );
-            std::cerr << fmt::format("{}", error_message);
             throw std::runtime_error("Component name already exists!");
         }
         m_components.emplace(component_name, component_reference);
     }
 
-    //! Creates a JSON manifest describing all settable parameters with their name, type, value,
+    //! Creates a JSON parameter map describing all settable parameters with their name, type, value,
     //! limits, and possibly allowed values in case of enumeration, all based on the information stored in the
     //! parameterRegistry.
     //!
     //! @returns JSON object with all initialized components and their settable parameters.
-    [[nodiscard("Manifest should not be discarded.")]] StaticJson ComponentRegistry::createManifest() const
+    [[nodiscard]] StaticJson ComponentRegistry::createParameterMap() const
     {
-        StaticJson manifest = nlohmann::json::array();
+        StaticJson parameterMap = nlohmann::json::array();
         for (const auto& [_, component] : m_components)
         {
-            manifest.push_back(component.get().serialize());
+            parameterMap.push_back(component.get().serialize());
         }
-        return manifest;
+        return parameterMap;
     }
 }   // namespace vslib::components

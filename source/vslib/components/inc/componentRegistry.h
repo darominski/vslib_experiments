@@ -44,7 +44,7 @@ namespace vslib::components
             m_components.clear();
         }
 
-        fgc4::utils::StaticJson createManifest() const;
+        fgc4::utils::StaticJson createParameterMap() const;
 
       private:
         ComponentRegistry() = default;

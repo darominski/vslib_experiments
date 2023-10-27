@@ -9,7 +9,7 @@
 
 namespace vslib::backgroundTask
 {
-    void uploadManifest();
+    void uploadParameterMap();
     void receiveJsonCommand();
     void executeJsonCommand(const fgc4::utils::StaticJson&);
     void processJsonCommands(const fgc4::utils::StaticJson&);

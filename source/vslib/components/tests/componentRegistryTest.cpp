@@ -34,11 +34,11 @@ TEST_F(ComponentRegistryTest, EmptyInstance)
     ASSERT_EQ(components.size(), 0);
 }
 
-//! Checks that a manifest of the empty ComponentRegistry can be created
-TEST_F(ComponentRegistryTest, EmptyInstanceManifest)
+//! Checks that a parameter map of the empty ComponentRegistry can be created
+TEST_F(ComponentRegistryTest, EmptyInstanceParameterMap)
 {
     ComponentRegistry& component_registry = ComponentRegistry::instance();
-    EXPECT_EQ(component_registry.createManifest(), nlohmann::json::array());
+    EXPECT_EQ(component_registry.createParameterMap(), nlohmann::json::array());
 }
 
 //! Checks automatically adding a component to the ComponentRegistry
@@ -56,8 +56,8 @@ TEST_F(ComponentRegistryTest, AddComponentAutomatically)
     ASSERT_NE(components.find(name_in_registry), components.end());
 }
 
-//! Checks the manifest created for a component automatically registered in the ComponentRegistry
-TEST_F(ComponentRegistryTest, AutomaticComponentManifest)
+//! Checks the parameter map created for a component automatically registered in the ComponentRegistry
+TEST_F(ComponentRegistryTest, AutomaticComponentParameterMap)
 {
     ComponentRegistry&         registry       = ComponentRegistry::instance();
     constexpr std::string_view component_type = "TestComponentType";
@@ -66,13 +66,13 @@ TEST_F(ComponentRegistryTest, AutomaticComponentManifest)
 
     auto& components = registry.getComponents();
     ASSERT_EQ(components.size(), 1);
-    nlohmann::json expected_manifest
+    nlohmann::json expected_parameter_map
         = {{{"name", "TestComponent"},
             {"type", "TestComponentType"},
             {"parameters", nlohmann::json::array()},
             {"components", nlohmann::json::array()}}};
-    nlohmann::json created_manifest = registry.createManifest();
-    EXPECT_EQ(created_manifest, expected_manifest);
+    nlohmann::json created_parameter_map = registry.createParameterMap();
+    EXPECT_EQ(created_parameter_map, expected_parameter_map);
 }
 
 //! Checks explicitly adding a component to the ComponentRegistry
