@@ -20,10 +20,6 @@ namespace vslib::parameters
         using ParameterReference = std::reference_wrapper<IParameter>;
 
       public:
-        ~ParameterRegistry() override   // is not expected to be called, lifetime equal to that of the program
-        {
-            m_parameters.clear();
-        }
         //! Provides an instance of the singleton registry
         //!
         //! @return Singular instance of the parameter registry
