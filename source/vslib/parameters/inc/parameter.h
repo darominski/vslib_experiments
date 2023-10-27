@@ -109,7 +109,7 @@ namespace vslib::parameters
             {
                 fgc4::utils::Error message(
                     fmt::
-                        format("Out of bounds access attempted at index: {}, array size: {}", index, std::tuple_size_v<T>),
+                        format("Out of bounds access attempted at index: {}, array size: {}\n.", index, std::tuple_size_v<T>),
                     fgc4::utils::errorCodes::out_of_bounds_access
                 );
                 std::cerr << fmt::format("{}", message);
