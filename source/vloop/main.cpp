@@ -64,8 +64,11 @@ int main()
     int counter = 0;
     while (true)
     {
-        if (counter == 50)
+        if (counter == 10)
         {
+#ifdef PERFORMANCE_TESTS
+            std::cout << "Average time per interrupt: " << timer.benchmarkInterrupt() << std::endl;
+#endif
             timer.stop();
             break;
         }
