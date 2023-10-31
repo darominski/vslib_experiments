@@ -1,34 +1,34 @@
 /******************************************************************************
- *
- * Copyright (C) 2010 - 2019 Xilinx, Inc.  All rights reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- *
- *
- ******************************************************************************/
+*
+* Copyright (C) 2010 - 2019 Xilinx, Inc.  All rights reserved.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+*
+*
+*
+******************************************************************************/
 /*****************************************************************************/
 /**
  *
  * @file xemacps_bd.h
- * @addtogroup emacps_v3_10
- * @{
+* @addtogroup emacps_v3_10
+* @{
  *
  * This header provides operations to manage buffer descriptors in support
  * of scatter-gather DMA.
@@ -71,38 +71,36 @@
  * ***************************************************************************
  */
 
-#ifndef XEMACPS_BD_H /* prevent circular inclusions */
-#define XEMACPS_BD_H /* by using protection macros */
+#ifndef XEMACPS_BD_H		/* prevent circular inclusions */
+#define XEMACPS_BD_H		/* by using protection macros */
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-    /***************************** Include Files *********************************/
+/***************************** Include Files *********************************/
 
 #include <string.h>
-
-#include "xil_assert.h"
 #include "xil_types.h"
+#include "xil_assert.h"
 
 /************************** Constant Definitions *****************************/
 
 /**************************** Type Definitions *******************************/
 #ifdef __aarch64__
 /* Minimum BD alignment */
-#define XEMACPS_DMABD_MINIMUM_ALIGNMENT 64U
-#define XEMACPS_BD_NUM_WORDS            4U
+#define XEMACPS_DMABD_MINIMUM_ALIGNMENT  64U
+#define XEMACPS_BD_NUM_WORDS 4U
 #else
 /* Minimum BD alignment */
-#define XEMACPS_DMABD_MINIMUM_ALIGNMENT 4U
-#define XEMACPS_BD_NUM_WORDS            2U
+#define XEMACPS_DMABD_MINIMUM_ALIGNMENT  4U
+#define XEMACPS_BD_NUM_WORDS 2U
 #endif
 
-    /**
-     * The XEmacPs_Bd is the type for buffer descriptors (BDs).
-     */
-    typedef u32 XEmacPs_Bd[XEMACPS_BD_NUM_WORDS];
+/**
+ * The XEmacPs_Bd is the type for buffer descriptors (BDs).
+ */
+typedef u32 XEmacPs_Bd[XEMACPS_BD_NUM_WORDS];
 
 
 /***************** Macros (Inline Functions) Definitions *********************/
@@ -120,43 +118,45 @@ extern "C"
  *    void XEmacPs_BdClear(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdClear(BdPtr) memset((BdPtr), 0, sizeof(XEmacPs_Bd))
+#define XEmacPs_BdClear(BdPtr)                                  \
+    memset((BdPtr), 0, sizeof(XEmacPs_Bd))
 
 /****************************************************************************/
 /**
- *
- * Read the given Buffer Descriptor word.
- *
- * @param    BaseAddress is the base address of the BD to read
- * @param    Offset is the word offset to be read
- *
- * @return   The 32-bit value of the field
- *
- * @note
- * C-style signature:
- *    u32 XEmacPs_BdRead(UINTPTR BaseAddress, UINTPTR Offset)
- *
- *****************************************************************************/
-#define XEmacPs_BdRead(BaseAddress, Offset) (*(u32*)((UINTPTR)((void*)(BaseAddress)) + (u32)(Offset)))
+*
+* Read the given Buffer Descriptor word.
+*
+* @param    BaseAddress is the base address of the BD to read
+* @param    Offset is the word offset to be read
+*
+* @return   The 32-bit value of the field
+*
+* @note
+* C-style signature:
+*    u32 XEmacPs_BdRead(UINTPTR BaseAddress, UINTPTR Offset)
+*
+*****************************************************************************/
+#define XEmacPs_BdRead(BaseAddress, Offset)             \
+	(*(u32 *)((UINTPTR)((void*)(BaseAddress)) + (u32)(Offset)))
 
 /****************************************************************************/
 /**
- *
- * Write the given Buffer Descriptor word.
- *
- * @param    BaseAddress is the base address of the BD to write
- * @param    Offset is the word offset to be written
- * @param    Data is the 32-bit value to write to the field
- *
- * @return   None.
- *
- * @note
- * C-style signature:
- *    void XEmacPs_BdWrite(UINTPTR BaseAddress, UINTPTR Offset, UINTPTR Data)
- *
- *****************************************************************************/
-#define XEmacPs_BdWrite(BaseAddress, Offset, Data)                                                                     \
-    (*(u32*)((UINTPTR)(void*)(BaseAddress) + (u32)(Offset)) = (u32)(Data))
+*
+* Write the given Buffer Descriptor word.
+*
+* @param    BaseAddress is the base address of the BD to write
+* @param    Offset is the word offset to be written
+* @param    Data is the 32-bit value to write to the field
+*
+* @return   None.
+*
+* @note
+* C-style signature:
+*    void XEmacPs_BdWrite(UINTPTR BaseAddress, UINTPTR Offset, UINTPTR Data)
+*
+*****************************************************************************/
+#define XEmacPs_BdWrite(BaseAddress, Offset, Data)              \
+    (*(u32 *)((UINTPTR)(void*)(BaseAddress) + (u32)(Offset)) = (u32)(Data))
 
 /*****************************************************************************/
 /**
@@ -172,11 +172,14 @@ extern "C"
  *
  *****************************************************************************/
 #if defined(__aarch64__) || defined(__arch64__)
-#define XEmacPs_BdSetAddressTx(BdPtr, Addr)                                                                            \
-    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_ADDR_OFFSET, (u32)((Addr)&ULONG64_LO_MASK));                                   \
-    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_ADDR_HI_OFFSET, (u32)(((Addr)&ULONG64_HI_MASK) >> 32U));
+#define XEmacPs_BdSetAddressTx(BdPtr, Addr)                        \
+    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_ADDR_OFFSET,		\
+			(u32)((Addr) & ULONG64_LO_MASK));		\
+    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_ADDR_HI_OFFSET,		\
+	(u32)(((Addr) & ULONG64_HI_MASK) >> 32U));
 #else
-#define XEmacPs_BdSetAddressTx(BdPtr, Addr) XEmacPs_BdWrite((BdPtr), XEMACPS_BD_ADDR_OFFSET, (u32)(Addr))
+#define XEmacPs_BdSetAddressTx(BdPtr, Addr)                        \
+    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_ADDR_OFFSET, (u32)(Addr))
 #endif
 
 /*****************************************************************************/
@@ -194,19 +197,17 @@ extern "C"
  *
  *****************************************************************************/
 #ifdef __aarch64__
-#define XEmacPs_BdSetAddressRx(BdPtr, Addr)                                                                            \
-    XEmacPs_BdWrite(                                                                                                   \
-        (BdPtr), XEMACPS_BD_ADDR_OFFSET,                                                                               \
-        ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) & ~XEMACPS_RXBUF_ADD_MASK) | ((u32)((Addr)&ULONG64_LO_MASK)) \
-        )                                                                                                              \
-    );                                                                                                                 \
-    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_ADDR_HI_OFFSET, (u32)(((Addr)&ULONG64_HI_MASK) >> 32U));
+#define XEmacPs_BdSetAddressRx(BdPtr, Addr)                        \
+    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_ADDR_OFFSET,              \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) &           \
+	~XEMACPS_RXBUF_ADD_MASK) | ((u32)((Addr) & ULONG64_LO_MASK))));  \
+    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_ADDR_HI_OFFSET, 	\
+	(u32)(((Addr) & ULONG64_HI_MASK) >> 32U));
 #else
-#define XEmacPs_BdSetAddressRx(BdPtr, Addr)                                                                            \
-    XEmacPs_BdWrite(                                                                                                   \
-        (BdPtr), XEMACPS_BD_ADDR_OFFSET,                                                                               \
-        ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) & ~XEMACPS_RXBUF_ADD_MASK) | (UINTPTR)(Addr))                \
-    )
+#define XEmacPs_BdSetAddressRx(BdPtr, Addr)                        \
+    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_ADDR_OFFSET,              \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) &           \
+    ~XEMACPS_RXBUF_ADD_MASK) | (UINTPTR)(Addr)))
 #endif
 
 /*****************************************************************************/
@@ -221,8 +222,9 @@ extern "C"
  *    void XEmacPs_BdSetStatus(XEmacPs_Bd* BdPtr, UINTPTR Data)
  *
  *****************************************************************************/
-#define XEmacPs_BdSetStatus(BdPtr, Data)                                                                               \
-    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_STAT_OFFSET, XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) | (Data))
+#define XEmacPs_BdSetStatus(BdPtr, Data)                           \
+    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_STAT_OFFSET,              \
+    XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) | (Data))
 
 
 /*****************************************************************************/
@@ -240,7 +242,8 @@ extern "C"
  * Due to the BD bit layout differences in transmit and receive. User's
  * caution is required.
  *****************************************************************************/
-#define XEmacPs_BdGetStatus(BdPtr) XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET)
+#define XEmacPs_BdGetStatus(BdPtr)                                 \
+    XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET)
 
 
 /*****************************************************************************/
@@ -255,10 +258,12 @@ extern "C"
  *
  *****************************************************************************/
 #if defined(__aarch64__) || defined(__arch64__)
-#define XEmacPs_BdGetBufAddr(BdPtr)                                                                                    \
-    (XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) | (XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_HI_OFFSET)) << 32U)
+#define XEmacPs_BdGetBufAddr(BdPtr)                               \
+    (XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) |		  \
+	(XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_HI_OFFSET)) << 32U)
 #else
-#define XEmacPs_BdGetBufAddr(BdPtr) (XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET))
+#define XEmacPs_BdGetBufAddr(BdPtr)                               \
+    (XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET))
 #endif
 
 /*****************************************************************************/
@@ -274,11 +279,10 @@ extern "C"
  *    void XEmacPs_BdSetLength(XEmacPs_Bd* BdPtr, u32 LenBytes)
  *
  *****************************************************************************/
-#define XEmacPs_BdSetLength(BdPtr, LenBytes)                                                                           \
-    XEmacPs_BdWrite(                                                                                                   \
-        (BdPtr), XEMACPS_BD_STAT_OFFSET,                                                                               \
-        ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & ~XEMACPS_TXBUF_LEN_MASK) | (LenBytes))                     \
-    )
+#define XEmacPs_BdSetLength(BdPtr, LenBytes)                       \
+    XEmacPs_BdWrite((BdPtr), XEMACPS_BD_STAT_OFFSET,              \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    ~XEMACPS_TXBUF_LEN_MASK) | (LenBytes)))
 
 
 /*****************************************************************************/
@@ -301,7 +305,9 @@ extern "C"
  *    XEAMCPS_RXBUF_LEN_MASK is same as XEMACPS_TXBUF_LEN_MASK.
  *
  *****************************************************************************/
-#define XEmacPs_BdGetLength(BdPtr) (XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_RXBUF_LEN_MASK)
+#define XEmacPs_BdGetLength(BdPtr)                                 \
+    (XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &            \
+    XEMACPS_RXBUF_LEN_MASK)
 
 /*****************************************************************************/
 /**
@@ -323,8 +329,9 @@ extern "C"
  *    RxBufMask is dependent on whether jumbo is enabled or not.
  *
  *****************************************************************************/
-#define XEmacPs_GetRxFrameSize(InstancePtr, BdPtr)                                                                     \
-    (XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & (InstancePtr)->RxBufMask)
+#define XEmacPs_GetRxFrameSize(InstancePtr, BdPtr)                   \
+    (XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &            \
+    (InstancePtr)->RxBufMask)
 
 /*****************************************************************************/
 /**
@@ -339,8 +346,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsLast(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsLast(BdPtr)                                                                                        \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_RXBUF_EOF_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsLast(BdPtr)                                    \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_RXBUF_EOF_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -355,10 +363,10 @@ extern "C"
  *    void XEmacPs_BdSetLast(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdSetLast(BdPtr)                                                                                       \
-    (XEmacPs_BdWrite(                                                                                                  \
-        (BdPtr), XEMACPS_BD_STAT_OFFSET, XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) | XEMACPS_TXBUF_LAST_MASK     \
-    ))
+#define XEmacPs_BdSetLast(BdPtr)                                   \
+    (XEmacPs_BdWrite((BdPtr), XEMACPS_BD_STAT_OFFSET,             \
+    XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) |             \
+    XEMACPS_TXBUF_LAST_MASK))
 
 
 /*****************************************************************************/
@@ -373,10 +381,10 @@ extern "C"
  *    void XEmacPs_BdClearLast(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdClearLast(BdPtr)                                                                                     \
-    (XEmacPs_BdWrite(                                                                                                  \
-        (BdPtr), XEMACPS_BD_STAT_OFFSET, XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & ~XEMACPS_TXBUF_LAST_MASK    \
-    ))
+#define XEmacPs_BdClearLast(BdPtr)                                 \
+    (XEmacPs_BdWrite((BdPtr), XEMACPS_BD_STAT_OFFSET,             \
+    XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &             \
+    ~XEMACPS_TXBUF_LAST_MASK))
 
 
 /*****************************************************************************/
@@ -409,8 +417,9 @@ extern "C"
  *    u8 XEmacPs_BdIsRxWrap(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsRxWrap(BdPtr)                                                                                      \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) & XEMACPS_RXBUF_WRAP_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsRxWrap(BdPtr)                                  \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) &           \
+    XEMACPS_RXBUF_WRAP_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -443,8 +452,9 @@ extern "C"
  *    u8 XEmacPs_BdGetTxWrap(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsTxWrap(BdPtr)                                                                                      \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_TXBUF_WRAP_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsTxWrap(BdPtr)                                  \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_TXBUF_WRAP_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -461,10 +471,10 @@ extern "C"
  *    void XEmacPs_BdClearRxNew(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdClearRxNew(BdPtr)                                                                                    \
-    (XEmacPs_BdWrite(                                                                                                  \
-        (BdPtr), XEMACPS_BD_ADDR_OFFSET, XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) & ~XEMACPS_RXBUF_NEW_MASK     \
-    ))
+#define XEmacPs_BdClearRxNew(BdPtr)                                \
+    (XEmacPs_BdWrite((BdPtr), XEMACPS_BD_ADDR_OFFSET,             \
+    XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) &             \
+    ~XEMACPS_RXBUF_NEW_MASK))
 
 
 /*****************************************************************************/
@@ -478,8 +488,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsRxNew(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsRxNew(BdPtr)                                                                                       \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) & XEMACPS_RXBUF_NEW_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsRxNew(BdPtr)                                   \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_ADDR_OFFSET) &           \
+    XEMACPS_RXBUF_NEW_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -496,10 +507,10 @@ extern "C"
  *    void XEmacPs_BdSetTxUsed(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdSetTxUsed(BdPtr)                                                                                     \
-    (XEmacPs_BdWrite(                                                                                                  \
-        (BdPtr), XEMACPS_BD_STAT_OFFSET, XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) | XEMACPS_TXBUF_USED_MASK     \
-    ))
+#define XEmacPs_BdSetTxUsed(BdPtr)                                 \
+    (XEmacPs_BdWrite((BdPtr), XEMACPS_BD_STAT_OFFSET,             \
+    XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) |             \
+    XEMACPS_TXBUF_USED_MASK))
 
 
 /*****************************************************************************/
@@ -515,10 +526,10 @@ extern "C"
  *    void XEmacPs_BdClearTxUsed(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdClearTxUsed(BdPtr)                                                                                   \
-    (XEmacPs_BdWrite(                                                                                                  \
-        (BdPtr), XEMACPS_BD_STAT_OFFSET, XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & ~XEMACPS_TXBUF_USED_MASK    \
-    ))
+#define XEmacPs_BdClearTxUsed(BdPtr)                               \
+    (XEmacPs_BdWrite((BdPtr), XEMACPS_BD_STAT_OFFSET,             \
+    XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &             \
+    ~XEMACPS_TXBUF_USED_MASK))
 
 
 /*****************************************************************************/
@@ -532,8 +543,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsTxUsed(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsTxUsed(BdPtr)                                                                                      \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_TXBUF_USED_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsTxUsed(BdPtr)                                  \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_TXBUF_USED_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -547,8 +559,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsTxRetry(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsTxRetry(BdPtr)                                                                                     \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_TXBUF_RETRY_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsTxRetry(BdPtr)                                 \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_TXBUF_RETRY_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -563,8 +576,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsTxUrun(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsTxUrun(BdPtr)                                                                                      \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_TXBUF_URUN_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsTxUrun(BdPtr)                                  \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_TXBUF_URUN_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -579,8 +593,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsTxExh(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsTxExh(BdPtr)                                                                                       \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_TXBUF_EXH_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsTxExh(BdPtr)                                   \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_TXBUF_EXH_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -599,10 +614,10 @@ extern "C"
  *    UINTPTR XEmacPs_BdSetTxNoCRC(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdSetTxNoCRC(BdPtr)                                                                                    \
-    (XEmacPs_BdWrite(                                                                                                  \
-        (BdPtr), XEMACPS_BD_STAT_OFFSET, XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) | XEMACPS_TXBUF_NOCRC_MASK    \
-    ))
+#define XEmacPs_BdSetTxNoCRC(BdPtr)                                \
+    (XEmacPs_BdWrite((BdPtr), XEMACPS_BD_STAT_OFFSET,             \
+    XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) |             \
+    XEMACPS_TXBUF_NOCRC_MASK))
 
 
 /*****************************************************************************/
@@ -621,10 +636,10 @@ extern "C"
  *    UINTPTR XEmacPs_BdClearTxNoCRC(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdClearTxNoCRC(BdPtr)                                                                                  \
-    (XEmacPs_BdWrite(                                                                                                  \
-        (BdPtr), XEMACPS_BD_STAT_OFFSET, XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & ~XEMACPS_TXBUF_NOCRC_MASK   \
-    ))
+#define XEmacPs_BdClearTxNoCRC(BdPtr)                              \
+    (XEmacPs_BdWrite((BdPtr), XEMACPS_BD_STAT_OFFSET,             \
+    XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &             \
+    ~XEMACPS_TXBUF_NOCRC_MASK))
 
 
 /*****************************************************************************/
@@ -638,8 +653,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsRxBcast(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsRxBcast(BdPtr)                                                                                     \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_RXBUF_BCAST_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsRxBcast(BdPtr)                                 \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_RXBUF_BCAST_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -653,8 +669,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsRxMultiHash(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsRxMultiHash(BdPtr)                                                                                 \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_RXBUF_MULTIHASH_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsRxMultiHash(BdPtr)                             \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_RXBUF_MULTIHASH_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -668,8 +685,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsRxUniHash(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsRxUniHash(BdPtr)                                                                                   \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_RXBUF_UNIHASH_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsRxUniHash(BdPtr)                               \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_RXBUF_UNIHASH_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -683,8 +701,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsRxVlan(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsRxVlan(BdPtr)                                                                                      \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_RXBUF_VLAN_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsRxVlan(BdPtr)                                  \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_RXBUF_VLAN_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -699,8 +718,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsRxPri(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsRxPri(BdPtr)                                                                                       \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_RXBUF_PRI_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsRxPri(BdPtr)                                   \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_RXBUF_PRI_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -715,8 +735,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdIsRxCFI(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsRxCFI(BdPtr)                                                                                       \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_RXBUF_CFI_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsRxCFI(BdPtr)                                   \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_RXBUF_CFI_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -730,8 +751,9 @@ extern "C"
  *    UINTPTR XEmacPs_BdGetRxEOF(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsRxEOF(BdPtr)                                                                                       \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_RXBUF_EOF_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsRxEOF(BdPtr)                                   \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_RXBUF_EOF_MASK)!=0U ? TRUE : FALSE)
 
 
 /*****************************************************************************/
@@ -745,11 +767,12 @@ extern "C"
  *    UINTPTR XEmacPs_BdGetRxSOF(XEmacPs_Bd* BdPtr)
  *
  *****************************************************************************/
-#define XEmacPs_BdIsRxSOF(BdPtr)                                                                                       \
-    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) & XEMACPS_RXBUF_SOF_MASK) != 0U ? TRUE : FALSE)
+#define XEmacPs_BdIsRxSOF(BdPtr)                                   \
+    ((XEmacPs_BdRead((BdPtr), XEMACPS_BD_STAT_OFFSET) &           \
+    XEMACPS_RXBUF_SOF_MASK)!=0U ? TRUE : FALSE)
 
 
-    /************************** Function Prototypes ******************************/
+/************************** Function Prototypes ******************************/
 
 #ifdef __cplusplus
 }

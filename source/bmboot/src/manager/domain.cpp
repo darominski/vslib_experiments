@@ -2,13 +2,17 @@
 //! @brief  Domain management
 //! @author Martin Cejp
 
-#include "../mach/mach_linux.hpp"
 #include "../bmboot_internal.hpp"
 #include "bmboot/domain.hpp"
 #include "coredump_linux.hpp"
 #include "../utility/mmap.hpp"
 
 #include "monitor_zynqmp_cpu1.hpp"
+#include "monitor_zynqmp_cpu2.hpp"
+#include "monitor_zynqmp_cpu3.hpp"
+
+// This, of course, negates any attempt to keep platform-specific stuff contained.
+#include "zynqmp_manager.hpp"
 
 #include <cstring>
 #include <variant>
@@ -40,6 +44,18 @@ enum class DomainGeneralState
 //  - probed, running or started by us; defer to domain-reported state
 static DomainGeneralState domain_general_state[DomainIndex::max_domain];
 
+struct PhysicalMemoryRanges
+{
+    intptr_t monitor_address;
+    size_t monitor_size;
+    intptr_t monitor_ipc_address;
+    size_t monitor_ipc_size;
+    intptr_t payload_address;
+    size_t payload_size;
+};
+
+static PhysicalMemoryRanges const& getPhysicalMemoryRanges(DomainIndex domain);
+
 // ************************************************************
 
 class Domain : public IDomain
@@ -65,6 +81,7 @@ public:
 
 private:
     MaybeError awaitMonitorStartup();
+    PhysicalMemoryRanges const& getPhysicalMemoryRanges() { return ::getPhysicalMemoryRanges(m_domain); }
     MaybeError startPayloadAt(uintptr_t entry_address, size_t payload_size, uint32_t payload_crc32);
     MaybeError startup(std::span<uint8_t const> monitor_binary);
 
@@ -109,6 +126,47 @@ static std::variant<int, ErrorCode> get_devmem_handle()
     return s_devmem_handle;
 }
 
+static PhysicalMemoryRanges const& getPhysicalMemoryRanges(DomainIndex domain)
+{
+    static PhysicalMemoryRanges cpu1
+    {
+        .monitor_address = bmboot_cpu1_monitor_ADDRESS,
+        .monitor_size = bmboot_cpu1_monitor_SIZE,
+        .monitor_ipc_address = bmboot_cpu1_monitor_ipc_ADDRESS,
+        .monitor_ipc_size = bmboot_cpu1_monitor_ipc_SIZE,
+        .payload_address = bmboot_cpu1_payload_ADDRESS,
+        .payload_size = bmboot_cpu1_payload_SIZE,
+    };
+
+    static PhysicalMemoryRanges cpu2
+    {
+        .monitor_address = bmboot_cpu2_monitor_ADDRESS,
+        .monitor_size = bmboot_cpu2_monitor_SIZE,
+        .monitor_ipc_address = bmboot_cpu2_monitor_ipc_ADDRESS,
+        .monitor_ipc_size = bmboot_cpu2_monitor_ipc_SIZE,
+        .payload_address = bmboot_cpu2_payload_ADDRESS,
+        .payload_size = bmboot_cpu2_payload_SIZE,
+    };
+
+    static PhysicalMemoryRanges cpu3
+    {
+        .monitor_address = bmboot_cpu3_monitor_ADDRESS,
+        .monitor_size = bmboot_cpu3_monitor_SIZE,
+        .monitor_ipc_address = bmboot_cpu3_monitor_ipc_ADDRESS,
+        .monitor_ipc_size = bmboot_cpu3_monitor_ipc_SIZE,
+        .payload_address = bmboot_cpu3_payload_ADDRESS,
+        .payload_size = bmboot_cpu3_payload_SIZE,
+    };
+
+    switch (domain)
+    {
+        case DomainIndex::cpu1: return cpu1;
+        case DomainIndex::cpu2: return cpu2;
+        case DomainIndex::cpu3: return cpu3;
+        default: std::terminate();
+    }
+}
+
 static MaybeError load_to_physical_memory(uintptr_t address, std::span<uint8_t const> binary)
 {
     auto devmem = get_devmem_handle();
@@ -137,7 +195,7 @@ static MaybeError load_to_physical_memory(uintptr_t address, std::span<uint8_t c
 
     memcpy(code_area.data(), binary.data(), binary.size());
 
-    __clear_cache(code_area.data(), (uint8_t*) code_area.data() + MONITOR_CODE_SIZE);
+    __clear_cache(code_area.data(), (uint8_t*) code_area.data() + size_aligned);
 
     code_area.unmap();
 
@@ -171,7 +229,8 @@ MaybeError Domain::dumpCore(char const* filename)
 {
     auto state = getState();
 
-    if (state != DomainState::crashed_payload)
+    // TODO: This permits a core dump in case of a crashed monitor, but it will still only include the payload's memory
+    if (state != DomainState::crashed_payload && state != DomainState::crashed_monitor)
     {
         return ErrorCode::bad_domain_state;
     }
@@ -182,12 +241,14 @@ MaybeError Domain::dumpCore(char const* filename)
         return std::get<ErrorCode>(devmem);
     }
 
+    auto& ranges = getPhysicalMemoryRanges();
+
     Mmap code_area(nullptr,
-                   PAYLOAD_MAX_SIZE,
+                   ranges.payload_size,
                    PROT_READ | PROT_WRITE,
                    MAP_SHARED,
                    std::get<int>(devmem),
-                   PAYLOAD_START);
+                   ranges.payload_address);
 
     if (!code_area)
     {
@@ -198,7 +259,7 @@ MaybeError Domain::dumpCore(char const* filename)
 
     static const MemorySegment segments[]
     {
-            { PAYLOAD_START, PAYLOAD_MAX_SIZE, code_area.data() },
+            { ranges.payload_address, ranges.payload_size, code_area.data() },
     };
 
     writeCoreDump(filename,
@@ -264,6 +325,10 @@ DomainState Domain::getState()
     {
         return DomainState::in_reset;
     }
+    else if (domain_general_state[m_domain] == DomainGeneralState::unavailable)
+    {
+        return DomainState::unavailable;
+    }
 
     auto state_raw = getInbox().state;
 
@@ -312,9 +377,21 @@ MaybeError Domain::loadAndStartPayload(std::span<uint8_t const> payload_binary, 
         return ErrorCode::bad_domain_state;
     }
 
-    load_to_physical_memory(PAYLOAD_START, payload_binary);
+    auto& ranges = getPhysicalMemoryRanges();
 
-    return startPayloadAt(PAYLOAD_START, payload_binary.size(), payload_crc32);
+    if (payload_binary.size() > ranges.payload_size)
+    {
+        return ErrorCode::program_too_large;
+    }
+
+    auto error = load_to_physical_memory(ranges.payload_address, payload_binary);
+
+    if (error.has_value())
+    {
+        return error;
+    }
+
+    return startPayloadAt(ranges.payload_address, payload_binary.size(), payload_crc32);
 }
 
 // ************************************************************
@@ -327,24 +404,26 @@ DomainInstanceOrErrorCode IDomain::open(DomainIndex domain)
         return std::get<ErrorCode>(devmem);
     }
 
+    auto& ranges = getPhysicalMemoryRanges(domain);
+
     auto ipc_block = (IpcBlock*) mmap(nullptr,
-                                      MONITOR_IPC_SIZE,
+                                      ranges.monitor_ipc_size,
                                       PROT_READ | PROT_WRITE,
                                       MAP_SHARED,
                                       std::get<int>(devmem),
-                                      MONITOR_IPC_START);
-    if (ipc_block == nullptr)
+                                      ranges.monitor_ipc_address);
+    if (ipc_block == MAP_FAILED)
     {
         return ErrorCode::mmap_failed;
     }
 
     auto code_area = (uint8_t*) mmap(nullptr,
-                                     MONITOR_CODE_SIZE,
+                                     ranges.monitor_size,
                                      PROT_READ | PROT_WRITE,
                                      MAP_SHARED,
                                      std::get<int>(devmem),
-                                     MONITOR_CODE_START);
-    if (code_area == nullptr)
+                                     ranges.monitor_address);
+    if (code_area == MAP_FAILED)
     {
         return ErrorCode::mmap_failed;
     }
@@ -355,11 +434,11 @@ DomainInstanceOrErrorCode IDomain::open(DomainIndex domain)
 
     // Look for cookie in the specified location
     Cookie cookie = -1;
-    memcpy(&cookie, code_area + MONITOR_CODE_SIZE - sizeof(cookie), sizeof(cookie));
+    memcpy(&cookie, code_area + ranges.monitor_size - sizeof(cookie), sizeof(cookie));
 
     if (cookie != MONITOR_CODE_COOKIE)
     {
-        if (mach::isZynqCpu1InReset(std::get<int>(devmem)))
+        if (mach::isCoreInReset(std::get<int>(devmem), domain))
         {
             domain_general_state[domain] = DomainGeneralState::inReset;
         }
@@ -379,7 +458,7 @@ DomainInstanceOrErrorCode IDomain::open(DomainIndex domain)
         domain_general_state[domain] = DomainGeneralState::monitorStarted;
     }
 
-    munmap(code_area, MONITOR_CODE_SIZE);
+    munmap(code_area, ranges.monitor_size);
 
     return std::make_unique<Domain>(domain, *ipc_block);
 }
@@ -452,7 +531,12 @@ MaybeError Domain::startPayloadAt(uintptr_t entry_address, size_t payload_size, 
 
 MaybeError Domain::startup()
 {
-    return startup(monitor_zynqmp_cpu1_payload);
+    switch (m_domain) {
+        case DomainIndex::cpu1: return startup(monitor_zynqmp_cpu1_payload);
+        case DomainIndex::cpu2: return startup(monitor_zynqmp_cpu2_payload);
+        case DomainIndex::cpu3: return startup(monitor_zynqmp_cpu3_payload);
+        default: return ErrorCode::hw_resource_unavailable;
+    }
 }
 
 // ************************************************************
@@ -470,39 +554,42 @@ MaybeError Domain::startup(std::span<uint8_t const> monitor_binary)
         return std::get<ErrorCode>(devmem);
     }
 
+    auto& ranges = getPhysicalMemoryRanges();
+
     auto code_area = (uint8_t*) mmap(nullptr,
-                                     MONITOR_CODE_SIZE,
+                                     ranges.monitor_size,
                                      PROT_READ | PROT_WRITE,
                                      MAP_SHARED,
                                      std::get<int>(devmem),
-                                     MONITOR_CODE_START);
-    if (code_area == nullptr)
+                                     ranges.monitor_address);
+    if (code_area == MAP_FAILED)
     {
         return ErrorCode::mmap_failed;
     }
 
     const auto cookie = MONITOR_CODE_COOKIE;
 
-    if (monitor_binary.size() > MONITOR_CODE_SIZE - sizeof(cookie))
+    if (monitor_binary.size() > ranges.monitor_size - sizeof(cookie))
     {
         return ErrorCode::program_too_large;
     }
 
     memcpy(code_area, monitor_binary.data(), monitor_binary.size());      // won't work without cache flush to L2/DDR
-    memcpy(code_area + MONITOR_CODE_SIZE - sizeof(cookie), &cookie, sizeof(cookie));
+    memcpy(code_area + ranges.monitor_size - sizeof(cookie), &cookie, sizeof(cookie));
 
     // flush the newly written code from L1 through to DDR (since CPUn will come up in uncached mode)
-    __clear_cache(code_area, code_area + MONITOR_CODE_SIZE);
+    __clear_cache(code_area, code_area + ranges.monitor_size);
 
-    munmap(code_area, MONITOR_CODE_SIZE);
+    munmap(code_area, ranges.monitor_size);
 
     // initialize IPC block
-    memset((void*) &m_ipc_block, 0, MONITOR_IPC_SIZE);
+    memset((void*) &m_ipc_block, 0, ranges.monitor_ipc_size);
+    m_ipc_block.executor_to_manager.state = DomainState::invalid_state;
 
     // flush the IPC region to DDR (since the SCU is not in effect yet and CPUn will come up with cold caches)
-    __clear_cache(&m_ipc_block, (uint8_t*) &m_ipc_block + MONITOR_IPC_SIZE);
+    __clear_cache(&m_ipc_block, (uint8_t*) &m_ipc_block + ranges.monitor_ipc_size);
 
-    mach::bootZynqCpu1(std::get<int>(devmem), MONITOR_CODE_START);
+    mach::bootCore(std::get<int>(devmem), m_domain, ranges.monitor_address);
 
     // TODO: maybe we should only do this after state goes to ready
     domain_general_state[m_domain] = DomainGeneralState::monitorStarted;
@@ -531,7 +618,7 @@ MaybeError Domain::terminatePayload()
     // TODO: Clean up a bit; these values have no meaning, but if/when we have multiple different IPIs, we will use
     //       this buffer to signal which one is being invoked.
     uint8_t message[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
-    mach::sendIpiMessage(std::get<int>(devmem), message);
+    mach::sendIpiMessage(std::get<int>(devmem), m_domain, message);
 
     return awaitMonitorStartup();
 }

@@ -2,15 +2,13 @@
 #include "xuartps_hw.h"
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
-    char inbyte(void);
+char inbyte(void);
 #ifdef __cplusplus
 }
-#endif
+#endif 
 
-char inbyte(void)
-{
-    return XUartPs_RecvByte(STDIN_BASEADDRESS);
+char inbyte(void) {
+	 return XUartPs_RecvByte(STDIN_BASEADDRESS);
 }

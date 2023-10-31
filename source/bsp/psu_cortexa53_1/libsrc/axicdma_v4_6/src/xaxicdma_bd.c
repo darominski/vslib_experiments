@@ -1,33 +1,33 @@
 /******************************************************************************
- *
- * Copyright (C) 2010 - 2019 Xilinx, Inc.  All rights reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- *
- *
- ******************************************************************************/
+*
+* Copyright (C) 2010 - 2019 Xilinx, Inc.  All rights reserved.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+*
+*
+*
+******************************************************************************/
 /*****************************************************************************/
 /**
  *  @file xaxicdma_bd.c
- * @addtogroup axicdma_v4_6
- * @{
+* @addtogroup axicdma_v4_6
+* @{
  *
  * The implementation for the Buffer Descriptor (BD) API functions.
  *
@@ -47,7 +47,7 @@
 #include "xaxicdma.h"
 #include "xaxicdma_bd.h"
 
-#define XAXICDMA_PAGE_SIZE 0x1000
+#define XAXICDMA_PAGE_SIZE  0x1000
 
 /************************** Constant Definitions *****************************/
 
@@ -66,9 +66,10 @@
  *****************************************************************************/
 void XAxiCdma_BdClear(XAxiCdma_Bd* BdPtr)
 {
-    memset((void*)((UINTPTR)BdPtr + XAXICDMA_BD_START_CLEAR), 0, XAXICDMA_BD_TO_CLEAR);
+	memset((void *)((UINTPTR)BdPtr + XAXICDMA_BD_START_CLEAR), 0,
+	    XAXICDMA_BD_TO_CLEAR);
 
-    return;
+	return;
 }
 
 /*****************************************************************************/
@@ -83,15 +84,14 @@ void XAxiCdma_BdClear(XAxiCdma_Bd* BdPtr)
  * @note	None.
  *
  *****************************************************************************/
-void XAxiCdma_BdClone(XAxiCdma_Bd* BdPtr, XAxiCdma_Bd* TmpBd)
+void XAxiCdma_BdClone(XAxiCdma_Bd *BdPtr, XAxiCdma_Bd *TmpBd)
 {
 
-    memcpy(
-        (void*)((UINTPTR)BdPtr + XAXICDMA_BD_START_CLEAR), (void*)((UINTPTR)TmpBd + XAXICDMA_BD_START_CLEAR),
-        XAXICDMA_BD_TO_CLEAR
-    );
+	memcpy((void *)((UINTPTR)BdPtr + XAXICDMA_BD_START_CLEAR),
+	    (void *)((UINTPTR)TmpBd + XAXICDMA_BD_START_CLEAR),
+	    XAXICDMA_BD_TO_CLEAR);
 
-    return;
+	return;
 }
 
 /*****************************************************************************/
@@ -107,19 +107,15 @@ void XAxiCdma_BdClone(XAxiCdma_Bd* BdPtr, XAxiCdma_Bd* TmpBd)
  *****************************************************************************/
 LONG XAxiCdma_BdGetNextPtr(XAxiCdma_Bd* BdPtr)
 {
-    u32 addrlen;
-    addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
+	u32 addrlen;
+	addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
 
-    if (addrlen > 32)
-    {
-        return (u64
-        )((XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_NDESC_OFFSET))
-          | ((uint64_t)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_NDESC_MSB_OFFSET)) << 32U));
-    }
-    else
-    {
-        return (u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_NDESC_OFFSET));
-    }
+	if (addrlen > 32) {
+		return (u64)((XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_NDESC_OFFSET)) |
+		((uint64_t)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_NDESC_MSB_OFFSET)) << 32U));
+	} else {
+		return (u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_NDESC_OFFSET));
+	}
 }
 
 /*****************************************************************************/
@@ -136,12 +132,15 @@ LONG XAxiCdma_BdGetNextPtr(XAxiCdma_Bd* BdPtr)
  *****************************************************************************/
 void XAxiCdma_BdSetNextPtr(XAxiCdma_Bd* BdPtr, UINTPTR NextBdPtr)
 {
-    u32 addrlen;
-    addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
+	u32 addrlen;
+        addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
 
-    XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_NDESC_OFFSET, (NextBdPtr & XAXICDMA_DESC_LSB_MASK));
-    if (addrlen > 32) XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_NDESC_MSB_OFFSET, UPPER_32_BITS(NextBdPtr));
-    return;
+	XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_NDESC_OFFSET,
+                         (NextBdPtr & XAXICDMA_DESC_LSB_MASK));
+	if (addrlen > 32)
+		XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_NDESC_MSB_OFFSET,
+				 UPPER_32_BITS(NextBdPtr));
+	return;
 }
 
 /*****************************************************************************/
@@ -158,7 +157,8 @@ void XAxiCdma_BdSetNextPtr(XAxiCdma_Bd* BdPtr, UINTPTR NextBdPtr)
 u32 XAxiCdma_BdGetSts(XAxiCdma_Bd* BdPtr)
 {
 
-    return ((u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_STS_OFFSET)) & XAXICDMA_BD_STS_ALL_MASK);
+	return ((u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_STS_OFFSET)) &
+		XAXICDMA_BD_STS_ALL_MASK);
 }
 
 /*****************************************************************************/
@@ -180,9 +180,9 @@ u32 XAxiCdma_BdGetSts(XAxiCdma_Bd* BdPtr)
 void XAxiCdma_BdClearSts(XAxiCdma_Bd* BdPtr)
 {
 
-    XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_STS_OFFSET, 0);
+	XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_STS_OFFSET, 0);
 
-    return;
+	return;
 }
 
 /*****************************************************************************/
@@ -202,30 +202,28 @@ void XAxiCdma_BdClearSts(XAxiCdma_Bd* BdPtr)
  *****************************************************************************/
 u32 XAxiCdma_BdSetSrcBufAddr(XAxiCdma_Bd* BdPtr, UINTPTR Addr)
 {
-    u32 addrlen;
-    addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
+	u32 addrlen;
+        addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
 
-    if (XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_HASDRE_OFFSET) == 0)
-    {
+	if (XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_HASDRE_OFFSET) == 0) {
 
-        if (Addr & (XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_WORDLEN_OFFSET) - 1))
-        {
+		if (Addr &
+		    (XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_WORDLEN_OFFSET) - 1)) {
 
-            xdbg_printf(
-                XDBG_DEBUG_ERROR,
-                "Unaligned transfers not supported, address %x "
-                "not aligned\r\n",
-                (unsigned int)Addr
-            );
+			xdbg_printf(XDBG_DEBUG_ERROR,
+			    "Unaligned transfers not supported, address %x "
+			    "not aligned\r\n", (unsigned int)Addr);
 
-            return XST_INVALID_PARAM;
-        }
-    }
+			return XST_INVALID_PARAM;
+		}
+	}
 
-    XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_BUFSRC_OFFSET, LOWER_32_BITS(Addr));
-    if (addrlen > 32) XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_BUFSRC_MSB_OFFSET, UPPER_32_BITS(Addr));
+	XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_BUFSRC_OFFSET, LOWER_32_BITS(Addr));
+	if (addrlen > 32)
+		XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_BUFSRC_MSB_OFFSET,
+				 UPPER_32_BITS(Addr));
 
-    return XST_SUCCESS;
+	return XST_SUCCESS;
 }
 
 /*****************************************************************************/
@@ -241,15 +239,15 @@ u32 XAxiCdma_BdSetSrcBufAddr(XAxiCdma_Bd* BdPtr, UINTPTR Addr)
  *****************************************************************************/
 LONG XAxiCdma_BdGetSrcBufAddr(XAxiCdma_Bd* BdPtr)
 {
-    u32 addrlen;
-    addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
+	u32 addrlen;
+        addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
 
-    if (addrlen > 32)
-        return (u64
-        )((XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFSRC_OFFSET))
-          | ((uint64_t)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFSRC_MSB_OFFSET)) << 32U));
-    else
-        return (u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFSRC_OFFSET));
+	if (addrlen > 32)
+		return (u64)((XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFSRC_OFFSET)) |
+			((uint64_t)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFSRC_MSB_OFFSET))
+				<< 32U));
+	else
+		return (u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFSRC_OFFSET));
 }
 
 /*****************************************************************************/
@@ -269,29 +267,27 @@ LONG XAxiCdma_BdGetSrcBufAddr(XAxiCdma_Bd* BdPtr)
  *****************************************************************************/
 u32 XAxiCdma_BdSetDstBufAddr(XAxiCdma_Bd* BdPtr, UINTPTR Addr)
 {
-    u32 addrlen;
-    addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
+	u32 addrlen;
+        addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
 
-    if (XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_HASDRE_OFFSET) == 0)
-    {
+	if (XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_HASDRE_OFFSET) == 0) {
 
-        if (Addr & (XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_WORDLEN_OFFSET) - 1))
-        {
+		if (Addr &
+		    (XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_WORDLEN_OFFSET) - 1)) {
 
-            xdbg_printf(
-                XDBG_DEBUG_ERROR,
-                "Unaligned transfers not supported, address "
-                "not aligned %x\r\n",
-                (unsigned int)Addr
-            );
-            return XST_INVALID_PARAM;
-        }
-    }
+			xdbg_printf(XDBG_DEBUG_ERROR,
+			    "Unaligned transfers not supported, address "
+			    "not aligned %x\r\n", (unsigned int)Addr);
+			return XST_INVALID_PARAM;
+		}
+	}
 
-    XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_BUFDST_OFFSET, LOWER_32_BITS(Addr));
-    if (addrlen > 32) XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_BUFDST_MSB_OFFSET, UPPER_32_BITS(Addr));
+	XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_BUFDST_OFFSET, LOWER_32_BITS(Addr));
+	if (addrlen > 32)
+		XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_BUFDST_MSB_OFFSET,
+				 UPPER_32_BITS(Addr));
 
-    return XST_SUCCESS;
+	return XST_SUCCESS;
 }
 
 /*****************************************************************************/
@@ -307,15 +303,14 @@ u32 XAxiCdma_BdSetDstBufAddr(XAxiCdma_Bd* BdPtr, UINTPTR Addr)
  *****************************************************************************/
 LONG XAxiCdma_BdGetDstBufAddr(XAxiCdma_Bd* BdPtr)
 {
-    u32 addrlen;
+	u32 addrlen;
     addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
 
-    if (addrlen > 32)
-        return (u64
-        )(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFDST_OFFSET)
-          | ((uint64_t)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFDST_MSB_OFFSET)) << 32U));
-    else
-        return (u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFDST_OFFSET));
+	if (addrlen > 32)
+		return (u64) (XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFDST_OFFSET) |
+			((uint64_t)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFDST_MSB_OFFSET)) << 32U));
+	else
+		return (u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_BUFDST_OFFSET));
 }
 
 /*****************************************************************************/
@@ -338,18 +333,17 @@ LONG XAxiCdma_BdGetDstBufAddr(XAxiCdma_Bd* BdPtr)
  *****************************************************************************/
 u32 XAxiCdma_BdSetLength(XAxiCdma_Bd* BdPtr, int LenBytes)
 {
-    int MaxLen;
+	int MaxLen;
 
-    MaxLen = XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_MAX_LEN_OFFSET);
+	MaxLen = XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_MAX_LEN_OFFSET);
 
-    if ((LenBytes < 1) || (LenBytes > MaxLen))
-    {
-        return XST_INVALID_PARAM;
-    }
+	if ((LenBytes < 1) || (LenBytes > MaxLen)) {
+		return XST_INVALID_PARAM;
+	}
 
-    XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_CTRL_LEN_OFFSET, LenBytes);
+	XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_CTRL_LEN_OFFSET, LenBytes);
 
-    return XST_SUCCESS;
+	return XST_SUCCESS;
 }
 
 /*****************************************************************************/
@@ -366,7 +360,7 @@ u32 XAxiCdma_BdSetLength(XAxiCdma_Bd* BdPtr, int LenBytes)
 u32 XAxiCdma_BdGetLength(XAxiCdma_Bd* BdPtr)
 {
 
-    return (u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_CTRL_LEN_OFFSET));
+	return (u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_CTRL_LEN_OFFSET));
 }
 
 /*****************************************************************************/
@@ -383,13 +377,15 @@ u32 XAxiCdma_BdGetLength(XAxiCdma_Bd* BdPtr)
  *****************************************************************************/
 void XAxiCdma_BdSetPhysAddr(XAxiCdma_Bd* BdPtr, UINTPTR PhysAddr)
 {
-    u32 addrlen;
+	u32 addrlen;
     addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
 
-    XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_PHYS_ADDR_OFFSET, PhysAddr);
-    if (addrlen > 32) XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_PHYS_ADDR_MSB_OFFSET, UPPER_32_BITS(PhysAddr));
+	XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_PHYS_ADDR_OFFSET, PhysAddr);
+	if (addrlen > 32)
+                XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_PHYS_ADDR_MSB_OFFSET,
+				 UPPER_32_BITS(PhysAddr));
 
-    return;
+	return;
 }
 
 /*****************************************************************************/
@@ -407,9 +403,9 @@ void XAxiCdma_BdSetPhysAddr(XAxiCdma_Bd* BdPtr, UINTPTR PhysAddr)
 void XAxiCdma_BdSetIsLite(XAxiCdma_Bd* BdPtr, int IsLite)
 {
 
-    XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_ISLITE_OFFSET, IsLite);
+	XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_ISLITE_OFFSET, IsLite);
 
-    return;
+	return;
 }
 
 /*****************************************************************************/
@@ -427,9 +423,9 @@ void XAxiCdma_BdSetIsLite(XAxiCdma_Bd* BdPtr, int IsLite)
 void XAxiCdma_BdSetHasDRE(XAxiCdma_Bd* BdPtr, int HasDRE)
 {
 
-    XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_HASDRE_OFFSET, HasDRE);
+	XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_HASDRE_OFFSET, HasDRE);
 
-    return;
+	return;
 }
 
 /*****************************************************************************/
@@ -447,9 +443,9 @@ void XAxiCdma_BdSetHasDRE(XAxiCdma_Bd* BdPtr, int HasDRE)
 void XAxiCdma_BdSetWordLen(XAxiCdma_Bd* BdPtr, int WordLen)
 {
 
-    XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_WORDLEN_OFFSET, WordLen);
+	XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_WORDLEN_OFFSET, WordLen);
 
-    return;
+	return;
 }
 
 /*****************************************************************************/
@@ -467,9 +463,9 @@ void XAxiCdma_BdSetWordLen(XAxiCdma_Bd* BdPtr, int WordLen)
 void XAxiCdma_BdSetMaxLen(XAxiCdma_Bd* BdPtr, int MaxLen)
 {
 
-    XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_MAX_LEN_OFFSET, MaxLen);
+	XAxiCdma_BdWrite(BdPtr, XAXICDMA_BD_MAX_LEN_OFFSET, MaxLen);
 
-    return;
+	return;
 }
 
 /*****************************************************************************/
@@ -485,15 +481,15 @@ void XAxiCdma_BdSetMaxLen(XAxiCdma_Bd* BdPtr, int MaxLen)
  *****************************************************************************/
 LONG XAxiCdma_BdGetPhysAddr(XAxiCdma_Bd* BdPtr)
 {
-    u32 addrlen;
-    addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
+	 u32 addrlen;
+        addrlen = XAxiCdma_BdGetAddrLength(BdPtr);
 
-    if (addrlen > 32)
-        return (u64
-        )((XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_PHYS_ADDR_OFFSET))
-          | ((uint64_t)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_PHYS_ADDR_MSB_OFFSET)) << 32U));
-    else
-        return (u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_PHYS_ADDR_OFFSET));
+	 if (addrlen > 32)
+             return (u64)((XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_PHYS_ADDR_OFFSET)) |
+                       ((uint64_t)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_PHYS_ADDR_MSB_OFFSET))
+                                << 32U));
+        else
+             return (u32)(XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_PHYS_ADDR_OFFSET));
 }
 
 /*****************************************************************************/
@@ -509,19 +505,33 @@ LONG XAxiCdma_BdGetPhysAddr(XAxiCdma_Bd* BdPtr)
  *****************************************************************************/
 void XAxiCdma_DumpBd(XAxiCdma_Bd* BdPtr)
 {
-    xil_printf("\r\nDump BD %p:\r\n", BdPtr);
+	xil_printf("\r\nDump BD %p:\r\n", BdPtr);
 
-    xil_printf("Next BD ptr \t%x\r\n", (unsigned int)XAxiCdma_BdGetNextPtr(BdPtr));
-    xil_printf("Buffer srcaddr \t%x\r\n", (unsigned int)XAxiCdma_BdGetSrcBufAddr(BdPtr));
-    xil_printf("Buffer dstaddr \t%x\r\n", (unsigned int)XAxiCdma_BdGetDstBufAddr(BdPtr));
-    xil_printf("Buffer Length \t%x\r\n", (unsigned int)XAxiCdma_BdGetLength(BdPtr));
-    xil_printf("BD status \t%x\r\n", (unsigned int)XAxiCdma_BdGetSts(BdPtr));
-    xil_printf("BD phys Addr \t%x\r\n", (unsigned int)XAxiCdma_BdGetPhysAddr(BdPtr));
-    xil_printf("BD is Lite \t%x\r\n", (unsigned int)XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_ISLITE_OFFSET));
-    xil_printf("BD has DRE \t%x\r\n", (unsigned int)XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_HASDRE_OFFSET));
-    xil_printf("BD word length \t%x\r\n\r\n", (unsigned int)XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_WORDLEN_OFFSET));
-    xil_printf("BD max transfer length \t%x\r\n\r\n", (unsigned int)XAxiCdma_BdRead(BdPtr, XAXICDMA_BD_MAX_LEN_OFFSET));
+	xil_printf("Next BD ptr \t%x\r\n",
+	    (unsigned int)XAxiCdma_BdGetNextPtr(BdPtr));
+	xil_printf("Buffer srcaddr \t%x\r\n",
+	    (unsigned int)XAxiCdma_BdGetSrcBufAddr(BdPtr));
+	xil_printf("Buffer dstaddr \t%x\r\n",
+	    (unsigned int)XAxiCdma_BdGetDstBufAddr(BdPtr));
+	xil_printf("Buffer Length \t%x\r\n",
+	    (unsigned int)XAxiCdma_BdGetLength(BdPtr));
+	xil_printf("BD status \t%x\r\n",
+	    (unsigned int)XAxiCdma_BdGetSts(BdPtr));
+	xil_printf("BD phys Addr \t%x\r\n",
+	    (unsigned int)XAxiCdma_BdGetPhysAddr(BdPtr));
+	xil_printf("BD is Lite \t%x\r\n",
+	    (unsigned int)XAxiCdma_BdRead(BdPtr,
+	    XAXICDMA_BD_ISLITE_OFFSET));
+	xil_printf("BD has DRE \t%x\r\n",
+	    (unsigned int)XAxiCdma_BdRead(BdPtr,
+	    XAXICDMA_BD_HASDRE_OFFSET));
+	xil_printf("BD word length \t%x\r\n\r\n",
+	    (unsigned int)XAxiCdma_BdRead(BdPtr,
+	    XAXICDMA_BD_WORDLEN_OFFSET));
+	xil_printf("BD max transfer length \t%x\r\n\r\n",
+	    (unsigned int)XAxiCdma_BdRead(BdPtr,
+	    XAXICDMA_BD_MAX_LEN_OFFSET));
 
-    return;
+	return;
 }
 /** @} */

@@ -1,33 +1,33 @@
 /******************************************************************************
- *
- * Copyright (C) 2010 - 2019 Xilinx, Inc.  All rights reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- *
- *
- ******************************************************************************/
+*
+* Copyright (C) 2010 - 2019 Xilinx, Inc.  All rights reserved.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+*
+*
+*
+******************************************************************************/
 /*****************************************************************************/
 /**
  *  @file xaxicdma_intr.c
- * @addtogroup axicdma_v4_6
- * @{
+* @addtogroup axicdma_v4_6
+* @{
  *
  * The implementation of the interrupt related API. The interrupt handler is
  * also implemented here.
@@ -60,13 +60,14 @@
  * @note	None.
  *
  *****************************************************************************/
-void XAxiCdma_IntrEnable(XAxiCdma* InstancePtr, u32 Mask)
+void XAxiCdma_IntrEnable(XAxiCdma *InstancePtr, u32 Mask)
 {
-    u32 RegValue;
+	u32 RegValue;
 
-    RegValue = XAxiCdma_ReadReg(InstancePtr->BaseAddr, XAXICDMA_CR_OFFSET);
+	RegValue = XAxiCdma_ReadReg(InstancePtr->BaseAddr, XAXICDMA_CR_OFFSET);
 
-    XAxiCdma_WriteReg(InstancePtr->BaseAddr, XAXICDMA_CR_OFFSET, RegValue | (Mask & XAXICDMA_XR_IRQ_ALL_MASK));
+	XAxiCdma_WriteReg(InstancePtr->BaseAddr, XAXICDMA_CR_OFFSET,
+		RegValue | (Mask & XAXICDMA_XR_IRQ_ALL_MASK));
 }
 
 /*****************************************************************************/
@@ -80,9 +81,10 @@ void XAxiCdma_IntrEnable(XAxiCdma* InstancePtr, u32 Mask)
  * @note	None.
  *
  *****************************************************************************/
-u32 XAxiCdma_IntrGetEnabled(XAxiCdma* InstancePtr)
+u32 XAxiCdma_IntrGetEnabled(XAxiCdma *InstancePtr)
 {
-    return (XAxiCdma_ReadReg(InstancePtr->BaseAddr, XAXICDMA_CR_OFFSET) & XAXICDMA_XR_IRQ_ALL_MASK);
+	return (XAxiCdma_ReadReg(InstancePtr->BaseAddr, XAXICDMA_CR_OFFSET) &
+		XAXICDMA_XR_IRQ_ALL_MASK);
 }
 
 /*****************************************************************************/
@@ -98,13 +100,14 @@ u32 XAxiCdma_IntrGetEnabled(XAxiCdma* InstancePtr)
  * @note	None.
  *
  *****************************************************************************/
-void XAxiCdma_IntrDisable(XAxiCdma* InstancePtr, u32 Mask)
+void XAxiCdma_IntrDisable(XAxiCdma *InstancePtr, u32 Mask)
 {
-    u32 RegValue;
+	u32 RegValue;
 
-    RegValue = XAxiCdma_ReadReg(InstancePtr->BaseAddr, XAXICDMA_CR_OFFSET);
+	RegValue = XAxiCdma_ReadReg(InstancePtr->BaseAddr, XAXICDMA_CR_OFFSET);
 
-    XAxiCdma_WriteReg(InstancePtr->BaseAddr, XAXICDMA_CR_OFFSET, RegValue & ~(Mask & XAXICDMA_XR_IRQ_ALL_MASK));
+	XAxiCdma_WriteReg(InstancePtr->BaseAddr, XAXICDMA_CR_OFFSET,
+		RegValue & ~(Mask & XAXICDMA_XR_IRQ_ALL_MASK));
 }
 
 /*****************************************************************************/
@@ -127,134 +130,124 @@ void XAxiCdma_IntrDisable(XAxiCdma* InstancePtr, u32 Mask)
  *		the only user of the DMA engine, then you do not have to worry
  *		about this.
  *****************************************************************************/
-void XAxiCdma_IntrHandler(void* HandlerRef)
+void XAxiCdma_IntrHandler(void *HandlerRef)
 {
-    XAxiCdma* InstancePtr;
-    u32       Status;
-    u32       Irq;
-    u32       Error = 0x0;
+	XAxiCdma *InstancePtr;
+	u32 Status;
+	u32 Irq;
+	u32 Error = 0x0;
 
-    InstancePtr = (XAxiCdma*)HandlerRef;
-    Status      = XAxiCdma_ReadReg(InstancePtr->BaseAddr, XAXICDMA_SR_OFFSET);
+	InstancePtr = (XAxiCdma *)HandlerRef;
+	Status = XAxiCdma_ReadReg(InstancePtr->BaseAddr, XAXICDMA_SR_OFFSET);
 
-    /* Check what interrupts have fired
-     */
-    Irq = Status & XAXICDMA_XR_IRQ_ALL_MASK;
+	/* Check what interrupts have fired
+	 */
+	Irq = Status & XAXICDMA_XR_IRQ_ALL_MASK;
 
-    if (Irq == 0x0)
-    {
-        xdbg_printf(XDBG_DEBUG_ERROR, "No interrupt for intr handler\r\n");
-        return;
-    }
+	if (Irq == 0x0) {
+		xdbg_printf(XDBG_DEBUG_ERROR, "No interrupt for intr handler\r\n");
+		return;
+	}
 
-    /* Acknowledge the interrupt
-     */
-    XAxiCdma_WriteReg(InstancePtr->BaseAddr, XAXICDMA_SR_OFFSET, Irq);
+	/* Acknowledge the interrupt
+	 */
+	XAxiCdma_WriteReg(InstancePtr->BaseAddr, XAXICDMA_SR_OFFSET, Irq);
 
-    /* Pass the interrupt and error status to the callback function
-     * if the transfer has one
-     */
+	/* Pass the interrupt and error status to the callback function
+	 * if the transfer has one
+	 */
 
-    /* If SimpleNotDone flag is set, then it is a simple transfer
-     */
-    if (InstancePtr->SimpleNotDone)
-    {
-        if (InstancePtr->SimpleCallBackFn)
-        {
-            (InstancePtr->SimpleCallBackFn)(InstancePtr->SimpleCallBackRef, Irq, NULL);
+	/* If SimpleNotDone flag is set, then it is a simple transfer
+	 */
+	if (InstancePtr->SimpleNotDone) {
+		if (InstancePtr->SimpleCallBackFn) {
+			(InstancePtr->SimpleCallBackFn)(
+			    InstancePtr->SimpleCallBackRef, Irq, NULL);
 
-            InstancePtr->SimpleCallBackFn = NULL;
-        }
+			InstancePtr->SimpleCallBackFn = NULL;
+		}
 
-        InstancePtr->SimpleNotDone = 0;
+		InstancePtr->SimpleNotDone = 0;
 
-        if (InstancePtr->SGWaiting)
-        {
-            XAxiCdma_BdRingStartTransfer(InstancePtr);
-        }
-    }
-    else
-    { /* SG transfer */
-        if (InstancePtr->SgHandlerHead != InstancePtr->SgHandlerTail)
-        {
-            int Tmp;
+		if (InstancePtr->SGWaiting) {
+			XAxiCdma_BdRingStartTransfer(InstancePtr);
+		}
+	}
+	else {	/* SG transfer */
+		if (InstancePtr->SgHandlerHead != InstancePtr->SgHandlerTail) {
+			int Tmp;
 
-            XAxiCdma_IntrHandlerList Handler = InstancePtr->Handlers[InstancePtr->SgHandlerHead];
+			XAxiCdma_IntrHandlerList Handler =
+			    InstancePtr->Handlers[InstancePtr->SgHandlerHead];
 
-            Tmp = Handler.NumBds;
+			Tmp = Handler.NumBds;
 
-            /* Caution: may have race condition here
-             *
-             * If an interrupt for another transfer happens
-             * while in callback function, then the wrong callback
-             * function may be called.
-             */
-            Handler.CallBackFn(Handler.CallBackRef, Irq, &(Tmp));
+			/* Caution: may have race condition here
+			 *
+			 * If an interrupt for another transfer happens
+			 * while in callback function, then the wrong callback
+			 * function may be called.
+			 */
+			Handler.CallBackFn(Handler.CallBackRef, Irq, &(Tmp));
 
-            InstancePtr->Handlers[InstancePtr->SgHandlerHead].NumBds = Tmp;
+			InstancePtr->Handlers[InstancePtr->SgHandlerHead].NumBds = Tmp;
 
-            /* Update the handler head if this transfer is done
-             */
-            if (Tmp == 0)
-            {
-                Tmp = InstancePtr->SgHandlerHead + 1;
+			/* Update the handler head if this transfer is done
+			 */
+			if (Tmp == 0) {
+				Tmp = InstancePtr->SgHandlerHead + 1;
 
-                if (Tmp == XAXICDMA_MAXIMUM_MAX_HANDLER)
-                {
-                    Tmp = 0;
-                }
+				if (Tmp == XAXICDMA_MAXIMUM_MAX_HANDLER) {
+					Tmp	= 0;
+				}
 
-                InstancePtr->SgHandlerHead = Tmp;
-            }
-        }
-        else
-        {
-            xdbg_printf(XDBG_DEBUG_ERROR, "ERROR: SG transfer intr without handler\r\n");
-        }
-    }
+				InstancePtr->SgHandlerHead = Tmp;
+			}
+		}
+		else {
+			xdbg_printf(XDBG_DEBUG_ERROR,
+			    "ERROR: SG transfer intr without handler\r\n");
+		}
+	}
 
-    /* If has error interrupt, hardware needs to be reset
-     */
-    Error = Status & XAXICDMA_SR_ERR_ALL_MASK;
-    if ((Irq & XAXICDMA_XR_IRQ_ERROR_MASK) && Error)
-    {
-        int TimeOut;
+	/* If has error interrupt, hardware needs to be reset
+	 */
+	Error = Status & XAXICDMA_SR_ERR_ALL_MASK;
+	if ((Irq & XAXICDMA_XR_IRQ_ERROR_MASK) && Error) {
+		int TimeOut;
 
 
-        TimeOut = XAXICDMA_RESET_LOOP_LIMIT;
+		TimeOut = XAXICDMA_RESET_LOOP_LIMIT;
 
-        /* Need to reset the hardware to clear the errors
-         */
-        XAxiCdma_Reset(InstancePtr);
+		/* Need to reset the hardware to clear the errors
+		 */
+		XAxiCdma_Reset(InstancePtr);
 
-        while (TimeOut)
-        {
+		while (TimeOut) {
 
-            if (XAxiCdma_ResetIsDone(InstancePtr))
-            {
-                break;
-            }
+			if (XAxiCdma_ResetIsDone(InstancePtr)) {
+				break;
+			}
 
-            TimeOut -= 1;
-        }
+			TimeOut -= 1;
+		}
 
-        /* Reset failed
-         */
-        if (!TimeOut)
-        {
-            /* Mark the driver/engine is not in working state
-             */
-            InstancePtr->Initialized = 0;
-        }
+		/* Reset failed
+		 */
+		if (!TimeOut) {
+			/* Mark the driver/engine is not in working state
+			 */
+			InstancePtr->Initialized = 0;
+		}
 
-        /* In case of error, no further handling is needed
-         *
-         * User should check send/receive buffers to see what happened
-         * as well as check the DMA engine registers
-         */
-        return;
-    }
+		/* In case of error, no further handling is needed
+		 *
+		 * User should check send/receive buffers to see what happened
+		 * as well as check the DMA engine registers
+		 */
+		return;
+ 	}
 
-    return;
+	return;
 }
 /** @} */

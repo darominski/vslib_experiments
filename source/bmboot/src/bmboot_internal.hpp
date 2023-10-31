@@ -13,18 +13,12 @@
 namespace bmboot::internal
 {
 
-// We are assuming a coherent memory system
-// TODO: multiple definitions will be needed for different domains
-constexpr inline uintptr_t  MONITOR_CODE_START =    bmboot_cpu1_monitor_ADDRESS;
-constexpr inline size_t     MONITOR_CODE_SIZE =     bmboot_cpu1_monitor_SIZE;
-constexpr inline uintptr_t  MONITOR_IPC_START =     bmboot_cpu1_monitor_ipc_ADDRESS;
-constexpr inline size_t     MONITOR_IPC_SIZE =      bmboot_cpu1_monitor_ipc_SIZE;
-constexpr inline uintptr_t  PAYLOAD_START =         bmboot_cpu1_payload_ADDRESS;
-constexpr inline uintptr_t  PAYLOAD_MAX_SIZE =      bmboot_cpu1_payload_SIZE;
-
 // placed in the last 4 bytes of MONITOR_CODE area
 using Cookie = uint32_t;
 constexpr inline Cookie MONITOR_CODE_COOKIE = 0x7150ABCD;
+
+constexpr inline int GIC_MIN_USER_INTERRUPT_ID = 0;
+constexpr inline int GIC_MAX_USER_INTERRUPT_ID = 128;     // inclusive
 
 enum
 {
@@ -34,9 +28,11 @@ enum
 enum {
     SMC_NOTIFY_PAYLOAD_STARTED = 0xF2000000,
     SMC_NOTIFY_PAYLOAD_CRASHED,
-    SMC_START_PERIODIC_INTERRUPT,
-    SMC_STOP_PERIODIC_INTERRUPT,
     SMC_WRITE_STDOUT,
+
+    SMC_ZYNQMP_GIC_IRQ_CONFIGURE,
+    SMC_ZYNQMP_GIC_IRQ_ENABLE,
+    SMC_ZYNQMP_GIC_IRQ_DISABLE,
 };
 
 enum Command
@@ -91,6 +87,8 @@ struct IpcBlock
     executor_to_manager;
 };
 
-static_assert(sizeof(IpcBlock) <= MONITOR_IPC_SIZE);
+static_assert(sizeof(IpcBlock) <= bmboot_cpu1_monitor_ipc_SIZE);
+static_assert(sizeof(IpcBlock) <= bmboot_cpu2_monitor_ipc_SIZE);
+static_assert(sizeof(IpcBlock) <= bmboot_cpu3_monitor_ipc_SIZE);
 
 }

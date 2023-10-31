@@ -1,34 +1,34 @@
 /******************************************************************************
- *
- * Copyright (C) 2010 - 2019 Xilinx, Inc.  All rights reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- *
- *
- ******************************************************************************/
+*
+* Copyright (C) 2010 - 2019 Xilinx, Inc.  All rights reserved.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+*
+*
+*
+******************************************************************************/
 /*****************************************************************************/
 /**
  *  @file xaxicdma.h
- * @addtogroup axicdma_v4_6
- * @{
- * @details
+* @addtogroup axicdma_v4_6
+* @{
+* @details
  *
  * This is the driver API for the AXI CDMA engine.
  *
@@ -339,12 +339,11 @@
  * </pre>
  *****************************************************************************/
 
-#ifndef XAXICDMA_H_ /* prevent circular inclusions */
+#ifndef XAXICDMA_H_    /* prevent circular inclusions */
 #define XAXICDMA_H_
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /***************************** Include Files *********************************/
@@ -354,18 +353,17 @@ extern "C"
 #include "xenv.h"
 #else
 #include <string.h>
-
 #include "xil_cache.h"
 #endif
 
 /************************** Constant Definitions *****************************/
-#define XAXICDMA_COALESCE_NO_CHANGE 0xFFFFFFFF
-#define XAXICDMA_ALL_BDS            0x7FFFFFFF /* 2147 Million */
+#define XAXICDMA_COALESCE_NO_CHANGE  0xFFFFFFFF
+#define XAXICDMA_ALL_BDS             0x7FFFFFFF /* 2147 Million */
 
 /* Constants for engine mode: simple/SG
  */
-#define XAXICDMA_SG_MODE     1
-#define XAXICDMA_SIMPLE_MODE 2
+#define XAXICDMA_SG_MODE        1
+#define XAXICDMA_SIMPLE_MODE    2
 
 /* Maximum active SG interrupt handler this driver can manage
  *
@@ -377,113 +375,111 @@ extern "C"
 
 /* Constants of KeyHole feature selection: Write/Read
  */
-#define XAXICDMA_KEYHOLE_READ  0
-#define XAXICDMA_KEYHOLE_WRITE 1
+#define XAXICDMA_KEYHOLE_READ	0
+#define XAXICDMA_KEYHOLE_WRITE	1
 
-    /**************************** Type Definitions *******************************/
+/**************************** Type Definitions *******************************/
 
-    /**
-     * @name Call Back function
-     *
-     * If interrupt is enabled, and the application wants to be notified about the
-     * completion of a transfer, the application should register its call back
-     * function to the driver.
-     *
-     * The call back function is registered through the transfer submission.
-     *
-     * @param CallBackRef is the call back reference passed in by application. A
-     *        NULL pointer is acceptable.
-     *
-     * @param IrqMask is the interrupt mask regarding this completion
-     * @param NumBdPtr is the pointer to number of BDs this handler should handle,
-     *        for simple transfer, it is ignored.
-     */
-    typedef void (*XAxiCdma_CallBackFn)(void* CallBackRef, u32 IrqMask, int* NumBdPtr);
+/**
+ * @name Call Back function
+ *
+ * If interrupt is enabled, and the application wants to be notified about the
+ * completion of a transfer, the application should register its call back
+ * function to the driver.
+ *
+ * The call back function is registered through the transfer submission.
+ *
+ * @param CallBackRef is the call back reference passed in by application. A
+ *        NULL pointer is acceptable.
+ *
+ * @param IrqMask is the interrupt mask regarding this completion
+ * @param NumBdPtr is the pointer to number of BDs this handler should handle,
+ *        for simple transfer, it is ignored.
+ */
+typedef void (*XAxiCdma_CallBackFn)(void *CallBackRef, u32 IrqMask,
+    int *NumBdPtr);
 
-    /**
-     * @name XAxiCdma_IntrHandlerList
-     *
-     * Interrupt handler list for scatter gather transfers
-     *
-     * @{
-     */
-    typedef struct
-    {
-        XAxiCdma_CallBackFn CallBackFn;  /**< Callback function */
-        void*               CallBackRef; /**< Callback reference pointer */
-        volatile int        NumBds;      /**< Number of BDs this handler cares */
-    } XAxiCdma_IntrHandlerList;
+/**
+ * @name XAxiCdma_IntrHandlerList
+ *
+ * Interrupt handler list for scatter gather transfers
+ *
+ * @{
+ */
+typedef struct {
+	XAxiCdma_CallBackFn CallBackFn; /**< Callback function */
+	void *CallBackRef;              /**< Callback reference pointer */
+	volatile int NumBds;            /**< Number of BDs this handler cares */
+}XAxiCdma_IntrHandlerList;
 
-    /**
-     * @name XAxiCdma_Config
-     *
-     * The hardware configuration structure, to be passed to the driver by the
-     * user, or by tools if using XPS.
-     *
-     * @{
-     */
-    typedef struct
-    {
-        u32     DeviceId;    /**< Unique ID of this instance */
-        UINTPTR BaseAddress; /**< Physical address of this instance */
-        int     HasDRE;      /**< Whether support unaligned transfers */
-        int     IsLite;      /**< Whether hardware build is lite mode */
-        int     DataWidth;   /**< Length of a word in bits */
-        int     BurstLen;    /**< Burst length */
-        int     AddrWidth;   /**< Address Width */
-    } XAxiCdma_Config;
+/**
+ * @name XAxiCdma_Config
+ *
+ * The hardware configuration structure, to be passed to the driver by the
+ * user, or by tools if using XPS.
+ *
+ * @{
+ */
+typedef struct {
+	u32 DeviceId;             /**< Unique ID of this instance */
+	UINTPTR BaseAddress;          /**< Physical address of this instance */
+	int HasDRE;               /**< Whether support unaligned transfers */
+	int IsLite;               /**< Whether hardware build is lite mode */
+	int DataWidth;            /**< Length of a word in bits */
+	int BurstLen;             /**< Burst length */
+	int AddrWidth;		  /**< Address Width */
+}XAxiCdma_Config;
 
-    /**
-     * @name XAxiCdma
-     *
-     * The structure to hold the driver instance data. An instance of this
-     * structure corresponds to one DMA engine.
-     *
-     * @{
-     */
-    typedef struct
-    {
-        UINTPTR BaseAddr; /**< Virtual base address of the DMA engine */
+/**
+ * @name XAxiCdma
+ *
+ * The structure to hold the driver instance data. An instance of this
+ * structure corresponds to one DMA engine.
+ *
+ * @{
+ */
+typedef struct {
+	UINTPTR BaseAddr;         /**< Virtual base address of the DMA engine */
 
-        int Initialized;     /**< The driver/engine in working state */
-        int SimpleOnlyBuild; /**< Whether hardware is simple only build */
-        int HasDRE;          /**< Whether support unaligned transfers */
-        int IsLite;          /**< Whether hardware is in lite mode */
-        int WordLength;      /**< Length of a word in bytes */
-        int MaxTransLen;     /**< Length hardware supports */
-        int SimpleNotDone;   /**< Flag that a simple transfer is ongoing */
-        int SGWaiting;       /**< Flag that SG transfers are waiting */
+	int Initialized;      /**< The driver/engine in working state */
+	int SimpleOnlyBuild;  /**< Whether hardware is simple only build */
+	int HasDRE;           /**< Whether support unaligned transfers */
+	int IsLite;           /**< Whether hardware is in lite mode */
+	int WordLength;       /**< Length of a word in bytes */
+	int MaxTransLen;      /**< Length hardware supports */
+	int SimpleNotDone;    /**< Flag that a simple transfer is ongoing */
+	int SGWaiting;        /**< Flag that SG transfers are waiting */
 
-        /* BD ring fields for SG transfer */
-        UINTPTR      FirstBdPhysAddr; /**< Physical address of 1st BD in list */
-        UINTPTR      FirstBdAddr;     /**< Virtual address of 1st BD in list */
-        UINTPTR      LastBdAddr;      /**< Virtual address of last BD in the list */
-        u32          BdRingTotalLen;  /**< Total size of ring in bytes */
-        u32          BdSeparation;    /**< Distance between adjacent BDs in bytes */
-        XAxiCdma_Bd* FreeBdHead;      /**< First BD in the free group */
-        XAxiCdma_Bd* PreBdHead;       /**< First BD in the pre-work group */
-        XAxiCdma_Bd* HwBdHead;        /**< First BD in the work group */
-        XAxiCdma_Bd* HwBdTail;        /**< Last BD in the work group */
-        XAxiCdma_Bd* PostBdHead;      /**< First BD in the post-work group */
-        XAxiCdma_Bd* BdaRestart;      /**< BD to load when hardware restarted */
-        int          FreeBdCnt;       /**< Number of allocatable BDs */
-        int          PreBdCnt;        /**< Number of BDs in pre-work group */
-        int          HwBdCnt;         /**< Number of BDs in work group */
-        int          PostBdCnt;       /**< Number of BDs in post-work group */
-        int          AllBdCnt;        /**< Total Number of BDs */
+	/* BD ring fields for SG transfer */
+	UINTPTR FirstBdPhysAddr;  /**< Physical address of 1st BD in list */
+	UINTPTR FirstBdAddr;      /**< Virtual address of 1st BD in list */
+	UINTPTR LastBdAddr;       /**< Virtual address of last BD in the list */
+	u32 BdRingTotalLen;   /**< Total size of ring in bytes */
+	u32 BdSeparation;     /**< Distance between adjacent BDs in bytes */
+	XAxiCdma_Bd *FreeBdHead;   /**< First BD in the free group */
+	XAxiCdma_Bd *PreBdHead;    /**< First BD in the pre-work group */
+	XAxiCdma_Bd *HwBdHead;     /**< First BD in the work group */
+	XAxiCdma_Bd *HwBdTail;     /**< Last BD in the work group */
+	XAxiCdma_Bd *PostBdHead;   /**< First BD in the post-work group */
+	XAxiCdma_Bd *BdaRestart; /**< BD to load when hardware restarted */
+	int FreeBdCnt;             /**< Number of allocatable BDs */
+	int PreBdCnt;              /**< Number of BDs in pre-work group */
+	int HwBdCnt;               /**< Number of BDs in work group */
+	int PostBdCnt;             /**< Number of BDs in post-work group */
+	int AllBdCnt;              /**< Total Number of BDs */
 
-        /* Callback function for simple transfer*/
-        XAxiCdma_CallBackFn SimpleCallBackFn; /**< Callback function for simple
+	/* Callback function for simple transfer*/
+	XAxiCdma_CallBackFn SimpleCallBackFn; /**< Callback function for simple
                                                transfer */
-        void* SimpleCallBackRef;              /**< Callback reference pointer */
+	void *SimpleCallBackRef;       /**< Callback reference pointer */
 
-        int                      SgHandlerHead; /**< First active sg transfer handler */
-        int                      SgHandlerTail; /**< Last active sg transfer handler */
-        XAxiCdma_IntrHandlerList Handlers[XAXICDMA_MAXIMUM_MAX_HANDLER];
-        /**< List of interrupt handlers */
-        int AddrWidth; /**< Address Width */
+	int SgHandlerHead;             /**< First active sg transfer handler */
+	int SgHandlerTail;             /**< Last active sg transfer handler */
+	XAxiCdma_IntrHandlerList Handlers[XAXICDMA_MAXIMUM_MAX_HANDLER];
+	                               /**< List of interrupt handlers */
+	int AddrWidth;		  /**< Address Width */
 
-    } XAxiCdma;
+}XAxiCdma;
 /* @} */
 
 /***************** Macros (Inline Functions) Definitions *********************/
@@ -500,75 +496,84 @@ extern "C"
 #define XAXICDMA_CACHE_INVALIDATE(BdPtr)
 #elif __MICROBLAZE__
 #ifdef XCACHE_FLUSH_DCACHE_RANGE
-#define XAXICDMA_CACHE_FLUSH(BdPtr) XCACHE_FLUSH_DCACHE_RANGE((BdPtr), XAXICDMA_BD_HW_NUM_BYTES)
+#define XAXICDMA_CACHE_FLUSH(BdPtr)               \
+      XCACHE_FLUSH_DCACHE_RANGE((BdPtr), XAXICDMA_BD_HW_NUM_BYTES)
 #else
 #define XAXICDMA_CACHE_FLUSH(BdPtr)
 #endif
 
 #ifdef XCACHE_INVALIDATE_DCACHE_RANGE
-#define XAXICDMA_CACHE_INVALIDATE(BdPtr) XCACHE_INVALIDATE_DCACHE_RANGE((BdPtr), XAXICDMA_BD_HW_NUM_BYTES)
+#define XAXICDMA_CACHE_INVALIDATE(BdPtr)          \
+      XCACHE_INVALIDATE_DCACHE_RANGE((BdPtr), XAXICDMA_BD_HW_NUM_BYTES)
 #else
 #define XAXICDMA_CACHE_INVALIDATE(BdPtr)
 #endif
 
 #else /* __MICROBLAZE__*/
-#define XAXICDMA_CACHE_FLUSH(BdPtr) Xil_DCacheFlushRange((BdPtr), XAXICDMA_BD_HW_NUM_BYTES);
+#define XAXICDMA_CACHE_FLUSH(BdPtr)               \
+	Xil_DCacheFlushRange((BdPtr), XAXICDMA_BD_HW_NUM_BYTES);
 
-#define XAXICDMA_CACHE_INVALIDATE(BdPtr) Xil_DCacheInvalidateRange((BdPtr), XAXICDMA_BD_HW_NUM_BYTES)
+#define XAXICDMA_CACHE_INVALIDATE(BdPtr)          \
+      Xil_DCacheInvalidateRange((BdPtr), XAXICDMA_BD_HW_NUM_BYTES)
 
 #endif
 
 
-    /************************** Function Prototypes ******************************/
+/************************** Function Prototypes ******************************/
 
-    XAxiCdma_Config* XAxiCdma_LookupConfig(u32 DeviceId);
+XAxiCdma_Config *XAxiCdma_LookupConfig(u32 DeviceId);
 
-    u32  XAxiCdma_CfgInitialize(XAxiCdma* InstancePtr, XAxiCdma_Config* CfgPtr, UINTPTR EffectiveAddr);
-    void XAxiCdma_Reset(XAxiCdma* InstancePtr);
-    int  XAxiCdma_ResetIsDone(XAxiCdma* InstancePtr);
-    int  XAxiCdma_IsBusy(XAxiCdma* InstancePtr);
-    int  XAxiCdma_SetCoalesce(XAxiCdma* InstancePtr, u32 Counter, u32 Delay);
-    void XAxiCdma_GetCoalesce(XAxiCdma* InstancePtr, u32* CounterPtr, u32* DelayPtr);
-    u32  XAxiCdma_GetError(XAxiCdma* InstancePtr);
-    void XAxiCdma_IntrEnable(XAxiCdma* InstancePtr, u32 Mask);
-    u32  XAxiCdma_IntrGetEnabled(XAxiCdma* InstancePtr);
-    void XAxiCdma_IntrDisable(XAxiCdma* InstancePtr, u32 Mask);
-    void XAxiCdma_IntrHandler(void* HandlerRef);
-    u32  XAxiCdma_SimpleTransfer(
-         XAxiCdma* InstancePtr, UINTPTR SrcAddr, UINTPTR DstAddr, int Length, XAxiCdma_CallBackFn SimpleCallBack,
-         void* CallbackRef
-     );
-    int XAxiCdma_SelectKeyHole(XAxiCdma* InstancePtr, u32 Direction, u32 Select);
+u32 XAxiCdma_CfgInitialize(XAxiCdma *InstancePtr, XAxiCdma_Config *CfgPtr,
+        UINTPTR EffectiveAddr);
+void XAxiCdma_Reset(XAxiCdma *InstancePtr);
+int XAxiCdma_ResetIsDone(XAxiCdma *InstancePtr);
+int XAxiCdma_IsBusy(XAxiCdma *InstancePtr);
+int XAxiCdma_SetCoalesce(XAxiCdma *InstancePtr, u32 Counter, u32 Delay);
+void XAxiCdma_GetCoalesce(XAxiCdma *InstancePtr, u32 *CounterPtr,
+        u32 *DelayPtr);
+u32 XAxiCdma_GetError(XAxiCdma *InstancePtr);
+void XAxiCdma_IntrEnable(XAxiCdma *InstancePtr, u32 Mask);
+u32 XAxiCdma_IntrGetEnabled(XAxiCdma *InstancePtr);
+void XAxiCdma_IntrDisable(XAxiCdma *InstancePtr, u32 Mask);
+void XAxiCdma_IntrHandler(void *HandlerRef);
+u32 XAxiCdma_SimpleTransfer(XAxiCdma *InstancePtr, UINTPTR SrcAddr, UINTPTR DstAddr,
+        int Length, XAxiCdma_CallBackFn SimpleCallBack, void *CallbackRef);
+int XAxiCdma_SelectKeyHole(XAxiCdma *InstancePtr, u32 Direction, u32 Select);
 
-    /* BD ring API functions
-     */
-    u32          XAxiCdma_BdRingCntCalc(u32 Alignment, u32 Bytes, UINTPTR BuffAddr);
-    u32          XAxiCdma_BdRingMemCalc(u32 Alignment, int NumBd);
-    u32          XAxiCdma_BdRingGetCnt(XAxiCdma* InstancePtr);
-    u32          XAxiCdma_BdRingGetFreeCnt(XAxiCdma* InstancePtr);
-    void         XAxiCdma_BdRingSnapShotCurrBd(XAxiCdma* InstancePtr);
-    XAxiCdma_Bd* XAxiCdma_BdRingGetCurrBd(XAxiCdma* InstancePtr);
-    XAxiCdma_Bd* XAxiCdma_BdRingNext(XAxiCdma* InstancePtr, XAxiCdma_Bd* BdPtr);
-    XAxiCdma_Bd* XAxiCdma_BdRingPrev(XAxiCdma* InstancePtr, XAxiCdma_Bd* BdPtr);
-    LONG XAxiCdma_BdRingCreate(XAxiCdma* InstancePtr, UINTPTR PhysAddr, UINTPTR VirtAddr, u32 Alignment, int BdCount);
-    LONG XAxiCdma_BdRingClone(XAxiCdma* InstancePtr, XAxiCdma_Bd* TemplateBdPtr);
-    LONG XAxiCdma_BdRingAlloc(XAxiCdma* InstancePtr, int NumBd, XAxiCdma_Bd** BdSetPtr);
-    LONG XAxiCdma_BdRingUnAlloc(XAxiCdma* InstancePtr, int NumBd, XAxiCdma_Bd* BdSetPtr);
-    LONG XAxiCdma_BdRingToHw(
-        XAxiCdma* InstancePtr, int NumBd, XAxiCdma_Bd* BdSetPtr, XAxiCdma_CallBackFn CallBack, void* CallBackRef
-    );
-    u32  XAxiCdma_BdRingFromHw(XAxiCdma* InstancePtr, int BdLimit, XAxiCdma_Bd** BdSetPtr);
-    u32  XAxiCdma_BdRingFree(XAxiCdma* InstancePtr, int NumBd, XAxiCdma_Bd* BdSetPtr);
-    void XAxiCdma_BdSetCurBdPtr(XAxiCdma* InstancePtr, UINTPTR CurBdPtr);
-    void XAxiCdma_BdSetTailBdPtr(XAxiCdma* InstancePtr, UINTPTR TailBdPtr);
+/* BD ring API functions
+ */
+u32 XAxiCdma_BdRingCntCalc(u32 Alignment, u32 Bytes, UINTPTR BuffAddr);
+u32 XAxiCdma_BdRingMemCalc(u32 Alignment, int NumBd);
+u32 XAxiCdma_BdRingGetCnt(XAxiCdma *InstancePtr);
+u32 XAxiCdma_BdRingGetFreeCnt(XAxiCdma *InstancePtr);
+void XAxiCdma_BdRingSnapShotCurrBd(XAxiCdma *InstancePtr);
+XAxiCdma_Bd *XAxiCdma_BdRingGetCurrBd(XAxiCdma *InstancePtr);
+XAxiCdma_Bd *XAxiCdma_BdRingNext(XAxiCdma *InstancePtr, XAxiCdma_Bd *BdPtr);
+XAxiCdma_Bd *XAxiCdma_BdRingPrev(XAxiCdma *InstancePtr, XAxiCdma_Bd *BdPtr);
+LONG XAxiCdma_BdRingCreate(XAxiCdma *InstancePtr, UINTPTR PhysAddr,
+        UINTPTR VirtAddr, u32 Alignment, int BdCount);
+LONG XAxiCdma_BdRingClone(XAxiCdma *InstancePtr, XAxiCdma_Bd * TemplateBdPtr);
+LONG XAxiCdma_BdRingAlloc(XAxiCdma *InstancePtr, int NumBd,
+	XAxiCdma_Bd ** BdSetPtr);
+LONG XAxiCdma_BdRingUnAlloc(XAxiCdma *InstancePtr, int NumBd,
+	XAxiCdma_Bd * BdSetPtr);
+LONG XAxiCdma_BdRingToHw(XAxiCdma *InstancePtr, int NumBd,
+        XAxiCdma_Bd * BdSetPtr, XAxiCdma_CallBackFn CallBack,
+        void *CallBackRef);
+u32 XAxiCdma_BdRingFromHw(XAxiCdma *InstancePtr, int BdLimit,
+        XAxiCdma_Bd ** BdSetPtr);
+u32 XAxiCdma_BdRingFree(XAxiCdma *InstancePtr, int NumBd,
+        XAxiCdma_Bd * BdSetPtr);
+void XAxiCdma_BdSetCurBdPtr(XAxiCdma *InstancePtr, UINTPTR CurBdPtr);
+void XAxiCdma_BdSetTailBdPtr(XAxiCdma *InstancePtr, UINTPTR TailBdPtr);
 
-    /* Debug utility function
-     */
-    void XAxiCdma_DumpRegisters(XAxiCdma* InstancePtr);
+/* Debug utility function
+ */
+void XAxiCdma_DumpRegisters(XAxiCdma *InstancePtr);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* prevent circular inclusions */
+#endif    /* prevent circular inclusions */
 /** @} */

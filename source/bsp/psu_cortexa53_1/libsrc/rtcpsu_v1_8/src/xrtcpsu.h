@@ -123,21 +123,20 @@
  ******************************************************************************/
 
 
-#ifndef XRTC_H_ /* prevent circular inclusions */
-#define XRTC_H_ /* by using protection macros */
+#ifndef XRTC_H_			/* prevent circular inclusions */
+#define XRTC_H_			/* by using protection macros */
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-    /***************************** Include Files *********************************/
+/***************************** Include Files *********************************/
 
+#include "xstatus.h"
 #include "xil_assert.h"
 #include "xil_io.h"
-#include "xil_types.h"
 #include "xrtcpsu_hw.h"
-#include "xstatus.h"
+#include "xil_types.h"
 
 /************************** Constant Definitions *****************************/
 
@@ -149,85 +148,82 @@ extern "C"
  *
  * @{
  */
-#define XRTCPSU_EVENT_ALARM_GEN 1U /**< Alarm generated event */
-#define XRTCPSU_EVENT_SECS_GEN  2U /**< A new second generated event */
-    /*@}*/
+#define XRTCPSU_EVENT_ALARM_GEN		1U /**< Alarm generated event */
+#define XRTCPSU_EVENT_SECS_GEN		2U /**< A new second generated event */
+/*@}*/
 
-#define XRTCPSU_CRYSTAL_OSC_EN ((u32)1 << XRTC_CTL_OSC_SHIFT)
-    /**< Separate Mask for Crystal oscillator bit Enable */
+#define XRTCPSU_CRYSTAL_OSC_EN		((u32)1 << XRTC_CTL_OSC_SHIFT)
+/**< Separate Mask for Crystal oscillator bit Enable */
 
-    /**************************** Type Definitions *******************************/
+/**************************** Type Definitions *******************************/
 
-    /******************************************************************************/
-    /**
-     * This data type defines a handler that an application defines to communicate
-     * with interrupt system to retrieve state information about an application.
-     *
-     * @param	CallBackRef is a callback reference passed in by the upper layer
-     *		when setting the handler, and is passed back to the upper layer
-     *		when the handler is called. It is used to find the device driver
-     *		instance.
-     * @param	Event contains one of the event constants indicating events that
-     *		have occurred.
-     * @param	EventData contains the number of bytes sent or received at the
-     *		time of the call for send and receive events and contains the
-     *		modem status for modem events.
-     *
-     ******************************************************************************/
-    typedef void (*XRtcPsu_Handler)(const void* CallBackRef, u32 Event);
+/******************************************************************************/
+/**
+ * This data type defines a handler that an application defines to communicate
+ * with interrupt system to retrieve state information about an application.
+ *
+ * @param	CallBackRef is a callback reference passed in by the upper layer
+ *		when setting the handler, and is passed back to the upper layer
+ *		when the handler is called. It is used to find the device driver
+ *		instance.
+ * @param	Event contains one of the event constants indicating events that
+ *		have occurred.
+ * @param	EventData contains the number of bytes sent or received at the
+ *		time of the call for send and receive events and contains the
+ *		modem status for modem events.
+ *
+ ******************************************************************************/
+typedef void (*XRtcPsu_Handler) (const void *CallBackRef, u32 Event);
 
-    /**
-     * This typedef contains configuration information for a device.
-     */
-    typedef struct
-    {
-        u16 DeviceId; /**< Unique ID of device */
-        u32 BaseAddr; /**< Register base address */
-    } XRtcPsu_Config;
+/**
+ * This typedef contains configuration information for a device.
+ */
+typedef struct {
+	u16 DeviceId;		/**< Unique ID of device */
+	u32 BaseAddr;		/**< Register base address */
+} XRtcPsu_Config;
 
-    /**
-     * The XRtcPsu driver instance data. The user is required to allocate a
-     * variable of this type for the RTC device in the system. A pointer
-     * to a variable of this type is then passed to the driver API functions.
-     */
-    typedef struct
-    {
-        XRtcPsu_Config  RtcConfig; /**< Device configuration */
-        u32             IsReady;   /**< Device is initialized and ready */
-        u32             PeriodicAlarmTime;
-        u8              IsPeriodicAlarm;
-        u32             OscillatorFreq;
-        u32             CalibrationValue;
-        XRtcPsu_Handler Handler;
-        void*           CallBackRef; /**< Callback reference for
-                                      * event handler
-                                      */
-        u32 TimeUpdated;
-        u32 CurrTimeUpdated;
-    } XRtcPsu;
+/**
+ * The XRtcPsu driver instance data. The user is required to allocate a
+ * variable of this type for the RTC device in the system. A pointer
+ * to a variable of this type is then passed to the driver API functions.
+ */
+typedef struct {
+	XRtcPsu_Config RtcConfig;	/**< Device configuration */
+	u32 IsReady;			/**< Device is initialized and ready */
+	u32 PeriodicAlarmTime;
+	u8 IsPeriodicAlarm;
+	u32 OscillatorFreq;
+	u32 CalibrationValue;
+	XRtcPsu_Handler Handler;
+	void *CallBackRef;		/**< Callback reference for
+					  * event handler
+					  */
+	u32 TimeUpdated;
+	u32 CurrTimeUpdated;
+} XRtcPsu;
 
-    /**
-     * This typedef contains DateTime format structure.
-     */
-    typedef struct
-    {
-        u32 Year;
-        u32 Month;
-        u32 Day;
-        u32 Hour;
-        u32 Min;
-        u32 Sec;
-        u32 WeekDay;
-    } XRtcPsu_DT;
+/**
+ * This typedef contains DateTime format structure.
+ */
+typedef struct {
+	u32 Year;
+	u32 Month;
+	u32 Day;
+	u32 Hour;
+	u32 Min;
+	u32 Sec;
+	u32 WeekDay;
+} XRtcPsu_DT;
 
 
-    /************************* Variable Definitions ******************************/
+/************************* Variable Definitions ******************************/
 
 
-    /***************** Macros (Inline Functions) Definitions *********************/
+/***************** Macros (Inline Functions) Definitions *********************/
 
 #define XRTC_CALIBRATION_VALUE 0x8000U
-#define XRTC_TYPICAL_OSC_FREQ  32768U
+#define XRTC_TYPICAL_OSC_FREQ 32768U
 
 /****************************************************************************/
 /**
@@ -243,8 +239,9 @@ extern "C"
  *		void XRtcPsu_SetTime(XRtcPsu *InstancePtr, u32 Time)
  *
  *****************************************************************************/
-#define XRtcPsu_WriteSetTime(InstancePtr, Time)                                                                        \
-    XRtcPsu_WriteReg(((InstancePtr)->RtcConfig.BaseAddr + XRTC_SET_TIME_WR_OFFSET), (Time))
+#define XRtcPsu_WriteSetTime(InstancePtr, Time) \
+	XRtcPsu_WriteReg(((InstancePtr)->RtcConfig.BaseAddr + \
+				XRTC_SET_TIME_WR_OFFSET), (Time))
 
 /****************************************************************************/
 /**
@@ -260,7 +257,9 @@ extern "C"
  *		u32 XRtcPsu_GetLastSetTime(XRtcPsu  *InstancePtr)
  *
  *****************************************************************************/
-#define XRtcPsu_GetLastSetTime(InstancePtr) XRtcPsu_ReadReg((InstancePtr)->RtcConfig.BaseAddr + XRTC_SET_TIME_RD_OFFSET)
+#define XRtcPsu_GetLastSetTime(InstancePtr) \
+	XRtcPsu_ReadReg((InstancePtr)->RtcConfig.BaseAddr + \
+		XRTC_SET_TIME_RD_OFFSET)
 
 /****************************************************************************/
 /**
@@ -275,7 +274,8 @@ extern "C"
  *		u32 XRtcPsu_GetCalibration(XRtcPsu  *InstancePtr)
  *
  *****************************************************************************/
-#define XRtcPsu_GetCalibration(InstancePtr) XRtcPsu_ReadReg((InstancePtr)->RtcConfig.BaseAddr + XRTC_CALIB_RD_OFFSET)
+#define XRtcPsu_GetCalibration(InstancePtr) \
+	XRtcPsu_ReadReg((InstancePtr)->RtcConfig.BaseAddr+XRTC_CALIB_RD_OFFSET)
 
 /****************************************************************************/
 /**
@@ -290,7 +290,8 @@ extern "C"
  *		u32 XRtcPsu_ReadCurrentTime(XRtcPsu  *InstancePtr)
  *
  *****************************************************************************/
-#define XRtcPsu_ReadCurrentTime(InstancePtr) XRtcPsu_ReadReg((InstancePtr)->RtcConfig.BaseAddr + XRTC_CUR_TIME_OFFSET)
+#define XRtcPsu_ReadCurrentTime(InstancePtr) \
+	XRtcPsu_ReadReg((InstancePtr)->RtcConfig.BaseAddr+XRTC_CUR_TIME_OFFSET)
 
 /****************************************************************************/
 /**
@@ -307,8 +308,9 @@ extern "C"
  *					u32 Value)
  *
  *****************************************************************************/
-#define XRtcPsu_SetControlRegister(InstancePtr, Value)                                                                 \
-    XRtcPsu_WriteReg((InstancePtr)->RtcConfig.BaseAddr + XRTC_CTL_OFFSET, (Value))
+#define XRtcPsu_SetControlRegister(InstancePtr, Value) \
+	XRtcPsu_WriteReg((InstancePtr)->RtcConfig.BaseAddr + \
+		XRTC_CTL_OFFSET, (Value))
 
 /****************************************************************************/
 /**
@@ -323,7 +325,8 @@ extern "C"
  *		u32 XRtcPsu_GetSafetyCheck(XRtcPsu  *InstancePtr)
  *
  *****************************************************************************/
-#define XRtcPsu_GetSafetyCheck(InstancePtr) XRtcPsu_ReadReg((InstancePtr)->RtcConfig.BaseAddr + XRTC_SFTY_CHK_OFFSET)
+#define XRtcPsu_GetSafetyCheck(InstancePtr)	\
+	XRtcPsu_ReadReg((InstancePtr)->RtcConfig.BaseAddr+XRTC_SFTY_CHK_OFFSET)
 
 /****************************************************************************/
 /**
@@ -339,8 +342,9 @@ extern "C"
  *		void XRtcPsu_SetSafetyCheck(XRtcPsu  *InstancePtr, u32 Value)
  *
  *****************************************************************************/
-#define XRtcPsu_SetSafetyCheck(InstancePtr, Value)                                                                     \
-    XRtcPsu_WriteReg((InstancePtr)->RtcConfig.BaseAddr + XRTC_SFTY_CHK_OFFSET, (Value))
+#define XRtcPsu_SetSafetyCheck(InstancePtr, Value)	\
+	XRtcPsu_WriteReg((InstancePtr)->RtcConfig.BaseAddr + \
+			XRTC_SFTY_CHK_OFFSET, (Value))
 
 /****************************************************************************/
 /**
@@ -355,8 +359,9 @@ extern "C"
  *		u32 XRtcPsu_ResetAlarm(XRtcPsu  *InstancePtr)
  *
  *****************************************************************************/
-#define XRtcPsu_ResetAlarm(InstancePtr)                                                                                \
-    XRtcPsu_WriteReg((InstancePtr)->RtcConfig.BaseAddr + XRTC_ALRM_OFFSET, XRTC_ALRM_RSTVAL)
+#define XRtcPsu_ResetAlarm(InstancePtr) \
+		XRtcPsu_WriteReg((InstancePtr)->RtcConfig.BaseAddr + \
+			XRTC_ALRM_OFFSET, XRTC_ALRM_RSTVAL)
 
 /****************************************************************************/
 /**
@@ -371,33 +376,38 @@ extern "C"
  *		u32 XRtcPsu_RoundOff(float Number)
  *
  *****************************************************************************/
-#define XRtcPsu_RoundOff(Number) (u32)(((Number) < (u32)0) ? ((Number) - (u32)0.5) : ((Number) + (u32)0.5))
+#define XRtcPsu_RoundOff(Number) \
+	(u32)(((Number) < (u32)0) ? ((Number) - (u32)0.5) : \
+		((Number) + (u32)0.5))
 
-    /************************** Function Prototypes ******************************/
+/************************** Function Prototypes ******************************/
 
-    /* Functions in xrtcpsu.c */
-    s32 XRtcPsu_CfgInitialize(XRtcPsu* InstancePtr, const XRtcPsu_Config* ConfigPtr, u32 EffectiveAddr);
+/* Functions in xrtcpsu.c */
+s32 XRtcPsu_CfgInitialize(XRtcPsu *InstancePtr, const XRtcPsu_Config *ConfigPtr,
+				u32 EffectiveAddr);
 
-    void XRtcPsu_SetAlarm(XRtcPsu* InstancePtr, u32 Alarm, u32 Periodic);
-    void XRtcPsu_SecToDateTime(u32 Seconds, XRtcPsu_DT* dt);
-    u32  XRtcPsu_DateTimeToSec(XRtcPsu_DT* dt);
-    void XRtcPsu_CalculateCalibration(XRtcPsu* InstancePtr, u32 TimeReal, u32 CrystalOscFreq);
-    u32  XRtcPsu_IsSecondsEventGenerated(const XRtcPsu* InstancePtr);
-    u32  XRtcPsu_IsAlarmEventGenerated(const XRtcPsu* InstancePtr);
-    u32  XRtcPsu_GetCurrentTime(XRtcPsu* InstancePtr);
-    void XRtcPsu_SetTime(XRtcPsu* InstancePtr, u32 Time);
+void XRtcPsu_SetAlarm(XRtcPsu *InstancePtr, u32 Alarm, u32 Periodic);
+void XRtcPsu_SecToDateTime(u32 Seconds, XRtcPsu_DT *dt);
+u32 XRtcPsu_DateTimeToSec(XRtcPsu_DT *dt);
+void XRtcPsu_CalculateCalibration(XRtcPsu *InstancePtr, u32 TimeReal,
+		u32 CrystalOscFreq);
+u32 XRtcPsu_IsSecondsEventGenerated(const XRtcPsu *InstancePtr);
+u32 XRtcPsu_IsAlarmEventGenerated(const XRtcPsu *InstancePtr);
+u32 XRtcPsu_GetCurrentTime(XRtcPsu *InstancePtr);
+void XRtcPsu_SetTime(XRtcPsu *InstancePtr, u32 Time);
 
-    /* interrupt functions in xrtcpsu_intr.c */
-    void XRtcPsu_SetInterruptMask(const XRtcPsu* InstancePtr, u32 Mask);
-    void XRtcPsu_ClearInterruptMask(const XRtcPsu* InstancePtr, u32 Mask);
-    void XRtcPsu_InterruptHandler(XRtcPsu* InstancePtr);
-    void XRtcPsu_SetHandler(XRtcPsu* InstancePtr, XRtcPsu_Handler FuncPtr, void* CallBackRef);
+/* interrupt functions in xrtcpsu_intr.c */
+void XRtcPsu_SetInterruptMask(const XRtcPsu *InstancePtr, u32 Mask);
+void XRtcPsu_ClearInterruptMask(const XRtcPsu *InstancePtr, u32 Mask);
+void XRtcPsu_InterruptHandler(XRtcPsu *InstancePtr);
+void XRtcPsu_SetHandler(XRtcPsu *InstancePtr, XRtcPsu_Handler FuncPtr,
+			 void *CallBackRef);
 
-    /* Functions in xrtcpsu_selftest.c */
-    s32 XRtcPsu_SelfTest(const XRtcPsu* InstancePtr);
+/* Functions in xrtcpsu_selftest.c */
+s32 XRtcPsu_SelfTest(const XRtcPsu *InstancePtr);
 
-    /* Functions in xrtcpsu_sinit.c */
-    XRtcPsu_Config* XRtcPsu_LookupConfig(u16 DeviceId);
+/* Functions in xrtcpsu_sinit.c */
+XRtcPsu_Config *XRtcPsu_LookupConfig(u16 DeviceId);
 
 #ifdef __cplusplus
 }

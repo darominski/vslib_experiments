@@ -10,7 +10,7 @@
 /*                                                                 */
 /*******************************************************************/
 _STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x2000;
-_HEAP_SIZE  = 0x00001000;      /* 4 KB */
+_HEAP_SIZE  = 0x01000000;      /* 16 MB */
 
 /*
 _STACK_SIZE = 0x00100000;
@@ -21,7 +21,7 @@ _STACK_SIZE = 0x00100000;
 
 MEMORY
 {
-   RAM   (rwx) : ORIGIN = {{bmboot.cpu1_monitor.ADDRESS}}, LENGTH = {{bmboot.cpu1_monitor.SIZE}}
+   RAM   (rwx) : ORIGIN = 0x800100000, LENGTH = 0x02000000
    psu_ocm_ram_0_S_AXI_BASEADDR : ORIGIN = 0xFFFC0000, LENGTH = 0x00029E00
    psu_ocm_ram_1_S_AXI_BASEADDR : ORIGIN = 0xFFFE9E00, LENGTH = 0x00000200
    psu_ocm_ram_2_S_AXI_BASEADDR : ORIGIN = 0xFFFF0040, LENGTH = 0x0000FDC0
@@ -44,7 +44,7 @@ SECTIONS
    *(.gnu.linkonce.t.*)
    *(.plt)
    *(.gnu_warning)
-   *(.gcc_execpt_table)
+   KEEP (*(.gcc_except_table))
    *(.glue_7)
    *(.glue_7t)
    *(.ARM.extab)
@@ -95,17 +95,13 @@ SECTIONS
 } > RAM
 
 .eh_frame : {
-  *(.eh_frame)
+  KEEP (*(.eh_frame))
 } > RAM
 
 .eh_framehdr : {
    __eh_framehdr_start = .;
    *(.eh_framehdr)
    __eh_framehdr_end = .;
-} > RAM
-
-.gcc_except_table : {
-   *(.gcc_except_table)
 } > RAM
 
 .mmu_tbl0 (ALIGN(4096)) : {
