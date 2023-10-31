@@ -233,8 +233,7 @@ namespace vslib::parameters
         //! applicable to this Parameter type. Calls serializeSpecific to handle different types.
         //!
         //! @return JSON object with fully-serialized parameter
-        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
-        serialize() const noexcept override
+        [[nodiscard]] StaticJson serialize() const noexcept override
         {
             // all parameters have a name and a type that can be fetched the same way
             StaticJson serialized_parameter = {{"name", m_name}, {"type", fgc4::utils::getTypeLabel<T>()}};
@@ -351,8 +350,7 @@ namespace vslib::parameters
         //! Serializes enumerations by providing number of objects of the type ('length') and enumeration values
         //!
         //! @return JSON object with information about the stored enumeration
-        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
-        serializeSpecific() const noexcept
+        [[nodiscard]] StaticJson serializeSpecific() const noexcept
             requires fgc4::utils::Enumeration<T>
         {
             StaticJson serialized_parameter
@@ -371,8 +369,7 @@ namespace vslib::parameters
         //! Serializes std::array type by exposing the length of the array
         //!
         //! @return JSON object with information about the stored std::array
-        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
-        serializeSpecific() const noexcept
+        [[nodiscard]] StaticJson serializeSpecific() const noexcept
             requires fgc4::utils::StdArray<T>
         {
             StaticJson serialized_parameter = {{"length", std::tuple_size_v<T>}};
@@ -390,8 +387,7 @@ namespace vslib::parameters
         //! Serializes std::string type by exposing the length of the string
         //!
         //! @return JSON object with information about the stored std::array
-        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
-        serializeSpecific() const noexcept
+        [[nodiscard]] StaticJson serializeSpecific() const noexcept
             requires fgc4::utils::String<T>
         {
             StaticJson serialized_parameter = {{"length", m_value[BufferSwitch::getState()].size()}};
@@ -409,8 +405,7 @@ namespace vslib::parameters
         //! Serializes numeric types: integers and floating point numbers
         //!
         //! @return JSON object with informaton about the stored numerical values
-        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
-        serializeSpecific() const noexcept
+        [[nodiscard]] StaticJson serializeSpecific() const noexcept
             requires fgc4::utils::NumericScalar<T>
         {
             StaticJson serialized_parameter = {{"length", 1}};
@@ -428,8 +423,7 @@ namespace vslib::parameters
         //! Default overload for catching unsupported types. Blocks compilation for those types
         //!
         //! @return Empty JSON for unsupported type
-        [[nodiscard("Serialization output of parameter should not be discarded")]] StaticJson
-        serializeSpecific() const noexcept
+        [[nodiscard]] StaticJson serializeSpecific() const noexcept
         {
             static_assert(fgc4::utils::always_false<T>, "Type currently not serializable.");
             return {};
