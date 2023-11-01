@@ -38,4 +38,5 @@ function(Bmboot_PayloadPostBuild target)
             COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${target}> ${CMAKE_BINARY_DIR}/${stem}.bin
             COMMAND ${CMAKE_OBJDUMP} -dt $<TARGET_FILE:${target}> > ${CMAKE_BINARY_DIR}/${stem}.txt
             COMMENT "Building ${CMAKE_BINARY_DIR}/${CMAKE_BINARY_DIR}/${stem}.bin")
+
 endfunction()
