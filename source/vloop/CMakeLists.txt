@@ -65,75 +65,62 @@ include_directories(
 # VSLIB is treated as external library, as it would be in vloop applications
 add_subdirectory(../vslib ${CMAKE_CURRENT_BINARY_DIR}/vslib)
 
-add_executable(${APP}.elf
+add_custom_target(install_bin_files_5)
+
+add_bmboot_payload(${APP}
   main.cpp
   )
 
-target_include_directories(${APP}.elf PRIVATE
-  inc
-  public_include
-  )
+foreach (TARGET ${${APP}_TARGETS})
 
+  target_link_libraries(${TARGET} PRIVATE
+    vslib
+    fmt::fmt
+    bmboot_payload_runtime
+    fgc4_bsp_el1
+    )
 
-target_link_libraries(${APP}.elf PRIVATE
-  vslib
-  fmt::fmt
-  bmboot_payload_runtime
-  fgc4_bsp_el1
-  )
+endforeach()
 
-Bmboot_PayloadPostBuild(${APP}.elf)
+# ############################################################
+# # Installation
+# ############################################################
 
-# post-build, automatically run:
-# - objcopy to create .bin file
-# - objdump to create disassembly
-# - (not needed at the moment: mkimage to creat U-Boot image)
-set(IMG_FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.img)
-if (OVERRIDE_BIN_FILE)
-    set(BIN_FILE ${OVERRIDE_BIN_FILE})
-else()
-    set(BIN_FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin)
-endif()
+# set(INSTALL_LIB_DIR ${CMAKE_BINARY_DIR}/bin)
+
+# install(TARGETS ${APP}.elf
+#   ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
+# )
+
+# ############################################################
+# # Start packaging
+# ############################################################
+
+# # Sets creating deb package and tarball only
+# set(CPACK_BINARY_DEB "ON")
+# set(CPACK_BINARY_TGZ "ON")
+# set(CPACK_BINARY_TZ "OFF")
+# set(CPACK_BINARY_STGZ "OFF")
+# set(CPACK_BINARY_NSIS "OFF")
+
+# set(CPACK_SOURCE_ZIP "ON")
+# set(CPACK_SOURCE_TBZ2 "OFF")
+# set(CPACK_SOURCE_TZ "OFF")
+# set(CPACK_SOURCE_TXZ "OFF")
+# set(CPACK_SOURCE_7Z "OFF")
+
+# # Set all necessary fields for deb package creation,
+# set(CPACK_PACKAGE_CONTACT "dominik.arominski@cern.ch")
+# set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dominik Arominski")
+
+# # Ignore hidden (e.g. .git) and build directories for source packaging
+# set(CPACK_SOURCE_IGNORE_FILES
+#   build
+#   git
+#   [Cc][Mm]ake
+# )
+
+# include(CPack)
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UPPER)
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/build_flags.txt "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_${CMAKE_BUILD_TYPE_UPPER}}")    # needed for benchmark framework
-
-############################################################
-# Installation
-############################################################
-
-set(INSTALL_LIB_DIR ${CMAKE_BINARY_DIR}/bin)
-
-install(TARGETS ${APP}.elf
-  ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
-)
-
-############################################################
-# Start packaging
-############################################################
-
-# Sets creating deb package and tarball only
-set(CPACK_BINARY_DEB "ON")
-set(CPACK_BINARY_TGZ "ON")
-set(CPACK_BINARY_TZ "OFF")
-set(CPACK_BINARY_STGZ "OFF")
-set(CPACK_BINARY_NSIS "OFF")
-
-set(CPACK_SOURCE_ZIP "ON")
-set(CPACK_SOURCE_TBZ2 "OFF")
-set(CPACK_SOURCE_TZ "OFF")
-set(CPACK_SOURCE_TXZ "OFF")
-set(CPACK_SOURCE_7Z "OFF")
-
-# Set all necessary fields for deb package creation,
-set(CPACK_PACKAGE_CONTACT "dominik.arominski@cern.ch")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dominik Arominski")
-
-# Ignore hidden (e.g. .git) and build directories for source packaging
-set(CPACK_SOURCE_IGNORE_FILES
-  build
-  git
-  [Cc][Mm]ake
-)
-
-include(CPack)
