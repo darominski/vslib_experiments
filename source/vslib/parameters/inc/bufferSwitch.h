@@ -11,16 +11,6 @@ namespace vslib::parameters
     class BufferSwitch : public NonCopyableNonMovable
     {
       public:
-        // //! Provides an instance of the singleton registry
-        // //!
-        // //! @return Singular instance of the parameter registry
-        // static BufferSwitch& instance()
-        // {
-        //     // Registry is constructed on first access
-        //     static BufferSwitch m_instance;
-        //     return m_instance;
-        // }
-
         //! Returns the state of the buffer switch
         //!
         //! @return Either 0 or 1, depending on the switch state
