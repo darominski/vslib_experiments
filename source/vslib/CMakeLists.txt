@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.17)
 
-set(LIB vslib)
-
-project(${LIB} CXX)
-
 set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_SYSTEM_NAME Generic)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
+set(LIB vslib)
+
+project(${LIB} CXX)
 
 if (NOT DEFINED LIBRARIES_HOME)
   message(FATAL_ERROR "LIBRARIES_HOME path needs to be defined.")
