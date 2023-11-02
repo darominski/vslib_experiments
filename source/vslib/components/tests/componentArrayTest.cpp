@@ -58,7 +58,7 @@ TEST_F(ComponentArrayTest, BasicArray)
     EXPECT_EQ(serialized_component["parameters"], nlohmann::json::array());
     EXPECT_EQ(serialized_component["components"].size(), 3);
     EXPECT_EQ(serialized_component["components"][0]["type"], "Derived");
-    EXPECT_EQ(serialized_component["components"][0]["name"], "array_1");
+    EXPECT_EQ(serialized_component["components"][0]["name"], "array[0]");
     EXPECT_EQ(serialized_component["components"][0]["parameters"], nlohmann::json::array());
     EXPECT_EQ(serialized_component["components"][0]["components"], nlohmann::json::array());
 }
@@ -74,7 +74,7 @@ TEST_F(ComponentArrayTest, BasicArrayInteractions)
     size_t counter = 0;
     for (const auto& element : component)   // tests begin() and end() operators
     {
-        std::string element_name = std::string("array_") + std::to_string(++counter);
+        std::string element_name = std::string("array[") + std::to_string(counter++) + "]";
         EXPECT_EQ(element.getName(), element_name);
         EXPECT_EQ(
             element.getFullName(), component_type + "." + component_name + "." + held_type_name + "." + element_name
@@ -82,7 +82,7 @@ TEST_F(ComponentArrayTest, BasicArrayInteractions)
         EXPECT_EQ(element.getParameters().size(), 0);
     }
     // tests operator[] overload:
-    EXPECT_EQ(component[2].getName(), "array_3");
+    EXPECT_EQ(component[2].getName(), "array[2]");
 }
 
 //! Checks that ComponentArray can hold a ComponentArray
@@ -105,11 +105,11 @@ TEST_F(ComponentArrayTest, HierarchicalArrayTest)
     EXPECT_EQ(serialized_component["parameters"], nlohmann::json::array());
     EXPECT_EQ(serialized_component["components"].size(), 1);
     EXPECT_EQ(serialized_component["components"][0]["type"], "ComponentArray");
-    EXPECT_EQ(serialized_component["components"][0]["name"], "array_1");
+    EXPECT_EQ(serialized_component["components"][0]["name"], "array[0]");
     EXPECT_EQ(serialized_component["components"][0]["parameters"], nlohmann::json::array());
     EXPECT_EQ(serialized_component["components"][0]["components"].size(), 3);
     EXPECT_EQ(serialized_component["components"][0]["components"][0]["type"], "Derived");
-    EXPECT_EQ(serialized_component["components"][0]["components"][0]["name"], "array_1_1");
+    EXPECT_EQ(serialized_component["components"][0]["components"][0]["name"], "array[0][0]");
     EXPECT_EQ(serialized_component["components"][0]["components"][0]["parameters"], nlohmann::json::array());
     EXPECT_EQ(serialized_component["components"][0]["components"][0]["components"].size(), 0);
 }

@@ -59,7 +59,7 @@ namespace vslib::components
         {
             // Create and initialize the current component
             m_components[index]
-                = std::make_unique<ComponentType>(name_base + "_" + std::to_string(index + 1), this, settings...);
+                = std::make_unique<ComponentType>(name_base + "[" + std::to_string(index) + "]", this, settings...);
             // Recursively create the rest of the components
             if (N > (index + 1))
             {
