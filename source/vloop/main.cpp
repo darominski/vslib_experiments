@@ -15,6 +15,7 @@
 #include "interrupts.h"
 #include "json/json.hpp"
 #include "logString.h"
+#include "lowPassFilter.h"
 #include "parameterRegistry.h"
 #include "pid.h"
 #include "rst.h"
@@ -51,6 +52,8 @@ int main()
     components::PID pid1("pid_1", components::independent_component);
     components::PID pid3("pid_3", components::independent_component);
     components::RST rst("rst_1", components::independent_component);
+
+    components::LowPassFilter<10> filter();
 
     // No parameter declarations beyond this point!
     // ************************************************************
