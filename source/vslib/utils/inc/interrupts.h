@@ -35,6 +35,7 @@ namespace vslib
 #else
             m_interrupt_handler = handler_function;
 #endif
+            m_current_interrupt_id = m_interrupt_id++;
         }
 
         virtual ~Interrupt() = default;
@@ -45,6 +46,18 @@ namespace vslib
         //! Stops the interrupt
         virtual void stop() = 0;
 
+        //! Enables the interrupt handling of this interrupt
+        void enable() const
+        {
+            bmboot::disableInterruptHandling(m_current_interrupt_id);
+        }
+
+        //! Disables the interrupt handling of this interrupt
+        void disable() const
+        {
+            bmboot::disableInterruptHandling(m_current_interrupt_id);
+        }
+
 #ifdef PERFORMANCE_TESTS
         int64_t benchmarkInterrupt() const
         {
@@ -54,9 +67,10 @@ namespace vslib
                 / denominator;
         }
 #endif
-
       protected:
         std::function<void(void)> m_interrupt_handler;
+        int                       m_current_interrupt_id{0};
+        inline static int         m_interrupt_id{0};
 
 #ifdef PERFORMANCE_TESTS
         int32_t                   m_measurement_counter{0};
@@ -81,10 +95,10 @@ namespace vslib
     {
       public:
         TimerInterrupt(std::function<void(void)> handler_function, int microsecond_delay)
-            : Interrupt(handler_function),
+            : Interrupt(std::move(handler_function)),
               m_microsecond_delay{microsecond_delay}
         {
-            assert((microseconds_delay > 0) && "Delay for the timing interrupt must be a positive number.");
+            assert((microsecond_delay > 0) && "Delay for the timing interrupt must be a positive number.");
         }
 
         void start() override
@@ -98,7 +112,7 @@ namespace vslib
         }
 
       private:
-        int64_t m_microsecond_delay;
+        int m_microsecond_delay;
     };
 
 
