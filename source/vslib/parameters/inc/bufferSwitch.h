@@ -26,8 +26,8 @@ namespace vslib::parameters
         }
 
       private:
-        BufferSwitch() = default;
-        inline static unsigned short m_buffer_switch
-            = 0;   // used to define which is the read buffer in use, values: 0 or 1
+        BufferSwitch()                               = default;
+        // used to define which is the read buffer in use, values: 0 or 1
+        inline static unsigned short m_buffer_switch = 0;
     };
 }   // namespace vslib::parameters
