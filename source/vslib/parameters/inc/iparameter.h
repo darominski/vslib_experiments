@@ -12,14 +12,17 @@
 
 namespace vslib::parameters
 {
+    class ParameterSerializer;   // forward declaration of serialization visitor
+
     class IParameter : public NonCopyableNonMovable
     {
       public:
         virtual ~IParameter() = default;
 
-        virtual std::optional<fgc4::utils::Warning> setJsonValue(const fgc4::utils::StaticJson&) = 0;
-        virtual fgc4::utils::StaticJson             serialize() const noexcept                   = 0;
-        virtual void                                synchroniseWriteBuffer()                     = 0;
-        virtual void                                synchroniseReadBuffers()                     = 0;
+        virtual std::string_view                    getName() const noexcept                             = 0;
+        virtual std::optional<fgc4::utils::Warning> setJsonValue(const fgc4::utils::StaticJson&)         = 0;
+        virtual fgc4::utils::StaticJson             serialize(const ParameterSerializer&) const noexcept = 0;
+        virtual void                                synchroniseWriteBuffer()                             = 0;
+        virtual void                                synchroniseReadBuffers()                             = 0;
     };
 }   // namespace vslib::parameters

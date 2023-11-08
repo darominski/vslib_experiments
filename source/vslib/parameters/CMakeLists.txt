@@ -3,6 +3,7 @@ set(APP parameterTests)
 add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/parameterTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/parameterTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/parameterSerializerTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/parameterRegistryTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/parameterRegistry.cpp
 )

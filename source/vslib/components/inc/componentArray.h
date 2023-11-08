@@ -23,7 +23,7 @@ namespace vslib::components
         //! @param settings All settings that are forwarded to construct Components held in the array
         template<typename... ComponentSettings>
         ComponentArray(const std::string& name, Component* parent = nullptr, ComponentSettings... settings)
-            : Component("ComponentArray", name, parent)
+            : Component("ComponentArray" + ComponentType::getType(), name, parent)
         {
             static_assert(std::derived_from<ComponentType, Component>, "ComponentType must be derived from Component");
             createComponents<ComponentSettings...>(name, 0, settings...);   // 0-based indexing for the array

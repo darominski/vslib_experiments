@@ -12,6 +12,7 @@
 #include "iparameter.h"
 #include "nonCopyableNonMovable.h"
 #include "parameterRegistry.h"
+#include "parameterSerializer.h"
 #include "staticJson.h"
 
 namespace vslib::components
@@ -64,11 +65,12 @@ namespace vslib::components
         //! @return Returns a fully-serialized component as a JSON object
         [[nodiscard]] StaticJson serialize() const noexcept
         {
-            StaticJson serialized_component  = nlohmann::json::array();
-            StaticJson serialized_parameters = nlohmann::json::array();
+            StaticJson                      serialized_component  = nlohmann::json::array();
+            StaticJson                      serialized_parameters = nlohmann::json::array();
+            parameters::ParameterSerializer serializer;
             for (const auto& parameter : m_parameters)
             {
-                serialized_parameters.emplace_back(std::get<1>(parameter).get().serialize());
+                serialized_parameters.emplace_back(serializer.serialize(std::get<1>(parameter).get()));
             }
 
             StaticJson serialized_children = nlohmann::json::array();

@@ -174,7 +174,6 @@ namespace vslib::parameters
         //!
         //! @return True if the lower limit is defined, false otherwise
         [[nodiscard]] bool isLimitMinDefined() const noexcept
-            requires fgc4::utils::Numeric<T>
         {
             return m_limit_min_defined;
         }
@@ -183,7 +182,6 @@ namespace vslib::parameters
         //!
         //! @return True if the upper limit is defined, false otherwise
         [[nodiscard]] bool isLimitMaxDefined() const noexcept
-            requires fgc4::utils::Numeric<T>
         {
             return m_limit_max_defined;
         }
@@ -247,26 +245,13 @@ namespace vslib::parameters
 
         // ************************************************************
 
-        //! Serializes the Parameter by exposing name, type, and in case of enumerations, all options
-        //! applicable to this Parameter type. Calls serializeSpecific to handle different types.
+        //! Serializes this Parameter using JSON serialization class.
         //!
-        //! @return JSON object with fully-serialized parameter
-        [[nodiscard]] StaticJson serialize() const noexcept override
+        //! @param visitor Reference to serialization visitor
+        //! @return JSON-serialized Parameter
+        [[nodiscard]] StaticJson serialize(const ParameterSerializer& serializer) const noexcept override
         {
-            // all parameters have a name and a type that can be fetched the same way
-            StaticJson serialized_parameter = {{"name", m_name}, {"type", fgc4::utils::getTypeLabel<T>()}};
-            // other type-dependent properties, e.g. length of the stored type needs to be handled individually
-            serialized_parameter.merge_patch(serializeSpecific());
-            // minimum and maximum numerical limits can be also be serialized, if set
-            if (m_limit_min_defined)
-            {
-                serialized_parameter["limit_min"] = m_limit_min;
-            }
-            if (m_limit_max_defined)
-            {
-                serialized_parameter["limit_max"] = m_limit_max;
-            }
-            return serialized_parameter;
+            return serializer.serialize(*this);
         }
 
         // ************************************************************
@@ -359,91 +344,6 @@ namespace vslib::parameters
         //! @return Empty optional return (success)
         std::optional<fgc4::utils::Warning> checkLimits(T) const noexcept
         {
-            return {};
-        }
-
-        // ************************************************************
-        // Methods related to type-dependent serialization
-
-        //! Serializes enumerations by providing number of objects of the type ('length') and enumeration values
-        //!
-        //! @return JSON object with information about the stored enumeration
-        [[nodiscard]] StaticJson serializeSpecific() const noexcept
-            requires fgc4::utils::Enumeration<T>
-        {
-            StaticJson serialized_parameter
-                = {{"length", magic_enum::enum_count<T>()}, {"fields", magic_enum::enum_names<T>()}};
-            if (m_initialized)
-            {
-                serialized_parameter["value"] = magic_enum::enum_name(m_value[BufferSwitch::getState()]);
-            }
-            else
-            {
-                serialized_parameter["value"] = nlohmann::json::object();
-            }
-            return serialized_parameter;
-        }
-
-        //! Serializes std::array type by exposing the length of the array
-        //!
-        //! @return JSON object with information about the stored std::array
-        [[nodiscard]] StaticJson serializeSpecific() const noexcept
-            requires fgc4::utils::StdArray<T>
-        {
-            StaticJson serialized_parameter = {{"length", std::tuple_size_v<T>}};
-            if (m_initialized)
-            {
-                serialized_parameter["value"] = m_value[BufferSwitch::getState()];
-            }
-            else
-            {
-                serialized_parameter["value"] = nlohmann::json::array();
-            }
-            return serialized_parameter;
-        }
-
-        //! Serializes std::string type by exposing the length of the string
-        //!
-        //! @return JSON object with information about the stored std::array
-        [[nodiscard]] StaticJson serializeSpecific() const noexcept
-            requires fgc4::utils::String<T>
-        {
-            StaticJson serialized_parameter = {{"length", m_value[BufferSwitch::getState()].size()}};
-            if (m_initialized)
-            {
-                serialized_parameter["value"] = m_value[BufferSwitch::getState()];
-            }
-            else
-            {
-                serialized_parameter["value"] = nlohmann::json::object();
-            }
-            return serialized_parameter;
-        }
-
-        //! Serializes numeric types: integers and floating point numbers
-        //!
-        //! @return JSON object with informaton about the stored numerical values
-        [[nodiscard]] StaticJson serializeSpecific() const noexcept
-            requires fgc4::utils::NumericScalar<T>
-        {
-            StaticJson serialized_parameter = {{"length", 1}};
-            if (m_initialized)
-            {
-                serialized_parameter["value"] = m_value[BufferSwitch::getState()];
-            }
-            else
-            {
-                serialized_parameter["value"] = nlohmann::json::object();
-            }
-            return serialized_parameter;
-        }
-
-        //! Default overload for catching unsupported types. Blocks compilation for those types
-        //!
-        //! @return Empty JSON for unsupported type
-        [[nodiscard]] StaticJson serializeSpecific() const noexcept
-        {
-            static_assert(fgc4::utils::always_false<T>, "Type currently not serializable.");
             return {};
         }
 
