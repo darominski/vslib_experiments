@@ -119,7 +119,7 @@ namespace vslib::parameters
         //! type
         //!
         //! @return Ordering between the current Parameter and the one we compared the object to
-        auto operator<=>(const Parameter& other) const
+        auto operator<=>(const Parameter& other) const noexcept
         {
             // parameters are compared based on the values stored
             // in the currently active buffer
@@ -149,7 +149,7 @@ namespace vslib::parameters
         //! implicit conversion of a complex type, e.g. arrays, enums, etc.
         //!
         //! @return Value stored cast explictly to the underlying type
-        [[nodiscard]] const T& value() const
+        [[nodiscard]] const T& value() const noexcept
         {
             return m_value[BufferSwitch::getState()];
         }
@@ -157,7 +157,7 @@ namespace vslib::parameters
         //! Getter for the initialization flag of the Parameter
         //!
         //! @return True if the Parameter has been initialized, false otherwise
-        [[nodiscard]] bool isInitialized() const
+        [[nodiscard]] bool isInitialized() const noexcept
         {
             return m_initialized;
         }
@@ -165,15 +165,33 @@ namespace vslib::parameters
         //! Getter for the Parameter name
         //!
         //! @return Parameter name
-        [[nodiscard]] std::string_view getName() const
+        [[nodiscard]] std::string_view getName() const noexcept
         {
             return m_name;
+        }
+
+        //! Getter for whether the lower numerical limit is defined
+        //!
+        //! @return True if the lower limit is defined, false otherwise
+        [[nodiscard]] bool isLimitMinDefined() const noexcept
+            requires fgc4::utils::Numeric<T>
+        {
+            return m_limit_min_defined;
+        }
+
+        //! Getter for whether the upper numerical limit is defined
+        //!
+        //! @return True if the upper limit is defined, false otherwise
+        [[nodiscard]] bool isLimitMaxDefined() const noexcept
+            requires fgc4::utils::Numeric<T>
+        {
+            return m_limit_max_defined;
         }
 
         //! Getter for the lower limit of the held value
         //!
         //! @return Lower limit of allowed stored value
-        [[nodiscard]] const LimitType<T>& getLimitMin() const
+        [[nodiscard]] const LimitType<T>& getLimitMin() const noexcept
             requires fgc4::utils::Numeric<T>
         {
             return m_limit_min;
@@ -182,7 +200,7 @@ namespace vslib::parameters
         //! Getter for the upper limit of the held value
         //!
         //! @return Upper limit of allowed stored value
-        [[nodiscard]] const LimitType<T>& getLimitMax() const
+        [[nodiscard]] const LimitType<T>& getLimitMax() const noexcept
             requires fgc4::utils::Numeric<T>
         {
             return m_limit_max;
