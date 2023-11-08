@@ -59,7 +59,7 @@ namespace vslib
         }
 
 #ifdef PERFORMANCE_TESTS
-        int64_t benchmarkInterrupt() const
+        double benchmarkInterrupt() const
         {
             auto const denominator
                 = static_cast<double>(std::min(static_cast<int32_t>(m_measurements.size()), m_measurement_counter));
