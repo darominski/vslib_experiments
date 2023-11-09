@@ -12,7 +12,6 @@
 #include "componentArray.h"
 #include "componentRegistry.h"
 #include "compositePID.h"
-#include "interrupts.h"
 #include "json/json.hpp"
 #include "logString.h"
 #include "lowPassFilter.h"
@@ -20,6 +19,7 @@
 #include "pid.h"
 #include "rst.h"
 #include "staticJson.h"
+#include "timerInterrupt.h"
 
 // This is one way to stop users from creating objects on the heap and explicit memory allocations
 #ifdef __GNUC__

@@ -1,5 +1,5 @@
 //! @file
-//! @brief File containing a thin-layer interface to configure interrupts in VSlib.
+//! @brief File containing a base class for a thin-layer interface to configure interrupts in VSlib.
 //! @author Dominik Arominski
 
 #pragma once
@@ -8,7 +8,7 @@
 #include <functional>
 
 #include "bmboot/payload_runtime.hpp"
-#include "counters.h"
+#include "pollCpuClock.h"
 
 namespace vslib
 {
@@ -46,18 +46,6 @@ namespace vslib
         //! Stops the interrupt
         virtual void stop() = 0;
 
-        //! Enables the interrupt handling of this interrupt
-        void enable() const
-        {
-            bmboot::disableInterruptHandling(m_current_interrupt_id);
-        }
-
-        //! Disables the interrupt handling of this interrupt
-        void disable() const
-        {
-            bmboot::disableInterruptHandling(m_current_interrupt_id);
-        }
-
 #ifdef PERFORMANCE_TESTS
         double benchmarkInterrupt() const
         {
@@ -90,30 +78,5 @@ namespace vslib
         }
 #endif
     };
-
-    class TimerInterrupt : public Interrupt
-    {
-      public:
-        TimerInterrupt(std::function<void(void)> handler_function, int microsecond_delay)
-            : Interrupt(std::move(handler_function)),
-              m_microsecond_delay{microsecond_delay}
-        {
-            assert((microsecond_delay > 0) && "Delay for the timing interrupt must be a positive number.");
-        }
-
-        void start() override
-        {
-            bmboot::startPeriodicInterrupt(m_microsecond_delay, m_interrupt_handler);
-        }
-
-        void stop() override
-        {
-            bmboot::stopPeriodicInterrupt();
-        }
-
-      private:
-        int m_microsecond_delay;
-    };
-
 
 }   // namespace vslib
