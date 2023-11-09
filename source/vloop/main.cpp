@@ -16,6 +16,7 @@
 #include "logString.h"
 #include "lowPassFilter.h"
 #include "parameterRegistry.h"
+#include "peripheralInterrupt.h"
 #include "pid.h"
 #include "rst.h"
 #include "staticJson.h"
@@ -40,6 +41,14 @@ namespace user
         usleep(5);   // 5 us
     }
 
+    static int peripheralCounter = 0;
+    void       peripheralTask()
+    {
+        printf("%dth event\n", ++peripheralCounter);
+
+        usleep(5);   // 5 us
+    }
+
 }   // namespace user
 
 int main()
@@ -58,8 +67,11 @@ int main()
     // No parameter declarations beyond this point!
     // ************************************************************
 
-    puts("Parameter map:");
-    backgroundTask::uploadParameterMap();
+    // puts("Parameter map:");
+    // backgroundTask::uploadParameterMap();
+
+    PeripheralInterrupt peripheral(user::peripheralTask, 0, bmboot::PayloadInterruptPriority::p6);
+    peripheral.start();
 
     TimerInterrupt timer(user::realTimeTask, 100);
     timer.start();
@@ -73,6 +85,7 @@ int main()
             std::cout << "Average time per interrupt: " << timer.benchmarkInterrupt() << std::endl;
 #endif
             timer.stop();
+            peripheral.stop();
             break;
         }
         puts(std::to_string(counter++).c_str());
