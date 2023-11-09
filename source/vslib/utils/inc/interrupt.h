@@ -17,6 +17,8 @@ namespace vslib
     {
       public:
         //! Constructor for the Interrupt object
+        //!
+        //! @param handler_function Function to be executed when an interrupt is triggered
         Interrupt(std::function<void(void)> handler_function)
         {
 #ifdef PERFORMANCE_TESTS
@@ -47,6 +49,7 @@ namespace vslib
         virtual void stop() = 0;
 
 #ifdef PERFORMANCE_TESTS
+        //! Allows for benchmarking execution time of the interrupt as an average of the measured times
         double benchmarkInterrupt() const
         {
             auto const denominator
@@ -65,12 +68,17 @@ namespace vslib
         std::array<int64_t, 1000> m_measurements;
 
         //! Defines the preconditions necessary to estimate the execution time of the interrupt handler
+        //!
+        //! @return Clock value at the time of the call
         int64_t preConditions()
         {
             return fgc4::utils::read_CNTPCT();
         }
 
         //! Defines the postconditions necessary to estimate the execution time of the interrupt handler
+        //!
+        //! @param starting_point Clock value at the start of the interrupt
+        //! @return Difference between the starting and current clock values
         int64_t postConditions(int64_t starting_point)
         {
             // implementation of polling the CPU clock is required
