@@ -54,6 +54,7 @@ namespace vslib::backgroundTask
 
     //! Validates the provided json command.
     //!
+    //! @param command JSON object to be validated as a valid command
     //! @return True if the command contains all expected fields, false otherwise.
     bool validateJsonCommand(const StaticJson& command)
     {
@@ -72,6 +73,7 @@ namespace vslib::backgroundTask
     }
 
     //! Processes the received JSON commands, checking whether one or many commands were received.
+    //!
     //! @param command JSON object containing one or more JSON commands to be executed
     void processJsonCommands(const StaticJson& commands)
     {
