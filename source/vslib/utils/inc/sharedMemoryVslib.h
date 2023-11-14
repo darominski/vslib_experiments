@@ -12,7 +12,7 @@
 #include "errorCodes.h"
 #include "errorMessage.h"
 #include "fmt/format.h"
-#include "json/json.hpp"
+#include "staticJson.h"
 #include "vslib_shared_memory_memmap.h"
 #include "warningMessage.h"
 
@@ -35,9 +35,9 @@ namespace vslib
     // ************************************************************
 
     // definitions of I/O functions to silence -Wmissing-declarations warnings
-    void           initializeSharedMemory(SharedMemory*);
-    void           writeJsonToSharedMemory(const nlohmann::json&, SharedMemory*);
-    nlohmann::json readJsonFromSharedMemory(SharedMemory*);
+    void                    initializeSharedMemory(SharedMemory*);
+    void                    writeJsonToSharedMemory(const fgc4::utils::StaticJson&, SharedMemory*);
+    fgc4::utils::StaticJson readJsonFromSharedMemory(SharedMemory*);
 
     //! Memory that initializes shared memory structure fields to a known state
     //!
@@ -57,7 +57,7 @@ namespace vslib
     //!
     //! @param json_object JSON object to be copied to the shared memory
     //! @param shared_memory Reference to the shared memory object
-    void writeJsonToSharedMemory(const nlohmann::json& json_object, SharedMemory* shared_memory)
+    void writeJsonToSharedMemory(const fgc4::utils::StaticJson& json_object, SharedMemory* shared_memory)
     {
         auto serialized = json_object.dump();
         if (serialized.size() < fgc4::utils::constants::json_memory_pool_size)
@@ -83,10 +83,10 @@ namespace vslib
     //! Helper function to read JSON object from shared memory and deserialize it
     //!
     //! @param shared_memory Reference to the shared memory object
-    //! @return JSON object parsed from shared memory
-    nlohmann::json readJsonFromSharedMemory(SharedMemory* shared_memory)
+    //! @return Static JSON object parsed from shared memory
+    fgc4::utils::StaticJson readJsonFromSharedMemory(SharedMemory* shared_memory)
     {
-        nlohmann::json json_object;
+        auto json_object = fgc4::utils::StaticJsonFactory::getJsonObject();
         try
         {
             json_object = nlohmann::json::parse(
