@@ -6,7 +6,7 @@
 
 #include "nonCopyableNonMovable.h"
 
-namespace vslib::parameters
+namespace vslib
 {
     class BufferSwitch : public NonCopyableNonMovable
     {
@@ -30,4 +30,4 @@ namespace vslib::parameters
         // used to define which is the read buffer in use, values: 0 or 1
         inline static unsigned short m_buffer_switch = 0;
     };
-}   // namespace vslib::parameters
+}   // namespace vslib

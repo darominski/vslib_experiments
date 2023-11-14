@@ -9,7 +9,7 @@
 #include "component.h"
 #include "pid.h"
 
-namespace vslib::components
+namespace vslib
 {
     class CompositePID : public Component
     {
@@ -24,4 +24,4 @@ namespace vslib::components
         PID pid1;
         PID pid2;
     };
-}   // namespace components
+}   // namespace vslib

@@ -7,7 +7,7 @@
 #include "magic_enum.hpp"
 #include "parameter.h"
 
-namespace vslib::components
+namespace vslib
 {
     // Helper enumeration class for definition of all relevant statuses
     enum class Status
@@ -39,8 +39,8 @@ namespace vslib::components
             return magic_enum::enum_name(status.value());
         }
 
-        parameters::Parameter<std::array<double, 4>> r;
-        parameters::Parameter<Status>                status;
-        parameters::Parameter<bool>                  flag;
+        Parameter<std::array<double, 4>> r;
+        Parameter<Status>                status;
+        Parameter<bool>                  flag;
     };
-}   // namespace components
+}   // namespace vslib

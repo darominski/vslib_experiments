@@ -11,7 +11,6 @@
 #include "parameterRegistry.h"
 
 using namespace vslib;
-using namespace vslib::components;
 
 class ComponentTest : public ::testing::Test
 {
@@ -22,7 +21,7 @@ class ComponentTest : public ::testing::Test
         // they would persist between tests
         ComponentRegistry& component_registry = ComponentRegistry::instance();
         component_registry.clearRegistry();
-        parameters::ParameterRegistry& parameter_registry = parameters::ParameterRegistry::instance();
+        ParameterRegistry& parameter_registry = ParameterRegistry::instance();
         parameter_registry.clearRegistry();
     }
 
@@ -49,7 +48,7 @@ class DerivedComponentIntParameter : public Component
     {
     }
 
-    parameters::Parameter<uint32_t> parameter;
+    Parameter<uint32_t> parameter;
 };
 
 //! Checks that a basic component of base class can be created, is registered, and can be serialized
@@ -156,12 +155,12 @@ TEST_F(ComponentTest, DerivedComponentIntParameter)
 //! Checks derived component with many parameters of various types
 TEST_F(ComponentTest, DerivedComponentWithManyParameters)
 {
-    const std::string                            component_type = "type";
-    const std::string                            component_name = "name";
-    DerivedComponentIntParameter                 component(component_type, component_name, nullptr);
-    parameters::Parameter<double>                doubleParameter(component, "double");
-    parameters::Parameter<bool>                  boolParameter(component, "bool");
-    parameters::Parameter<std::array<double, 3>> arrayParameter(component, "array");
+    const std::string                component_type = "type";
+    const std::string                component_name = "name";
+    DerivedComponentIntParameter     component(component_type, component_name, nullptr);
+    Parameter<double>                doubleParameter(component, "double");
+    Parameter<bool>                  boolParameter(component, "bool");
+    Parameter<std::array<double, 3>> arrayParameter(component, "array");
 
     EXPECT_EQ(component.getName(), component_name);
     EXPECT_EQ(component.getFullName(), component_type + "." + component_name);

@@ -10,7 +10,7 @@
 #include "component.h"
 #include "ringBufferAllocator.h"
 
-namespace vslib::components
+namespace vslib
 {
 
     using DequeAllocator = fgc4::utils::StaticRingBufferAllocator<double, std::deque<double>, 1000>;
@@ -39,20 +39,15 @@ namespace vslib::components
             return output;
         }
 
-        parameters::Parameter<std::array<double, N>> coefficients;
+        Parameter<std::array<double, N>> coefficients;
 
       private:
         Deque m_buffer;
 
         void shiftBuffer(double input)
         {
-            // for (size_t index = N - 1; index > 0; --index) {
-            //     buffer[index] = buffer[index - 1];
-            // }
-            // m_buffer[0] = input;
             m_buffer.push_front(input);
             m_buffer.pop_back();
         }
     };
-
-}
+}   // namespace vslib

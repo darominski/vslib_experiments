@@ -15,11 +15,11 @@
 #include "parameterSerializer.h"
 #include "staticJson.h"
 
-namespace vslib::components
+namespace vslib
 {
     class Component : public NonCopyableNonMovable
     {
-        using ParameterReference = std::reference_wrapper<parameters::IParameter>;
+        using ParameterReference = std::reference_wrapper<IParameter>;
         using ParameterList      = std::vector<std::tuple<std::string, ParameterReference>>;
         using ComponentReference = std::reference_wrapper<Component>;
         using ChildrenList       = std::vector<ComponentReference>;
@@ -51,9 +51,9 @@ namespace vslib::components
         //!
         //! @param parameter_name Name of the parameter to be added to the parameter registry
         //! @param parameter Reference to the parameter being added to the parameter registry
-        void registerParameter(std::string_view parameter_name, parameters::IParameter& parameter)
+        void registerParameter(std::string_view parameter_name, IParameter& parameter)
         {
-            parameters::ParameterRegistry::instance().addToRegistry(
+            ParameterRegistry::instance().addToRegistry(
                 this->getFullName() + "." + std::string(parameter_name), parameter
             );
             m_parameters.emplace_back(parameter_name, parameter);
@@ -65,9 +65,9 @@ namespace vslib::components
         //! @return Returns a fully-serialized component as a JSON object
         [[nodiscard]] StaticJson serialize() const noexcept
         {
-            StaticJson                      serialized_component  = nlohmann::json::array();
-            StaticJson                      serialized_parameters = nlohmann::json::array();
-            parameters::ParameterSerializer serializer;
+            StaticJson          serialized_component  = nlohmann::json::array();
+            StaticJson          serialized_parameters = nlohmann::json::array();
+            ParameterSerializer serializer;
             for (const auto& parameter : m_parameters)
             {
                 serialized_parameters.emplace_back(serializer.serialize(std::get<1>(parameter).get()));
@@ -140,4 +140,4 @@ namespace vslib::components
     // Constant for denoting that the component constructed is independent (has no parents)
     constexpr Component* independent_component = nullptr;
 
-}   // namespace vslib::components
+}   // namespace vslib

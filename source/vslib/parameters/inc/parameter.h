@@ -25,7 +25,7 @@
 #include "typeLabel.h"
 #include "warningMessage.h"
 
-namespace vslib::parameters
+namespace vslib
 {
     // ************************************************************
     // Convenience constants for parameter class
@@ -62,7 +62,7 @@ namespace vslib::parameters
         //!
         //! @param parent Component owning this Parameter
         //! @param name Name of the Parameter
-        Parameter(components::Component& parent, std::string_view name) noexcept
+        Parameter(Component& parent, std::string_view name) noexcept
             requires fgc4::utils::NonNumeric<T>
             : m_name{name}
         {
@@ -74,7 +74,7 @@ namespace vslib::parameters
         //! @param parent Component owning this Parameter
         //! @param name Name of the Parameter
         Parameter(
-            components::Component& parent, std::string_view name,
+            Component& parent, std::string_view name,
             LimitType<T> limit_min = std::numeric_limits<LimitType<T>>::lowest(),
             LimitType<T> limit_max = std::numeric_limits<LimitType<T>>::max()
         )
@@ -401,4 +401,4 @@ namespace vslib::parameters
             return {};
         }
     };
-}   // namespace vslib::parameters
+}   // namespace vslib

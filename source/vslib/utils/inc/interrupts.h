@@ -115,5 +115,4 @@ namespace vslib
         int m_microsecond_delay;
     };
 
-
 }   // namespace vslib

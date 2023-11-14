@@ -49,11 +49,11 @@ int main()
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
-    components::PID pid1("pid_1", components::independent_component);
-    components::PID pid3("pid_3", components::independent_component);
-    components::RST rst("rst_1", components::independent_component);
+    PID pid1("pid_1", independent_component);
+    PID pid3("pid_3", independent_component);
+    RST rst("rst_1", independent_component);
 
-    components::LowPassFilter<10> filter();
+    LowPassFilter<10> filter();
 
     // No parameter declarations beyond this point!
     // ************************************************************

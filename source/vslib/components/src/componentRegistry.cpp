@@ -11,7 +11,7 @@
 
 using namespace fgc4::utils;
 
-namespace vslib::components
+namespace vslib
 {
     //! Adds a new entry to the component registry
     //!
@@ -45,4 +45,4 @@ namespace vslib::components
         }
         return parameterMap;
     }
-}   // namespace vslib::components
+}   // namespace vslib

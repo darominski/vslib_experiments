@@ -20,7 +20,7 @@ namespace vslib::backgroundTask
     void uploadParameterMap()
     {
         auto json_component_registry = StaticJsonFactory::getJsonObject();
-        json_component_registry      = components::ComponentRegistry::instance().createParameterMap();
+        json_component_registry      = ComponentRegistry::instance().createParameterMap();
         std::cout << json_component_registry.dump() << "\n";
         writeJsonToSharedMemory(json_component_registry, &(SHARED_MEMORY));
     }
@@ -46,7 +46,7 @@ namespace vslib::backgroundTask
         {
             // if no new data came in the previous iteration, assume it is safe to switch the read buffers now and
             // synchronise them
-            parameters::BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
+            BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
             // synchronise new background to new active buffer
             synchroniseReadBuffers();
             received_new_data = false;   // buffers updated, no new data available
@@ -102,7 +102,7 @@ namespace vslib::backgroundTask
             return;
         }
         std::string const parameter_name     = command["name"];
-        auto const&       parameter_registry = parameters::ParameterRegistry::instance().getParameters();
+        auto const&       parameter_registry = ParameterRegistry::instance().getParameters();
         auto const        parameter          = parameter_registry.find(parameter_name);
         if (parameter == parameter_registry.end())
         {
@@ -122,7 +122,7 @@ namespace vslib::backgroundTask
     //! Calls each registered parameter to synchronise read buffers
     void synchroniseReadBuffers()
     {
-        for (const auto& parameter : parameters::ParameterRegistry::instance().getParameters())
+        for (const auto& parameter : ParameterRegistry::instance().getParameters())
         {
             parameter.second.get().synchroniseReadBuffers();
         }

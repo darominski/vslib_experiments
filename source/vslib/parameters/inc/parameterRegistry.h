@@ -13,7 +13,7 @@
 #include "json/json.hpp"
 #include "nonCopyableNonMovable.h"
 
-namespace vslib::parameters
+namespace vslib
 {
     class ParameterRegistry : public NonCopyableNonMovable
     {
@@ -49,4 +49,4 @@ namespace vslib::parameters
         ParameterRegistry() = default;
         std::map<std::string, ParameterReference> m_parameters;
     };
-}   // namespace parameters
+}   // namespace vslib

@@ -17,4 +17,4 @@ namespace vslib
         NonCopyableNonMovable& operator=(const NonCopyableNonMovable&) = delete;
         NonCopyableNonMovable& operator=(NonCopyableNonMovable&&)      = delete;
     };
-}
+}   // namespace vslib
