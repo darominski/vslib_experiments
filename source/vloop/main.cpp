@@ -37,7 +37,7 @@ namespace user
     {
         printf("%dth event\n", ++counter);
 
-        usleep(5);   // 5 us
+        usleep(5000);   // 5 us
     }
 
 }   // namespace user

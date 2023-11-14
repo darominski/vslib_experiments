@@ -10,8 +10,8 @@ namespace fgcd
         Fgc4Shmem()
             : m_dev_mem("/dev/mem"),
               m_shared_memory(
-                  m_dev_mem, SHARED_MEMORY_ADDRESS, SHARED_MEMORY_SIZE, PROT_READ | PROT_WRITE,
-                  (void*)SHARED_MEMORY_ADDRESS
+                  m_dev_mem, app_data_0_1_ADDRESS, app_data_0_1_SIZE, PROT_READ | PROT_WRITE,
+                  (void*)app_data_0_1_ADDRESS
               )
         {
         }

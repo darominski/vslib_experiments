@@ -13,6 +13,7 @@
 #include "errorMessage.h"
 #include "fmt/format.h"
 #include "json/json.hpp"
+#include "vslib_shared_memory_memmap.h"
 #include "warningMessage.h"
 
 namespace vslib
@@ -25,10 +26,11 @@ namespace vslib
         std::array<std::byte, fgc4::utils::constants::json_memory_pool_size> json_buffer;
     };
 
-#define SHARED_MEMORY_ADDRESS 0x802000000
-#define SHARED_MEMORY_SIZE    fgc4::utils::constants::json_memory_pool_size
+#define SHARED_MEMORY (*(struct SharedMemory*)app_data_0_1_ADDRESS)
 
-#define SHARED_MEMORY (*(struct SharedMemory* volatile)SHARED_MEMORY_ADDRESS)
+    static_assert(sizeof(SharedMemory) <= app_data_0_1_SIZE);
+    static_assert(sizeof(SharedMemory) <= app_data_0_2_SIZE);
+    static_assert(sizeof(SharedMemory) <= app_data_0_3_SIZE);
 
     // ************************************************************
 
