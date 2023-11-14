@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD 20)
 # Compiler flags and warnings
 add_compile_options(-O2 -mtune=cortex-a53 -ffunction-sections -fdata-sections -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
     -Wwrite-strings -Wmissing-declarations
-    -Wredundant-decls -Winline -Wno-long-long
+    -Wredundant-decls -Wno-long-long
     -Wconversion)
 
 # Linker flags and warnings
