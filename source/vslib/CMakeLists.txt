@@ -14,25 +14,25 @@ if (NOT DEFINED LIBRARIES_HOME)
   message(FATAL_ERROR "LIBRARIES_HOME path needs to be defined.")
 endif()
 
-add_compile_options(-Wall -O0 -mtune=cortex-a53 -ffunction-sections -fdata-sections
-  -fexceptions
-  -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
-  -Wwrite-strings -Wmissing-declarations
-  -Wredundant-decls -Wno-long-long
-  -Wconversion
-)
-
 if (NOT BUILD_TESTS)
+
+  if (NOT DEFINED CMAKE_CXX_COMPILER)
+   message(FATAL_ERROR "CMAKE_CXX_COMPILER for bare-metal target needs to be defined.")
+  endif()
+
+  add_compile_options(-Wall -O0 -mtune=cortex-a53 -ffunction-sections -fdata-sections
+    -fexceptions
+    -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
+    -Wwrite-strings -Wmissing-declarations
+    -Wredundant-decls -Wno-long-long
+    -Wconversion
+  )
 
   add_link_options(
     -Wall
     -specs=nosys.specs
     -Wl,-gc-sections
   )
-
-  if (NOT DEFINED CMAKE_CXX_COMPILER)
-   message(FATAL_ERROR "CMAKE_CXX_COMPILER for bare-metal target needs to be defined.")
-  endif()
 
   add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
 
@@ -99,5 +99,6 @@ if(BUILD_TESTS)
   # Include your components and parameters
   add_subdirectory(components)
   add_subdirectory(parameters)
+  add_subdirectory(utils)
 
 endif()

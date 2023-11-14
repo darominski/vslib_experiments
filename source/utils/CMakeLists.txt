@@ -13,7 +13,6 @@ add_executable(utilsTests
   tests/logStringTest.cpp
   tests/ringBufferTest.cpp
   tests/ringBufferAllocatorTest.cpp
-  tests/sharedMemoryVslibTest.cpp
   tests/staticJsonTest.cpp
   tests/typeLabelTest.cpp
   tests/warningMessageTest.cpp
