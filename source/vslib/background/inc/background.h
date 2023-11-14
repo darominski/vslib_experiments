@@ -1,5 +1,5 @@
 //! @file
-//! @brief File containing background-task specific code for copying and synchronising parameter buffers.
+//! @brief File containing background-task specific code triggering parameter buffer synchronisation.
 //! @author Dominik Arominski
 
 #pragma once
@@ -15,4 +15,4 @@ namespace vslib::backgroundTask
     void processJsonCommands(const fgc4::utils::StaticJson&);
     void synchroniseReadBuffers();
     bool validateJsonCommand(const fgc4::utils::StaticJson&);
-}   // namespace backgroundTask
+}   // namespace vslib::backgroundTask

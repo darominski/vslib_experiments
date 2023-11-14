@@ -16,12 +16,11 @@ using namespace fgc4::utils;
 
 namespace vslib::backgroundTask
 {
-    //! Creates and uploads the component and parameter map to the shared memory (and standard output)
+    //! Creates and uploads the parameter map to the shared memory
     void uploadParameterMap()
     {
         auto json_component_registry = StaticJsonFactory::getJsonObject();
         json_component_registry      = ComponentRegistry::instance().createParameterMap();
-        std::cout << json_component_registry.dump() << "\n";
         writeJsonToSharedMemory(json_component_registry, &(SHARED_MEMORY));
     }
 
@@ -98,7 +97,7 @@ namespace vslib::backgroundTask
     {
         if (!validateJsonCommand(command))
         {
-            const Warning messsage("Command invalid, ignored.\n");
+            const Warning message("Command invalid, ignored.\n");
             return;
         }
         std::string const parameter_name     = command["name"];
