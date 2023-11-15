@@ -47,7 +47,7 @@ namespace vslib
         shared_memory->acknowledged_counter = 0;
         shared_memory->transmitted_counter  = 0;
         shared_memory->message_length       = 0;
-        for (auto element : shared_memory->json_buffer)
+        for (auto& element : shared_memory->json_buffer)
         {
             element = std::byte();
         }
