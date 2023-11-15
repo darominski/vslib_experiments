@@ -51,10 +51,14 @@ namespace user
 
 }   // namespace user
 
+#define SHARED_MEMORY (*(struct vslib::SharedMemory*)app_data_0_1_ADDRESS)
+
 int main()
 {
     bmboot::notifyPayloadStarted();
     puts("Hello world from vloop running on cpu1!");
+
+    vslib::backgroundTask::initializeMemory(&(SHARED_MEMORY));
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
@@ -67,8 +71,7 @@ int main()
     // No parameter declarations beyond this point!
     // ************************************************************
 
-    // puts("Parameter map:");
-    // backgroundTask::uploadParameterMap();
+    backgroundTask::uploadParameterMap(&(SHARED_MEMORY));
 
     PeripheralInterrupt peripheral(user::peripheralTask, 0, bmboot::PayloadInterruptPriority::p6);
     peripheral.start();
@@ -105,7 +108,7 @@ int main()
         // }
         // puts("");
 
-        backgroundTask::receiveJsonCommand();
+        backgroundTask::receiveJsonCommand(&(SHARED_MEMORY));
         usleep(500);   // 50 us
         // usleep(1000000);   // 1 s
     }
