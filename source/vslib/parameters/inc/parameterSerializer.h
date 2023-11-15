@@ -9,7 +9,7 @@
 #include "typeLabel.h"
 #include "typeTraits.h"
 
-namespace vslib::parameters
+namespace vslib
 {
 
     using StaticJson = fgc4::utils::StaticJson;
@@ -146,4 +146,4 @@ namespace vslib::parameters
             return {};
         }
     };
-}   // namespace vslib::parameters
+}   // namespace vslib

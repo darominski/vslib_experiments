@@ -10,7 +10,6 @@
 #include "json/json.hpp"
 
 using namespace vslib;
-using namespace vslib::components;
 
 class ComponentArrayTest : public ::testing::Test
 {

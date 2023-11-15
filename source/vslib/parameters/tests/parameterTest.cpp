@@ -11,7 +11,6 @@
 #include "parameterRegistry.h"
 
 using namespace vslib;
-using namespace vslib::parameters;
 
 class ParameterTest : public ::testing::Test
 {
@@ -33,7 +32,7 @@ class ParameterTest : public ::testing::Test
     }
 };
 
-class MockComponent : public components::Component
+class MockComponent : public Component
 {
   public:
     MockComponent()

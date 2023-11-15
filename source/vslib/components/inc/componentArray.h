@@ -10,7 +10,7 @@
 #include "component.h"
 #include "constants.h"
 
-namespace vslib::components
+namespace vslib
 {
     template<typename ComponentType, size_t N>
     class ComponentArray : public Component
@@ -100,4 +100,4 @@ namespace vslib::components
         };
     };
 
-}   // namespace components
+}   // namespace vslib

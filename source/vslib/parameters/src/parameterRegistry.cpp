@@ -10,7 +10,7 @@
 using namespace nlohmann;
 using namespace fgc4::utils;
 
-namespace vslib::parameters
+namespace vslib
 {
     //! Adds a new entry to the parameter registry
     //!
@@ -29,4 +29,4 @@ namespace vslib::parameters
         }
         m_parameters.emplace(parameter_name, parameter_reference);
     }
-}
+}   // namespace vslib

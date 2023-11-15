@@ -10,7 +10,7 @@
 #include "staticJson.h"
 #include "warningMessage.h"
 
-namespace vslib::parameters
+namespace vslib
 {
     class ParameterSerializer;   // forward declaration of serialization visitor
 
@@ -25,4 +25,4 @@ namespace vslib::parameters
         virtual void                                synchroniseWriteBuffer()                             = 0;
         virtual void                                synchroniseReadBuffers()                             = 0;
     };
-}   // namespace vslib::parameters
+}   // namespace vslib

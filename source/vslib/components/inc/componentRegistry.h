@@ -10,7 +10,7 @@
 #include "nonCopyableNonMovable.h"
 #include "staticJson.h"
 
-namespace vslib::components
+namespace vslib
 {
     class Component;   // forward declaration
 
@@ -50,4 +50,4 @@ namespace vslib::components
         ComponentRegistry() = default;
         std::map<std::string, ComponentReference> m_components;   // holds all independent components
     };
-}   // namespace vslib::components
+}   // namespace vslib

@@ -1,0 +1,83 @@
+[fgc4_shmem]
+start = 0x8_0000_0000
+end = 0x8_8000_0000
+
+[bmboot.cpu1_monitor]
+in = fgc4_shmem
+align = 4k
+size = 64k
+
+[bmboot.cpu2_monitor]
+in = fgc4_shmem
+align = 4k
+size = 64k
+
+[bmboot.cpu3_monitor]
+in = fgc4_shmem
+align = 4k
+size = 64k
+
+[bmboot.cpu1_monitor_ipc]
+in = fgc4_shmem
+align = 4k
+size = 16k
+
+[bmboot.cpu2_monitor_ipc]
+in = fgc4_shmem
+align = 4k
+size = 16k
+
+[bmboot.cpu3_monitor_ipc]
+in = fgc4_shmem
+align = 4k
+size = 16k
+
+[bmboot.cpu1_payload]
+in = fgc4_shmem
+align = 1024k
+size = 32768k
+
+[bmboot.cpu2_payload]
+in = fgc4_shmem
+align = 1024k
+size = 32768k
+
+[bmboot.cpu3_payload]
+in = fgc4_shmem
+align = 1024k
+size = 32768k
+
+[app_data_0_1]
+in = fgc4_shmem
+align = 1M
+size = 4M
+
+[app_data_0_2]
+in = fgc4_shmem
+align = 1M
+size = 4M
+
+[app_data_0_3]
+in = fgc4_shmem
+align = 1M
+size = 4M
+
+[app_data_1_2]
+in = fgc4_shmem
+align = 1M
+size = 4M
+
+[app_data_1_3]
+in = fgc4_shmem
+align = 1M
+size = 4M
+
+[app_data_2_3]
+in = fgc4_shmem
+align = 1M
+size = 4M
+
+[pool]
+in = fgc4_shmem
+align = 1M
+size = 1024M

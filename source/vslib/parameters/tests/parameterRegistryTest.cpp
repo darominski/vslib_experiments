@@ -10,7 +10,6 @@
 #include "parameterRegistry.h"
 
 using namespace vslib;
-using namespace vslib::parameters;
 
 class ParameterRegistryTest : public ::testing::Test
 {
@@ -28,7 +27,7 @@ class ParameterRegistryTest : public ::testing::Test
     }
 };
 
-class MockComponent : public components::Component
+class MockComponent : public Component
 {
   public:
     MockComponent()
@@ -38,7 +37,7 @@ class MockComponent : public components::Component
 };
 
 // Mock the component registry addition
-void components::ComponentRegistry::addToRegistry(std::string_view, components::Component&)
+void ComponentRegistry::addToRegistry(std::string_view, Component&)
 {
     return;
 }

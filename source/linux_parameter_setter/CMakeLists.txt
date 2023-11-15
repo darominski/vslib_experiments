@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD 20)
 # Compiler flags and warnings
 add_compile_options(-O2 -mtune=cortex-a53 -ffunction-sections -fdata-sections -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
     -Wwrite-strings -Wmissing-declarations
-    -Wredundant-decls -Winline -Wno-long-long
+    -Wredundant-decls -Wno-long-long
     -Wconversion)
 
 # Linker flags and warnings
@@ -44,6 +44,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/../lib # all external libraries are stored in this directory
     ${LIBRARIES_HOME}/json-3.11.2
     ${CMAKE_SOURCE_DIR}/../utils # all external libraries are stored in this directory
+    ${CMAKE_SOURCE_DIR}/../vslib/utils/inc # all external libraries are stored in this directory
 )
 
 add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)

@@ -8,7 +8,7 @@
 #include "componentRegistry.h"
 #include "json/json.hpp"
 
-using namespace vslib::components;
+using namespace vslib;
 
 class ComponentRegistryTest : public ::testing::Test
 {

@@ -13,28 +13,45 @@
 #include "errorMessage.h"
 #include "fmt/format.h"
 #include "json/json.hpp"
+#include "vslib_shared_memory_memmap.h"
 #include "warningMessage.h"
 
 namespace vslib
 {
     struct SharedMemory
     {
-        std::size_t                                                          acknowledged_counter{0};
-        std::size_t                                                          transmitted_counter{0};
-        std::size_t                                                          message_length{0};
+        std::size_t                                                          acknowledged_counter;
+        std::size_t                                                          transmitted_counter;
+        std::size_t                                                          message_length;
         std::array<std::byte, fgc4::utils::constants::json_memory_pool_size> json_buffer;
     };
 
-#define SHARED_MEMORY_ADDRESS 0x802000000
-#define SHARED_MEMORY_SIZE    fgc4::utils::constants::json_memory_pool_size
+#define SHARED_MEMORY (*(struct SharedMemory*)app_data_0_1_ADDRESS)
 
-#define SHARED_MEMORY (*(struct SharedMemory* volatile)SHARED_MEMORY_ADDRESS)
+    static_assert(sizeof(SharedMemory) <= app_data_0_1_SIZE);
+    static_assert(sizeof(SharedMemory) <= app_data_0_2_SIZE);
+    static_assert(sizeof(SharedMemory) <= app_data_0_3_SIZE);
 
     // ************************************************************
 
     // definitions of I/O functions to silence -Wmissing-declarations warnings
+    void           initializeSharedMemory(SharedMemory*);
     void           writeJsonToSharedMemory(const nlohmann::json&, SharedMemory*);
     nlohmann::json readJsonFromSharedMemory(SharedMemory*);
+
+    //! Memory that initializes shared memory structure fields to a known state
+    //!
+    //! @param shared_memory Shared memory object
+    void initializeSharedMemory(SharedMemory* shared_memory)
+    {
+        shared_memory->acknowledged_counter = 0;
+        shared_memory->transmitted_counter  = 0;
+        shared_memory->message_length       = 0;
+        for (auto element : shared_memory->json_buffer)
+        {
+            element = std::byte();
+        }
+    }
 
     //! Helper function to serialize JSON object and write to shared memory
     //!

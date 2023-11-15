@@ -9,7 +9,7 @@
 #include "component.h"
 #include "parameter.h"
 
-namespace vslib::components
+namespace vslib
 {
     class PID : public Component
     {
@@ -22,8 +22,8 @@ namespace vslib::components
         {
         }
 
-        parameters::Parameter<double> p;
-        parameters::Parameter<double> i;
-        parameters::Parameter<double> d;
+        Parameter<double> p;
+        Parameter<double> i;
+        Parameter<double> d;
     };
-}   // namespace components
+}   // namespace vslib

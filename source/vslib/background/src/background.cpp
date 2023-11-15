@@ -16,12 +16,13 @@ using namespace fgc4::utils;
 
 namespace vslib::backgroundTask
 {
-    //! Creates and uploads the component and parameter map to the shared memory (and standard output)
+    //! Creates and uploads the parameter map to the shared memory. The memory is reinitialized each time
+    //! this method is called.
     void uploadParameterMap()
     {
+        initializeSharedMemory(&(SHARED_MEMORY));
         auto json_component_registry = StaticJsonFactory::getJsonObject();
-        json_component_registry      = components::ComponentRegistry::instance().createParameterMap();
-        std::cout << json_component_registry.dump() << "\n";
+        json_component_registry      = ComponentRegistry::instance().createParameterMap();
         writeJsonToSharedMemory(json_component_registry, &(SHARED_MEMORY));
     }
 
@@ -46,7 +47,7 @@ namespace vslib::backgroundTask
         {
             // if no new data came in the previous iteration, assume it is safe to switch the read buffers now and
             // synchronise them
-            parameters::BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
+            BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
             // synchronise new background to new active buffer
             synchroniseReadBuffers();
             received_new_data = false;   // buffers updated, no new data available
@@ -55,6 +56,7 @@ namespace vslib::backgroundTask
 
     //! Validates the provided json command.
     //!
+    //! @param command JSON object to be validated as a valid command
     //! @return True if the command contains all expected fields, false otherwise.
     bool validateJsonCommand(const StaticJson& command)
     {
@@ -73,6 +75,7 @@ namespace vslib::backgroundTask
     }
 
     //! Processes the received JSON commands, checking whether one or many commands were received.
+    //!
     //! @param command JSON object containing one or more JSON commands to be executed
     void processJsonCommands(const StaticJson& commands)
     {
@@ -98,11 +101,11 @@ namespace vslib::backgroundTask
     {
         if (!validateJsonCommand(command))
         {
-            const Warning messsage("Command invalid, ignored.\n");
+            const Warning message("Command invalid, ignored.\n");
             return;
         }
         std::string const parameter_name     = command["name"];
-        auto const&       parameter_registry = parameters::ParameterRegistry::instance().getParameters();
+        auto const&       parameter_registry = ParameterRegistry::instance().getParameters();
         auto const        parameter          = parameter_registry.find(parameter_name);
         if (parameter == parameter_registry.end())
         {
@@ -122,7 +125,7 @@ namespace vslib::backgroundTask
     //! Calls each registered parameter to synchronise read buffers
     void synchroniseReadBuffers()
     {
-        for (const auto& parameter : parameters::ParameterRegistry::instance().getParameters())
+        for (const auto& parameter : ParameterRegistry::instance().getParameters())
         {
             parameter.second.get().synchroniseReadBuffers();
         }
