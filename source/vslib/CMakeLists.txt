@@ -99,5 +99,6 @@ if(BUILD_TESTS)
   add_subdirectory(components)
   add_subdirectory(parameters)
   add_subdirectory(utils)
+  add_subdirectory(background)
 
 endif()
