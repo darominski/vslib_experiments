@@ -9,6 +9,7 @@
 
 namespace vslib::backgroundTask
 {
+    void initializeSharedMemory();
     void uploadParameterMap();
     void receiveJsonCommand();
     void executeJsonCommand(const fgc4::utils::StaticJson&);

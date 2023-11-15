@@ -16,11 +16,17 @@ using namespace fgc4::utils;
 
 namespace vslib::backgroundTask
 {
+
+    //! Connects to the initialization of the shared memory structure to a known state
+    void initializeSharedMemory()
+    {
+        initializeSharedMemory(&(SHARED_MEMORY));
+    }
+
     //! Creates and uploads the parameter map to the shared memory. The memory is reinitialized each time
     //! this method is called.
     void uploadParameterMap()
     {
-        initializeSharedMemory(&(SHARED_MEMORY));
         auto json_component_registry = StaticJsonFactory::getJsonObject();
         json_component_registry      = ComponentRegistry::instance().createParameterMap();
         writeJsonToSharedMemory(json_component_registry, &(SHARED_MEMORY));

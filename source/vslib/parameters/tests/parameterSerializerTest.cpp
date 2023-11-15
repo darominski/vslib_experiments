@@ -33,7 +33,6 @@ class ParameterTest : public ::testing::Test
     }
 };
 
-
 class MockComponent : public Component
 {
   public:
