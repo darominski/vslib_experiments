@@ -1,5 +1,5 @@
 //! @file
-//! @brief File defining all error codes used by the FGC4.
+//! @brief File defining all error codes used in the FGC4 namespace.
 //! @author Dominik Arominski
 
 #pragma once

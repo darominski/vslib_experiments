@@ -12,14 +12,15 @@
 #include "componentArray.h"
 #include "componentRegistry.h"
 #include "compositePID.h"
-#include "interrupts.h"
 #include "json/json.hpp"
 #include "logString.h"
 #include "lowPassFilter.h"
 #include "parameterRegistry.h"
+#include "peripheralInterrupt.h"
 #include "pid.h"
 #include "rst.h"
 #include "staticJson.h"
+#include "timerInterrupt.h"
 
 // This is one way to stop users from creating objects on the heap and explicit memory allocations
 #ifdef __GNUC__
@@ -40,29 +41,50 @@ namespace user
         usleep(5000);   // 5 us
     }
 
+    static int peripheralCounter = 0;
+    void       peripheralTask()
+    {
+        printf("%dth event\n", ++peripheralCounter);
+
+        usleep(5);   // 5 us
+    }
+
 }   // namespace user
+
+#define SHARED_MEMORY (*(struct vslib::SharedMemory*)app_data_0_1_ADDRESS)
 
 int main()
 {
     bmboot::notifyPayloadStarted();
     puts("Hello world from vloop running on cpu1!");
 
+    vslib::backgroundTask::initializeMemory(&(SHARED_MEMORY));
+
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
-    PID pid1("pid_1", independent_component);
-    PID pid3("pid_3", independent_component);
-    RST rst("rst_1", independent_component);
+    // PID pid1("pid_1", independent_component);
+    // PID pid3("pid_3", independent_component);
+    // RST rst("rst_1", independent_component);
 
-    LowPassFilter<10> filter();
+    LowPassFilter<10> filter("fir_filter", nullptr);
+
+    for (auto const& val : filter.data)
+    {
+        std::cout << val << std::endl;
+    }
+
+    // ComponentArray<ComponentArray<PID, 3>, 3> array("brick_2", nullptr);
 
     // No parameter declarations beyond this point!
     // ************************************************************
 
-    puts("Parameter map:");
-    backgroundTask::uploadParameterMap();
+    backgroundTask::uploadParameterMap(&(SHARED_MEMORY));
 
-    TimerInterrupt timer(user::realTimeTask, 100);
-    timer.start();
+    PeripheralInterrupt peripheral(user::peripheralTask, 0, bmboot::PayloadInterruptPriority::p6);
+    peripheral.start();
+
+    // TimerInterrupt timer(user::realTimeTask, 100);
+    // timer.start();
 
     int counter = 0;
     while (true)
@@ -73,6 +95,7 @@ int main()
             std::cout << "Average time per interrupt: " << timer.benchmarkInterrupt() << std::endl;
 #endif
             timer.stop();
+            peripheral.stop();
             break;
         }
         puts(std::to_string(counter++).c_str());
@@ -92,7 +115,7 @@ int main()
         // }
         // puts("");
 
-        backgroundTask::receiveJsonCommand();
+        backgroundTask::receiveJsonCommand(&(SHARED_MEMORY));
         usleep(500);   // 50 us
         // usleep(1000000);   // 1 s
     }

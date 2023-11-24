@@ -26,8 +26,6 @@ namespace vslib
         std::array<std::byte, fgc4::utils::constants::json_memory_pool_size> json_buffer;
     };
 
-#define SHARED_MEMORY (*(struct SharedMemory*)app_data_0_1_ADDRESS)
-
     static_assert(sizeof(SharedMemory) <= app_data_0_1_SIZE);
     static_assert(sizeof(SharedMemory) <= app_data_0_2_SIZE);
     static_assert(sizeof(SharedMemory) <= app_data_0_3_SIZE);
@@ -47,7 +45,7 @@ namespace vslib
         shared_memory->acknowledged_counter = 0;
         shared_memory->transmitted_counter  = 0;
         shared_memory->message_length       = 0;
-        for (auto element : shared_memory->json_buffer)
+        for (auto& element : shared_memory->json_buffer)
         {
             element = std::byte();
         }

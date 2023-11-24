@@ -1,5 +1,5 @@
 //! @file
-//! @brief File containing a thin-layer interface to configure interrupts in VSlib.
+//! @brief File containing a base class for a thin-layer interface to configure interrupts in VSlib.
 //! @author Dominik Arominski
 
 #pragma once
@@ -8,7 +8,7 @@
 #include <functional>
 
 #include "bmboot/payload_runtime.hpp"
-#include "counters.h"
+#include "pollCpuClock.h"
 
 namespace vslib
 {
@@ -17,6 +17,8 @@ namespace vslib
     {
       public:
         //! Constructor for the Interrupt object
+        //!
+        //! @param handler_function Function to be executed when an interrupt is triggered
         Interrupt(std::function<void(void)> handler_function)
         {
 #ifdef PERFORMANCE_TESTS
@@ -46,19 +48,8 @@ namespace vslib
         //! Stops the interrupt
         virtual void stop() = 0;
 
-        //! Enables the interrupt handling of this interrupt
-        void enable() const
-        {
-            bmboot::disableInterruptHandling(m_current_interrupt_id);
-        }
-
-        //! Disables the interrupt handling of this interrupt
-        void disable() const
-        {
-            bmboot::disableInterruptHandling(m_current_interrupt_id);
-        }
-
 #ifdef PERFORMANCE_TESTS
+        //! Allows for benchmarking execution time of the interrupt as an average of the measured times
         double benchmarkInterrupt() const
         {
             auto const denominator
@@ -77,42 +68,23 @@ namespace vslib
         std::array<int64_t, 1000> m_measurements;
 
         //! Defines the preconditions necessary to estimate the execution time of the interrupt handler
+        //!
+        //! @return Clock value at the time of the call
         int64_t preConditions()
         {
             return fgc4::utils::read_CNTPCT();
         }
 
         //! Defines the postconditions necessary to estimate the execution time of the interrupt handler
+        //!
+        //! @param starting_point Clock value at the start of the interrupt
+        //! @return Difference between the starting and current clock values
         int64_t postConditions(int64_t starting_point)
         {
             // implementation of polling the CPU clock is required
             return fgc4::utils::read_CNTPCT() - starting_point;
         }
 #endif
-    };
-
-    class TimerInterrupt : public Interrupt
-    {
-      public:
-        TimerInterrupt(std::function<void(void)> handler_function, int microsecond_delay)
-            : Interrupt(std::move(handler_function)),
-              m_microsecond_delay{microsecond_delay}
-        {
-            assert((microsecond_delay > 0) && "Delay for the timing interrupt must be a positive number.");
-        }
-
-        void start() override
-        {
-            bmboot::startPeriodicInterrupt(m_microsecond_delay, m_interrupt_handler);
-        }
-
-        void stop() override
-        {
-            bmboot::stopPeriodicInterrupt();
-        }
-
-      private:
-        int m_microsecond_delay;
     };
 
 }   // namespace vslib

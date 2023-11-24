@@ -66,9 +66,12 @@ public:
     MaybeError dumpCore(char const* filename) final;
     void dumpDebugInfo() final;
     MaybeError ensureReadyToLoadPayload() final;
-    MaybeError loadAndStartPayload(std::span<uint8_t const> payload_binary, uint32_t payload_crc32) final;
+    MaybeError loadAndStartPayload(std::span<uint8_t const> payload_binary,
+                                   uint32_t payload_crc32,
+                                   uintptr_t payload_argument) final;
     int getchar() final;
     CrashInfo getCrashInfo() final;
+    DomainIndex getIndex() const final { return m_domain; }
     DomainState getState() final;
     MaybeError terminatePayload() final;
     MaybeError startup() final;
@@ -76,13 +79,16 @@ public:
     void startDummyPayload() final
     {
         // we _know_ that this will time out, don't bother checking the result
-        startPayloadAt(0xbaadf00d, 0, 0);
+        startPayloadAt(0xbaadf00d, 0, 0, 0);
     }
 
 private:
     MaybeError awaitMonitorStartup();
     PhysicalMemoryRanges const& getPhysicalMemoryRanges() { return ::getPhysicalMemoryRanges(m_domain); }
-    MaybeError startPayloadAt(uintptr_t entry_address, size_t payload_size, uint32_t payload_crc32);
+    MaybeError startPayloadAt(uintptr_t entry_address,
+                              size_t payload_size,
+                              uint32_t payload_crc32,
+                              uintptr_t payload_argument);
     MaybeError startup(std::span<uint8_t const> monitor_binary);
 
 //    volatile IpcBlock& getIpcBlock()
@@ -369,7 +375,9 @@ int Domain::getchar()
 
 // ************************************************************
 
-MaybeError Domain::loadAndStartPayload(std::span<uint8_t const> payload_binary, uint32_t payload_crc32)
+MaybeError Domain::loadAndStartPayload(std::span<uint8_t const> payload_binary,
+                                       uint32_t payload_crc32,
+                                       uintptr_t payload_argument)
 {
     // First, ensure we are in 'ready' state
     if (getState() != DomainState::monitor_ready)
@@ -391,7 +399,10 @@ MaybeError Domain::loadAndStartPayload(std::span<uint8_t const> payload_binary, 
         return error;
     }
 
-    return startPayloadAt(ranges.payload_address, payload_binary.size(), payload_crc32);
+    return startPayloadAt(ranges.payload_address,
+                          payload_binary.size(),
+                          payload_crc32,
+                          payload_argument);
 }
 
 // ************************************************************
@@ -431,31 +442,34 @@ DomainInstanceOrErrorCode IDomain::open(DomainIndex domain)
     // It is not obvious how to determine whether the bmboot monitor is running on a given CPU core
     // We solve this by placing a special value -- a *cookie* at a fixed memory location when starting the monitor.
     // If this value is found there, we assume the monitor has been started up previously.
+    //
+    // It is not without corner cases -- what if the CPU has been reset without clearing the DDR RAM?
+    // So we check for core reset bit first, cookie second
 
-    // Look for cookie in the specified location
-    Cookie cookie = -1;
-    memcpy(&cookie, code_area + ranges.monitor_size - sizeof(cookie), sizeof(cookie));
-
-    if (cookie != MONITOR_CODE_COOKIE)
+    if (mach::isCoreInReset(std::get<int>(devmem), domain))
     {
-        if (mach::isCoreInReset(std::get<int>(devmem), domain))
-        {
-            domain_general_state[domain] = DomainGeneralState::inReset;
-        }
-        else
-        {
-            // Core has been started, but not by us...
-            domain_general_state[domain] = DomainGeneralState::unavailable;
-        }
+        domain_general_state[domain] = DomainGeneralState::inReset;
     }
     else
     {
-        // Cookie found -> assume bmboot running (potentially with user payload)
-        //
-        // This can give a false positive if the startup failed or if the monitor crashed... tough luck.
-        // A reboot is probably the only way out in that case, anyway.
+        // Look for cookie in the specified location
+        Cookie cookie = -1;
+        memcpy(&cookie, code_area + ranges.monitor_size - sizeof(cookie), sizeof(cookie));
 
-        domain_general_state[domain] = DomainGeneralState::monitorStarted;
+        if (cookie == MONITOR_CODE_COOKIE)
+        {
+            // Cookie found -> assume bmboot running (potentially with user payload)
+            //
+            // This can give a false positive if the startup failed or if the monitor crashed... tough luck.
+            // A reboot is probably the only way out in that case, anyway.
+
+            domain_general_state[domain] = DomainGeneralState::monitorStarted;
+        }
+        else
+        {
+            // Core is running... but not our code!
+            domain_general_state[domain] = DomainGeneralState::unavailable;
+        }
     }
 
     munmap(code_area, ranges.monitor_size);
@@ -465,7 +479,10 @@ DomainInstanceOrErrorCode IDomain::open(DomainIndex domain)
 
 // ************************************************************
 
-MaybeError Domain::startPayloadAt(uintptr_t entry_address, size_t payload_size, uint32_t payload_crc32)
+MaybeError Domain::startPayloadAt(uintptr_t entry_address,
+                                  size_t payload_size,
+                                  uint32_t payload_crc32,
+                                  uintptr_t payload_argument)
 {
     // First, ensure we are in 'ready' state
     if (getState() != DomainState::monitor_ready)
@@ -487,6 +504,7 @@ MaybeError Domain::startPayloadAt(uintptr_t entry_address, size_t payload_size, 
     outbox.payload_entry_address = entry_address;
     outbox.payload_size = payload_size;
     outbox.payload_crc = payload_crc32;
+    outbox.payload_argument = payload_argument;
     outbox.cmd = Command::start_payload;
     memory_write_reorder_barrier();
     outbox.cmd_seq = (outbox.cmd_seq + 1);

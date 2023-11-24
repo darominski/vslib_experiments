@@ -47,10 +47,7 @@ TEST_F(SharedMemoryVslibTest, ReadJsonFromSharedMemory)
 TEST_F(SharedMemoryVslibTest, WriteTooLongJsonToSharedMemory)
 {
     nlohmann::json json_data;
-    for (size_t index = 0; index < 1024 * 128; index++)
-    {
-        json_data.push_back({{"key", "value"}});
-    }
+    json_data["long_string"] = std::string(1024 * 1024, 'A');
 
     EXPECT_THROW(writeJsonToSharedMemory(json_data, &shared_memory), std::bad_alloc);
 }

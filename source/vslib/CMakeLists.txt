@@ -38,7 +38,6 @@ if (NOT BUILD_TESTS)
 
   # Collect source files for the vslib code
   set(${LIB}_SOURCES
-      background/src/background.cpp
       components/src/componentRegistry.cpp
       parameters/src/parameterRegistry.cpp
      # Other vslib source files go here
@@ -100,5 +99,6 @@ if(BUILD_TESTS)
   add_subdirectory(components)
   add_subdirectory(parameters)
   add_subdirectory(utils)
+  add_subdirectory(background)
 
 endif()
