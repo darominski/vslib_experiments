@@ -12,12 +12,12 @@
 namespace vslib
 {
     template<size_t N>
-    class LowPassFilter : public Component
+    class FIRFilter : public Component
     {
       public:
         //! Constructor of the low pass filter component, initializing one Parameter: coefficients
-        LowPassFilter(std::string_view name, Component* parent = nullptr)
-            : Component("LowPassFilter", name, parent),
+        FIRFilter(std::string_view name, Component* parent = nullptr)
+            : Component("FIRFilter", name, parent),
               coefficients(*this, "coefficients")
         {
         }
@@ -32,7 +32,7 @@ namespace vslib
             double output = 0.0;
             for (int64_t index = 0; index < N; index++)
             {
-                output += coefficients[index] * m_buffer[(index + m_front - 1) % N];
+                output += coefficients[index] * m_buffer[(index + m_front + 1) % N];
             }
             return output;
         }
@@ -41,7 +41,7 @@ namespace vslib
 
       private:
         std::array<double, N> m_buffer{0};
-        int64_t               m_front = 0;
+        int64_t               m_front = N - 1;
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
@@ -49,7 +49,11 @@ namespace vslib
         void shiftBuffer(double input)
         {
             m_buffer[m_front] = input;
-            m_front           = (m_front + 1) % N;
+            m_front--;
+            if (m_front < 0)
+            {
+                m_front = N - 1;
+            }
         }
     };
 }   // namespace vslib

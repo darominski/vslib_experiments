@@ -8,13 +8,13 @@
 #include <iostream>
 #include <unistd.h>
 
+#include "FIRFilter.h"
 #include "background.h"
 #include "componentArray.h"
 #include "componentRegistry.h"
 #include "compositePID.h"
 #include "json/json.hpp"
 #include "logString.h"
-#include "lowPassFilter.h"
 #include "parameterRegistry.h"
 #include "peripheralInterrupt.h"
 #include "pid.h"
@@ -66,7 +66,7 @@ int main()
     // PID pid3("pid_3", independent_component);
     // RST rst("rst_1", independent_component);
 
-    LowPassFilter<10> filter("fir_filter", nullptr);
+    FIRFilter<10> filter("fir_filter", nullptr);
 
     for (auto const& val : filter.data)
     {
