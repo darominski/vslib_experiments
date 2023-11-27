@@ -68,11 +68,6 @@ int main()
 
     FIRFilter<10> filter("fir_filter", nullptr);
 
-    for (auto const& val : filter.data)
-    {
-        std::cout << val << std::endl;
-    }
-
     // ComponentArray<ComponentArray<PID, 3>, 3> array("brick_2", nullptr);
 
     // No parameter declarations beyond this point!

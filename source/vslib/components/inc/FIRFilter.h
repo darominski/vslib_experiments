@@ -37,6 +37,28 @@ namespace vslib
             return output;
         }
 
+        //! Filters the provided input array by convolving coefficients and the input.
+        //!
+        //! @param input Input values to be filtered
+        //! @return Filtered values
+        std::array<double, N> filter(const std::array<double, N>& inputs)
+        {
+            m_buffer = inputs;
+            std::array<double, N> outputs{0};
+            for (int64_t index = 0; index < N; index++)
+            {
+                const auto& input = inputs[index];
+                outputs[index]    = std::accumulate(
+                    coefficients.cbegin(), coefficients.cend(), 0.0,
+                    [&input](const auto& lhs, const auto& coefficient)
+                    {
+                        return lhs + input * coefficient;
+                    }
+                );
+            }
+            return outputs;
+        }
+
         Parameter<std::array<double, N>> coefficients;
 
       private:
