@@ -10,6 +10,7 @@
 
 #include "FIRFilter.h"
 #include "background.h"
+#include "boxFilter.h"
 #include "componentArray.h"
 #include "componentRegistry.h"
 #include "compositePID.h"
@@ -67,6 +68,7 @@ int main()
     // RST rst("rst_1", independent_component);
 
     FIRFilter<10> filter("fir_filter", nullptr);
+    BoxFilter<5>  bfilter("box_filter", nullptr);
 
     // ComponentArray<ComponentArray<PID, 3>, 3> array("brick_2", nullptr);
 
