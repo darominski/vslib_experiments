@@ -78,8 +78,8 @@ int main()
     PeripheralInterrupt peripheral(user::peripheralTask, 0, bmboot::PayloadInterruptPriority::p6);
     peripheral.start();
 
-    // TimerInterrupt timer(user::realTimeTask, 100);
-    // timer.start();
+    TimerInterrupt timer(user::realTimeTask, 100);
+    timer.start();
 
     int counter = 0;
     while (true)
