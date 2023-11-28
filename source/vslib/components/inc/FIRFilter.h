@@ -1,5 +1,5 @@
 //! @file
-//! @brief Defines class for a low-pass filter.
+//! @brief Defines class for a finite-impulse filter.
 //! @author Dominik Arominski
 
 #pragma once
@@ -11,11 +11,11 @@
 
 namespace vslib
 {
-    template<size_t N>
+    template<int64_t BufferLength>
     class FIRFilter : public Component
     {
       public:
-        //! Constructor of the low pass filter component, initializing one Parameter: coefficients
+        //! Constructor of the FIR filter component, initializing one Parameter: coefficients
         FIRFilter(std::string_view name, Component* parent = nullptr)
             : Component("FIRFilter", name, parent),
               coefficients(*this, "coefficients")
@@ -30,9 +30,9 @@ namespace vslib
         {
             shiftBuffer(input);
             double output = 0.0;
-            for (int64_t index = 0; index < N; index++)
+            for (int64_t index = 0; index < BufferLength; index++)
             {
-                output += coefficients[index] * m_buffer[(index + m_front + 1) % N];
+                output += coefficients[index] * m_buffer[(index + m_front + 1) % BufferLength];
             }
             return output;
         }
@@ -41,11 +41,11 @@ namespace vslib
         //!
         //! @param input Input values to be filtered
         //! @return Filtered values
-        std::array<double, N> filter(const std::array<double, N>& inputs)
+        std::array<double, BufferLength> filter(const std::array<double, BufferLength>& inputs)
         {
             m_buffer = inputs;
-            std::array<double, N> outputs{0};
-            for (int64_t index = 0; index < N; index++)
+            std::array<double, BufferLength> outputs{0};
+            for (int64_t index = 0; index < BufferLength; index++)
             {
                 const auto& input = inputs[index];
                 outputs[index]    = std::accumulate(
@@ -59,11 +59,11 @@ namespace vslib
             return outputs;
         }
 
-        Parameter<std::array<double, N>> coefficients;
+        Parameter<std::array<double, BufferLength>> coefficients;
 
       private:
-        std::array<double, N> m_buffer{0};
-        int64_t               m_front = N - 1;
+        std::array<double, BufferLength> m_buffer{0};
+        int64_t                          m_front = BufferLength - 1;
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
@@ -74,7 +74,7 @@ namespace vslib
             m_front--;
             if (m_front < 0)
             {
-                m_front = N - 1;
+                m_front = BufferLength - 1;
             }
         }
     };
