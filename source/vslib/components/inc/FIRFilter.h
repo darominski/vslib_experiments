@@ -63,7 +63,7 @@ namespace vslib
 
       private:
         std::array<double, BufferLength> m_buffer{0};
-        int64_t                          m_front = BufferLength - 1;
+        int64_t                          m_front{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
