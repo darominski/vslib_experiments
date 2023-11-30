@@ -32,7 +32,7 @@ namespace vslib
             double output = 0.0;
             for (int64_t index = 0; index < BufferLength; index++)
             {
-                output += coefficients[index] * m_buffer[(index + m_front + 1) % BufferLength];
+                output += coefficients[BufferLength - index - 1] * m_buffer[(index + m_front + 1) % BufferLength];
             }
             return output;
         }
@@ -62,8 +62,8 @@ namespace vslib
         Parameter<std::array<double, BufferLength>> coefficients;
 
       private:
-        std::array<double, BufferLength> m_buffer{0};
-        int64_t                          m_front{BufferLength - 1};
+        std::array<double, BufferLength> m_buffer{0.0};
+        int32_t                          m_front{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
