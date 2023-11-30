@@ -8,17 +8,17 @@
 #include <cstdint>
 #include <string>
 
-#include "component.h"
+#include "filter.h"
 
 namespace vslib
 {
     template<int32_t BufferLength>
-    class BoxFilter : public Component
+    class BoxFilter : public Filter
     {
       public:
         //! Constructor of the box filter component
-        BoxFilter(std::string_view name, Component* parent = nullptr)
-            : Component("BoxFilter", name, parent)
+        BoxFilter(std::string_view name, Component* parent = nullptr, double max_input_value = 1e6)
+            : Filter("BoxFilter", name, parent, max_input_value)
         {
         }
 
@@ -27,22 +27,24 @@ namespace vslib
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
-        double filter(double input)
+        double filter(double input) override
         {
-            shiftBuffer(input);
-            return (m_cumulative - m_buffer[m_front - 1] + m_buffer[m_front]) / m_filtered_counter;
+            auto const input_integer = static_cast<int32_t>(m_float_to_integer * input);
+            shiftBuffer(input_integer);
+            m_cumulative += m_buffer[m_front] - m_buffer[m_front - 1];
+            return m_integer_to_float * m_cumulative / m_filtered_counter;
         }
 
       private:
-        std::array<double, BufferLength> m_buffer{0};
-        int32_t                          m_filtered_counter{0};
-        int32_t                          m_front{BufferLength - 1};
-        double                           m_cumulative{0.0};
+        std::array<int32_t, BufferLength> m_buffer{0};
+        int32_t                           m_filtered_counter{0};
+        int32_t                           m_front{BufferLength - 1};
+        int32_t                           m_cumulative{0};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
         //! @param input Input value to be added to the front of the buffer
-        void shiftBuffer(double input)
+        void shiftBuffer(int32_t input)
         {
             m_buffer[m_front] = input;
             m_front--;

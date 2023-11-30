@@ -7,17 +7,17 @@
 #include <array>
 #include <string>
 
-#include "component.h"
+#include "filter.h"
 
 namespace vslib
 {
-    template<int64_t BufferLength>
-    class FIRFilter : public Component
+    template<int32_t BufferLength>
+    class FIRFilter : public Filter
     {
       public:
         //! Constructor of the FIR filter component, initializing one Parameter: coefficients
-        FIRFilter(std::string_view name, Component* parent = nullptr)
-            : Component("FIRFilter", name, parent),
+        FIRFilter(std::string_view name, Component* parent = nullptr, double max_input_value = 1e6)
+            : Filter("FIRFilter", name, parent, max_input_value),
               coefficients(*this, "coefficients")
         {
         }
@@ -26,13 +26,15 @@ namespace vslib
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
-        double filter(double input)
+        double filter(double input) override
         {
-            shiftBuffer(input);
+            auto const input_integer = static_cast<int32_t>(m_float_to_integer * input);
+            shiftBuffer(input_integer);
             double output = 0.0;
             for (int64_t index = 0; index < BufferLength; index++)
             {
-                output += coefficients[BufferLength - index - 1] * m_buffer[(index + m_front + 1) % BufferLength];
+                output += coefficients[BufferLength - index - 1] * m_integer_to_float
+                    * m_buffer[(index + m_front + 1) % BufferLength];
             }
             return output;
         }
@@ -44,7 +46,6 @@ namespace vslib
         template<int32_t N>
         std::array<double, BufferLength> filter(const std::array<double, BufferLength>& inputs)
         {
-            m_buffer = inputs;
             std::array<double, N> outputs{0};
             int32_t               index = 0;
             for (const auto& input : inputs)
@@ -58,13 +59,13 @@ namespace vslib
         Parameter<std::array<double, BufferLength>> coefficients;
 
       private:
-        std::array<double, BufferLength> m_buffer{0.0};
-        int32_t                          m_front{BufferLength - 1};
+        std::array<int32_t, BufferLength> m_buffer{0};
+        int32_t                           m_front{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
         //! @param input Input value to be added to the front of the buffer
-        void shiftBuffer(double input)
+        void shiftBuffer(int32_t input)
         {
             m_buffer[m_front] = input;
             m_front--;
