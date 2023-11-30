@@ -41,20 +41,16 @@ namespace vslib
         //!
         //! @param input Input values to be filtered
         //! @return Filtered values
+        template<int32_t N>
         std::array<double, BufferLength> filter(const std::array<double, BufferLength>& inputs)
         {
             m_buffer = inputs;
-            std::array<double, BufferLength> outputs{0};
-            for (int64_t index = 0; index < BufferLength; index++)
+            std::array<double, N> outputs{0};
+            int32_t               index = 0;
+            for (const auto& input : inputs)
             {
-                const auto& input = inputs[index];
-                outputs[index]    = std::accumulate(
-                    coefficients.cbegin(), coefficients.cend(), 0.0,
-                    [&input](const auto& lhs, const auto& coefficient)
-                    {
-                        return lhs + input * coefficient;
-                    }
-                );
+                outputs[index] = filter(input);
+                index++;
             }
             return outputs;
         }
