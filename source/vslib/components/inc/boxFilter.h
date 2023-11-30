@@ -5,6 +5,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <string>
 
 #include "component.h"
@@ -29,13 +30,14 @@ namespace vslib
         double filter(double input)
         {
             shiftBuffer(input);
-            return std::accumulate(m_buffer.cbegin(), m_buffer.cend(), 0.0) / m_filtered_counter;
+            return (m_cumulative - m_buffer[m_front - 1] + m_buffer[m_front]) / m_filtered_counter;
         }
 
       private:
         std::array<double, BufferLength> m_buffer{0};
         int32_t                          m_filtered_counter{0};
         int32_t                          m_front{BufferLength - 1};
+        double                           m_cumulative{0.0};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
