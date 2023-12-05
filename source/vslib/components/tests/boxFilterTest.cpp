@@ -42,24 +42,25 @@ TEST_F(BoxFilterTest, FilterNonDefaultConstruction)
 //! Checks that a BoxFilter object can filter provided value
 TEST_F(BoxFilterTest, FilterSingleValue)
 {
-    BoxFilter<10> filter("filter", nullptr);
-    double        value = 3.14159;
-    EXPECT_NEAR(filter.filter(value), value, 1e-3);
+    constexpr size_t         buffer_length = 10;
+    BoxFilter<buffer_length> filter("filter", nullptr);
+    double                   value = 3.14159;
+    EXPECT_NEAR(filter.filter(value), value / buffer_length, 1e-3);
 }
 
 //! Checks that a BoxFilter object can filter a number of provided values
 TEST_F(BoxFilterTest, FilterMultipleValues)
 {
-    BoxFilter<10>       filter("filter", nullptr, 1e4);
-    std::vector<double> values(10);
+    constexpr size_t         buffer_length = 10;
+    BoxFilter<buffer_length> filter("filter", nullptr, 1e4);
+    std::vector<double>      values(buffer_length);
     std::iota(values.begin(), values.end(), 0);
     double accumulator = 0;
     int    counter     = 0;
     for (const auto& value : values)
     {
-        accumulator += value;
-        counter++;
-        const double average = accumulator / counter;
+        accumulator          += value;
+        const double average = accumulator / buffer_length;
         EXPECT_NEAR(filter.filter(value), average, 1e-3);
     }
 }
@@ -67,21 +68,21 @@ TEST_F(BoxFilterTest, FilterMultipleValues)
 //! Checks that a BoxFilter filters correctly when buffer wraps around
 TEST_F(BoxFilterTest, FilterValuesBufferWrapAround)
 {
-    BoxFilter<5>        filter("filter", nullptr, 1e4);
-    std::vector<double> values(10);
+    constexpr size_t         buffer_length = 5;
+    BoxFilter<buffer_length> filter("filter", nullptr, 1e4);
+    std::vector<double>      values(10);
     std::iota(values.begin(), values.end(), 0);
     double accumulator = 0;
     int    counter     = 0;
     for (int index = 0; index < values.size(); index++)
     {
-        counter             = index < 5 ? index + 1 : 5;   // never more than 5 elements in the filter
         double oldest_value = 0;
-        if (index > 5)
+        if (index > buffer_length)
         {
-            oldest_value = values[index % 5];
+            oldest_value = values[index % buffer_length];
         }
         accumulator          += values[index] - oldest_value;
-        const double average = accumulator / counter;
+        const double average = accumulator / buffer_length;
 
         EXPECT_NEAR(filter.filter(values[index]), average, 1e-3);
     }
