@@ -217,3 +217,52 @@ TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
     inputs_file.close();
     outputs_file.close();
 }
+
+//! Checks the behaviour of fourth-order low-pass FIR filter on a real data coming from
+//! GPS power converter, and compared with filtering in Matlab
+TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
+{
+    constexpr int            filter_length = 11;
+    FIRFilter<filter_length> filter("filter");
+    // calculated with coefficients = designLowpassFIR(FilterOrder=2,CutoffFrequency=0.5,Window="hann"); command in
+    // Matlab:
+    std::array<double, filter_length> coefficient_array{0, 0.1945, 0.6110, 0.1945, 0};
+    setValues<filter_length>(filter, coefficient_array);
+
+    // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
+    std::filesystem::path inputs_path
+        = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_shortened.csv";
+    // the output from:
+    // firFilt = dsp.FIRFilter(NumeratorSource="Input port");
+    // firFilt(input_data, coefficients);
+    std::filesystem::path outputs_path
+        = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_low-pass_fir_4_0_5.csv";
+
+    std::ifstream inputs_file(inputs_path);
+    std::ifstream outputs_file(outputs_path);
+    ASSERT_TRUE(inputs_file.is_open());
+    ASSERT_TRUE(outputs_file.is_open());
+
+    std::string input_str;
+    std::string output_str;
+
+    while (getline(inputs_file, input_str) && getline(outputs_file, output_str))
+    {
+        auto const input_value         = std::stod(input_str);
+        auto const matlab_output_value = std::stod(output_str);
+
+        double const filtered_value = filter.filter(input_value);
+        double       relative;
+        if (matlab_output_value == 0)
+        {
+            relative = (matlab_output_value - filtered_value);
+        }
+        else
+        {
+            relative = (matlab_output_value - filtered_value) / matlab_output_value;
+        }
+        EXPECT_NEAR(relative, 0.0, 1e-2);   // at least 1e-2 relative precision
+    }
+    inputs_file.close();
+    outputs_file.close();
+}
