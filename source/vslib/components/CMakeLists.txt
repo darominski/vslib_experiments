@@ -1,11 +1,12 @@
 set(APP componentTests)
 
 add_executable(${APP}
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/boxFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentRegistryTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentArrayTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/boxFilterTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/firFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/componentRegistry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
 )
@@ -26,3 +27,9 @@ target_include_directories(${APP} PUBLIC
 target_link_libraries(${APP} PUBLIC ${GTEST_LIBRARIES} GTest::gtest pthread dl fmt::fmt)
 target_link_options(${APP} PUBLIC  -Wl,-dynamic-linker,/my-lib/ld-2.33.so -Wl,-rpath,/my-lib)
 target_link_options(${APP} PRIVATE -static -static-libgcc -static-libstdc++)
+
+add_custom_command(
+        TARGET ${APP} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/inputs
+                $<TARGET_FILE_DIR:${APP}>/inputs)
