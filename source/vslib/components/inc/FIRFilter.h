@@ -31,12 +31,12 @@ namespace vslib
         {
             auto const input_integer = static_cast<int32_t>(m_float_to_integer * input);
             shiftBuffer(input_integer);
-            double output = 0.0;
+            int32_t output = 0;
             for (int64_t index = 0; index < BufferLength; index++)
             {
-                output += coefficients[index] * m_integer_to_float * m_buffer[(index + m_front + 1) % BufferLength];
+                output += coefficients[index] * m_buffer[(index + m_front + 1) % BufferLength];
             }
-            return output;
+            return output * m_integer_to_float;
         }
 
         //! Filters the provided input array by convolving coefficients and the input.
