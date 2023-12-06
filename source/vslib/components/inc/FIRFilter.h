@@ -8,6 +8,7 @@
 #include <string>
 
 #include "filter.h"
+#include "parameter.h"
 
 namespace vslib
 {
@@ -33,8 +34,7 @@ namespace vslib
             double output = 0.0;
             for (int64_t index = 0; index < BufferLength; index++)
             {
-                output += coefficients[BufferLength - index - 1] * m_integer_to_float
-                    * m_buffer[(index + m_front + 1) % BufferLength];
+                output += coefficients[index] * m_integer_to_float * m_buffer[(index + m_front + 1) % BufferLength];
             }
             return output;
         }
@@ -43,8 +43,8 @@ namespace vslib
         //!
         //! @param input Input values to be filtered
         //! @return Filtered values
-        template<int32_t N>
-        std::array<double, BufferLength> filter(const std::array<double, BufferLength>& inputs)
+        template<size_t N>
+        std::array<double, N> filter(const std::array<double, N>& inputs)
         {
             std::array<double, N> outputs{0};
             int32_t               index = 0;
