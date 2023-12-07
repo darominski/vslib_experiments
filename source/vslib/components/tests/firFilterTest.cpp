@@ -86,7 +86,7 @@ TEST_F(FIRFilterTest, FilterMultipleValues)
 TEST_F(FIRFilterTest, FilterEntireArray)
 {
     constexpr int                     filter_length = 4;
-    FIRFilter<filter_length>          filter("filter");
+    FIRFilter<filter_length>          filter("filter", nullptr, 100);
     std::array<double, filter_length> coefficient_array{0.1, 0.4, 0.4, 0.1};
     setValues<filter_length>(filter, coefficient_array);
 
@@ -113,7 +113,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataSecondOrder)
     constexpr int                     filter_length = 4;
     FIRFilter<filter_length>          filter("filter");
     std::array<double, filter_length> coefficient_array{
-        0.0167, 0.4833, 0.4833, 0.0167};   // calculated by fir1 Matlab function with n=3, and Wn=0.5
+        0.01674, 0.48326, 0.48326, 0.01674};   // calculated by fir1 Matlab function with n=3, and Wn=0.5
     setValues<filter_length>(filter, coefficient_array);
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
@@ -137,7 +137,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataSecondOrder)
 
         double const filtered_value = filter.filter(input_value);
         auto const   relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-2);   // at least 1e-2 relative precision
+        EXPECT_NEAR(relative, 0.0, 1e-3);   // at least 1e-3 relative precision
     }
     inputs_file.close();
     outputs_file.close();
@@ -150,7 +150,8 @@ TEST_F(FIRFilterTest, FilterBMeasDataFifthOrder)
     constexpr int                     filter_length = 6;
     FIRFilter<filter_length>          filter("filter");
     std::array<double, filter_length> coefficient_array{
-        -0.0078, 0.0645, 0.4433, 0.4433, 0.0645, -0.0078};   // calculated by fir1 Matlab function with n=5, and Wn=0.5
+        -7.776e-3, 6.445e-2, 4.433e-1,
+        4.433e-1,  6.445e-2, -7.776e-3};   // calculated by fir1 Matlab function with n=5, and Wn=0.5
     setValues<filter_length>(filter, coefficient_array);
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
@@ -174,7 +175,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataFifthOrder)
 
         double const filtered_value = filter.filter(input_value);
         auto const   relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-2);   // at least 1e-2 relative precision
+        EXPECT_NEAR(relative, 0.0, 1e-3);   // at least 1e-3 relative precision
     }
     inputs_file.close();
     outputs_file.close();
@@ -187,8 +188,8 @@ TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
     constexpr int                     filter_length = 11;
     FIRFilter<filter_length>          filter("filter");
     std::array<double, filter_length> coefficient_array{
-        0.0051, 0.0,  -0.0419, 0.0, 0.2885, 0.4968,
-        0.2885, 0.00, -0.0419, 0.0, 0.0051};   // calculated by fir1 Matlab function with n=10, and Wn=0.5
+        5.060e-3, 0.0,  -4.194e-2, 0.0, 2.885e-1, 4.968e-1,
+        2.885e-1, 0.00, -4.194e-2, 0.0, 5.060e-3};   // calculated by fir1 Matlab function with n=10, and Wn=0.5
     setValues<filter_length>(filter, coefficient_array);
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
@@ -212,7 +213,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
 
         double const filtered_value = filter.filter(input_value);
         auto const   relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-2);   // at least 1e-2 relative precision
+        EXPECT_NEAR(relative, 0.0, 1e-3);   // at least 1e-3 relative precision
     }
     inputs_file.close();
     outputs_file.close();
@@ -261,7 +262,7 @@ TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
         {
             relative = (matlab_output_value - filtered_value) / matlab_output_value;
         }
-        EXPECT_NEAR(relative, 0.0, 1e-2);   // at least 1e-2 relative precision
+        EXPECT_NEAR(relative, 0.0, 1e-3);   // at least 1e-2 relative precision
     }
     inputs_file.close();
     outputs_file.close();
