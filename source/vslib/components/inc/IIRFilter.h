@@ -12,7 +12,7 @@
 
 namespace vslib
 {
-    template<int32_t BufferLength>
+    template<size_t BufferLength>
     class IIRFilter : public Filter
     {
       public:
