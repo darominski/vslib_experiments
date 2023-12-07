@@ -19,7 +19,7 @@ namespace vslib
         //! Constructor of the FIR filter component, initializing one Parameter: coefficients
         IIRFilter(std::string_view name, Component* parent = nullptr, double max_input_value = 1e6)
             : Filter("IIRFilter", name, parent, max_input_value),
-              nominator(*this, "nominator_coefficients") denominator(*this, "denominator_coefficients")
+              numerator(*this, "numerator_coefficients") denominator(*this, "denominator_coefficients")
         {
         }
 
@@ -35,17 +35,17 @@ namespace vslib
             int32_t output = 0.0;
             for (int64_t index = 0; index < BufferLength; index++)
             {
-                output += nominator[index] * m_inputs_buffer[(index + m_front + 1) % BufferLength]
+                output += numerator[index] * m_inputs_buffer[(index + m_front + 1) % BufferLength]
                     - denominator[index] * m_outputs_buffer[(index + m_front + 1) % BufferLength]
             }
             shiftOutputBuffer(input_integer);
             return output * m_integer_to_float;
         }
 
-        //! Filters the provided input array by convolving coefficients and the input.
+        //! Filters the provided input array by filtering each element of the input.
         //!
-        //! @param input Input values to be filtered
-        //! @return Filtered values
+        //! @param input Array with input values to be filtered
+        //! @return Array with the filtered values
         template<size_t N>
         std::array<double, N> filter(const std::array<double, N>& inputs)
         {
@@ -59,7 +59,8 @@ namespace vslib
             return outputs;
         }
 
-        Parameter<std::array<double, BufferLength>> coefficients;
+        Parameter<std::array<double, BufferLength>> numerator;
+        Parameter<std::array<double, BufferLength>> denominator;
 
       private:
         std::array<int32_t, BufferLength> m_inputs_buffer{0};
@@ -79,7 +80,7 @@ namespace vslib
             }
         }
 
-        //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
+        //! Pushes the provided value into the front of the output buffer, overriding the oldest value in effect
         //!
         //! @param output Output value to be added to the front of the outputs buffer
         void shiftOutputBuffer(int32_t output)
