@@ -94,7 +94,7 @@ TEST_F(IIRFilterTest, FilterSingleValueSetDenominator)
     EXPECT_NEAR(filter.filter(input), input * numerator_values[0], 1e-3);
 }
 
-//! Checks that a FIRFilter object can filter a number of provided values
+//! Checks that a FIRFilter object can filter a number of provided values, without wrapping around the buffers
 TEST_F(IIRFilterTest, FilterMultipleValues)
 {
     constexpr int                     filter_length = 3;
@@ -104,7 +104,7 @@ TEST_F(IIRFilterTest, FilterMultipleValues)
     std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};
     setDenominatorValues<filter_length>(filter, denominator_values);
 
-    std::array<double, filter_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
+    std::array<double, filter_length> inputs{3.14159 * 0.5, 3.14159 * 1, 3.14159 * 1.5};
     std::array<double, filter_length> outputs{0};
 
     outputs[0] = filter.filter(inputs[0]);
@@ -125,6 +125,77 @@ TEST_F(IIRFilterTest, FilterMultipleValues)
     );
 }
 
+//! Checks that a FIRFilter object can filter a number of provided values, with buffer wrap-around
+TEST_F(IIRFilterTest, FilterMultipleValuesBufferWrapAround)
+{
+    constexpr int                     filter_length = 3;
+    IIRFilter<filter_length>          filter("filter");
+    std::array<double, filter_length> numerator_values{0.1, 0.8, 0.1};
+    setNumeratorValues<filter_length>(filter, numerator_values);
+    std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};
+    setDenominatorValues<filter_length>(filter, denominator_values);
+
+    double const                     pi           = 3.14159;
+    constexpr int                    array_length = 5;
+    std::array<double, array_length> inputs{pi * 0.5, pi, pi * 1.5, pi * 2, pi * 2.5};
+    std::array<double, array_length> outputs{0};
+
+    outputs[0] = filter.filter(inputs[0]);
+    EXPECT_NEAR(outputs[0], inputs[0] * numerator_values[0], 1e-3);
+
+    outputs[1] = filter.filter(inputs[1]);
+    EXPECT_NEAR(
+        outputs[1],
+        inputs[1] * numerator_values[0] + inputs[0] * numerator_values[1] - outputs[0] * denominator_values[1], 1e-3
+    );
+
+    outputs[2] = filter.filter(inputs[2]);
+    EXPECT_NEAR(
+        outputs[2],
+        inputs[2] * numerator_values[0] + inputs[1] * numerator_values[1] + inputs[0] * numerator_values[2]
+            - (outputs[1] * denominator_values[1] + outputs[0] * denominator_values[2]),
+        1e-3
+    );
+
+    outputs[3] = filter.filter(inputs[3]);
+    EXPECT_NEAR(
+        outputs[3],
+        inputs[3] * numerator_values[0] + inputs[2] * numerator_values[1] + inputs[1] * numerator_values[2]
+            - (outputs[2] * denominator_values[1] + outputs[1] * denominator_values[2]),
+        1e-3
+    );
+
+    outputs[4] = filter.filter(inputs[4]);
+    EXPECT_NEAR(
+        outputs[4],
+        inputs[4] * numerator_values[0] + inputs[3] * numerator_values[1] + inputs[2] * numerator_values[2]
+            - (outputs[3] * denominator_values[1] + outputs[2] * denominator_values[2]),
+        1e-3
+    );
+}
+
+//! Checks that a FIRFilter object can filter a number of provided values, with buffer wrap-around
+TEST_F(IIRFilterTest, FilterEntrieArrayCompareWithMatlab)
+{
+    constexpr int                     filter_length = 3;
+    IIRFilter<filter_length>          filter("filter");
+    std::array<double, filter_length> numerator_values{0.1, 0.8, 0.1};
+    setNumeratorValues<filter_length>(filter, numerator_values);
+    std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};
+    setDenominatorValues<filter_length>(filter, denominator_values);
+
+    double const                     pi           = 3.14159;
+    constexpr int                    array_length = 5;
+    std::array<double, array_length> inputs{pi * 0.5, pi, pi * 1.5, pi * 2, pi * 2.5};
+    std::array<double, array_length> expected_values{0.1571, 1.6289, 3.7129, 5.7604, 7.6719};
+    auto const                       filtered_values = filter.filter(inputs);
+
+    for (int index = 0; index < array_length; index++)
+    {
+        EXPECT_NEAR((expected_values[index] - filtered_values[index]) / expected_values[index], 0.0, 2e-4);
+    }
+}
+
 //! Checks the behaviour of second-order Butterworth IIR filter on a real data coming from
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
@@ -135,7 +206,7 @@ TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
     // [b,a] = butter(2, 0.4);
     // iirFilt = dsp.IIRFilter('Numerator', b, 'Denominator', a);
     // iirFilt(input_data);
-    std::array<double, filter_length> numerator_values{2.0657e-1, 4.1314e-1, 2.057e-1};
+    std::array<double, filter_length> numerator_values{2.0657e-1, 4.1314e-1, 2.0657e-1};
     setNumeratorValues<filter_length>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -3.6953e-1, 1.9582e-1};
     setDenominatorValues<filter_length>(filter, denominator_values);
@@ -153,8 +224,6 @@ TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
     std::string input_str;
     std::string output_str;
 
-    int counter = 0;
-
     while (getline(inputs_file, input_str) && getline(outputs_file, output_str))
     {
         auto const input_value         = std::stod(input_str);
@@ -163,7 +232,7 @@ TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
         double const filtered_value = filter.filter(input_value);
 
         double const relative = (matlab_output_value - filtered_value) / matlab_output_value;
-        ASSERT_NEAR(relative, 0.0, 4e-2);   // at least 4% relative consistency, limited by casting
+        EXPECT_NEAR(relative, 0.0, 1e-3);   // at least 0.1% relative precision
     }
     inputs_file.close();
     outputs_file.close();
@@ -174,22 +243,24 @@ TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
 TEST_F(IIRFilterTest, ChebyIIRFilterBMeasTenthOrder)
 {
     constexpr int            filter_length = 11;
-    IIRFilter<filter_length> filter("filter", nullptr, 1e3);
+    IIRFilter<filter_length> filter("filter", nullptr, 2e4);
     // Matlab output and coefficients come from executing:
     // [b,a] = cheby1(10, 0.5, 0.5);
     // iirFilt = dsp.IIRFilter('Numerator', b, 'Denominator', a);
     // iirFilt(input_data);
-    std::array<double, filter_length> numerator_values{3.4877E-4, 3.4877E-3, 1.5695E-2, 4.1852E-2, 7.3241E-2, 8.7890E-2,
-                                                       7.3241E-2, 4.1852E-2, 1.5695E-2, 3.4877E-3, 3.4877E-4};
+    std::array<double, filter_length> numerator_values{2.89645E-03, 2.89645E-02, 1.30340E-01, 3.47574E-01,
+                                                       6.08254E-01, 7.29904E-01, 6.08254E-01, 3.47574E-01,
+                                                       1.30340E-01, 2.89645E-02, 2.89645E-03};
     setNumeratorValues<filter_length>(filter, numerator_values);
-    std::array<double, filter_length> denominator_values{1.0000E0, -3.0128E0, 6.5992E0, -1.0166E1,  1.2378E1, -1.1971E1,
-                                                         9.2990E0, -5.7129E0, 2.6817E0, -8.8487E-1, 1.6786E-1};
+    std::array<double, filter_length> denominator_values{1.00000E00,  -3.12098E-15, 1.34038E00,  -3.19478E-15,
+                                                         5.45354E-01, -8.28580E-16, 7.70412E-02, -1.38675E-17,
+                                                         3.16548E-03, 1.58106E-17,  1.67788E-05};
     setDenominatorValues<filter_length>(filter, denominator_values);
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
     std::filesystem::path inputs_path = "components/inputs/RPOPB.245.BR23.RMPS_B_MEAS_2023-11-17_09-32_inputs.csv";
     std::filesystem::path outputs_path
-        = "components/inputs/RPOPB.245.BR23.RMPS_B_MEAS_2023-11-17_09-32_iir_cheby1_10.csv";
+        = "components/inputs/RPOPB.245.BR23.RMPS_B_MEAS_2023-11-17_09-32_iir_butter_10.csv";
 
     std::ifstream inputs_file(inputs_path);
     std::ifstream outputs_file(outputs_path);
@@ -199,8 +270,6 @@ TEST_F(IIRFilterTest, ChebyIIRFilterBMeasTenthOrder)
     std::string input_str;
     std::string output_str;
 
-    int counter = 0;
-
     while (getline(inputs_file, input_str) && getline(outputs_file, output_str))
     {
         auto const input_value         = std::stod(input_str);
@@ -208,8 +277,8 @@ TEST_F(IIRFilterTest, ChebyIIRFilterBMeasTenthOrder)
 
         double const filtered_value = filter.filter(input_value);
 
-        double const relative = abs(matlab_output_value - filtered_value) / matlab_output_value;
-        ASSERT_NEAR(relative, 0.0, 0.2);   // at least 20% relative precision
+        double const relative = (matlab_output_value - filtered_value) / matlab_output_value;
+        ASSERT_NEAR(relative, 0.0, 1e-2);   // at least 1% relative precision
     }
     inputs_file.close();
     outputs_file.close();
