@@ -17,8 +17,8 @@ namespace vslib
     {
       public:
         //! Constructor of the FIR filter component, initializing one Parameter: coefficients
-        IIRFilter(std::string_view name, Component* parent = nullptr)
-            : Filter("IIRFilter", name, parent),
+        IIRFilter(std::string_view name, Component* parent = nullptr, double max_input_value = 1e6)
+            : Filter("IIRFilter", name, parent, max_input_value),
               numerator(*this, "numerator_coefficients"),
               denominator(*this, "denominator_coefficients")
         {
@@ -31,15 +31,15 @@ namespace vslib
         //! @return Filtered value
         double filter(double input) override
         {
-            // auto const input_integer = static_cast<int32_t>(m_float_to_integer * input);
             shiftInputBuffer(input);
-            double output = numerator[0] * m_inputs_buffer[(m_front + 1) % BufferLength];
+            double output = numerator[0] * m_inputs_buffer[m_front];
             for (size_t index = 1; index < BufferLength; index++)
             {
-                output += numerator[index] * m_inputs_buffer[(index + m_front + 1) % BufferLength]
-                    - denominator[index] * m_outputs_buffer[(index + m_front) % BufferLength];
+                size_t const buffer_index = (index + m_front) % BufferLength;
+                output                    += numerator[index] * m_inputs_buffer[buffer_index]
+                    - denominator[index] * (m_integer_to_float * m_outputs_buffer[buffer_index]);
             }
-            shiftOutputBuffer(output);
+            shiftOutputBuffer(output * m_float_to_integer);
             return output;
         }
 
@@ -64,9 +64,9 @@ namespace vslib
         Parameter<std::array<double, BufferLength>> denominator;
 
       private:
-        std::array<double, BufferLength> m_inputs_buffer{0};
-        std::array<double, BufferLength> m_outputs_buffer{0};
-        int32_t                          m_front{BufferLength - 1};
+        std::array<double, BufferLength>  m_inputs_buffer{0};
+        std::array<int32_t, BufferLength> m_outputs_buffer{0};
+        int32_t                           m_front{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
@@ -74,19 +74,19 @@ namespace vslib
         void shiftInputBuffer(double input)
         {
             m_inputs_buffer[m_front] = input;
-            m_front--;
-            if (m_front < 0)
-            {
-                m_front = BufferLength - 1;
-            }
         }
 
         //! Pushes the provided value into the front of the output buffer, overriding the oldest value in effect
         //!
         //! @param output Output value to be added to the front of the outputs buffer
-        void shiftOutputBuffer(double output)
+        void shiftOutputBuffer(int32_t output)
         {
             m_outputs_buffer[m_front] = output;
+            m_front--;
+            if (m_front < 0)
+            {
+                m_front = BufferLength - 1;
+            }
         }
     };
 }   // namespace vslib
