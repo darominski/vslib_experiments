@@ -61,6 +61,11 @@ namespace vslib
             return outputs;
         }
 
+        [[nodiscard]] auto const getMaxInputValue() const noexcept
+        {
+            return FixedPoint<FixedPointMantissa>::maximumValue();
+        }
+
         Parameter<std::array<double, BufferLength>> numerator;
         Parameter<std::array<double, BufferLength>> denominator;
 
