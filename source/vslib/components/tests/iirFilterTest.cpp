@@ -6,8 +6,8 @@
 #include <fstream>
 #include <gtest/gtest.h>
 
-#include "IIRFilter.h"
 #include "componentRegistry.h"
+#include "iirFilter.h"
 #include "staticJson.h"
 
 using namespace vslib;
