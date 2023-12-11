@@ -2,6 +2,7 @@ set(APP utilsTests)
 
 add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/utilsTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/fixedPointTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/sharedMemoryVslibTest.cpp
 )
 

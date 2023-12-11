@@ -75,27 +75,30 @@ int main()
     // No parameter declarations beyond this point!
     // ************************************************************
 
-    backgroundTask::uploadParameterMap(&(SHARED_MEMORY));
+    // backgroundTask::uploadParameterMap(&(SHARED_MEMORY));
 
-    PeripheralInterrupt peripheral(user::peripheralTask, 0, bmboot::PayloadInterruptPriority::p6);
-    peripheral.start();
+    auto const frequency = fgc4::utils::check_freq_CNTPCT();
+    std::cout << "Frequency: " << frequency << std::endl;
 
-    TimerInterrupt timer(user::realTimeTask, 100);
-    timer.start();
+    // PeripheralInterrupt peripheral(user::peripheralTask, 0, bmboot::PayloadInterruptPriority::p6);
+    // peripheral.start();
+
+    // TimerInterrupt timer(user::realTimeTask, 100);
+    // timer.start();
 
     int counter = 0;
     while (true)
     {
-        if (counter == 10)
-        {
-#ifdef PERFORMANCE_TESTS
-            std::cout << "Average time per interrupt: " << timer.benchmarkInterrupt() << std::endl;
-#endif
-            timer.stop();
-            peripheral.stop();
-            break;
-        }
-        puts(std::to_string(counter++).c_str());
+        // if (counter == 10)
+        // {
+        // #ifdef PERFORMANCE_TESTS
+        //             std::cout << "Average time per interrupt: " << timer.benchmarkInterrupt() << std::endl;
+        // #endif
+        //             timer.stop();
+        //             peripheral.stop();
+        //             break;
+        //         }
+        //         puts(std::to_string(counter++).c_str());
         // TEST CODE, verbose parameters signalling on thread 1
         // puts("PID1: ");
         // puts(std::to_string(pid1.p).c_str());

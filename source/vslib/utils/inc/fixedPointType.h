@@ -11,11 +11,11 @@
 namespace vslib
 {
 
-    template<unsigned short MantissaBits>
+    template<unsigned short FractionalBits>
     class FixedPoint
     {
 
-        static_assert(MantissaBits <= 32, "Number of bits in the mantissa cannot be larger or equal to 32 bits!");
+        static_assert(FractionalBits <= 32, "Number of the fractional bits cannot be larger or equal to 32 bits!");
 
       public:
         FixedPoint()
@@ -24,33 +24,33 @@ namespace vslib
         }
 
         FixedPoint(double floatValue)
-            : m_value{static_cast<int64_t>(floatValue * static_cast<double>(int64_t(1) << MantissaBits))}
+            : m_value{static_cast<int64_t>(floatValue * static_cast<double>(int64_t(1) << FractionalBits))}
         {
         }
 
         [[nodiscard]] double toDouble() const
         {
-            return static_cast<double>(m_value) / static_cast<double>(int64_t(1) << MantissaBits);
+            return static_cast<double>(m_value) / static_cast<double>(int64_t(1) << FractionalBits);
         }
 
         void operator+=(const FixedPoint& other)
         {
-            m_value += other.value();
+            m_value += other.m_value;
         }
 
         void operator-=(const FixedPoint& other)
         {
-            m_value -= other.value();
+            m_value -= other.m_value;
         }
 
         void operator*=(const FixedPoint& other)
         {
-            m_value *= other.value();
+            m_value = (this->m_value * other.m_value + (int64_t(1) << (FractionalBits - 1))) >> FractionalBits;
         }
 
         void operator/=(const FixedPoint& other)
         {
-            m_value /= other.value();
+            m_value = (m_value << FractionalBits) / other.m_value;
         }
 
         auto operator<=>(const FixedPoint& other) const = default;
@@ -58,28 +58,28 @@ namespace vslib
         FixedPoint operator+(const FixedPoint& other) const
         {
             FixedPoint result;
-            result.m_value = this->m_value + other.value();
+            result.m_value = this->m_value + other.m_value;
             return result;
         }
 
         FixedPoint operator-(const FixedPoint& other) const
         {
             FixedPoint result;
-            result.m_value = this->m_value - other.value();
+            result.m_value = this->m_value - other.m_value;
             return result;
         }
 
         FixedPoint operator*(const FixedPoint& other) const
         {
             FixedPoint result;
-            result.m_value = (this->m_value * other.value() + (1 << (MantissaBits - 1))) >> MantissaBits;
+            result.m_value = (this->m_value * other.m_value + (int64_t(1) << (FractionalBits - 1))) >> FractionalBits;
             return result;
         }
 
         FixedPoint operator/(const FixedPoint& other) const
         {
             FixedPoint result;
-            result.m_value = (this->m_value << MantissaBits) / other.value();
+            result.m_value = (this->m_value << FractionalBits) / other.m_value;
             return result;
         }
 
@@ -96,7 +96,7 @@ namespace vslib
       private:
         int64_t                        m_value;
         inline static constexpr double m_max_value{
-            pow(2, sizeof(int64_t) * 8 - MantissaBits - 1)};   // 8 bits per byte, -1 for sign:
+            pow(2, sizeof(int64_t) * 8 - FractionalBits - 1)};   // 8 bits per byte, -1 for sign:
     };
 
 }   // namespace vslib

@@ -13,7 +13,7 @@
 
 namespace vslib
 {
-    template<size_t BufferLength, unsigned short FixedPointMantissa = 24>
+    template<size_t BufferLength, unsigned short FractionalBits = 24>
     class IIRFilter : public Filter
     {
       public:
@@ -33,7 +33,7 @@ namespace vslib
         double filter(double input) override
         {
             shiftInputBuffer(input);
-            FixedPoint<FixedPointMantissa> output = m_inputs_buffer[m_front] * numerator[0];
+            FixedPoint<FractionalBits> output = m_inputs_buffer[m_front] * numerator[0];
             for (size_t index = 1; index < BufferLength; index++)
             {
                 size_t const buffer_index = (index + m_front) % BufferLength;
@@ -63,16 +63,16 @@ namespace vslib
 
         [[nodiscard]] auto const getMaxInputValue() const noexcept
         {
-            return FixedPoint<FixedPointMantissa>::maximumValue();
+            return FixedPoint<FractionalBits>::maximumValue();
         }
 
         Parameter<std::array<double, BufferLength>> numerator;
         Parameter<std::array<double, BufferLength>> denominator;
 
       private:
-        std::array<FixedPoint<FixedPointMantissa>, BufferLength> m_inputs_buffer{0};
-        std::array<FixedPoint<FixedPointMantissa>, BufferLength> m_outputs_buffer{0};
-        int32_t                                                  m_front{BufferLength - 1};
+        std::array<FixedPoint<FractionalBits>, BufferLength> m_inputs_buffer{0};
+        std::array<FixedPoint<FractionalBits>, BufferLength> m_outputs_buffer{0};
+        int32_t                                              m_front{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
@@ -85,7 +85,7 @@ namespace vslib
         //! Pushes the provided value into the front of the output buffer, overriding the oldest value in effect
         //!
         //! @param output Output value to be added to the front of the outputs buffer
-        void shiftOutputBuffer(FixedPoint<FixedPointMantissa>& output)
+        void shiftOutputBuffer(FixedPoint<FractionalBits>& output)
         {
             m_outputs_buffer[m_front] = output;
             m_front--;

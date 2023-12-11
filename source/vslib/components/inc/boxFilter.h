@@ -13,7 +13,7 @@
 
 namespace vslib
 {
-    template<int64_t BufferLength, unsigned short FixedPointMantissa = 24>
+    template<int64_t BufferLength, unsigned short FractionalBits = 24>
     class BoxFilter : public Filter
     {
       public:
@@ -39,12 +39,12 @@ namespace vslib
 
         [[nodiscard]] auto const getMaxInputValue() const noexcept
         {
-            return FixedPoint<FixedPointMantissa>::maximumValue();
+            return FixedPoint<FractionalBits>::maximumValue();
         }
 
       private:
-        std::array<FixedPoint<FixedPointMantissa>, BufferLength> m_buffer{0};
-        int64_t                                                  m_front{0};
-        FixedPoint<FixedPointMantissa>                           m_cumulative{0};
+        std::array<FixedPoint<FractionalBits>, BufferLength> m_buffer{0};
+        int64_t                                              m_front{0};
+        FixedPoint<FractionalBits>                           m_cumulative{0};
     };
 }   // namespace vslib

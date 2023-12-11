@@ -13,7 +13,7 @@
 
 namespace vslib
 {
-    template<size_t BufferLength, unsigned short FixedPointMantissa = 24>
+    template<size_t BufferLength, unsigned short FractionalBits = 24>
     class FIRFilter : public Filter
     {
       public:
@@ -31,8 +31,8 @@ namespace vslib
         double filter(double input) override
         {
             shiftBuffer(input);
-            FixedPoint<FixedPointMantissa> output(0);
-            for (int64_t index = 0; index < BufferLength; index++)
+            FixedPoint<FractionalBits> output(0);
+            for (uint64_t index = 0; index < BufferLength; index++)
             {
                 output += m_buffer[(index + m_front + 1) % BufferLength] * coefficients[index];
             }
@@ -47,24 +47,25 @@ namespace vslib
         std::array<double, N> filter(const std::array<double, N>& inputs)
         {
             std::array<double, N> outputs{0};
-            int32_t               index = 0;
-            for (const auto& input : inputs)
-            {
-                outputs[index] = filter(input);
-                index++;
-            }
+            std::transform(
+                inputs.cbegin(), inputs.cend(), outputs.begin(),
+                [&](const auto& input)
+                {
+                    return filter(input);
+                }
+            );
             return outputs;
         }
         [[nodiscard]] auto const getMaxInputValue() const noexcept
         {
-            return FixedPoint<FixedPointMantissa>::maximumValue();
+            return FixedPoint<FractionalBits>::maximumValue();
         }
 
         Parameter<std::array<double, BufferLength>> coefficients;
 
       private:
-        std::array<FixedPoint<FixedPointMantissa>, BufferLength> m_buffer{0};
-        int64_t                                                  m_front{BufferLength - 1};
+        std::array<FixedPoint<FractionalBits>, BufferLength> m_buffer{0};
+        int64_t                                              m_front{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
