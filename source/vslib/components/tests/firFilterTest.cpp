@@ -42,15 +42,7 @@ TEST_F(FIRFilterTest, FilterDefaultConstruction)
 {
     FIRFilter<1> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
-    EXPECT_EQ(filter.getMaxInputValue(), 1e6);
-}
-
-//! Checks that a FIRFilter object can be constructed with non-default parameters
-TEST_F(FIRFilterTest, FilterNonDefaultConstruction)
-{
-    FIRFilter<1> filter("filter", nullptr, 1e4);
-    EXPECT_EQ(filter.getName(), "filter");
-    EXPECT_EQ(filter.getMaxInputValue(), 1e4);
+    EXPECT_EQ(filter.getMaxInputValue(), pow(2, 64 - 24 - 1));
 }
 
 //! Checks that a FIRFilter object can filter provided value
@@ -86,7 +78,7 @@ TEST_F(FIRFilterTest, FilterMultipleValues)
 TEST_F(FIRFilterTest, FilterEntireArray)
 {
     constexpr int                     filter_length = 4;
-    FIRFilter<filter_length>          filter("filter", nullptr, 100);
+    FIRFilter<filter_length>          filter("filter", nullptr);
     std::array<double, filter_length> coefficient_array{0.1, 0.4, 0.4, 0.1};
     setValues<filter_length>(filter, coefficient_array);
 

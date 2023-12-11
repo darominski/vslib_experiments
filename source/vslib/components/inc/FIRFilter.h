@@ -8,17 +8,18 @@
 #include <string>
 
 #include "filter.h"
+#include "fixedPointType.h"
 #include "parameter.h"
 
 namespace vslib
 {
-    template<size_t BufferLength>
+    template<size_t BufferLength, unsigned short FixedPointMantissa = 24>
     class FIRFilter : public Filter
     {
       public:
         //! Constructor of the FIR filter component, initializing one Parameter: coefficients
-        FIRFilter(std::string_view name, Component* parent = nullptr, double max_input_value = 1e6)
-            : Filter("FIRFilter", name, parent, max_input_value),
+        FIRFilter(std::string_view name, Component* parent = nullptr)
+            : Filter("FIRFilter", name, parent),
               coefficients(*this, "coefficients")
         {
         }
@@ -29,14 +30,13 @@ namespace vslib
         //! @return Filtered value
         double filter(double input) override
         {
-            auto const input_integer = static_cast<int32_t>(m_float_to_integer * input);
-            shiftBuffer(input_integer);
-            int32_t output = 0;
+            shiftBuffer(input);
+            FixedPoint<FixedPointMantissa> output(0);
             for (int64_t index = 0; index < BufferLength; index++)
             {
-                output += coefficients[index] * m_buffer[(index + m_front + 1) % BufferLength];
+                output += m_buffer[(index + m_front + 1) % BufferLength] * coefficients[index];
             }
-            return output * m_integer_to_float;
+            return output.toDouble();
         }
 
         //! Filters the provided input array by convolving coefficients and the input.
@@ -55,17 +55,21 @@ namespace vslib
             }
             return outputs;
         }
+        [[nodiscard]] auto const getMaxInputValue() const noexcept
+        {
+            return FixedPoint<FixedPointMantissa>::maximumValue();
+        }
 
         Parameter<std::array<double, BufferLength>> coefficients;
 
       private:
-        std::array<int32_t, BufferLength> m_buffer{0};
-        int32_t                           m_front{BufferLength - 1};
+        std::array<FixedPoint<FixedPointMantissa>, BufferLength> m_buffer{0};
+        int64_t                                                  m_front{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
         //! @param input Input value to be added to the front of the buffer
-        void shiftBuffer(int32_t input)
+        void shiftBuffer(double input)
         {
             m_buffer[m_front] = input;
             m_front--;
