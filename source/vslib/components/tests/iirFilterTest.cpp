@@ -58,14 +58,6 @@ TEST_F(IIRFilterTest, FilterDefaultConstruction)
     EXPECT_EQ(filter.getMaxInputValue(), 1e6);
 }
 
-//! Checks that a IIRFilter object can be constructed with non-default parameters
-TEST_F(IIRFilterTest, FilterNonDefaultConstruction)
-{
-    IIRFilter<1> filter("filter", nullptr, 1e4);
-    EXPECT_EQ(filter.getName(), "filter");
-    EXPECT_EQ(filter.getMaxInputValue(), 1e4);
-}
-
 //! Checks that a IIRFilter object can filter provided value.
 //! Without setting denominator values it should behave like an FIR.
 TEST_F(IIRFilterTest, FilterSingleValue)
@@ -141,37 +133,28 @@ TEST_F(IIRFilterTest, FilterMultipleValuesBufferWrapAround)
     std::array<double, array_length> outputs{0};
 
     outputs[0] = filter.filter(inputs[0]);
-    EXPECT_NEAR(outputs[0], inputs[0] * numerator_values[0], 1e-3);
+    EXPECT_NEAR(outputs[0], inputs[0] * numerator_values[0], 1e-5);
 
     outputs[1] = filter.filter(inputs[1]);
-    EXPECT_NEAR(
-        outputs[1],
-        inputs[1] * numerator_values[0] + inputs[0] * numerator_values[1] - outputs[0] * denominator_values[1], 1e-3
-    );
+    double expected_value
+        = inputs[1] * numerator_values[0] + inputs[0] * numerator_values[1] - outputs[0] * denominator_values[1];
+    EXPECT_NEAR((expected_value - outputs[1]) / expected_value, 0.0, 1e-5);
 
-    outputs[2] = filter.filter(inputs[2]);
-    EXPECT_NEAR(
-        outputs[2],
-        inputs[2] * numerator_values[0] + inputs[1] * numerator_values[1] + inputs[0] * numerator_values[2]
-            - (outputs[1] * denominator_values[1] + outputs[0] * denominator_values[2]),
-        1e-3
-    );
+    outputs[2]     = filter.filter(inputs[2]);
+    expected_value = inputs[2] * numerator_values[0] + inputs[1] * numerator_values[1] + inputs[0] * numerator_values[2]
+        - (outputs[1] * denominator_values[1] + outputs[0] * denominator_values[2]);
+    EXPECT_NEAR((expected_value - outputs[2]) / expected_value, 0.0, 1e-5);
 
-    outputs[3] = filter.filter(inputs[3]);
-    EXPECT_NEAR(
-        outputs[3],
-        inputs[3] * numerator_values[0] + inputs[2] * numerator_values[1] + inputs[1] * numerator_values[2]
-            - (outputs[2] * denominator_values[1] + outputs[1] * denominator_values[2]),
-        1e-3
-    );
+    outputs[3]     = filter.filter(inputs[3]);
+    expected_value = inputs[3] * numerator_values[0] + inputs[2] * numerator_values[1] + inputs[1] * numerator_values[2]
+        - (outputs[2] * denominator_values[1] + outputs[1] * denominator_values[2]);
+    EXPECT_NEAR((expected_value - outputs[3]) / expected_value, 0.0, 1e-5);
 
-    outputs[4] = filter.filter(inputs[4]);
-    EXPECT_NEAR(
-        outputs[4],
-        inputs[4] * numerator_values[0] + inputs[3] * numerator_values[1] + inputs[2] * numerator_values[2]
-            - (outputs[3] * denominator_values[1] + outputs[2] * denominator_values[2]),
-        1e-3
-    );
+
+    outputs[4]     = filter.filter(inputs[4]);
+    expected_value = inputs[4] * numerator_values[0] + inputs[3] * numerator_values[1] + inputs[2] * numerator_values[2]
+        - (outputs[3] * denominator_values[1] + outputs[2] * denominator_values[2]);
+    EXPECT_NEAR((expected_value - outputs[4]) / expected_value, 0.0, 1e-5);
 }
 
 //! Checks that a FIRFilter object can filter a number of provided values, with buffer wrap-around
@@ -201,7 +184,7 @@ TEST_F(IIRFilterTest, FilterEntrieArrayCompareWithMatlab)
 TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
 {
     constexpr int            filter_length = 3;
-    IIRFilter<filter_length> filter("filter", nullptr, 2e4);
+    IIRFilter<filter_length> filter("filter", nullptr);
     // Matlab output and coefficients come from executing:
     // [b,a] = butter(2, 0.4);
     // iirFilt = dsp.IIRFilter('Numerator', b, 'Denominator', a);
@@ -232,7 +215,7 @@ TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
         double const filtered_value = filter.filter(input_value);
 
         double const relative = (matlab_output_value - filtered_value) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-3);   // at least 0.1% relative precision
+        ASSERT_NEAR(relative, 0.0, 2e-4);   // at least 0.02% relative precision
     }
     inputs_file.close();
     outputs_file.close();
@@ -243,7 +226,7 @@ TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
 TEST_F(IIRFilterTest, ChebyIIRFilterBMeasTenthOrder)
 {
     constexpr int            filter_length = 11;
-    IIRFilter<filter_length> filter("filter", nullptr, 2e4);
+    IIRFilter<filter_length> filter("filter", nullptr);
     // Matlab output and coefficients come from executing:
     // [b,a] = cheby1(10, 0.5, 0.5);
     // iirFilt = dsp.IIRFilter('Numerator', b, 'Denominator', a);
@@ -278,7 +261,7 @@ TEST_F(IIRFilterTest, ChebyIIRFilterBMeasTenthOrder)
         double const filtered_value = filter.filter(input_value);
 
         double const relative = (matlab_output_value - filtered_value) / matlab_output_value;
-        ASSERT_NEAR(relative, 0.0, 1e-2);   // at least 1% relative precision
+        ASSERT_NEAR(relative, 0.0, 5e-4);   // at least 0.05% relative precision
     }
     inputs_file.close();
     outputs_file.close();

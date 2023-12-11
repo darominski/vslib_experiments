@@ -8,17 +8,18 @@
 #include <string>
 
 #include "filter.h"
+#include "fixedPointType.h"
 #include "parameter.h"
 
 namespace vslib
 {
-    template<size_t BufferLength>
+    template<size_t BufferLength, unsigned short FixedPointMantissa = 24>
     class IIRFilter : public Filter
     {
       public:
         //! Constructor of the FIR filter component, initializing one Parameter: coefficients
-        IIRFilter(std::string_view name, Component* parent = nullptr, double max_input_value = 1e6)
-            : Filter("IIRFilter", name, parent, max_input_value),
+        IIRFilter(std::string_view name, Component* parent = nullptr)
+            : Filter("IIRFilter", name, parent),
               numerator(*this, "numerator_coefficients"),
               denominator(*this, "denominator_coefficients")
         {
@@ -32,15 +33,15 @@ namespace vslib
         double filter(double input) override
         {
             shiftInputBuffer(input);
-            double output = numerator[0] * m_inputs_buffer[m_front];
+            FixedPoint<FixedPointMantissa> output = m_inputs_buffer[m_front] * numerator[0];
             for (size_t index = 1; index < BufferLength; index++)
             {
                 size_t const buffer_index = (index + m_front) % BufferLength;
-                output                    += numerator[index] * m_inputs_buffer[buffer_index]
-                    - denominator[index] * (m_integer_to_float * m_outputs_buffer[buffer_index]);
+                output                    += m_inputs_buffer[buffer_index] * numerator[index]
+                    - m_outputs_buffer[buffer_index] * denominator[index];
             }
-            shiftOutputBuffer(output * m_float_to_integer);
-            return output;
+            shiftOutputBuffer(output);
+            return output.toDouble();
         }
 
         //! Filters the provided input array by filtering each element of the input.
@@ -64,9 +65,9 @@ namespace vslib
         Parameter<std::array<double, BufferLength>> denominator;
 
       private:
-        std::array<double, BufferLength>  m_inputs_buffer{0};
-        std::array<int32_t, BufferLength> m_outputs_buffer{0};
-        int32_t                           m_front{BufferLength - 1};
+        std::array<FixedPoint<FixedPointMantissa>, BufferLength> m_inputs_buffer{0};
+        std::array<FixedPoint<FixedPointMantissa>, BufferLength> m_outputs_buffer{0};
+        int32_t                                                  m_front{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
@@ -79,7 +80,7 @@ namespace vslib
         //! Pushes the provided value into the front of the output buffer, overriding the oldest value in effect
         //!
         //! @param output Output value to be added to the front of the outputs buffer
-        void shiftOutputBuffer(int32_t output)
+        void shiftOutputBuffer(FixedPoint<FixedPointMantissa>& output)
         {
             m_outputs_buffer[m_front] = output;
             m_front--;
