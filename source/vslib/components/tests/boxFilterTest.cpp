@@ -28,15 +28,16 @@ TEST_F(BoxFilterTest, FilterDefaultConstruction)
 {
     BoxFilter<1> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
-    EXPECT_EQ(filter.getMaxInputValue(), 1e6);
+    EXPECT_EQ(filter.getMaxInputValue(), pow(2, 64 - 24 - 1));
 }
 
-//! Checks that a BoxFilter object can be constructed with non-default parameters
+//! Checks that a BoxFilter object can be constructed with non-default mantissa template parameter
 TEST_F(BoxFilterTest, FilterNonDefaultConstruction)
 {
-    BoxFilter<1> filter("filter", nullptr, 1e4);
+    constexpr unsigned short      mantissa_length = 26;
+    BoxFilter<1, mantissa_length> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
-    EXPECT_EQ(filter.getMaxInputValue(), 1e4);
+    EXPECT_EQ(filter.getMaxInputValue(), pow(2, 64 - mantissa_length - 1));
 }
 
 //! Checks that a BoxFilter object can filter provided value
@@ -52,7 +53,7 @@ TEST_F(BoxFilterTest, FilterSingleValue)
 TEST_F(BoxFilterTest, FilterMultipleValues)
 {
     constexpr size_t         buffer_length = 10;
-    BoxFilter<buffer_length> filter("filter", nullptr, 1e4);
+    BoxFilter<buffer_length> filter("filter", nullptr);
     std::vector<double>      values(buffer_length);
     std::iota(values.begin(), values.end(), 0);
     double accumulator = 0;
@@ -69,7 +70,7 @@ TEST_F(BoxFilterTest, FilterMultipleValues)
 TEST_F(BoxFilterTest, FilterValuesBufferWrapAround)
 {
     constexpr size_t         buffer_length = 5;
-    BoxFilter<buffer_length> filter("filter", nullptr, 1e4);
+    BoxFilter<buffer_length> filter("filter", nullptr);
     std::vector<double>      values(10);
     std::iota(values.begin(), values.end(), 0);
     double accumulator = 0;

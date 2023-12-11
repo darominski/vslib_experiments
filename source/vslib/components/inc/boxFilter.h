@@ -9,16 +9,17 @@
 #include <string>
 
 #include "filter.h"
+#include "fixedPointType.h"
 
 namespace vslib
 {
-    template<int32_t BufferLength>
+    template<int64_t BufferLength, unsigned short FixedPointMantissa = 24>
     class BoxFilter : public Filter
     {
       public:
         //! Constructor of the box filter component
-        BoxFilter(std::string_view name, Component* parent = nullptr, double max_input_value = 1e6)
-            : Filter("BoxFilter", name, parent, max_input_value)
+        BoxFilter(std::string_view name, Component* parent = nullptr)
+            : Filter("BoxFilter", name, parent)
         {
         }
 
@@ -29,17 +30,21 @@ namespace vslib
         //! @return Filtered value
         double filter(double input) override
         {
-            auto const oldest_value  = m_buffer[m_front];
-            auto const input_integer = static_cast<int32_t>(m_float_to_integer * input);
-            m_buffer[m_front]        = input_integer;
-            m_cumulative             += input_integer - oldest_value;
-            m_front                  = (m_front + 1) % BufferLength;
-            return m_integer_to_float * m_cumulative / BufferLength;
+            auto const oldest_value = m_buffer[m_front];
+            m_buffer[m_front]       = input;
+            m_cumulative            += m_buffer[m_front] - oldest_value;
+            m_front                 = (m_front + 1) % BufferLength;
+            return (m_cumulative.toDouble()) / BufferLength;
+        }
+
+        [[nodiscard]] auto const getMaxInputValue() const noexcept
+        {
+            return FixedPoint<FixedPointMantissa>::maximumValue();
         }
 
       private:
-        std::array<int32_t, BufferLength> m_buffer{0};
-        int32_t                           m_front{0};
-        int32_t                           m_cumulative{0};
+        std::array<FixedPoint<FixedPointMantissa>, BufferLength> m_buffer{0};
+        int64_t                                                  m_front{0};
+        FixedPoint<FixedPointMantissa>                           m_cumulative{0};
     };
 }   // namespace vslib
