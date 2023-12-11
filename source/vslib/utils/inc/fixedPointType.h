@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <compare>
 #include <cstdint>
 
@@ -87,8 +88,15 @@ namespace vslib
             return m_value;
         }
 
+        static double maximumValue()
+        {
+            return m_max_value;
+        }
+
       private:
-        int64_t m_value;
+        int64_t                        m_value;
+        inline static constexpr double m_max_value{
+            pow(2, sizeof(int64_t) * 8 - MantissaBits - 1)};   // 8 bits per byte, -1 for sign:
     };
 
 }   // namespace vslib
