@@ -73,7 +73,7 @@ namespace vslib
       private:
         std::array<FixedPoint<FractionalBits>, BufferLength> m_inputs_buffer{0};
         std::array<FixedPoint<FractionalBits>, BufferLength> m_outputs_buffer{0};
-        int32_t                                              m_front{BufferLength - 1};
+        int64_t                                              m_front{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
