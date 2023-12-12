@@ -24,13 +24,13 @@ namespace vslib
         }
 
         FixedPoint(double floatValue)
-            : m_value{static_cast<int64_t>(floatValue * static_cast<double>(int64_t(1) << FractionalBits))}
+            : m_value{static_cast<int64_t>(floatValue * m_fractional_shift)}
         {
         }
 
         [[nodiscard]] double toDouble() const
         {
-            return static_cast<double>(m_value) / static_cast<double>(int64_t(1) << FractionalBits);
+            return static_cast<double>(m_value) / m_fractional_shift;
         }
 
         void operator+=(const FixedPoint& other)
@@ -45,7 +45,7 @@ namespace vslib
 
         void operator*=(const FixedPoint& other)
         {
-            m_value = (this->m_value * other.m_value + (int64_t(1) << (FractionalBits - 1))) >> FractionalBits;
+            m_value = (this->m_value * other.m_value + m_fractional_rounding) >> FractionalBits;
         }
 
         void operator/=(const FixedPoint& other)
@@ -72,7 +72,7 @@ namespace vslib
         FixedPoint operator*(const FixedPoint& other) const
         {
             FixedPoint result;
-            result.m_value = (this->m_value * other.m_value + (int64_t(1) << (FractionalBits - 1))) >> FractionalBits;
+            result.m_value = (this->m_value * other.m_value + m_fractional_rounding) >> FractionalBits;
             return result;
         }
 
@@ -94,9 +94,12 @@ namespace vslib
         }
 
       private:
-        int64_t                        m_value;
+        int64_t                         m_value;
+        inline static constexpr double  m_fractional_shift{static_cast<double>(int64_t(1) << FractionalBits)};
+        inline static constexpr int64_t m_fractional_rounding{int64_t(1) << (FractionalBits - 1)};
+
         inline static constexpr double m_max_value{
-            pow(2, sizeof(int64_t) * 8 - FractionalBits - 1)};   // 8 bits per byte, -1 for sign:
+            pow(2, sizeof(int64_t) * 8 - FractionalBits - 1)};   // 8 bits per byte, -1 for sign
     };
 
 }   // namespace vslib
