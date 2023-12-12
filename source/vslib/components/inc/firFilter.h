@@ -34,7 +34,7 @@ namespace vslib
             FixedPoint<FractionalBits> output(0);
             for (uint64_t index = 0; index < BufferLength; index++)
             {
-                output += m_buffer[(index + m_front + 1) % BufferLength] * coefficients[index];
+                output += m_buffer[(index + m_head + 1) % BufferLength] * coefficients[index];
             }
             return output.toDouble();
         }
@@ -65,18 +65,18 @@ namespace vslib
 
       private:
         std::array<FixedPoint<FractionalBits>, BufferLength> m_buffer{0};
-        int64_t                                              m_front{BufferLength - 1};
+        int64_t                                              m_head{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
         //! @param input Input value to be added to the front of the buffer
         void shiftBuffer(double input)
         {
-            m_buffer[m_front] = input;
-            m_front--;
-            if (m_front < 0)
+            m_buffer[m_head] = input;
+            m_head--;
+            if (m_head < 0)
             {
-                m_front = BufferLength - 1;
+                m_head = BufferLength - 1;
             }
         }
     };

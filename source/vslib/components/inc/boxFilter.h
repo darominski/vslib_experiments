@@ -30,10 +30,10 @@ namespace vslib
         //! @return Filtered value
         double filter(double input) override
         {
-            auto const oldest_value = m_buffer[m_front];
-            m_buffer[m_front]       = input;
-            m_cumulative            += m_buffer[m_front] - oldest_value;
-            m_front                 = (m_front + 1) % BufferLength;
+            auto const oldest_value = m_buffer[m_head];
+            m_buffer[m_head]        = input;
+            m_cumulative            += m_buffer[m_head] - oldest_value;
+            m_head                  = (m_head + 1) % BufferLength;
             return (m_cumulative.toDouble()) / BufferLength;
         }
 
@@ -44,7 +44,7 @@ namespace vslib
 
       private:
         std::array<FixedPoint<FractionalBits>, BufferLength> m_buffer{0};
-        int64_t                                              m_front{0};
+        int64_t                                              m_head{0};
         FixedPoint<FractionalBits>                           m_cumulative{0};
     };
 }   // namespace vslib

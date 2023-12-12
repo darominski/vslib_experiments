@@ -33,10 +33,10 @@ namespace vslib
         double filter(double input) override
         {
             shiftInputBuffer(input);
-            FixedPoint<FractionalBits> output = m_inputs_buffer[m_front] * numerator[0];
+            FixedPoint<FractionalBits> output = m_inputs_buffer[m_head] * numerator[0];
             for (size_t index = 1; index < BufferLength; index++)
             {
-                size_t const buffer_index = (index + m_front) % BufferLength;
+                size_t const buffer_index = (index + m_head) % BufferLength;
                 output                    += m_inputs_buffer[buffer_index] * numerator[index]
                     - m_outputs_buffer[buffer_index] * denominator[index];
             }
@@ -73,14 +73,14 @@ namespace vslib
       private:
         std::array<FixedPoint<FractionalBits>, BufferLength> m_inputs_buffer{0};
         std::array<FixedPoint<FractionalBits>, BufferLength> m_outputs_buffer{0};
-        int64_t                                              m_front{BufferLength - 1};
+        int64_t                                              m_head{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
         //! @param input Input value to be added to the front of the inputs buffer
         void shiftInputBuffer(double input)
         {
-            m_inputs_buffer[m_front] = input;
+            m_inputs_buffer[m_head] = input;
         }
 
         //! Pushes the provided value into the front of the output buffer, overriding the oldest value in effect
@@ -88,11 +88,11 @@ namespace vslib
         //! @param output Output value to be added to the front of the outputs buffer
         void shiftOutputBuffer(FixedPoint<FractionalBits>& output)
         {
-            m_outputs_buffer[m_front] = output;
-            m_front--;
-            if (m_front < 0)
+            m_outputs_buffer[m_head] = output;
+            m_head--;
+            if (m_head < 0)
             {
-                m_front = BufferLength - 1;
+                m_head = BufferLength - 1;
             }
         }
     };
