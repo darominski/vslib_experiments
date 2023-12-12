@@ -8,12 +8,12 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "FIRFilter.h"
 #include "background.h"
 #include "boxFilter.h"
 #include "componentArray.h"
 #include "componentRegistry.h"
 #include "compositePID.h"
+#include "firFilter.h"
 #include "json/json.hpp"
 #include "logString.h"
 #include "parameterRegistry.h"
@@ -76,9 +76,6 @@ int main()
     // ************************************************************
 
     // backgroundTask::uploadParameterMap(&(SHARED_MEMORY));
-
-    auto const frequency = fgc4::utils::check_freq_CNTPCT();
-    std::cout << "Frequency: " << frequency << std::endl;
 
     // PeripheralInterrupt peripheral(user::peripheralTask, 0, bmboot::PayloadInterruptPriority::p6);
     // peripheral.start();
