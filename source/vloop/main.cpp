@@ -34,12 +34,11 @@ using namespace fgc4;
 
 namespace user
 {
-    static int counter = 0;
+    static int rt_counter = 0;
     void       realTimeTask()
     {
-        printf("%dth event\n", ++counter);
-
-        usleep(5000);   // 5 us
+        printf("%dth event\n", ++rt_counter);
+        usleep(5);   // 5 us
     }
 
     static int peripheralCounter = 0;
@@ -80,22 +79,23 @@ int main()
     // PeripheralInterrupt peripheral(user::peripheralTask, 0, bmboot::PayloadInterruptPriority::p6);
     // peripheral.start();
 
-    // TimerInterrupt timer(user::realTimeTask, 100);
-    // timer.start();
+    TimerInterrupt timer(user::realTimeTask, 10);
+    timer.start();
 
     int counter = 0;
     while (true)
     {
-        // if (counter == 10)
-        // {
-        // #ifdef PERFORMANCE_TESTS
-        //             std::cout << "Average time per interrupt: " << timer.benchmarkInterrupt() << std::endl;
-        // #endif
-        //             timer.stop();
-        //             peripheral.stop();
-        //             break;
-        //         }
-        //         puts(std::to_string(counter++).c_str());
+        if (counter == 20)
+        {
+#ifdef PERFORMANCE_TESTS
+            std::cout << "Average time per interrupt: " << timer.benchmarkInterrupt() << std::endl;
+#endif
+            timer.stop();
+
+            // peripheral.stop();
+            break;
+        }
+        puts(std::to_string(counter++).c_str());
         // TEST CODE, verbose parameters signalling on thread 1
         // puts("PID1: ");
         // puts(std::to_string(pid1.p).c_str());
@@ -113,8 +113,7 @@ int main()
         // puts("");
 
         backgroundTask::receiveJsonCommand(&(SHARED_MEMORY));
-        usleep(500);   // 50 us
-        // usleep(1000000);   // 1 s
+        usleep(500);   // 500 us
     }
 
     return 0;
