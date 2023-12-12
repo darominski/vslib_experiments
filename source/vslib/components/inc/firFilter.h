@@ -13,7 +13,7 @@
 
 namespace vslib
 {
-    template<size_t BufferLength, unsigned short FractionalBits = 24>
+    template<uint64_t BufferLength, unsigned short FractionalBits = 24>
     class FIRFilter : public Filter
     {
       public:
@@ -65,7 +65,7 @@ namespace vslib
 
       private:
         std::array<FixedPoint<FractionalBits>, BufferLength> m_buffer{0};
-        int64_t                                              m_head{BufferLength - 1};
+        uint64_t                                             m_head{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!

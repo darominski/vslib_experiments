@@ -13,7 +13,7 @@
 
 namespace vslib
 {
-    template<int64_t BufferLength, unsigned short FractionalBits = 24>
+    template<uint64_t BufferLength, unsigned short FractionalBits = 24>
     class BoxFilter : public Filter
     {
       public:
@@ -44,7 +44,7 @@ namespace vslib
 
       private:
         std::array<FixedPoint<FractionalBits>, BufferLength> m_buffer{0};
-        int64_t                                              m_head{0};
+        uint64_t                                             m_head{0};
         FixedPoint<FractionalBits>                           m_cumulative{0};
     };
 }   // namespace vslib

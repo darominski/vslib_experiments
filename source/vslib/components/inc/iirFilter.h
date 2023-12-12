@@ -13,7 +13,7 @@
 
 namespace vslib
 {
-    template<size_t BufferLength, unsigned short FractionalBits = 24>
+    template<uint64_t BufferLength, unsigned short FractionalBits = 24>
     class IIRFilter : public Filter
     {
       public:
@@ -34,10 +34,10 @@ namespace vslib
         {
             shiftInputBuffer(input);
             FixedPoint<FractionalBits> output = m_inputs_buffer[m_head] * numerator[0];
-            for (size_t index = 1; index < BufferLength; index++)
+            for (uint64_t index = 1; index < BufferLength; index++)
             {
-                size_t const buffer_index = (index + m_head) % BufferLength;
-                output                    += m_inputs_buffer[buffer_index] * numerator[index]
+                uint64_t const buffer_index = (index + m_head) % BufferLength;
+                output                      += m_inputs_buffer[buffer_index] * numerator[index]
                     - m_outputs_buffer[buffer_index] * denominator[index];
             }
             shiftOutputBuffer(output);
@@ -48,7 +48,7 @@ namespace vslib
         //!
         //! @param input Array with input values to be filtered
         //! @return Array with the filtered values
-        template<size_t N>
+        template<uint64_t N>
         std::array<double, N> filter(const std::array<double, N>& inputs)
         {
             std::array<double, N> outputs{0};
@@ -73,7 +73,7 @@ namespace vslib
       private:
         std::array<FixedPoint<FractionalBits>, BufferLength> m_inputs_buffer{0};
         std::array<FixedPoint<FractionalBits>, BufferLength> m_outputs_buffer{0};
-        int64_t                                              m_head{BufferLength - 1};
+        uint64_t                                             m_head{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
