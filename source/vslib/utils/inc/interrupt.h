@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "bmboot/payload_runtime.hpp"
+#include "histogram.h"
 #include "pollCpuClock.h"
 
 namespace vslib
@@ -49,14 +50,25 @@ namespace vslib
         virtual void stop() = 0;
 
 #ifdef PERFORMANCE_TESTS
-        //! Allows for benchmarking execution time of the interrupt as an average of the measured times
-        double benchmarkInterrupt() const
+
+        double average() const
         {
-            auto const denominator
-                = static_cast<double>(std::min(static_cast<int32_t>(m_measurements.size()), m_measurement_counter));
-            return static_cast<double>(std::accumulate(m_measurements.cbegin(), m_measurements.cend(), 0))
-                / denominator;
+            return calculateAverage<1000>(m_measurements);
         }
+
+        double standardDeviation(const double mean) const
+        {
+            return calculateStandardDeviation<1000>(m_measurments, mean);
+        }
+
+        template<size_t nBins = 11>   // log2(1000) + 1 = 11: Sturges' formula for optimal number of bins
+        Histogram<nBins> histogramMeasurements() const
+        {
+            auto histogram = prepareHistogram<nBins>(min, max);
+            fillHistogram(histogram, m_measurements);
+            return std::move(histogram);
+        }
+
 #endif
       protected:
         std::function<void(void)> m_interrupt_handler;
@@ -64,7 +76,6 @@ namespace vslib
         inline static int         m_interrupt_id{0};
 
 #ifdef PERFORMANCE_TESTS
-        int32_t                   m_measurement_counter{0};
         std::array<int64_t, 1000> m_measurements;
 
         //! Defines the preconditions necessary to estimate the execution time of the interrupt handler
