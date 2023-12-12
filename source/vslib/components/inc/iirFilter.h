@@ -52,12 +52,13 @@ namespace vslib
         std::array<double, N> filter(const std::array<double, N>& inputs)
         {
             std::array<double, N> outputs{0};
-            int32_t               index = 0;
-            for (const auto& input : inputs)
-            {
-                outputs[index] = filter(input);
-                index++;
-            }
+            std::transform(
+                inputs.cbegin(), inputs.cend(), outputs.begin(),
+                [&](const auto& input)
+                {
+                    return filter(input);
+                }
+            );
             return outputs;
         }
 
