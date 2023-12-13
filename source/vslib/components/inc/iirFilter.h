@@ -68,7 +68,7 @@ namespace vslib
       private:
         std::array<double, BufferLength> m_inputs_buffer{0};
         std::array<double, BufferLength> m_outputs_buffer{0};
-        uint64_t                         m_head{BufferLength - 1};
+        int64_t                          m_head{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
