@@ -22,115 +22,123 @@ class FixedPointTest : public ::testing::Test
 
 TEST_F(FixedPointTest, CreateDefaultVariable)
 {
-    constexpr unsigned short mantissa_length = 24;
+    constexpr unsigned short franctional_bits = 24;
 
-    FixedPoint<mantissa_length> fixed_point;
-    EXPECT_EQ(FixedPoint<mantissa_length>::maximumValue(), pow(2, 64 - mantissa_length - 1));
+    FixedPoint<franctional_bits> fixed_point;
+    EXPECT_EQ(FixedPoint<franctional_bits>::maximumValue(), pow(2, 64 - franctional_bits - 1));
     EXPECT_EQ(fixed_point.toDouble(), 0.0);
 }
 
 TEST_F(FixedPointTest, CreateCustomVariable)
 {
-    constexpr unsigned short    mantissa_length = 15;
-    double                      variable        = 3.14159;
-    FixedPoint<mantissa_length> fixed_point     = variable;
+    constexpr unsigned short     franctional_bits = 15;
+    double                       variable         = 3.14159;
+    FixedPoint<franctional_bits> fixed_point      = variable;
     EXPECT_NEAR(fixed_point.toDouble(), variable, 1e-3);
-    EXPECT_EQ(fixed_point.maximumValue(), pow(2, 64 - mantissa_length - 1));
+    EXPECT_EQ(fixed_point.maximumValue(), pow(2, 64 - franctional_bits - 1));
 }
 
 TEST_F(FixedPointTest, SumFixedPointVariables)
 {
-    constexpr unsigned short    mantissa_length = 15;
-    double                      variable1       = 3.14159;
-    double                      variable2       = 2.7128;
-    FixedPoint<mantissa_length> lhs             = variable1;
-    FixedPoint<mantissa_length> rhs             = variable2;
-    auto const                  result          = lhs + rhs;
-    EXPECT_NEAR(result.toDouble(), variable1 + variable2, 1e-3);
+    constexpr unsigned short     franctional_bits   = 29;
+    double                       variable1          = 3.14159;
+    double                       variable2          = 2.7128;
+    FixedPoint<franctional_bits> lhs                = variable1;
+    FixedPoint<franctional_bits> rhs                = variable2;
+    auto const                   result             = lhs + rhs;
+    double const                 expected_precision = pow(2, -franctional_bits + 1);
+    EXPECT_NEAR(result.toDouble(), variable1 + variable2, expected_precision);
 }
 
 TEST_F(FixedPointTest, SubtractFixedPointVariables)
 {
-    constexpr unsigned short    mantissa_length = 15;
-    double                      variable1       = 3.14159;
-    double                      variable2       = 2.7128;
-    FixedPoint<mantissa_length> lhs             = variable1;
-    FixedPoint<mantissa_length> rhs             = variable2;
-    auto const                  result          = lhs - rhs;
-    EXPECT_NEAR(result.toDouble(), variable1 - variable2, 1e-3);
+    constexpr unsigned short     franctional_bits   = 31;
+    double                       variable1          = 3.14159;
+    double                       variable2          = 2.7128;
+    FixedPoint<franctional_bits> lhs                = variable1;
+    FixedPoint<franctional_bits> rhs                = variable2;
+    auto const                   result             = lhs - rhs;
+    double const                 expected_precision = pow(2, -franctional_bits + 1);
+    EXPECT_NEAR(result.toDouble(), variable1 - variable2, expected_precision);
 }
 
 TEST_F(FixedPointTest, DivideFixedPointVariables)
 {
-    constexpr unsigned short    mantissa_length = 15;
-    double                      variable1       = 3.14159;
-    double                      variable2       = 2.7128;
-    FixedPoint<mantissa_length> lhs             = variable1;
-    FixedPoint<mantissa_length> rhs             = variable2;
-    auto const                  result          = lhs / rhs;
-    EXPECT_NEAR(result.toDouble(), variable1 / variable2, 1e-3);
+    constexpr unsigned short     franctional_bits   = 19;
+    double                       variable1          = 3.14159;
+    double                       variable2          = 2.7128;
+    FixedPoint<franctional_bits> lhs                = variable1;
+    FixedPoint<franctional_bits> rhs                = variable2;
+    auto const                   result             = lhs / rhs;
+    double const                 expected_precision = pow(2, -franctional_bits + 1);
+    EXPECT_NEAR(result.toDouble(), variable1 / variable2, expected_precision);
 }
 
 TEST_F(FixedPointTest, MultiplyFixedPointVariables)
 {
-    constexpr unsigned short    mantissa_length = 15;
-    double                      variable1       = 3.14159;
-    double                      variable2       = 2.7128;
-    FixedPoint<mantissa_length> lhs             = variable1;
-    FixedPoint<mantissa_length> rhs             = variable2;
-    auto const                  result          = lhs * rhs;
-    EXPECT_NEAR(result.toDouble(), variable1 * variable2, 1e-3);
+    constexpr unsigned short     franctional_bits   = 15;
+    double                       variable1          = 3.14159;
+    double                       variable2          = 2.7128;
+    FixedPoint<franctional_bits> lhs                = variable1;
+    FixedPoint<franctional_bits> rhs                = variable2;
+    auto const                   result             = lhs * rhs;
+    double const                 expected_precision = pow(2, -franctional_bits + 1);
+    EXPECT_NEAR(result.toDouble(), variable1 * variable2, expected_precision);
 }
 
 TEST_F(FixedPointTest, EqualSumFixedPointVariables)
 {
-    constexpr unsigned short    mantissa_length = 15;
-    double                      variable1       = 3.14159;
-    double                      variable2       = 2.7128;
-    FixedPoint<mantissa_length> lhs             = variable1;
-    FixedPoint<mantissa_length> rhs             = variable2;
-    lhs                                         += rhs;
-    EXPECT_NEAR(lhs.toDouble(), variable1 + variable2, 1e-3);
+    constexpr unsigned short     franctional_bits = 21;
+    double                       variable1        = 3.14159;
+    double                       variable2        = 2.7128;
+    FixedPoint<franctional_bits> lhs              = variable1;
+    FixedPoint<franctional_bits> rhs              = variable2;
+    lhs                                           += rhs;
+    double const expected_precision               = pow(2, -franctional_bits + 1);
+    EXPECT_NEAR(lhs.toDouble(), variable1 + variable2, expected_precision);
 }
 
 TEST_F(FixedPointTest, EqualSubtractFixedPointVariables)
 {
-    constexpr unsigned short    mantissa_length = 15;
-    double                      variable1       = 3.14159;
-    double                      variable2       = 2.7128;
-    FixedPoint<mantissa_length> lhs             = variable1;
-    FixedPoint<mantissa_length> rhs             = variable2;
-    lhs                                         -= rhs;
-    EXPECT_NEAR(lhs.toDouble(), variable1 - variable2, 1e-3);
+    constexpr unsigned short     franctional_bits = 20;
+    double                       variable1        = 3.14159;
+    double                       variable2        = 2.7128;
+    FixedPoint<franctional_bits> lhs              = variable1;
+    FixedPoint<franctional_bits> rhs              = variable2;
+    lhs                                           -= rhs;
+    double const expected_precision               = pow(2, -franctional_bits + 1);
+    EXPECT_NEAR(lhs.toDouble(), variable1 - variable2, expected_precision);
 }
 
 TEST_F(FixedPointTest, EqualMultiplyFixedPointVariables)
 {
-    constexpr unsigned short    mantissa_length = 15;
-    double                      variable1       = 3.14159;
-    double                      variable2       = 2.7128;
-    FixedPoint<mantissa_length> lhs             = variable1;
-    FixedPoint<mantissa_length> rhs             = variable2;
-    lhs                                         *= rhs;
-    EXPECT_NEAR(lhs.toDouble(), variable1 * variable2, 1e-3);
+    constexpr unsigned short     franctional_bits = 17;
+    double                       variable1        = 3.14159;
+    double                       variable2        = 2.7128;
+    FixedPoint<franctional_bits> lhs              = variable1;
+    FixedPoint<franctional_bits> rhs              = variable2;
+    lhs                                           *= rhs;
+    double const expected_precision               = pow(2, -franctional_bits + 1);
+    EXPECT_NEAR(lhs.toDouble(), variable1 * variable2, expected_precision);
 }
 
 TEST_F(FixedPointTest, EqualDivideFixedPointVariables)
 {
-    constexpr unsigned short    mantissa_length = 15;
-    double                      variable1       = 3.14159;
-    double                      variable2       = 2.7128;
-    FixedPoint<mantissa_length> lhs             = variable1;
-    FixedPoint<mantissa_length> rhs             = variable2;
-    lhs                                         /= rhs;
-    EXPECT_NEAR(lhs.toDouble(), variable1 / variable2, 1e-3);
+    constexpr unsigned short     franctional_bits = 14;
+    double                       variable1        = 3.14159;
+    double                       variable2        = 2.7128;
+    FixedPoint<franctional_bits> lhs              = variable1;
+    FixedPoint<franctional_bits> rhs              = variable2;
+    lhs                                           /= rhs;
+    double const expected_precision               = pow(2, -franctional_bits + 1);
+    EXPECT_NEAR(lhs.toDouble(), variable1 / variable2, expected_precision);
 }
 
 TEST_F(FixedPointTest, CompareFixedPointVariables)
 {
-    constexpr unsigned short    mantissa_length = 15;
-    FixedPoint<mantissa_length> lhs             = 3.14159;
-    FixedPoint<mantissa_length> rhs             = 2.7128;
+    constexpr unsigned short     franctional_bits = 15;
+    FixedPoint<franctional_bits> lhs              = 3.14159;
+    FixedPoint<franctional_bits> rhs              = 2.7128;
     EXPECT_EQ(lhs > rhs, true);
     EXPECT_EQ(lhs < rhs, false);
     EXPECT_EQ(lhs >= rhs, true);
