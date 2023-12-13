@@ -11,6 +11,11 @@
 namespace vslib
 {
 
+    //! This class implements the Q notation to represent fixed-point numbers with the flexibility what the
+    //! fractional precision shall be.
+    //! Please note that no overflow nor underflow check is ever performed, just like with the standard C++ plain-old
+    //! data types. The maximal value that can be stored without internal overflow is defined by the number of bits left
+    //! for the exponent part and is accessible via maximumValue() public method.
     template<unsigned short FractionalBits>
     class FixedPoint
     {
@@ -18,43 +23,53 @@ namespace vslib
         static_assert(FractionalBits <= 32, "Number of the fractional bits cannot be larger or equal to 32 bits!");
 
       public:
+        //! Default constructor, stored value initialized to zero.
         FixedPoint()
             : m_value(0)
         {
         }
 
+        //! Constructor taking one double-precision floating-point value and converting it to Q notation
         FixedPoint(double floatValue)
             : m_value{static_cast<int64_t>(floatValue * m_fractional_shift)}
         {
         }
 
+        //! Inverse conversion from the internal Q notation to double-precision floating point.
         [[nodiscard]] double toDouble() const
         {
             return static_cast<double>(m_value) / m_fractional_shift;
         }
 
+        //! Overload to handle summing a FixedPoint object's value with the already-existing object
         void operator+=(const FixedPoint& other)
         {
             m_value += other.m_value;
         }
 
+        //! Overload to handle subtracting a FixedPoint object's value from the already-existing object
         void operator-=(const FixedPoint& other)
         {
             m_value -= other.m_value;
         }
 
+        //! Overload to handle multiplying a FixedPoint object's value with the already-existing object
         void operator*=(const FixedPoint& other)
         {
             m_value = (this->m_value * other.m_value + m_fractional_rounding) >> FractionalBits;
         }
 
+        //! Overload to handle dividing the already-existing object's value by a FixedPoint object's value
         void operator/=(const FixedPoint& other)
         {
             m_value = (m_value << FractionalBits) / other.m_value;
         }
 
+        //! Operator overload providing all 5 relationship checks, will only work where the number of fractional bits
+        //! is consistent between this LHS and RHS objects.
         auto operator<=>(const FixedPoint& other) const = default;
 
+        //! Overload to handle summing two FixedPoint objects where a new object needs to be created.
         FixedPoint operator+(const FixedPoint& other) const
         {
             FixedPoint result;
@@ -62,6 +77,7 @@ namespace vslib
             return result;
         }
 
+        //! Overload to handle summing two FixedPoint objects where a new object needs to be created.
         FixedPoint operator-(const FixedPoint& other) const
         {
             FixedPoint result;
@@ -69,6 +85,7 @@ namespace vslib
             return result;
         }
 
+        //! Overload to handle summing two FixedPoint objects where a new object needs to be created.
         FixedPoint operator*(const FixedPoint& other) const
         {
             FixedPoint result;
@@ -76,6 +93,7 @@ namespace vslib
             return result;
         }
 
+        //! Overload to handle summing two FixedPoint objects where a new object needs to be created.
         FixedPoint operator/(const FixedPoint& other) const
         {
             FixedPoint result;
@@ -83,14 +101,22 @@ namespace vslib
             return result;
         }
 
+        //! Overload to handle summing two FixedPoint objects where a new object needs to be created.
         const auto value() const noexcept
         {
             return m_value;
         }
 
+        //! Overload to handle summing two FixedPoint objects where a new object needs to be created.
         static double maximumValue()
         {
             return m_max_value;
+        }
+
+        //! Overload to handle summing two FixedPoint objects where a new object needs to be created.
+        static double representationPrecision()
+        {
+            return m_representation_precision;
         }
 
       private:
@@ -100,6 +126,7 @@ namespace vslib
 
         inline static constexpr double m_max_value{
             pow(2, sizeof(int64_t) * 8 - FractionalBits - 1)};   // 8 bits per byte, -1 for sign
+        inline static constexpr double m_representation_precision{pow(2, -FractionalBits)};
     };
 
 }   // namespace vslib

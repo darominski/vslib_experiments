@@ -34,7 +34,7 @@ TEST_F(FixedPointTest, CreateCustomVariable)
     constexpr unsigned short     franctional_bits = 15;
     double                       variable         = 3.14159;
     FixedPoint<franctional_bits> fixed_point      = variable;
-    EXPECT_NEAR(fixed_point.toDouble(), variable, 1e-3);
+    EXPECT_NEAR(fixed_point.toDouble(), variable, fixed_point.representationPrecision());
     EXPECT_EQ(fixed_point.maximumValue(), pow(2, 64 - franctional_bits - 1));
 }
 
