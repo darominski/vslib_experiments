@@ -21,9 +21,9 @@ namespace vslib
     {
         return std::accumulate(
             data.cbegin(), data.cend(), 0.0,
-            [&mean, &N](const auto& value)
+            [&mean](const auto& value)
             {
-                return pow((mean - value), 2) / (N - 1)
+                return pow((mean - value), 2) / (N - 1);
             }
         );
     }
