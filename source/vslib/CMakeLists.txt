@@ -20,7 +20,7 @@ if (NOT BUILD_TESTS)
    message(FATAL_ERROR "CMAKE_CXX_COMPILER for bare-metal target needs to be defined.")
   endif()
 
-  add_compile_options(-Wall -O0 -mtune=cortex-a53 -ffunction-sections -fdata-sections
+  add_compile_options(-Wall -O2 -mtune=cortex-a53 -ffunction-sections -fdata-sections
     -fexceptions
     -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
     -Wwrite-strings -Wmissing-declarations

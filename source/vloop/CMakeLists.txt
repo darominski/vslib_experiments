@@ -14,7 +14,7 @@ endif()
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-add_compile_options(-Wall -O0 -mtune=cortex-a53 -ffunction-sections -fdata-sections
+add_compile_options(-Wall -O2 -mtune=cortex-a53 -ffunction-sections -fdata-sections
     -fexceptions
     -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
     -Wwrite-strings -Wmissing-declarations
