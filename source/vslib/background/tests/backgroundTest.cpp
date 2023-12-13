@@ -9,7 +9,6 @@
 #include "bufferSwitch.h"
 #include "parameter.h"
 #include "parameterRegistry.h"
-#include "sharedMemoryVslib.h"
 #include "staticJson.h"
 #include "warningMessage.h"
 

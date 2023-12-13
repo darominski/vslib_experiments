@@ -5,6 +5,7 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/backgroundTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../components/src/componentRegistry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../utils/src/sharedMemory.cpp
 )
 
 target_include_directories(${APP} PRIVATE

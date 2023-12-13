@@ -40,6 +40,7 @@ if (NOT BUILD_TESTS)
   set(${LIB}_SOURCES
       components/src/componentRegistry.cpp
       parameters/src/parameterRegistry.cpp
+      utils/src/sharedMemory.cpp
      # Other vslib source files go here
   )
 

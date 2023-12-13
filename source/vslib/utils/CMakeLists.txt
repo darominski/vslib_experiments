@@ -3,7 +3,8 @@ set(APP utilsTests)
 add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/utilsTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/fixedPointTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/sharedMemoryVslibTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/sharedMemoryTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/sharedMemory.cpp
 )
 
 target_include_directories(${APP} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc ${CMAKE_CURRENT_SOURCE_DIR}/../../utils  ${LIBRARIES_HOME}/json-3.11.2)

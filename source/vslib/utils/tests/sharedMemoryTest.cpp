@@ -7,11 +7,11 @@
 #include <string>
 #include <vector>
 
-#include "sharedMemoryVslib.h"
+#include "sharedMemory.h"
 
 using namespace vslib;
 
-class SharedMemoryVslibTest : public ::testing::Test
+class SharedMemoryTest : public ::testing::Test
 {
   protected:
     SharedMemory shared_memory;
@@ -23,31 +23,31 @@ class SharedMemoryVslibTest : public ::testing::Test
     }
 };
 
-TEST_F(SharedMemoryVslibTest, WriteJsonToSharedMemory)
+TEST_F(SharedMemoryTest, WriteJsonToSharedMemory)
 {
     nlohmann::json json_data = {{"key", "value"}};
 
-    writeJsonToSharedMemory(json_data, &shared_memory);
+    writeJsonToSharedMemory(json_data, shared_memory);
 
     EXPECT_EQ(shared_memory.message_length, json_data.dump().size());
 }
 
-TEST_F(SharedMemoryVslibTest, ReadJsonFromSharedMemory)
+TEST_F(SharedMemoryTest, ReadJsonFromSharedMemory)
 {
     // Set up shared memory with JSON data
     nlohmann::json json_data = {{"key", "value"}};
-    writeJsonToSharedMemory(json_data, &shared_memory);
+    writeJsonToSharedMemory(json_data, shared_memory);
 
-    nlohmann::json read_data = readJsonFromSharedMemory(&shared_memory);
+    nlohmann::json read_data = readJsonFromSharedMemory(shared_memory);
 
     // Add assertions to verify the state of read data
     EXPECT_EQ(read_data, json_data);
 }
 
-TEST_F(SharedMemoryVslibTest, WriteTooLongJsonToSharedMemory)
+TEST_F(SharedMemoryTest, WriteTooLongJsonToSharedMemory)
 {
     nlohmann::json json_data;
     json_data["long_string"] = std::string(1024 * 1024, 'A');
 
-    EXPECT_THROW(writeJsonToSharedMemory(json_data, &shared_memory), std::bad_alloc);
+    EXPECT_THROW(writeJsonToSharedMemory(json_data, shared_memory), std::bad_alloc);
 }

@@ -20,6 +20,7 @@
 #include "peripheralInterrupt.h"
 #include "pid.h"
 #include "rst.h"
+#include "sharedMemory.h"
 #include "staticJson.h"
 #include "timerInterrupt.h"
 
@@ -31,6 +32,8 @@
 
 using namespace vslib;
 using namespace fgc4;
+
+#define SHARED_MEMORY (*(struct SharedMemory*)app_data_0_1_ADDRESS)
 
 namespace user
 {
@@ -50,8 +53,6 @@ namespace user
     }
 
 }   // namespace user
-
-#define SHARED_MEMORY (*(struct vslib::SharedMemory*)app_data_0_1_ADDRESS)
 
 int main()
 {
