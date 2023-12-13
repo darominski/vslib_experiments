@@ -2,6 +2,7 @@
 //! @brief File with unit tests of BoxFilter class.
 //! @author Dominik Arominski
 
+#include <cmath>
 #include <gtest/gtest.h>
 
 #include "boxFilter.h"
@@ -28,16 +29,17 @@ TEST_F(BoxFilterTest, FilterDefaultConstruction)
 {
     BoxFilter<1> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
-    EXPECT_EQ(filter.getMaxInputValue(), pow(2, 64 - 24 - 1));
+    EXPECT_EQ(filter.getMaxInputValue(), pow(2, std::ceil(log2(1e5))));
+    EXPECT_EQ((BoxFilter<1, 1e5>::fractional_bits), 64 - 1 - std::ceil(log2(1e5)));
 }
 
 //! Checks that a BoxFilter object can be constructed with non-default mantissa template parameter
 TEST_F(BoxFilterTest, FilterNonDefaultConstruction)
 {
-    constexpr unsigned short      mantissa_length = 26;
-    BoxFilter<1, mantissa_length> filter("filter");
+    constexpr double            maximal_value = 1e4;   // maximal value to be filtered
+    BoxFilter<1, maximal_value> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
-    EXPECT_EQ(filter.getMaxInputValue(), pow(2, 64 - mantissa_length - 1));
+    EXPECT_EQ(filter.getMaxInputValue(), pow(2, std::ceil(log2(maximal_value))));
 }
 
 //! Checks that a BoxFilter object can filter provided value
@@ -46,7 +48,7 @@ TEST_F(BoxFilterTest, FilterSingleValue)
     constexpr size_t         buffer_length = 10;
     BoxFilter<buffer_length> filter("filter", nullptr);
     double                   value = 3.14159;
-    EXPECT_NEAR(filter.filter(value), value / buffer_length, 1e-3);
+    EXPECT_NEAR(filter.filter(value), value / buffer_length, 1e-5);
 }
 
 //! Checks that a BoxFilter object can filter a number of provided values
@@ -62,7 +64,7 @@ TEST_F(BoxFilterTest, FilterMultipleValues)
     {
         accumulator          += value;
         const double average = accumulator / buffer_length;
-        EXPECT_NEAR(filter.filter(value), average, 1e-3);
+        EXPECT_NEAR(filter.filter(value), average, 1e-5);
     }
 }
 
@@ -85,6 +87,6 @@ TEST_F(BoxFilterTest, FilterValuesBufferWrapAround)
         accumulator          += values[index] - oldest_value;
         const double average = accumulator / buffer_length;
 
-        EXPECT_NEAR(filter.filter(values[index]), average, 1e-3);
+        EXPECT_NEAR(filter.filter(values[index]), average, 1e-5);
     }
 }

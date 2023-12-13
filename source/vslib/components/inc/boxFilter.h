@@ -5,6 +5,7 @@
 #pragma once
 
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <string>
 
@@ -13,10 +14,14 @@
 
 namespace vslib
 {
-    template<uint64_t BufferLength, unsigned short FractionalBits = 24>
+    template<uint64_t BufferLength, double maximalFilteredValue = 1e5>
     class BoxFilter : public Filter
     {
+
       public:
+        //! 8 is the number of bits per byte, -1 is for the sign
+        constexpr uint64_t static fractional_bits = sizeof(int64_t) * 8 - 1 - std::ceil(log2(maximalFilteredValue));
+
         //! Constructor of the box filter component
         BoxFilter(std::string_view name, Component* parent = nullptr)
             : Filter("BoxFilter", name, parent)
@@ -39,12 +44,12 @@ namespace vslib
 
         [[nodiscard]] auto const getMaxInputValue() const noexcept
         {
-            return FixedPoint<FractionalBits>::maximumValue();
+            return FixedPoint<fractional_bits>::maximumValue();
         }
 
       private:
-        std::array<FixedPoint<FractionalBits>, BufferLength> m_buffer{0};
-        uint64_t                                             m_head{0};
-        FixedPoint<FractionalBits>                           m_cumulative{0};
+        std::array<FixedPoint<fractional_bits>, BufferLength> m_buffer{0};
+        uint64_t                                              m_head{0};
+        FixedPoint<fractional_bits>                           m_cumulative{0};
     };
 }   // namespace vslib
