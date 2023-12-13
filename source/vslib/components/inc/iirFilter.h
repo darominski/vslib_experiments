@@ -8,7 +8,6 @@
 #include <string>
 
 #include "filter.h"
-#include "fixedPointType.h"
 #include "parameter.h"
 
 namespace vslib
