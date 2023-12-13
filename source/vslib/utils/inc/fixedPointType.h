@@ -20,8 +20,6 @@ namespace vslib
     class FixedPoint
     {
 
-        static_assert(FractionalBits <= 32, "Number of the fractional bits cannot be larger or equal to 32 bits!");
-
       public:
         //! Default constructor, stored value initialized to zero.
         FixedPoint()

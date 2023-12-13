@@ -146,3 +146,19 @@ TEST_F(FixedPointTest, CompareFixedPointVariables)
     EXPECT_EQ(lhs == rhs, false);
     EXPECT_EQ(lhs != rhs, true);
 }
+
+TEST_F(FixedPointTest, CompareFixedPointVariablesCloseToMaximum)
+{
+    constexpr unsigned short franctional_bits  = 15;
+    double const             close_to_maximum1 = pow(2, 64 - franctional_bits - 1) - 0.1;
+    double const             close_to_maximum2 = pow(2, 64 - franctional_bits - 1) - 0.5;
+
+    FixedPoint<franctional_bits> lhs(close_to_maximum1);
+    FixedPoint<franctional_bits> rhs(close_to_maximum2);
+    EXPECT_EQ(lhs > rhs, true);
+    EXPECT_EQ(lhs < rhs, false);
+    EXPECT_EQ(lhs >= rhs, true);
+    EXPECT_EQ(lhs <= rhs, false);
+    EXPECT_EQ(lhs == rhs, false);
+    EXPECT_EQ(lhs != rhs, true);
+}
