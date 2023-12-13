@@ -59,7 +59,8 @@ int main()
     bmboot::notifyPayloadStarted();
     puts("Hello world from vloop running on cpu1!");
 
-    vslib::backgroundTask::initializeMemory(&(SHARED_MEMORY));
+    BackgroundTask backgroundTask;
+    backgroundTask.initializeMemory();
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
@@ -67,20 +68,17 @@ int main()
     // PID pid3("pid_3", independent_component);
     // RST rst("rst_1", independent_component);
 
-    FIRFilter<10> filter("fir_filter", nullptr);
-    BoxFilter<5>  bfilter("box_filter", nullptr);
+    FIRFilter<10> filter("fir_filter");
+    BoxFilter<5>  bfilter("box_filter");
 
     // ComponentArray<ComponentArray<PID, 3>, 3> array("brick_2", nullptr);
 
     // No parameter declarations beyond this point!
     // ************************************************************
 
-    // backgroundTask::uploadParameterMap(&(SHARED_MEMORY));
+    backgroundTask.uploadParameterMap();
 
-    // PeripheralInterrupt peripheral(user::peripheralTask, 0, bmboot::PayloadInterruptPriority::p6);
-    // peripheral.start();
-
-    TimerInterrupt timer(user::realTimeTask, 10);
+    TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(10));
     timer.start();
 
     int counter = 0;
@@ -93,7 +91,6 @@ int main()
 #endif
             timer.stop();
 
-            // peripheral.stop();
             break;
         }
         puts(std::to_string(counter++).c_str());
@@ -113,7 +110,7 @@ int main()
         // }
         // puts("");
 
-        backgroundTask::receiveJsonCommand(&(SHARED_MEMORY));
+        backgroundTask.receiveJsonCommand();
         usleep(500);   // 500 us
     }
 
