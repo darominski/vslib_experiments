@@ -60,7 +60,6 @@ int main()
     puts("Hello world from vloop running on cpu1!");
 
     BackgroundTask backgroundTask;
-    backgroundTask.initializeMemory();
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST

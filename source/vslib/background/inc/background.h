@@ -16,6 +16,7 @@ namespace vslib
         BackgroundTask(SharedMemory& shared_memory)
             : m_shared_memory_ref(shared_memory)
         {
+            initializeMemory();
         }
 
         void initializeMemory();

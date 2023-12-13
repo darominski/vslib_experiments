@@ -45,7 +45,6 @@ TEST_F(BackgroundTaskTest, InitializeSharedMemory)
 {
     SharedMemory   shared_memory;
     BackgroundTask backgroundTask(shared_memory);
-    backgroundTask.initializeMemory();
     EXPECT_EQ(shared_memory.acknowledged_counter, 0);
     EXPECT_EQ(shared_memory.transmitted_counter, 0);
     EXPECT_EQ(shared_memory.message_length, 0);
@@ -58,9 +57,8 @@ TEST_F(BackgroundTaskTest, InitializeSharedMemory)
 // Tests triggering creation of parameter map and its uploading to the shared memory structure
 TEST_F(BackgroundTaskTest, UploadParameterMap)
 {
-    SharedMemory   shared_memory;
-    BackgroundTask backgroundTask(shared_memory);
-    backgroundTask.initializeMemory();
+    SharedMemory       shared_memory;
+    BackgroundTask     backgroundTask(shared_memory);
     MockComponent      component;
     Parameter<int32_t> parameter(component, "parameter");
     backgroundTask.uploadParameterMap();
@@ -108,7 +106,6 @@ TEST_F(BackgroundTaskTest, ExecuteJsonCommand)
 {
     SharedMemory   shared_memory;
     BackgroundTask backgroundTask(shared_memory);
-    backgroundTask.initializeMemory();
     shared_memory.transmitted_counter++;
 
     MockComponent     component;
@@ -128,7 +125,6 @@ TEST_F(BackgroundTaskTest, ReceiveJsonCommand)
 {
     SharedMemory   shared_memory;
     BackgroundTask backgroundTask(shared_memory);
-    backgroundTask.initializeMemory();
 
     MockComponent     component;
     Parameter<double> parameter(component, "parameter");
