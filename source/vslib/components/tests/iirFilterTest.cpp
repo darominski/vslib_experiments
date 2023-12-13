@@ -55,7 +55,6 @@ TEST_F(IIRFilterTest, FilterDefaultConstruction)
 {
     IIRFilter<1> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
-    EXPECT_EQ(filter.getMaxInputValue(), pow(2, 64 - 24 - 1));
 }
 
 //! Checks that a IIRFilter object can filter provided value.

@@ -13,7 +13,7 @@
 
 namespace vslib
 {
-    template<uint64_t BufferLength, unsigned short FractionalBits = 24>
+    template<uint64_t BufferLength>
     class IIRFilter : public Filter
     {
       public:
@@ -33,7 +33,7 @@ namespace vslib
         double filter(double input) override
         {
             shiftInputBuffer(input);
-            FixedPoint<FractionalBits> output = m_inputs_buffer[m_head] * numerator[0];
+            double output = m_inputs_buffer[m_head] * numerator[0];
             for (uint64_t index = 1; index < BufferLength; index++)
             {
                 uint64_t const buffer_index = (index + m_head) % BufferLength;
@@ -41,7 +41,7 @@ namespace vslib
                     - m_outputs_buffer[buffer_index] * denominator[index];
             }
             shiftOutputBuffer(output);
-            return output.toDouble();
+            return output;
         }
 
         //! Filters the provided input array by filtering each element of the input.
@@ -62,18 +62,13 @@ namespace vslib
             return outputs;
         }
 
-        [[nodiscard]] auto const getMaxInputValue() const noexcept
-        {
-            return FixedPoint<FractionalBits>::maximumValue();
-        }
-
         Parameter<std::array<double, BufferLength>> numerator;
         Parameter<std::array<double, BufferLength>> denominator;
 
       private:
-        std::array<FixedPoint<FractionalBits>, BufferLength> m_inputs_buffer{0};
-        std::array<FixedPoint<FractionalBits>, BufferLength> m_outputs_buffer{0};
-        uint64_t                                             m_head{BufferLength - 1};
+        std::array<double, BufferLength> m_inputs_buffer{0};
+        std::array<double, BufferLength> m_outputs_buffer{0};
+        uint64_t                         m_head{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
@@ -86,7 +81,7 @@ namespace vslib
         //! Pushes the provided value into the front of the output buffer, overriding the oldest value in effect
         //!
         //! @param output Output value to be added to the front of the outputs buffer
-        void shiftOutputBuffer(FixedPoint<FractionalBits>& output)
+        void shiftOutputBuffer(double output)
         {
             m_outputs_buffer[m_head] = output;
             m_head--;

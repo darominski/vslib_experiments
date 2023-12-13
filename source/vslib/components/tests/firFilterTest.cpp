@@ -42,7 +42,6 @@ TEST_F(FIRFilterTest, FilterDefaultConstruction)
 {
     FIRFilter<1> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
-    EXPECT_EQ(filter.getMaxInputValue(), pow(2, 64 - 24 - 1));
 }
 
 //! Checks that a FIRFilter object can filter provided value

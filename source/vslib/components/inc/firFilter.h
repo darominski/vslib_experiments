@@ -8,12 +8,11 @@
 #include <string>
 
 #include "filter.h"
-#include "fixedPointType.h"
 #include "parameter.h"
 
 namespace vslib
 {
-    template<uint64_t BufferLength, unsigned short FractionalBits = 24>
+    template<uint64_t BufferLength>
     class FIRFilter : public Filter
     {
       public:
@@ -31,12 +30,12 @@ namespace vslib
         double filter(double input) override
         {
             shiftBuffer(input);
-            FixedPoint<FractionalBits> output(0);
+            double output(0);
             for (uint64_t index = 0; index < BufferLength; index++)
             {
                 output += m_buffer[(index + m_head + 1) % BufferLength] * coefficients[index];
             }
-            return output.toDouble();
+            return output;
         }
 
         //! Filters the provided input array by convolving coefficients and the input.
@@ -56,16 +55,12 @@ namespace vslib
             );
             return outputs;
         }
-        [[nodiscard]] auto const getMaxInputValue() const noexcept
-        {
-            return FixedPoint<FractionalBits>::maximumValue();
-        }
 
         Parameter<std::array<double, BufferLength>> coefficients;
 
       private:
-        std::array<FixedPoint<FractionalBits>, BufferLength> m_buffer{0};
-        uint64_t                                             m_head{BufferLength - 1};
+        std::array<double, BufferLength> m_buffer{0};
+        uint64_t                         m_head{BufferLength - 1};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
