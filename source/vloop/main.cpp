@@ -59,7 +59,7 @@ int main()
     bmboot::notifyPayloadStarted();
     puts("Hello world from vloop running on cpu1!");
 
-    BackgroundTask backgroundTask;
+    BackgroundTask backgroundTask(SHARED_MEMORY);
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
