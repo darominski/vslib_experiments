@@ -115,8 +115,6 @@ TEST_F(BackgroundTaskTest, ExecuteJsonCommand)
     StaticJson jsonCommand = {{"name", "MockType.MockName.parameter"}, {"value", 1.5}};
     backgroundTask.executeJsonCommand(jsonCommand);
     BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
-    // synchronise new background to new active buffer
-    backgroundTask.synchroniseReadBuffers();
     EXPECT_EQ(parameter.value(), 1.5);
 }
 

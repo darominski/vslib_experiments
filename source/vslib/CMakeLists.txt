@@ -42,7 +42,6 @@ if (NOT BUILD_TESTS)
       parameters/src/parameterRegistry.cpp
       background/src/background.cpp
       utils/src/sharedMemory.cpp
-     # Other vslib source files go here
   )
 
   # Create a library from the vslib sources

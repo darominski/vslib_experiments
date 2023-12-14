@@ -16,20 +16,22 @@ namespace vslib
         BackgroundTask(SharedMemory& shared_memory)
             : m_shared_memory_ref(shared_memory)
         {
-            initializeMemory();
+            initializeSharedMemory();
         }
 
-        void initializeMemory();
         void uploadParameterMap();
+
         void receiveJsonCommand();
-        void executeJsonCommand(const fgc4::utils::StaticJson&);
         void processJsonCommands(const fgc4::utils::StaticJson&);
-        void synchroniseReadBuffers();
         bool validateJsonCommand(const fgc4::utils::StaticJson&);
+        void executeJsonCommand(const fgc4::utils::StaticJson&);
 
       private:
         bool          m_received_new_data{false};
         SharedMemory& m_shared_memory_ref;
+
+        void triggerReadBufferSynchronisation();
+        void initializeSharedMemory();
     };
 
 }   // namespace vslib::backgroundTask

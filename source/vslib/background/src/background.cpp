@@ -13,9 +13,9 @@ using namespace fgc4::utils;
 
 namespace vslib
 {
-    void BackgroundTask::initializeMemory()
+    void BackgroundTask::initializeSharedMemory()
     {
-        initializeSharedMemory(m_shared_memory_ref);
+        vslib::initializeSharedMemory(m_shared_memory_ref);
     }
 
     //! Creates and uploads the parameter map to the shared memory. The memory is reinitialized each time
@@ -48,8 +48,26 @@ namespace vslib
             // synchronise them
             BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
             // synchronise new background to new active buffer
-            synchroniseReadBuffers();
+            triggerReadBufferSynchronisation();
             m_received_new_data = false;   // buffers updated, no new data available
+        }
+    }
+
+    //! Processes the received JSON commands, checking whether one or many commands were received.
+    //!
+    //! @param command JSON object containing one or more JSON commands to be executed
+    void BackgroundTask::processJsonCommands(const fgc4::utils::StaticJson& commands)
+    {
+        if (commands.is_object())   // single command
+        {
+            executeJsonCommand(commands);
+        }
+        else if (commands.is_array())   // multiple commands
+        {
+            for (const auto& command : commands)
+            {
+                executeJsonCommand(command);
+            }
         }
     }
 
@@ -73,24 +91,6 @@ namespace vslib
         return valid;
     }
 
-    //! Processes the received JSON commands, checking whether one or many commands were received.
-    //!
-    //! @param command JSON object containing one or more JSON commands to be executed
-    void BackgroundTask::processJsonCommands(const fgc4::utils::StaticJson& commands)
-    {
-        if (commands.is_object())   // single command
-        {
-            executeJsonCommand(commands);
-        }
-        else if (commands.is_array())   // multiple commands
-        {
-            for (const auto& command : commands)
-            {
-                executeJsonCommand(command);
-            }
-        }
-    }
-
     //! Executes a single JSON command by moving the received command value to the memory address
     //! specified in ParameterRegistry for the received parameter name.
     //!
@@ -108,7 +108,7 @@ namespace vslib
         auto const        parameter          = parameter_registry.find(parameter_name);
         if (parameter == parameter_registry.end())
         {
-            const fgc4::utils::Warning messsage("Parameter ID: " + parameter_name + " not found. Command ignored.\n");
+            const fgc4::utils::Warning message("Parameter ID: " + parameter_name + " not found. Command ignored.\n");
             return;
         }
 
@@ -122,7 +122,7 @@ namespace vslib
     }
 
     //! Calls each registered parameter to synchronise read buffers
-    void BackgroundTask::synchroniseReadBuffers()
+    void BackgroundTask::triggerReadBufferSynchronisation()
     {
         for (const auto& parameter : ParameterRegistry::instance().getParameters())
         {
