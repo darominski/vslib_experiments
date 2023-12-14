@@ -78,15 +78,14 @@ namespace vslib
     bool BackgroundTask::validateJsonCommand(const fgc4::utils::StaticJson& command)
     {
         bool valid = true;
-        if (!command.contains("name"))
+        try
         {
-            const fgc4::utils::Warning message("Command must contain 'name'.\n");
-            valid = false;
+            m_validator.validate(command);
         }
-        else if (!command.contains("value"))
+        catch (const std::exception& e)
         {
-            const fgc4::utils::Warning message("Command must container 'value'.\n");
             valid = false;
+            const fgc4::utils::Warning message(std::string("Command invalid: ") + e.what());
         }
         return valid;
     }

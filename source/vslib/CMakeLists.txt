@@ -35,6 +35,7 @@ if (NOT BUILD_TESTS)
   )
 
   add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
+  add_subdirectory("${LIBRARIES_HOME}/json-schema-validator-2.2.0" ${CMAKE_CURRENT_BINARY_DIR}/json-schema-validator)
 
   # Collect source files for the vslib code
   set(${LIB}_SOURCES
@@ -60,8 +61,9 @@ if (NOT BUILD_TESTS)
       # Other vslib include directories go here
   )
 
-  target_link_libraries(${LIB} PRIVATE
+  target_link_libraries(${LIB} PUBLIC
     fmt::fmt
+    nlohmann_json_schema_validator
     )
 
   if (PERFORMANCE_TESTS)

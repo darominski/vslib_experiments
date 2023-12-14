@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <nlohmann/json-schema.hpp>
+
+#include "jsonCommandSchema.h"
 #include "sharedMemory.h"
 #include "staticJson.h"
 
@@ -17,6 +20,7 @@ namespace vslib
             : m_shared_memory_ref(shared_memory)
         {
             initializeSharedMemory();
+            m_validator.set_root_schema(utils::json_command_schema);
         }
 
         void uploadParameterMap();
@@ -27,8 +31,9 @@ namespace vslib
         void executeJsonCommand(const fgc4::utils::StaticJson&);
 
       private:
-        bool          m_received_new_data{false};
-        SharedMemory& m_shared_memory_ref;
+        bool                                  m_received_new_data{false};
+        SharedMemory&                         m_shared_memory_ref;
+        nlohmann::json_schema::json_validator m_validator;
 
         void triggerReadBufferSynchronisation();
         void initializeSharedMemory();
