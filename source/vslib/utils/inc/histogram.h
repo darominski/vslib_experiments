@@ -12,28 +12,21 @@
 namespace vslib
 {
 
-    template<typename T>
-    concept Iterable = requires(T x) {
-                           x.begin();
-                           x.end();
-                       };
-
-
     template<size_t nBins>
     class Histogram
     {
       public:
         Histogram() = delete;
 
-        Histogram(const auto& data)
+        //! Histogram constructor where the minimum and maximum value to be stored is provided.
+        //!
+        //! @param min Defines the first bin lower edge
+        //! @param max Defines the final bin upper edge
+        Histogram(double min, double max) noexcept
+            : m_min_value(min),
+              m_max_value(max)
         {
-            requires Iterable(data)
-
-                         double const min
-                = *std::min_element(data.cbegin(), data.cend());
-            double const max = *std::max_element(data.cbegin(), data.cend());
-            prepareHistogram(min, max);
-            fillHistogram(data);
+            prepareHistogram();
         }
 
         void addValue(double value)
@@ -58,17 +51,19 @@ namespace vslib
 
       private:
         std::array<double, nBins + 1> m_edges{0};
-        std::array<double, nBins>     m_counts{0};
+        std::array<int64_t, nBins>    m_counts{0};
+        double                        m_min_value;
+        double                        m_max_value;
         double                        m_bin_width{0};
 
-        void prepareHistogram(double min, double max)
+        void prepareHistogram()
         {
-            m_bin_width = (max - min) / nBins;
-            for (int index = 0; index < nBins; index++)
+            m_bin_width = (m_max_value - m_min_value) / nBins;
+            for (size_t index = 0; index < nBins; index++)
             {
-                m_edges[index] = min + index * bin_width;
+                m_edges[index] = m_min_value + static_cast<double>(index) * m_bin_width;
             }
-            m_edges[nBins] = max * 1.1;   // 10 % extra for all possible overflow values
+            m_edges[nBins] = m_max_value;
         }
     };
 
