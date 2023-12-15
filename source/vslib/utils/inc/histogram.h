@@ -35,12 +35,12 @@ namespace vslib::utils
         //! @param value New value to be added to the histogram
         void addValue(double value) noexcept
         {
-            const int64_t bin_index = std::floor((value - m_edges[0]) / m_bin_width);
+            const int64_t bin_index = std::floor((value - m_min_value) / m_bin_width);
             if (bin_index < 0)   // underflow case
             {
                 m_counts[0]++;
             }
-            else if (bin_index > BinNumber)   // overflow case
+            else if (bin_index >= BinNumber)   // overflow case
             {
                 m_counts[BinNumber - 1]++;
             }
@@ -77,9 +77,16 @@ namespace vslib::utils
             return m_counts;
         }
 
+        //! Returns the number of bins of the histogram
         [[nodiscard]] const auto getBinNumber() const noexcept
         {
             return BinNumber;
+        }
+
+        //! Returns the bin width of the histogram
+        [[nodiscard]] const auto& getBinWidth() const noexcept
+        {
+            return m_bin_width;
         }
 
       private:
