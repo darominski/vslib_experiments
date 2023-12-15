@@ -57,16 +57,19 @@ namespace vslib
         //! Returns the standard deviation of interrupt time measurements
         double standardDeviation(const double mean) const
         {
-            return calculateStandardDeviation(m_measurments, mean);
+            return calculateStandardDeviation(m_measurements, mean);
         }
 
         //! Returns the histogram with interrupt time measurements
-        template<size_t nBins = 11>   // log2(1000) + 1 = 11: Sturges' formula for optimal number of bins
+        template<size_t nBins = 32>   // std::ceil(sqrt(1000)) = 32
         Histogram<nBins> histogramMeasurements(double min, double max) const
         {
             auto histogram = Histogram<nBins>(min, max);
-            fillHistogram(histogram, m_measurements);
-            return std::move(histogram);
+            for (auto const& value : m_measurements)
+            {
+                histogram.addValue(value);
+            }
+            return histogram;
         }
 
 #endif
@@ -74,7 +77,8 @@ namespace vslib
         std::function<void(void)> m_interrupt_handler;
 
 #ifdef PERFORMANCE_TESTS
-        std::array<int64_t, 1000> m_measurements;
+        std::array<int64_t, 1000> m_measurements{0};
+        int32_t                   m_measurement_counter;
 
         //! Defines the preconditions necessary to estimate the execution time of the interrupt handler
         //!
