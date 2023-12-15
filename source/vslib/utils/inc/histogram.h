@@ -6,6 +6,7 @@
 
 #include <array>
 #include <cmath>
+#include <utility>
 
 #include "statistics.h"
 
@@ -29,24 +30,51 @@ namespace vslib
             prepareHistogram();
         }
 
-        void addValue(double value)
+        //! Adds the provided value to the histogram
+        //!
+        //! @param value New value to be added to the histogram
+        void addValue(double value) noexcept
         {
-            for (int index = 0; index <= nBins; index++)
+            const int64_t bin_index = std::floor((value - m_edges[0]) / m_bin_width);
+            if (bin_index < 0)   // underflow case
             {
-                if (m_edges[index + 1] >= value)
-                {
-                    m_counts[index] += value;
-                    break;
-                }
+                m_counts[0]++;
+            }
+            else if (bin_index > nBins)   // overflow case
+            {
+                m_counts[nBins - 1]++;
+            }
+            else   // regular case
+            {
+                m_counts[bin_index]++;
             }
         }
 
-        void fill(auto& data)
+        //! Returns the bin value with the maximum value of counts
+        //!
+        //! @return Bin number where the maximal number of counts is stored
+        [[nodiscard]] size_t getBinWithMax() const noexcept
         {
-            for (const auto& value : data)
+            return std::distance(m_counts.cbegin(), std::max_element(m_counts.cbegin(), m_counts.cend()));
+        }
+
+        //! Returns the bin edges values for the provided bin_number. If the bin number is above the number of bins, it
+        //! returns the last bin
+        //!
+        //! @param bin_number Bin number of interest
+        [[nodiscard]] std::pair<double, double> getBinEdges(size_t bin_number) const noexcept
+        {
+            if (bin_number > nBins)
             {
-                histogram.addValue(value);
+                bin_number = nBins;
             }
+            return std::make_pair(m_edges[bin_number], m_edges[bin_number + 1]);
+        }
+
+        //! Returns the data stored in the histogram
+        [[nodiscard]] const auto& getData() const noexcept
+        {
+            return m_counts;
         }
 
       private:
