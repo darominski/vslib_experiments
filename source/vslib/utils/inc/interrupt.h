@@ -4,10 +4,8 @@
 
 #pragma once
 
-#include <cassert>
 #include <functional>
 
-#include "bmboot/payload_runtime.hpp"
 #include "histogram.h"
 #include "pollCpuClock.h"
 
@@ -38,7 +36,6 @@ namespace vslib
 #else
             m_interrupt_handler = handler_function;
 #endif
-            m_current_interrupt_id = m_interrupt_id++;
         }
 
         virtual ~Interrupt() = default;
@@ -72,8 +69,6 @@ namespace vslib
 #endif
       protected:
         std::function<void(void)> m_interrupt_handler;
-        int                       m_current_interrupt_id{0};
-        inline static int         m_interrupt_id{0};
 
 #ifdef PERFORMANCE_TESTS
         std::array<int64_t, 1000> m_measurements;
