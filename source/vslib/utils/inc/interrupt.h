@@ -48,20 +48,23 @@ namespace vslib
 
 #ifdef PERFORMANCE_TESTS
 
+        //! Returns the average of interrupt time measurements
         double average() const
         {
-            return calculateAverage<1000>(m_measurements);
+            return calculateAverage(m_measurements);
         }
 
+        //! Returns the standard deviation of interrupt time measurements
         double standardDeviation(const double mean) const
         {
-            return calculateStandardDeviation<1000>(m_measurments, mean);
+            return calculateStandardDeviation(m_measurments, mean);
         }
 
+        //! Returns the histogram with interrupt time measurements
         template<size_t nBins = 11>   // log2(1000) + 1 = 11: Sturges' formula for optimal number of bins
-        Histogram<nBins> histogramMeasurements() const
+        Histogram<nBins> histogramMeasurements(double min, double max) const
         {
-            auto histogram = prepareHistogram<nBins>(min, max);
+            auto histogram = Histogram<nBins>(min, max);
             fillHistogram(histogram, m_measurements);
             return std::move(histogram);
         }
@@ -76,7 +79,7 @@ namespace vslib
         //! Defines the preconditions necessary to estimate the execution time of the interrupt handler
         //!
         //! @return Clock value at the time of the call
-        int64_t preConditions()
+        uint64_t preConditions()
         {
             return fgc4::utils::read_CNTPCT();
         }
@@ -85,7 +88,7 @@ namespace vslib
         //!
         //! @param starting_point Clock value at the start of the interrupt
         //! @return Difference between the starting and current clock values
-        int64_t postConditions(int64_t starting_point)
+        uint64_t postConditions(uint64_t starting_point)
         {
             // implementation of polling the CPU clock is required
             return fgc4::utils::read_CNTPCT() - starting_point;
