@@ -2,6 +2,7 @@
 #include <array>
 #include <bmboot/payload_runtime.hpp>
 #include <cerrno>
+#include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
 #include <functional>
@@ -10,10 +11,13 @@
 
 #include "background.h"
 #include "boxFilter.h"
+#include "boxFilterFirstOrder.h"
 #include "componentArray.h"
 #include "componentRegistry.h"
 #include "compositePID.h"
 #include "firFilter.h"
+#include "firFilterFirstOrder.h"
+#include "iirFilter.h"
 #include "json/json.hpp"
 #include "logString.h"
 #include "parameterRegistry.h"
@@ -37,20 +41,29 @@ using namespace fgc4;
 
 namespace user
 {
-    static int rt_counter = 0;
-    void       realTimeTask()
+    // static int rt_counter = 0;
+    // BoxFilter<2>  bfilter("box_filter");
+    BoxFirstOrderFilter bfilter("box_filter");
+    // FIRFilter<2> ffilter("fir_filter");
+    // IIRFilter<3>  ifilter("fir_filter");
+    // FIRFirstOrderFilter ffilter("fir_fo_filter");
+
+    void realTimeTask()
     {
-        printf("%dth event\n", ++rt_counter);
-        usleep(5);   // 5 us
+        for (int index = 0; index < 50; index++)
+        {
+            // volatile auto variable = std::rand();
+            volatile auto variable = bfilter.filter(std::rand());
+        }
     }
 
-    static int peripheralCounter = 0;
-    void       peripheralTask()
-    {
-        printf("%dth event\n", ++peripheralCounter);
+    // static int peripheralCounter = 0;
+    // void       peripheralTask()
+    // {
+    //     // printf("%dth event\n", ++peripheralCounter);
 
-        usleep(5);   // 5 us
-    }
+    //     usleep(5);   // 5 us
+    // }
 
 }   // namespace user
 
@@ -67,8 +80,22 @@ int main()
     // PID pid3("pid_3", independent_component);
     // RST rst("rst_1", independent_component);
 
-    FIRFilter<10> filter("fir_filter");
-    BoxFilter<5>  bfilter("box_filter");
+    // FIRFilter<10> filter("fir_filter");
+    // BoxFilter<5>  bfilter("box_filter");
+
+    std::srand(10);
+
+    // StaticJson values = std::array<double, 2>{0.5, 0.5};
+    // user::ffilter.coefficients.setJsonValue(values);
+    // user::ffilter.coefficients.synchroniseWriteBuffer();
+    // BufferSwitch::flipState();
+
+    // nlohmann::json numerator_values = std::array<double, 3>{2.0657e-1, 4.1314e-1, 2.0657e-1};
+    // nlohmann::json denominator_values = std::array<double, 3>{1.0, -3.6953e-1, 1.9582e-1};
+    // user::ifilter.numerator.setJsonValue(numerator_values);
+    // user::ifilter.numerator.synchroniseWriteBuffer();
+    // user::ifilter.denominator.setJsonValue(denominator_values);
+    // user::ifilter.denominator.synchroniseWriteBuffer();
 
     // ComponentArray<ComponentArray<PID, 3>, 3> array("brick_2", nullptr);
 
@@ -77,22 +104,36 @@ int main()
 
     backgroundTask.uploadParameterMap();
 
-    TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(10));
+    TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(40));
     timer.start();
 
-    int counter = 0;
+    int counter        = 0;
+    int time_range_min = 50;    // in clock ticks, 0 us
+    int time_range_max = 150;   // in clock ticks, equals 5 us
+
     while (true)
     {
-        if (counter == 20)
+        if (counter == 100)
         {
-#ifdef PERFORMANCE_TESTS
-            std::cout << "Average time per interrupt: " << timer.benchmarkInterrupt() << std::endl;
-#endif
             timer.stop();
-
+#ifdef PERFORMANCE_TESTS
+            double const mean = timer.average();
+            std::cout << "Average time per interrupt: " << mean << " +- " << timer.standardDeviation(mean) << std::endl;
+            auto const histogram = timer.histogramMeasurements<50>(time_range_min, time_range_max);
+            for (auto const& value : histogram.getData())
+            {
+                std::cout << value << " ";
+            }
+            std::cout << std::endl;
+            auto const bin_with_max = histogram.getBinWithMax();
+            auto const edges        = histogram.getBinEdges(bin_with_max);
+            std::cout << "bin with max: " << bin_with_max << ", centered at: " << 0.5 * (edges.first + edges.second)
+                      << std::endl;
+#endif
             break;
         }
-        puts(std::to_string(counter++).c_str());
+        counter++;
+        // puts(std::to_string(counter++).c_str());
         // TEST CODE, verbose parameters signalling on thread 1
         // puts("PID1: ");
         // puts(std::to_string(pid1.p).c_str());
@@ -109,8 +150,8 @@ int main()
         // }
         // puts("");
 
-        backgroundTask.receiveJsonCommand();
-        usleep(500);   // 500 us
+        // backgroundTask.receiveJsonCommand();
+        usleep(1000);   // 1 ms
     }
 
     return 0;
