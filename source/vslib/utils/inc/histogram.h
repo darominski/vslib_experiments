@@ -10,10 +10,10 @@
 
 #include "statistics.h"
 
-namespace vslib
+namespace vslib::utils
 {
 
-    template<size_t nBins>
+    template<size_t BinNumber>
     class Histogram
     {
       public:
@@ -40,9 +40,9 @@ namespace vslib
             {
                 m_counts[0]++;
             }
-            else if (bin_index > nBins)   // overflow case
+            else if (bin_index > BinNumber)   // overflow case
             {
-                m_counts[nBins - 1]++;
+                m_counts[BinNumber - 1]++;
             }
             else   // regular case
             {
@@ -64,9 +64,9 @@ namespace vslib
         //! @param bin_number Bin number of interest
         [[nodiscard]] std::pair<double, double> getBinEdges(size_t bin_number) const noexcept
         {
-            if (bin_number > nBins)
+            if (bin_number > BinNumber)
             {
-                bin_number = nBins;
+                bin_number = BinNumber;
             }
             return std::make_pair(m_edges[bin_number], m_edges[bin_number + 1]);
         }
@@ -77,22 +77,27 @@ namespace vslib
             return m_counts;
         }
 
+        [[nodiscard]] const auto getBinNumber() const noexcept
+        {
+            return BinNumber;
+        }
+
       private:
-        std::array<double, nBins + 1> m_edges{0};
-        std::array<int64_t, nBins>    m_counts{0};
-        double                        m_min_value;
-        double                        m_max_value;
-        double                        m_bin_width{0};
+        std::array<double, BinNumber + 1> m_edges{0};
+        std::array<int64_t, BinNumber>    m_counts{0};
+        double                            m_min_value;
+        double                            m_max_value;
+        double                            m_bin_width{0};
 
         void prepareHistogram()
         {
-            m_bin_width = (m_max_value - m_min_value) / nBins;
-            for (size_t index = 0; index < nBins; index++)
+            m_bin_width = (m_max_value - m_min_value) / BinNumber;
+            for (size_t index = 0; index < BinNumber; index++)
             {
                 m_edges[index] = m_min_value + static_cast<double>(index) * m_bin_width;
             }
-            m_edges[nBins] = m_max_value;
+            m_edges[BinNumber] = m_max_value;
         }
     };
 
-}   // namespace vslib
+}   // namespace vslib::utils
