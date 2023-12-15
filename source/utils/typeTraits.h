@@ -84,4 +84,13 @@ namespace fgc4::utils
     template<typename... T>
     constexpr bool always_false = false;
 
+    // Helper definitions for iterable concepts, assuming an object is iterable if it has begin() and end() functions
+    // defined
+
+    template<typename T>
+    concept Iterable = requires(T x) {
+                           x.begin();
+                           x.end();
+                       };
+
 }
