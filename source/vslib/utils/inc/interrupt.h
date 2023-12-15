@@ -23,7 +23,6 @@ namespace vslib
 #ifdef PERFORMANCE_TESTS
             m_interrupt_handler = [this, handler_function]()
             {
-                m_measurement_counter++;
                 const auto start_time = preConditions();
                 handler_function();
                 const auto total_time = postConditions(start_time);   // and this value needs to be sent somewhere
@@ -31,6 +30,7 @@ namespace vslib
                 {
                     m_measurements[m_measurement_counter] = total_time;
                 }
+                m_measurement_counter++;
             };
             m_measurements = {0};   // sets all elements to 0
 #else
