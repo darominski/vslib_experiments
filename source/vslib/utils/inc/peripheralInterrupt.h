@@ -4,10 +4,21 @@
 
 #pragma once
 
+#include "bmboot/payload_runtime.hpp"
 #include "interrupt.h"
 
 namespace vslib
 {
+    //! This enumeration controls the interrupt priority by connecting to the appropriate interrupt line
+    enum class InterruptPriority
+    {
+        high   = 0x80,   // TODO: example values, exact will be established when relevant IPs and HAL are in place
+        medium = 0xC0,
+        low    = 0xF0,
+    };
+
+    // ************************************************************
+
     class PeripheralInterrupt : public Interrupt
     {
       public:
@@ -16,14 +27,13 @@ namespace vslib
         //! @param handler_function Function to be called when the interrupt triggers
         //! @param interrupt_id Platform-dependent interrupt ID
         //! @param priority Priority level of the interrupt
-        PeripheralInterrupt(
-            std::function<void(void)> handler_function, int interrupt_id, bmboot::PayloadInterruptPriority priority
-        )
+        PeripheralInterrupt(std::function<void(void)> handler_function, int interrupt_id, InterruptPriority priority)
             : Interrupt(std::move(handler_function)),
               m_interrupt_id{interrupt_id},
               m_priority{priority}
         {
-            bmboot::setupInterruptHandling(m_interrupt_id, m_priority, m_interrupt_handler);
+            translatePriority();
+            bmboot::setupInterruptHandling(m_interrupt_id, m_priority_bmboot, m_interrupt_handler);
         }
 
         //! Starts peripheral interrupt
@@ -40,6 +50,25 @@ namespace vslib
 
       private:
         int                              m_interrupt_id;
-        bmboot::PayloadInterruptPriority m_priority;
+        InterruptPriority                m_priority;
+        bmboot::PayloadInterruptPriority m_priority_bmboot;
+
+        //! Translates local enumeration of priority lines to the bmboot-internal enumeration of priority values
+        void translatePriority() noexcept
+        {
+            switch (m_priority)
+            {
+                case InterruptPriority::high:
+                    m_priority_bmboot = bmboot::PayloadInterruptPriority::p7_max;
+                    break;
+                case InterruptPriority::medium:
+                    m_priority_bmboot
+                        = bmboot::PayloadInterruptPriority::p3;   // example of mapping medium to an intermediate value
+                    break;
+                case InterruptPriority::low:
+                    m_priority_bmboot = bmboot::PayloadInterruptPriority::p0_min;
+                    break;
+            }
+        }
     };
 }   // namespace vslib
