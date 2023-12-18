@@ -13,9 +13,8 @@ namespace vslib
     //! @param shared_memory Shared memory object
     void initializeSharedMemory(SharedMemory& shared_memory)
     {
-        shared_memory.acknowledged_counter = 0;
-        shared_memory.transmitted_counter  = 0;
-        shared_memory.message_length       = 0;
+        shared_memory.status         = CommunicationStatus::ready_to_receive;
+        shared_memory.message_length = 0;
         for (auto& element : shared_memory.json_buffer)
         {
             element = std::byte();
@@ -28,6 +27,11 @@ namespace vslib
     //! @param shared_memory Reference to the shared memory object
     void writeJsonToSharedMemory(const fgc4::utils::StaticJson& json_object, SharedMemory& shared_memory)
     {
+        if (shared_memory.status != CommunicationStatus::ready_to_receive)
+        {
+            fgc4::utils::Warning("Communication channel busy, message not sent!");
+            return;
+        }
         auto serialized = json_object.dump();
         if (serialized.size() < fgc4::utils::constants::json_memory_pool_size)
         {
@@ -37,12 +41,14 @@ namespace vslib
         }
         else
         {
+            shared_memory.status = CommunicationStatus::failure;
             fgc4::utils::Error(
                 "Error writing JSON: run out of shared memory.\n", fgc4::utils::errorCodes::allocation_buffer_overflow
             );
             throw std::bad_alloc();
         }
         shared_memory.message_length = serialized.size();
+        shared_memory.status         = CommunicationStatus::message_ready;
     }
 
     //! Helper function to read JSON object from shared memory and deserialize it
@@ -51,10 +57,12 @@ namespace vslib
     //! @return Static JSON object parsed from shared memory
     fgc4::utils::StaticJson readJsonFromSharedMemory(SharedMemory& shared_memory)
     {
-        auto json_object = fgc4::utils::StaticJsonFactory::getJsonObject();
+        shared_memory.status = CommunicationStatus::processing;
+        auto json_object     = fgc4::utils::StaticJsonFactory::getJsonObject();
         try
         {
-            json_object = nlohmann::json::parse(
+            shared_memory.status = CommunicationStatus::failure;
+            json_object          = nlohmann::json::parse(
                 shared_memory.json_buffer.begin(), shared_memory.json_buffer.begin() + shared_memory.message_length
             );
         }

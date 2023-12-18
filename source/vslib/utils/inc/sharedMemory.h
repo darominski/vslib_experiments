@@ -16,10 +16,20 @@
 
 namespace vslib
 {
+    //! Enumeration of the possible states of the communication between bare metal and Linux domain
+    enum class CommunicationStatus
+    {
+        ready_to_receive,
+        message_ready,
+        processing,
+        failure
+    };
+
+    // ************************************************************
+
     struct SharedMemory
     {
-        std::size_t                                                          acknowledged_counter;
-        std::size_t                                                          transmitted_counter;
+        CommunicationStatus                                                  status;
         std::size_t                                                          message_length;
         std::array<std::byte, fgc4::utils::constants::json_memory_pool_size> json_buffer;
     };

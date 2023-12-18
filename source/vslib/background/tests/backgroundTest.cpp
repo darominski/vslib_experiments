@@ -45,8 +45,7 @@ TEST_F(BackgroundTaskTest, InitializeSharedMemory)
 {
     SharedMemory   shared_memory;
     BackgroundTask backgroundTask(shared_memory);
-    EXPECT_EQ(shared_memory.acknowledged_counter, 0);
-    EXPECT_EQ(shared_memory.transmitted_counter, 0);
+    EXPECT_EQ(shared_memory.status, CommunicationStatus::ready_to_receive);
     EXPECT_EQ(shared_memory.message_length, 0);
     for (auto const& element : shared_memory.json_buffer)
     {
@@ -109,7 +108,6 @@ TEST_F(BackgroundTaskTest, ExecuteJsonCommand)
 {
     SharedMemory   shared_memory;
     BackgroundTask backgroundTask(shared_memory);
-    shared_memory.transmitted_counter++;
 
     MockComponent     component;
     Parameter<double> parameter(component, "parameter");
@@ -134,7 +132,6 @@ TEST_F(BackgroundTaskTest, ReceiveJsonCommand)
     StaticJson json_command = {{"name", "MockType.MockName.parameter"}, {"value", 1.5}, {"version", "0.1"}};
     writeJsonToSharedMemory(json_command, shared_memory);
 
-    shared_memory.transmitted_counter++;
     backgroundTask.receiveJsonCommand();
     // second call to acknowledge that no new data is coming and thus trigger buffer switch flip
     backgroundTask.receiveJsonCommand();
