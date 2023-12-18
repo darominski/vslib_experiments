@@ -7,6 +7,7 @@
 #include "bufferSwitch.h"
 #include "parameter.h"
 #include "parameterRegistry.h"
+#include "versions.h"
 #include "warningMessage.h"
 
 using namespace fgc4::utils;
@@ -86,6 +87,15 @@ namespace vslib
         {
             valid = false;
             const fgc4::utils::Warning message(std::string("Command invalid: ") + e.what());
+        }
+        // check that version is correct
+        if (valid)
+        {
+            valid = (command["version"] == vslib::utils::version::json_command);
+            const fgc4::utils::Warning message(fmt::format(
+                "Inconsistent version of the communication interface! Provided version: {}, expected version: {}.",
+                command["version"], vslib::utils::version::json_command
+            ));
         }
         return valid;
     }

@@ -62,28 +62,31 @@ TEST_F(BackgroundTaskTest, UploadParameterMap)
     MockComponent      component;
     Parameter<int32_t> parameter(component, "parameter");
     backgroundTask.uploadParameterMap();
-    EXPECT_EQ(shared_memory.message_length, 128);
+    EXPECT_EQ(shared_memory.message_length, 146);
     nlohmann::json parameter_map = nlohmann::json::parse(
         shared_memory.json_buffer.begin(), shared_memory.json_buffer.begin() + shared_memory.message_length
     );
     EXPECT_NE(parameter_map, nlohmann::json::object());
     EXPECT_TRUE(parameter_map.is_array());
     EXPECT_TRUE(parameter_map[0].is_object());
-    EXPECT_TRUE(parameter_map[0].contains("components"));
-    EXPECT_TRUE(parameter_map[0].contains("parameters"));
-    EXPECT_TRUE(parameter_map[0].contains("name"));
-    EXPECT_TRUE(parameter_map[0].contains("type"));
-    EXPECT_TRUE(parameter_map[0]["parameters"][0].contains("length"));
-    EXPECT_TRUE(parameter_map[0]["parameters"][0].contains("name"));
-    EXPECT_TRUE(parameter_map[0]["parameters"][0].contains("type"));
-    EXPECT_TRUE(parameter_map[0]["parameters"][0].contains("value"));
-    EXPECT_EQ(parameter_map[0]["components"], nlohmann::json::array());
-    EXPECT_EQ(parameter_map[0]["name"], "MockName");
-    EXPECT_EQ(parameter_map[0]["type"], "MockType");
-    EXPECT_EQ(parameter_map[0]["parameters"][0]["length"], 1);
-    EXPECT_EQ(parameter_map[0]["parameters"][0]["value"], nlohmann::json::object());
-    EXPECT_EQ(parameter_map[0]["parameters"][0]["name"], "parameter");
-    EXPECT_EQ(parameter_map[0]["parameters"][0]["type"], "Int32");
+    EXPECT_TRUE(parameter_map[0].contains("version"));
+    EXPECT_EQ(parameter_map[0]["version"], "0.1");
+    EXPECT_TRUE(parameter_map[1].is_object());
+    EXPECT_TRUE(parameter_map[1].contains("components"));
+    EXPECT_TRUE(parameter_map[1].contains("parameters"));
+    EXPECT_TRUE(parameter_map[1].contains("name"));
+    EXPECT_TRUE(parameter_map[1].contains("type"));
+    EXPECT_TRUE(parameter_map[1]["parameters"][0].contains("length"));
+    EXPECT_TRUE(parameter_map[1]["parameters"][0].contains("name"));
+    EXPECT_TRUE(parameter_map[1]["parameters"][0].contains("type"));
+    EXPECT_TRUE(parameter_map[1]["parameters"][0].contains("value"));
+    EXPECT_EQ(parameter_map[1]["components"], nlohmann::json::array());
+    EXPECT_EQ(parameter_map[1]["name"], "MockName");
+    EXPECT_EQ(parameter_map[1]["type"], "MockType");
+    EXPECT_EQ(parameter_map[1]["parameters"][0]["length"], 1);
+    EXPECT_EQ(parameter_map[1]["parameters"][0]["value"], nlohmann::json::object());
+    EXPECT_EQ(parameter_map[1]["parameters"][0]["name"], "parameter");
+    EXPECT_EQ(parameter_map[1]["parameters"][0]["type"], "Int32");
 }
 
 // Tests validation of the incoming json command
@@ -94,7 +97,7 @@ TEST_F(BackgroundTaskTest, ValidateJsonCommand)
 
     StaticJson command_no_name  = {{"value", 1.0}};
     StaticJson command_no_value = {{"name", "p"}};
-    StaticJson command_valid    = {{"name", "p"}, {"value", 1}};
+    StaticJson command_valid    = {{"name", "p"}, {"value", 1}, {"version", "0.1"}};
 
     EXPECT_EQ(backgroundTask.validateJsonCommand(command_no_name), false);
     EXPECT_EQ(backgroundTask.validateJsonCommand(command_no_value), false);
@@ -112,7 +115,7 @@ TEST_F(BackgroundTaskTest, ExecuteJsonCommand)
     Parameter<double> parameter(component, "parameter");
 
     // Simulate a JSON command in shared memory
-    StaticJson jsonCommand = {{"name", "MockType.MockName.parameter"}, {"value", 1.5}};
+    StaticJson jsonCommand = {{"name", "MockType.MockName.parameter"}, {"value", 1.5}, {"version", "0.1"}};
     backgroundTask.executeJsonCommand(jsonCommand);
     BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
     EXPECT_EQ(parameter.value(), 1.5);
@@ -128,7 +131,7 @@ TEST_F(BackgroundTaskTest, ReceiveJsonCommand)
     Parameter<double> parameter(component, "parameter");
 
     // Simulate a JSON command in shared memory
-    StaticJson json_command = {{"name", "MockType.MockName.parameter"}, {"value", 1.5}};
+    StaticJson json_command = {{"name", "MockType.MockName.parameter"}, {"value", 1.5}, {"version", "0.1"}};
     writeJsonToSharedMemory(json_command, shared_memory);
 
     shared_memory.transmitted_counter++;

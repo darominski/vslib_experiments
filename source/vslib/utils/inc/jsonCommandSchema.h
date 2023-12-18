@@ -23,11 +23,16 @@ namespace vslib::utils
         "value": {
             "description": "New value to be set to the parameter",
             "type": ["array", "boolean", "number", "string"]
+        },
+        "version": {
+            "description": "Version of the communication interface",
+            "type": "string"
         }
     },
     "required": [
                  "name",
-                 "value"
+                 "value",
+                 "version"
                  ],
     "type": "object"
 }

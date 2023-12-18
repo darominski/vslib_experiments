@@ -38,7 +38,8 @@ TEST_F(ComponentRegistryTest, EmptyInstance)
 TEST_F(ComponentRegistryTest, EmptyInstanceParameterMap)
 {
     ComponentRegistry& component_registry = ComponentRegistry::instance();
-    EXPECT_EQ(component_registry.createParameterMap(), nlohmann::json::array());
+    nlohmann::json     version            = {{{"version", "0.1"}}};
+    EXPECT_EQ(component_registry.createParameterMap(), version);
 }
 
 //! Checks automatically adding a component to the ComponentRegistry
@@ -67,7 +68,8 @@ TEST_F(ComponentRegistryTest, AutomaticComponentParameterMap)
     auto& components = registry.getComponents();
     ASSERT_EQ(components.size(), 1);
     nlohmann::json expected_parameter_map
-        = {{{"name", "TestComponent"},
+        = {{{"version", "0.1"}},
+           {{"name", "TestComponent"},
             {"type", "TestComponentType"},
             {"parameters", nlohmann::json::array()},
             {"components", nlohmann::json::array()}}};

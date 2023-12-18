@@ -8,6 +8,7 @@
 #include "errorCodes.h"
 #include "errorMessage.h"
 #include "fmt/format.h"
+#include "versions.h"
 
 using namespace fgc4::utils;
 
@@ -39,6 +40,7 @@ namespace vslib
     [[nodiscard]] StaticJson ComponentRegistry::createParameterMap() const
     {
         StaticJson parameterMap = nlohmann::json::array();
+        parameterMap.push_back({{"version", utils::version::json_parameter_map}});
         for (const auto& [_, component] : m_components)
         {
             parameterMap.push_back(component.get().serialize());
