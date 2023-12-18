@@ -18,10 +18,10 @@
 #include "firFilter.h"
 #include "firFilterFirstOrder.h"
 #include "iirFilter.h"
+#include "interruptRegistry.h"
 #include "json/json.hpp"
 #include "logString.h"
 #include "parameterRegistry.h"
-#include "peripheralInterrupt.h"
 #include "pid.h"
 #include "rst.h"
 #include "sharedMemory.h"
@@ -57,13 +57,13 @@ namespace user
         }
     }
 
-    // static int peripheralCounter = 0;
-    // void       peripheralTask()
-    // {
-    //     // printf("%dth event\n", ++peripheralCounter);
+    static int peripheralCounter = 0;
+    void       peripheralTask()
+    {
+        printf("%dth event\n", ++peripheralCounter);
 
-    //     usleep(5);   // 5 us
-    // }
+        usleep(5);   // 5 us
+    }
 
 }   // namespace user
 
@@ -106,6 +106,10 @@ int main()
 
     TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(40));
     timer.start();
+
+    InterruptRegistry interrupt_registry;
+    interrupt_registry.registerInterrupt("physical1", user::peripheralTask, 0, InterruptPriority::medium);
+    interrupt_registry.startInterrupt("physical1");
 
     int counter        = 0;
     int time_range_min = 50;    // in clock ticks, 0 us

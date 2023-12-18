@@ -43,6 +43,7 @@ if (NOT BUILD_TESTS)
       parameters/src/parameterRegistry.cpp
       background/src/background.cpp
       utils/src/sharedMemory.cpp
+      utils/src/interruptRegistry.cpp
   )
 
   # Create a library from the vslib sources
@@ -64,6 +65,7 @@ if (NOT BUILD_TESTS)
   target_link_libraries(${LIB} PUBLIC
     fmt::fmt
     nlohmann_json_schema_validator
+    bmboot_payload_runtime
     )
 
   if (PERFORMANCE_TESTS)

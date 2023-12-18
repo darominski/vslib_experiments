@@ -7,6 +7,7 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/sharedMemoryTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/statisticsTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/sharedMemory.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/interruptRegistry.cpp
 )
 
 target_include_directories(${APP} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc ${CMAKE_CURRENT_SOURCE_DIR}/../../utils  ${LIBRARIES_HOME}/json-3.11.2)
