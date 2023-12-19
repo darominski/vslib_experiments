@@ -41,6 +41,12 @@ namespace vslib
             return (m_cumulative.toDouble()) / BufferLength;
         }
 
+        // ************************************************************
+        // Getters
+
+        //! Returns the maximum value that can be filtered by this filter
+        //!
+        //! @return Maximal value that can be filter by this filter
         [[nodiscard]] auto const getMaxInputValue() const noexcept
         {
             return FixedPoint<fractional_bits>::maximumValue();
