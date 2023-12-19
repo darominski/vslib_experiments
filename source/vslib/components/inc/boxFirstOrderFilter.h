@@ -1,11 +1,9 @@
 //! @file
-//! @brief Defines class for a finite-impulse filter.
+//! @brief Defines class for a first-order box averaging filter.
 //! @author Dominik Arominski
 
 #pragma once
 
-#include <array>
-#include <cstdint>
 #include <string>
 
 #include "filter.h"
