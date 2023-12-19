@@ -16,7 +16,7 @@ namespace vslib
     class IIRFilter : public Filter
     {
       public:
-        //! Constructor of the FIR filter component, initializing one Parameter: coefficients
+        //! Constructor of the IIR filter component, initializing one Parameter: coefficients
         IIRFilter(std::string_view name, Component* parent = nullptr)
             : Filter("IIRFilter", name, parent),
               numerator(*this, "numerator_coefficients"),
