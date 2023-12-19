@@ -2,6 +2,7 @@ set(APP componentTests)
 
 add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/boxFilterTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/boxFirstOrderFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentRegistryTest.cpp
