@@ -46,6 +46,17 @@ namespace vslib
             }
         }
 
+        // ************************************************************
+        // Methods for registering Parameters belonging to this Component and serializing it
+
+        //! Adds a child Component to this Component
+        //!
+        //! @param child Child Component to be added to this Component
+        void addChild(Component& child)
+        {
+            m_children.emplace_back(child);
+        }
+
         //! Registers the parameter belonging to this component in the parameter registry, simultaneously adding it to
         //! the parameters vector.
         //!
@@ -87,6 +98,9 @@ namespace vslib
             return serialized_component;
         }
 
+        // ************************************************************
+        // Standard getters
+
         //! Provides the name of this component
         //!
         //! @return String_view of the component name
@@ -115,11 +129,6 @@ namespace vslib
         [[nodiscard]] auto const& getParameters() const noexcept
         {
             return m_parameters;
-        }
-
-        void addChild(Component& child)
-        {
-            m_children.emplace_back(child);
         }
 
       protected:
