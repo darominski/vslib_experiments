@@ -51,20 +51,20 @@ namespace vslib
         //! Returns the average of interrupt time measurements
         double average() const
         {
-            return calculateAverage(m_measurements);
+            return utils::calculateAverage(m_measurements);
         }
 
         //! Returns the standard deviation of interrupt time measurements
         double standardDeviation(const double mean) const
         {
-            return calculateStandardDeviation(m_measurements, mean);
+            return utils::calculateStandardDeviation(m_measurements, mean);
         }
 
         //! Returns the histogram with interrupt time measurements
         template<size_t nBins = 32>   // std::ceil(sqrt(1000)) = 32
-        Histogram<nBins> histogramMeasurements(double min, double max) const
+        utils::Histogram<nBins> histogramMeasurements(double min, double max) const
         {
-            auto histogram = Histogram<nBins>(min, max);
+            auto histogram = utils::Histogram<nBins>(min, max);
             for (auto const& value : m_measurements)
             {
                 histogram.addValue(value);
