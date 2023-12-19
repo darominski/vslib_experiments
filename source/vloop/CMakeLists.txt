@@ -37,26 +37,6 @@ project(${APP} C CXX ASM)
 
 set(CMAKE_CXX_STANDARD 20)
 
-### BSP
-
-include(../bsp/bsp.cmake)
-
-MakeBsp(1)
-
-### END BSP
-
-### bumbleboot
-
-set(BMBOOT_BUILD_PAYLOAD 1)   # TODO: This is *bad*. It should probably be a separate CMakeLists instead.
-
-add_subdirectory(../bmboot ${CMAKE_CURRENT_BINARY_DIR}/bmboot)
-
-### END bumbleboot
-
-set(BMBOOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../bmboot)
-
-include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
-
 # Include directories for headers
 include_directories(
     ${CMAKE_SOURCE_DIR}/../utils # header files shared between fgc4 bare-metal applications
