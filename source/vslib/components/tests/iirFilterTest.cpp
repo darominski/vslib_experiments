@@ -1,5 +1,5 @@
 //! @file
-//! @brief File with unit tests of FIRFilter class.
+//! @brief File with unit tests of IIRFilter class.
 //! @author Dominik Arominski
 
 #include <filesystem>
@@ -85,7 +85,7 @@ TEST_F(IIRFilterTest, FilterSingleValueSetDenominator)
     EXPECT_NEAR(filter.filter(input), input * numerator_values[0], 1e-3);
 }
 
-//! Checks that a FIRFilter object can filter a number of provided values, without wrapping around the buffers
+//! Checks that a IIRFilter object can filter a number of provided values, without wrapping around the buffers
 TEST_F(IIRFilterTest, FilterMultipleValues)
 {
     constexpr int                     filter_length = 3;
@@ -116,7 +116,7 @@ TEST_F(IIRFilterTest, FilterMultipleValues)
     );
 }
 
-//! Checks that a FIRFilter object can filter a number of provided values, with buffer wrap-around
+//! Checks that a IIRFilter object can filter a number of provided values, with buffer wrap-around
 TEST_F(IIRFilterTest, FilterMultipleValuesBufferWrapAround)
 {
     constexpr int                     filter_length = 3;
@@ -155,8 +155,8 @@ TEST_F(IIRFilterTest, FilterMultipleValuesBufferWrapAround)
     EXPECT_NEAR((expected_value - outputs[4]) / expected_value, 0.0, 1e-5);
 }
 
-//! Checks that a FIRFilter object can filter a number of provided values, with buffer wrap-around
-TEST_F(IIRFilterTest, FilterEntrieArrayCompareWithMatlab)
+//! Checks that a IIRFilter object can filter a number of provided values, with buffer wrap-around
+TEST_F(IIRFilterTest, FilterEntireArrayCompareWithMatlab)
 {
     constexpr int                     filter_length = 3;
     IIRFilter<filter_length>          filter("filter");
