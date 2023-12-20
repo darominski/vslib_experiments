@@ -17,11 +17,6 @@ When building the manager, CMake will recurse into itself to build the monitor, 
 the manager library. Due to this, a number of variables are mandatory, whether building the project stand-alone or via
 ``add_subdirectory``.
 
-- CMAKE_C_COMPILER_AARCH64_NONE_ELF
-- CMAKE_CXX_COMPILER_AARCH64_NONE_ELF
-- CMAKE_OBJCOPY_AARCH64_NONE_ELF
-- CMAKE_OBJDUMP_AARCH64_NONE_ELF
-- CMAKE_SIZE_AARCH64_NONE_ELF
 - BMBOOT_BSP_EL3_INCLUDE_DIR
 - BMBOOT_BSP_EL3_LIBRARIES
 
@@ -65,10 +60,8 @@ Voici un exemple:
 
     add_bmboot_payload(hello_world src/main.cpp)
 
-    foreach (TARGET ${hello_world_TARGETS})
-        target_compile_definitions(${TARGET} PRIVATE HELLO=world)
-        target_include_directories(${TARGET} PRIVATE include)
-    endforeach()
+    target_compile_definitions(hello_world PRIVATE HELLO=world)
+    target_include_directories(hello_world PRIVATE include)
 
 
 

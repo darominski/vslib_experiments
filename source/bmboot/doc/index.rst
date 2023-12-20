@@ -14,7 +14,9 @@ Bmboot docs
    external-requirements
    memory-map
    testing
+   cli
    api-base
    api-manager
    api-payload
+   api-message-queue
    literature
