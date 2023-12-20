@@ -20,14 +20,6 @@ if (NOT BUILD_TESTS)
    message(FATAL_ERROR "CMAKE_CXX_COMPILER for bare-metal target needs to be defined.")
   endif()
 
-  ### BSP
-
-  include(../bsp/bsp.cmake)
-
-  MakeBsp(1)
-
-  ### END BSP
-
   ### bumbleboot
 
   set(BMBOOT_BUILD_PAYLOAD 1)   # TODO: This is *bad*. It should probably be a separate CMakeLists instead.
@@ -35,10 +27,6 @@ if (NOT BUILD_TESTS)
   add_subdirectory(../bmboot ${CMAKE_CURRENT_BINARY_DIR}/bmboot)
 
   ### END bumbleboot
-
-  set(BMBOOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../bmboot)
-
-  include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
 
   ### VSlib
 

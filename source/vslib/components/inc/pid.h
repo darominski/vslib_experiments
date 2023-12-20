@@ -34,7 +34,8 @@ namespace vslib
               kp(*this, "p", -10.0, 10.0),   // min limit: -10, max limit: 10
               ki(*this, "i", -10.0, 10.0),
               kd(*this, "d"),   // default limits apply here
-              m_anti_windup_protection{anti_windup_protection}
+              integral_limit(*this, "integral_limit"),
+              m_anti_windup_protection(anti_windup_protection)
         {
         }
 
@@ -55,7 +56,7 @@ namespace vslib
         //! @return Result of this iteration
         double control(double current_value)
         {
-            double const m_error = m_target - current_value;
+            m_error = m_target - current_value;
             processIntegralError(m_error);
             double const derivative = m_error - m_previous_error;   // assuming time difference denominator is = 1
             double const output     = kp * m_error + ki * m_integral + kd * derivative;
@@ -66,7 +67,7 @@ namespace vslib
         void processIntegralError(double error) noexcept
         {
             m_integral += error;
-            m_integral = anti_windup_protection(m_integral)
+            m_integral = m_anti_windup_protection(m_integral);
         }
 
         // ************************************************************
@@ -135,5 +136,7 @@ namespace vslib
         double m_error{0};            //!< Current error value
         double m_previous_error{0};   //!< Previous error value
         double m_integral{0};         //!< Cumulative error over time
+
+        std::function<double(double)> m_anti_windup_protection;
     };
 }   // namespace vslib

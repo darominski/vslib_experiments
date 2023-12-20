@@ -20,13 +20,16 @@ namespace vslib
 
     // ************************************************************
 
-    <template size_t ControllerLength> class RST : public Component
+    template<size_t ControllerLength>
+    class RST : public Component
     {
       public:
         RST(std::string_view name, Component* parent)
             : Component("RST", name, parent),
               r(*this, "r", -12.0, 10.0),
-              status(*this, "status"),
+              s(*this, "s", -12.0, 10.0),
+              t(*this, "t", -12.0, 10.0),
+              status(*this, "status")
         {
         }
 
@@ -40,7 +43,7 @@ namespace vslib
             double const control_output = std::inner_product(r.cbegin(), r.cend(), m_current_state_r.cbegin(), 0.0);
 
             // Update the state vector
-            std::rotate(m_current_state.rbegin(), m_current_state_r.rbegin() + 1, m_current_state_r.rend());
+            std::rotate(m_current_state_r.rbegin(), m_current_state_r.rbegin() + 1, m_current_state_r.rend());
             m_current_state_r[0] = reference - control_output;
 
             // Calculate the tracking output
@@ -94,8 +97,8 @@ namespace vslib
         Parameter<Status>                               status;
 
       private:
-        std::array < double, ControllerLength >> m_current_state_r{0};
-        std::array < double, ControllerLength >> m_current_state_s{0};
-        double m_output{0};
+        std::array<double, ControllerLength> m_current_state_r{0};
+        std::array<double, ControllerLength> m_current_state_s{0};
+        double                               m_output{0};
     };
 }   // namespace vslib
