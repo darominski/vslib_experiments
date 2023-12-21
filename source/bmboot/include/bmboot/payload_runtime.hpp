@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include "bmboot.hpp"
-
+#include <chrono>
 #include <functional>
+
+#include "bmboot.hpp"
 
 namespace bmboot
 {
@@ -54,7 +55,7 @@ void notifyPayloadStarted();
 //!
 //! \param period_us Interrupt period in microseconds
 //! \param handler Funcion to be called
-void setupPeriodicInterrupt(int period_us, InterruptHandler handler);
+void setupPeriodicInterrupt(std::chrono::microseconds period_us, InterruptHandler handler);
 
 //! Start the built-in periodic interrupt.
 //!
