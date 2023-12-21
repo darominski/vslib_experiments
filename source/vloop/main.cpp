@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <bmboot/message_queue.hpp>
 #include <bmboot/payload_runtime.hpp>
 #include <cerrno>
 #include <cstdlib>
@@ -37,8 +38,6 @@
 using namespace vslib;
 using namespace fgc4;
 
-#define SHARED_MEMORY (*(struct SharedMemory*)app_data_0_1_ADDRESS)
-
 namespace user
 {
     // static int rt_counter = 0;
@@ -67,95 +66,90 @@ namespace user
 
 }   // namespace user
 
+
 int main()
 {
     bmboot::notifyPayloadStarted();
     puts("Hello world from vloop running on cpu1!");
 
-    BackgroundTask backgroundTask(SHARED_MEMORY);
+    BackgroundTask backgroundTask;
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
-    // PID pid1("pid_1", independent_component);
+
+    PID pid1("pid_1", independent_component);
     // PID pid3("pid_3", independent_component);
     // RST rst("rst_1", independent_component);
 
     // FIRFilter<10> filter("fir_filter");
     // BoxFilter<5>  bfilter("box_filter");
 
-    std::srand(10);
-
-    // StaticJson values = std::array<double, 2>{0.5, 0.5};
-    // user::ffilter.coefficients.setJsonValue(values);
-    // user::ffilter.coefficients.synchroniseWriteBuffer();
-    // BufferSwitch::flipState();
-
-    // nlohmann::json numerator_values = std::array<double, 3>{2.0657e-1, 4.1314e-1, 2.0657e-1};
-    // nlohmann::json denominator_values = std::array<double, 3>{1.0, -3.6953e-1, 1.9582e-1};
-    // user::ifilter.numerator.setJsonValue(numerator_values);
-    // user::ifilter.numerator.synchroniseWriteBuffer();
-    // user::ifilter.denominator.setJsonValue(denominator_values);
-    // user::ifilter.denominator.synchroniseWriteBuffer();
+    // std::srand(10);
 
     // ComponentArray<ComponentArray<PID, 3>, 3> array("brick_2", nullptr);
 
     // No parameter declarations beyond this point!
     // ************************************************************
 
+    // auto parameter_map = fgc4::utils::StaticJsonFactory::getJsonObject();
+    // parameter_map      = (ComponentRegistry::instance().createParameterMap()).dump();
+
+    // write_queue.write({parameter_map, parameter_map.size()}, {});
+
     backgroundTask.uploadParameterMap();
 
-    TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(40));
-    timer.start();
+    // TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(40));
+    // timer.start();
 
-    InterruptRegistry interrupt_registry;
-    interrupt_registry.registerInterrupt("physical1", user::peripheralTask, 0, InterruptPriority::medium);
-    interrupt_registry.startInterrupt("physical1");
+    //     InterruptRegistry interrupt_registry;
+    //     interrupt_registry.registerInterrupt("physical1", user::peripheralTask, 0, InterruptPriority::medium);
+    //     interrupt_registry.startInterrupt("physical1");
 
-    int counter        = 0;
-    int time_range_min = 50;    // in clock ticks, 0 us
-    int time_range_max = 150;   // in clock ticks, equals 5 us
+    int counter = 0;
+    //     int time_range_min = 50;    // in clock ticks, 0 us
+    //     int time_range_max = 150;   // in clock ticks, equals 5 us
 
     while (true)
     {
-        if (counter == 100)
-        {
-            timer.stop();
-#ifdef PERFORMANCE_TESTS
-            double const mean = timer.average();
-            std::cout << "Average time per interrupt: " << mean << " +- " << timer.standardDeviation(mean) << std::endl;
-            auto const histogram = timer.histogramMeasurements<50>(time_range_min, time_range_max);
-            for (auto const& value : histogram.getData())
-            {
-                std::cout << value << " ";
-            }
-            std::cout << std::endl;
-            auto const bin_with_max = histogram.getBinWithMax();
-            auto const edges        = histogram.getBinEdges(bin_with_max);
-            std::cout << "bin with max: " << bin_with_max << ", centered at: " << 0.5 * (edges.first + edges.second)
-                      << std::endl;
-#endif
-            break;
-        }
-        counter++;
-        // puts(std::to_string(counter++).c_str());
-        // TEST CODE, verbose parameters signalling on thread 1
-        // puts("PID1: ");
-        // puts(std::to_string(pid1.p).c_str());
-        // puts(std::to_string(pid1.i).c_str());
-        // puts(std::to_string(pid1.d).c_str());
-        // puts("PID3: ");
-        // puts(std::to_string(pid3.p).c_str());
-        // puts(std::to_string(pid3.i).c_str());
-        // puts(std::to_string(pid3.d).c_str());
-        // puts("RST: ");
-        // for (const auto& val : rst.r)
-        // {
-        //     std::cout << val << " ";
-        // }
-        // puts("");
+        //         if (counter == 100)
+        //         {
+        //             timer.stop();
+        // #ifdef PERFORMANCE_TESTS
+        //             double const mean = timer.average();
+        //             std::cout << "Average time per interrupt: " << mean << " +- " << timer.standardDeviation(mean) <<
+        //             std::endl; auto const histogram = timer.histogramMeasurements<50>(time_range_min,
+        //             time_range_max); for (auto const& value : histogram.getData())
+        //             {
+        //                 std::cout << value << " ";
+        //             }
+        //             std::cout << std::endl;
+        //             auto const bin_with_max = histogram.getBinWithMax();
+        //             auto const edges        = histogram.getBinEdges(bin_with_max);
+        //             std::cout << "bin with max: " << bin_with_max << ", centered at: " << 0.5 * (edges.first +
+        //             edges.second)
+        //                       << std::endl;
+        // #endif
+        //             break;
+        //         }
+        puts(std::to_string(counter++).c_str());
+        //         // TEST CODE, verbose parameters signalling on thread 1
+        puts("PID1: ");
+        puts(std::to_string(pid1.kp).c_str());
+        puts(std::to_string(pid1.ki).c_str());
+        puts(std::to_string(pid1.kd).c_str());
+        //         // puts("PID3: ");
+        //         // puts(std::to_string(pid3.p).c_str());
+        //         // puts(std::to_string(pid3.i).c_str());
+        //         // puts(std::to_string(pid3.d).c_str());
+        //         // puts("RST: ");
+        //         // for (const auto& val : rst.r)
+        //         // {
+        //         //     std::cout << val << " ";
+        //         // }
+        //         // puts("");
 
-        // backgroundTask.receiveJsonCommand();
-        usleep(1000);   // 1 ms
+        backgroundTask.receiveJsonCommand();
+        usleep(500'000);   // 500 ms
     }
 
     return 0;

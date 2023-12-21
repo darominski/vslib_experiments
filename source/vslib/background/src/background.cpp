@@ -14,40 +14,31 @@ using namespace fgc4::utils;
 
 namespace vslib
 {
-    void BackgroundTask::initializeSharedMemory()
-    {
-        vslib::initializeSharedMemory(m_shared_memory_ref);
-    }
 
     //! Creates and uploads the parameter map to the shared memory. The memory is reinitialized each time
     //! this method is called.
     void BackgroundTask::uploadParameterMap()
     {
-        if (m_shared_memory_ref.status != CommunicationStatus::ready_to_receive)
-        {
-            const fgc4::utils::Warning message("Communication bus not ready to send parameter map!");
-            // wait a bit until ready...?
-            return;
-        }
         auto json_component_registry = fgc4::utils::StaticJsonFactory::getJsonObject();
         json_component_registry      = ComponentRegistry::instance().createParameterMap();
-        writeJsonToSharedMemory(json_component_registry, m_shared_memory_ref);
+        writeJsonToMessageQueue(json_component_registry, m_write_parameter_map_queue);
     }
 
     //! Checks if a new command has arrived in shared memory, processes it, and when
     //! new command has come previously switches buffers and calls to synchronise them
     void BackgroundTask::receiveJsonCommand()
     {
-        if (m_shared_memory_ref.status == CommunicationStatus::message_ready)
+        auto message = m_read_commands_queue.read(m_read_commands_buffer);
+
+        if (message.has_value())
         {
             auto json_object = fgc4::utils::StaticJsonFactory::getJsonObject();
-            json_object      = readJsonFromSharedMemory(m_shared_memory_ref);
+            json_object      = readJsonFromMessageQueue(message.value());
             // execute the command from the incoming stream, synchronises write and background buffers
             processJsonCommands(json_object);
 
             // acknowledge transaction
-            m_shared_memory_ref.status = CommunicationStatus::ready_to_receive;
-            m_received_new_data        = true;
+            m_received_new_data = true;
         }
         else if (m_received_new_data)
         {
@@ -115,7 +106,6 @@ namespace vslib
     {
         if (!validateJsonCommand(command))
         {
-            m_shared_memory_ref.status = CommunicationStatus::failure;
             const fgc4::utils::Warning message("Command invalid, ignored.\n");
             return;
         }
@@ -124,18 +114,13 @@ namespace vslib
         auto const        parameter          = parameter_registry.find(parameter_name);
         if (parameter == parameter_registry.end())
         {
-            m_shared_memory_ref.status = CommunicationStatus::failure;
             const fgc4::utils::Warning message("Parameter ID: " + parameter_name + " not found. Command ignored.\n");
             return;
         }
 
         // execute the command, parameter will handle the validation of provided value.
         auto const result = (*parameter).second.get().setJsonValue(command["value"]);
-        if (result.has_value())   // failure, Warning message already logged
-        {
-            m_shared_memory_ref.status = CommunicationStatus::failure;
-        }
-        else   // success
+        if (!result.has_value())   // success, otherwise: failure and Warning message already logged
         {
             // synchronise the write buffer with the background buffer
             (*parameter).second.get().synchroniseWriteBuffer();

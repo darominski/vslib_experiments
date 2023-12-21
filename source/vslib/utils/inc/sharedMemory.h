@@ -6,6 +6,7 @@
 #pragma once
 
 #include <array>
+#include <bmboot/message_queue.hpp>
 
 #include "constants.h"
 #include "errorCodes.h"
@@ -34,6 +35,11 @@ namespace vslib
         std::array<std::byte, fgc4::utils::constants::json_memory_pool_size> json_buffer;
     };
 
+    struct SharedMemoryHeader
+    {
+        std::size_t message_length;
+    };
+
     static_assert(sizeof(SharedMemory) <= app_data_0_1_SIZE);
     static_assert(sizeof(SharedMemory) <= app_data_0_2_SIZE);
     static_assert(sizeof(SharedMemory) <= app_data_0_3_SIZE);
@@ -44,5 +50,8 @@ namespace vslib
     void                    initializeSharedMemory(SharedMemory&);
     void                    writeJsonToSharedMemory(const fgc4::utils::StaticJson&, SharedMemory&);
     fgc4::utils::StaticJson readJsonFromSharedMemory(SharedMemory&);
+
+    void writeJsonToMessageQueue(const fgc4::utils::StaticJson&, bmboot::MessageQueueWriter<SharedMemoryHeader>&);
+    fgc4::utils::StaticJson readJsonFromMessageQueue(const std::pair<SharedMemoryHeader, std::span<uint8_t>>&);
 
 }   // namespace vslib

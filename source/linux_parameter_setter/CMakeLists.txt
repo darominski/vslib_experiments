@@ -10,6 +10,17 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(CMAKE_CXX_STANDARD 20)
 
+### bumbleboot
+
+set(BMBOOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../bmboot)
+
+include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
+
+set(BMBOOT_BUILD_PAYLOAD 0)   # TODO: This is *bad*. It should probably be a separate CMakeLists instead.
+add_subdirectory(../bmboot ${CMAKE_CURRENT_BINARY_DIR}/bmboot)
+
+add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
+
 # Compiler flags and warnings
 add_compile_options(-O2 -mtune=cortex-a53 -ffunction-sections -fdata-sections -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
     -Wwrite-strings -Wmissing-declarations
@@ -24,36 +35,40 @@ add_link_options(
 
 set(REMOTE_SOURCES
     remote.cpp
+    ${CMAKE_SOURCE_DIR}/../vslib/utils/src/sharedMemory.cpp
 )
 
-set(REMOTE_USER_SOURCES
-    remote_user.cpp
-)
+# set(REMOTE_USER_SOURCES
+#     remote_user.cpp
+# )
 
 # Create executables
 add_executable(remote
   ${REMOTE_SOURCES}
   )
 
-  add_executable(remote_user
-  ${REMOTE_USER_SOURCES}
-  )
+# add_executable(remote_user
+# ${REMOTE_USER_SOURCES}
+# )
 
 # Add external libraries
 include_directories(
     ${CMAKE_SOURCE_DIR}/../lib # all external libraries are stored in this directory
     ${LIBRARIES_HOME}/json-3.11.2
-    ${CMAKE_SOURCE_DIR}/../utils # all external libraries are stored in this directory
-    ${CMAKE_SOURCE_DIR}/../vslib/utils/inc # all external libraries are stored in this directory
+    ${CMAKE_SOURCE_DIR}/../utils # all general fgc4-utils are stored in this directory
+    ${CMAKE_SOURCE_DIR}/../vslib/utils/inc # all vslib-specific utils are stored in this directory
+    ${CMAKE_SOURCE_DIR}/../bmboot/include # all public bmboot includes are stored in this directory
 )
 
-add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
-
 target_compile_features(remote PUBLIC cxx_std_20)
-target_compile_features(remote_user PUBLIC cxx_std_20)
+# target_compile_features(remote_user PUBLIC cxx_std_20)
 
 target_link_options(remote PRIVATE -static -static-libgcc -static-libstdc++)
-target_link_options(remote_user PRIVATE -static -static-libgcc -static-libstdc++)
+# target_link_options(remote_user PRIVATE -static -static-libgcc -static-libstdc++)
 
-target_link_libraries(remote PRIVATE fmt::fmt)
-target_link_libraries(remote_user PRIVATE fmt::fmt)
+target_link_libraries(remote
+  PRIVATE
+  fmt::fmt
+  bmboot_manager
+)
+# target_link_libraries(remote_user PRIVATE fmt::fmt)

@@ -3,7 +3,11 @@
 #include <string>
 #include <unistd.h>
 
+#include "bmboot/domain.hpp"
+#include "bmboot/domain_helpers.hpp"
+#include "bmboot/message_queue.hpp"
 #include "json/json.hpp"
+#include "sharedMemory.h"
 #include "shared_memory.h"
 
 using Json = nlohmann::json;
@@ -71,37 +75,64 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
 
 int main()
 {
-    Fgc4Shmem shared_memory;
+    fprintf(stderr, "Start Bmboot\n");
 
-    auto const json_manifest = readJsonFromSharedMemory(&SHARED_MEMORY);
-    std::cout << json_manifest.dump(4) << "\n";
-    auto const settable_parameters = parseManifest(json_manifest);
-    auto const commands            = prepareCommands(settable_parameters);
+    auto domain = bmboot::throwOnError(bmboot::IDomain::open(bmboot::DomainIndex::cpu1), "IDomain::open");
+    bmboot::throwOnError(domain->ensureReadyToLoadPayload(), "ensureReadyToLoadPayload");
 
-    size_t counter = 0;
+    fprintf(stderr, "Map memory\n");
+    constexpr int queue_size = fgc4::utils::constants::json_memory_pool_size;
+
+    int          fd = open("/dev/mem", O_RDWR);
+    bmboot::Mmap buffer(nullptr, 64 * queue_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, app_data_0_1_ADDRESS);
+
+    fprintf(stderr, "Init message queues\n");
+    // one read queue for reading the parameter map and one queue for writing commands
+
+    auto write_commands_queue = bmboot::createMessageQueue<bmboot::MessageQueueWriter<SharedMemoryHeader>>(
+        (uint8_t*)buffer.data(), queue_size
+    );
+    auto read_parameter_map_queue = bmboot::createMessageQueue<bmboot::MessageQueueReader<SharedMemoryHeader>>(
+        (uint8_t*)buffer.data() + queue_size, queue_size
+    );
+
+    fprintf(stderr, "Run payload\n");
+    bmboot::loadPayloadFromFileOrThrow(*domain, "vloop_cpu1.bin");
+    usleep(500'000);   // delay for initialization
+
+    std::array<uint8_t, queue_size> parameter_map_buffer;
+    std::vector<Json>               commands;
+    bool                            commands_set = false;
+    size_t                          counter      = 0;
     while (true)
     {
-        if (SHARED_MEMORY.acknowledged_counter < SHARED_MEMORY.transmitted_counter)
-        {
-            // first process not ready to receive more commands, wait and skip to next iteration
-            usleep(500000);   // 0.5 s
-            continue;
-        }
-        std::cout << "Thread2 counter: " << counter << "\n";
+        std::cout << "Linux counter: " << counter++ << "\n";
         // TEST CODE FOR TRANSFERRING COMMANDS
         // there are 3 PID with 9 params + RST with 1 parameter, so 10 in total,
         // modulo prevents setting not used fields
-        if (counter >= commands.size())
+        fprintf(stderr, "Read parameter map\n");
+        auto message = read_parameter_map_queue.read(parameter_map_buffer);
+        if (message.has_value())
         {
-            break;
+            auto const json_manifest = vslib::readJsonFromMessageQueue(message.value());
+            std::cout << json_manifest.dump(1) << "\n";
+            auto const settable_parameters = parseManifest(json_manifest);
+            commands                       = prepareCommands(settable_parameters);
+            commands_set                   = true;
         }
-        writeJsonToSharedMemory(commands[counter], &SHARED_MEMORY);
-        SHARED_MEMORY.transmitted_counter++;
+        else
+        {
+            std::cerr << "No parameter map!\n";
+        }
+
+        if (commands_set)
+        {
+            writeJsonToMessageQueue(commands[counter], write_commands_queue);
+        }
         // END OF TEST CODE
 
-        counter++;
         // Add some delay to simulate work
-        usleep(1000000);   // 1 s
+        usleep(1'000'000);   // 1 s
     }
 
     return 0;
