@@ -12,13 +12,6 @@
 namespace vslib
 {
 
-    //! Creates an interrupt with provided parameters and registers it in the internal container under the given
-    //! name id
-    //!
-    //! @param interrupt_name Name identifier for the peripheral interrupt
-    //! @param handler_function Function to be called when this interrupt triggers
-    //! @param interrupt_id Interrupt id to be given
-    //! @param priority The physical priority line of the interrupt
     void InterruptRegistry::registerInterrupt(
         std::string_view interrupt_name, std::function<void(void)> handler_function, int interrupt_id,
         InterruptPriority priority
@@ -36,25 +29,16 @@ namespace vslib
         m_interrupts.emplace(interrupt_name, interrupt);
     }
 
-    //! Starts the chosen interrupt
-    //!
-    //! @param interrupt_name Name identifier for the peripheral interrupt
     void InterruptRegistry::startInterrupt(std::string_view interrupt_name) noexcept
     {
         getInterrupt(interrupt_name).start();
     }
 
-    //! Stops the chosen interrupt
-    //!
-    //! @param interrupt_name Name identifier for the peripheral interrupt
     void InterruptRegistry::stopInterrupt(std::string_view interrupt_name) noexcept
     {
         getInterrupt(interrupt_name).stop();
     }
 
-    //! Returns a reference to the chosen interrupt
-    //!
-    //! @param interrupt_name Name identifier for the peripheral interrupt
     PeripheralInterrupt& InterruptRegistry::getInterrupt(std::string_view interrupt_name) noexcept
     {
         auto iterator = m_interrupts.find(interrupt_name);
