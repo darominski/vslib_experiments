@@ -58,12 +58,9 @@ namespace vslib
     PeripheralInterrupt& InterruptRegistry::getInterrupt(std::string_view interrupt_name) noexcept
     {
         auto iterator = m_interrupts.find(interrupt_name);
-        if (iterator != m_interrupts.end())
+        if (iterator == m_interrupts.end())
         {
-            iterator->second.get();
-        }
-        else
-        {
+
             fgc4::utils::Error error_message(
                 fmt::format("Interrupt with name: {} has not been registered!", interrupt_name),
                 fgc4::utils::errorCodes::name_already_used
@@ -71,6 +68,7 @@ namespace vslib
             // possibly throw an exception to trip the converter since code is most likely severely malformed
             throw std::runtime_error("Interrupt has not been registered!");
         }
+        return iterator->second.get();
     }
 
 }   // namespace vslib
