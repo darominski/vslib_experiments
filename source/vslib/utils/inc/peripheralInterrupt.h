@@ -12,9 +12,9 @@ namespace vslib
     //! This enumeration controls the interrupt priority by connecting to the appropriate interrupt line
     enum class InterruptPriority
     {
-        high   = 0x80,   // TODO: example values, exact will be established when relevant IPs and HAL are in place
-        medium = 0xC0,
-        low    = 0xF0,
+        high,
+        medium,
+        low,
     };
 
     // ************************************************************
