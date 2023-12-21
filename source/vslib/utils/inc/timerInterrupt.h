@@ -20,7 +20,7 @@ namespace vslib
               m_delay{delay}
         {
             assert((delay > 0) && "Delay for the timing interrupt must be a positive number.");
-            bmboot::setupPeriodicInterrupt(static_cast<int>(m_delay.count()), m_interrupt_handler);
+            bmboot::setupPeriodicInterrupt(m_delay, m_interrupt_handler);
         }
 
         //! Starts periodic interrupt
