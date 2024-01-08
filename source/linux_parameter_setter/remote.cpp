@@ -128,8 +128,7 @@ int main()
         {
             std::cerr << "No parameter map!\n";
         }
-
-        if (commands_set)
+        if (commands_set && (counter < commands.size()))
         {
             writeJsonToMessageQueue(commands[counter], write_commands_queue);
         }
