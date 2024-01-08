@@ -14,6 +14,10 @@ if (NOT DEFINED LIBRARIES_HOME)
   message(FATAL_ERROR "LIBRARIES_HOME path needs to be defined.")
 endif()
 
+set(BMBOOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../bmboot)
+
+include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
+
 if (NOT BUILD_TESTS)
 
   if (NOT DEFINED CMAKE_CXX_COMPILER)
@@ -80,7 +84,7 @@ if (NOT BUILD_TESTS)
 
   if (PERFORMANCE_TESTS)
     add_definitions(-DPERFORMANCE_TESTS)
-   endif()
+  endif()
 
 endif()
 
