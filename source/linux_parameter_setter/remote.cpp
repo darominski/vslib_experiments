@@ -20,6 +20,10 @@ auto parseManifest(const Json& manifest)
     std::vector<std::pair<std::string, std::string>> settable_parameters;
     for (auto const& element : manifest)
     {
+        if (!element.contains("parameters"))   // version of the parameter map
+        {
+            continue;
+        }
         auto const& parameters        = element["parameters"];   // array of settable parameters;
         auto const& full_component_id = std::string(element["type"]) + "." + std::string(element["name"]);
         for (auto const& parameter : parameters)
