@@ -17,41 +17,14 @@
 
 namespace vslib
 {
-    //! Enumeration of the possible states of the communication between bare metal and Linux domain
-    enum class CommunicationStatus
-    {
-        ready_to_receive,
-        message_ready,
-        processing,
-        failure
-    };
-
-    // ************************************************************
-
     struct SharedMemory
-    {
-        CommunicationStatus                                                  status;
-        std::size_t                                                          message_length;
-        std::array<std::byte, fgc4::utils::constants::json_memory_pool_size> json_buffer;
-    };
-
-    struct SharedMemoryHeader
     {
         std::size_t message_length;
     };
 
-    static_assert(sizeof(SharedMemory) <= app_data_0_1_SIZE);
-    static_assert(sizeof(SharedMemory) <= app_data_0_2_SIZE);
-    static_assert(sizeof(SharedMemory) <= app_data_0_3_SIZE);
-
     // ************************************************************
 
-    // definitions of I/O functions to silence -Wmissing-declarations warnings
-    void                    initializeSharedMemory(SharedMemory&);
-    void                    writeJsonToSharedMemory(const fgc4::utils::StaticJson&, SharedMemory&);
-    fgc4::utils::StaticJson readJsonFromSharedMemory(SharedMemory&);
-
-    void writeJsonToMessageQueue(const fgc4::utils::StaticJson&, bmboot::MessageQueueWriter<SharedMemoryHeader>&);
-    fgc4::utils::StaticJson readJsonFromMessageQueue(const std::pair<SharedMemoryHeader, std::span<uint8_t>>&);
+    void writeJsonToMessageQueue(const fgc4::utils::StaticJson&, bmboot::MessageQueueWriter<SharedMemory>&);
+    fgc4::utils::StaticJson readJsonFromMessageQueue(const std::pair<SharedMemory, std::span<uint8_t>>&);
 
 }   // namespace vslib

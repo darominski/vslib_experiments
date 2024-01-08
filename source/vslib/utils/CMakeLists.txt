@@ -4,7 +4,6 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/utilsTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/fixedPointTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/histogramTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/sharedMemoryTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/statisticsTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/sharedMemory.cpp
 )
