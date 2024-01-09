@@ -17,14 +17,6 @@
 
 namespace vslib
 {
-    struct SharedMemory
-    {
-        std::size_t message_length;
-    };
-
-    // ************************************************************
-
-    void writeJsonToMessageQueue(const fgc4::utils::StaticJson&, bmboot::MessageQueueWriter<SharedMemory>&);
-    fgc4::utils::StaticJson readJsonFromMessageQueue(const std::pair<SharedMemory, std::span<uint8_t>>&);
-
+    void                    writeJsonToMessageQueue(const fgc4::utils::StaticJson&, bmboot::MessageQueueWriter<void>&);
+    fgc4::utils::StaticJson readJsonFromMessageQueue(std::span<uint8_t>&);
 }   // namespace vslib

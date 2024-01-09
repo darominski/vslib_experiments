@@ -11,18 +11,13 @@ namespace vslib
     //!
     //! @param json_object JSON object to be copied to the shared memory
     //! @param message_queue Reference to the shared memory object
-    void writeJsonToMessageQueue(
-        const fgc4::utils::StaticJson& json_object, bmboot::MessageQueueWriter<SharedMemory>& message_queue
-    )
+    void
+    writeJsonToMessageQueue(const fgc4::utils::StaticJson& json_object, bmboot::MessageQueueWriter<void>& message_queue)
     {
         auto serialized = json_object.dump();
         if (serialized.size() < fgc4::utils::constants::json_memory_pool_size)
         {
-            SharedMemory                   shared_memory(serialized.size());
-            std::span<const unsigned char> serialized_message(
-                reinterpret_cast<const unsigned char*>(serialized.data()), serialized.size()
-            );
-            message_queue.write(shared_memory, serialized_message);
+            message_queue.write({reinterpret_cast<uint8_t*>(serialized.data()), serialized.size()});
         }
         else
         {
@@ -37,13 +32,12 @@ namespace vslib
     //!
     //! @param message Reference to the shared memory object
     //! @return Static JSON object parsed from shared memory
-    fgc4::utils::StaticJson readJsonFromMessageQueue(const std::pair<SharedMemory, std::span<uint8_t>>& message)
+    fgc4::utils::StaticJson readJsonFromMessageQueue(std::span<uint8_t>& message)
     {
         auto json_object = fgc4::utils::StaticJsonFactory::getJsonObject();
         try
         {
-            json_object
-                = nlohmann::json::parse(message.second.begin(), message.second.begin() + message.first.message_length);
+            json_object = nlohmann::json::parse(message.begin(), message.end());
         }
         catch (const std::exception& e)
         {

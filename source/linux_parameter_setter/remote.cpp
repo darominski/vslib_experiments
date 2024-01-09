@@ -39,15 +39,17 @@ auto parseManifest(const Json& manifest)
 auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& parameters)
 {
     std::vector<Json> commands;
+    std::string_view  version = "0.1";
     for (const auto& [name, type] : parameters)
     {
         Json command = {{"name", name}};
+        command.push_back({"version", version});
         if (type == "Float64")
         {
             // half of the values will be invalid
             if (commands.size() % 2 == 0)
             {
-                double value = 3.14159 * static_cast<double>(commands.size());
+                double value = 3.14159 * static_cast<double>(commands.size() + 2);
                 command.push_back({"value", value});
             }
             else
@@ -93,10 +95,9 @@ int main()
     fprintf(stderr, "Init message queues\n");
     // one read queue for reading the parameter map and one queue for writing commands
 
-    auto write_commands_queue = bmboot::createMessageQueue<bmboot::MessageQueueWriter<SharedMemoryHeader>>(
-        (uint8_t*)buffer.data(), queue_size
-    );
-    auto read_parameter_map_queue = bmboot::createMessageQueue<bmboot::MessageQueueReader<SharedMemoryHeader>>(
+    auto write_commands_queue
+        = bmboot::createMessageQueue<bmboot::MessageQueueWriter<void>>((uint8_t*)buffer.data(), queue_size);
+    auto read_parameter_map_queue = bmboot::createMessageQueue<bmboot::MessageQueueReader<void>>(
         (uint8_t*)buffer.data() + queue_size, queue_size
     );
 
@@ -106,8 +107,9 @@ int main()
 
     std::array<uint8_t, queue_size> parameter_map_buffer;
     std::vector<Json>               commands;
-    bool                            commands_set = false;
-    size_t                          counter      = 0;
+    bool                            commands_set  = false;
+    size_t                          counter       = 0;
+    size_t                          commands_sent = 0;
     while (true)
     {
         std::cout << "Linux counter: " << counter++ << "\n";
@@ -118,25 +120,31 @@ int main()
         auto message = read_parameter_map_queue.read(parameter_map_buffer);
         if (message.has_value())
         {
-            auto const json_manifest = vslib::readJsonFromMessageQueue(message.value());
-            std::cout << json_manifest.dump(1) << "\n";
+            auto const json_manifest       = vslib::readJsonFromMessageQueue(message.value());
+            // std::cout << json_manifest.dump(1) << "\n";
             auto const settable_parameters = parseManifest(json_manifest);
             commands                       = prepareCommands(settable_parameters);
             commands_set                   = true;
         }
-        else
+
+        if (commands_set && (commands_sent < commands.size()))
         {
-            std::cerr << "No parameter map!\n";
+            writeJsonToMessageQueue(commands[commands_sent], write_commands_queue);
+            commands_sent++;
         }
-        if (commands_set && (counter < commands.size()))
+
+        if (commands_sent == commands.size())
         {
-            writeJsonToMessageQueue(commands[counter], write_commands_queue);
+            break;
         }
+
         // END OF TEST CODE
 
         // Add some delay to simulate work
         usleep(1'000'000);   // 1 s
     }
+    std::cout << "Now running the console: \n";
+    runConsoleUntilInterrupted(*domain);
 
     return 0;
 }

@@ -108,6 +108,7 @@ int main()
     int counter = 0;
     //     int time_range_min = 50;    // in clock ticks, 0 us
     //     int time_range_max = 150;   // in clock ticks, equals 5 us
+    usleep(500'000);   // 500 ms
 
     while (true)
     {
@@ -133,10 +134,10 @@ int main()
         //         }
         puts(std::to_string(counter++).c_str());
         //         // TEST CODE, verbose parameters signalling on thread 1
-        puts("PID1: ");
-        puts(std::to_string(pid1.kp).c_str());
-        puts(std::to_string(pid1.ki).c_str());
-        puts(std::to_string(pid1.kd).c_str());
+        // puts("PID1: ");
+        std::cout << std::string("Kp: ") + std::to_string(pid1.kp) << "\n";
+        // puts(std::to_string(pid1.ki).c_str());
+        // puts(std::to_string(pid1.kd).c_str());
         //         // puts("PID3: ");
         //         // puts(std::to_string(pid3.p).c_str());
         //         // puts(std::to_string(pid3.i).c_str());
