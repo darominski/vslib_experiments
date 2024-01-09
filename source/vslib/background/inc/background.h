@@ -11,6 +11,7 @@
 #include "jsonCommandSchema.h"
 #include "sharedMemory.h"
 #include "staticJson.h"
+#include "vslib_shared_memory_memmap.h"
 
 namespace vslib
 {

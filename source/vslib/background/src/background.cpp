@@ -5,6 +5,9 @@
 
 #include "background.h"
 #include "bufferSwitch.h"
+#include "constants.h"
+#include "errorCodes.h"
+#include "fmt/format.h"
 #include "parameter.h"
 #include "parameterRegistry.h"
 #include "versions.h"

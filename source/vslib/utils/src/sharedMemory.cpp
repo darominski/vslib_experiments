@@ -2,6 +2,7 @@
 //! @brief File containing implementation of methods used to manipulate the shared memory object.
 //! @author Dominik Arominski
 
+#include "errorMessage.h"
 #include "sharedMemory.h"
 #include "warningMessage.h"
 
