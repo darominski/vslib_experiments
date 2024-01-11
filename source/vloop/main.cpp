@@ -53,10 +53,10 @@ namespace user
         }
     }
 
-    static int peripheralCounter = 0;
+    static int peripheral_counter = 0;
     void       peripheralTask()
     {
-        printf("%dth event\n", ++peripheralCounter);
+        printf("%dth event\n", ++peripheral_counter);
 
         usleep(5);   // 5 us
     }
@@ -69,7 +69,7 @@ int main()
     bmboot::notifyPayloadStarted();
     puts("Hello world from vloop running on cpu1!");
 
-    BackgroundTask backgroundTask;
+    BackgroundTask background_task;
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
@@ -93,7 +93,7 @@ int main()
 
     // write_queue.write({parameter_map, parameter_map.size()}, {});
 
-    backgroundTask.uploadParameterMap();
+    background_task.uploadParameterMap();
 
     // TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(40));
     // timer.start();
@@ -146,7 +146,7 @@ int main()
         //         // }
         //         // puts("");
 
-        backgroundTask.receiveJsonCommand();
+        background_task.receiveJsonCommand();
         usleep(500'000);   // 500 ms
     }
 
