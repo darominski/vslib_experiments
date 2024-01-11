@@ -41,7 +41,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include(../bsp/bsp.cmake)
 
-MakeBsp(1)
+#BSP is now built and used as dependency by the vloop
 
 ### END BSP
 
