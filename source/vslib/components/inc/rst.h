@@ -72,9 +72,9 @@ namespace vslib
         // ************************************************************
         // Getters
 
-        //! Returns the output
+        //! Returns the control output value
         //!
-        //!
+        //! @return Control output value
         [[nodiscard]] double getOutput() const noexcept
         {
             return m_output;

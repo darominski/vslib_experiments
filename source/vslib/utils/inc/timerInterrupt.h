@@ -19,7 +19,7 @@ namespace vslib
             : Interrupt(std::move(handler_function)),
               m_delay{delay}
         {
-            assert((delay > 0) && "Delay for the timing interrupt must be a positive number.");
+            assert((delay.count() > 0) && "Delay for the timing interrupt must be a positive number.");
             bmboot::setupPeriodicInterrupt(m_delay, m_interrupt_handler);
         }
 
