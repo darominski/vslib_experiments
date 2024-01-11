@@ -3,8 +3,15 @@ proc CreateWorkspace {workspace_dir} {
     setws -switch $workspace_dir
 }
 
+# Patches the BSP of the platform project so it can work with the bmboot
+proc PatchPlatform {root_dir workspace_dir plat_name} {
+    cd $plat_name
+    exec patch -p1 < $root_dir/inputs/bsp.patch
+    cd ..
+}
+
 # Vitis platform project creation procedure
-proc CreatePlatformProject {xsa_path proc_name workspace_dir} {
+proc CreatePlatformProject {root_dir xsa_dir proc_name workspace_dir} {
     set plat_name "diot_a53_1"
     set project_domain "cortex_a53_1"
 
@@ -20,7 +27,7 @@ proc CreatePlatformProject {xsa_path proc_name workspace_dir} {
     if (![file exists $plat_name]) {
 	# platform project is only generated once even if there are multiple application projects
 	platform create -name $plat_name\
-	    -hw $xsa_path\
+	    -hw $xsa_dir\
 	    -proc $proc_name\
 	    -os "standalone"\
 	    -out $workspace_dir
@@ -29,12 +36,13 @@ proc CreatePlatformProject {xsa_path proc_name workspace_dir} {
 	importproject $workspace_dir
 	# -domains ensures that only the specified domain will be built
 	platform generate -domains "standalone_domain"
+	PatchPlatform $root_dir $workspace_dir $plat_name
     }
     platform active $plat_name
 }
 
 # Vitis custom application project creation procedure
-proc CreateApplicationProject {app_name proc_name source_path workspace_dir} {
+proc CreateApplicationProject {app_name proc_name source_dir workspace_dir root_dir bmboot_dir bmboot_binary_dir libraries_dir vslib_build_dir} {
     # creates empty application project connected to the active bare-metal domain
     app create -name $app_name\
 	-proc $proc_name\
@@ -44,25 +52,49 @@ proc CreateApplicationProject {app_name proc_name source_path workspace_dir} {
 	-template "Empty Application"
 
     # fills the project with the code from the cloned repository
-    importsources -name $app_name -path $source_path -soft-link
+    importsources -name $app_name -path $source_dir -soft-link
 
     # configures correctly the location of the include files for both Release and Debug builds
     set builds {release debug}
     foreach build $builds {
 	app config -name $app_name -set build-config $build
-	app config -name $app_name -add "include-path" $source_path/inc
-	app config -name $app_name -add "include-path" $source_path/lib
-	app config -name $app_name -add "library-search-path" $source_path/lib
+	app config -name $app_name -add "include-path" $source_dir/../vslib/background/inc
+	app config -name $app_name -add "include-path" $source_dir/../vslib/components/inc
+	app config -name $app_name -add "include-path" $source_dir/../vslib/parameters/inc
+	app config -name $app_name -add "include-path" $source_dir/../vslib/utils/inc
+	app config -name $app_name -add "include-path" $source_dir/../utils
+	app config -name $app_name -add "include-path" $libraries_dir/json-3.11.2
+	app config -name $app_name -add "include-path" $libraries_dir/magic_enum-0.9.3
+	app config -name $app_name -add "include-path" $libraries_dir/fmt-8.0.1/include
+	app config -name $app_name -add "include-path" $libraries_dir/json-schema-validator-2.2.0/src/
+	app config -name $app_name -add "include-path" $workspace_dir/build-vslib/_deps/nlohmann_json-src/include
+	app config -name $app_name -add "compiler-misc" "-std=c++20"
+	app config -name $app_name -set "linker-misc" "-Wl,--undefined=_close -Wl,--undefined=_fstat -Wl,--undefined=_isatty -Wl,--undefined=_lseek -Wl,--undefined=_read -Wl,--undefined=_write -Wl,--start-group,-lxil,-lgcc,-lc,-lstdc++,--end-group -specs=nosys.specs"
+	app config -name $app_name -add "include-path" $bmboot_dir
+	app config -name $app_name -add "library-search-path" $bmboot_binary_dir
+	app config -name $app_name -add "library-search-path" $vslib_build_dir
+	app config -name $app_name -add "library-search-path" $vslib_build_dir/fmt
+	app config -name $app_name -add "library-search-path" $vslib_build_dir/json-schema-validator
+	app config -name $app_name -add "libraries" fmt
+	app config -name $app_name -add "libraries" nlohmann_json_schema_validator
+	app config -name $app_name -add "libraries" vslib
+	app config -name $app_name -add "libraries" bmboot_payload_runtime
+	app config -name $app_name -set "linker-script" $root_dir/inputs/lscript.ld
     }
 
     # builds the application
     app build -name $app_name
 }
 
-set workspace_dir [lindex $argv 0]
-set xsa_path [lindex $argv 1]
-set source_path [lindex $argv 2]
-set app_name [lindex $argv 3]
+set root_dir [lindex $argv 0]
+set workspace_dir [lindex $argv 1]
+set xsa_dir [lindex $argv 2]
+set source_dir [lindex $argv 3]
+set app_name [lindex $argv 4]
+set bmboot_include_dir [lindex $argv 5]
+set bmboot_binary_dir [lindex $argv 6]
+set libraries_dir [lindex $argv 7]
+set vslib_build_dir [lindex $argv 8]
 
 set proc_name "psu_cortexa53_1"
 
@@ -71,7 +103,7 @@ CreateWorkspace $workspace_dir
 cd $workspace_dir
 
 # Platform project creation
-CreatePlatformProject $xsa_path $proc_name $workspace_dir
+CreatePlatformProject $root_dir $xsa_dir $proc_name $workspace_dir
 
 # Application project creation and build
-CreateApplicationProject $app_name $proc_name $source_path $workspace_dir
+CreateApplicationProject $app_name $proc_name $source_dir $workspace_dir $root_dir $bmboot_include_dir $bmboot_binary_dir $libraries_dir $vslib_build_dir
