@@ -135,11 +135,20 @@ namespace vslib
 
       private:
         double m_starting_value{0};   //!< Starting value of control
-        double m_target;              //!< Target setpoint
+        double m_target{0};           //!< Target setpoint
         double m_error{0};            //!< Current error value
         double m_previous_error{0};   //!< Previous error value
         double m_integral{0};         //!< Cumulative error over time
 
         std::function<double(double)> m_anti_windup_protection;
+
+        //! Accumulates the error and calls the anti-windup function
+        //!
+        //! @param error Current control iteration error
+        void processIntegralError(double error) noexcept
+        {
+            m_integral += error;
+            m_integral = m_anti_windup_protection(m_integral);
+        }
     };
 }   // namespace vslib
