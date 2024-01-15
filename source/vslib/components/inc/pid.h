@@ -71,25 +71,9 @@ namespace vslib
         //! Returns the target value of the controller
         //!
         //! @return Target value of the controller
-        [[nodiscard]] double getTarget() const noexcept
-        {
-            return m_target;
-        }
-
-        //! Returns the target value of the controller
-        //!
-        //! @return Target value of the controller
         [[nodiscard]] double getError() const noexcept
         {
             return m_error;
-        }
-
-        //! Returns the target value of the controller
-        //!
-        //! @return Target value of the controller
-        [[nodiscard]] double getPreviousError() const noexcept
-        {
-            return m_previous_error;
         }
 
         //! Returns the target value of the controller
@@ -100,12 +84,28 @@ namespace vslib
             return m_integral;
         }
 
-        //! Sets the target value of the controller
+        //! Returns the target value of the controller
         //!
-        //! @param target Target value for the controller
-        void setTarget(double target) noexcept
+        //! @return Target value of the controller
+        [[nodiscard]] double getPreviousError() const noexcept
         {
-            m_target = target;
+            return m_previous_error;
+        }
+
+        //! Returns the starting value of the controller
+        //!
+        //! @return Starting value of the controller
+        [[nodiscard]] double getStartingValue() const noexcept
+        {
+            return m_starting_value;
+        }
+
+        //! Returns the target value of the controller
+        //!
+        //! @return Target value of the controller
+        [[nodiscard]] double getTarget() const noexcept
+        {
+            return m_target;
         }
 
         //! Sets the starting value of the controller
@@ -114,6 +114,14 @@ namespace vslib
         void setStartingValue(double value) noexcept
         {
             m_starting_value = value;
+        }
+
+        //! Sets the target value of the controller
+        //!
+        //! @param target Target value for the controller
+        void setTarget(double target) noexcept
+        {
+            m_target = target;
         }
 
         // ************************************************************
