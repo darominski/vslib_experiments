@@ -1,0 +1,181 @@
+//! @file
+//! @brief File with unit tests of PID component.
+//! @author Dominik Arominski
+
+#include <filesystem>
+#include <fstream>
+#include <gtest/gtest.h>
+
+#include "componentRegistry.h"
+#include "pid.h"
+#include "staticJson.h"
+
+using namespace vslib;
+
+class PIDTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override
+    {
+    }
+
+    void TearDown() override
+    {
+        ComponentRegistry& component_registry = ComponentRegistry::instance();
+        component_registry.clearRegistry();
+        ParameterRegistry& parameter_registry = ParameterRegistry::instance();
+        parameter_registry.clearRegistry();
+    }
+
+    void set_pid_parameters(PID& pid, double p, double i, double d, double max_integral)
+    {
+        StaticJson p_value = p;
+        pid.kp.setJsonValue(p_value);
+        pid.kp.synchroniseWriteBuffer();
+        StaticJson i_value = i;
+        pid.ki.setJsonValue(i_value);
+        pid.ki.synchroniseWriteBuffer();
+        StaticJson d_value = d;
+        pid.kd.setJsonValue(d_value);
+        pid.kd.synchroniseWriteBuffer();
+        StaticJson integral_limit_value = max_integral;
+        pid.integral_limit.setJsonValue(integral_limit_value);
+        pid.integral_limit.synchroniseWriteBuffer();
+        BufferSwitch::flipState();
+    }
+};
+
+//! Checks that a default PID object can be constructed and is correctly added to the registry
+TEST_F(PIDTest, PIDDefaultConstruction)
+{
+    std::string name = "pid_1";
+    PID         pid(name);
+    EXPECT_EQ(pid.getName(), name);
+    EXPECT_EQ(pid.getError(), 0.0);
+    EXPECT_EQ(pid.getTarget(), 0.0);
+    EXPECT_EQ(pid.getPreviousError(), 0.0);
+    EXPECT_EQ(pid.getStartingValue(), 0.0);
+    EXPECT_EQ(pid.getIntegral(), 0.0);
+
+    ComponentRegistry& registry = ComponentRegistry::instance();
+    EXPECT_EQ(registry.getComponents().size(), 1);
+    EXPECT_NE(registry.getComponents().find(pid.getFullName()), registry.getComponents().end());
+
+    auto serialized_pid = pid.serialize();
+    EXPECT_EQ(serialized_pid["name"], name);
+    EXPECT_EQ(serialized_pid["type"], "PID");
+    EXPECT_EQ(serialized_pid["components"], nlohmann::json::array());
+    EXPECT_EQ(serialized_pid["parameters"].size(), 4);
+    EXPECT_EQ(serialized_pid["parameters"][0]["name"], "p");
+    EXPECT_EQ(serialized_pid["parameters"][1]["name"], "i");
+    EXPECT_EQ(serialized_pid["parameters"][2]["name"], "d");
+    EXPECT_EQ(serialized_pid["parameters"][3]["name"], "integral_limit");
+}
+
+//! Checks that a PID object with an anti-windup function defined can be constructed
+TEST_F(PIDTest, PIDAntiWindupConstruction)
+{
+    std::string  name                 = "pid_2";
+    double const max_integral         = 1500;
+    auto         anti_windup_function = [&max_integral](double input)
+    {
+        return input > max_integral ? max_integral : input;
+    };   // clamping anti-windup
+    PID pid(name, nullptr, anti_windup_function);
+    EXPECT_EQ(pid.getName(), name);
+    EXPECT_EQ(pid.getError(), 0.0);
+    EXPECT_EQ(pid.getTarget(), 0.0);
+    EXPECT_EQ(pid.getPreviousError(), 0.0);
+    EXPECT_EQ(pid.getStartingValue(), 0.0);
+    EXPECT_EQ(pid.getIntegral(), 0.0);
+}
+
+//! Checks that target setter interact correctly with PID object
+TEST_F(PIDTest, PIDSetters)
+{
+    std::string name = "pid_3";
+    PID         pid(name);
+
+    const double target_value = 3.14159;
+    pid.setTarget(target_value);
+    EXPECT_EQ(pid.getTarget(), target_value);
+
+    const double starting_value = 2 * 3.14159;
+    pid.setStartingValue(starting_value);
+    EXPECT_EQ(pid.getStartingValue(), starting_value);
+}
+
+//! Checks that reset method correctly sets all internal parameters to zero, and sets new starting value
+TEST_F(PIDTest, PIDReset)
+{
+    std::string name = "pid_4";
+    PID         pid(name);
+
+    const double target_value = 3.14159;
+    pid.setTarget(target_value);
+    EXPECT_EQ(pid.getTarget(), target_value);
+
+    const double starting_value = 2 * 3.14159;
+    pid.setStartingValue(starting_value);
+    EXPECT_EQ(pid.getStartingValue(), starting_value);
+
+    const double new_starting_value = 1.0;
+    pid.reset(new_starting_value);
+    EXPECT_EQ(pid.getTarget(), 0.0);
+    EXPECT_EQ(pid.getStartingValue(), new_starting_value);
+}
+
+//! Checks that single iteration of control method correctly calculates the gain
+TEST_F(PIDTest, PIDSingleIteration)
+{
+    std::string  name = "pid_5";
+    PID          pid(name);
+    double const p            = 2.0;
+    double const i            = 1.0;
+    double const d            = 1.5;
+    double const max_integral = 1000.0;
+    set_pid_parameters(pid, p, i, d, max_integral);
+
+    const double target_value = 3.14159;
+    pid.setTarget(target_value);
+
+    const double starting_value = 0.0;
+    pid.setStartingValue(starting_value);
+
+    const double expected_value = target_value * p + target_value * i + target_value * d;
+    EXPECT_EQ(pid.control(starting_value), expected_value);
+}
+
+
+//! Checks that a couple of iterations of control method correctly calculates gains
+TEST_F(PIDTest, PIDControlIteration)
+{
+    std::string  name = "pid_6";
+    PID          pid(name);
+    double const p            = 2.0;
+    double const i            = 1.0;
+    double const d            = 1.5;
+    double const max_integral = 1000.0;
+    set_pid_parameters(pid, p, i, d, max_integral);
+
+    const double target_value = 3.14159;
+    pid.setTarget(target_value);
+
+    const double starting_value = 0.0;
+    pid.setStartingValue(starting_value);
+
+    const double first_gain = target_value * p + target_value * i + target_value * d;
+    EXPECT_EQ(pid.control(starting_value), first_gain);
+
+    double       previous_error = target_value;
+    double       current_error  = target_value - first_gain;
+    const double second_gain
+        = (target_value - first_gain) * p + (2 * target_value - first_gain) * i + (current_error - previous_error) * d;
+    EXPECT_EQ(pid.control(first_gain), second_gain);
+
+    previous_error          = current_error;
+    current_error           = target_value - second_gain;
+    const double third_gain = (target_value - second_gain) * p + (3 * target_value - first_gain - second_gain) * i
+        + (current_error - previous_error) * d;
+    EXPECT_EQ(pid.control(second_gain), third_gain);
+}
