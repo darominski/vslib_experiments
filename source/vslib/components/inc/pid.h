@@ -39,17 +39,6 @@ namespace vslib
         {
         }
 
-        //! Allows for resetting errors of the controller and setting new starting value
-        //!
-        //! @param start_value New starting value of the controller
-        void reset(double start_value) noexcept
-        {
-            m_starting_value = start_value;
-            m_error          = 0;
-            m_previous_error = 0;
-            m_integral       = 0;
-        }
-
         //! Computes one iteration of the controller
         //!
         //! @param current_value Value of the controlled
@@ -64,10 +53,16 @@ namespace vslib
             return output;
         }
 
-        void processIntegralError(double error) noexcept
+        //! Allows for resetting errors of the controller and setting new starting value
+        //!
+        //! @param start_value New starting value of the controller
+        void reset(double start_value) noexcept
         {
-            m_integral += error;
-            m_integral = m_anti_windup_protection(m_integral);
+            m_starting_value = start_value;
+            m_error          = 0;
+            m_integral       = 0;
+            m_previous_error = 0;
+            m_target         = 0;
         }
 
         // ************************************************************
