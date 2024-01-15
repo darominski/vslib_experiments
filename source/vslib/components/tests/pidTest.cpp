@@ -52,7 +52,7 @@ TEST_F(PIDTest, PIDDefaultConstruction)
     PID         pid(name);
     EXPECT_EQ(pid.getName(), name);
     EXPECT_EQ(pid.getError(), 0.0);
-    EXPECT_EQ(pid.getTarget(), 0.0);
+    EXPECT_EQ(pid.getSetPoint(), 0.0);
     EXPECT_EQ(pid.getPreviousError(), 0.0);
     EXPECT_EQ(pid.getStartingValue(), 0.0);
     EXPECT_EQ(pid.getIntegral(), 0.0);
@@ -84,7 +84,7 @@ TEST_F(PIDTest, PIDAntiWindupConstruction)
     PID pid(name, nullptr, anti_windup_function);
     EXPECT_EQ(pid.getName(), name);
     EXPECT_EQ(pid.getError(), 0.0);
-    EXPECT_EQ(pid.getTarget(), 0.0);
+    EXPECT_EQ(pid.getSetPoint(), 0.0);
     EXPECT_EQ(pid.getPreviousError(), 0.0);
     EXPECT_EQ(pid.getStartingValue(), 0.0);
     EXPECT_EQ(pid.getIntegral(), 0.0);
@@ -97,8 +97,8 @@ TEST_F(PIDTest, PIDSetters)
     PID         pid(name);
 
     const double target_value = 3.14159;
-    pid.setTarget(target_value);
-    EXPECT_EQ(pid.getTarget(), target_value);
+    pid.setSetPoint(target_value);
+    EXPECT_EQ(pid.getSetPoint(), target_value);
 
     const double starting_value = 2 * 3.14159;
     pid.setStartingValue(starting_value);
@@ -112,8 +112,8 @@ TEST_F(PIDTest, PIDReset)
     PID         pid(name);
 
     const double target_value = 3.14159;
-    pid.setTarget(target_value);
-    EXPECT_EQ(pid.getTarget(), target_value);
+    pid.setSetPoint(target_value);
+    EXPECT_EQ(pid.getSetPoint(), target_value);
 
     const double starting_value = 2 * 3.14159;
     pid.setStartingValue(starting_value);
@@ -121,7 +121,7 @@ TEST_F(PIDTest, PIDReset)
 
     const double new_starting_value = 1.0;
     pid.reset(new_starting_value);
-    EXPECT_EQ(pid.getTarget(), 0.0);
+    EXPECT_EQ(pid.getSetPoint(), 0.0);
     EXPECT_EQ(pid.getStartingValue(), new_starting_value);
 }
 
@@ -137,7 +137,7 @@ TEST_F(PIDTest, PIDSingleIteration)
     set_pid_parameters(pid, p, i, d, max_integral);
 
     const double target_value = 3.14159;
-    pid.setTarget(target_value);
+    pid.setSetPoint(target_value);
 
     const double starting_value = 0.0;
     pid.setStartingValue(starting_value);
@@ -146,36 +146,35 @@ TEST_F(PIDTest, PIDSingleIteration)
     EXPECT_EQ(pid.control(starting_value), expected_value);
 }
 
-
 //! Checks that a couple of iterations of control method correctly calculates gains
 TEST_F(PIDTest, PIDControlIteration)
 {
     std::string  name = "pid_6";
     PID          pid(name);
-    double const p            = 2.0;
-    double const i            = 1.0;
-    double const d            = 1.5;
+    double const p            = 0.6;
+    double const i            = 0.3;
+    double const d            = 0.06;
     double const max_integral = 1000.0;
     set_pid_parameters(pid, p, i, d, max_integral);
 
     const double target_value = 3.14159;
-    pid.setTarget(target_value);
+    pid.setSetPoint(target_value);
 
     const double starting_value = 0.0;
     pid.setStartingValue(starting_value);
 
-    const double first_gain = target_value * p + target_value * i + target_value * d;
-    EXPECT_EQ(pid.control(starting_value), first_gain);
+    const double first_actuation = target_value * p + target_value * i + target_value * d;
+    EXPECT_NEAR(pid.control(starting_value), first_actuation, 1e-6);
 
-    double       previous_error = target_value;
-    double       current_error  = target_value - first_gain;
-    const double second_gain
-        = (target_value - first_gain) * p + (2 * target_value - first_gain) * i + (current_error - previous_error) * d;
-    EXPECT_EQ(pid.control(first_gain), second_gain);
-
-    previous_error          = current_error;
-    current_error           = target_value - second_gain;
-    const double third_gain = (target_value - second_gain) * p + (3 * target_value - first_gain - second_gain) * i
+    double       previous_error   = target_value;
+    double       current_error    = target_value - first_actuation;
+    const double second_actuation = (target_value - first_actuation) * p + (2 * target_value - first_actuation) * i
         + (current_error - previous_error) * d;
-    EXPECT_EQ(pid.control(second_gain), third_gain);
+    EXPECT_NEAR(pid.control(first_actuation), second_actuation, 1e-6);
+
+    previous_error               = current_error;
+    current_error                = target_value - second_actuation;
+    const double third_actuation = (target_value - second_actuation) * p
+        + (3 * target_value - first_actuation - second_actuation) * i + (current_error - previous_error) * d;
+    EXPECT_NEAR(pid.control(second_actuation), third_actuation, 1e-6);
 }

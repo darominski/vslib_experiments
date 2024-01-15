@@ -41,16 +41,20 @@ namespace vslib
 
         //! Computes one iteration of the controller
         //!
-        //! @param current_value Value of the controlled
+        //! @param process_value Value of the controlled
         //! @return Result of this iteration
-        double control(double current_value)
+        double control(double process_value)
         {
-            m_error = m_target - current_value;
-            processIntegralError(m_error);
-            double const derivative = m_error - m_previous_error;   // assuming time difference denominator is = 1
-            double const output     = kp * m_error + ki * m_integral + kd * derivative;
-            m_previous_error        = m_error;   // update errors for the next iteration
-            return output;
+            m_error                   = m_set_point - process_value;
+            m_integral                += m_error;
+            m_integral                = m_anti_windup_protection(m_integral);
+            double const proportional = kp * m_error;
+            double const integral     = ki * m_integral;
+            double const derivative
+                = kd * (m_error - m_previous_error);   // assuming time difference denominator is included in kd
+            double const actuation = proportional + integral + derivative;
+            m_previous_error       = m_error;   // update errors for the next iteration
+            return actuation;
         }
 
         //! Allows for resetting errors of the controller and setting new starting value
@@ -62,7 +66,7 @@ namespace vslib
             m_error          = 0;
             m_integral       = 0;
             m_previous_error = 0;
-            m_target         = 0;
+            m_set_point      = 0;
         }
 
         // ************************************************************
@@ -103,9 +107,9 @@ namespace vslib
         //! Returns the target value of the controller
         //!
         //! @return Target value of the controller
-        [[nodiscard]] double getTarget() const noexcept
+        [[nodiscard]] double getSetPoint() const noexcept
         {
-            return m_target;
+            return m_set_point;
         }
 
         //! Sets the starting value of the controller
@@ -119,9 +123,9 @@ namespace vslib
         //! Sets the target value of the controller
         //!
         //! @param target Target value for the controller
-        void setTarget(double target) noexcept
+        void setSetPoint(double set_point) noexcept
         {
-            m_target = target;
+            m_set_point = set_point;
         }
 
         // ************************************************************
@@ -135,20 +139,11 @@ namespace vslib
 
       private:
         double m_starting_value{0};   //!< Starting value of control
-        double m_target{0};           //!< Target setpoint
+        double m_set_point{0};        //!< Target setpoint
         double m_error{0};            //!< Current error value
         double m_previous_error{0};   //!< Previous error value
         double m_integral{0};         //!< Cumulative error over time
 
         std::function<double(double)> m_anti_windup_protection;
-
-        //! Accumulates the error and calls the anti-windup function
-        //!
-        //! @param error Current control iteration error
-        void processIntegralError(double error) noexcept
-        {
-            m_integral += error;
-            m_integral = m_anti_windup_protection(m_integral);
-        }
     };
 }   // namespace vslib
