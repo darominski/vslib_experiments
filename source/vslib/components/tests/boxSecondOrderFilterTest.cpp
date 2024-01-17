@@ -51,7 +51,7 @@ TEST_F(BoxSecondOrderFilterTest, FilterMultipleValues)
     int    counter        = 0;
     for (const auto& value : values)
     {
-        const double average = (value + previous_value) / 3.0;
+        const double average = (value + previous_value + earlier_value) / 3.0;
         earlier_value        = previous_value;
         previous_value       = value;
         EXPECT_NEAR(filter.filter(value), average, 1e-6);
