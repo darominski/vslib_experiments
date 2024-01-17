@@ -9,6 +9,7 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentArrayTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/firFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/firFirstOrderFilterTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/firSecondOrderFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/iirFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/iirFirstOrderFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidTest.cpp
