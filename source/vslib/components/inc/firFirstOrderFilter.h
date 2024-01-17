@@ -1,5 +1,5 @@
 //! @file
-//! @brief Defines class for a finite-impulse filter.
+//! @brief Defines class for a first order finite-impulse filter.
 //! @author Dominik Arominski
 
 #pragma once
@@ -17,7 +17,7 @@ namespace vslib
       public:
         //! Constructor of the FIR filter component, initializing one Parameter: coefficients
         FIRFirstOrderFilter(std::string_view name, Component* parent = nullptr)
-            : Filter("FIRFilterFirstOrder", name, parent),
+            : Filter("FIRFirstOrderFilter", name, parent),
               coefficients(*this, "coefficients")
         {
         }
