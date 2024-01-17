@@ -35,8 +35,12 @@ namespace vslib
             double output = m_inputs_buffer[m_head] * numerator[0];
             for (uint64_t index = 1; index < BufferLength; index++)
             {
-                uint64_t const buffer_index = (index + m_head) % BufferLength;
-                output                      += m_inputs_buffer[buffer_index] * numerator[index]
+                uint64_t buffer_index = (index + m_head);
+                if (buffer_index >= BufferLength)
+                {
+                    buffer_index -= BufferLength;
+                }
+                output += m_inputs_buffer[buffer_index] * numerator[index]
                     - m_outputs_buffer[buffer_index] * denominator[index];
             }
             shiftOutputBuffer(output);
