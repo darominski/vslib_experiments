@@ -70,7 +70,6 @@ foreach (TARGET ${${APP}_TARGETS})
     vslib
     fmt::fmt
     bmboot_payload_runtime
-    fgc4_bsp_el1
     )
 
   list(APPEND BIN_TARGETS "${CMAKE_BINARY_DIR}/${TARGET}.bin")
