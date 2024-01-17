@@ -11,6 +11,9 @@
 
 namespace vslib
 {
+#ifdef PERFORMANCE_TESTS
+    static constexpr int number_measurements = 1000;
+#endif
 
     class Interrupt
     {
@@ -21,15 +24,13 @@ namespace vslib
         Interrupt(std::function<void(void)> handler_function)
         {
 #ifdef PERFORMANCE_TESTS
-            m_interrupt_handler = [this, handler_function]()
+            m_measurement_counter = 0;
+            m_interrupt_handler   = [this, handler_function]()
             {
                 const auto start_time = preConditions();
                 handler_function();
-                const auto total_time = postConditions(start_time);   // and this value needs to be sent somewhere
-                if (m_measurement_counter < 1000)
-                {
-                    m_measurements[m_measurement_counter] = total_time;
-                }
+                const auto total_time                                       = postConditions(start_time);
+                m_measurements[m_measurement_counter % number_measurements] = total_time;
                 m_measurement_counter++;
             };
             m_measurements = {0};   // sets all elements to 0
@@ -77,8 +78,8 @@ namespace vslib
         std::function<void(void)> m_interrupt_handler;
 
 #ifdef PERFORMANCE_TESTS
-        std::array<int64_t, 1000> m_measurements{0};
-        int32_t                   m_measurement_counter;
+        std::array<uint64_t, number_measurements> m_measurements{0};
+        int32_t                                   m_measurement_counter;
 
         //! Defines the preconditions necessary to estimate the execution time of the interrupt handler
         //!
