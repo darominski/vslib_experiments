@@ -1,5 +1,5 @@
 //! @file
-//! @brief File with unit tests of FIRFilter class.
+//! @brief File with unit tests of FIRSecondOrderFilter class.
 //! @author Dominik Arominski
 
 #include <filesystem>
