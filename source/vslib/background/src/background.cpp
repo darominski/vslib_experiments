@@ -40,8 +40,7 @@ namespace vslib
             // execute the command from the incoming stream, synchronises write and background buffers
             processJsonCommands(json_object);
 
-            // acknowledge transaction
-            m_received_new_data = true;
+            m_received_new_data = true;   // next time there is no message, trigger buffer synchronisation
         }
         else if (m_received_new_data)
         {
@@ -104,8 +103,8 @@ namespace vslib
         return valid;
     }
 
-    //! Executes a single JSON command by moving the received command value to the memory address
-    //! specified in ParameterRegistry for the received parameter name.
+    //! Executes a single JSON command by setting the received command value to the parameter reference
+    //! stored in ParameterRegistry identified by the command's parameter name.
     //!
     //! @param command JSON object containing name of the parameter to be modified, and the new value with its type to
     //! be inserted
@@ -134,7 +133,7 @@ namespace vslib
         }
     }
 
-    //! Calls each registered parameter to synchronise read buffers
+    //! Calls each registered parameter to synchronise background with real-time buffers
     void BackgroundTask::triggerReadBufferSynchronisation()
     {
         for (const auto& parameter : ParameterRegistry::instance().getParameters())
