@@ -1,8 +1,11 @@
 //! @file
-//! @brief File containing implementation of methods used to manipulate the shared memory object.
+//! @brief File containing implementation of methods used to manipulate communicate with the read/write message queues.
 //! @author Dominik Arominski
 
+#include "constants.h"
+#include "errorCodes.h"
 #include "errorMessage.h"
+#include "fmt/format.h"
 #include "sharedMemory.h"
 #include "warningMessage.h"
 
