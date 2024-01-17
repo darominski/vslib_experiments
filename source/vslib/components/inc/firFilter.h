@@ -33,7 +33,12 @@ namespace vslib
             double output(0);
             for (uint64_t index = 0; index < BufferLength; index++)
             {
-                output += m_buffer[(index + m_head + 1) % BufferLength] * coefficients[index];
+                uint64_t buffer_index = (index + m_head + 1);
+                if (buffer_index >= BufferLength)
+                {
+                    buffer_index -= BufferLength;
+                }
+                output += m_buffer[buffer_index] * coefficients[index];
             }
             return output;
         }
