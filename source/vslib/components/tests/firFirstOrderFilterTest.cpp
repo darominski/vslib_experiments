@@ -57,12 +57,12 @@ TEST_F(FIRFirstOrderFilterTest, FilterSingleValue)
 //! Checks that a FIRFirstOrderFilter object can filter a number of provided values
 TEST_F(FIRFirstOrderFilterTest, FilterMultipleValues)
 {
-    constexpr int         filter_length = 3;
+    constexpr int         inputs_length = 3;
     FIRFirstOrderFilter   filter("filter");
     std::array<double, 2> coefficient_array{0.2, 0.8};
     setValues(filter, coefficient_array);
 
-    std::array<double, filter_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
+    std::array<double, inputs_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
     EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-3);
     EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-3);
     EXPECT_NEAR(filter.filter(inputs[2]), inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1], 1e-3);

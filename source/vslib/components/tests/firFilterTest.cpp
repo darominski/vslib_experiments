@@ -61,7 +61,7 @@ TEST_F(FIRFilterTest, FilterMultipleValues)
 {
     constexpr int                     filter_length = 3;
     FIRFilter<filter_length>          filter("filter");
-    std::array<double, filter_length> coefficient_array{0.1, 0.8, 0.1};
+    std::array<double, filter_length> coefficient_array{0.15, 0.8, 0.05};
     setValues<filter_length>(filter, coefficient_array);
 
     std::array<double, filter_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
@@ -71,6 +71,20 @@ TEST_F(FIRFilterTest, FilterMultipleValues)
         filter.filter(inputs[2]),
         inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1] + inputs[0] * coefficient_array[2], 1e-3
     );
+}
+
+//! Checks that a FIRFilter object filters correctly a number of provided values larger than the number of coefficients
+TEST_F(FIRFilterTest, FilterMultipleValuesWrapAround)
+{
+    constexpr int                     filter_length = 2;
+    FIRFilter<filter_length>          filter("filter");
+    std::array<double, filter_length> coefficient_array{0.2, 0.8};
+    setValues<filter_length>(filter, coefficient_array);
+
+    std::array<double, filter_length + 1> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
+    EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-3);
+    EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-3);
+    EXPECT_NEAR(filter.filter(inputs[2]), inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1], 1e-3);
 }
 
 //! Checks that a FIRFilter object can filter an array of inputs at once
