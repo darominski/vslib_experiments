@@ -40,7 +40,6 @@ namespace vslib
         void executeJsonCommand(const fgc4::utils::StaticJson&);
 
       private:
-        bool                                                               m_received_new_data{false};
         nlohmann::json_schema::json_validator                              m_validator;
         bmboot::MessageQueueReader<void>                                   m_read_commands_queue;
         bmboot::MessageQueueWriter<void>                                   m_write_parameter_map_queue;

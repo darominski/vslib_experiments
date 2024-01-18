@@ -40,16 +40,11 @@ namespace vslib
             // execute the command from the incoming stream, synchronises write and background buffers
             processJsonCommands(json_object);
 
-            m_received_new_data = true;   // next time there is no message, trigger buffer synchronisation
-        }
-        else if (m_received_new_data)
-        {
-            // if no new data came in the previous iteration, assume it is safe to switch the read buffers now and
-            // synchronise them
+            // TO-DO: wait a little in case more commands come before flipping state
+
             BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
             // synchronise new background to new active buffer
             triggerReadBufferSynchronisation();
-            m_received_new_data = false;   // buffers updated, no new data available
         }
     }
 
