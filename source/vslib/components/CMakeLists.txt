@@ -23,6 +23,7 @@ add_executable(${APP}
 # and then linked as library for testing purposes
 
 target_include_directories(${APP} PUBLIC
+    ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../../utils        # FGC4-general utilities

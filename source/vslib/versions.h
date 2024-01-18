@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace vslib::utils::version
+namespace vslib::version
 {
     class Version
     {
@@ -23,6 +23,6 @@ namespace vslib::utils::version
 
     // ************************************************************
 
-    constexpr std::string_view json_command       = "0.1";
-    constexpr std::string_view json_parameter_map = "0.1";
+    constexpr Version json_command(0, 1);
+    constexpr Version json_parameter_map(0, 1);
 }

@@ -90,13 +90,14 @@ namespace vslib
         // check that version is correct
         if (valid)
         {
-            valid = (std::string(command["version"]) == vslib::utils::version::json_command);
+            valid = (command["version"][0] == vslib::utils::version::json_command.major);
             if (!valid)
             {
                 const fgc4::utils::Warning message(fmt::format(
-                    "Inconsistent version of the communication interface! Provided version: {}, expected version: "
+                    "Inconsistent major version of the communication interface! Provided version: {}, expected "
+                    "version: "
                     "{}.\n",
-                    command["version"], vslib::utils::version::json_command
+                    command["version"][0], vslib::utils::version::json_command.major
                 ));
             }
         }
