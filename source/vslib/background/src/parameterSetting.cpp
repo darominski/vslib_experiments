@@ -76,7 +76,16 @@ namespace vslib
         // check that major version is consistent
         if (valid)
         {
-            valid = (command["version"][0] == vslib::version::json_command.major);
+            try
+            {
+                valid = (command["version"][0] == vslib::version::json_command.major);
+            }
+            catch (const std::exception& e)
+            {
+                valid = false;
+                const fgc4::utils::Warning message(std::string("Command invalid: ") + e.what());
+                return valid;
+            }
             if (!valid)
             {
                 const fgc4::utils::Warning message(fmt::format(
