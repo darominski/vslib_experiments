@@ -74,7 +74,7 @@ if (NOT BUILD_TESTS)
   # Include directories for vslib
   target_include_directories(${LIB}
       PUBLIC
-      ${CMAKE_SOURCE_DIR}
+      .
       background/inc
       components/inc
       parameters/inc
