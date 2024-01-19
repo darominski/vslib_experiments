@@ -38,8 +38,8 @@ auto parseManifest(const Json& manifest)
 
 auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& parameters)
 {
-    std::vector<Json> commands;
-    std::string_view  version = "0.1";
+    std::vector<Json>  commands;
+    std::array<int, 2> version{0, 1};
     for (const auto& [name, type] : parameters)
     {
         Json command = {{"name", name}};
