@@ -4,8 +4,8 @@
 //! @author Dominik Arominski
 
 #include "componentRegistry.h"
+#include "messageQueue.h"
 #include "parameterMap.h"
-#include "sharedMemory.h"
 
 namespace vslib
 {

@@ -6,7 +6,7 @@
 #include "errorCodes.h"
 #include "errorMessage.h"
 #include "fmt/format.h"
-#include "sharedMemory.h"
+#include "messageQueue.h"
 #include "warningMessage.h"
 
 namespace vslib

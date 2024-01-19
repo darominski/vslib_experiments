@@ -1,5 +1,5 @@
 #include "Util_Mmap.h"
-#include "sharedMemory.h"
+#include "vslib_shared_memory_memmap.h"
 
 namespace fgcd
 {

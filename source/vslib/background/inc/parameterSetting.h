@@ -9,7 +9,7 @@
 #include <nlohmann/json-schema.hpp>
 
 #include "jsonCommandSchema.h"
-#include "sharedMemory.h"
+#include "messageQueue.h"
 #include "staticJson.h"
 #include "vslib_shared_memory_memmap.h"
 

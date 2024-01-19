@@ -7,7 +7,7 @@
 #include "bmboot/domain_helpers.hpp"
 #include "bmboot/message_queue.hpp"
 #include "json/json.hpp"
-#include "sharedMemory.h"
+#include "messageQueue.h"
 #include "shared_memory.h"
 
 using Json = nlohmann::json;
