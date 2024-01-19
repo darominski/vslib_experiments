@@ -63,7 +63,7 @@ if (NOT BUILD_TESTS)
   set(${LIB}_SOURCES
       components/src/componentRegistry.cpp
       parameters/src/parameterRegistry.cpp
-      background/src/background.cpp
+      background/src/parameterSetting.cpp
       utils/src/sharedMemory.cpp
       utils/src/interruptRegistry.cpp
   )

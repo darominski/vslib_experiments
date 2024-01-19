@@ -1,6 +1,6 @@
 //! @file
-//! @brief Source file containing library-side background task specific declarations for creating and uploading the
-//! parameter map, validation of incoming commands, executing them, and triggering synchronisation of buffers.
+//! @brief Source file containing background task class responsible for validation of incoming commands,
+//! executing them, and triggering synchronisation of buffers.
 //! @author Dominik Arominski
 
 #pragma once
@@ -15,12 +15,12 @@
 
 namespace vslib
 {
-    class BackgroundTask
+    class ParameterSetting
     {
       public:
         //! Creates the background task object and initializes the JSON schema validator as well as read and write JSON
         //! queues
-        BackgroundTask()
+        ParameterSetting()
             : m_read_commands_queue{bmboot::createMessageQueue<bmboot::MessageQueueReader<void>>(
                 (uint8_t*)app_data_0_1_ADDRESS, fgc4::utils::constants::json_memory_pool_size
             )},
