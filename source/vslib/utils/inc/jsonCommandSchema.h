@@ -26,7 +26,7 @@ namespace vslib::utils
         },
         "version": {
             "description": "Version of the communication interface",
-            "type": "string"
+            "type": "array"
         }
     },
     "required": [
