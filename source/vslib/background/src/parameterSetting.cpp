@@ -112,9 +112,10 @@ namespace vslib
         }
 
         // execute the command, parameter will handle the validation of provided value.
-        auto const result = (*parameter).second.get().setJsonValue(command["value"]);
-        if (!result.has_value())   // success, otherwise: failure and Warning message already logged
+        auto const has_warning = (*parameter).second.get().setJsonValue(command["value"]);
+        if (!has_warning.has_value())
         {
+            // success, otherwise: failure and Warning message already logged by setJsonValue
             // synchronise the write buffer with the background buffer
             (*parameter).second.get().synchroniseWriteBuffer();
         }
