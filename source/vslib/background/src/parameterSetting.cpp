@@ -1,6 +1,6 @@
 //! @file
-//! @brief Source file containing library-side background task specific code for creating and uploading the parameter
-//! map, validation of incoming commands, executing them, and triggering synchronisation of buffers.
+//! @brief Source file containing library-side background task code for receiving and
+//! validation of incoming commands, their execution, and triggering synchronisation of buffers.
 //! @author Dominik Arominski
 
 #include "bufferSwitch.h"
@@ -17,15 +17,6 @@ using namespace fgc4::utils;
 
 namespace vslib
 {
-
-    //! Creates and uploads the parameter map to the shared memory. The memory is reinitialized each time
-    //! this method is called.
-    void ParameterSetting::uploadParameterMap()
-    {
-        auto json_component_registry = fgc4::utils::StaticJsonFactory::getJsonObject();
-        json_component_registry      = ComponentRegistry::instance().createParameterMap();
-        writeJsonToMessageQueue(json_component_registry, m_write_parameter_map_queue);
-    }
 
     //! Checks if a new command has arrived in shared memory, processes it, and when
     //! new command has come previously switches buffers and calls to synchronise them

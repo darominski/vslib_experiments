@@ -20,6 +20,7 @@
 #include "iirFilter.h"
 #include "interruptRegistry.h"
 #include "logString.h"
+#include "parameterMap.h"
 #include "parameterRegistry.h"
 #include "parameterSetting.h"
 #include "pid.h"
@@ -70,6 +71,7 @@ int main()
     puts("Hello world from vloop running on cpu1!");
 
     ParameterSetting parameter_setting_task;
+    ParameterMap     parameter_map;
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
@@ -93,7 +95,7 @@ int main()
 
     // write_queue.write({parameter_map, parameter_map.size()}, {});
 
-    parameter_setting_task.uploadParameterMap();
+    parameter_map.uploadParameterMap();
 
     // TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(40));
     // timer.start();

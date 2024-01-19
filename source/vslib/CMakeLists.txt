@@ -64,6 +64,7 @@ if (NOT BUILD_TESTS)
       components/src/componentRegistry.cpp
       parameters/src/parameterRegistry.cpp
       background/src/parameterSetting.cpp
+      background/src/parameterMap.cpp
       utils/src/sharedMemory.cpp
       utils/src/interruptRegistry.cpp
   )
