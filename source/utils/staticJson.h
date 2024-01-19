@@ -28,7 +28,9 @@ namespace fgc4::utils
       public:
         static StaticJson getJsonObject()
         {
-            RingBuffer<StaticJsonFactory, constants::json_memory_pool_size>::clear();
+            // TO-DO: This buffer used to be cleared before each use. A better approach than just letting it loop
+            // around with possibly many objects in the memory needs to be found. More dynamic memory allocation
+            // along with separate buffers for different uses should be investigated.
             return {};   // This is important, to always get the fresh object
         }
     };
