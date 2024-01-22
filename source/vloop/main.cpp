@@ -10,7 +10,6 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "background.h"
 #include "boxFilter.h"
 #include "boxFirstOrderFilter.h"
 #include "componentArray.h"
@@ -21,7 +20,9 @@
 #include "iirFilter.h"
 #include "interruptRegistry.h"
 #include "logString.h"
+#include "parameterMap.h"
 #include "parameterRegistry.h"
+#include "parameterSetting.h"
 #include "pid.h"
 #include "rst.h"
 #include "timerInterrupt.h"
@@ -69,7 +70,8 @@ int main()
     bmboot::notifyPayloadStarted();
     puts("Hello world from vloop running on cpu1!");
 
-    BackgroundTask background_task;
+    ParameterSetting parameter_setting_task;
+    ParameterMap     parameter_map;
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
@@ -93,7 +95,7 @@ int main()
 
     // write_queue.write({parameter_map, parameter_map.size()}, {});
 
-    background_task.uploadParameterMap();
+    parameter_map.uploadParameterMap();
 
     // TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(40));
     // timer.start();
@@ -146,7 +148,7 @@ int main()
         //         // }
         //         // puts("");
 
-        background_task.receiveJsonCommand();
+        parameter_setting_task.receiveJsonCommand();
         usleep(500'000);   // 500 ms
     }
 

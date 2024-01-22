@@ -1,15 +1,15 @@
 //! @file
-//! @brief Source file containing library-side background task specific code for creating and uploading the parameter
-//! map, validation of incoming commands, executing them, and triggering synchronisation of buffers.
+//! @brief Source file containing library-side background task code for receiving and
+//! validation of incoming commands, their execution, and triggering synchronisation of buffers.
 //! @author Dominik Arominski
 
-#include "background.h"
 #include "bufferSwitch.h"
 #include "constants.h"
 #include "errorCodes.h"
 #include "fmt/format.h"
 #include "parameter.h"
 #include "parameterRegistry.h"
+#include "parameterSetting.h"
 #include "versions.h"
 #include "warningMessage.h"
 
@@ -18,18 +18,9 @@ using namespace fgc4::utils;
 namespace vslib
 {
 
-    //! Creates and uploads the parameter map to the shared memory. The memory is reinitialized each time
-    //! this method is called.
-    void BackgroundTask::uploadParameterMap()
-    {
-        auto json_component_registry = fgc4::utils::StaticJsonFactory::getJsonObject();
-        json_component_registry      = ComponentRegistry::instance().createParameterMap();
-        writeJsonToMessageQueue(json_component_registry, m_write_parameter_map_queue);
-    }
-
     //! Checks if a new command has arrived in shared memory, processes it, and when
     //! new command has come previously switches buffers and calls to synchronise them
-    void BackgroundTask::receiveJsonCommand()
+    void ParameterSetting::receiveJsonCommand()
     {
         auto message = m_read_commands_queue.read(m_read_commands_buffer);
 
@@ -51,7 +42,7 @@ namespace vslib
     //! Processes the received JSON commands, checking whether one or many commands were received.
     //!
     //! @param command JSON object containing one or more JSON commands to be executed
-    void BackgroundTask::processJsonCommands(const fgc4::utils::StaticJson& commands)
+    void ParameterSetting::processJsonCommands(const fgc4::utils::StaticJson& commands)
     {
         if (commands.is_object())   // single command
         {
@@ -70,7 +61,7 @@ namespace vslib
     //!
     //! @param command JSON object to be validated as a valid command
     //! @return True if the command contains all expected fields, false otherwise.
-    bool BackgroundTask::validateJsonCommand(const fgc4::utils::StaticJson& command)
+    bool ParameterSetting::validateJsonCommand(const fgc4::utils::StaticJson& command)
     {
         bool valid = true;
         try
@@ -82,17 +73,26 @@ namespace vslib
             valid = false;
             const fgc4::utils::Warning message(std::string("Command invalid: ") + e.what());
         }
-        // check that version is correct
+        // check that major version is consistent
         if (valid)
         {
-            valid = (command["version"][0] == vslib::utils::version::json_command.major);
+            try
+            {
+                valid = (command["version"][0] == vslib::version::json_command.major);
+            }
+            catch (const std::exception& e)
+            {
+                valid = false;
+                const fgc4::utils::Warning message(std::string("Command invalid: ") + e.what());
+                return valid;
+            }
             if (!valid)
             {
                 const fgc4::utils::Warning message(fmt::format(
                     "Inconsistent major version of the communication interface! Provided version: {}, expected "
                     "version: "
                     "{}.\n",
-                    command["version"][0], vslib::utils::version::json_command.major
+                    command["version"][0], vslib::version::json_command.major
                 ));
             }
         }
@@ -104,7 +104,7 @@ namespace vslib
     //!
     //! @param command JSON object containing name of the parameter to be modified, and the new value with its type to
     //! be inserted
-    void BackgroundTask::executeJsonCommand(const fgc4::utils::StaticJson& command)
+    void ParameterSetting::executeJsonCommand(const fgc4::utils::StaticJson& command)
     {
         if (!validateJsonCommand(command))
         {
@@ -121,20 +121,21 @@ namespace vslib
         }
 
         // execute the command, parameter will handle the validation of provided value.
-        auto const result = (*parameter).second.get().setJsonValue(command["value"]);
-        if (!result.has_value())   // success, otherwise: failure and Warning message already logged
+        auto const has_warning = (*parameter).second.get().setJsonValue(command["value"]);
+        if (!has_warning.has_value())
         {
+            // success, otherwise: failure and Warning message already logged by setJsonValue
             // synchronise the write buffer with the background buffer
             (*parameter).second.get().synchroniseWriteBuffer();
         }
     }
 
     //! Calls each registered parameter to synchronise background with real-time buffers
-    void BackgroundTask::triggerReadBufferSynchronisation()
+    void ParameterSetting::triggerReadBufferSynchronisation()
     {
         for (const auto& parameter : ParameterRegistry::instance().getParameters())
         {
             parameter.second.get().synchroniseReadBuffers();
         }
     }
-}   // namespace backgroundTask
+}   // namespace vslib
