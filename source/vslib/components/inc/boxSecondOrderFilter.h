@@ -1,5 +1,5 @@
 //! @file
-//! @brief Defines class for a second-order box averaging filter.
+//! @brief Defines partial template specialization for a second-order box averaging filter.
 //! @author Dominik Arominski
 
 #pragma once
@@ -10,12 +10,13 @@
 
 namespace vslib
 {
-    class BoxSecondOrderFilter : public Filter
+    template<>
+    class BoxFilter<3> : public Filter
     {
 
       public:
         //! Constructor of the box filter component
-        BoxSecondOrderFilter(std::string_view name, Component* parent = nullptr)
+        BoxFilter(std::string_view name, Component* parent = nullptr)
             : Filter("BoxSecondOrderFilter", name, parent)
         {
         }

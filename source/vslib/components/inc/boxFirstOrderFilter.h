@@ -1,22 +1,23 @@
 //! @file
-//! @brief Defines class for a first-order box averaging filter.
+//! @brief Defines partial template specialization for a first-order box averaging filter.
 //! @author Dominik Arominski
 
 #pragma once
 
 #include <string>
 
+#include "boxFilter.h"
 #include "filter.h"
 
 namespace vslib
 {
-    class BoxFirstOrderFilter : public Filter
+    template<>
+    class BoxFilter<2> : public Filter
     {
-
       public:
         //! Constructor of the box filter component
-        BoxFirstOrderFilter(std::string_view name, Component* parent = nullptr)
-            : Filter("BoxFirstOrderFilter", name, parent)
+        BoxFilter(std::string_view name, Component* parent = nullptr)
+            : Filter("BoxFilter", name, parent)
         {
         }
 
