@@ -1,5 +1,5 @@
 //! @file
-//! @brief Defines class for a first-order infinite-impulse filter.
+//! @brief Defines partial order specialization for a first-order infinite-impulse filter.
 //! @author Dominik Arominski
 
 #pragma once
@@ -12,11 +12,12 @@
 
 namespace vslib
 {
-    class IIRFirstOrderFilter : public Filter
+    template<>
+    class IIRFilter<2> : public Filter
     {
       public:
         //! Constructor of the first-order IIR filter component, initializing one Parameter: coefficients
-        IIRFirstOrderFilter(std::string_view name, Component* parent = nullptr)
+        IIRFilter(std::string_view name, Component* parent = nullptr)
             : Filter("IIRFirstOrderFilter", name, parent),
               numerator(*this, "numerator_coefficients"),
               denominator(*this, "denominator_coefficients")

@@ -1,5 +1,5 @@
 //! @file
-//! @brief Defines class for a first order finite-impulse filter.
+//! @brief Defines partial template specialization for a first order finite-impulse filter.
 //! @author Dominik Arominski
 
 #pragma once
@@ -12,12 +12,13 @@
 
 namespace vslib
 {
-    class FIRFirstOrderFilter : public Filter
+    template<>
+    class FIRFilter<2> : public Filter
     {
       public:
         //! Constructor of the FIR filter component, initializing one Parameter: coefficients
-        FIRFirstOrderFilter(std::string_view name, Component* parent = nullptr)
-            : Filter("FIRFirstOrderFilter", name, parent),
+        FIRFilter(std::string_view name, Component* parent = nullptr)
+            : Filter("FIRFilter", name, parent),
               coefficients(*this, "coefficients")
         {
         }
