@@ -1,28 +1,13 @@
 //! @file
-//! @brief File containing versions for all used communication interfaces.
+//! @brief File containing version objects for all used communication interfaces.
 //! @author Dominik Arominski
 
 #pragma once
 
-#include <string>
+#include "version.h"
 
 namespace vslib::version
 {
-    class Version
-    {
-      public:
-        constexpr Version(short _major, short _minor)
-            : major(_major),
-              minor(_minor)
-        {
-        }
-
-        short major;
-        short minor;
-    };
-
-    // ************************************************************
-
-    constexpr Version json_command(0, 1);
-    constexpr Version json_parameter_map(0, 1);
+    constexpr fgc4::utils::Version json_command(0, 1, 0);
+    constexpr fgc4::utils::Version json_parameter_map(0, 1, 0);
 }
