@@ -36,6 +36,8 @@ namespace vslib
             for (uint64_t index = 1; index < BufferLength; index++)
             {
                 uint64_t buffer_index = (index + m_head);
+                // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
+                // when if statement is used instead of modulo to perform the shift below
                 if (buffer_index >= BufferLength)
                 {
                     buffer_index -= BufferLength;
@@ -93,5 +95,45 @@ namespace vslib
                 m_head = BufferLength - 1;
             }
         }
+    };
+
+    // ************************************************************
+    // Partial template specialization for the first-order filter
+    //
+    // Benchmarking showed 19% gain for the first order, and only 4% for the 2nd order. Therefore, only
+    // the first order is specialized.
+
+    template<>
+    class IIRFilter<2> : public Filter
+    {
+      public:
+        //! Constructor of the first-order IIR filter component, initializing one Parameter: coefficients
+        IIRFilter(std::string_view name, Component* parent = nullptr)
+            : Filter("IIRFirstOrderFilter", name, parent),
+              numerator(*this, "numerator_coefficients"),
+              denominator(*this, "denominator_coefficients")
+        {
+        }
+
+        //! Filters the provided input by convolving coefficients and the input, including previous inputs
+        //! and previously filtered value's output.
+        //!
+        //! @param input Input value to be filtered
+        //! @return Filtered value
+        double filter(double input) override
+        {
+            double const output
+                = input * numerator[0] + m_previous_input * numerator[1] - m_previous_output * denominator[1];
+            m_previous_input  = input;
+            m_previous_output = output;
+            return output;
+        }
+
+        Parameter<std::array<double, 2>> numerator;
+        Parameter<std::array<double, 2>> denominator;
+
+      private:
+        double m_previous_input{0};
+        double m_previous_output{0};
     };
 }   // namespace vslib

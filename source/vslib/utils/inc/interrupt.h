@@ -12,7 +12,7 @@
 namespace vslib
 {
 #ifdef PERFORMANCE_TESTS
-    static constexpr int number_measurements = 1000;
+    static constexpr int number_measurements = 1'000'000;
 #endif
 
     class Interrupt
@@ -29,9 +29,12 @@ namespace vslib
             {
                 const auto start_time = preConditions();
                 handler_function();
-                const auto total_time                                       = postConditions(start_time);
-                m_measurements[m_measurement_counter % number_measurements] = total_time;
-                m_measurement_counter++;
+                const auto total_time = postConditions(start_time);
+                if (m_measurement_counter < number_measurements)
+                {
+                    m_measurements[m_measurement_counter % number_measurements] = total_time;
+                    m_measurement_counter++;
+                }
             };
             m_measurements = {0};   // sets all elements to 0
 #else

@@ -40,7 +40,11 @@ namespace vslib
     [[nodiscard]] StaticJson ComponentRegistry::createParameterMap() const
     {
         StaticJson parameterMap = nlohmann::json::array();
-        parameterMap.push_back({{"version", {version::json_parameter_map.major, version::json_parameter_map.minor}}});
+        parameterMap.push_back(
+            {{"version",
+              {version::json_parameter_map.major, version::json_parameter_map.minor,
+               version::json_parameter_map.revision}}}
+        );
         for (const auto& [_, component] : m_components)
         {
             parameterMap.push_back(component.get().serialize());

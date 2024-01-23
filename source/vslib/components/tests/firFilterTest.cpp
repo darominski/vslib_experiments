@@ -47,10 +47,32 @@ TEST_F(FIRFilterTest, FilterDefaultConstruction)
 //! Checks that a FIRFilter object can filter provided value
 TEST_F(FIRFilterTest, FilterSingleValue)
 {
-    constexpr int                     filter_length = 3;
+    constexpr int                     filter_length = 4;
     FIRFilter<filter_length>          filter("filter");
-    std::array<double, filter_length> coefficient_array{0.1, 0.8, 0.1};
+    std::array<double, filter_length> coefficient_array{0.05, 0.8, 0.025, 0.025};
     setValues<filter_length>(filter, coefficient_array);
+
+    double input = 3.14159;
+    EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-3);
+}
+
+//! Checks that a partial template specialization (1st order) object can filter provided value
+TEST_F(FIRFilterTest, FirstOrderFilterSingleValue)
+{
+    FIRFilter<2>          filter("filter");
+    std::array<double, 2> coefficient_array{0.2, 0.8};
+    setValues(filter, coefficient_array);
+
+    double input = 3.14159;
+    EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-3);
+}
+
+//! Checks that a partial template specialization (2nd order) object can filter provided value
+TEST_F(FIRFilterTest, SecondOrderFilterSingleValue)
+{
+    FIRFilter<3>          filter("filter");
+    std::array<double, 3> coefficient_array{0.05, 0.8, 0.15};
+    setValues(filter, coefficient_array);
 
     double input = 3.14159;
     EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-3);
@@ -59,12 +81,43 @@ TEST_F(FIRFilterTest, FilterSingleValue)
 //! Checks that a FIRFilter object can filter a number of provided values
 TEST_F(FIRFilterTest, FilterMultipleValues)
 {
-    constexpr int                     filter_length = 3;
+    constexpr int                     filter_length = 4;
     FIRFilter<filter_length>          filter("filter");
-    std::array<double, filter_length> coefficient_array{0.15, 0.8, 0.05};
+    std::array<double, filter_length> coefficient_array{0.1, 0.8, 0.05, 0.05};
     setValues<filter_length>(filter, coefficient_array);
 
     std::array<double, filter_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
+    EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-3);
+    EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-3);
+    EXPECT_NEAR(
+        filter.filter(inputs[2]),
+        inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1] + inputs[0] * coefficient_array[2], 1e-3
+    );
+}
+
+//! Checks that a partial template specialization (1st order) object can filter a number of provided values
+TEST_F(FIRFilterTest, FirstOrderFilterMultipleValues)
+{
+    constexpr int         inputs_length = 3;
+    FIRFilter<2>          filter("filter");
+    std::array<double, 2> coefficient_array{0.2, 0.8};
+    setValues(filter, coefficient_array);
+
+    std::array<double, inputs_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
+    EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-3);
+    EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-3);
+    EXPECT_NEAR(filter.filter(inputs[2]), inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1], 1e-3);
+}
+
+//! Checks that a partial template specialization (2nd order) object can filter a number of provided values
+TEST_F(FIRFilterTest, SecondOrderFilterMultipleValues)
+{
+    constexpr int         inputs_length = 3;
+    FIRFilter<3>          filter("filter");
+    std::array<double, 3> coefficient_array{0.15, 0.8, 0.05};
+    setValues(filter, coefficient_array);
+
+    std::array<double, inputs_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
     EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-3);
     EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-3);
     EXPECT_NEAR(

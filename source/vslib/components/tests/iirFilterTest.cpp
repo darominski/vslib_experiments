@@ -70,6 +70,50 @@ TEST_F(IIRFilterTest, FilterSingleValue)
     EXPECT_NEAR(filter.filter(input), input * numerator_values[0], 1e-3);
 }
 
+//! Checks that a partial template specialization (1st order) IIRFilter object can filter provided value.
+//! For a single input, the IIR will still behave like an FIR.
+TEST_F(IIRFilterTest, FirstOrderFilterSingleValueSetDenominator)
+{
+    constexpr int         inputs_length = 3;
+    IIRFilter<2>          filter("filter");
+    std::array<double, 2> numerator_values{0.3, 0.7};
+    setNumeratorValues(filter, numerator_values);
+    std::array<double, 2> denominator_values{1.0, -0.37};   // from Matlab: Butterworth IIR filter
+    setDenominatorValues(filter, denominator_values);
+
+    double input = 3.14159;
+    EXPECT_NEAR(filter.filter(input), input * numerator_values[0], 1e-3);
+}
+
+//! Checks that a FIRFilter object can filter a number of provided values, without wrapping around the buffers
+TEST_F(IIRFilterTest, FirstOrderFilterMultipleValues)
+{
+    constexpr int         input_length = 3;
+    IIRFilter<2>          filter("filter");
+    std::array<double, 2> numerator_values{0.2, 0.8};
+    setNumeratorValues(filter, numerator_values);
+    std::array<double, 2> denominator_values{1.0, -0.37};
+    setDenominatorValues(filter, denominator_values);
+
+    std::array<double, input_length> inputs{3.14159 * 0.5, 3.14159 * 1, 3.14159 * 1.5};
+    std::array<double, input_length> outputs{0};
+
+    outputs[0] = filter.filter(inputs[0]);
+    EXPECT_NEAR(outputs[0], inputs[0] * numerator_values[0], 1e-3);
+
+    outputs[1] = filter.filter(inputs[1]);
+    EXPECT_NEAR(
+        outputs[1],
+        inputs[1] * numerator_values[0] + inputs[0] * numerator_values[1] - outputs[0] * denominator_values[1], 1e-3
+    );
+
+    outputs[2] = filter.filter(inputs[2]);
+    EXPECT_NEAR(
+        outputs[2],
+        inputs[2] * numerator_values[0] + inputs[1] * numerator_values[1] - (outputs[1] * denominator_values[1]), 1e-3
+    );
+}
+
 //! Checks that a IIRFilter object can filter provided value. For a single input,
 //! the IIR will still behave like an FIR.
 TEST_F(IIRFilterTest, FilterSingleValueSetDenominator)

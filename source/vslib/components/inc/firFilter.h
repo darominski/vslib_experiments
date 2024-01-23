@@ -34,6 +34,8 @@ namespace vslib
             for (uint64_t index = 0; index < BufferLength; index++)
             {
                 uint64_t buffer_index = (index + m_head + 1);
+                // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
+                // when if statement is used instead of modulo to perform the shift below
                 if (buffer_index >= BufferLength)
                 {
                     buffer_index -= BufferLength;
@@ -79,5 +81,71 @@ namespace vslib
                 m_head = BufferLength - 1;
             }
         }
+    };
+
+    // ************************************************************
+    // Partial template specialization for low-order filters
+    //
+    // Benchmarking showed 44% gain for the first order, and 72% for the 2nd order.
+
+    template<>
+    class FIRFilter<2> : public Filter
+    {
+      public:
+        //! Constructor of the FIR filter component, initializing one Parameter: coefficients
+        FIRFilter(std::string_view name, Component* parent = nullptr)
+            : Filter("FIRFilter", name, parent),
+              coefficients(*this, "coefficients")
+        {
+        }
+
+        //! Filters the provided input by convolving coefficients and the input, including previous inputs
+        //!
+        //! @param input Input value to be filtered
+        //! @return Filtered value
+        double filter(const double input) override
+        {
+            double const output = input * coefficients[0] + m_previous_input * coefficients[1];
+            m_previous_input    = input;
+            return output;
+        }
+
+        Parameter<std::array<double, 2>> coefficients;
+
+      private:
+        double m_previous_input{0.0};
+    };
+
+    // ************************************************************
+
+    template<>
+    class FIRFilter<3> : public Filter
+    {
+      public:
+        //! Constructor of the FIR filter component, initializing one Parameter: coefficients
+        FIRFilter(std::string_view name, Component* parent = nullptr)
+            : Filter("FIRFilter", name, parent),
+              coefficients(*this, "coefficients")
+        {
+        }
+
+        //! Filters the provided input by convolving coefficients and the input, including previous inputs
+        //!
+        //! @param input Input value to be filtered
+        //! @return Filtered value
+        double filter(const double input) override
+        {
+            double const output
+                = input * coefficients[0] + m_previous_input * coefficients[1] + m_earlier_input * coefficients[2];
+            m_earlier_input  = m_previous_input;
+            m_previous_input = input;
+            return output;
+        }
+
+        Parameter<std::array<double, 3>> coefficients;
+
+      private:
+        double m_previous_input{0.0};
+        double m_earlier_input{0.0};
     };
 }   // namespace vslib
