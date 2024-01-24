@@ -88,7 +88,7 @@ namespace vslib
     // ************************************************************
     // Partial template specialization for low-order filters
     //
-    // Benchmarking showed 126% gain for the first order, and 100% for the 2nd order.
+    // Benchmarking showed 126% gain for the first order, and 50% for the 2nd order.
 
     template<>
     class BoxFilter<3> : public Filter
