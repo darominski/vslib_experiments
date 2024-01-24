@@ -283,7 +283,7 @@ TEST_F(ParameterTest, DoubleParameterSetInvalidValue)
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), true);   // there is a warning message
-    EXPECT_EQ(fmt::format("{}", output.value()), "Warning: Provided value: 10 is outside the limits: -1, 5!\n");
+    EXPECT_EQ(fmt::format("{}", output.value()), "Warning: Provided value: 10 is outside the limits: -1, 5!");
     parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
     BufferSwitch::flipState();            // switches between read and background buffer
 
@@ -308,10 +308,7 @@ TEST_F(ParameterTest, EnumParameterSetInvalidValue)
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), true);   // there is a warning message
-    EXPECT_EQ(
-        fmt::format("{}", output.value()),
-        "Warning: The provided enum value is not one of the allowed values.\nCommand ignored.\n"
-    );
+    EXPECT_EQ(fmt::format("{}", output.value()), "Warning: The provided enum value is not one of the allowed values.");
     EXPECT_EQ(parameter.isInitialized(), false);
 }
 
@@ -354,8 +351,7 @@ TEST_F(ParameterTest, ParameterSetInvalidTypeValue)
     auto           output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), true);   // there is a warning message
     EXPECT_EQ(
-        fmt::format("{}", output.value()),
-        "Warning: [json.exception.type_error.302] type must be number, but is string.\nCommand ignored.\n"
+        fmt::format("{}", output.value()), "Warning: [json.exception.type_error.302] type must be number, but is string"
     );
     EXPECT_EQ(parameter.isInitialized(), false);
 }
