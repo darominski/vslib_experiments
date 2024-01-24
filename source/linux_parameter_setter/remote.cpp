@@ -44,21 +44,21 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     {
         Json command = {{"name", name}};
         command.push_back({"version", version});
-        if (type == "Float64")
-        {
-            // half of the values will be invalid
-            if (commands.size() % 2 == 0)
-            {
-                double value = 3.14159 * static_cast<double>(commands.size() + 2);
-                command.push_back({"value", value});
-            }
-            else
-            {
-                std::string value = "invalid";
-                command.push_back({"value", value});
-            }
-        }
-        else if (type == "Bool")
+        // if (type == "Float64")
+        // {
+        //     // half of the values will be invalid
+        //     if (commands.size() % 2 == 0)
+        //     {
+        //         double value = 3.14159 * static_cast<double>(commands.size() + 2);
+        //         command.push_back({"value", value});
+        //     }
+        //     else
+        //     {
+        //         std::string value = "invalid";
+        //         command.push_back({"value", value});
+        //     }
+        // }
+        if (type == "Bool")
         {
             command.push_back({"value", true});
         }
@@ -68,9 +68,12 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
         }
         else
         {   // Float32Array
-            int const             counter = static_cast<int>(commands.size());
-            std::array<double, 4> value   = {counter + 0.1, counter + 1.1, counter + 2.2, counter + 3.3};
+            std::cout << name << std::endl;
+            int value = -123;
             command.push_back({"value", value});
+            // int const             counter = static_cast<int>(commands.size());
+            // std::array<double, 4> value   = {counter + 0.1, counter + 1.1, counter + 2.2, counter + 3.3};
+            // command.push_back({"value", value});
         }
         commands.push_back(command);
     }
@@ -120,8 +123,8 @@ int main()
         auto message = read_parameter_map_queue.read(parameter_map_buffer);
         if (message.has_value())
         {
-            auto const json_manifest       = vslib::readJsonFromMessageQueue(message.value());
-            // std::cout << json_manifest.dump(1) << "\n";
+            auto const json_manifest = vslib::readJsonFromMessageQueue(message.value());
+            std::cout << json_manifest.dump(1) << "\n";
             auto const settable_parameters = parseManifest(json_manifest);
             commands                       = prepareCommands(settable_parameters);
             commands_set                   = true;
