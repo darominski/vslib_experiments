@@ -23,6 +23,7 @@
 #include "parameterRegistry.h"
 #include "staticJson.h"
 #include "typeLabel.h"
+#include "typeVerification.h"
 #include "warningMessage.h"
 
 namespace vslib
@@ -350,13 +351,15 @@ namespace vslib
         // ************************************************************
         // Methods related to setting new parameter value based on the JSON input
 
-        //! Validates the provided JSON value against the Parameter type.
+        //! Validates the provided JSON value against the scalar Parameter type.
         //!
         //! @param json_value JSON object containing command value to be validated
         //! @return If validation not successful returns Warning with relevant information, nothing otherwise
         std::optional<fgc4::utils::Warning> verifyTypeAgrees(const StaticJson& json_value)
         {
-            if (std::is_integral<T>() && !json_value.is_number_integer())
+            // C++ standard does not differentiate between integral and boolean type in std::is_integral and
+            // std::is_unsigned. Therefore, boolean has to be explicitely removed from comparison below.
+            if (!utils::checkIfIntegral<T>(json_value))
             {
                 fgc4::utils::Warning message(fmt::format(
                     "The provided command value: {} is not an integer, while Parameter type is an integer.",
@@ -364,7 +367,7 @@ namespace vslib
                 ));
                 return message;
             }
-            if (std::is_unsigned<T>::value && !json_value.is_number_unsigned())
+            if (!utils::checkIfUnsigned<T>(json_value))
             {
                 fgc4::utils::Warning message(fmt::format(
                     "The provided command value: {} is not an unsigned integer, while Parameter type is an unsigned "
@@ -373,10 +376,18 @@ namespace vslib
                 ));
                 return message;
             }
+            if (!utils::checkIfBoolean<T>(json_value))
+            {
+                fgc4::utils::Warning message(fmt::format(
+                    "The provided command value: {} is not a boolean, while Parameter type is a boolean.",
+                    json_value.dump()
+                ));
+                return message;
+            }
             return {};
         }
 
-        //! Sets the provided JSON value to the write buffer.
+        //! Sets the provided JSON value to the write buffer. Handles boolean, std::string, numerical types, and arrays
         //!
         //! @param json_value JSON object containing new parameter value to be set
         //! @return If not successful returns Warning with relevant information, nothing otherwise
@@ -394,12 +405,16 @@ namespace vslib
                 fgc4::utils::Warning message(e.what());
                 return message;
             }
-            // Command type is implicitly castable, this step ensures that types agree more precisely:
+
+            // Command type is implicitly castable, this step ensures that numerical types agree more precisely:
             // integral vs floating point agreement and signedness are checked
-            auto const has_warning = verifyTypeAgrees(json_value);
-            if (has_warning.has_value())
+            if constexpr (fgc4::utils::NumericScalar<T> || fgc4::utils::Boolean<T> || fgc4::utils::NumericArray<T>)
             {
-                return has_warning.value();
+                auto const has_warning = verifyTypeAgrees(json_value);
+                if (has_warning.has_value())
+                {
+                    return has_warning.value();
+                }
             }
             // When types and their details are in agreement, the command value needs to fit in the Parameter's (and the
             // type's) limits
