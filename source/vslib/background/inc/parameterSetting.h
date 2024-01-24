@@ -28,8 +28,6 @@ namespace vslib
             m_validator.set_root_schema(utils::json_command_schema);
         }
 
-        void uploadParameterMap();
-
         void receiveJsonCommand();
         void processJsonCommands(const fgc4::utils::StaticJson&);
         bool validateJsonCommand(const fgc4::utils::StaticJson&);
