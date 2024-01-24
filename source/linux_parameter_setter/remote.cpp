@@ -90,7 +90,8 @@ int main()
     bmboot::throwOnError(domain->ensureReadyToLoadPayload(), "ensureReadyToLoadPayload");
 
     fprintf(stderr, "Map memory\n");
-    constexpr int queue_size = fgc4::utils::constants::json_memory_pool_size;
+    constexpr int queue_size        = fgc4::utils::constants::json_memory_pool_size;
+    constexpr int string_queue_size = fgc4::utils::constants::string_memory_pool_size;
 
     int          fd = open("/dev/mem", O_RDWR);
     bmboot::Mmap buffer(nullptr, 64 * queue_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, app_data_0_1_ADDRESS);
@@ -103,27 +104,30 @@ int main()
     auto read_parameter_map_queue = bmboot::createMessageQueue<bmboot::MessageQueueReader<void>>(
         (uint8_t*)buffer.data() + queue_size, queue_size
     );
+    auto read_command_status_queue = bmboot::createMessageQueue<bmboot::MessageQueueReader<void>>(
+        (uint8_t*)buffer.data() + 2 * queue_size, string_queue_size
+    );
 
     fprintf(stderr, "Run payload\n");
     bmboot::loadPayloadFromFileOrThrow(*domain, "vloop_cpu1.bin");
     usleep(500'000);   // delay for initialization
 
-    std::array<uint8_t, queue_size> parameter_map_buffer;
-    std::vector<Json>               commands;
-    bool                            commands_set  = false;
-    size_t                          counter       = 0;
-    size_t                          commands_sent = 0;
+    std::array<uint8_t, queue_size>        parameter_map_buffer;
+    std::array<uint8_t, string_queue_size> command_status_buffer{0};
+    std::vector<Json>                      commands;
+    bool                                   commands_set  = false;
+    size_t                                 counter       = 0;
+    size_t                                 commands_sent = 0;
     while (true)
     {
         std::cout << "Linux counter: " << counter++ << "\n";
         // TEST CODE FOR TRANSFERRING COMMANDS
         // there are 3 PID with 9 params + RST with 1 parameter, so 10 in total,
         // modulo prevents setting not used fields
-        fprintf(stderr, "Read parameter map\n");
         auto message = read_parameter_map_queue.read(parameter_map_buffer);
         if (message.has_value())
         {
-            auto const json_manifest = vslib::readJsonFromMessageQueue(message.value());
+            auto const json_manifest = vslib::utils::readJsonFromMessageQueue(message.value());
             std::cout << json_manifest.dump(1) << "\n";
             auto const settable_parameters = parseManifest(json_manifest);
             commands                       = prepareCommands(settable_parameters);
@@ -132,7 +136,19 @@ int main()
 
         if (commands_set && (commands_sent < commands.size()))
         {
-            writeJsonToMessageQueue(commands[commands_sent], write_commands_queue);
+            // check status of previous command
+            auto message = read_command_status_queue.read(command_status_buffer);
+            if (message.has_value())
+            {
+
+                std::cout << "Status: " << std::string(message->begin(), message->end()) << std::endl;
+            }
+            else
+            {
+                std::cout << "No status\n";
+            }
+            std::cout << "Command sent: " << commands[commands_sent].dump() << std::endl;
+            vslib::utils::writeJsonToMessageQueue(commands[commands_sent], write_commands_queue);
             commands_sent++;
         }
 
