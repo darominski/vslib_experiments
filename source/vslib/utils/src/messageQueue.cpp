@@ -51,4 +51,23 @@ namespace vslib::utils
         return json_object;
     }
 
+    //! Helper function to write string object from the message and deserialize it
+    //!
+    //! @param message Reference to the shared memory object
+    //! @return Static JSON object parsed from shared memory
+    void writeStringToMessageQueue(const std::string& message, bmboot::MessageQueueWriter<void>& message_queue)
+    {
+        if (message.size() < fgc4::utils::constants::string_memory_pool_size)
+        {
+            message_queue.write({(const uint8_t*)(message.data()), message.size()});
+        }
+        else
+        {
+            fgc4::utils::Error(
+                "Error writing string to message queue: run out of shared memory.\n",
+                fgc4::utils::errorCodes::allocation_buffer_overflow
+            );
+            throw std::bad_alloc();
+        }
+    }
 }   // namespace vslib::utils

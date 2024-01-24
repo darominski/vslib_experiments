@@ -13,4 +13,5 @@ namespace vslib::utils
 {
     void                    writeJsonToMessageQueue(const fgc4::utils::StaticJson&, bmboot::MessageQueueWriter<void>&);
     fgc4::utils::StaticJson readJsonFromMessageQueue(std::span<uint8_t>&);
+    void                    writeStringToMessageQueue(const std::string&, bmboot::MessageQueueWriter<void>&);
 }   // namespace vslib::utils
