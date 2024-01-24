@@ -107,7 +107,7 @@ namespace vslib
             {
                 fgc4::utils::Error message(
                     fmt::
-                        format("Out of bounds access attempted at index: {}, array size: {}\n.", index, std::tuple_size_v<T>),
+                        format("Out of bounds access attempted at index: {}, array size: {}.", index, std::tuple_size_v<T>),
                     fgc4::utils::errorCodes::out_of_bounds_access
                 );
                 throw std::out_of_range(fmt::format("{}", message));
@@ -312,7 +312,7 @@ namespace vslib
                 if (m_limit_min > element || element > m_limit_max)
                 {
                     fgc4::utils::Warning message(fmt::format(
-                        "Value in the provided array: {} is outside the limits: {}, {}!\n", element, m_limit_min,
+                        "Value in the provided array: {} is outside the limits: {}, {}!", element, m_limit_min,
                         m_limit_max
                     ));
                     return message;
@@ -331,7 +331,7 @@ namespace vslib
             if (value < m_limit_min || value > m_limit_max)
             {
                 fgc4::utils::Warning message(
-                    fmt::format("Provided value: {} is outside the limits: {}, {}!\n", value, m_limit_min, m_limit_max)
+                    fmt::format("Provided value: {} is outside the limits: {}, {}!", value, m_limit_min, m_limit_max)
                 );
                 return message;
             }
@@ -359,7 +359,7 @@ namespace vslib
             if (std::is_integral<T>() && !json_value.is_number_integer())
             {
                 fgc4::utils::Warning message(fmt::format(
-                    "The provided command value: {} is not an integer, while Parameter type is an integer.\n",
+                    "The provided command value: {} is not an integer, while Parameter type is an integer.",
                     json_value.dump()
                 ));
                 return message;
@@ -368,7 +368,7 @@ namespace vslib
             {
                 fgc4::utils::Warning message(fmt::format(
                     "The provided command value: {} is not an unsigned integer, while Parameter type is an unsigned "
-                    "integer.\n",
+                    "integer.",
                     json_value.dump()
                 ));
                 return message;
@@ -391,7 +391,7 @@ namespace vslib
             }
             catch (nlohmann::json::exception& e)
             {
-                fgc4::utils::Warning message(e.what() + std::string(".\nCommand ignored.\n"));
+                fgc4::utils::Warning message(e.what());
                 return message;
             }
             // Command type is implicitly castable, this step ensures that types agree more precisely:
@@ -430,9 +430,7 @@ namespace vslib
             }
             else
             {
-                fgc4::utils::Warning message(
-                    "The provided enum value is not one of the allowed values.\nCommand ignored.\n"
-                );
+                fgc4::utils::Warning message("The provided enum value is not one of the allowed values.");
                 return message;
             }
             return {};

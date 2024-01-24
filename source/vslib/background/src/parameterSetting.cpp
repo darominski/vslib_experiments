@@ -76,6 +76,8 @@ namespace vslib
         // check that major version is consistent
         if (valid)
         {
+            // The try-catch avoids fatal failure in case version is severely malformed: e.g. if it is not a list,
+            // or contains elements not comparable with integers
             try
             {
                 valid = (command["version"][0] == vslib::version::json_command.major);
@@ -84,16 +86,17 @@ namespace vslib
             {
                 valid = false;
                 const fgc4::utils::Warning message(std::string("Command invalid: ") + e.what());
+                utils::writeStringToMessageQueue(message.warning_str.data(), m_write_command_status);
                 return valid;
             }
             if (!valid)
             {
                 const fgc4::utils::Warning message(fmt::format(
                     "Inconsistent major version of the communication interface! Provided version: {}, expected "
-                    "version: "
-                    "{}.\n",
+                    "version: {}",
                     command["version"][0], vslib::version::json_command.major
                 ));
+                utils::writeStringToMessageQueue(message.warning_str.data(), m_write_command_status);
             }
         }
         return valid;
@@ -108,7 +111,7 @@ namespace vslib
     {
         if (!validateJsonCommand(command))
         {
-            const fgc4::utils::Warning message("Command invalid, ignored.\n");
+            const fgc4::utils::Warning message("Command invalid, ignored.");
             return;
         }
         std::string const parameter_name     = command["name"];
@@ -116,7 +119,8 @@ namespace vslib
         auto const        parameter          = parameter_registry.find(parameter_name);
         if (parameter == parameter_registry.end())
         {
-            const fgc4::utils::Warning message("Parameter ID: " + parameter_name + " not found. Command ignored.\n");
+            const fgc4::utils::Warning message("Parameter ID: " + parameter_name + " not found. Command ignored.");
+            utils::writeStringToMessageQueue(message.warning_str.data(), m_write_command_status);
             return;
         }
 
@@ -127,6 +131,12 @@ namespace vslib
             // success, otherwise: failure and Warning message already logged by setJsonValue
             // synchronise the write buffer with the background buffer
             (*parameter).second.get().synchroniseWriteBuffer();
+            utils::writeStringToMessageQueue("Command executed successfully.", m_write_command_status);
+        }
+        else
+        {
+            std::cout << "Warning message: " << has_warning.value().warning_str << std::endl;
+            utils::writeStringToMessageQueue(has_warning.value().warning_str.data(), m_write_command_status);
         }
     }
 

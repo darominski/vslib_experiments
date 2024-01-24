@@ -23,7 +23,14 @@ namespace vslib
         ParameterSetting()
             : m_read_commands_queue{bmboot::createMessageQueue<bmboot::MessageQueueReader<void>>(
                 (uint8_t*)app_data_0_1_ADDRESS, fgc4::utils::constants::json_memory_pool_size
-            )}
+            )},
+              m_write_command_status{bmboot::createMessageQueue<bmboot::MessageQueueWriter<void>>(
+                  (uint8_t*)app_data_0_1_ADDRESS
+                      + 2 * fgc4::utils::constants::json_memory_pool_size,   // offset with regard to write and read
+                                                                             // queues, TO-DO: have it as part of memory
+                                                                             // mapping
+                  fgc4::utils::constants::json_memory_pool_size
+              )}
         {
             m_validator.set_root_schema(utils::json_command_schema);
         }
@@ -36,6 +43,7 @@ namespace vslib
       private:
         nlohmann::json_schema::json_validator                              m_validator;
         bmboot::MessageQueueReader<void>                                   m_read_commands_queue;
+        bmboot::MessageQueueWriter<void>                                   m_write_command_status;
         std::array<uint8_t, fgc4::utils::constants::json_memory_pool_size> m_read_commands_buffer;
 
         void triggerReadBufferSynchronisation();
