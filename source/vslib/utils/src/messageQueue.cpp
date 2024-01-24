@@ -9,7 +9,7 @@
 #include "messageQueue.h"
 #include "warningMessage.h"
 
-namespace vslib
+namespace vslib::utils
 {
     //! Helper function to serialize JSON object and write to the message queue
     //!
@@ -51,4 +51,4 @@ namespace vslib
         return json_object;
     }
 
-}
+}   // namespace vslib::utils

@@ -23,11 +23,10 @@ namespace vslib
     void ParameterSetting::receiveJsonCommand()
     {
         auto message = m_read_commands_queue.read(m_read_commands_buffer);
-
         if (message.has_value())
         {
             auto json_object = fgc4::utils::StaticJsonFactory::getJsonObject();
-            json_object      = readJsonFromMessageQueue(message.value());
+            json_object      = utils::readJsonFromMessageQueue(message.value());
             // execute the command from the incoming stream, synchronises write and background buffers
             processJsonCommands(json_object);
 
@@ -72,6 +71,7 @@ namespace vslib
         {
             valid = false;
             const fgc4::utils::Warning message(std::string("Command invalid: ") + e.what());
+            utils::writeStringToMessageQueue(message.warning_str.data(), m_write_command_status);
         }
         // check that major version is consistent
         if (valid)
