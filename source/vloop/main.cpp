@@ -14,7 +14,6 @@
 #include "componentArray.h"
 #include "componentRegistry.h"
 #include "compositePID.h"
-#include "filterFactory.h"
 #include "firFilter.h"
 #include "iirFilter.h"
 #include "interruptRegistry.h"
@@ -68,9 +67,6 @@ int main()
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
-
-    auto myfilter = FilterFactory::createFilter<10>(FilterType::IIR, "iir");
-    myfilter->filter(5);
 
     PID pid1("pid_1", independent_component);
     // PID pid3("pid_3", independent_component);

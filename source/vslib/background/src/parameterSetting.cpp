@@ -135,7 +135,6 @@ namespace vslib
         }
         else
         {
-            std::cout << "Warning message: " << has_warning.value().warning_str << std::endl;
             utils::writeStringToMessageQueue(has_warning.value().warning_str.data(), m_write_command_status);
         }
     }
