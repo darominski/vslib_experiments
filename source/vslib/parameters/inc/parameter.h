@@ -350,12 +350,40 @@ namespace vslib
         // ************************************************************
         // Methods related to setting new parameter value based on the JSON input
 
+        //! Validates the provided JSON value against the Parameter type.
+        //!
+        //! @param json_value JSON object containing command value to be validated
+        //! @return If validation not successful returns Warning with relevant information, nothing otherwise
+        std::optional<fgc4::utils::Warning> verifyTypeAgrees(const StaticJson& json_value)
+        {
+            if (std::is_integral<T>() && !json_value.is_number_integer())
+            {
+                fgc4::utils::Warning message(fmt::format(
+                    "The provided command value: {} is not an integer, while Parameter type is an integer.\n",
+                    json_value.dump()
+                ));
+                return message;
+            }
+            if (std::is_unsigned<T>::value && !json_value.is_number_unsigned())
+            {
+                fgc4::utils::Warning message(fmt::format(
+                    "The provided command value: {} is not an unsigned integer, while Parameter type is an unsigned "
+                    "integer.\n",
+                    json_value.dump()
+                ));
+                return message;
+            }
+            return {};
+        }
+
         //! Sets the provided JSON value to the write buffer.
         //!
         //! @param json_value JSON object containing new parameter value to be set
         //! @return If not successful returns Warning with relevant information, nothing otherwise
         std::optional<fgc4::utils::Warning> setJsonValueImpl(const StaticJson& json_value)
         {
+            // Try to implicitly cast the json_value-stored value to the parameter's type
+            // This step removes steps that are not implicitly castable, e.g. string and numeric types
             T command_value;
             try   // try to extract the value stored in json_value
             {
@@ -366,12 +394,21 @@ namespace vslib
                 fgc4::utils::Warning message(e.what() + std::string(".\nCommand ignored.\n"));
                 return message;
             }
+            // Command type is implicitly castable, this step ensures that types agree more precisely:
+            // integral vs floating point agreement and signedness are checked
+            auto const has_warning = verifyTypeAgrees(json_value);
+            if (has_warning.has_value())
+            {
+                return has_warning.value();
+            }
+            // When types and their details are in agreement, the command value needs to fit in the Parameter's (and the
+            // type's) limits
             auto const check_status = checkLimits(command_value);
             if (check_status.has_value())
             {
                 return check_status.value();
             }
-            else
+            else   // no issues, value can be safely set
             {
                 m_value[write_buffer_id] = command_value;
                 return {};
