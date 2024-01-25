@@ -40,7 +40,7 @@ class FIRFilterTest : public ::testing::Test
 //! Checks that a FIRFilter object can be constructed
 TEST_F(FIRFilterTest, FilterDefaultConstruction)
 {
-    FIRFilter<1> filter("filter");
+    FIRFilter<2> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
 }
 

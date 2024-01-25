@@ -27,7 +27,7 @@ class BoxFilterTest : public ::testing::Test
 //! Checks that a BoxFilter object can be constructed
 TEST_F(BoxFilterTest, FilterDefaultConstruction)
 {
-    BoxFilter<1> filter("filter");
+    BoxFilter<2> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
     EXPECT_EQ(filter.getMaxInputValue(), pow(2, std::ceil(log2(1e5))));
     EXPECT_EQ((BoxFilter<1, 1e5>::fractional_bits), 64 - 1 - std::ceil(log2(1e5)));
@@ -37,7 +37,7 @@ TEST_F(BoxFilterTest, FilterDefaultConstruction)
 TEST_F(BoxFilterTest, FilterNonDefaultConstruction)
 {
     constexpr double            maximal_value = 1e4;   // maximal value to be filtered
-    BoxFilter<1, maximal_value> filter("filter");
+    BoxFilter<2, maximal_value> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
     EXPECT_EQ(filter.getMaxInputValue(), pow(2, std::ceil(log2(maximal_value))));
 }

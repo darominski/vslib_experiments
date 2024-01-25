@@ -53,7 +53,7 @@ class IIRFilterTest : public ::testing::Test
 //! Checks that a IIRFilter object can be constructed
 TEST_F(IIRFilterTest, FilterDefaultConstruction)
 {
-    IIRFilter<1> filter("filter");
+    IIRFilter<2> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
 }
 

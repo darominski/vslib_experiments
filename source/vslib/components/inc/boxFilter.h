@@ -25,6 +25,7 @@ namespace vslib
         BoxFilter(std::string_view name, Component* parent = nullptr)
             : Filter("BoxFilter", name, parent)
         {
+            static_assert(BufferLength > 1, "Buffer length needs to be a positive number larger than one.");
         }
 
         //! Filters the provided input by calculating the moving average of the buffer of previously

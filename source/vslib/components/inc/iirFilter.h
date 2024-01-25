@@ -22,6 +22,7 @@ namespace vslib
               numerator(*this, "numerator_coefficients"),
               denominator(*this, "denominator_coefficients")
         {
+            static_assert(BufferLength > 1, "Buffer length needs to be a positive number larger than one.");
         }
 
         //! Filters the provided input by convolving coefficients and the input, including previous inputs
