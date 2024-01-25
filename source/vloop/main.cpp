@@ -93,9 +93,9 @@ int main()
     // 20 us -> 50 kHz
     // 10 us -> 100 kHz
     // 1 us  -> 1 MHz
-    int interrupt_delay = 50;   // us
-    // TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(interrupt_delay));
-    // timer.start();
+    int            interrupt_delay = 50;   // us
+    TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(interrupt_delay));
+    timer.start();
 
     //     InterruptRegistry interrupt_registry;
     //     interrupt_registry.registerInterrupt("physical1", user::peripheralTask, 0, InterruptPriority::medium);
@@ -109,51 +109,50 @@ int main()
     int time_range_min       = expected_delay - 10;   // in clock ticks
     int time_range_max       = expected_delay + 10;   // in clock ticks
     // usleep(1'000'000);          // 1 s
-    constexpr int n_elements = 1'000'000;
+    constexpr int n_elements = 100'000;
 
     while (true)
     {
-        //         if (counter == n_elements + 50)
-        //         {
-        //             timer.stop();
-        // #ifdef PERFORMANCE_TESTS
-        //             // std::array<int64_t, n_elements> differences{0};
-        //             // int64_t                         starting_value = timer.m_measurements[0];
-        //             // for (size_t index = 0; index < timer.m_measurements.size() - 1; index++)
-        //             // {
-        //             //     int64_t expected_value = starting_value + expected_delay * index;
-        //             //     differences[index]     = timer.m_measurements[index] - expected_value;
-        //             //     // if (differences[index] < 0)
-        //             //     // {
-        //             //     //     differences[index] = expected_delay;   // loop-around hot-fix
-        //             //     // }
-        //             //     if (abs(differences[index]) > 1)
-        //             //     {
-        //             //         std::cout << index << " " << differences[index] << " " << expected_delay << std::endl;
-        //             //     }
-        //             // }
-        //             // for (int index = 0; index < timer.m_measurements.size(); index++)
-        //             // {
-        //             //     timer.m_measurements[index] = differences[index];
-        //             // }
-        //             // timer.m_measurements[n_elements-1] = timer.m_measurements[n_elements-2];
-        //             double const mean = timer.average();
-        //             std::cout << "Average time per interrupt: " << mean << " +- " << timer.standardDeviation(mean) <<
-        //             std::endl; auto const histogram = timer.histogramMeasurements<100>(time_range_min,
-        //             time_range_max); for (auto const& value : histogram.getData())
-        //             {
-        //                 std::cout << value << " ";
-        //             }
-        //             std::cout << std::endl;
-        //             auto const bin_with_max = histogram.getBinWithMax();
-        //             auto const edges        = histogram.getBinEdges(bin_with_max);
-        //             std::cout << "bin with max: " << bin_with_max << ", centered at: " << 0.5 * (edges.first +
-        //             edges.second)
-        //                       << std::endl;
-        // #endif
-        //             break;
-        //         }
-        // __asm volatile("wfi");
+        if (counter == n_elements + 50)
+        {
+            timer.stop();
+#ifdef PERFORMANCE_TESTS
+            // std::array<int64_t, n_elements> differences{0};
+            // int64_t                         starting_value = timer.m_measurements[0];
+            // for (size_t index = 0; index < timer.m_measurements.size() - 1; index++)
+            // {
+            //     int64_t expected_value = starting_value + expected_delay * index;
+            //     differences[index]     = timer.m_measurements[index] - expected_value;
+            //     // if (differences[index] < 0)
+            //     // {
+            //     //     differences[index] = expected_delay;   // loop-around hot-fix
+            //     // }
+            //     if (abs(differences[index]) > 1)
+            //     {
+            //         std::cout << index << " " << differences[index] << " " << expected_delay << std::endl;
+            //     }
+            // }
+            // for (int index = 0; index < timer.m_measurements.size(); index++)
+            // {
+            //     timer.m_measurements[index] = differences[index];
+            // }
+            // timer.m_measurements[n_elements-1] = timer.m_measurements[n_elements-2];
+            double const mean = timer.average();
+            std::cout << "Average time per interrupt: " << mean << " +- " << timer.standardDeviation(mean) << std::endl;
+            auto const histogram = timer.histogramMeasurements<100>(time_range_min, time_range_max);
+            for (auto const& value : histogram.getData())
+            {
+                std::cout << value << " ";
+            }
+            std::cout << std::endl;
+            auto const bin_with_max = histogram.getBinWithMax();
+            auto const edges        = histogram.getBinEdges(bin_with_max);
+            std::cout << "bin with max: " << bin_with_max << ", centered at: " << 0.5 * (edges.first + edges.second)
+                      << std::endl;
+#endif
+            break;
+        }
+        __asm volatile("wfi");
         counter++;
         // puts(std::to_string(counter++).c_str());
         //         // TEST CODE, verbose parameters signalling on thread 1
