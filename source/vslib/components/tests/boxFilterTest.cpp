@@ -27,7 +27,7 @@ class BoxFilterTest : public ::testing::Test
 //! Checks that a BoxFilter object can be constructed
 TEST_F(BoxFilterTest, FilterDefaultConstruction)
 {
-    BoxFilter<2> filter("filter");
+    BoxFilter<4> filter("filter");
     EXPECT_EQ(filter.getName(), "filter");
     EXPECT_EQ(filter.getMaxInputValue(), pow(2, std::ceil(log2(1e5))));
     EXPECT_EQ((BoxFilter<1, 1e5>::fractional_bits), 64 - 1 - std::ceil(log2(1e5)));

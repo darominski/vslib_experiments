@@ -103,44 +103,25 @@ namespace vslib
     };
 
     // ************************************************************
-    // Partial template specialization for the first-order filter
+    // Partial template specialization for the first-order filter. Specialization of functions avoids repetition
+    // of the entire class structure.
     //
     // Benchmarking showed 19% gain for the first order, and only 4% for the 2nd order. Therefore, only
     // the first order is specialized.
 
     template<>
-    class IIRFilter<2> : public Filter
+    double IIRFilter<2>::filter(const double input)
     {
-      public:
-        //! Constructor of the first-order IIR filter component, initializing one Parameter: coefficients
-        IIRFilter(std::string_view name, Component* parent = nullptr)
-            : Filter("IIRFirstOrderFilter", name, parent),
-              numerator(*this, "numerator_coefficients"),
-              denominator(*this, "denominator_coefficients")
-        {
-        }
+        auto const previous_input  = m_inputs_buffer[0];
+        auto const previous_output = m_outputs_buffer[0];
 
-        //! Filters the provided input by convolving coefficients and the input, including previous inputs
-        //! and previously filtered value's output.
-        //!
-        //! @param input Input value to be filtered
-        //! @return Filtered value
-        double filter(double input) override
-        {
-            double const output
-                = input * numerator[0] + m_previous_input * numerator[1] - m_previous_output * denominator[1];
+        double const output = input * numerator[0] + previous_input * numerator[1] - previous_output * denominator[1];
 
-            m_previous_input  = input;
-            m_previous_output = output;
+        // update input and output buffers
+        m_inputs_buffer[0]  = input;
+        m_outputs_buffer[0] = output;
 
-            return output;
-        }
+        return output;
+    }
 
-        Parameter<std::array<double, 2>> numerator;
-        Parameter<std::array<double, 2>> denominator;
-
-      private:
-        double m_previous_input{0};
-        double m_previous_output{0};
-    };
 }   // namespace vslib
