@@ -45,15 +45,19 @@ namespace vslib
         //! @return Result of this iteration
         double control(double process_value)
         {
-            m_error                   = m_set_point - process_value;
-            m_integral                += m_error;
-            m_integral                = m_anti_windup_protection(m_integral);
+            m_error    = m_set_point - process_value;
+            m_integral += m_error;
+            m_integral = m_anti_windup_protection(m_integral);
+
             double const proportional = kp * m_error;
             double const integral     = ki * m_integral;
             double const derivative
                 = kd * (m_error - m_previous_error);   // assuming time difference denominator is included in kd
             double const actuation = proportional + integral + derivative;
-            m_previous_error       = m_error;   // update errors for the next iteration
+
+            // update errors for the next iteration
+            m_previous_error = m_error;
+
             return actuation;
         }
 

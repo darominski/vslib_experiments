@@ -34,6 +34,7 @@ namespace vslib
         {
             shiftInputBuffer(input);
             double output = m_inputs_buffer[m_head] * numerator[0];
+
             for (uint64_t index = 1; index < BufferLength; index++)
             {
                 uint64_t buffer_index = (index + m_head);
@@ -46,7 +47,9 @@ namespace vslib
                 output += m_inputs_buffer[buffer_index] * numerator[index]
                     - m_outputs_buffer[buffer_index] * denominator[index];
             }
+
             shiftOutputBuffer(output);
+
             return output;
         }
 
@@ -65,6 +68,7 @@ namespace vslib
                     return filter(input);
                 }
             );
+
             return outputs;
         }
 
@@ -125,8 +129,10 @@ namespace vslib
         {
             double const output
                 = input * numerator[0] + m_previous_input * numerator[1] - m_previous_output * denominator[1];
+
             m_previous_input  = input;
             m_previous_output = output;
+
             return output;
         }
 

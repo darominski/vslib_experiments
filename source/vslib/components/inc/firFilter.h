@@ -32,6 +32,7 @@ namespace vslib
         {
             shiftBuffer(input);
             double output(0);
+
             for (uint64_t index = 0; index < BufferLength; index++)
             {
                 uint64_t buffer_index = (index + m_head + 1);
@@ -43,6 +44,7 @@ namespace vslib
                 }
                 output += m_buffer[buffer_index] * coefficients[index];
             }
+
             return output;
         }
 
@@ -108,6 +110,7 @@ namespace vslib
         {
             double const output = input * coefficients[0] + m_previous_input * coefficients[1];
             m_previous_input    = input;
+
             return output;
         }
 
@@ -138,8 +141,10 @@ namespace vslib
         {
             double const output
                 = input * coefficients[0] + m_previous_input * coefficients[1] + m_earlier_input * coefficients[2];
+
             m_earlier_input  = m_previous_input;
             m_previous_input = input;
+
             return output;
         }
 

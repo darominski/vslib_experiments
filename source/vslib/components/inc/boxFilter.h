@@ -36,9 +36,17 @@ namespace vslib
         double filter(double input) override
         {
             auto const oldest_value = m_buffer[m_head];
-            m_buffer[m_head]        = input;
-            m_cumulative            += m_buffer[m_head] - oldest_value;
-            m_head                  = (m_head + 1) % BufferLength;
+
+            m_buffer[m_head] = input;
+            m_cumulative     += m_buffer[m_head] - oldest_value;
+
+            m_head++;
+            // this if statement and subsequent shift is about 10% more efficient than a modulo operation
+            if (m_head >= BufferLength)
+            {
+                m_head -= BufferLength;
+            }
+
             return (m_cumulative.toDouble()) / BufferLength;
         }
 
@@ -59,10 +67,15 @@ namespace vslib
         FixedPoint<fractional_bits>                           m_cumulative{0};
     };
 
+    // ************************************************************
+    // Partial template specialization for low-order filters
+    //
+    // Benchmarking showed 126% gain for the first order, and 50% for the 2nd order.
 
     template<>
     class BoxFilter<2> : public Filter
     {
+
       public:
         //! Constructor of the box filter component
         BoxFilter(std::string_view name, Component* parent = nullptr)
@@ -83,13 +96,9 @@ namespace vslib
         }
 
       private:
-        double m_previous_value{0};
+        double m_previous_value{0};   // input value one iteration earlier
+        double m_earlier_value{0};    // input value two iterations earlier
     };
-
-    // ************************************************************
-    // Partial template specialization for low-order filters
-    //
-    // Benchmarking showed 126% gain for the first order, and 50% for the 2nd order.
 
     template<>
     class BoxFilter<3> : public Filter
@@ -98,7 +107,7 @@ namespace vslib
       public:
         //! Constructor of the box filter component
         BoxFilter(std::string_view name, Component* parent = nullptr)
-            : Filter("BoxSecondOrderFilter", name, parent)
+            : Filter("BoxFilter", name, parent)
         {
         }
 
@@ -116,7 +125,7 @@ namespace vslib
         }
 
       private:
-        double m_previous_value{0};
-        double m_earlier_value{0};
+        double m_previous_value{0};   // input value one iteration earlier
+        double m_earlier_value{0};    // input value two iterations earlier
     };
 }   // namespace vslib

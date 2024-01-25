@@ -357,8 +357,6 @@ namespace vslib
         //! @return If validation not successful returns Warning with relevant information, nothing otherwise
         std::optional<fgc4::utils::Warning> verifyTypeAgrees(const StaticJson& json_value)
         {
-            // C++ standard does not differentiate between integral and boolean type in std::is_integral and
-            // std::is_unsigned. Therefore, boolean has to be explicitely removed from comparison below.
             if (!utils::checkIfIntegral<T>(json_value))
             {
                 fgc4::utils::Warning message(fmt::format(
