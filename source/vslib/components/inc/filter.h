@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include <cmath>
-#include <cstdint>
-#include <limits>
 #include <string>
 
 #include "component.h"
