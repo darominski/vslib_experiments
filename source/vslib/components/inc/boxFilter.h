@@ -56,7 +56,7 @@ namespace vslib
         //! Returns the maximum value that can be filtered by this filter
         //!
         //! @return Maximal value that can be filter by this filter
-        [[nodiscard]] auto const getMaxInputValue() const noexcept
+        [[nodiscard]] static auto const getMaxInputValue()
         {
             return FixedPoint<fractional_bits>::maximumValue();
         }
@@ -91,8 +91,18 @@ namespace vslib
         double filter(double input) override
         {
             double const result = input + m_previous_value;
-            m_previous_value    = input;
-            return 0.5 * result;
+
+            m_previous_value = input;
+
+            return result / 2.0;
+        }
+
+        //! Returns the maximum value that can be filtered by this filter
+        //!
+        //! @return Maximal value that can be filter by this filter
+        [[nodiscard]] static auto const getMaxInputValue()
+        {
+            return std::numeric_limits<double>::max();
         }
 
       private:
@@ -119,9 +129,19 @@ namespace vslib
         double filter(double input) override
         {
             double const result = input + m_previous_value + m_earlier_value;
-            m_earlier_value     = m_previous_value;
-            m_previous_value    = input;
+
+            m_earlier_value  = m_previous_value;
+            m_previous_value = input;
+
             return result / 3.0;
+        }
+
+        //! Returns the maximum value that can be filtered by this filter
+        //!
+        //! @return Maximal value that can be filter by this filter
+        [[nodiscard]] static auto const getMaxInputValue()
+        {
+            return std::numeric_limits<double>::max();
         }
 
       private:
