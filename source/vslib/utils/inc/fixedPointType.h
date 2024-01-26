@@ -105,26 +105,15 @@ namespace vslib
             return m_value;
         }
 
-        //! Overload to handle summing two FixedPoint objects where a new object needs to be created.
-        static double maximumValue()
-        {
-            return m_max_value;
-        }
+        inline static constexpr double maximum_value{
+            pow(2, sizeof(int64_t) * 8 - FractionalBits - 1)};   // 8 bits per byte, -1 for sign
 
-        //! Overload to handle summing two FixedPoint objects where a new object needs to be created.
-        static double representationPrecision()
-        {
-            return m_representation_precision;
-        }
+        inline static constexpr double representation_precision{pow(2, -FractionalBits)};
 
       private:
-        int64_t                         m_value;
+        int64_t                         m_value;   // value stored by the FixedPoint type
         inline static constexpr double  m_fractional_shift{static_cast<double>(int64_t(1) << FractionalBits)};
         inline static constexpr int64_t m_fractional_rounding{int64_t(1) << (FractionalBits - 1)};
-
-        inline static constexpr double m_max_value{
-            pow(2, sizeof(int64_t) * 8 - FractionalBits - 1)};   // 8 bits per byte, -1 for sign
-        inline static constexpr double m_representation_precision{pow(2, -FractionalBits)};
     };
 
 }   // namespace vslib
