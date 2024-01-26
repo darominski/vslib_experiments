@@ -107,7 +107,6 @@ namespace vslib
 
       private:
         double m_previous_value{0};   // input value one iteration earlier
-        double m_earlier_value{0};    // input value two iterations earlier
     };
 
     template<>
