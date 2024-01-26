@@ -87,11 +87,11 @@ TEST_F(FIRFilterTest, FilterMultipleValues)
     setValues<filter_length>(filter, coefficient_array);
 
     std::array<double, filter_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
-    EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-3);
-    EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-3);
+    EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-6);
+    EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-6);
     EXPECT_NEAR(
         filter.filter(inputs[2]),
-        inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1] + inputs[0] * coefficient_array[2], 1e-3
+        inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1] + inputs[0] * coefficient_array[2], 1e-6
     );
 }
 
@@ -104,9 +104,9 @@ TEST_F(FIRFilterTest, FirstOrderFilterMultipleValues)
     setValues(filter, coefficient_array);
 
     std::array<double, inputs_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
-    EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-3);
-    EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-3);
-    EXPECT_NEAR(filter.filter(inputs[2]), inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1], 1e-3);
+    EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-6);
+    EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-6);
+    EXPECT_NEAR(filter.filter(inputs[2]), inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1], 1e-6);
 }
 
 //! Checks that a partial template specialization (2nd order) object can filter a number of provided values
@@ -118,11 +118,11 @@ TEST_F(FIRFilterTest, SecondOrderFilterMultipleValues)
     setValues(filter, coefficient_array);
 
     std::array<double, inputs_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
-    EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-3);
-    EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-3);
+    EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-4);
+    EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-6);
     EXPECT_NEAR(
         filter.filter(inputs[2]),
-        inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1] + inputs[0] * coefficient_array[2], 1e-3
+        inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1] + inputs[0] * coefficient_array[2], 1e-6
     );
 }
 
@@ -135,9 +135,9 @@ TEST_F(FIRFilterTest, FilterMultipleValuesWrapAround)
     setValues<filter_length>(filter, coefficient_array);
 
     std::array<double, filter_length + 1> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
-    EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-3);
-    EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-3);
-    EXPECT_NEAR(filter.filter(inputs[2]), inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1], 1e-3);
+    EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-4);
+    EXPECT_NEAR(filter.filter(inputs[1]), inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-6);
+    EXPECT_NEAR(filter.filter(inputs[2]), inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1], 1e-6);
 }
 
 //! Checks that a FIRFilter object can filter an array of inputs at once
@@ -150,17 +150,17 @@ TEST_F(FIRFilterTest, FilterEntireArray)
 
     std::array<double, filter_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3, 3.14159 * 4};
     auto const                        output = filter.filter(inputs);
-    EXPECT_NEAR(output[0], inputs[0] * coefficient_array[0], 1e-3);
-    EXPECT_NEAR(output[1], inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-3);
+    EXPECT_NEAR(output[0], inputs[0] * coefficient_array[0], 1e-6);
+    EXPECT_NEAR(output[1], inputs[1] * coefficient_array[0] + inputs[0] * coefficient_array[1], 1e-6);
     EXPECT_NEAR(
         output[2],
-        inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1] + inputs[0] * coefficient_array[2], 1e-3
+        inputs[2] * coefficient_array[0] + inputs[1] * coefficient_array[1] + inputs[0] * coefficient_array[2], 1e-6
     );
     EXPECT_NEAR(
         output[3],
         inputs[3] * coefficient_array[0] + inputs[2] * coefficient_array[1] + inputs[1] * coefficient_array[2]
             + inputs[0] * coefficient_array[3],
-        1e-3
+        1e-6
     );
 }
 
@@ -195,7 +195,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
 
         double const filtered_value = filter.filter(input_value);
         auto const   relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-3);   // at least 1e-3 relative precision
+        EXPECT_NEAR(relative, 0.0, 3e-4);   // at least 3e-4 relative precision
     }
     inputs_file.close();
     outputs_file.close();
@@ -233,7 +233,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataFifthOrder)
 
         double const filtered_value = filter.filter(input_value);
         auto const   relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-3);   // at least 1e-3 relative precision
+        EXPECT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
     }
     inputs_file.close();
     outputs_file.close();
@@ -271,7 +271,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
 
         double const filtered_value = filter.filter(input_value);
         auto const   relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-3);   // at least 1e-3 relative precision
+        EXPECT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
     }
     inputs_file.close();
     outputs_file.close();
@@ -320,7 +320,7 @@ TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
         {
             relative = (matlab_output_value - filtered_value) / matlab_output_value;
         }
-        EXPECT_NEAR(relative, 0.0, 1e-3);   // at least 1e-2 relative precision
+        EXPECT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
     }
     inputs_file.close();
     outputs_file.close();
