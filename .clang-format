@@ -33,6 +33,7 @@ AlignConsecutiveBitFields: Consecutive
 AlignConsecutiveDeclarations: Consecutive
 AlignConsecutiveMacros: Consecutive
 AlignTrailingComments: true
+AlignOperands: true
 # AllowShortEnumsOnASingleLine: false
 
 # Sort includes

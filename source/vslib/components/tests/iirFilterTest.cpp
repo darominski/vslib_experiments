@@ -185,17 +185,17 @@ TEST_F(IIRFilterTest, FilterMultipleValuesBufferWrapAround)
 
     outputs[2]     = filter.filter(inputs[2]);
     expected_value = inputs[2] * numerator_values[0] + inputs[1] * numerator_values[1] + inputs[0] * numerator_values[2]
-        - (outputs[1] * denominator_values[1] + outputs[0] * denominator_values[2]);
+                     - (outputs[1] * denominator_values[1] + outputs[0] * denominator_values[2]);
     EXPECT_NEAR((expected_value - outputs[2]) / expected_value, 0.0, 1e-6);
 
     outputs[3]     = filter.filter(inputs[3]);
     expected_value = inputs[3] * numerator_values[0] + inputs[2] * numerator_values[1] + inputs[1] * numerator_values[2]
-        - (outputs[2] * denominator_values[1] + outputs[1] * denominator_values[2]);
+                     - (outputs[2] * denominator_values[1] + outputs[1] * denominator_values[2]);
     EXPECT_NEAR((expected_value - outputs[3]) / expected_value, 0.0, 1e-6);
 
     outputs[4]     = filter.filter(inputs[4]);
     expected_value = inputs[4] * numerator_values[0] + inputs[3] * numerator_values[1] + inputs[2] * numerator_values[2]
-        - (outputs[3] * denominator_values[1] + outputs[2] * denominator_values[2]);
+                     - (outputs[3] * denominator_values[1] + outputs[2] * denominator_values[2]);
     EXPECT_NEAR((expected_value - outputs[4]) / expected_value, 0.0, 1e-6);
 }
 

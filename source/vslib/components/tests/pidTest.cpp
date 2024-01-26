@@ -169,12 +169,13 @@ TEST_F(PIDTest, PIDControlIteration)
     double       previous_error   = target_value;
     double       current_error    = target_value - first_actuation;
     const double second_actuation = (target_value - first_actuation) * p + (2 * target_value - first_actuation) * i
-        + (current_error - previous_error) * d;
+                                    + (current_error - previous_error) * d;
     EXPECT_NEAR(pid.control(first_actuation), second_actuation, 1e-6);
 
     previous_error               = current_error;
     current_error                = target_value - second_actuation;
     const double third_actuation = (target_value - second_actuation) * p
-        + (3 * target_value - first_actuation - second_actuation) * i + (current_error - previous_error) * d;
+                                   + (3 * target_value - first_actuation - second_actuation) * i
+                                   + (current_error - previous_error) * d;
     EXPECT_NEAR(pid.control(second_actuation), third_actuation, 1e-6);
 }
