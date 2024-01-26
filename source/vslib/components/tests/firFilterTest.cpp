@@ -53,7 +53,7 @@ TEST_F(FIRFilterTest, FilterSingleValue)
     setValues<filter_length>(filter, coefficient_array);
 
     double input = 3.14159;
-    EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-3);
+    EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-6);
 }
 
 //! Checks that a partial template specialization (1st order) object can filter provided value
@@ -64,7 +64,7 @@ TEST_F(FIRFilterTest, FirstOrderFilterSingleValue)
     setValues(filter, coefficient_array);
 
     double input = 3.14159;
-    EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-3);
+    EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-6);
 }
 
 //! Checks that a partial template specialization (2nd order) object can filter provided value
@@ -75,7 +75,7 @@ TEST_F(FIRFilterTest, SecondOrderFilterSingleValue)
     setValues(filter, coefficient_array);
 
     double input = 3.14159;
-    EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-3);
+    EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-6);
 }
 
 //! Checks that a FIRFilter object can filter a number of provided values
@@ -129,7 +129,7 @@ TEST_F(FIRFilterTest, SecondOrderFilterMultipleValues)
 //! Checks that a FIRFilter object filters correctly a number of provided values larger than the number of coefficients
 TEST_F(FIRFilterTest, FilterMultipleValuesWrapAround)
 {
-    constexpr int                     filter_length = 2;
+    constexpr int                     filter_length = 4;
     FIRFilter<filter_length>          filter("filter");
     std::array<double, filter_length> coefficient_array{0.2, 0.8};
     setValues<filter_length>(filter, coefficient_array);
@@ -164,9 +164,9 @@ TEST_F(FIRFilterTest, FilterEntireArray)
     );
 }
 
-//! Checks the behaviour of second-order FIR filter on a real data coming from
+//! Checks the behaviour of third-order FIR filter on a real data coming from
 //! GPS power converter, and compared with filtering in Matlab
-TEST_F(FIRFilterTest, FilterBMeasDataSecondOrder)
+TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
 {
     constexpr int                     filter_length = 4;
     FIRFilter<filter_length>          filter("filter");
