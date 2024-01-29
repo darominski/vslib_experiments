@@ -63,10 +63,18 @@ int main()
     bmboot::notifyPayloadStarted();
     puts("Hello world from vloop running on cpu1!");
 
-    ParameterSetting parameter_setting_task;
-    ParameterMap     parameter_map(
-        (uint8_t*)app_data_0_1_ADDRESS + fgc4::utils::constants::json_memory_pool_size,
-        fgc4::utils::constants::json_memory_pool_size
+    constexpr size_t read_commands_queue_address = app_data_0_1_ADDRESS;
+    constexpr size_t write_commands_status_queue_address
+        = read_commands_queue_address + fgc4::utils::constants::json_memory_pool_size;
+    constexpr size_t write_parameter_map_queue_address = read_commands_queue_address
+                                                         + fgc4::utils::constants::json_memory_pool_size
+                                                         + fgc4::utils::constants::string_memory_pool_size;
+
+    ParameterSetting parameter_setting_task(
+        (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address
+    );
+    ParameterMap parameter_map(
+        (uint8_t*)write_parameter_map_queue_address, fgc4::utils::constants::json_memory_pool_size
     );
 
     // ************************************************************

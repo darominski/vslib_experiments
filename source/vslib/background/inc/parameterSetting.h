@@ -11,7 +11,6 @@
 #include "jsonCommandSchema.h"
 #include "messageQueue.h"
 #include "staticJson.h"
-#include "vslib_shared_memory_memmap.h"
 
 namespace vslib
 {
@@ -20,16 +19,12 @@ namespace vslib
       public:
         //! Creates the ParameterSetting background task object and initializes the JSON schema validator as well as
         //! read and write JSON queues
-        ParameterSetting()
+        ParameterSetting(uint8_t* read_command_queue_address, uint8_t* write_status_queue_address)
             : m_read_commands_queue{bmboot::createMessageQueue<bmboot::MessageQueueReader<void>>(
-                (uint8_t*)app_data_0_1_ADDRESS, fgc4::utils::constants::json_memory_pool_size
+                read_command_queue_address, fgc4::utils::constants::json_memory_pool_size
             )},
               m_write_command_status{bmboot::createMessageQueue<bmboot::MessageQueueWriter<void>>(
-                  (uint8_t*)app_data_0_1_ADDRESS
-                      + 2 * fgc4::utils::constants::json_memory_pool_size,   // offset with regard to write and read
-                                                                             // queues, TO-DO: have it as part of memory
-                                                                             // mapping
-                  fgc4::utils::constants::json_memory_pool_size
+                  write_status_queue_address, fgc4::utils::constants::string_memory_pool_size
               )}
         {
             m_validator.set_root_schema(utils::json_command_schema);

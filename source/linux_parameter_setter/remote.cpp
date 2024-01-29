@@ -90,29 +90,38 @@ int main()
     bmboot::throwOnError(domain->ensureReadyToLoadPayload(), "ensureReadyToLoadPayload");
 
     fprintf(stderr, "Map memory\n");
-    constexpr int queue_size        = fgc4::utils::constants::json_memory_pool_size;
+    constexpr int json_queue_size   = fgc4::utils::constants::json_memory_pool_size;
     constexpr int string_queue_size = fgc4::utils::constants::string_memory_pool_size;
 
     int          fd = open("/dev/mem", O_RDWR);
-    bmboot::Mmap buffer(nullptr, 64 * queue_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, app_data_0_1_ADDRESS);
+    bmboot::Mmap buffer(nullptr, 64 * json_queue_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, app_data_0_1_ADDRESS);
 
     fprintf(stderr, "Init message queues\n");
     // one read queue for reading the parameter map and one queue for writing commands
 
+    constexpr size_t read_commands_queue_address = app_data_0_1_ADDRESS;
+    constexpr size_t write_commands_status_queue_address
+        = read_commands_queue_address + fgc4::utils::constants::json_memory_pool_size;
+    constexpr size_t write_parameter_map_queue_address = read_commands_queue_address
+                                                         + fgc4::utils::constants::json_memory_pool_size
+                                                         + fgc4::utils::constants::string_memory_pool_size;
+
     auto write_commands_queue
-        = bmboot::createMessageQueue<bmboot::MessageQueueWriter<void>>((uint8_t*)buffer.data(), queue_size);
-    auto read_parameter_map_queue = bmboot::createMessageQueue<bmboot::MessageQueueReader<void>>(
-        (uint8_t*)buffer.data() + queue_size, queue_size
-    );
+        = bmboot::createMessageQueue<bmboot::MessageQueueWriter<void>>((uint8_t*)buffer.data(), json_queue_size);
+
     auto read_command_status_queue = bmboot::createMessageQueue<bmboot::MessageQueueReader<void>>(
-        (uint8_t*)buffer.data() + 2 * queue_size, string_queue_size
+        (uint8_t*)buffer.data() + json_queue_size, string_queue_size
+    );
+
+    auto read_parameter_map_queue = bmboot::createMessageQueue<bmboot::MessageQueueReader<void>>(
+        (uint8_t*)buffer.data() + json_queue_size + string_queue_size, json_queue_size
     );
 
     fprintf(stderr, "Run payload\n");
     bmboot::loadPayloadFromFileOrThrow(*domain, "vloop_cpu1.bin");
     usleep(500'000);   // delay for initialization
 
-    std::array<uint8_t, queue_size>        parameter_map_buffer;
+    std::array<uint8_t, json_queue_size>   parameter_map_buffer;
     std::array<uint8_t, string_queue_size> command_status_buffer{0};
     std::vector<Json>                      commands;
     bool                                   commands_set  = false;
