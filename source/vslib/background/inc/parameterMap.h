@@ -8,7 +8,6 @@
 #include <bmboot/message_queue.hpp>
 
 #include "staticJson.h"
-#include "vslib_shared_memory_memmap.h"
 
 namespace vslib
 {
@@ -16,13 +15,9 @@ namespace vslib
     {
       public:
         //! Creates the ParameterMap background task object and initializes the write JSON queue
-        ParameterMap()
-            : m_write_parameter_map_queue{bmboot::createMessageQueue<bmboot::MessageQueueWriter<void>>(
-                (uint8_t*)app_data_0_1_ADDRESS
-                    + fgc4::utils::constants::json_memory_pool_size,   // offset with regard to read queue, TO-DO: have
-                                                                       // it as part of memory mapping
-                fgc4::utils::constants::json_memory_pool_size
-            )}
+        ParameterMap(uint8_t* address, size_t queue_size)
+            : m_write_parameter_map_queue{
+                bmboot::createMessageQueue<bmboot::MessageQueueWriter<void>>(address, queue_size)}
         {
         }
 

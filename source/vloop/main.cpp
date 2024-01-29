@@ -24,6 +24,7 @@
 #include "pid.h"
 #include "rst.h"
 #include "timerInterrupt.h"
+#include "vslib_shared_memory_memmap.h"
 
 // This is one way to stop users from creating objects on the heap and explicit memory allocations
 #ifdef __GNUC__
@@ -63,7 +64,10 @@ int main()
     puts("Hello world from vloop running on cpu1!");
 
     ParameterSetting parameter_setting_task;
-    ParameterMap     parameter_map;
+    ParameterMap     parameter_map(
+        (uint8_t*)app_data_0_1_ADDRESS + fgc4::utils::constants::json_memory_pool_size,
+        fgc4::utils::constants::json_memory_pool_size
+    );
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
