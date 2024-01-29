@@ -32,20 +32,20 @@ namespace vslib
         //! @return Filtered value
         double filter(double input) override
         {
-            shiftInputBuffer(input);
+            updateInputBuffer(input);
             double output = m_inputs_buffer[m_head] * numerator[0];
 
             for (uint64_t index = 1; index < BufferLength; index++)
             {
-                uint64_t buffer_index = (index + m_head);
+                int64_t buffer_index = (m_head - index);
                 // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
                 // when if statement is used instead of modulo to perform the shift below
-                if (buffer_index >= BufferLength)
+                if (buffer_index < 0)
                 {
-                    buffer_index -= BufferLength;
+                    buffer_index += BufferLength;
                 }
                 output += m_inputs_buffer[buffer_index] * numerator[index]
-                    - m_outputs_buffer[buffer_index] * denominator[index];
+                          - m_outputs_buffer[buffer_index] * denominator[index];
             }
 
             shiftOutputBuffer(output);
@@ -83,7 +83,7 @@ namespace vslib
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
         //! @param input Input value to be added to the front of the inputs buffer
-        void shiftInputBuffer(double input)
+        void updateInputBuffer(double input)
         {
             m_inputs_buffer[m_head] = input;
         }
@@ -94,10 +94,10 @@ namespace vslib
         void shiftOutputBuffer(double output)
         {
             m_outputs_buffer[m_head] = output;
-            m_head--;
-            if (m_head < 0)
+            m_head++;
+            if (m_head >= BufferLength)
             {
-                m_head = BufferLength - 1;
+                m_head -= BufferLength;
             }
         }
     };

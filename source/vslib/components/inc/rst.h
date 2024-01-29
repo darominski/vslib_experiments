@@ -54,7 +54,7 @@ namespace vslib
             m_current_state_s[0] = m_output - tracking_output;
 
             m_output = std::inner_product(s.cbegin(), s.cend(), m_current_state_s.cbegin(), 0.0)
-                + std::inner_product(t.cbegin(), t.cend(), m_current_state_r.cbegin(), 0.0);
+                       + std::inner_product(t.cbegin(), t.cend(), m_current_state_r.cbegin(), 0.0);
             return m_output;
         }
 

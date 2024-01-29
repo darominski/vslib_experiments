@@ -35,12 +35,12 @@ namespace vslib
 
             for (uint64_t index = 0; index < BufferLength; index++)
             {
-                uint64_t buffer_index = (index + m_head + 1);
+                int64_t buffer_index = (m_head - 1 - index);
                 // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
                 // when if statement is used instead of modulo to perform the shift below
-                if (buffer_index >= BufferLength)
+                if (buffer_index < 0)
                 {
-                    buffer_index -= BufferLength;
+                    buffer_index += BufferLength;
                 }
                 output += m_buffer[buffer_index] * coefficients[index];
             }
@@ -70,7 +70,7 @@ namespace vslib
 
       private:
         std::array<double, BufferLength> m_buffer{0};
-        int64_t                          m_head{BufferLength - 1};
+        int64_t                          m_head{0};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
@@ -78,10 +78,10 @@ namespace vslib
         void shiftBuffer(double input)
         {
             m_buffer[m_head] = input;
-            m_head--;
-            if (m_head < 0)
+            m_head++;
+            if (m_head >= BufferLength)
             {
-                m_head = BufferLength - 1;
+                m_head -= BufferLength;
             }
         }
     };

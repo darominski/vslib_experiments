@@ -67,7 +67,7 @@ TEST_F(IIRFilterTest, FilterSingleValue)
     setNumeratorValues<filter_length>(filter, numerator_values);
 
     double input = 3.14159;
-    EXPECT_NEAR(filter.filter(input), input * numerator_values[0], 1e-3);
+    EXPECT_NEAR(filter.filter(input), input * numerator_values[0], 1e-6);
 }
 
 //! Checks that a partial template specialization (1st order) IIRFilter object can filter provided value.
@@ -82,7 +82,7 @@ TEST_F(IIRFilterTest, FirstOrderFilterSingleValueSetDenominator)
     setDenominatorValues(filter, denominator_values);
 
     double input = 3.14159;
-    EXPECT_NEAR(filter.filter(input), input * numerator_values[0], 1e-3);
+    EXPECT_NEAR(filter.filter(input), input * numerator_values[0], 1e-6);
 }
 
 //! Checks that a FIRFilter object can filter a number of provided values, without wrapping around the buffers
@@ -99,18 +99,18 @@ TEST_F(IIRFilterTest, FirstOrderFilterMultipleValues)
     std::array<double, input_length> outputs{0};
 
     outputs[0] = filter.filter(inputs[0]);
-    EXPECT_NEAR(outputs[0], inputs[0] * numerator_values[0], 1e-3);
+    EXPECT_NEAR(outputs[0], inputs[0] * numerator_values[0], 1e-6);
 
     outputs[1] = filter.filter(inputs[1]);
     EXPECT_NEAR(
         outputs[1],
-        inputs[1] * numerator_values[0] + inputs[0] * numerator_values[1] - outputs[0] * denominator_values[1], 1e-3
+        inputs[1] * numerator_values[0] + inputs[0] * numerator_values[1] - outputs[0] * denominator_values[1], 1e-6
     );
 
     outputs[2] = filter.filter(inputs[2]);
     EXPECT_NEAR(
         outputs[2],
-        inputs[2] * numerator_values[0] + inputs[1] * numerator_values[1] - (outputs[1] * denominator_values[1]), 1e-3
+        inputs[2] * numerator_values[0] + inputs[1] * numerator_values[1] - (outputs[1] * denominator_values[1]), 1e-6
     );
 }
 
@@ -126,7 +126,7 @@ TEST_F(IIRFilterTest, FilterSingleValueSetDenominator)
     setDenominatorValues<filter_length>(filter, denominator_values);
 
     double input = 3.14159;
-    EXPECT_NEAR(filter.filter(input), input * numerator_values[0], 1e-3);
+    EXPECT_NEAR(filter.filter(input), input * numerator_values[0], 1e-6);
 }
 
 //! Checks that a IIRFilter object can filter a number of provided values, without wrapping around the buffers
@@ -143,12 +143,12 @@ TEST_F(IIRFilterTest, FilterMultipleValues)
     std::array<double, filter_length> outputs{0};
 
     outputs[0] = filter.filter(inputs[0]);
-    EXPECT_NEAR(outputs[0], inputs[0] * numerator_values[0], 1e-3);
+    EXPECT_NEAR(outputs[0], inputs[0] * numerator_values[0], 1e-6);
 
     outputs[1] = filter.filter(inputs[1]);
     EXPECT_NEAR(
         outputs[1],
-        inputs[1] * numerator_values[0] + inputs[0] * numerator_values[1] - outputs[0] * denominator_values[1], 1e-3
+        inputs[1] * numerator_values[0] + inputs[0] * numerator_values[1] - outputs[0] * denominator_values[1], 1e-6
     );
 
     outputs[2] = filter.filter(inputs[2]);
@@ -156,7 +156,7 @@ TEST_F(IIRFilterTest, FilterMultipleValues)
         outputs[2],
         inputs[2] * numerator_values[0] + inputs[1] * numerator_values[1] + inputs[0] * numerator_values[2]
             - (outputs[1] * denominator_values[1] + outputs[0] * denominator_values[2]),
-        1e-3
+        1e-6
     );
 }
 
@@ -176,27 +176,27 @@ TEST_F(IIRFilterTest, FilterMultipleValuesBufferWrapAround)
     std::array<double, array_length> outputs{0};
 
     outputs[0] = filter.filter(inputs[0]);
-    EXPECT_NEAR(outputs[0], inputs[0] * numerator_values[0], 1e-5);
+    EXPECT_NEAR(outputs[0], inputs[0] * numerator_values[0], 1e-6);
 
     outputs[1] = filter.filter(inputs[1]);
     double expected_value
         = inputs[1] * numerator_values[0] + inputs[0] * numerator_values[1] - outputs[0] * denominator_values[1];
-    EXPECT_NEAR((expected_value - outputs[1]) / expected_value, 0.0, 1e-5);
+    EXPECT_NEAR((expected_value - outputs[1]) / expected_value, 0.0, 1e-6);
 
     outputs[2]     = filter.filter(inputs[2]);
     expected_value = inputs[2] * numerator_values[0] + inputs[1] * numerator_values[1] + inputs[0] * numerator_values[2]
-        - (outputs[1] * denominator_values[1] + outputs[0] * denominator_values[2]);
-    EXPECT_NEAR((expected_value - outputs[2]) / expected_value, 0.0, 1e-5);
+                     - (outputs[1] * denominator_values[1] + outputs[0] * denominator_values[2]);
+    EXPECT_NEAR((expected_value - outputs[2]) / expected_value, 0.0, 1e-6);
 
     outputs[3]     = filter.filter(inputs[3]);
     expected_value = inputs[3] * numerator_values[0] + inputs[2] * numerator_values[1] + inputs[1] * numerator_values[2]
-        - (outputs[2] * denominator_values[1] + outputs[1] * denominator_values[2]);
-    EXPECT_NEAR((expected_value - outputs[3]) / expected_value, 0.0, 1e-5);
+                     - (outputs[2] * denominator_values[1] + outputs[1] * denominator_values[2]);
+    EXPECT_NEAR((expected_value - outputs[3]) / expected_value, 0.0, 1e-6);
 
     outputs[4]     = filter.filter(inputs[4]);
     expected_value = inputs[4] * numerator_values[0] + inputs[3] * numerator_values[1] + inputs[2] * numerator_values[2]
-        - (outputs[3] * denominator_values[1] + outputs[2] * denominator_values[2]);
-    EXPECT_NEAR((expected_value - outputs[4]) / expected_value, 0.0, 1e-5);
+                     - (outputs[3] * denominator_values[1] + outputs[2] * denominator_values[2]);
+    EXPECT_NEAR((expected_value - outputs[4]) / expected_value, 0.0, 1e-6);
 }
 
 //! Checks that a IIRFilter object can filter a number of provided values, with buffer wrap-around
