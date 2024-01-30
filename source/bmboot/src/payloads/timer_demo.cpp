@@ -1,5 +1,3 @@
-#include <chrono>
-
 #include <bmboot/payload_runtime.hpp>
 
 static void myHandler();
@@ -10,7 +8,7 @@ int main(int argc, char** argv)
 
     printf("hello from payload\n");
 
-    bmboot::setupPeriodicInterrupt(std::chrono::seconds(1), myHandler);
+    bmboot::setupPeriodicInterrupt(1'000'000, myHandler);
     bmboot::startPeriodicInterrupt();
 
     for (;;) {}

@@ -4,6 +4,7 @@
 
 #include "../bmboot_internal.hpp"
 #include "bmboot/domain.hpp"
+#include "bmboot/manager_configuration.hpp"
 #include "coredump_linux.hpp"
 #include "../utility/mmap.hpp"
 
@@ -363,7 +364,7 @@ int Domain::getchar()
 
     if (outbox.stdout_rdpos != inbox.stdout_wrpos)
     {
-        char c = inbox.stdout_buf[outbox.stdout_rdpos];
+        unsigned char c = inbox.stdout_buf[outbox.stdout_rdpos];
         outbox.stdout_rdpos = (outbox.stdout_rdpos + 1) % sizeof(inbox.stdout_buf);
         return c;
     }
@@ -519,13 +520,23 @@ MaybeError Domain::startPayloadAt(uintptr_t entry_address,
 
         if (inbox.cmd_ack == outbox.cmd_seq)
         {
-            if (inbox.cmd_resp == Response::crc_mismatched)
+            switch (inbox.cmd_resp)
             {
-                return ErrorCode::payload_checksum_mismatch;
-            }
-            else
-            {
-                // Otherwise we expect Response::crc_ok, but we are waiting for DomainState::running_payload anyway
+                case Response::crc_ok:
+                    // Good, but we are waiting for DomainState::running_payload
+                    break;
+
+                case Response::crc_mismatched:
+                    return ErrorCode::payload_checksum_mismatch;
+
+                case Response::image_malformed:
+                    return ErrorCode::payload_image_malformed;
+
+                case Response::abi_incompatible:
+                    return ErrorCode::payload_abi_incompatible;
+
+                default:
+                    return ErrorCode::unknown_error;
             }
         }
 
@@ -561,6 +572,12 @@ MaybeError Domain::startup()
 
 MaybeError Domain::startup(std::span<uint8_t const> monitor_binary)
 {
+    ManagerConfiguration config {};
+    if (!loadConfigurationFromDefaultFile(config))
+    {
+        return ErrorCode::configuration_file_error;
+    }
+
     if (domain_general_state[m_domain] != DomainGeneralState::inReset)
     {
         return ErrorCode::bad_domain_state;
@@ -603,6 +620,9 @@ MaybeError Domain::startup(std::span<uint8_t const> monitor_binary)
     // initialize IPC block
     memset((void*) &m_ipc_block, 0, ranges.monitor_ipc_size);
     m_ipc_block.executor_to_manager.state = DomainState::invalid_state;
+
+    // patch in the frequency of the Generic Timer (see doc/arch-counter.rst)
+    m_ipc_block.manager_to_executor.cntfrq = config.cntfrq;
 
     // flush the IPC region to DDR (since the SCU is not in effect yet and CPUn will come up with cold caches)
     __clear_cache(&m_ipc_block, (uint8_t*) &m_ipc_block + ranges.monitor_ipc_size);

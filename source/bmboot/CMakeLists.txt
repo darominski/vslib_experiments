@@ -5,11 +5,6 @@ if (BUILD_MONITOR OR BMBOOT_BUILD_PAYLOAD)
         message(FATAL_ERROR "You must provide CMAKE_SIZE option")
     endif()
 
-    set(CMAKE_SYSTEM_NAME Generic)
-    # SET(CMAKE_C_COMPILER_WORKS 1)
-    # SET(CMAKE_CXX_COMPILER_WORKS 1)
-    set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-
     add_compile_options(-O2 -Wall -mtune=cortex-a53 -ffunction-sections -fdata-sections)
     add_compile_definitions(_DIOT=1)
 
@@ -38,6 +33,7 @@ function(add_bmboot_payload_library BMBOOT_BSP_EL1_HOME BMBOOT_BSP_EL1_INCLUDE_D
             src/utility/message_queue.cpp
             )
 
+    target_compile_definitions(${TARGET} PUBLIC __bmboot__=1)
     target_compile_features(${TARGET} PUBLIC cxx_std_20)
 
     target_include_directories(${TARGET} PUBLIC
@@ -110,40 +106,48 @@ elseif (BUILD_MONITOR)
         message(FATAL_ERROR "BMBOOT_BSP_EL3_LIBRARIES must be set")
     endif()
 
+    # Monitor target (common)
+
+    add_library(monitor_zynqmp OBJECT
+            include/bmboot.hpp
+            src/executor/executor.cpp
+            src/executor/executor_asm.S
+            src/executor/monitor/monitor_asm.S
+            src/executor/monitor/monitor.cpp
+            src/executor/monitor/smc_handlers.cpp
+            src/platform/zynqmp/executor/asm_vectors.S
+            src/platform/zynqmp/executor/monitor/interrupt_controller.cpp
+            src/platform/zynqmp/executor/monitor/vectors_el3.cpp
+            src/utility/crc32.c
+            )
+
+    target_include_directories(monitor_zynqmp PRIVATE
+            include
+            src
+            src/executor
+            src/executor/monitor
+            src/platform/zynqmp
+            src/platform/zynqmp/executor
+            src/platform/zynqmp/executor/monitor
+
+            ${BMBOOT_BSP_EL3_INCLUDE_DIR}
+            )
+    target_compile_features(monitor_zynqmp PUBLIC cxx_std_20)
+    target_link_libraries(monitor_zynqmp PRIVATE
+            m
+            ${BMBOOT_BSP_EL3_LIBRARIES}
+            )
+
+    # Instantiate monitor target for each CPU core
+
     foreach(CPU ${BMBOOT_ALL_CPUS})
         set(TARGET monitor_zynqmp_cpu${CPU})
 
-        add_executable(${TARGET}
-                include/bmboot.hpp
-                src/executor/executor.cpp
-                src/executor/executor_asm.S
-                src/executor/monitor/monitor_asm.S
-                src/executor/monitor/monitor.cpp
-                src/executor/monitor/smc_handlers.cpp
-                src/platform/zynqmp/executor/asm_vectors.S
-                src/platform/zynqmp/executor/monitor/interrupt_controller.cpp
-                src/platform/zynqmp/executor/monitor/vectors_el3.cpp
-                src/utility/crc32.c
-                )
+        add_executable("${TARGET}" $<TARGET_OBJECTS:monitor_zynqmp>)
+        # TODO: according to https://cmake.org/cmake/help/v3.4/manual/cmake-buildsystem.7.html#object-libraries,
+        #       we should not link against monitor_zynqmp. For the time being, it seems to work, anyway.
+        target_link_libraries("${TARGET}" PRIVATE monitor_zynqmp)
 
-        # -----------------------------------------------------------------------------------------------------------
-
-        target_include_directories(${TARGET} PRIVATE
-                include
-                src
-                src/executor
-                src/executor/monitor
-                src/platform/zynqmp
-                src/platform/zynqmp/executor
-                src/platform/zynqmp/executor/monitor
-
-                ${BMBOOT_BSP_EL3_INCLUDE_DIR}
-                )
-        target_compile_features(${TARGET} PUBLIC cxx_std_20)
-        target_link_libraries(${TARGET} PRIVATE
-                m
-                ${BMBOOT_BSP_EL3_LIBRARIES}
-                )
         target_link_options(${TARGET} PRIVATE
                 -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/src/executor/monitor/monitor_cpu${CPU}.ld
                 )
@@ -184,6 +188,8 @@ elseif (BUILD_MONITOR)
         add_bmboot_payload(payload_${PAYLOAD} src/payloads/${PAYLOAD}.cpp)
     endforeach()
 
+    add_bmboot_payload(payload_MemoryLatency src/benchmarks/MemoryLatency/MemoryLatency.c src/benchmarks/MemoryLatency/MemoryLatency_arm.s)
+
     # -----------------------------------------------------------------------------------------------------------
 else()
     set(GENERATED_INCLUDE ${CMAKE_BINARY_DIR}/generated_include)
@@ -191,36 +197,11 @@ else()
 
     include(ExternalProject)
 
-    if(NOT DEFINED CMAKE_C_COMPILER_AARCH64_NONE_ELF)
-        message(FATAL_ERROR "CMAKE_C_COMPILER_AARCH64_NONE_ELF must be set")
-    endif()
-
-    if(NOT DEFINED CMAKE_CXX_COMPILER_AARCH64_NONE_ELF)
-        message(FATAL_ERROR "CMAKE_CXX_COMPILER_AARCH64_NONE_ELF must be set")
-    endif()
-
-    if(NOT DEFINED CMAKE_OBJCOPY_AARCH64_NONE_ELF)
-        message(FATAL_ERROR "CMAKE_OBJCOPY_AARCH64_NONE_ELF must be set")
-    endif()
-
-    if(NOT DEFINED CMAKE_OBJDUMP_AARCH64_NONE_ELF)
-        message(FATAL_ERROR "CMAKE_OBJDUMP_AARCH64_NONE_ELF must be set")
-    endif()
-
-    if(NOT DEFINED CMAKE_SIZE_AARCH64_NONE_ELF)
-        message(FATAL_ERROR "CMAKE_SIZE_AARCH64_NONE_ELF must be set")
-    endif()
-
     # add executor code as ExternalProject
     ExternalProject_Add(monitor_zynqmp
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
             CMAKE_ARGS
-                # TODO: can we do better than having to enumerate these one by one?
-                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER_AARCH64_NONE_ELF}
-                -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER_AARCH64_NONE_ELF}
-                -DCMAKE_OBJCOPY=${CMAKE_OBJCOPY_AARCH64_NONE_ELF}
-                -DCMAKE_OBJDUMP=${CMAKE_OBJDUMP_AARCH64_NONE_ELF}
-                -DCMAKE_SIZE=${CMAKE_SIZE_AARCH64_NONE_ELF}
+                -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_LIST_DIR}/Aarch64BareMetal.cmake
                 -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
                 -DCMAKE_BUILD_TYPE=RelWithDebInfo
                 -DBUILD_MONITOR=ON
@@ -249,6 +230,7 @@ else()
             include/bmboot.hpp
             include/bmboot/domain.hpp
             src/bmboot_internal.hpp
+            src/manager/configuration.cpp
             src/manager/coredump_linux.cpp
             src/manager/domain.cpp
             src/manager/domain_helpers.cpp
@@ -293,12 +275,15 @@ else()
     add_executable(console src/tools/console.cpp)
     target_link_libraries(console PUBLIC bmboot_manager)
 
+    add_executable(MemoryLatency src/benchmarks/MemoryLatency/MemoryLatency.c src/benchmarks/MemoryLatency/MemoryLatency_arm.s)
+    target_link_libraries(MemoryLatency PUBLIC m)
+
     add_executable(message_queue_demo
             src/tools/message_queue_demo.cpp
             )
     target_link_libraries(message_queue_demo PUBLIC bmboot_manager)
 
-    foreach(TOOL bmctl console message_queue_demo)
+    foreach(TOOL bmctl console MemoryLatency message_queue_demo)
         # Make sure bmctl is linked fully statically
         # This is only a temporary workaround for the discrepancy between library versions expected by our compiler
         # and available on the target OS (PetaLinux 2019).

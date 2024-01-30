@@ -14,21 +14,6 @@ endif()
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-add_compile_options(-Wall -O2 -mtune=cortex-a53 -ffunction-sections -fdata-sections
-    -fexceptions
-    -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align
-    -Wwrite-strings -Wmissing-declarations
-    -Wredundant-decls -Wno-long-long
-    -Wconversion)
-add_compile_definitions(_DIOT=1)
-
-add_link_options(
-  -Wall
-  -specs=nosys.specs
-  -Wl,-gc-sections
-  -Wl,-Map=output.map
-  )
-
 if (PERFORMANCE_TESTS)
   add_definitions(-DPERFORMANCE_TESTS)
 endif()
@@ -37,22 +22,9 @@ project(${APP} C CXX ASM)
 
 set(CMAKE_CXX_STANDARD 20)
 
-### BSP
-
-include(../bsp/bsp.cmake)
-
-#BSP is now built and used as dependency by the vloop
-
-### END BSP
-
 set(BMBOOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../bmboot)
 
 include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
-
-# Include directories for headers
-include_directories(
-    ${CMAKE_SOURCE_DIR}/../utils # header files shared between fgc4 bare-metal applications
-)
 
 # VSLIB is treated as external library, as it would be in vloop applications
 add_subdirectory(../vslib ${CMAKE_CURRENT_BINARY_DIR}/vslib)
@@ -61,21 +33,19 @@ add_bmboot_payload(${APP}
   main.cpp
   )
 
-set(BIN_TARGETS)
-set(ELF_TARGETS)
+target_link_options(${APP} PRIVATE
+    -Wl,-gc-sections
+  )
 
-foreach (TARGET ${${APP}_TARGETS})
-
-  target_link_libraries(${TARGET} PRIVATE
+target_link_libraries(${APP} PRIVATE
     vslib
     fmt::fmt
-    bmboot_payload_runtime
-    )
+)
 
-  list(APPEND BIN_TARGETS "${CMAKE_BINARY_DIR}/${TARGET}.bin")
-  list(APPEND ELF_TARGETS "${CMAKE_BINARY_DIR}/${TARGET}.elf")
-
-endforeach()
+# Include directories for headers
+target_include_directories(${APP} PRIVATE
+    ${CMAKE_SOURCE_DIR}/../utils # header files shared between fgc4 bare-metal applications
+)
 
 ############################################################
 # Installation
