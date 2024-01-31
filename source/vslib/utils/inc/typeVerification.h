@@ -9,7 +9,7 @@
 namespace vslib::utils
 {
     template<typename T>
-    bool checkIfUnsigned(const StaticJson& value)
+    bool checkIfUnsigned(const fgc4::utils::StaticJson& value)
         requires fgc4::utils::Numeric<T>
     {
         // C++ standard does not differentiate between integral and boolean type in std::is_integral and
@@ -24,7 +24,7 @@ namespace vslib::utils
     }
 
     template<typename T>
-    bool checkIfUnsigned(const StaticJson& value)
+    bool checkIfUnsigned(const fgc4::utils::StaticJson& value)
         requires fgc4::utils::NumericArray<T>
     {
         // C++ standard does not differentiate between integral and boolean type in std::is_integral and
@@ -46,7 +46,7 @@ namespace vslib::utils
     }
 
     template<typename T>
-    bool checkIfBoolean(const StaticJson& value)
+    bool checkIfBoolean(const fgc4::utils::StaticJson& value)
     {
         bool passed = true;
         if (fgc4::utils::Boolean<T>)
@@ -58,7 +58,7 @@ namespace vslib::utils
     }
 
     template<typename T>
-    bool checkIfBoolean(const StaticJson& value)
+    bool checkIfBoolean(const fgc4::utils::StaticJson& value)
         requires fgc4::utils::StdArray<T>
     {
         bool passed = true;
@@ -78,7 +78,7 @@ namespace vslib::utils
     }
 
     template<typename T>
-    bool checkIfIntegral(const StaticJson& value)
+    bool checkIfIntegral(const fgc4::utils::StaticJson& value)
         requires fgc4::utils::Numeric<T>
     {
         // The boolean type has to be explicitly excluded from the integral type
@@ -91,7 +91,7 @@ namespace vslib::utils
     }
 
     template<typename T>
-    bool checkIfIntegral(const StaticJson& value)
+    bool checkIfIntegral(const fgc4::utils::StaticJson& value)
         requires fgc4::utils::NumericArray<T>
     {
         // The boolean type has to be explicitly excluded from the integral type
