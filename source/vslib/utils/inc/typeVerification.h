@@ -34,7 +34,14 @@ namespace vslib::utils
         {   // checks internal type, e.g. stored in an array.
             if (value.is_array())
             {
-                passed = value[0].is_number_unsigned();   // verify the first element of the array
+                for (auto const& element : value)
+                {
+                    if (!element.is_number_unsigned())
+                    {
+                        passed = false;
+                        break;
+                    }
+                }
             }
             else
             {
@@ -66,7 +73,14 @@ namespace vslib::utils
         {
             if (value.is_array())
             {
-                passed = value.is_boolean();
+                for (auto const& element : value)
+                {
+                    if (!element.is_boolean())
+                    {
+                        passed = false;
+                        break;
+                    }
+                }
             }
             else
             {
@@ -100,7 +114,14 @@ namespace vslib::utils
         {
             if (value.is_array())
             {
-                passed = value[0].is_number_integer();
+                for (auto const& element : value)
+                {
+                    if (!element.is_number_integer())
+                    {
+                        passed = false;
+                        break;
+                    }
+                }
             }
             else
             {
