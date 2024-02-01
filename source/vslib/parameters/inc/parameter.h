@@ -357,30 +357,22 @@ namespace vslib
         //! @return If validation not successful returns Warning with relevant information, nothing otherwise
         std::optional<fgc4::utils::Warning> verifyTypeAgrees(const StaticJson& json_value)
         {
-            if (!utils::checkIfIntegral<T>(json_value))
+            auto const integral_check = utils::checkIfIntegral<T>(json_value);
+            if (integral_check.has_value())
             {
-                fgc4::utils::Warning message(fmt::format(
-                    "The provided command value: {} is not an integer, while Parameter type is an integer.",
-                    json_value.dump()
-                ));
-                return message;
+                return integral_check.value();
             }
-            if (!utils::checkIfUnsigned<T>(json_value))
+
+            auto const unsigned_check = utils::checkIfUnsigned<T>(json_value);
+            if (unsigned_check.has_value())
             {
-                fgc4::utils::Warning message(fmt::format(
-                    "The provided command value: {} is not an unsigned integer, while Parameter type is an unsigned "
-                    "integer.",
-                    json_value.dump()
-                ));
-                return message;
+                return integral_check.value();
             }
-            if (!utils::checkIfBoolean<T>(json_value))
+
+            auto const boolean_check = utils::checkIfBoolean<T>(json_value);
+            if (boolean_check.has_value())
             {
-                fgc4::utils::Warning message(fmt::format(
-                    "The provided command value: {} is not a boolean, while Parameter type is a boolean.",
-                    json_value.dump()
-                ));
-                return message;
+                return boolean_check.value();
             }
             return {};
         }
