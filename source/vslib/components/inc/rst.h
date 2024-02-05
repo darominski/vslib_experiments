@@ -9,17 +9,6 @@
 
 namespace vslib
 {
-    // Helper enumeration class for definition of all relevant statuses
-    enum class Status
-    {
-        uninitialized,
-        ready,
-        updating,
-        fault
-    };
-
-    // ************************************************************
-
     template<size_t ControllerLength>
     class RST : public Component
     {
@@ -29,7 +18,6 @@ namespace vslib
               r(*this, "r", -12.0, 10.0),
               s(*this, "s", -12.0, 10.0),
               t(*this, "t", -12.0, 10.0),
-              status(*this, "status")
         {
         }
 
@@ -80,21 +68,12 @@ namespace vslib
             return m_output;
         }
 
-        //! Provides status value as a string
-        //!
-        //! @return String view of the status of this component
-        [[nodiscard]] std::string_view getStatusAsStr() const
-        {
-            return magic_enum::enum_name(status.value());
-        }
-
         // ************************************************************
         // Settable Parameters
 
         Parameter<std::array<double, ControllerLength>> r;   //<! reference coefficients
         Parameter<std::array<double, ControllerLength>> s;   //<! disturbance coefficients
         Parameter<std::array<double, ControllerLength>> t;   //<! control coefficients
-        Parameter<Status>                               status;
 
       private:
         std::array<double, ControllerLength> m_current_state_r{0};
