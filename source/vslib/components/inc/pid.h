@@ -49,11 +49,12 @@ namespace vslib
             m_integral += m_error;
             m_integral = m_anti_windup_protection(m_integral);
 
+            double const feed_forward = kff * process_value;
             double const proportional = kp * m_error;
             double const integral     = ki * m_integral;
             double const derivative
                 = kd * (m_error - m_previous_error);   // assuming time difference denominator is included in kd
-            double const actuation = proportional + integral + derivative;
+            double const actuation = feed_forward + proportional + integral + derivative;
 
             // update errors for the next iteration
             m_previous_error = m_error;
@@ -135,9 +136,10 @@ namespace vslib
         // ************************************************************
         // Settable coefficients of the controller
 
-        Parameter<double> kp;   //!< Proportional gain coefficient
-        Parameter<double> ki;   //!< Integral gain coefficient
-        Parameter<double> kd;   //!< Derivative gain coefficient
+        Parameter<double> kp;    //!< Proportional gain coefficient
+        Parameter<double> ki;    //!< Integral gain coefficient
+        Parameter<double> kd;    //!< Derivative gain coefficient
+        Parameter<double> kff;   //!< Feed-forward scaling coefficient
 
         Parameter<double> integral_limit;   //!< limit of the integral error
 
