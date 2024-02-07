@@ -17,7 +17,7 @@ namespace vslib
     class RST : public Component
     {
       public:
-        RST(std::string_view name, Component* parent)
+        RST(std::string_view name, Component* parent = nullptr)
             : Component("RST", name, parent),
               r(*this, "r", -12.0, 10.0),
               s(*this, "s", -12.0, 10.0),
