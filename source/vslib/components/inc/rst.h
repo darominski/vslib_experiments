@@ -27,49 +27,68 @@ namespace vslib
 
         //! Calculates one iteration of the controller algorithm
         //!
+        //! @param process_value Current process value (measurement)
         //! @param reference Reference value for the controller
         //! @return Controller output of the iteration
-        double control(double reference) noexcept
+        double calculate_actuation(double process_value, double reference) noexcept
         {
-            // Calculate the control output
-            double const control_output = std::inner_product(r.cbegin(), r.cend(), m_current_state_r.cbegin(), 0.0);
+            // based on logic in regRstCalcActRT from CCLIBS libreg regRst.c
+            m_measurements[m_head] = process_value;
+            m_references[m_head]   = reference;
+            m_head++;
+            if (m_head >= ControllerLength)
+            {
+                m_head -= ControllerLength;
+            }
 
-            // Update the state vector
-            std::rotate(m_current_state_r.rbegin(), m_current_state_r.rbegin() + 1, m_current_state_r.rend());
-            m_current_state_r[0] = reference - control_output;
+            double actuation = t[0] * m_reference[m_head - 1] - r[0] * m_measurements[m_head - 1];
+            for (size_t index = 1; index < ControllerLength; index++)
+            {
+                const int64_t buffer_index = (m_head - 1 - index);
+                if (buffer_index < 0)
+                {
+                    buffer_index += BufferLength;
+                }
 
-            // Calculate the tracking output
-            double const tracking_output = std::inner_product(s.begin(), s.cend(), m_current_state_s.cbegin(), 0.0);
+                actuation += t[index] * m_reference[buffer_index] - r[index] * m_measurements[buffer_index]
+                             - s[index] * m_actuations[buffer_index];
+            }
+            actuation /= s[0];
 
-            // Update the state vector for the S filter
-            std::rotate(m_current_state_s.rbegin(), m_current_state_s.rbegin() + 1, m_current_state_s.rend());
-            m_current_state_s[0] = m_output - tracking_output;
+            m_actuations[m_head] = actuation;   // update reference, m_head or m_head - 1?
 
-            m_output = std::inner_product(s.cbegin(), s.cend(), m_current_state_s.cbegin(), 0.0)
-                       + std::inner_product(t.cbegin(), t.cend(), m_current_state_r.cbegin(), 0.0);
-            return m_output;
+            return actuation;
         }
 
-        //! Resets the controller to the initial state, zeroing all buffers
-        void reset() noexcept
+        //! Updates the most recent reference in the history, used in cases actuation goes over the limit
+        //!
+        //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
+        void update_reference(double updated_actuation)
         {
-            m_output = 0;
+            // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
+            m_actuations[m_head] = updated_actuation;
+
+            double reference = 0;
             for (size_t index = 0; index < ControllerLength; index++)
             {
-                m_current_state_r[index] = 0;
-                m_current_state_s[index] = 0;
+                const int64_t buffer_index = (m_head - 1 - index);
+                if (buffer_index < 0)
+                {
+                    buffer_index += BufferLength;
+                }
+
+                reference += t[index] * m_reference[buffer_index] - r[index] * m_measurements[buffer_index]
+                             - s[index] * m_actuations[buffer_index];
             }
+            m_reference[m_head] = reference;
         }
 
-        // ************************************************************
-        // Getters
-
-        //! Returns the control output value
-        //!
-        //! @return Control output value
-        [[nodiscard]] double getOutput() const noexcept
+        //! Resets the controller to the initial state by zeroing the history.
+        void reset() noexcept
         {
-            return m_output;
+            m_measurements = std::array<double, ControllerLength>{0};
+            m_references   = std::array<double, ControllerLength>{0};
+            m_actuations   = std::array<double, ControllerLength>{0};
         }
 
         // ************************************************************
@@ -80,8 +99,9 @@ namespace vslib
         Parameter<std::array<double, ControllerLength>> t;   //<! control coefficients
 
       private:
-        std::array<double, ControllerLength> m_current_state_r{0};
-        std::array<double, ControllerLength> m_current_state_s{0};
-        double                               m_output{0};
+        int64_t                              m_head{0};        // Index to latest entry in the history
+        std::array<double, ControllerLength> m_measurements;   // RST measurement history
+        std::array<double, ControllerLength> m_references;     // RST reference history
+        std::array<double, ControllerLength> m_actuations;     // RST actuation history.
     };
 }   // namespace vslib
