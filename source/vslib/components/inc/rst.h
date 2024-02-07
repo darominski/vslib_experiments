@@ -1,3 +1,7 @@
+//! @file
+//! @brief Class definiting two-degrees-of-freedom controller (RST).
+//! @author Dominik Arominski
+
 #pragma once
 
 #include <array>
