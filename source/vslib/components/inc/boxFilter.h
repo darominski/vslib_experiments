@@ -61,6 +61,12 @@ namespace vslib
             return FixedPoint<fractional_bits>::maximum_value;
         }
 
+        //! Update parameters method, called after paramaters of this component are modified
+        void updateParameters()
+        {
+            // recalculation of PID interface into internal RST parameters, then: stability test
+        }
+
       private:
         std::array<FixedPoint<fractional_bits>, BufferLength> m_buffer{0};
         uint64_t                                              m_head{0};
@@ -105,6 +111,12 @@ namespace vslib
             return std::numeric_limits<double>::max();
         }
 
+        //! Update parameters method, called after paramaters of this component are modified
+        void updateParameters()
+        {
+            // recalculation of PID interface into internal RST parameters, then: stability test
+        }
+
       private:
         double m_previous_value{0};   // input value one iteration earlier
     };
@@ -141,6 +153,12 @@ namespace vslib
         [[nodiscard]] static auto const getMaxInputValue()
         {
             return std::numeric_limits<double>::max();
+        }
+
+        //! Update parameters method, called after paramaters of this component are modified
+        void updateParameters()
+        {
+            // recalculation of PID interface into internal RST parameters, then: stability test
         }
 
       private:

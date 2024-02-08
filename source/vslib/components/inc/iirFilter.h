@@ -75,6 +75,12 @@ namespace vslib
         Parameter<std::array<double, BufferLength>> numerator;
         Parameter<std::array<double, BufferLength>> denominator;
 
+        //! Update parameters method, called after paramaters of this component are modified
+        void updateParameters()
+        {
+            // recalculation of PID interface into internal RST parameters, then: stability test
+        }
+
       private:
         std::array<double, BufferLength> m_inputs_buffer{0};
         std::array<double, BufferLength> m_outputs_buffer{0};

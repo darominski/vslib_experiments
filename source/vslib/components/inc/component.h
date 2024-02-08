@@ -131,6 +131,11 @@ namespace vslib
             return m_parameters;
         }
 
+        //! Update parameters method, to be called after paramaters of this component are modified
+        virtual void updateParameters()
+        {
+        }
+
       protected:
         std::string const m_component_type;
         std::string       m_parent_name{""};

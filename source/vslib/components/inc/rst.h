@@ -98,6 +98,12 @@ namespace vslib
         Parameter<std::array<double, ControllerLength>> s;   //<! disturbance coefficients
         Parameter<std::array<double, ControllerLength>> t;   //<! control coefficients
 
+        //! Update parameters method, called after paramaters of this component are modified
+        void updateParameters()
+        {
+            // recalculation of PID interface into internal RST parameters, then: stability test
+        }
+
       private:
         int64_t                              m_head{0};        // Index to latest entry in the history
         std::array<double, ControllerLength> m_measurements;   // RST measurement history
