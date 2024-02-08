@@ -8,7 +8,6 @@
 #include <string>
 
 #include "component.h"
-#include "magic_enum.hpp"
 #include "parameter.h"
 
 namespace vslib
