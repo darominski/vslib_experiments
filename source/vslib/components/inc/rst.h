@@ -20,7 +20,7 @@ namespace vslib
             : Component("RST", name, parent),
               r(*this, "r", -12.0, 10.0),
               s(*this, "s", -12.0, 10.0),
-              t(*this, "t", -12.0, 10.0),
+              t(*this, "t", -12.0, 10.0)
         {
         }
 
