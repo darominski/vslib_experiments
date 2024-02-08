@@ -42,7 +42,8 @@ namespace vslib
 
         //! Computes one iteration of the controller
         //!
-        //! @param process_value Value of the controlled
+        //! @param process_value Value of the controlled process
+        //! @param reference Value of the set-point reference
         //! @return Result of this iteration
         double control(double process_value, double reference)
         {
