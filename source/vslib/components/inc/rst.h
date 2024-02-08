@@ -29,11 +29,12 @@ namespace vslib
         //! @param process_value Current process value (measurement)
         //! @param reference Reference value for the controller
         //! @return Controller output of the iteration
-        double calculate_actuation(double process_value, double reference) noexcept
+        double control(double process_value, double reference) noexcept
         {
             // based on logic in regRstCalcActRT from CCLIBS libreg regRst.c
             m_measurements[m_head] = process_value;
             m_references[m_head]   = reference;
+
             m_head++;
             if (m_head >= ControllerLength)
             {
