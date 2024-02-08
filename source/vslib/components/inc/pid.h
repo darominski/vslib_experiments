@@ -43,9 +43,9 @@ namespace vslib
         //!
         //! @param process_value Value of the controlled
         //! @return Result of this iteration
-        double control(double process_value)
+        double control(double process_value, double reference)
         {
-            m_error    = m_set_point - process_value;
+            m_error    = reference - process_value;
             m_integral += m_error;
             m_integral = m_anti_windup_protection(m_integral);
 
@@ -71,7 +71,6 @@ namespace vslib
             m_error          = 0;
             m_integral       = 0;
             m_previous_error = 0;
-            m_set_point      = 0;
         }
 
         // ************************************************************
@@ -109,28 +108,12 @@ namespace vslib
             return m_starting_value;
         }
 
-        //! Returns the target value of the controller
-        //!
-        //! @return Target value of the controller
-        [[nodiscard]] double getSetPoint() const noexcept
-        {
-            return m_set_point;
-        }
-
         //! Sets the starting value of the controller
         //!
         //! @param value Starting value for the controller
         void setStartingValue(double value) noexcept
         {
             m_starting_value = value;
-        }
-
-        //! Sets the target value of the controller
-        //!
-        //! @param target Target value for the controller
-        void setSetPoint(double set_point) noexcept
-        {
-            m_set_point = set_point;
         }
 
         // ************************************************************
@@ -145,7 +128,6 @@ namespace vslib
 
       private:
         double m_starting_value{0};   //!< Starting value of control
-        double m_set_point{0};        //!< Target setpoint
         double m_error{0};            //!< Current error value
         double m_previous_error{0};   //!< Previous error value
         double m_integral{0};         //!< Cumulative error over time
