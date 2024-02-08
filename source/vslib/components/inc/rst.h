@@ -41,16 +41,16 @@ namespace vslib
                 m_head -= ControllerLength;
             }
 
-            double actuation = t[0] * m_reference[m_head - 1] - r[0] * m_measurements[m_head - 1];
+            double actuation = t[0] * m_references[m_head - 1] - r[0] * m_measurements[m_head - 1];
             for (size_t index = 1; index < ControllerLength; index++)
             {
-                const int64_t buffer_index = (m_head - 1 - index);
+                int64_t buffer_index = (m_head - 1 - index);
                 if (buffer_index < 0)
                 {
-                    buffer_index += BufferLength;
+                    buffer_index += ControllerLength;
                 }
 
-                actuation += t[index] * m_reference[buffer_index] - r[index] * m_measurements[buffer_index]
+                actuation += t[index] * m_references[buffer_index] - r[index] * m_measurements[buffer_index]
                              - s[index] * m_actuations[buffer_index];
             }
             actuation /= s[0];
@@ -71,16 +71,16 @@ namespace vslib
             double reference = 0;
             for (size_t index = 0; index < ControllerLength; index++)
             {
-                const int64_t buffer_index = (m_head - 1 - index);
+                int64_t buffer_index = (m_head - 1 - index);
                 if (buffer_index < 0)
                 {
-                    buffer_index += BufferLength;
+                    buffer_index += ControllerLength;
                 }
 
-                reference += t[index] * m_reference[buffer_index] - r[index] * m_measurements[buffer_index]
+                reference += t[index] * m_references[buffer_index] - r[index] * m_measurements[buffer_index]
                              - s[index] * m_actuations[buffer_index];
             }
-            m_reference[m_head] = reference;
+            m_references[m_head] = reference;
         }
 
         //! Resets the controller to the initial state by zeroing the history.
