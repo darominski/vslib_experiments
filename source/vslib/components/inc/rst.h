@@ -101,7 +101,37 @@ namespace vslib
         //! Update parameters method, called after paramaters of this component are modified
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
-            // stability test
+            // Jury's stability test, based on logic implemented in CCLIBS regRst.c
+            if (r[0] == 0)
+            {
+                return fgc4::utils::Warning("First element of r coefficients is zero.");
+            }
+
+            if (s[0] == 0)
+            {
+                return fgc4::utils::Warning("First element of s coefficients is zero.");
+            }
+
+            if (t[0] == 0)
+            {
+                return fgc4::utils::Warning("First element of t coefficients is zero.");
+            }
+
+            const auto& maybe_warning_s = jurysStabilityTest(s.value());
+            if (maybe_warning_s.has_value())
+            {
+                return maybe_warning_s.value();
+            }
+
+            const auto& maybe_warning_t = jurysStabilityTest(t.value());
+            if (maybe_warning_t.has_value())
+            {
+                return maybe_warning_t.value();
+            }
+
+            // r is not checked in CCLIBS
+
+            // no issues, RST is stable, and parameters are valid
             return {};
         }
 
@@ -110,5 +140,84 @@ namespace vslib
         std::array<double, ControllerLength> m_measurements;   // RST measurement history
         std::array<double, ControllerLength> m_references;     // RST reference history
         std::array<double, ControllerLength> m_actuations;     // RST actuation history.
+
+
+        std::optional<fgc4::utils::Warning> jurysStabilityTest(const std::array<double, ControllerLength>& coefficients
+        ) const
+        {
+            int64_t coefficient_length = 1;
+            while (coefficient_length < ControllerLength && coefficients[coefficient_length] != 0.0F)
+            {
+                coefficient_length++;
+            }
+            coefficient_length--;
+
+            double sum_even{0};
+            double sum_odd{0};
+            double sum_abs{0};
+
+            for (size_t index = 0; index <= coefficient_length; index++)
+            {
+                const double coefficient = coefficients[index];
+
+                sum_abs += abs(coefficient);
+
+                if ((index & 1) == 0)
+                {
+                    sum_even += coefficient;
+                }
+                else
+                {
+                    sum_odd += coefficient;
+                }
+            }
+
+            // Stability check 1 : Sum(even coefficients) >= Sum(odd coefficients)
+            if (sum_even < sum_odd)
+            {
+                return fgc4::utils::Warning(
+                    "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"
+                );
+            }
+
+            // Stability check 2 : Sum(coefficients) > 0 - allow for floating point rounding errors
+            if (((sum_even + sum_odd) / sum_abs) < -fgc4::utils::constants::floating_point_min_threshold)
+            {
+                return fgc4::utils::Warning(
+                    "RST unstable: sum of coefficients below minimal floating-point threshold.\n"
+                );
+            }
+
+            // Stability check 3 : Jury's Stability Test for unstable roots
+
+            std::array<double, ControllerLength> b = coefficients;
+            std::array<double, ControllerLength> a{0};
+
+            while (coefficient_length > 2)
+            {
+                for (size_t index = 0; index <= coefficient_length; index++)
+                {
+                    a[index] = b[index];
+                }
+
+                double const d = a[coefficient_length] / a[0];
+
+                for (size_t index = 0; index < coefficient_length; index++)
+                {
+                    b[index] = a[index] - d * a[coefficient_length - index];
+                }
+
+                // First element of every row of Jury's array > 0 for stability
+                if (b[0] <= 0.0F)
+                {
+                    return fgc4::utils::Warning("RST unstable: the first element of Jury's array is not above zero.\n");
+                }
+
+                coefficient_length--;
+            }
+
+            // No warning returned because coefficients are stable
+            return {};
+        }
     };
 }   // namespace vslib
