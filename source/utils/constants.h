@@ -43,4 +43,10 @@ namespace fgc4::utils::constants
 
     constexpr std::string_view unsupported_type_label = "Unsupported";
 
+    // ************************************************************
+
+    // Lower bound for floating point number to be considered basically zero, allowing for floating point rounding
+    // errors. The exact value stems from CCLIBS.
+    constexpr double floating_point_min_threshold = 1E-7F;
+
 }   // namespace utils::constants
