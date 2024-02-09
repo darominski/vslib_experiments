@@ -30,13 +30,20 @@ namespace vslib
             // execute the command from the incoming stream, synchronises write and background buffers
             processJsonCommands(json_object);
 
-            // TO-DO: wait a little in case more commands come before flipping state
+            // after the processing, validate all touched Components
+            auto const maybe_error = validateModifiedComponents();
 
-            BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
-            // synchronise new background to new active buffer
-            triggerReadBufferSynchronisation();
+            // TO-DO: wait a little in case more commands come before flipping state
+            if (maybe_error.has_value())
+            {
+                BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
+                // synchronise new background to new active buffer
+                triggerReadBufferSynchronisation();
+            }
+            // else: message already logged, buffers will not be synchronised and state flipped
         }
     }
+
 
     //! Processes the received JSON commands, checking whether one or many commands were received.
     //!
@@ -93,7 +100,7 @@ namespace vslib
             {
                 const fgc4::utils::Warning message(fmt::format(
                     "Inconsistent major version of the communication interface! Provided version: {}, expected "
-                    "version: {}",
+                    "version: {}.\n",
                     command["version"][0], vslib::version::json_command.major
                 ));
                 utils::writeStringToMessageQueue(message.warning_str.data(), m_write_command_status);
@@ -111,7 +118,7 @@ namespace vslib
     {
         if (!validateJsonCommand(command))
         {
-            const fgc4::utils::Warning message("Command invalid, ignored.");
+            const fgc4::utils::Warning message("Command invalid, ignored.\n");
             return;
         }
         std::string const parameter_name     = command["name"];
@@ -119,10 +126,13 @@ namespace vslib
         auto const        parameter          = parameter_registry.find(parameter_name);
         if (parameter == parameter_registry.end())
         {
-            const fgc4::utils::Warning message("Parameter ID: " + parameter_name + " not found. Command ignored.");
+            const fgc4::utils::Warning message("Parameter ID: " + parameter_name + " not found. Command ignored.\n");
             utils::writeStringToMessageQueue(message.warning_str.data(), m_write_command_status);
             return;
         }
+        std::string const component_name     = parameter_name.substr(0, parameter_name.rfind("."));
+        auto const&       component_registry = ComponentRegistry::instance().getComponents();
+        auto const        modified_component = component_registry.find(component_name);
 
         // execute the command, parameter will handle the validation of provided value.
         auto const has_warning = (*parameter).second.get().setJsonValue(command["value"]);
@@ -131,12 +141,46 @@ namespace vslib
             // success, otherwise: failure and Warning message already logged by setJsonValue
             // synchronise the write buffer with the background buffer
             (*parameter).second.get().synchroniseWriteBuffer();
-            utils::writeStringToMessageQueue("Command executed successfully.", m_write_command_status);
+            utils::writeStringToMessageQueue("Parameter value updated successfully.\n", m_write_command_status);
+
+            // since parameter value has been updated sucessfully the component can be added to the list of modified
+            // components, provided it is not already there
+            auto const it_found = std::find(
+                std::cbegin(m_modified_components), std::cbegin(m_modified_components) + m_number_modified_components,
+                &(*modified_component).second.get()
+            );
+            if (it_found
+                == std::cbegin(m_modified_components)
+                       + m_number_modified_components)   // not found in the array == new element
+            {
+                m_modified_components[m_number_modified_components] = &((*modified_component).second.get());
+                m_number_modified_components++;
+            }
+            // else: component already present in the list, nothing to add
         }
         else
         {
             utils::writeStringToMessageQueue(has_warning.value().warning_str.data(), m_write_command_status);
         }
+    }
+
+    std::optional<fgc4::utils::Warning> ParameterSetting::validateModifiedComponents()
+    {
+        for (size_t index = 0; index < m_number_modified_components; index++)
+        {
+            auto const maybe_warning = m_modified_components[index]->verifyParameters();
+            if (maybe_warning.has_value())
+            {
+                // validation did not pass, roll back background buffer update and return a warning
+                for (auto& parameter : m_modified_components[index]->getParameters())
+                {
+                    parameter.second.get().synchroniseReadBuffers();
+                }
+                return maybe_warning.value();
+            }
+        }
+        m_number_modified_components = 0;
+        return {};
     }
 
     //! Calls each registered parameter to synchronise background with real-time buffers
