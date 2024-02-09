@@ -66,9 +66,13 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
         {
             command.push_back({"value", "updating"});
         }
+        else if (type == "ArrayFloat64")
+        {
+            std::array<double, 3> values = {1.0, 1.1, 1.3};
+            command.push_back({"value", values});
+        }
         else
-        {   // Float32Array
-            std::cout << name << std::endl;
+        {
             int value = -123;
             command.push_back({"value", value});
             // int const             counter = static_cast<int>(commands.size());
