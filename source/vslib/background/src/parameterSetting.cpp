@@ -143,20 +143,20 @@ namespace vslib
             (*parameter).second.get().synchroniseWriteBuffer();
             utils::writeStringToMessageQueue("Parameter value updated successfully.\n", m_write_command_status);
 
-            // since parameter value has been updated sucessfully the component can be added to the list of modified
+            // since parameter value has been updated sucessfully, the component can be added to the list of modified
             // components, provided it is not already there
             auto const it_found = std::find(
                 std::cbegin(m_modified_components), std::cbegin(m_modified_components) + m_number_modified_components,
-                &(*modified_component).second.get()
+                std::shared_ptr<Component>(&(*modified_component).second.get())
             );
             if (it_found
                 == std::cbegin(m_modified_components)
                        + m_number_modified_components)   // not found in the array == new element
             {
-                m_modified_components[m_number_modified_components] = &((*modified_component).second.get());
+                m_modified_components[m_number_modified_components]
+                    = std::shared_ptr<Component>(&(*modified_component).second.get());
                 m_number_modified_components++;
-            }
-            // else: component already present in the list, nothing to add
+            }   // else: component already present in the list, nothing to add
         }
         else
         {

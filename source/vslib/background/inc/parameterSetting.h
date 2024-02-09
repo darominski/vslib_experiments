@@ -44,8 +44,8 @@ namespace vslib
         bmboot::MessageQueueWriter<void>                                   m_write_command_status;
         std::array<uint8_t, fgc4::utils::constants::json_memory_pool_size> m_read_commands_buffer;
 
-        std::array<Component*, 100> m_modified_components{nullptr};
-        unsigned short              m_number_modified_components{0};
+        std::array<std::shared_ptr<Component>, 100> m_modified_components;
+        unsigned short                              m_number_modified_components{0};
 
         void triggerReadBufferSynchronisation();
     };
