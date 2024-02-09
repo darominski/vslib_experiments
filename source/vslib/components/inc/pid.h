@@ -128,12 +128,6 @@ namespace vslib
 
         Parameter<double> integral_limit;   //!< limit of the integral error
 
-        //! Update parameters method, called after paramaters of this component are modified
-        void updateParameters()
-        {
-            // recalculation of PID interface into internal RST parameters, then: stability test
-        }
-
       private:
         double m_starting_value{0};   //!< Starting value of control
         double m_error{0};            //!< Current error value

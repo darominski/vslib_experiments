@@ -20,7 +20,7 @@ namespace vslib
     class Component : public NonCopyableNonMovable
     {
         using ParameterReference = std::reference_wrapper<IParameter>;
-        using ParameterList      = std::vector<std::tuple<std::string, ParameterReference>>;
+        using ParameterList      = std::vector<std::pair<std::string, ParameterReference>>;
         using ComponentReference = std::reference_wrapper<Component>;
         using ChildrenList       = std::vector<ComponentReference>;
         using StaticJson         = fgc4::utils::StaticJson;
@@ -131,9 +131,10 @@ namespace vslib
             return m_parameters;
         }
 
-        //! Update parameters method, to be called after paramaters of this component are modified
-        virtual void updateParameters()
+        //! Verifies parameters after they are set, to be called after paramaters of this component are modified
+        virtual std::optional<fgc4::utils::Warning> verifyParameters()
         {
+            return {};
         }
 
       protected:

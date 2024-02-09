@@ -68,12 +68,6 @@ namespace vslib
 
         Parameter<std::array<double, BufferLength>> coefficients;
 
-        //! Update parameters method, called after paramaters of this component are modified
-        void updateParameters()
-        {
-            // recalculation of PID interface into internal RST parameters, then: stability test
-        }
-
       private:
         std::array<double, BufferLength> m_buffer{0};
         int64_t                          m_head{0};

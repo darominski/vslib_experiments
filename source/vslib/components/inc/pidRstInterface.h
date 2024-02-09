@@ -108,9 +108,10 @@ namespace vslib
         Parameter<double> kff;   //!< Feed-forward scaling coefficient
 
         //! Update parameters method, called after paramaters of this component are modified
-        void updateParameters()
+        std::optional<fgc4::utils::Warning> verifyParameters() override
         {
             // recalculation of PID interface into internal RST parameters, then: stability test
+            return {};
         }
 
       private:
