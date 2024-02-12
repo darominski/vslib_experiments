@@ -137,12 +137,30 @@ namespace vslib
             return {};
         }
 
+        //! Sets the value of flag with information whether parameters belonging to this Component have been recently
+        //! modified
+        //!
+        //! @param modified_status New status of whether the parameters of this Component have been modified
+        void setParametersModified(bool modified_status) noexcept
+        {
+            m_parameters_modified = modified_status;
+        }
+
+        //! Returns the value of the flag informing whether the parameters of this Component have been recently modified
+        //!
+        //! @return True if any parameter of this Component has been recently modified, false otherwise
+        [[nodiscard]] bool parametersModified() const noexcept
+        {
+            return m_parameters_modified;
+        }
+
       protected:
         std::string const m_component_type;
         std::string       m_parent_name{""};
         std::string const m_name;
         ParameterList     m_parameters;
         ChildrenList      m_children;
+        bool              m_parameters_modified{false};
 
         //! Registers this component in the ComponentRegistry
         void registerComponent() noexcept
