@@ -44,11 +44,6 @@ namespace vslib
         bmboot::MessageQueueWriter<void>                                   m_write_command_status;
         std::array<uint8_t, fgc4::utils::constants::json_memory_pool_size> m_read_commands_buffer;
 
-        // array of modified components, has to have a maximal length, arbitrary for now
-        std::array<std::shared_ptr<Component>, 100> m_modified_components;
-        // counter for how many components have been modified by commands
-        unsigned short m_number_modified_components{0};
-
         void triggerReadBufferSynchronisation();
     };
 

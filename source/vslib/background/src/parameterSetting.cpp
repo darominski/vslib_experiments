@@ -145,18 +145,7 @@ namespace vslib
 
             // since parameter value has been updated sucessfully, the component can be added to the list of modified
             // components, provided it is not already there
-            auto const it_found = std::find(
-                std::cbegin(m_modified_components), std::cbegin(m_modified_components) + m_number_modified_components,
-                std::shared_ptr<Component>(&(*modified_component).second.get())
-            );
-            if (it_found
-                == std::cbegin(m_modified_components)
-                       + m_number_modified_components)   // not found in the array == new element
-            {
-                m_modified_components[m_number_modified_components]
-                    = std::shared_ptr<Component>(&(*modified_component).second.get());
-                m_number_modified_components++;
-            }   // else: component already present in the list, nothing to add
+            (*modified_component).second.get().setParametersModified(true);
         }
         else
         {
@@ -164,22 +153,30 @@ namespace vslib
         }
     }
 
+    //! Calls verifyParameters of all modified components in the registry
+    //!
+    //! @return Optionally returns a Warning if validation has failed.
     std::optional<fgc4::utils::Warning> ParameterSetting::validateModifiedComponents()
     {
-        for (size_t index = 0; index < m_number_modified_components; index++)
+        auto const& component_registry = ComponentRegistry::instance().getComponents();
+        for (const auto& entry : component_registry)
         {
-            auto const maybe_warning = m_modified_components[index]->verifyParameters();
-            if (maybe_warning.has_value())
+            auto& component = entry.second.get();
+            if (component.parametersModified())
             {
-                // validation did not pass, roll back background buffer update and return a warning
-                for (auto& parameter : m_modified_components[index]->getParameters())
+                auto const maybe_warning = component.verifyParameters();
+                if (maybe_warning.has_value())
                 {
-                    parameter.second.get().synchroniseReadBuffers();
+                    // validation did not pass, roll back background buffer update and return a warning
+                    for (auto& parameter : component.getParameters())
+                    {
+                        parameter.second.get().synchroniseReadBuffers();
+                    }
+                    return maybe_warning.value();
                 }
-                return maybe_warning.value();
+                component.setParametersModified(false);
             }
         }
-        m_number_modified_components = 0;
         return {};
     }
 
