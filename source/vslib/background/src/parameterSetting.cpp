@@ -121,18 +121,18 @@ namespace vslib
             const fgc4::utils::Warning message("Command invalid, ignored.\n");
             return;
         }
-        std::string const parameter_name     = command["name"];
-        auto const&       parameter_registry = ParameterRegistry::instance().getParameters();
-        auto const        parameter          = parameter_registry.find(parameter_name);
+        const std::string& parameter_name     = command["name"];
+        const auto&        parameter_registry = ParameterRegistry::instance().getParameters();
+        const auto&        parameter          = parameter_registry.find(parameter_name);
         if (parameter == parameter_registry.end())
         {
             const fgc4::utils::Warning message("Parameter ID: " + parameter_name + " not found. Command ignored.\n");
             utils::writeStringToMessageQueue(message.warning_str.data(), m_write_command_status);
             return;
         }
-        std::string const component_name     = parameter_name.substr(0, parameter_name.rfind("."));
-        auto const&       component_registry = ComponentRegistry::instance().getComponents();
-        auto const        modified_component = component_registry.find(component_name);
+        const std::string& component_name     = parameter_name.substr(0, parameter_name.rfind("."));
+        const auto&        component_registry = ComponentRegistry::instance().getComponents();
+        const auto&        modified_component = component_registry.find(component_name);
 
         // execute the command, parameter will handle the validation of provided value.
         auto const has_warning = (*parameter).second.get().setJsonValue(command["value"]);
