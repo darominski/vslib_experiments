@@ -22,6 +22,7 @@
 #include "parameterRegistry.h"
 #include "parameterSetting.h"
 #include "pid.h"
+#include "pidRstInterface.h"
 #include "rst.h"
 #include "timerInterrupt.h"
 #include "vslib_shared_memory_memmap.h"
@@ -80,7 +81,8 @@ int main()
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
 
-    PID pid1("pid_1", independent_component);
+    PID    pid1("pid_1", independent_component);
+    PIDRST pid_rst("pid_rst_1", independent_component);
     // PID pid3("pid_3", independent_component);
     // RST rst("rst_1", independent_component);
 
