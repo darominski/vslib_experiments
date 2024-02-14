@@ -24,6 +24,23 @@ namespace vslib
         {
         }
 
+        //! Updates histories of measurements and references and moves the head of the history buffer
+        //!
+        //! @param measurement Current value of the process value
+        //! @param reference Current value of the set-point reference
+        void update_measurement_reference_histories(double measurement, double reference) noexcept
+        {
+            m_measurements[m_head] = measurement;
+            m_references[m_head]   = reference;
+
+            m_head++;
+            if (m_head >= ControllerLength)
+            {
+                m_history_ready = true;
+                m_head          -= ControllerLength;
+            }
+        }
+
         //! Calculates one iteration of the controller algorithm
         //!
         //! @param process_value Current process value (measurement)
@@ -32,14 +49,7 @@ namespace vslib
         double control(double process_value, double reference) noexcept
         {
             // based on logic in regRstCalcActRT from CCLIBS libreg regRst.c
-            m_measurements[m_head] = process_value;
-            m_references[m_head]   = reference;
-
-            m_head++;
-            if (m_head >= ControllerLength)
-            {
-                m_head -= ControllerLength;
-            }
+            update_measurement_reference_histories(process_value, reference);
 
             double actuation = t[0] * m_references[m_head - 1] - r[0] * m_measurements[m_head - 1];
             for (size_t index = 1; index < ControllerLength; index++)
@@ -55,7 +65,7 @@ namespace vslib
             }
             actuation /= s[0];
 
-            m_actuations[m_head] = actuation;   // update reference, m_head or m_head - 1?
+            m_actuations[m_head] = actuation;   // update reference
 
             return actuation;
         }
@@ -86,9 +96,19 @@ namespace vslib
         //! Resets the controller to the initial state by zeroing the history.
         void reset() noexcept
         {
-            m_measurements = std::array<double, ControllerLength>{0};
-            m_references   = std::array<double, ControllerLength>{0};
-            m_actuations   = std::array<double, ControllerLength>{0};
+            m_measurements  = std::array<double, ControllerLength>{0};
+            m_references    = std::array<double, ControllerLength>{0};
+            m_actuations    = std::array<double, ControllerLength>{0};
+            m_head          = 0;
+            m_history_ready = false;
+        }
+
+        //! Returns flag whether the reference and measurement histories are filled and RST is ready to regulate
+        //!
+        //! @return True if reference and measurement histories are filled, false otherwise
+        bool isReady() const noexcept
+        {
+            return m_history_ready;
         }
 
         // ************************************************************
@@ -129,7 +149,7 @@ namespace vslib
                 return maybe_warning_t.value();
             }
 
-            // r is not checked in CCLIBS
+            // r is not checked in CCLIBS and neither they are here
 
             // no issues, RST is stable, and parameters are valid
             return {};
@@ -141,9 +161,13 @@ namespace vslib
         std::array<double, ControllerLength> m_references;     // RST reference history
         std::array<double, ControllerLength> m_actuations;     // RST actuation history.
 
+        bool m_history_ready{false};                   // flag to mark RST ref and meas histories are filled
+        std::array<double, ControllerLength> m_b{0};   // variable used in Jury's test, declaring them here avoids
+                                                       // allocation whenever jurysStabilityTest is called
+        std::array<double, ControllerLength> m_a{0};   // variable used in Jury's test, declaring them here avoids
+                                                       // allocation whenever jurysStabilityTest is called
 
-        std::optional<fgc4::utils::Warning> jurysStabilityTest(const std::array<double, ControllerLength>& coefficients
-        ) const
+        std::optional<fgc4::utils::Warning> jurysStabilityTest(const std::array<double, ControllerLength>& coefficients)
         {
             int64_t coefficient_length = 1;
             while (coefficient_length < ControllerLength && coefficients[coefficient_length] != 0.0F)
@@ -190,25 +214,22 @@ namespace vslib
 
             // Stability check 3 : Jury's Stability Test for unstable roots
 
-            std::array<double, ControllerLength> b = coefficients;
-            std::array<double, ControllerLength> a{0};
-
             while (coefficient_length > 2)
             {
                 for (size_t index = 0; index <= coefficient_length; index++)
                 {
-                    a[index] = b[index];
+                    m_a[index] = m_b[index];
                 }
 
-                double const d = a[coefficient_length] / a[0];
+                double const d = m_a[coefficient_length] / m_a[0];
 
                 for (size_t index = 0; index < coefficient_length; index++)
                 {
-                    b[index] = a[index] - d * a[coefficient_length - index];
+                    m_b[index] = m_a[index] - d * m_a[coefficient_length - index];
                 }
 
                 // First element of every row of Jury's array > 0 for stability
-                if (b[0] <= 0.0F)
+                if (m_b[0] <= 0.0F)
                 {
                     return fgc4::utils::Warning("RST unstable: the first element of Jury's array is not above zero.\n");
                 }
