@@ -293,7 +293,7 @@ namespace vslib
 
       private:
         const std::string             m_name;   // Unique ID indicating component type, its name and the variable name
-        std::array<T, number_buffers> m_value;
+        std::array<T, number_buffers> m_value{T{}, T{}, T{}};
         LimitType<T>                  m_limit_min;
         LimitType<T>                  m_limit_max;
         bool                          m_limit_min_defined{false};
