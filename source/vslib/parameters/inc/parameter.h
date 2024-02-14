@@ -74,6 +74,8 @@ namespace vslib
         //!
         //! @param parent Component owning this Parameter
         //! @param name Name of the Parameter
+        //! @param limit_min Minimal numerical value that this Parameter can be set to
+        //! @param limit_max Maximal numerical value that this Parameter can be set to
         Parameter(
             Component& parent, std::string_view name,
             LimitType<T> limit_min = std::numeric_limits<LimitType<T>>::lowest(),
@@ -100,6 +102,7 @@ namespace vslib
 
         //! Provides element-access to the values stored in the value, provided the type stored is a std::array
         //!
+        //! @param index Index of the array to be accessed. If invalid, an out_of_range exception will be thrown
         //! @return Value stored at the provided index
         auto& operator[](uint64_t index) const
             requires fgc4::utils::StdArray<T>
@@ -119,6 +122,7 @@ namespace vslib
         //! Provides ordering for the Parameters, allowing to compare them to interact as if they were of the stored
         //! type
         //!
+        //! @param other Right-hand side Parameter to compare this Parameter against
         //! @return Ordering between the current Parameter and the one we compared the object to
         auto operator<=>(const Parameter& other) const noexcept
         {
@@ -248,7 +252,7 @@ namespace vslib
 
         //! Serializes this Parameter using JSON serialization class.
         //!
-        //! @param visitor Reference to serialization visitor
+        //! @param serializer Reference to ParameterSerializer visitor
         //! @return JSON-serialized Parameter
         [[nodiscard]] StaticJson serialize(const ParameterSerializer& serializer) const noexcept override
         {
