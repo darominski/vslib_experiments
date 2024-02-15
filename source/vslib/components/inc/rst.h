@@ -28,7 +28,7 @@ namespace vslib
         //!
         //! @param measurement Current value of the process value
         //! @param reference Current value of the set-point reference
-        void update_measurement_reference_histories(double measurement, double reference) noexcept
+        void update_input_histories(double measurement, double reference) noexcept
         {
             m_measurements[m_head] = measurement;
             m_references[m_head]   = reference;
@@ -49,7 +49,7 @@ namespace vslib
         double control(double process_value, double reference) noexcept
         {
             // based on logic in regRstCalcActRT from CCLIBS libreg regRst.c
-            update_measurement_reference_histories(process_value, reference);
+            update_input_histories(process_value, reference);
 
             double actuation = t[0] * m_references[m_head - 1] - r[0] * m_measurements[m_head - 1];
             for (size_t index = 1; index < ControllerLength; index++)
