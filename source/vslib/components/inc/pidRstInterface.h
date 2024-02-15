@@ -103,14 +103,22 @@ namespace vslib
             m_references[m_head] = reference;
         }
 
-        //! Allows for resetting errors of the controller and setting new starting value
-        //!
-        //! @param start_value New starting value of the controller
-        void reset(double start_value) noexcept
+        //! Resets the controller to the initial state by zeroing the history.
+        void reset() noexcept
         {
-            m_r = std::array<double, buffer_length>{0};
-            m_s = std::array<double, buffer_length>{0};
-            m_t = std::array<double, buffer_length>{0};
+            std::fill(std::begin(m_measurements), std::end(m_measurements), 0);
+            std::fill(std::begin(m_references), std::end(m_references), 0);
+            std::fill(std::begin(m_actuations), std::end(m_actuations), 0);
+            m_head          = 0;
+            m_history_ready = false;
+        }
+
+        //! Returns flag whether the reference and measurement histories are filled and RST is ready to regulate
+        //!
+        //! @return True if reference and measurement histories are filled, false otherwise
+        bool isReady() const noexcept
+        {
+            return m_history_ready;
         }
 
         // ************************************************************
@@ -194,6 +202,8 @@ namespace vslib
         std::array<double, buffer_length> m_r;   //!< r coefficients
         std::array<double, buffer_length> m_s;   //!< s coefficients
         std::array<double, buffer_length> m_t;   //!< t coefficients
+
+        bool m_history_ready{false};   // flag to mark RST ref and meas histories are filled
 
         std::optional<fgc4::utils::Warning> jurysStabilityTest(const std::array<double, 3>& coefficients) const
         {

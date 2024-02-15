@@ -96,9 +96,9 @@ namespace vslib
         //! Resets the controller to the initial state by zeroing the history.
         void reset() noexcept
         {
-            m_measurements  = std::array<double, ControllerLength>{0};
-            m_references    = std::array<double, ControllerLength>{0};
-            m_actuations    = std::array<double, ControllerLength>{0};
+            std::fill(std::begin(m_measurements), std::end(m_measurements), 0);
+            std::fill(std::begin(m_references), std::end(m_references), 0);
+            std::fill(std::begin(m_actuations), std::end(m_actuations), 0);
             m_head          = 0;
             m_history_ready = false;
         }
