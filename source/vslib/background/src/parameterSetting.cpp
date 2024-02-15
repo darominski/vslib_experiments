@@ -146,6 +146,7 @@ namespace vslib
             // since parameter value has been updated sucessfully, the component can be added to the list of modified
             // components, provided it is not already there
             (*modified_component).second.get().setParametersModified(true);
+            // TODO: do we need to mark children of the modified component?
         }
         else
         {
