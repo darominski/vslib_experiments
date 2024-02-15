@@ -34,6 +34,23 @@ namespace vslib
         {
         }
 
+        //! Updates histories of measurements and references and moves the head of the history buffer
+        //!
+        //! @param measurement Current value of the process value
+        //! @param reference Current value of the set-point reference
+        void update_input_histories(double measurement, double reference) noexcept
+        {
+            m_measurements[m_head] = measurement;
+            m_references[m_head]   = reference;
+
+            m_head++;
+            if (m_head >= buffer_length)
+            {
+                m_history_ready = true;
+                m_head          -= buffer_length;
+            }
+        }
+
         //! Computes one iteration of the controller
         //!
         //! @param process_value Value of the controlled
@@ -41,16 +58,10 @@ namespace vslib
         double control(double process_value, double reference) noexcept
         {
             // based on logic in regRstCalcActRT from CCLIBS libreg regRst.c
-            m_measurements[m_head] = process_value;
-            m_references[m_head]   = reference;
-
-            m_head++;
-            if (m_head >= buffer_length)
-            {
-                m_head -= buffer_length;
-            }
+            update_input_histories(process_value, reference);
 
             double actuation = m_t[0] * m_references[m_head - 1] - m_r[0] * m_measurements[m_head - 1];
+
             for (size_t index = 1; index < buffer_length; index++)
             {
                 int64_t buffer_index = (m_head - 1 - index);
