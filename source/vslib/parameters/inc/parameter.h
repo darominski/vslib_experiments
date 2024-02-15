@@ -292,13 +292,16 @@ namespace vslib
         }
 
       private:
-        const std::string             m_name;   // Unique ID indicating component type, its name and the variable name
-        std::array<T, number_buffers> m_value{T{}, T{}, T{}};
-        LimitType<T>                  m_limit_min;
-        LimitType<T>                  m_limit_max;
-        bool                          m_limit_min_defined{false};
-        bool                          m_limit_max_defined{false};
-        bool                          m_initialized{false};
+        const std::string m_name;   // Unique ID indicating component type, its name and the variable name
+
+        std::array<T, number_buffers> m_value{T{}, T{}, T{}};   // default-initialized values
+
+        LimitType<T> m_limit_min;                  // minimum numerical value that can be stored
+        LimitType<T> m_limit_max;                  // maximal numerical value that can be stroed
+        bool         m_limit_min_defined{false};   // flag defining whether the minimum limit has been set
+        bool         m_limit_max_defined{false};   // flag defining whether the maximum limit has been set
+
+        bool m_initialized{false};   // flag defining whether the Parameter has been initialized
 
         // ************************************************************
         // Methods related to checking the numerical limits of the parameter during parameter setting

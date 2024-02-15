@@ -116,32 +116,31 @@ namespace vslib
             // recalculation of PID interface into internal RST parameters, then: stability test
             // undefined variables: b, c, f0 - frequency, t_s - sampling period = vloop iteration period?, N -
             // derivative approximation?
-            double f0 = 300'000;   // 300 kHz
-            double N;              // = ?
-            double t_s;            // 1/T / f_b in [10, 25], f_b - bandwith of the closed-loop system
+            double f0;    // 300 kHz?, will be a settable parameter of STG
+            double t_s;   // 1/T / f_b in [10, 25], f_b - bandwith of the closed-loop system
+            double N;     // = ?
             double b;
             double c;
 
-            double const a  = 2.0 * std::numbers::pi_v<double> * f0 / atan(std::numbers::pi_v<double> * f0 * t_s);
-            double const a2 = pow(a, 2);   // helper a^2, which occurs often in the calculations below
+            double const kikpN = ki * kp * N;
+            double const a     = 2.0 * std::numbers::pi_v<double> * f0 / atan(std::numbers::pi_v<double> * f0 * t_s);
+            double const a2    = pow(a, 2);   // helper a^2, which occurs often in the calculations below
 
-            m_r[0] = (ki * kp * N + ki * kd * a + kd * kp * a2 + pow(kp, 2) * N * a + kd * kp * N * a2)
-                     / (4 * ki * kp * N);
-            m_r[1] = (2 * ki * kp * N - 2 * kd * kp * a2 * (1 + N)) / (4 * ki * kp * N);
-            m_r[2] = (ki * kp * N - kd * ki * a + kd * kp * a2 - pow(kp, 2) * N * a + kd * kp * N * a2)
-                     / (4 * ki * kp * N);
+            m_r[0] = (kikpN + ki * kd * a + kd * kp * a2 + pow(kp, 2) * N * a + kd * kp * N * a2) / (4 * kikpN);
+            m_r[1] = (2 * kikpN - 2 * kd * kp * a2 * (1 + N)) / (4 * kikpN);
+            m_r[2] = (kikpN - kd * ki * a + kd * kp * a2 - pow(kp, 2) * N * a + kd * kp * N * a2) / (4 * kikpN);
 
-            m_s[0] = (kd * a2 + kp * N * a) / (4 * ki * kp * N);
-            m_s[1] = (-kd * a2) / (2 * ki * kp * N);
-            m_s[2] = (kd * a2 - kp * N * a) / (4 * ki * kp * N);
+            m_s[0] = (kd * a2 + kp * N * a) / (4 * kikpN);
+            m_s[1] = (-kd * a2) / (2 * kikpN);
+            m_s[2] = (kd * a2 - kp * N * a) / (4 * kikpN);
 
-            m_t[0] = (ki * kp * N + kd * ki * a + kd * kff * a2 + kd * kp * a2 * b + pow(kp, 2) * N * a * b
-                      + kff * kp * N * a + kd * kp * N * a2 * c)
-                     / (4 * ki * kp * N);
-            m_t[1] = (ki * kp * N - kd * kff * a2 - kd * kp * a2 * b - kd * kp * N * a2 * c) / (2 * ki * kp * N);
-            m_t[2] = (ki * kp * N - kd * ki * a + kd * kff * a2 + kd * kp * a2 * b - pow(kp, 2) * N * a * b
-                      - kff * kp * N * a + kd * kp * N * a2 * c)
-                     / (4 * ki * kp * N);
+            m_t[0] = (kikpN + kd * ki * a + kd * kff * a2 + kd * kp * a2 * b + pow(kp, 2) * N * a * b + kff * kp * N * a
+                      + kd * kp * N * a2 * c)
+                     / (4 * kikpN);
+            m_t[1] = (kikpN - kd * kff * a2 - kd * kp * a2 * b - kd * kp * N * a2 * c) / (2 * kikpN);
+            m_t[2] = (kikpN - kd * ki * a + kd * kff * a2 + kd * kp * a2 * b - pow(kp, 2) * N * a * b - kff * kp * N * a
+                      + kd * kp * N * a2 * c)
+                     / (4 * kikpN);
 
             // Jury's stability test, based on logic implemented in CCLIBS regRst.c
             if (m_r[0] == 0)
