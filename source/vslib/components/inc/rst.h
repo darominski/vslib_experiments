@@ -110,12 +110,39 @@ namespace vslib
             m_history_ready = false;
         }
 
+        // ************************************************************
+        // Getters
+
         //! Returns flag whether the reference and measurement histories are filled and RST is ready to regulate
         //!
         //! @return True if reference and measurement histories are filled, false otherwise
         bool isReady() const noexcept
         {
             return m_history_ready;
+        }
+
+        //! Returns the actuation history buffer
+        //!
+        //! @return Reference to the history buffer holding previous actuations
+        const auto& getActuations() noexcept
+        {
+            return m_actuations;
+        }
+
+        //! Returns the reference history buffer
+        //!
+        //! @return Reference to the history buffer holding previous references
+        const auto& getReferences() noexcept
+        {
+            return m_references;
+        }
+
+        //! Returns the measurement history buffer
+        //!
+        //! @return Reference to the history buffer holding previous measurements
+        const auto& getMeasurements() noexcept
+        {
+            return m_measurements;
         }
 
         // ************************************************************
