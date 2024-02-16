@@ -34,7 +34,7 @@ namespace vslib
             m_references[m_head]   = reference;
 
             m_head++;
-            if (m_head >= ControllerLength)
+            if (m_head == ControllerLength)
             {
                 m_history_ready = true;
                 m_head          -= ControllerLength;
@@ -49,12 +49,13 @@ namespace vslib
         double control(double process_value, double reference) noexcept
         {
             // based on logic in regRstCalcActRT from CCLIBS libreg regRst.c
-            update_input_histories(process_value, reference);
+            m_measurements[m_head] = process_value;
+            m_references[m_head]   = reference;
 
-            double actuation = t[0] * m_references[m_head - 1] - r[0] * m_measurements[m_head - 1];
+            double actuation = t[0] * m_references[m_head] - r[0] * m_measurements[m_head];
             for (size_t index = 1; index < ControllerLength; index++)
             {
-                int64_t buffer_index = (m_head - 1 - index);
+                int64_t buffer_index = (m_head - index);
                 if (buffer_index < 0)
                 {
                     buffer_index += ControllerLength;
@@ -63,10 +64,16 @@ namespace vslib
                 actuation += t[index] * m_references[buffer_index] - r[index] * m_measurements[buffer_index]
                              - s[index] * m_actuations[buffer_index];
             }
+
             actuation /= s[0];
 
-            m_actuations[m_head] = actuation;   // update reference
+            m_actuations[m_head] = actuation;   // update actuations
 
+            m_head++;
+            if (m_head == ControllerLength)
+            {
+                m_head -= ControllerLength;
+            }
             return actuation;
         }
 
@@ -76,7 +83,7 @@ namespace vslib
         void update_reference(double updated_actuation)
         {
             // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
-            m_actuations[m_head] = updated_actuation;
+            m_actuations[m_head - 1] = updated_actuation;
 
             double reference = 0;
             for (size_t index = 0; index < ControllerLength; index++)
@@ -90,7 +97,7 @@ namespace vslib
                 reference += t[index] * m_references[buffer_index] - r[index] * m_measurements[buffer_index]
                              - s[index] * m_actuations[buffer_index];
             }
-            m_references[m_head] = reference;
+            m_references[m_head - 1] = reference;
         }
 
         //! Resets the controller to the initial state by zeroing the history.
