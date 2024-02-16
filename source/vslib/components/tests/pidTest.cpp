@@ -27,17 +27,28 @@ class PIDTest : public ::testing::Test
         parameter_registry.clearRegistry();
     }
 
-    void set_pid_parameters(PID& pid, double p, double i, double d, double max_integral)
+    void set_pid_parameters(PID& pid, double p, double i, double d, double ff, double b, double max_integral = 1000)
     {
         StaticJson p_value = p;
         pid.kp.setJsonValue(p_value);
         pid.kp.synchroniseWriteBuffer();
+
         StaticJson i_value = i;
         pid.ki.setJsonValue(i_value);
         pid.ki.synchroniseWriteBuffer();
+
         StaticJson d_value = d;
         pid.kd.setJsonValue(d_value);
         pid.kd.synchroniseWriteBuffer();
+
+        StaticJson ff_value = ff;
+        pid.kff.setJsonValue(ff_value);
+        pid.kff.synchroniseWriteBuffer();
+
+        StaticJson b_value = b;
+        pid.b.setJsonValue(b_value);
+        pid.b.synchroniseWriteBuffer();
+
         StaticJson integral_limit_value = max_integral;
         pid.integral_limit.setJsonValue(integral_limit_value);
         pid.integral_limit.synchroniseWriteBuffer();
@@ -64,11 +75,13 @@ TEST_F(PIDTest, PIDDefaultConstruction)
     EXPECT_EQ(serialized_pid["name"], name);
     EXPECT_EQ(serialized_pid["type"], "PID");
     EXPECT_EQ(serialized_pid["components"], nlohmann::json::array());
-    EXPECT_EQ(serialized_pid["parameters"].size(), 4);
-    EXPECT_EQ(serialized_pid["parameters"][0]["name"], "p");
-    EXPECT_EQ(serialized_pid["parameters"][1]["name"], "i");
-    EXPECT_EQ(serialized_pid["parameters"][2]["name"], "d");
-    EXPECT_EQ(serialized_pid["parameters"][3]["name"], "integral_limit");
+    EXPECT_EQ(serialized_pid["parameters"].size(), 6);
+    EXPECT_EQ(serialized_pid["parameters"][0]["name"], "kp");
+    EXPECT_EQ(serialized_pid["parameters"][1]["name"], "ki");
+    EXPECT_EQ(serialized_pid["parameters"][2]["name"], "kd");
+    EXPECT_EQ(serialized_pid["parameters"][3]["name"], "kff");
+    EXPECT_EQ(serialized_pid["parameters"][4]["name"], "b");
+    EXPECT_EQ(serialized_pid["parameters"][5]["name"], "integral_limit");
 }
 
 //! Checks that a PID object with an anti-windup function defined can be constructed
@@ -119,18 +132,21 @@ TEST_F(PIDTest, PIDSingleIteration)
 {
     std::string  name = "pid_5";
     PID          pid(name);
-    double const p            = 2.0;
-    double const i            = 1.0;
-    double const d            = 1.5;
-    double const max_integral = 1000.0;
-    set_pid_parameters(pid, p, i, d, max_integral);
+    double const p  = 2.0;
+    double const i  = 1.0;
+    double const d  = 1.5;
+    double const ff = 0.05;
+    double const b  = 1.2;
+    set_pid_parameters(pid, p, i, d, ff, b);
 
     const double target_value = 3.14159;
 
-    const double starting_value = 0.0;
+    const double starting_value = 1.0;
     pid.setStartingValue(starting_value);
 
-    const double expected_value = target_value * p + target_value * i + target_value * d;
+    const double error          = target_value - starting_value;
+    const double expected_value = (target_value * b - starting_value) * p + error * i + error * d + starting_value * ff;
+
     EXPECT_EQ(pid.control(starting_value, target_value), expected_value);
 }
 
@@ -142,27 +158,32 @@ TEST_F(PIDTest, PIDControlIteration)
     double const p            = 0.6;
     double const i            = 0.3;
     double const d            = 0.06;
+    double const ff           = 0.03;
+    double const b            = 1.11;
     double const max_integral = 1000.0;
-    set_pid_parameters(pid, p, i, d, max_integral);
+    set_pid_parameters(pid, p, i, d, ff, b);
 
     const double target_value = 3.14159;
 
     const double starting_value = 0.0;
     pid.setStartingValue(starting_value);
 
-    const double first_actuation = target_value * p + target_value * i + target_value * d;
+    double       current_error = target_value - starting_value;
+    const double first_actuation
+        = (target_value * b - starting_value) * p + current_error * i + current_error * d + starting_value * ff;
     EXPECT_NEAR(pid.control(starting_value, target_value), first_actuation, 1e-6);
 
-    double       previous_error   = target_value;
-    double       current_error    = target_value - first_actuation;
-    const double second_actuation = (target_value - first_actuation) * p + (2 * target_value - first_actuation) * i
-                                    + (current_error - previous_error) * d;
+    double previous_error = target_value;
+    current_error         = target_value - first_actuation;
+
+    const double second_actuation = (target_value * b - first_actuation) * p + (2 * target_value - first_actuation) * i
+                                    + (current_error - previous_error) * d + first_actuation * ff;
     EXPECT_NEAR(pid.control(first_actuation, target_value), second_actuation, 1e-6);
 
     previous_error               = current_error;
     current_error                = target_value - second_actuation;
-    const double third_actuation = (target_value - second_actuation) * p
+    const double third_actuation = (target_value * b - second_actuation) * p
                                    + (3 * target_value - first_actuation - second_actuation) * i
-                                   + (current_error - previous_error) * d;
+                                   + (current_error - previous_error) * d + second_actuation * ff;
     EXPECT_NEAR(pid.control(second_actuation, target_value), third_actuation, 1e-6);
 }
