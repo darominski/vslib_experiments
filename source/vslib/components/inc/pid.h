@@ -31,10 +31,10 @@ namespace vslib
             }
         )
             : Component("PID", name, parent),
-              kp(*this, "p", -10.0, 10.0),   // min limit: -10, max limit: 10
-              ki(*this, "i", -10.0, 10.0),
-              kd(*this, "d"),     // default limits apply here
-              kff(*this, "ff"),   // default limits apply here
+              kp(*this, "kp", -10.0, 10.0),   // min limit: -10, max limit: 10
+              ki(*this, "ki", -10.0, 10.0),
+              kd(*this, "kd"),     // default limits apply here
+              kff(*this, "kff"),   // default limits apply here
               b(*this, "b"),
               integral_limit(*this, "integral_limit"),
               m_anti_windup_protection(anti_windup_protection)

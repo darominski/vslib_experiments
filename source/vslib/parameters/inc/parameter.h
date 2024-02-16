@@ -68,7 +68,7 @@ namespace vslib
             : m_name{name},
               m_parent{parent}
         {
-            m_parent.get().registerParameter(name, *this);
+            m_parent.registerParameter(name, *this);
         }
 
         //! Constructor for parameters with optional numeric-type limits.
@@ -90,7 +90,7 @@ namespace vslib
               m_limit_min_defined{limit_min != std::numeric_limits<LimitType<T>>::lowest()},
               m_limit_max_defined(limit_max != std::numeric_limits<LimitType<T>>::max())
         {
-            m_parent.get().registerParameter(name, *this);
+            m_parent.registerParameter(name, *this);
         };
 
         // ************************************************************
@@ -274,7 +274,7 @@ namespace vslib
             {
                 // since parameter value has been updated sucessfully, the parent component needs to be marked as
                 // modified
-                m_parent.get().setParametersModified(true);
+                m_parent.setParametersModified(true);
                 // flip initialized flag if it has not been initialized before
                 if (!m_initialized)
                 {
@@ -301,8 +301,8 @@ namespace vslib
         }
 
       private:
-        const std::string m_name;   // Unique ID indicating component type, its name and the variable name
-        std::reference_wrapper<Component> m_parent;   // parent of this Parameter
+        const std::string m_name;     // Unique ID indicating component type, its name and the variable name
+        Component&        m_parent;   // parent of this Parameter
 
         std::array<T, number_buffers> m_value{T{}, T{}, T{}};   // default-initialized values
 
