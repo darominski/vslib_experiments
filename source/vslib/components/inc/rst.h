@@ -158,17 +158,17 @@ namespace vslib
             // Jury's stability test, based on logic implemented in CCLIBS regRst.c
             if (r[0] == 0)
             {
-                return fgc4::utils::Warning("First element of r coefficients is zero.");
+                return fgc4::utils::Warning("First element of r coefficients is zero.\n");
             }
 
             if (s[0] == 0)
             {
-                return fgc4::utils::Warning("First element of s coefficients is zero.");
+                return fgc4::utils::Warning("First element of s coefficients is zero.\n");
             }
 
             if (t[0] == 0)
             {
-                return fgc4::utils::Warning("First element of t coefficients is zero.");
+                return fgc4::utils::Warning("First element of t coefficients is zero.\n");
             }
 
             const auto& maybe_warning_s = jurysStabilityTest(s.value());
@@ -190,10 +190,10 @@ namespace vslib
         }
 
       private:
-        int64_t                              m_head{0};        // Index to latest entry in the history
-        std::array<double, ControllerLength> m_measurements;   // RST measurement history
-        std::array<double, ControllerLength> m_references;     // RST reference history
-        std::array<double, ControllerLength> m_actuations;     // RST actuation history.
+        int64_t                              m_head{0};           // Index to latest entry in the history
+        std::array<double, ControllerLength> m_measurements{0};   // RST measurement history
+        std::array<double, ControllerLength> m_references{0};     // RST reference history
+        std::array<double, ControllerLength> m_actuations{0};     // RST actuation history.
 
         bool m_history_ready{false};                   // flag to mark RST ref and meas histories are filled
         std::array<double, ControllerLength> m_b{0};   // variable used in Jury's test, declaring them here avoids
@@ -247,17 +247,13 @@ namespace vslib
             }
 
             // Stability check 3 : Jury's Stability Test for unstable roots
-
+            m_b = coefficients;
             while (coefficient_length > 2)
             {
+                m_a            = m_b;
+                double const d = m_a[coefficient_length - 1] / m_a[0];
+
                 for (size_t index = 0; index <= coefficient_length; index++)
-                {
-                    m_a[index] = m_b[index];
-                }
-
-                double const d = m_a[coefficient_length] / m_a[0];
-
-                for (size_t index = 0; index < coefficient_length; index++)
                 {
                     m_b[index] = m_a[index] - d * m_a[coefficient_length - index];
                 }
