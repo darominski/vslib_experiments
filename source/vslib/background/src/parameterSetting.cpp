@@ -44,7 +44,6 @@ namespace vslib
         }
     }
 
-
     //! Processes the received JSON commands, checking whether one or many commands were received.
     //!
     //! @param command JSON object containing one or more JSON commands to be executed
@@ -130,9 +129,6 @@ namespace vslib
             utils::writeStringToMessageQueue(message.warning_str.data(), m_write_command_status);
             return;
         }
-        const std::string& component_name     = parameter_name.substr(0, parameter_name.rfind("."));
-        const auto&        component_registry = ComponentRegistry::instance().getComponents();
-        const auto&        modified_component = component_registry.find(component_name);
 
         // execute the command, parameter will handle the validation of provided value.
         auto const has_warning = (*parameter).second.get().setJsonValue(command["value"]);
@@ -143,9 +139,6 @@ namespace vslib
             (*parameter).second.get().synchroniseWriteBuffer();
             utils::writeStringToMessageQueue("Parameter value updated successfully.\n", m_write_command_status);
 
-            // since parameter value has been updated sucessfully, the component can be added to the list of modified
-            // components, provided it is not already there
-            (*modified_component).second.get().setParametersModified(true);
             // TODO: do we need to mark children of the modified component?
         }
         else

@@ -65,9 +65,10 @@ namespace vslib
         //! @param name Name of the Parameter
         Parameter(Component& parent, std::string_view name) noexcept
             requires fgc4::utils::NonNumeric<T>
-            : m_name{name}
+            : m_name{name},
+              m_parent{parent}
         {
-            parent.registerParameter(name, *this);
+            m_parent.get().registerParameter(name, *this);
         }
 
         //! Constructor for parameters with optional numeric-type limits.
@@ -83,12 +84,13 @@ namespace vslib
         )
             requires fgc4::utils::Numeric<T>
             : m_name{name},
+              m_parent{parent},
               m_limit_min{limit_min},
               m_limit_max{limit_max},
               m_limit_min_defined{limit_min != std::numeric_limits<LimitType<T>>::lowest()},
               m_limit_max_defined(limit_max != std::numeric_limits<LimitType<T>>::max())
         {
-            parent.registerParameter(name, *this);
+            m_parent.get().registerParameter(name, *this);
         };
 
         // ************************************************************
@@ -268,9 +270,16 @@ namespace vslib
         std::optional<fgc4::utils::Warning> setJsonValue(const StaticJson& json_value) override
         {
             auto const& maybe_warning = setJsonValueImpl(json_value);
-            if (!m_initialized && !maybe_warning.has_value())
+            if (!maybe_warning.has_value())
             {
-                m_initialized = true;
+                // since parameter value has been updated sucessfully, the parent component needs to be marked as
+                // modified
+                m_parent.get().setParametersModified(true);
+                // flip initialized flag if it has not been initialized before
+                if (!m_initialized)
+                {
+                    m_initialized = true;
+                }
             }
             return maybe_warning;
         }
@@ -293,6 +302,7 @@ namespace vslib
 
       private:
         const std::string m_name;   // Unique ID indicating component type, its name and the variable name
+        std::reference_wrapper<Component> m_parent;   // parent of this Parameter
 
         std::array<T, number_buffers> m_value{T{}, T{}, T{}};   // default-initialized values
 
