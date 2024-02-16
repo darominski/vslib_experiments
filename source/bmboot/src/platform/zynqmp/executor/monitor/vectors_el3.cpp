@@ -1,11 +1,9 @@
+#include "armv8a.hpp"
 #include "executor.hpp"
 #include "executor_asm.hpp"
 #include "monitor_internal.hpp"
 #include "platform_interrupt_controller.hpp"
-#include "zynqmp_executor.hpp"
-
-#include "xipipsu.h"
-#include "xscugic.h"
+#include "zynqmp.hpp"
 
 // ************************************************************
 
@@ -15,25 +13,30 @@ enum {
 
 using namespace bmboot;
 using namespace bmboot::internal;
+using namespace zynqmp;
+using namespace zynqmp::scugic;
 
 // ************************************************************
 
 extern "C" void FIQInterrupt(void)
 {
-    auto iar = XScuGic_ReadReg(XPAR_SCUGIC_0_CPU_BASEADDR, XSCUGIC_INT_ACK_OFFSET);
+    auto iar = GICC->IAR;
+    auto interrupt_id = (iar & arm::gicv2::GICC::IAR_INTERRUPT_ID_MASK);
 
-    auto my_ipi = mach::getIpiChannelForCpu(getCpuIndex());
+    auto my_ipi = getIpiChannelForCpu(getCpuIndex());
 
-    if ((iar & XSCUGIC_ACK_INTID_MASK) == mach::getInterruptIdForIpi(my_ipi)) {
+    if (interrupt_id == getInterruptIdForIpi(my_ipi)) {
+        auto ipi = ipipsu::getIpi(my_ipi);
+
         // acknowledge IPI
-        auto ipi_base = mach::getIpiBaseAddress(my_ipi);
-        auto source_mask = XIpiPsu_ReadReg(ipi_base, XIPIPSU_ISR_OFFSET);
-        XIpiPsu_WriteReg(ipi_base, XIPIPSU_ISR_OFFSET, source_mask);
+        auto source_mask = ipi->ISR;
+        ipi->ISR = source_mask;
 
-        XScuGic_WriteReg(XPAR_SCUGIC_0_CPU_BASEADDR, XSCUGIC_EOI_OFFSET, iar);
+        // acknowledge interrupt
+        GICC->EOIR = iar;
 
         // IRQ triggered by APU?
-        if (source_mask & mach::getIpiPeerMask(mach::IPI_SRC_BMBOOT_MANAGER)) {
+        if (source_mask & getIpiPeerMask(internal::IPI_SRC_BMBOOT_MANAGER)) {
             platform::teardownEl1Interrupts();
 
             // reset monitor by jumping to entry point
@@ -45,7 +48,7 @@ extern "C" void FIQInterrupt(void)
     reportCrash(CrashingEntity::monitor, "Monitor FIQInterrupt", fault_address);
 
     // Even if we're crashing, we acknowledge the interrupt to not upset the GIC which is shared by the entire CPU
-    XScuGic_WriteReg(XPAR_SCUGIC_0_CPU_BASEADDR, XSCUGIC_EOI_OFFSET, iar);
+    GICC->EOIR = iar;
     for (;;) {}
 }
 
@@ -54,13 +57,13 @@ extern "C" void FIQInterrupt(void)
 // Should never arrive to EL3
 extern "C" void IRQInterrupt(void)
 {
-    auto iar = XScuGic_ReadReg(XPAR_SCUGIC_0_CPU_BASEADDR, XSCUGIC_INT_ACK_OFFSET);
+    auto iar = GICC->IAR;
 
     auto fault_address = iar; //get_ELR();
     reportCrash(CrashingEntity::monitor, "Monitor IRQInterrupt", fault_address);
 
     // Even if we're crashing, we acknowledge the interrupt to not upset the GIC which is shared by the entire CPU
-    XScuGic_WriteReg(XPAR_SCUGIC_0_CPU_BASEADDR, XSCUGIC_EOI_OFFSET, iar);
+    GICC->EOIR = iar;
     for (;;) {}
 }
 
@@ -76,7 +79,7 @@ extern "C" void SynchronousInterrupt(Aarch64_Regs& saved_regs)
         return;
     }
 
-    auto fault_address = get_ELR();
+    auto fault_address = readSysReg(ELR_EL3);
 
     auto& ipc_block = getIpcBlock();
     saveFpuState(ipc_block.executor_to_manager.fpregs);
@@ -90,7 +93,7 @@ extern "C" void SynchronousInterrupt(Aarch64_Regs& saved_regs)
 
 extern "C" void SErrorInterrupt(void)
 {
-    auto fault_address = get_ELR();
+    auto fault_address = readSysReg(ELR_EL3);
     reportCrash(CrashingEntity::monitor, "Monitor SErrorInterrupt", fault_address);
     for (;;) {}
 }

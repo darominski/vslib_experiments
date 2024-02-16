@@ -5,22 +5,22 @@ if (BUILD_MONITOR OR BMBOOT_BUILD_PAYLOAD)
         message(FATAL_ERROR "You must provide CMAKE_SIZE option")
     endif()
 
-    add_compile_options(-O2 -Wall -mtune=cortex-a53 -ffunction-sections -fdata-sections)
-    add_compile_definitions(_DIOT=1)
-
+    # Note that link options are NOT propagated via static libraries to the ultimate executable
     add_link_options(
-            -Wall
-#            -ffreestanding                  # no reason to use this since we do have a libc
             -specs=nosys.specs              # without this we don't get _exit, _sbrk and I/O functions
-            -Wl,--gc-sections
-    )
+            )
 endif()
 
 project(bmboot C CXX ASM)
 
 include(cmake/Bmboot.cmake)
 
-function(add_bmboot_payload_library BMBOOT_BSP_EL1_HOME BMBOOT_BSP_EL1_INCLUDE_DIR BMBOOT_BSP_EL1_LIBRARIES)
+# These flags will be added to all targets defined in this file
+# No nicer way to do --gc-sections: https://gitlab.kitware.com/cmake/cmake/-/issues/23235
+add_compile_options(-Wall -ffunction-sections -fdata-sections)
+add_link_options(-Wl,--gc-sections)
+
+function(add_bmboot_payload_library)
     set(TARGET bmboot_payload_runtime)
     add_library(${TARGET} STATIC
             src/executor/executor.cpp
@@ -29,12 +29,17 @@ function(add_bmboot_payload_library BMBOOT_BSP_EL1_HOME BMBOOT_BSP_EL1_INCLUDE_D
             src/executor/payload/syscalls.cpp
             src/executor/payload/syscalls.h
             src/platform/zynqmp/executor/asm_vectors.S
+            src/platform/zynqmp/executor/boot.S
             src/platform/zynqmp/executor/payload/vectors_el1.cpp
+            src/platform/zynqmp/executor/sleep.cpp
+            src/platform/zynqmp/executor/translation_table.S
+            src/platform/zynqmp/executor/xil-crt0.S
             src/utility/message_queue.cpp
             )
 
     target_compile_definitions(${TARGET} PUBLIC __bmboot__=1)
     target_compile_features(${TARGET} PUBLIC cxx_std_20)
+    target_compile_options(${TARGET} PRIVATE -Wall)
 
     target_include_directories(${TARGET} PUBLIC
             include
@@ -47,13 +52,6 @@ function(add_bmboot_payload_library BMBOOT_BSP_EL1_HOME BMBOOT_BSP_EL1_INCLUDE_D
             src/platform/zynqmp
             src/platform/zynqmp/executor
             src/platform/zynqmp/executor/payload
-
-            ${BMBOOT_BSP_EL1_INCLUDE_DIR}       # Note that this is PRIVATE, so it won't leak into user application
-                                                # Q: Is that a feature or a bug?
-            )
-
-    target_link_libraries(${TARGET} PUBLIC
-            ${BMBOOT_BSP_EL1_LIBRARIES}
             )
 
     target_link_options(${TARGET} PUBLIC
@@ -68,23 +66,7 @@ function(add_bmboot_payload_library BMBOOT_BSP_EL1_HOME BMBOOT_BSP_EL1_INCLUDE_D
 endfunction()
 
 if (BMBOOT_BUILD_PAYLOAD)
-    # note that in this case we expect BSP paths to be provided from outside
-
-    if(NOT DEFINED BMBOOT_BSP_EL1_HOME)
-        message(FATAL_ERROR "BMBOOT_BSP_EL1_HOME must be set")
-    endif()
-
-    if(NOT DEFINED BMBOOT_BSP_EL1_INCLUDE_DIR)
-        message(FATAL_ERROR "BMBOOT_BSP_EL1_INCLUDE_DIR must be set")
-    endif()
-
-    if(NOT DEFINED BMBOOT_BSP_EL1_LIBRARIES)
-        message(FATAL_ERROR "BMBOOT_BSP_EL1_LIBRARIES must be set")
-    endif()
-
-    # -----------------------------------------------------------------------------------------------------------
-
-    add_bmboot_payload_library("${BMBOOT_BSP_EL1_HOME}" "${BMBOOT_BSP_EL1_INCLUDE_DIR}" "${BMBOOT_BSP_EL1_LIBRARIES}")
+    add_bmboot_payload_library()
 
     add_bmboot_payload(bmboot_example_payload src/payloads/hello_world.cpp)
 
@@ -93,18 +75,6 @@ elseif (BUILD_MONITOR)
     # to be precise, what this configuration builds is the set of everything that bmboot_manager requires:
     #   - monitor_zynqmp_cpuN
     #   - test payloads
-
-    # not what we _should_ be doing, but something that works
-    include(../bsp/bsp.cmake)
-    MakeBsp(3)
-
-    if(NOT DEFINED BMBOOT_BSP_EL3_INCLUDE_DIR)
-        message(FATAL_ERROR "BMBOOT_BSP_EL3_INCLUDE_DIR must be set")
-    endif()
-
-    if(NOT DEFINED BMBOOT_BSP_EL3_LIBRARIES)
-        message(FATAL_ERROR "BMBOOT_BSP_EL3_LIBRARIES must be set")
-    endif()
 
     # Monitor target (common)
 
@@ -116,8 +86,12 @@ elseif (BUILD_MONITOR)
             src/executor/monitor/monitor.cpp
             src/executor/monitor/smc_handlers.cpp
             src/platform/zynqmp/executor/asm_vectors.S
+            src/platform/zynqmp/executor/boot.S
             src/platform/zynqmp/executor/monitor/interrupt_controller.cpp
             src/platform/zynqmp/executor/monitor/vectors_el3.cpp
+            src/platform/zynqmp/executor/sleep.cpp
+            src/platform/zynqmp/executor/translation_table.S
+            src/platform/zynqmp/executor/xil-crt0.S
             src/utility/crc32.c
             )
 
@@ -129,14 +103,9 @@ elseif (BUILD_MONITOR)
             src/platform/zynqmp
             src/platform/zynqmp/executor
             src/platform/zynqmp/executor/monitor
-
-            ${BMBOOT_BSP_EL3_INCLUDE_DIR}
             )
     target_compile_features(monitor_zynqmp PUBLIC cxx_std_20)
-    target_link_libraries(monitor_zynqmp PRIVATE
-            m
-            ${BMBOOT_BSP_EL3_LIBRARIES}
-            )
+    target_link_libraries(monitor_zynqmp PRIVATE m)
 
     # Instantiate monitor target for each CPU core
 
@@ -166,29 +135,17 @@ elseif (BUILD_MONITOR)
     # -----------------------------------------------------------------------------------------------------------
 
     # use this opportunity to also build test payloads
-    # is it ok to trigger also EL1 BSP here? or is this all wrong? THIS NEEDS A LONG, HARD LOOK
 
-    MakeBsp(1)
-
-    if(NOT DEFINED BMBOOT_BSP_EL1_HOME)
-        message(FATAL_ERROR "BMBOOT_BSP_EL1_HOME must be set")
-    endif()
-
-    if(NOT DEFINED BMBOOT_BSP_EL1_INCLUDE_DIR)
-        message(FATAL_ERROR "BMBOOT_BSP_EL1_INCLUDE_DIR must be set")
-    endif()
-
-    if(NOT DEFINED BMBOOT_BSP_EL1_LIBRARIES)
-        message(FATAL_ERROR "BMBOOT_BSP_EL1_LIBRARIES must be set")
-    endif()
-
-    add_bmboot_payload_library("${BMBOOT_BSP_EL1_HOME}" "${BMBOOT_BSP_EL1_INCLUDE_DIR}" "${BMBOOT_BSP_EL1_LIBRARIES}")
+    add_bmboot_payload_library()
 
     foreach(PAYLOAD access_violation adrian_irq_demo hello_world timer_demo exception_caught_demo message_queue)
         add_bmboot_payload(payload_${PAYLOAD} src/payloads/${PAYLOAD}.cpp)
     endforeach()
 
     add_bmboot_payload(payload_MemoryLatency src/benchmarks/MemoryLatency/MemoryLatency.c src/benchmarks/MemoryLatency/MemoryLatency_arm.s)
+    add_bmboot_payload(payload_fpga_latency
+            src/benchmarks/fpga_latency/fpga_latency.cpp
+            src/benchmarks/fpga_latency/fpga_latency.s)
 
     # -----------------------------------------------------------------------------------------------------------
 else()
@@ -205,8 +162,6 @@ else()
                 -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
                 -DCMAKE_BUILD_TYPE=RelWithDebInfo
                 -DBUILD_MONITOR=ON
-                -DBMBOOT_BSP_EL3_INCLUDE_DIR=${BMBOOT_BSP_EL3_INCLUDE_DIR}
-                -DBMBOOT_BSP_EL3_LIBRARIES=${BMBOOT_BSP_EL3_LIBRARIES}
             INSTALL_COMMAND ""
             BUILD_ALWAYS ON
             BUILD_BYPRODUCTS
@@ -263,14 +218,18 @@ else()
     target_link_libraries(bmctl PUBLIC bmboot_manager)
 
     # Testing
-    add_subdirectory("${LIBRARIES_HOME}/googletest-1.11.0" "${CMAKE_CURRENT_BINARY_DIR}/googletest")
+    if (DEFINED LIBRARIES_HOME)
+        add_subdirectory("${LIBRARIES_HOME}/googletest-1.11.0" "${CMAKE_CURRENT_BINARY_DIR}/googletest")
 
-    add_executable(bmtest
-            src/tests/tests.cpp
-            src/tools/bmtest.cpp
-            )
-    target_link_libraries(bmtest PUBLIC bmboot_manager GTest::gtest pthread dl)
-    target_link_options(bmtest PUBLIC  -Wl,-dynamic-linker,/my-lib/ld-linux-aarch64.so.1 -Wl,-rpath,/my-lib)
+        add_executable(bmtest
+                src/tests/tests.cpp
+                src/tools/bmtest.cpp
+                )
+        target_link_libraries(bmtest PUBLIC bmboot_manager GTest::gtest pthread dl)
+        target_link_options(bmtest PUBLIC  -Wl,-dynamic-linker,/my-lib/ld-linux-aarch64.so.1 -Wl,-rpath,/my-lib)
+    else()
+        message(WARNING "LIBRARIES_HOME not provided, will not build tests")
+    endif()
 
     add_executable(console src/tools/console.cpp)
     target_link_libraries(console PUBLIC bmboot_manager)

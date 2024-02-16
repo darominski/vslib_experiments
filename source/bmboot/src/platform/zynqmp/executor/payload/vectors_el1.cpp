@@ -1,32 +1,29 @@
+#include "armv8a.hpp"
 #include "bmboot/payload_runtime.hpp"
 #include "executor.hpp"
 #include "executor_asm.hpp"
 #include "payload_runtime_internal.hpp"
-#include "zynqmp_executor.hpp"
-
-#include "bspconfig.h"
-#include "xscugic.h"
+#include "zynqmp.hpp"
 
 // ************************************************************
 
-#if not(EL1_NONSECURE)
-#error This file is only relevant when building the payload runtime
-#endif
-
+using arm::armv8a::DAIF_F_MASK;
+using arm::armv8a::DAIF_I_MASK;
 using namespace bmboot;
 using namespace bmboot::internal;
+using namespace zynqmp;
 
 // ************************************************************
 
 extern "C" void FIQInterrupt(void)
 {
-    auto iar = XScuGic_ReadReg(XPAR_SCUGIC_0_CPU_BASEADDR, XSCUGIC_INT_ACK_OFFSET);
+    auto iar = scugic::GICC->IAR;
 
     auto fault_address = iar; //get_ELR();
     notifyPayloadCrashed("EL1 FIQInterrupt", fault_address);
 
     // Even if we're crashing, we acknowledge the interrupt to not upset the GIC which is shared by the entire CPU
-    XScuGic_WriteReg(XPAR_SCUGIC_0_CPU_BASEADDR, XSCUGIC_EOI_OFFSET, iar);
+    scugic::GICC->EOIR = iar;
     for (;;) {}
 }
 
@@ -34,12 +31,12 @@ extern "C" void FIQInterrupt(void)
 
 extern "C" void IRQInterrupt(void)
 {
-    auto iar = XScuGic_ReadReg(XPAR_SCUGIC_0_CPU_BASEADDR, XSCUGIC_INT_ACK_OFFSET);
-    auto int_id = (iar & XSCUGIC_ACK_INTID_MASK);
+    auto iar = scugic::GICC->IAR;
+    auto interrupt_id = (iar & arm::gicv2::GICC::IAR_INTERRUPT_ID_MASK);
 
-    if (int_id >= GIC_MIN_USER_INTERRUPT_ID &&
-        int_id <= GIC_MAX_USER_INTERRUPT_ID &&
-        user_interrupt_handlers[int_id - GIC_MIN_USER_INTERRUPT_ID])
+    if (interrupt_id >= GIC_MIN_USER_INTERRUPT_ID &&
+            interrupt_id <= GIC_MAX_USER_INTERRUPT_ID &&
+        user_interrupt_handlers[interrupt_id - GIC_MIN_USER_INTERRUPT_ID])
     {
         // Back up SPSR and ELR before re-enabling interrupts
         //
@@ -47,15 +44,15 @@ extern "C" void IRQInterrupt(void)
         // https://github.com/Xilinx/embeddedsw/blob/8fca1ac929453ba06613b5417141483b4c2d8cf3/lib/bsp/standalone/src/arm/common/xil_exception.h#L371
         uint64_t spsr = readSysReg(SPSR_EL1);
         uint64_t elr = readSysReg(ELR_EL1);
-        mtcpsr(mfcpsr() & ~XREG_CPSR_IRQ_ENABLE);           // clear IRQ *mask* bit (mis-named constant)
+        writeSysReg(DAIF, readSysReg(DAIF) & ~DAIF_I_MASK);
 
-        user_interrupt_handlers[int_id - GIC_MIN_USER_INTERRUPT_ID]();
+        user_interrupt_handlers[interrupt_id - GIC_MIN_USER_INTERRUPT_ID]();
 
-        mtcpsr(mfcpsr() | XREG_CPSR_IRQ_ENABLE);           // set IRQ *mask* bit (mis-named constant)
+        writeSysReg(DAIF, readSysReg(DAIF) | DAIF_I_MASK);              // mask IRQs again
         writeSysReg(SPSR_EL1, spsr);
         writeSysReg(ELR_EL1, elr);
 
-        XScuGic_WriteReg(XPAR_SCUGIC_0_CPU_BASEADDR, XSCUGIC_EOI_OFFSET, iar);
+        scugic::GICC->EOIR = iar;
         return;
     }
 
@@ -67,7 +64,7 @@ extern "C" void IRQInterrupt(void)
     notifyPayloadCrashed("EL1 IRQInterrupt", fault_address);
 
     // Even if we're crashing, we acknowledge the interrupt to not upset the GIC which is shared by the entire CPU
-    XScuGic_WriteReg(XPAR_SCUGIC_0_CPU_BASEADDR, XSCUGIC_EOI_OFFSET, iar);
+    scugic::GICC->EOIR = iar;
     for (;;) {}
 }
 
