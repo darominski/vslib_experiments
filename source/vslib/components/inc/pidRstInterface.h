@@ -29,10 +29,11 @@ namespace vslib
             : Component("PID", name, parent),
               kp(*this, "p", -10.0, 10.0),   // min limit: -10, max limit: 10
               ki(*this, "i", -10.0, 10.0),
-              kd(*this, "d"),     // default limits apply here
-              kff(*this, "ff"),   // default limits
-              b(*this, "b"),      // default limits
-              c(*this, "c")       // default limits
+              kd(*this, "d"),                       // default limits apply here
+              kff(*this, "ff"),                     // default limits
+              b(*this, "proportional_scaling"),     // default limits
+              c(*this, "derivative_scaling"),       // default limits
+              N(*this, "derivative_filter_order")   // default limits
         {
         }
 
@@ -132,6 +133,7 @@ namespace vslib
         Parameter<double> kff;   //!< Feed-forward scaling coefficient
         Parameter<double> b;     //!< Reference signal proportional gain scaling (from DSP regFGC3)
         Parameter<double> c;     //!< Reference signal derivative gain scaling (from High-Performance Digital Control)
+        Parameter<size_t> N;     //!< Filter order for derivative input
 
         //! Update parameters method, called after paramaters of this component are modified
         std::optional<fgc4::utils::Warning> verifyParameters() override
@@ -141,7 +143,6 @@ namespace vslib
             // derivative approximation?
             double f0;    // 300 kHz?, will be a settable parameter of STG
             double t_s;   // 1/T / f_b in [10, 25], f_b - bandwith of the closed-loop system
-            double N;     // = ?
 
             double const kikpN = ki * kp * N;
             double const a     = 2.0 * std::numbers::pi_v<double> * f0 / atan(std::numbers::pi_v<double> * f0 * t_s);
