@@ -129,6 +129,30 @@ namespace vslib
             return m_history_ready;
         }
 
+        //! Returns the r polynomial coefficients
+        //!
+        //! @return r polynomial coefficients
+        const auto& getR() const
+        {
+            return m_r;
+        }
+
+        //! Returns the s polynomial coefficients
+        //!
+        //! @return s polynomial coefficients
+        const auto& getS() const
+        {
+            return m_s;
+        }
+
+        //! Returns the t polynomial coefficients
+        //!
+        //! @return t polynomial coefficients
+        const auto& getT() const
+        {
+            return m_t;
+        }
+
         // ************************************************************
         // Settable coefficients of the controller
 
