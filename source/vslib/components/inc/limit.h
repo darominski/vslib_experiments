@@ -8,10 +8,11 @@
 #include <string>
 
 #include "component.h"
+#include "parameter.h"
 
 namespace vslib
 {
-    template<typename T, size_t TimeWindowLength = 0, size_t RMSBufferLength = 0>
+    template<typename T, size_t TimeWindowLength = 1, size_t RMSBufferLength = 1>
     class Limit : public Component
     {
       public:
@@ -21,8 +22,7 @@ namespace vslib
               max(*this, "upper_threshold"),
               dead_zone(*this, "dead_zone"),
               integral_limit(*this, "integral_limit"),
-              rms(*this, "rms_threshold"),
-              rms_time_constant(*this, "rms_time_constant")
+              rms(*this, "rms_threshold")
         {
         }
 
@@ -121,11 +121,15 @@ namespace vslib
         Parameter<std::array<T, 2>> dead_zone;
         Parameter<T>                integral_limit;
         Parameter<double>           rms;
-        Parameter<double>           rms_time_constant;
 
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
-            if (dead_zone.isInitialized() && dead_zone[0] != dead_zone[1])
+            if (dead_zone.isInitialized() && (dead_zone[0] < dead_zone[1]))
+            {
+                return fgc4::utils::Warning("Upper edge of the dead_zone is below the lower edge.\n");
+            }
+
+            if (dead_zone.isInitialized() && (dead_zone[0] != dead_zone[1]))
             {
                 m_is_dead_zone_defined = true;
             }
@@ -133,6 +137,8 @@ namespace vslib
             {
                 m_is_dead_zone_defined = false;
             }
+
+            return {};
         }
 
       private:
