@@ -17,6 +17,7 @@
 #include "firFilter.h"
 #include "iirFilter.h"
 #include "interruptRegistry.h"
+#include "limit.h"
 #include "logString.h"
 #include "parameterMap.h"
 #include "parameterRegistry.h"
@@ -38,13 +39,15 @@ using namespace fgc4;
 
 namespace user
 {
-    BoxFilter<3> filter("filter");
+    constexpr size_t   length = 7;
+    vslib::RST<length> rst("rst");
 
     void realTimeTask()
     {
         for (int index = 0; index < 50; index++)
         {
-            volatile auto variable = filter.filter(std::rand());
+            auto const    input    = std::rand();
+            volatile auto variable = rst.control(input, input + 2);
         }
     }
 
@@ -81,8 +84,11 @@ int main()
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
 
-    PID    pid1("pid_1", independent_component);
-    PIDRST pid_rst("pid_rst_1", independent_component);
+    PID                 pid1("pid_1", independent_component);
+    PID                 pid2("pid_2", independent_component);
+    RST<5>              rst("rst_1", independent_component);
+    PIDRST              pid_rst("pid_rst_1", independent_component);
+    Limit<double, 2, 4> limit_voltage("limit_v", independent_component);
     // PID pid3("pid_3", independent_component);
     // RST rst("rst_1", independent_component);
 
@@ -99,6 +105,22 @@ int main()
     // auto parameter_map = fgc4::utils::StaticJsonFactory::getJsonObject();
     // parameter_map      = (ComponentRegistry::instance().createParameterMap()).dump();
 
+    std::array<double, user::length> r;
+    std::array<double, user::length> s;
+    std::array<double, user::length> t;
+
+    std::iota(std::begin(r), std::end(r), 0);
+    std::iota(std::begin(s), std::end(s), 0);
+    std::iota(std::begin(t), std::end(t), 0);
+
+    nlohmann::json value = {{"value", r}};
+    user::rst.r.setJsonValue(value);
+    value = {{"value", s}};
+    user::rst.s.setJsonValue(value);
+    value = {{"value", t}};
+    user::rst.t.setJsonValue(value);
+    BufferSwitch::flipState();
+
     // write_queue.write({parameter_map, parameter_map.size()}, {});
     std::cout << "Uploading parameter map\n";
     parameter_map.uploadParameterMap();
@@ -109,27 +131,23 @@ int main()
     // 1 us  -> 1 MHz
     int            interrupt_delay = 50;   // us
     TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(interrupt_delay));
-    timer.start();
+    // timer.start();
 
     //     InterruptRegistry interrupt_registry;
     //     interrupt_registry.registerInterrupt("physical1", user::peripheralTask, 0, InterruptPriority::medium);
     //     interrupt_registry.startInterrupt("physical1");
 
-    int counter              = 0;
-    // int expected_value = 70;
-    // int time_range_min = expected_value - 100;   // in clock ticks
-    // int time_range_max = expected_value + 100;   // in clock ticks
-    int expected_delay       = interrupt_delay / 20e-3;
-    int time_range_min       = expected_delay - 10;   // in clock ticks
-    int time_range_max       = expected_delay + 10;   // in clock ticks
-    // usleep(1'000'000);          // 1 s
-    constexpr int n_elements = 100'000;
+    int           counter        = 0;
+    int           expected_delay = 210;
+    int           time_range_min = expected_delay - 20;   // in clock ticks
+    int           time_range_max = expected_delay + 20;   // in clock ticks
+    constexpr int n_elements     = 10000;
 
     while (true)
     {
         if (counter == n_elements + 50)
         {
-            timer.stop();
+            // timer.stop();
 #ifdef PERFORMANCE_TESTS
             // std::array<int64_t, n_elements> differences{0};
             // int64_t                         starting_value = timer.m_measurements[0];
@@ -166,25 +184,25 @@ int main()
 #endif
             break;
         }
-        __asm volatile("wfi");
+        // __asm volatile("wfi");
         counter++;
         // puts(std::to_string(counter++).c_str());
         //         // TEST CODE, verbose parameters signalling on thread 1
         // puts("PID1: ");
         // std::cout << std::string("Kp: ") + std::to_string(pid1.kp) << "\n";
         // puts(std::to_string(pid1.ki).c_str());
-        // puts(std::to_string(pid1.kd).c_str());
         //         // puts("PID3: ");
         //         // puts(std::to_string(pid3.p).c_str());
         //         // puts(std::to_string(pid3.i).c_str());
         //         // puts(std::to_string(pid3.d).c_str());
         //         // puts("RST: ");
-        //         // for (const auto& val : rst.r)
-        //         // {
-        //         //     std::cout << val << " ";
-        //         // }
+        for (const auto& val : rst.r)
+        {
+            std::cout << val << " ";
+        }
         //         // puts("");
-        parameter_setting_task.receiveJsonCommand();
+
+        // parameter_setting_task.receiveJsonCommand();
         usleep(500'000);   // 500 ms
     }
 

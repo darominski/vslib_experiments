@@ -12,7 +12,7 @@
 namespace vslib
 {
 #ifdef PERFORMANCE_TESTS
-    static constexpr int number_measurements = 1'000'000;
+    static constexpr int number_measurements = 1'000;
 #endif
 
     class Interrupt
