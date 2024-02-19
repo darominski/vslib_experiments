@@ -29,8 +29,9 @@ namespace vslib
             : Component("PID", name, parent),
               kp(*this, "p", -10.0, 10.0),   // min limit: -10, max limit: 10
               ki(*this, "i", -10.0, 10.0),
-              kd(*this, "d"),    // default limits apply here
-              kff(*this, "ff")   // default limits
+              kd(*this, "d"),     // default limits apply here
+              kff(*this, "ff"),   // default limits
+              b(*this, "b")
         {
         }
 
@@ -128,6 +129,7 @@ namespace vslib
         Parameter<double> ki;    //!< Integral gain coefficient
         Parameter<double> kd;    //!< Derivative gain coefficient
         Parameter<double> kff;   //!< Feed-forward scaling coefficient
+        Parameter<double> b;     //!< Reference signal proportional gain scaling (from DSP regFGC3)
 
         //! Update parameters method, called after paramaters of this component are modified
         std::optional<fgc4::utils::Warning> verifyParameters() override
@@ -138,7 +140,6 @@ namespace vslib
             double f0;    // 300 kHz?, will be a settable parameter of STG
             double t_s;   // 1/T / f_b in [10, 25], f_b - bandwith of the closed-loop system
             double N;     // = ?
-            double b;
             double c;
 
             double const kikpN = ki * kp * N;
