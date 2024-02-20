@@ -12,7 +12,7 @@
 
 namespace vslib
 {
-    template<typename T, size_t TimeWindowLength = 1, size_t RMSBufferLength = 1>
+    template<typename T, size_t TimeWindowLength = 16, size_t RMSBufferLength = 16>
     class Limit : public Component
     {
       public:
