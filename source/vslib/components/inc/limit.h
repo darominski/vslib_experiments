@@ -31,51 +31,55 @@ namespace vslib
         // Q3: how to efficiently check if the parameter has been set and should be used?
 
         //! Checks minimum and maximum thresholds as well as dead_zone
-        T check_min_max(T input)
+        std::optional<fgc4::utils::Warning> check_min_max(T input)
         {
             if (m_is_dead_zone_defined && (input >= dead_zone[0] && input <= dead_zone[1]))
             {
                 // ???, check which edge we are closer to and then return that?
-                return abs(input - dead_zone[0]) > abs(input - dead_zone[1]) ? dead_zone[1] : dead_zone[0];
+                return fgc4::utils::Warning(fmt::format(
+                    "Value: {} is inside the defined dead zone of [{}, {}]\n", input, dead_zone[0], dead_zone[1]
+                ));
             }
             if (input <= min)
             {
-                return min;
+                return fgc4::utils::Warning(
+                    fmt::format("Value: {} is below or equal to the minimal value of {}\n", input, min)
+                );
             }
             if (input >= max)
             {
-                return max;
+                return fgc4::utils::Warning(
+                    fmt::format("Value: {} is above of equal to the maximal value of {}\n", input, max)
+                );
             }
 
-            return input;
+            return {};
         }
 
         //! Checks cumulative (integral) limits
         //!
         //! @param input Numerical input to be checked
-        //! @return Zero if the input failed the check, input otherwise.
-        T check_integral_limit(T input)
+        std::optional<fgc4::utils::Warning> check_integral_limit(T input)
         {
             integral_buffer[m_head_integral] = input;
             if (std::accumulate(std::cbegin(integral_buffer), std::cend(integral_buffer), 0) >= integral_limit)
             {
-                // ???, zero the output?
-                return 0;
+                return fgc4::utils::Warning(
+                    fmt::format("Value: {} leads to overflow of the integral limit of {}\n", input, integral_limit)
+                );
             }
+
             m_head_integral++;
             if (m_head_integral >= TimeWindowLength)
             {
                 m_head_integral -= TimeWindowLength;
             }
-
-            return input;
         }
 
         //! Checks the RMS limits
         //!
         //! @param input Numerical input to be checked against set RMS limit
-        //! @return Zero if the input failed the check, input otherwise.
-        T check_rms_limit(T input)
+        std::optional<fgc4::utils::Warning> check_rms_limit(T input)
         {
             rms_buffer[m_head_rms] = input;
             if (sqrt(
@@ -90,8 +94,9 @@ namespace vslib
                 )
                 >= rms)
             {
-                // ???, zero the output?
-                return 0;
+                return fgc4::utils::Warning(
+                    fmt::format("Value: {} deviates too far from the RMS limit of {}\n", input, rms)
+                );
             }
             m_head_rms++;
             if (m_head_rms >= RMSBufferLength)
@@ -99,21 +104,32 @@ namespace vslib
                 m_head_rms -= RMSBufferLength;
             }
 
-            return input;
+            return {};
         }
 
 
-        T limit(T input)
+        std::optional<fgc4::utils::Warning> limit(T input)
             requires fgc4::utils::Numeric<decltype(input)>
         {
             // checking straight min/max thresholds with a possible dead-zone
-            T output = check_min_max(input);
+            auto& maybe_warning = check_min_max(input);
+            if (maybe_warning.has_value())
+            {
+                return maybe_warning.value();
+            }
 
-            output = check_integral_limit(output);
+            maybe_warning = check_integral_limit(input);
+            if (maybe_warning.has_value())
+            {
+                return maybe_warning.value();
+            }
 
-            output = check_rms_limit(output);
-
-            return output;
+            maybe_warning = check_rms_limit(input);
+            if (maybe_warning.has_value())
+            {
+                return maybe_warning.value();
+            }
+            return {};
         }
 
         Parameter<T>                min;
