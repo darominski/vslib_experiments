@@ -160,6 +160,9 @@ namespace vslib
         Parameter<size_t> N;     //!< Filter order for derivative input
 
         //! Update parameters method, called after parameters of this component are modified
+        //!
+        //! @return Optionally returns a Warning with pertinent information if verification was unsuccessful, nothing
+        //! otherwise
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
             // recalculation of PID interface into internal RST parameters, then: stability test
@@ -228,6 +231,11 @@ namespace vslib
 
         bool m_history_ready{false};   // flag to mark RST ref and meas histories are filled
 
+
+        //! Performs the Jury's stability test on the provided set of coefficients
+        //!
+        //! @param coefficients Coefficients to be tested
+        //! @return Optionally a Warning with pertinent information if an issue was found, nothing otherwise
         std::optional<fgc4::utils::Warning> jurysStabilityTest(const std::array<double, 3>& coefficients) const
         {
             int64_t coefficient_length = 1;
