@@ -55,11 +55,8 @@ namespace vslib
             double actuation = t[0] * m_references[m_head] - r[0] * m_measurements[m_head];
             for (size_t index = 1; index < ControllerLength; index++)
             {
-                int64_t buffer_index = (m_head - index);
-                if (buffer_index < 0)
-                {
-                    buffer_index += ControllerLength;
-                }
+                // tertiary operator avoids branching of if statement (10% slower) and overhead of modulo (40% slower)
+                const int64_t buffer_index = (m_head - index) >= 0 ? m_head - index : ControllerLength;
 
                 actuation += t[index] * m_references[buffer_index] - r[index] * m_measurements[buffer_index]
                              - s[index] * m_actuations[buffer_index];
@@ -69,11 +66,9 @@ namespace vslib
 
             m_actuations[m_head] = actuation;   // update actuations
 
-            m_head++;
-            if (m_head == ControllerLength)
-            {
-                m_head -= ControllerLength;
-            }
+            // update position of the head, minimally more efficient than tertiary operator but more concise
+            m_head = (m_head + 1) >= ControllerLength ? 0 : m_head + 1;
+
             return actuation;
         }
 
@@ -88,11 +83,7 @@ namespace vslib
             double reference = 0;
             for (size_t index = 0; index < ControllerLength; index++)
             {
-                int64_t buffer_index = (m_head - 1 - index);
-                if (buffer_index < 0)
-                {
-                    buffer_index += ControllerLength;
-                }
+                const int64_t buffer_index = (m_head - index) > 0 ? m_head - index : ControllerLength;
 
                 reference += t[index] * m_references[buffer_index] - r[index] * m_measurements[buffer_index]
                              - s[index] * m_actuations[buffer_index];

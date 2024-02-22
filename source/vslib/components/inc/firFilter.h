@@ -12,7 +12,7 @@
 
 namespace vslib
 {
-    template<uint64_t BufferLength>
+    template<size_t BufferLength>
     class FIRFilter : public Filter
     {
       public:
@@ -35,14 +35,9 @@ namespace vslib
 
             for (uint64_t index = 0; index < BufferLength; index++)
             {
-                int64_t buffer_index = (m_head - 1 - index);
-                // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
-                // when if statement is used instead of modulo to perform the shift below
-                if (buffer_index < 0)
-                {
-                    buffer_index += BufferLength;
-                }
-                output += m_buffer[buffer_index] * coefficients[index];
+                // tertiary operator avoids branching of if statement, and overhead of modulo
+                const int64_t buffer_index = (m_head - 1 - index) < 0 ? BufferLength - 1 : (m_head - 1 - index);
+                output                     += m_buffer[buffer_index] * coefficients[index];
             }
 
             return output;
@@ -78,6 +73,7 @@ namespace vslib
         void shiftBuffer(double input)
         {
             m_buffer[m_head] = input;
+
             m_head++;
             if (m_head >= BufferLength)
             {

@@ -69,11 +69,8 @@ namespace vslib
 
             for (size_t index = 1; index < buffer_length; index++)
             {
-                int64_t buffer_index = (m_head - 1 - index);
-                if (buffer_index < 0)
-                {
-                    buffer_index += buffer_length;
-                }
+                // tertiary operator avoids branching of if statement (10% slower) and overhead of modulo (40% slower)
+                const int64_t buffer_index = (m_head - index) >= 0 ? m_head - index : buffer_length;
 
                 actuation += m_t[index] * m_references[buffer_index] - m_r[index] * m_measurements[buffer_index]
                              - m_s[index] * m_actuations[buffer_index];
@@ -96,11 +93,7 @@ namespace vslib
             double reference = 0;
             for (size_t index = 0; index < buffer_length; index++)
             {
-                int64_t buffer_index = (m_head - 1 - index);
-                if (buffer_index < 0)
-                {
-                    buffer_index += buffer_length;
-                }
+                const int64_t buffer_index = (m_head - index) > 0 ? m_head - index : buffer_length;
 
                 reference += m_t[index] * m_references[buffer_index] - m_r[index] * m_measurements[buffer_index]
                              - m_s[index] * m_actuations[buffer_index];
