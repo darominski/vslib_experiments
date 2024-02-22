@@ -185,10 +185,10 @@ namespace vslib
         }
 
       private:
-        std::array<double, 3> m_r;
-        std::array<double, 3> m_s;
-        std::array<double, 3> m_t;
+        std::array<double, buffer_length> m_r;
+        std::array<double, buffer_length> m_s;
+        std::array<double, buffer_length> m_t;
 
-        RSTController<3> rst;
+        RSTController<buffer_length> rst;
     };
 }   // namespace vslib

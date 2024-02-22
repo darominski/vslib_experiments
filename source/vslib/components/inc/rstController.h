@@ -204,18 +204,24 @@ namespace vslib
         }
 
         //! Gets the R polynomial
+        //!
+        //! @return Array with R polynomial coefficients
         const auto& getR() const
         {
             return m_r;
         }
 
         //! Gets the S polynomial
+        //!
+        //! @return Array with S polynomial coefficients
         const auto& getS() const
         {
             return m_s;
         }
 
         //! Gets the T polynomial
+        //!
+        //! @return Array with T polynomial coefficients
         const auto& getT() const
         {
             return m_t;
@@ -224,16 +230,25 @@ namespace vslib
         // ************************************************************
         // Setters
 
+        //! Sets the R polynomial
+        //!
+        //! @param r Array with R polynomial values to be set
         void setR(const std::array<double, ControllerLength>& r)
         {
             m_r = r;
         }
 
+        //! Sets the S polynomial
+        //!
+        //! @param s Array with S polynomial values to be set
         void setS(const std::array<double, ControllerLength>& s)
         {
             m_s = s;
         }
 
+        //! Sets the T polynomial
+        //!
+        //! @param t Array with T polynomial values to be set
         void setT(const std::array<double, ControllerLength>& t)
         {
             m_t = t;
