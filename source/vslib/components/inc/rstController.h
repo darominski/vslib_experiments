@@ -6,6 +6,9 @@
 
 #include <array>
 #include <cstdint>
+#include <optional>
+
+#include "warningMessage.h"
 
 namespace vslib
 {
