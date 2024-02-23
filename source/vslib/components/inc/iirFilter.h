@@ -37,9 +37,15 @@ namespace vslib
 
             for (uint64_t index = 1; index < BufferLength; index++)
             {
-                // tertiary operator avoids branching of if statement, and overhead of modulo
-                const int64_t buffer_index = (m_head - 1 - index) < 0 ? BufferLength - 1 : (m_head - 1 - index);
-                output                     += m_inputs_buffer[buffer_index] * numerator[index]
+                int64_t buffer_index = (m_head - index);
+                // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
+                // when if statement is used instead of modulo to perform the shift below
+                if (buffer_index < 0)
+                {
+                    buffer_index += BufferLength;
+                }
+                output += m_inputs_buffer[buffer_index] * numerator[index]
+
                           - m_outputs_buffer[buffer_index] * denominator[index];
             }
 

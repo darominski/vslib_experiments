@@ -51,6 +51,10 @@ TEST_F(FIRFilterTest, FilterSingleValue)
     FIRFilter<filter_length>          filter("filter");
     std::array<double, filter_length> coefficient_array{0.05, 0.8, 0.025, 0.025};
     setValues<filter_length>(filter, coefficient_array);
+    for (int index = 0; index < filter_length; index++)
+    {
+        EXPECT_NEAR(filter.coefficients[index], coefficient_array[index], 1e-9);
+    }
 
     double input = 3.14159;
     EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-6);

@@ -33,11 +33,17 @@ namespace vslib
             shiftBuffer(input);
             double output(0);
 
-            for (uint64_t index = 0; index < BufferLength; index++)
+            for (int64_t index = 0; index < BufferLength; index++)
             {
-                // tertiary operator avoids branching of if statement, and overhead of modulo
-                const int64_t buffer_index = (m_head - 1 - index) < 0 ? BufferLength - 1 : (m_head - 1 - index);
-                output                     += m_buffer[buffer_index] * coefficients[index];
+                int64_t buffer_index = (m_head - 1 - index);
+                // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
+                // when if statement is used instead of modulo to perform the shift below
+                // tertiary operator does not improve the efficiency by more than 2% at a cost to readability
+                if (buffer_index < 0)
+                {
+                    buffer_index += BufferLength;
+                }
+                output += m_buffer[buffer_index] * coefficients[index];
             }
 
             return output;

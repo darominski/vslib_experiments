@@ -49,21 +49,27 @@ namespace vslib
             m_references[m_head]   = reference;
 
             double actuation = m_t[0] * m_references[m_head] - m_r[0] * m_measurements[m_head];
-            for (size_t index = 1; index < ControllerLength; index++)
+            // int64_t buffer_index = m_head;
+            for (int64_t index = 1; index < ControllerLength; index++)
             {
-                // tertiary operator avoids branching of if statement (10% slower) and overhead of modulo (40% slower)
-                const int64_t buffer_index = (m_head - index) >= 0 ? m_head - index : ControllerLength;
+                int64_t buffer_index = (m_head - index);
+                if (buffer_index < 0)
+                {
+                    buffer_index += ControllerLength;
+                }
 
                 actuation += m_t[index] * m_references[buffer_index] - m_r[index] * m_measurements[buffer_index]
                              - m_s[index] * m_actuations[buffer_index];
             }
-
             actuation /= m_s[0];
 
             m_actuations[m_head] = actuation;   // update actuations
 
-            // update position of the head, minimally more efficient than tertiary operator but more concise
-            m_head = (m_head + 1) >= ControllerLength ? 0 : m_head + 1;
+            m_head++;
+            if (m_head == ControllerLength)
+            {
+                m_head -= ControllerLength;
+            }
 
             return actuation;
         }
@@ -77,9 +83,13 @@ namespace vslib
             m_actuations[m_head - 1] = updated_actuation;
 
             double reference = 0;
-            for (std::size_t index = 0; index < ControllerLength; index++)
+            for (int64_t index = 0; index < ControllerLength; index++)
             {
-                const int64_t buffer_index = (m_head - index) > 0 ? m_head - index : ControllerLength;
+                int64_t buffer_index = (m_head - 1 - index);
+                if (buffer_index < 0)
+                {
+                    buffer_index += ControllerLength;
+                }
 
                 reference += m_t[index] * m_references[buffer_index] - m_r[index] * m_measurements[buffer_index]
                              - m_s[index] * m_actuations[buffer_index];

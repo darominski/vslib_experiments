@@ -247,6 +247,8 @@ TEST_F(RSTTest, RSTCalculateActuation)
     std::array<double, controller_length> t_value = {0.15, 0.25, 0.35};
 
     set_rst_parameters<controller_length>(rst, r_value, s_value, t_value);
+    const auto maybe_warning = rst.verifyParameters();
+    ASSERT_FALSE(maybe_warning.has_value());
 
     double const set_point_value   = 3.14159;
     double const measurement_value = 1.111;
@@ -278,6 +280,8 @@ TEST_F(RSTTest, RSTCalculateMultipleActuations)
     std::array<double, controller_length> t_value = {0.15, 0.25, 0.35};
 
     set_rst_parameters<controller_length>(rst, r_value, s_value, t_value);
+    const auto maybe_warning = rst.verifyParameters();
+    ASSERT_FALSE(maybe_warning.has_value());
 
     double const set_point_value   = 3.14159;
     double const measurement_value = 1.111;
@@ -323,6 +327,8 @@ TEST_F(RSTTest, RSTReCalculateReference)
     std::array<double, controller_length> t_value = {0.15, 0.25, 0.35};
 
     set_rst_parameters<controller_length>(rst, r_value, s_value, t_value);
+    const auto maybe_warning = rst.verifyParameters();
+    ASSERT_FALSE(maybe_warning.has_value());
 
     double const set_point_value   = 3.14159;
     double const measurement_value = 1.111;
