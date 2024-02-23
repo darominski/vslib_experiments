@@ -34,7 +34,6 @@ function(add_bmboot_payload_library)
             src/platform/zynqmp/executor/sleep.cpp
             src/platform/zynqmp/executor/translation_table.S
             src/platform/zynqmp/executor/xil-crt0.S
-            src/utility/message_queue.cpp
             )
 
     target_compile_definitions(${TARGET} PUBLIC __bmboot__=1)
@@ -138,7 +137,7 @@ elseif (BUILD_MONITOR)
 
     add_bmboot_payload_library()
 
-    foreach(PAYLOAD access_violation adrian_irq_demo hello_world timer_demo exception_caught_demo message_queue)
+    foreach(PAYLOAD access_violation adrian_irq_demo hello_world timer_demo exception_caught_demo)
         add_bmboot_payload(payload_${PAYLOAD} src/payloads/${PAYLOAD}.cpp)
     endforeach()
 
@@ -191,7 +190,6 @@ else()
             src/manager/domain_helpers.cpp
             src/platform/zynqmp/manager/zynqmp_manager.cpp
             src/utility/crc32.c
-            src/utility/message_queue.cpp
             src/utility/to_string.cpp
 
             ${MONITOR_ZYNQMP_HPP_ALL}
@@ -218,18 +216,14 @@ else()
     target_link_libraries(bmctl PUBLIC bmboot_manager)
 
     # Testing
-    if (DEFINED LIBRARIES_HOME)
-        add_subdirectory("${LIBRARIES_HOME}/googletest-1.11.0" "${CMAKE_CURRENT_BINARY_DIR}/googletest")
+    add_subdirectory("${LIBRARIES_HOME}/googletest-1.11.0" "${CMAKE_CURRENT_BINARY_DIR}/googletest")
 
-        add_executable(bmtest
-                src/tests/tests.cpp
-                src/tools/bmtest.cpp
-                )
-        target_link_libraries(bmtest PUBLIC bmboot_manager GTest::gtest pthread dl)
-        target_link_options(bmtest PUBLIC  -Wl,-dynamic-linker,/my-lib/ld-linux-aarch64.so.1 -Wl,-rpath,/my-lib)
-    else()
-        message(WARNING "LIBRARIES_HOME not provided, will not build tests")
-    endif()
+    add_executable(bmtest
+            src/tests/tests.cpp
+            src/tools/bmtest.cpp
+            )
+    target_link_libraries(bmtest PUBLIC bmboot_manager GTest::gtest pthread dl)
+    target_link_options(bmtest PUBLIC  -Wl,-dynamic-linker,/my-lib/ld-linux-aarch64.so.1 -Wl,-rpath,/my-lib)
 
     add_executable(console src/tools/console.cpp)
     target_link_libraries(console PUBLIC bmboot_manager)
@@ -237,12 +231,7 @@ else()
     add_executable(MemoryLatency src/benchmarks/MemoryLatency/MemoryLatency.c src/benchmarks/MemoryLatency/MemoryLatency_arm.s)
     target_link_libraries(MemoryLatency PUBLIC m)
 
-    add_executable(message_queue_demo
-            src/tools/message_queue_demo.cpp
-            )
-    target_link_libraries(message_queue_demo PUBLIC bmboot_manager)
-
-    foreach(TOOL bmctl console MemoryLatency message_queue_demo)
+    foreach(TOOL bmctl console MemoryLatency)
         # Make sure bmctl is linked fully statically
         # This is only a temporary workaround for the discrepancy between library versions expected by our compiler
         # and available on the target OS (PetaLinux 2019).

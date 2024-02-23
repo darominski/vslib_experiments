@@ -39,14 +39,16 @@ using namespace fgc4;
 
 namespace user
 {
-    constexpr size_t   length = 7;
+    constexpr size_t   length = 16;
     vslib::RST<length> rst("rst");
+    // vslib::FIRFilter<length> filter("fir");
 
     void realTimeTask()
     {
         for (int index = 0; index < 50; index++)
         {
-            auto const    input    = std::rand();
+            auto const input       = std::rand();
+            // volatile auto variable = filter.filter(input);
             volatile auto variable = rst.control(input, input + 2);
         }
     }
@@ -113,41 +115,37 @@ int main()
     std::iota(std::begin(s), std::end(s), 0);
     std::iota(std::begin(t), std::end(t), 0);
 
-    nlohmann::json value = {{"value", r}};
-    user::rst.r.setJsonValue(value);
-    value = {{"value", s}};
-    user::rst.s.setJsonValue(value);
-    value = {{"value", t}};
-    user::rst.t.setJsonValue(value);
-    BufferSwitch::flipState();
+    // nlohmann::json value = {{"value", r}};
+    // user::rst.r.setJsonValue(value);
+    // value = {{"value", s}};
+    // user::rst.s.setJsonValue(value);
+    // value = {{"value", t}};
+    // user::rst.t.setJsonValue(value);
+    // BufferSwitch::flipState();
 
     // write_queue.write({parameter_map, parameter_map.size()}, {});
-    std::cout << "Uploading parameter map\n";
-    parameter_map.uploadParameterMap();
+    // std::cout << "Uploading parameter map\n";
+    // parameter_map.uploadParameterMap();
     // 1 us  -> 1 kHz
     // 50 us -> 20 kHz
     // 20 us -> 50 kHz
     // 10 us -> 100 kHz
     // 1 us  -> 1 MHz
-    int            interrupt_delay = 50;   // us
+    int            interrupt_delay = 600;   // us
     TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(interrupt_delay));
-    // timer.start();
-
-    //     InterruptRegistry interrupt_registry;
-    //     interrupt_registry.registerInterrupt("physical1", user::peripheralTask, 0, InterruptPriority::medium);
-    //     interrupt_registry.startInterrupt("physical1");
+    timer.start();
 
     int           counter        = 0;
     int           expected_delay = 210;
     int           time_range_min = expected_delay - 20;   // in clock ticks
     int           time_range_max = expected_delay + 20;   // in clock ticks
-    constexpr int n_elements     = 10000;
+    constexpr int n_elements     = 1000;
 
     while (true)
     {
         if (counter == n_elements + 50)
         {
-            // timer.stop();
+            timer.stop();
 #ifdef PERFORMANCE_TESTS
             // std::array<int64_t, n_elements> differences{0};
             // int64_t                         starting_value = timer.m_measurements[0];
@@ -184,7 +182,8 @@ int main()
 #endif
             break;
         }
-        // __asm volatile("wfi");
+        // std::cout << counter << std::endl;
+        __asm volatile("wfi");
         counter++;
         // puts(std::to_string(counter++).c_str());
         //         // TEST CODE, verbose parameters signalling on thread 1
@@ -196,14 +195,10 @@ int main()
         //         // puts(std::to_string(pid3.i).c_str());
         //         // puts(std::to_string(pid3.d).c_str());
         //         // puts("RST: ");
-        for (const auto& val : rst.r)
-        {
-            std::cout << val << " ";
-        }
         //         // puts("");
 
         // parameter_setting_task.receiveJsonCommand();
-        usleep(500'000);   // 500 ms
+        // usleep(500'000);   // 500 ms
     }
 
     return 0;

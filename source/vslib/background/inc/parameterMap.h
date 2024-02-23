@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include <bmboot/message_queue.hpp>
-
+#include "messageQueue.hpp"
 #include "staticJson.h"
 
 namespace vslib
@@ -17,14 +16,14 @@ namespace vslib
         //! Creates the ParameterMap background task object and initializes the write JSON queue
         ParameterMap(uint8_t* address, size_t queue_size)
             : m_write_parameter_map_queue{
-                bmboot::createMessageQueue<bmboot::MessageQueueWriter<void>>(address, queue_size)}
+                fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueWriter<void>>(address, queue_size)}
         {
         }
 
         void uploadParameterMap();
 
       private:
-        bmboot::MessageQueueWriter<void> m_write_parameter_map_queue;
+        fgc4::utils::MessageQueueWriter<void> m_write_parameter_map_queue;
     };
 
 }   // namespace vslib

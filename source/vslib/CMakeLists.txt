@@ -50,6 +50,12 @@ if (NOT BUILD_TESTS)
     -Wconversion
   )
 
+  add_link_options(
+    -Wall
+    -specs=nosys.specs
+    -Wl,-gc-sections
+  )
+
   add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
   add_subdirectory("${LIBRARIES_HOME}/json-schema-validator-2.2.0" ${CMAKE_CURRENT_BINARY_DIR}/json-schema-validator)
 
@@ -60,7 +66,9 @@ if (NOT BUILD_TESTS)
       background/src/parameterSetting.cpp
       background/src/parameterMap.cpp
       utils/src/messageQueue.cpp
+      utils/src/vslibMessageQueue.cpp
       utils/src/interruptRegistry.cpp
+      ../utils/messageQueue.cpp
   )
 
   # Create a library from the vslib sources

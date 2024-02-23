@@ -24,4 +24,4 @@ repos:
     hooks:
     # Hooks using native
       - id: cppcheck             # static analyzer for C/C++ code
-        exclude: ^(source/bsp)|^(source/bmboot)|^(source/lib)
+        exclude: ^(source/bsp)|^(source/bmboot)|^(source/lib)|^(source/utils)

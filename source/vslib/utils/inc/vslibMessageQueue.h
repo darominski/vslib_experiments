@@ -5,13 +5,12 @@
 
 #pragma once
 
-#include <bmboot/message_queue.hpp>
-
+#include "message_queue.hpp"
 #include "staticJson.h"
 
 namespace vslib::utils
 {
-    void                    writeJsonToMessageQueue(const fgc4::utils::StaticJson&, bmboot::MessageQueueWriter<void>&);
+    void writeJsonToMessageQueue(const fgc4::utils::StaticJson&, fgc4::utils::MessageQueueWriter<void>&);
     fgc4::utils::StaticJson readJsonFromMessageQueue(std::span<uint8_t>&);
-    void                    writeStringToMessageQueue(const std::string&, bmboot::MessageQueueWriter<void>&);
+    void                    writeStringToMessageQueue(const std::string&, fgc4::utils::MessageQueueWriter<void>&);
 }   // namespace vslib::utils

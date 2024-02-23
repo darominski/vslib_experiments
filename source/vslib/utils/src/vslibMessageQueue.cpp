@@ -6,7 +6,7 @@
 #include "errorCodes.h"
 #include "errorMessage.h"
 #include "fmt/format.h"
-#include "messageQueue.h"
+#include "vslibMessageQueue.h"
 #include "warningMessage.h"
 
 namespace vslib::utils
@@ -15,8 +15,9 @@ namespace vslib::utils
     //!
     //! @param json_object JSON object to be copied to the shared memory
     //! @param message_queue Reference to the shared memory object
-    void
-    writeJsonToMessageQueue(const fgc4::utils::StaticJson& json_object, bmboot::MessageQueueWriter<void>& message_queue)
+    void writeJsonToMessageQueue(
+        const fgc4::utils::StaticJson& json_object, fgc4::utils::MessageQueueWriter<void>& message_queue
+    )
     {
         auto serialized = json_object.dump();
         if (serialized.size() < fgc4::utils::constants::json_memory_pool_size)
@@ -55,7 +56,7 @@ namespace vslib::utils
     //!
     //! @param message Reference to the shared memory object
     //! @return Static JSON object parsed from shared memory
-    void writeStringToMessageQueue(const std::string& message, bmboot::MessageQueueWriter<void>& message_queue)
+    void writeStringToMessageQueue(const std::string& message, fgc4::utils::MessageQueueWriter<void>& message_queue)
     {
         if (message.size() < fgc4::utils::constants::string_memory_pool_size)
         {
