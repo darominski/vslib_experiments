@@ -1,5 +1,5 @@
 //! @file
-//! @brief Defines the base class for filters.
+//! @brief Defines the Component class for various limits protection.
 //! @author Dominik Arominski
 
 #pragma once

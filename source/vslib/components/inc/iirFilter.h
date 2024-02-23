@@ -45,7 +45,6 @@ namespace vslib
                     buffer_index += BufferLength;
                 }
                 output += m_inputs_buffer[buffer_index] * numerator[index]
-
                           - m_outputs_buffer[buffer_index] * denominator[index];
             }
 
