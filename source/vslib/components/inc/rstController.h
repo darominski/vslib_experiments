@@ -270,9 +270,9 @@ namespace vslib
       private:
         int64_t m_head{0};   // Index to latest entry in the history
 
-        std::array<double, ControllerLength> m_r;
-        std::array<double, ControllerLength> m_s;
-        std::array<double, ControllerLength> m_t;
+        std::array<double, ControllerLength> m_r{0};
+        std::array<double, ControllerLength> m_s{0};
+        std::array<double, ControllerLength> m_t{0};
 
         std::array<double, ControllerLength> m_measurements{0};   // RST measurement history
         std::array<double, ControllerLength> m_references{0};     // RST reference history
