@@ -1,0 +1,247 @@
+//! @file
+//! @brief File with unit tests of RST controller.
+//! @author Dominik Arominski
+
+#include <gtest/gtest.h>
+
+#include "rstController.h"
+
+using namespace vslib;
+
+class RSTControllerTest : public ::testing::Test
+{
+  protected:
+    void SetUp() override
+    {
+    }
+
+    void TearDown() override
+    {
+    }
+};
+
+//! Checks that a default RSTController object can be default-constructed
+//! and is initialized as expected
+TEST_F(RSTControllerTest, RSTControllerDefaultConstruction)
+{
+    constexpr size_t controller_length = 3;
+
+    RSTController<controller_length> rst;
+
+    EXPECT_FALSE(rst.isReady());
+
+    for (int64_t index = 0; index < controller_length; index++)
+    {
+        EXPECT_EQ(rst.getR()[index], 0.0);
+        EXPECT_EQ(rst.getS()[index], 0.0);
+        EXPECT_EQ(rst.getT()[index], 0.0);
+    }
+}
+
+//! Checks that the input histories can be updated and when enough of points are provided, the RST is ready to control
+TEST_F(RSTControllerTest, RSTControllerUpdateInputHistories)
+{
+    constexpr size_t controller_length = 5;
+
+    RSTController<controller_length> rst;
+
+    for (size_t index = 0; index < controller_length; index++)
+    {
+        EXPECT_EQ(rst.isReady(), false);
+        rst.update_input_histories(index, index + 1);
+    }
+    // when the history buffers are filled: the RST should be ready
+    EXPECT_EQ(rst.isReady(), true);
+}
+
+//! Checks that the parameters of RST are set and initialized as expected
+TEST_F(RSTControllerTest, RSTControllerReset)
+{
+    constexpr size_t controller_length = 7;
+
+    RSTController<controller_length> rst;
+    EXPECT_EQ(rst.isReady(), false);
+
+    for (size_t index = 0; index < controller_length; index++)
+    {
+        EXPECT_EQ(rst.isReady(), false);
+        rst.update_input_histories(index, index + 1);
+    }
+    // when the history buffers are filled: the RST should be ready
+    EXPECT_EQ(rst.isReady(), true);
+
+    rst.reset();
+    EXPECT_EQ(rst.isReady(), false);
+}
+
+
+//! Checks that the verification of RST works as expected
+TEST_F(RSTControllerTest, RSTControllerVerifyParameters)
+{
+    constexpr size_t controller_length = 4;
+
+    RSTController<controller_length> rst;
+
+    // set parameters
+    std::array<double, controller_length> s_value;
+    std::array<double, controller_length> t_value;
+
+    // checks that s(odd) < s(even) is found out by the verification
+    s_value                                  = {0.5, 0.6, 0.5, 0.5};
+    auto const unstable_s_even_less_than_odd = rst.jurysStabilityTest(s_value);
+    ASSERT_EQ(unstable_s_even_less_than_odd.has_value(), true);
+    EXPECT_EQ(
+        unstable_s_even_less_than_odd.value().warning_str,
+        "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"
+    );
+
+    // checks that t(odd) < t(even) is found out by the verification
+    t_value                                  = {0.1, 0.2, 0.0, 0.0};
+    auto const unstable_t_even_less_than_odd = rst.jurysStabilityTest(t_value);
+    ASSERT_EQ(unstable_t_even_less_than_odd.has_value(), true);
+    EXPECT_EQ(
+        unstable_t_even_less_than_odd.value().warning_str,
+        "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"
+    );
+
+    // checks that sum of coefficients below 0 is found out by the verification
+    t_value                                 = {0.1, 0.2, -1.0, 0.1};
+    auto const unstable_coeffs_sum_negative = rst.jurysStabilityTest(t_value);
+    ASSERT_EQ(unstable_coeffs_sum_negative.has_value(), true);
+    EXPECT_EQ(
+        unstable_coeffs_sum_negative.value().warning_str,
+        "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"
+    );
+
+    // checks that roots of coefficients is not above 0 is found out by the verification
+    t_value                                   = {0.5, 0.5, 0.5, 0.5};
+    auto const unstable_coeffs_roots_negative = rst.jurysStabilityTest(t_value);
+    ASSERT_EQ(unstable_coeffs_roots_negative.has_value(), true);
+    EXPECT_EQ(
+        unstable_coeffs_roots_negative.value().warning_str,
+        "RST unstable: the first element of Jury's array is not above zero.\n"
+    );
+}
+
+//! Checks that the calculated actuation of RST is as expected
+TEST_F(RSTControllerTest, RSTControllerCalculateActuation)
+{
+    constexpr size_t controller_length = 3;
+
+    RSTController<controller_length> rst;
+
+    // set parameters
+    std::array<double, controller_length> r_value = {0.1, 0.2, 0.3};
+    std::array<double, controller_length> s_value = {0.5, 0.6, 0.7};
+    std::array<double, controller_length> t_value = {0.15, 0.25, 0.35};
+
+    rst.setR(r_value);
+    rst.setS(s_value);
+    rst.setT(t_value);
+
+    auto maybe_warning = rst.jurysStabilityTest(r_value);
+    ASSERT_FALSE(maybe_warning.has_value());
+    maybe_warning = rst.jurysStabilityTest(s_value);
+    ASSERT_FALSE(maybe_warning.has_value());
+    maybe_warning = rst.jurysStabilityTest(t_value);
+    ASSERT_FALSE(maybe_warning.has_value());
+
+    double const set_point_value   = 3.14159;
+    double const measurement_value = 1.111;
+
+    const double expected_actuation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
+    EXPECT_EQ(rst.control(measurement_value, set_point_value), expected_actuation);
+
+    std::array<double, controller_length> expected_measurement_history = {measurement_value, 0, 0};
+    EXPECT_EQ(rst.getMeasurements(), expected_measurement_history);
+
+    std::array<double, controller_length> expected_reference_history = {set_point_value, 0, 0};
+    EXPECT_EQ(rst.getReferences(), expected_reference_history);
+
+    std::array<double, controller_length> expected_actuation_history = {expected_actuation, 0, 0};
+    EXPECT_EQ(rst.getActuations(), expected_actuation_history);
+}
+
+//! Checks that the calculated actuation of RST is as expected
+TEST_F(RSTControllerTest, RSTControllerCalculateMultipleActuations)
+{
+    constexpr size_t controller_length = 3;
+
+    RSTController<controller_length> rst;
+
+    // set parameters
+    std::array<double, controller_length> r_value = {0.1, 0.2, 0.3};
+    std::array<double, controller_length> s_value = {0.5, 0.6, 0.7};
+    std::array<double, controller_length> t_value = {0.15, 0.25, 0.35};
+
+    rst.setR(r_value);
+    rst.setS(s_value);
+    rst.setT(t_value);
+
+    double const set_point_value   = 3.14159;
+    double const measurement_value = 1.111;
+
+    const double first_actuation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
+    EXPECT_NEAR(rst.control(measurement_value, set_point_value), first_actuation, 1e-6);
+
+    // here, the system transfer function is assumed to be unity so next measurement is the previous actuation
+    const double second_actuation
+        = ((t_value[0] + t_value[1]) * set_point_value - (r_value[0] * first_actuation + r_value[1] * measurement_value)
+           - (s_value[1] * first_actuation))
+          / s_value[0];
+    EXPECT_NEAR(rst.control(first_actuation, set_point_value), second_actuation, 1e-6);
+
+    const double third_actuation
+        = ((t_value[0] + t_value[1] + t_value[2]) * set_point_value
+           - (r_value[0] * second_actuation + r_value[1] * first_actuation + r_value[2] * measurement_value)
+           - (s_value[1] * second_actuation + s_value[2] * first_actuation))
+          / s_value[0];
+    EXPECT_NEAR(rst.control(second_actuation, set_point_value), third_actuation, 1e-6);
+
+    // history wraps around here
+    const double fourth_actuation
+        = ((t_value[0] + t_value[1] + t_value[2]) * set_point_value
+           - (r_value[0] * third_actuation + r_value[1] * second_actuation + r_value[2] * first_actuation)
+           - (s_value[1] * third_actuation + s_value[2] * second_actuation))
+          / s_value[0];
+
+    EXPECT_NEAR(rst.control(third_actuation, set_point_value), fourth_actuation, 1e-6);
+}
+
+//! Checks that the calculated actuation of RST is as expected
+TEST_F(RSTControllerTest, RSTControllerReCalculateReference)
+{
+    constexpr size_t controller_length = 3;
+
+    RSTController<controller_length> rst;
+
+    // set parameters
+    std::array<double, controller_length> r_value = {0.1, 0.2, 0.3};
+    std::array<double, controller_length> s_value = {0.5, 0.6, 0.7};
+    std::array<double, controller_length> t_value = {0.15, 0.25, 0.35};
+
+    rst.setR(r_value);
+    rst.setS(s_value);
+    rst.setT(t_value);
+
+    double const set_point_value   = 3.14159;
+    double const measurement_value = 1.111;
+
+    const double actuation         = rst.control(measurement_value, set_point_value);
+    double const limited_actuation = actuation - 2.0;   // simulates clamping of possible actuations
+    rst.update_reference(limited_actuation);
+
+    // measurements should not be modified
+    std::array<double, controller_length> expected_measurement_history = {measurement_value, 0, 0};
+    EXPECT_EQ(rst.getMeasurements(), expected_measurement_history);
+
+    // actuation should be the clamped actuation
+    std::array<double, controller_length> expected_actuation_history = {limited_actuation, 0, 0};
+    EXPECT_EQ(rst.getActuations(), expected_actuation_history);
+
+    // reference should be back-calculated
+    double const corrected_reference
+        = t_value[0] * set_point_value - r_value[0] * measurement_value - s_value[0] * limited_actuation;
+    std::array<double, controller_length> expected_reference_history = {corrected_reference, 0, 0};
+    EXPECT_EQ(rst.getReferences(), expected_reference_history);
+}
