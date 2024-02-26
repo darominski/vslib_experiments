@@ -29,10 +29,6 @@ namespace vslib
         {
         }
 
-        // Q1: what types should we limit ourselves to? only scalar or arrays should be permitted?
-        // Q2: how to optimise the design based on the fact that most of the checks are optional?
-        // Q3: how to efficiently check if the parameter has been set and should be used?
-
         //! Checks minimum and maximum thresholds as well as dead_zone
         //!
         //! @param input Numerical input to be checked
@@ -41,7 +37,6 @@ namespace vslib
         {
             if (m_dead_zone_defined && (input >= dead_zone[0] && input <= dead_zone[1]))
             {
-                // ???, check which edge we are closer to and then return that?
                 return fgc4::utils::Warning(fmt::format(
                     "Value: {} is inside the defined dead zone of [{}, {}].\n", input, dead_zone[0], dead_zone[1]
                 ));
