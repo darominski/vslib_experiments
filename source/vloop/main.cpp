@@ -23,7 +23,7 @@
 #include "parameterRegistry.h"
 #include "parameterSetting.h"
 #include "pid.h"
-#include "pidRstInterface.h"
+#include "pidRst.h"
 #include "rst.h"
 #include "timerInterrupt.h"
 #include "vslib_shared_memory_memmap.h"
