@@ -25,7 +25,9 @@ class PIDTest : public ::testing::Test
         parameter_registry.clearRegistry();
     }
 
-    void set_pid_parameters(PID& pid, double p, double i, double d, double ff, double b, double max_integral = 1000)
+    void set_pid_parameters(
+        PID& pid, double p, double i, double d, double ff, double b, double c = 1, double max_integral = 1000
+    )
     {
         StaticJson p_value = p;
         pid.kp.setJsonValue(p_value);
@@ -46,6 +48,10 @@ class PIDTest : public ::testing::Test
         StaticJson b_value = b;
         pid.b.setJsonValue(b_value);
         pid.b.synchroniseWriteBuffer();
+
+        StaticJson c_value = c;
+        pid.c.setJsonValue(c_value);
+        pid.c.synchroniseWriteBuffer();
 
         StaticJson integral_limit_value = max_integral;
         pid.integral_limit.setJsonValue(integral_limit_value);
@@ -73,13 +79,14 @@ TEST_F(PIDTest, PIDDefaultConstruction)
     EXPECT_EQ(serialized_pid["name"], name);
     EXPECT_EQ(serialized_pid["type"], "PID");
     EXPECT_EQ(serialized_pid["components"], nlohmann::json::array());
-    EXPECT_EQ(serialized_pid["parameters"].size(), 6);
+    EXPECT_EQ(serialized_pid["parameters"].size(), 7);
     EXPECT_EQ(serialized_pid["parameters"][0]["name"], "kp");
     EXPECT_EQ(serialized_pid["parameters"][1]["name"], "ki");
     EXPECT_EQ(serialized_pid["parameters"][2]["name"], "kd");
     EXPECT_EQ(serialized_pid["parameters"][3]["name"], "kff");
     EXPECT_EQ(serialized_pid["parameters"][4]["name"], "b");
-    EXPECT_EQ(serialized_pid["parameters"][5]["name"], "integral_limit");
+    EXPECT_EQ(serialized_pid["parameters"][5]["name"], "c");
+    EXPECT_EQ(serialized_pid["parameters"][6]["name"], "integral_limit");
 }
 
 //! Checks that a PID object with an anti-windup function defined can be constructed
@@ -135,7 +142,8 @@ TEST_F(PIDTest, PIDSingleIteration)
     double const d  = 1.5;
     double const ff = 0.05;
     double const b  = 1.2;
-    set_pid_parameters(pid, p, i, d, ff, b);
+    double const c  = 0.5;
+    set_pid_parameters(pid, p, i, d, ff, b, c);
 
     const double target_value = 3.14159;
 
@@ -143,9 +151,10 @@ TEST_F(PIDTest, PIDSingleIteration)
     pid.setStartingValue(starting_value);
 
     const double error          = target_value - starting_value;
-    const double expected_value = (target_value * b - starting_value) * p + error * i + error * d + starting_value * ff;
+    const double expected_value = (target_value * b - starting_value) * p + error * i
+                                  + d * (target_value * c - starting_value) + starting_value * ff;
 
-    EXPECT_EQ(pid.control(starting_value, target_value), expected_value);
+    EXPECT_NEAR(pid.control(starting_value, target_value), expected_value, 1e-6);
 }
 
 //! Checks that a couple of iterations of control method correctly calculates gains

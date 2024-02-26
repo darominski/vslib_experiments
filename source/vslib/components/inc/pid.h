@@ -36,6 +36,7 @@ namespace vslib
               kd(*this, "kd"),     // default limits apply here
               kff(*this, "kff"),   // default limits apply here
               b(*this, "b"),
+              c(*this, "c"),
               integral_limit(*this, "integral_limit"),
               m_anti_windup_protection(anti_windup_protection)
         {
@@ -55,9 +56,9 @@ namespace vslib
             double const feed_forward = kff * process_value;
             double const proportional = kp * (reference * b - process_value);
             double const integral     = ki * m_integral;
-            double const derivative
-                = kd * (m_error - m_previous_error);   // assuming time difference denominator is included in kd
-            double const actuation = feed_forward + proportional + integral + derivative;
+            // assuming time difference denominator is included in kd:
+            double const derivative   = kd * ((reference * c - process_value) - m_previous_error);
+            double const actuation    = feed_forward + proportional + integral + derivative;
 
             // update errors for the next iteration
             m_previous_error = m_error;
@@ -127,6 +128,7 @@ namespace vslib
         Parameter<double> kd;    //!< Derivative gain coefficient
         Parameter<double> kff;   //!< Feed-forward scaling coefficient
         Parameter<double> b;     //!< Gain of the proportional stage reference signal
+        Parameter<double> c;     //!< Gain of the proportional stage reference signal
 
         Parameter<double> integral_limit;   //!< limit of the integral error
 
