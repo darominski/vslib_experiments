@@ -99,6 +99,32 @@ TEST_F(PIDRSTTest, PIDRSTDefaultConstruction)
     EXPECT_EQ(serialized_pid["parameters"][8]["name"], "control_frequency");
 }
 
+//! Checks that a default PID object can be constructed and is correctly added to the registry
+TEST_F(PIDRSTTest, PIDRST)
+{
+    std::string name = "pid_1";
+    PIDRST      pid(name);
+    EXPECT_EQ(pid.getName(), name);
+
+    ComponentRegistry& registry = ComponentRegistry::instance();
+    EXPECT_EQ(registry.getComponents().size(), 1);
+    EXPECT_NE(registry.getComponents().find(pid.getFullName()), registry.getComponents().end());
+
+    auto serialized_pid = pid.serialize();
+    EXPECT_EQ(serialized_pid["name"], name);
+    EXPECT_EQ(serialized_pid["type"], "PID");
+    EXPECT_EQ(serialized_pid["components"], nlohmann::json::array());
+    EXPECT_EQ(serialized_pid["parameters"].size(), 9);
+    EXPECT_EQ(serialized_pid["parameters"][0]["name"], "kp");
+    EXPECT_EQ(serialized_pid["parameters"][1]["name"], "ki");
+    EXPECT_EQ(serialized_pid["parameters"][2]["name"], "kd");
+    EXPECT_EQ(serialized_pid["parameters"][3]["name"], "kff");
+    EXPECT_EQ(serialized_pid["parameters"][4]["name"], "proportional_scaling");
+    EXPECT_EQ(serialized_pid["parameters"][5]["name"], "derivative_scaling");
+    EXPECT_EQ(serialized_pid["parameters"][6]["name"], "derivative_filter_order");
+    EXPECT_EQ(serialized_pid["parameters"][7]["name"], "sampling_period");
+    EXPECT_EQ(serialized_pid["parameters"][8]["name"], "control_frequency");
+}
 
 //! Checks that single iteration of control method correctly calculates the gain
 TEST_F(PIDRSTTest, PIDRSTSingleIteration)
