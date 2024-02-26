@@ -98,3 +98,32 @@ TEST_F(PIDRSTTest, PIDRSTDefaultConstruction)
     EXPECT_EQ(serialized_pid["parameters"][7]["name"], "sampling_period");
     EXPECT_EQ(serialized_pid["parameters"][8]["name"], "control_frequency");
 }
+
+
+//! Checks that single iteration of control method correctly calculates the gain
+TEST_F(PIDRSTTest, PIDRSTSingleIteration)
+{
+    std::string  name = "pid_2";
+    PIDRST       pid(name);
+    double const p  = 2.0;
+    double const i  = 1.0;
+    double const d  = 1.5;
+    double const ff = 0.0;
+    double const b  = 1.0;
+    double const c  = 1.0;
+    double const N  = 1.0;
+    double const ts = 3.0;
+    double const f0 = 2.263752;
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+
+    const double target_value = 3.14159;
+
+    const double starting_value = 1.0;
+
+    const double error          = target_value - starting_value;
+    const double expected_value = (target_value * b - starting_value) * p + error * i
+                                  + d * (1 / (1 + d / (N * p))) * (target_value * c - starting_value)
+                                  + starting_value * ff;
+
+    EXPECT_NEAR(pid.control(starting_value, target_value), expected_value, 1e-6);
+}
