@@ -28,10 +28,10 @@ namespace vslib
         //! @return PID controller object
         PIDRST(std::string_view name, Component* parent = nullptr)
             : Component("PID", name, parent),
-              kp(*this, "p", -10.0, 10.0),              // min limit: -10, max limit: 10
-              ki(*this, "i", -10.0, 10.0),              // min limit: -10, max limit: 10
-              kd(*this, "d"),                           // default limits apply here
-              kff(*this, "ff"),                         // default limits
+              kp(*this, "kp", -10.0, 10.0),             // min limit: -10, max limit: 10
+              ki(*this, "ki", -10.0, 10.0),             // min limit: -10, max limit: 10
+              kd(*this, "kd"),                          // default limits apply here
+              kff(*this, "kff"),                        // default limits
               b(*this, "proportional_scaling"),         // default limits
               c(*this, "derivative_scaling"),           // default limits
               N(*this, "derivative_filter_order", 0),   // min limit: 0
@@ -116,9 +116,9 @@ namespace vslib
         Parameter<double> kff;   //!< Feed-forward scaling coefficient
         Parameter<double> b;     //!< Reference signal proportional gain scaling (from DSP regFGC3)
         Parameter<double> c;     //!< Reference signal derivative gain scaling (from High-Performance Digital Control)
+        Parameter<size_t> N;     //!< Filter order for derivative input
         Parameter<double> ts;    //!< Sampling period
         Parameter<double> f0;    //!< Control freqency
-        Parameter<size_t> N;     //!< Filter order for derivative input
 
         //! Update parameters method, called after parameters of this component are modified
         //!
