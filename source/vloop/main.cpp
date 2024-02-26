@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <array>
-#include <bmboot/message_queue.hpp>
 #include <bmboot/payload_runtime.hpp>
 #include <cerrno>
 #include <cstdlib>

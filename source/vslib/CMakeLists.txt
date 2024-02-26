@@ -65,7 +65,6 @@ if (NOT BUILD_TESTS)
       parameters/src/parameterRegistry.cpp
       background/src/parameterSetting.cpp
       background/src/parameterMap.cpp
-      utils/src/messageQueue.cpp
       utils/src/vslibMessageQueue.cpp
       utils/src/interruptRegistry.cpp
       ../utils/messageQueue.cpp

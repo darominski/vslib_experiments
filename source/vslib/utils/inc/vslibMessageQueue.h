@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "message_queue.hpp"
+#include "messageQueue.h"
 #include "staticJson.h"
 
 namespace vslib::utils
