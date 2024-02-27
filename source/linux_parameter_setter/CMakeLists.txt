@@ -35,7 +35,8 @@ add_link_options(
 
 set(REMOTE_SOURCES
     remote.cpp
-    ${CMAKE_SOURCE_DIR}/../vslib/utils/src/messageQueue.cpp
+    ${CMAKE_SOURCE_DIR}/../utils/messageQueue.cpp
+    ${CMAKE_SOURCE_DIR}/../vslib/utils/src/vslibMessageQueue.cpp
 )
 
 # set(REMOTE_USER_SOURCES

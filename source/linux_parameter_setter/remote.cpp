@@ -5,10 +5,10 @@
 
 #include "bmboot/domain.hpp"
 #include "bmboot/domain_helpers.hpp"
-#include "bmboot/message_queue.hpp"
 #include "json/json.hpp"
 #include "messageQueue.h"
 #include "shared_memory.h"
+#include "vslibMessageQueue.h"
 
 using Json = nlohmann::json;
 using namespace vslib;
@@ -44,21 +44,21 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     {
         Json command = {{"name", name}};
         command.push_back({"version", version});
-        // if (type == "Float64")
-        // {
-        //     // half of the values will be invalid
-        //     if (commands.size() % 2 == 0)
-        //     {
-        //         double value = 3.14159 * static_cast<double>(commands.size() + 2);
-        //         command.push_back({"value", value});
-        //     }
-        //     else
-        //     {
-        //         std::string value = "invalid";
-        //         command.push_back({"value", value});
-        //     }
-        // }
-        if (type == "Bool")
+        if (type == "Float64")
+        {
+            // half of the values will be invalid
+            // if (commands.size() % 2 == 0)
+            // {
+            double value = 3.14159 * static_cast<double>(commands.size() + 2);
+            command.push_back({"value", value});
+            // }
+            // else
+            // {
+            //     std::string value = "invalid";
+            //     command.push_back({"value", value});
+            // }
+        }
+        else if (type == "Bool")
         {
             command.push_back({"value", true});
         }
@@ -110,14 +110,15 @@ int main()
                                                          + fgc4::utils::constants::json_memory_pool_size
                                                          + fgc4::utils::constants::string_memory_pool_size;
 
-    auto write_commands_queue
-        = bmboot::createMessageQueue<bmboot::MessageQueueWriter<void>>((uint8_t*)buffer.data(), json_queue_size);
+    auto write_commands_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueWriter<void>>(
+        (uint8_t*)buffer.data(), json_queue_size
+    );
 
-    auto read_command_status_queue = bmboot::createMessageQueue<bmboot::MessageQueueReader<void>>(
+    auto read_command_status_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
         (uint8_t*)buffer.data() + json_queue_size, string_queue_size
     );
 
-    auto read_parameter_map_queue = bmboot::createMessageQueue<bmboot::MessageQueueReader<void>>(
+    auto read_parameter_map_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
         (uint8_t*)buffer.data() + json_queue_size + string_queue_size, json_queue_size
     );
 
