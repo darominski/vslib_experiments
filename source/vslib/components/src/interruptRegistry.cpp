@@ -25,7 +25,7 @@ namespace vslib
             );
             throw std::runtime_error("Interrupt name already registered!");
         }
-        PeripheralInterrupt interrupt(handler_function, interrupt_id, priority);
+        PeripheralInterrupt interrupt(interrupt_name, this, handler_function, interrupt_id, priority);
         m_interrupts.emplace(interrupt_name, interrupt);
     }
 

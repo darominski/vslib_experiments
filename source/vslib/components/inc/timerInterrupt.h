@@ -5,6 +5,7 @@
 #pragma once
 
 #include "interrupt.h"
+#include "parameter.h"
 
 namespace vslib
 {
@@ -15,12 +16,17 @@ namespace vslib
         //!
         //! @param handler_function Function to be called when an interrupt triggers
         //! @param microsecond_delay Delay between interrupts in integer increments of a microsecond
-        TimerInterrupt(std::function<void(void)> handler_function, std::chrono::microseconds delay)
-            : Interrupt(std::move(handler_function)),
-              m_delay{delay}
+        TimerInterrupt(
+            std::string_view name, Component* parent = nullptr,
+            std::function<void(void)> handler_function =
+                []()
+            {
+                ;
+            }
+        )
+            : Interrupt("TimerInterrupt", name, parent, std::move(handler_function)),
+              delay(*this, "delay", 0.0)
         {
-            assert((delay.count() > 0) && "Delay for the timing interrupt must be a positive number.");
-            bmboot::setupPeriodicInterrupt(m_delay, m_interrupt_handler);
         }
 
         //! Starts periodic interrupt
@@ -35,7 +41,13 @@ namespace vslib
             bmboot::stopPeriodicInterrupt();
         }
 
-      private:
-        std::chrono::microseconds m_delay;
+        std::optional<fgc4::utils::Warning> verifyParameters() override
+        {
+            bmboot::setupPeriodicInterrupt(std::chrono::microseconds(delay.value()), m_interrupt_handler);
+
+            return {};
+        }
+
+        Parameter<int64_t> delay;
     };
 }   // namespace vslib

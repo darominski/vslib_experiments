@@ -5,15 +5,20 @@
 #pragma once
 
 #include <map>
+#include <string>
 
+#include "component.h"
 #include "peripheralInterrupt.h"
 
 namespace vslib
 {
-    class InterruptRegistry
+    class InterruptRegistry : public Component
     {
       public:
-        InterruptRegistry() noexcept = default;
+        InterruptRegistry(std::string_view name, Component* parent) noexcept
+            : Component("InterruptRegistry", name, parent)
+        {
+        }
 
         //! Creates an interrupt with provided parameters and registers it in the internal container under the given
         //! name id

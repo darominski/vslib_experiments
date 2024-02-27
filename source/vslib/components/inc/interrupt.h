@@ -6,6 +6,7 @@
 
 #include <functional>
 
+#include "component.h"
 #include "histogram.h"
 #include "pollCpuClock.h"
 
@@ -15,13 +16,17 @@ namespace vslib
     static constexpr int number_measurements = 1'000;
 #endif
 
-    class Interrupt
+    class Interrupt : public Component
     {
       public:
         //! Constructor for the Interrupt object
         //!
         //! @param handler_function Function to be executed when an interrupt is triggered
-        Interrupt(std::function<void(void)> handler_function)
+        Interrupt(
+            std::string_view component_type, std::string_view name, Component* parent,
+            std::function<void(void)> handler_function
+        )
+            : Component(component_type, name, parent)
         {
 #ifdef PERFORMANCE_TESTS
             m_measurement_counter = 0;

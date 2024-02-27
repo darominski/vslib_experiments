@@ -62,11 +62,11 @@ if (NOT BUILD_TESTS)
   # Collect source files for the vslib code
   set(${LIB}_SOURCES
       components/src/componentRegistry.cpp
+      components/src/interruptRegistry.cpp
       parameters/src/parameterRegistry.cpp
       background/src/parameterSetting.cpp
       background/src/parameterMap.cpp
       utils/src/vslibMessageQueue.cpp
-      utils/src/interruptRegistry.cpp
       ../utils/messageQueue.cpp
   )
 

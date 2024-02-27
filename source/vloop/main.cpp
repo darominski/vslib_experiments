@@ -131,7 +131,13 @@ int main()
     // 10 us -> 100 kHz
     // 1 us  -> 1 MHz
     int            interrupt_delay = 600;   // us
-    TimerInterrupt timer(user::realTimeTask, std::chrono::microseconds(interrupt_delay));
+    TimerInterrupt timer("timer", independent_component, user::realTimeTask);
+    nlohmann::json value = {{"value", interrupt_delay}};
+
+    timer.delay.setJsonValue(value);
+    timer.delay.synchroniseWriteBuffer();
+    BufferSwitch::flipState();
+
     timer.start();
 
     int           counter        = 0;
