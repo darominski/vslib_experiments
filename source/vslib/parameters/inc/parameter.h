@@ -378,7 +378,7 @@ namespace vslib
             auto const unsigned_check = utils::checkIfUnsigned<T>(json_value);
             if (unsigned_check.has_value())
             {
-                return integral_check.value();
+                return unsigned_check.value();
             }
 
             auto const boolean_check = utils::checkIfBoolean<T>(json_value);
