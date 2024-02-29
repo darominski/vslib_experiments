@@ -286,8 +286,8 @@ namespace vslib
         // ************************************************************
         // Method for synchronizing buffers
 
-        //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
-        void synchroniseBuffers() override
+        //! Copies all contents of the currently used buffer to the inactive buffer to synchronise them.
+        void syncInactiveBuffer() override
         {
             const auto& buffer_switch  = BufferSwitch::getState();
             m_value[buffer_switch ^ 1] = m_value[buffer_switch];

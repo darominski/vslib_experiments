@@ -136,7 +136,7 @@ int main()
 
     timer.delay.setJsonValue(value);
     BufferSwitch::flipState();
-    timer.delay.synchroniseBuffers();
+    timer.delay.syncInactiveBuffer();
 
     timer.start();
 

@@ -137,7 +137,7 @@ namespace vslib
         {
             // success, otherwise: failure and Warning message already logged by setJsonValue
             // synchronise the write buffer with the background buffer
-            (*parameter).second.get().synchroniseBuffers();
+            (*parameter).second.get().syncInactiveBuffer();
             utils::writeStringToMessageQueue("Parameter value updated successfully.\n", m_write_command_status);
 
             // TODO: do we need to mark children of the modified component?
@@ -165,7 +165,7 @@ namespace vslib
                     // validation did not pass, roll back background buffer update and return a warning
                     for (auto& parameter : component.getParameters())
                     {
-                        parameter.second.get().synchroniseBuffers();
+                        parameter.second.get().syncInactiveBuffer();
                     }
                     return maybe_warning.value();
                 }
@@ -180,7 +180,7 @@ namespace vslib
     {
         for (const auto& parameter : ParameterRegistry::instance().getParameters())
         {
-            parameter.second.get().synchroniseBuffers();
+            parameter.second.get().syncInactiveBuffer();
         }
     }
 }   // namespace vslib
