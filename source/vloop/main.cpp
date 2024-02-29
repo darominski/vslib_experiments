@@ -135,8 +135,8 @@ int main()
     nlohmann::json value = {{"value", interrupt_delay}};
 
     timer.delay.setJsonValue(value);
-    timer.delay.synchroniseWriteBuffer();
     BufferSwitch::flipState();
+    timer.delay.synchroniseBuffers();
 
     timer.start();
 
