@@ -137,12 +137,12 @@ TEST_F(PIDTest, PIDSingleIteration)
 {
     std::string  name = "pid_5";
     PID          pid(name);
-    double const p  = 2.0;
-    double const i  = 1.0;
-    double const d  = 1.5;
-    double const ff = 0.05;
-    double const b  = 1.2;
-    double const c  = 0.5;
+    const double p  = 2.0;
+    const double i  = 1.0;
+    const double d  = 1.5;
+    const double ff = 0.05;
+    const double b  = 1.2;
+    const double c  = 0.5;
     set_pid_parameters(pid, p, i, d, ff, b, c);
 
     const double target_value = 3.14159;
@@ -162,12 +162,12 @@ TEST_F(PIDTest, PIDControlIteration)
 {
     std::string  name = "pid_6";
     PID          pid(name);
-    double const p            = 0.6;
-    double const i            = 0.3;
-    double const d            = 0.06;
-    double const ff           = 0.03;
-    double const b            = 1.11;
-    double const max_integral = 1000.0;
+    const double p            = 0.6;
+    const double i            = 0.3;
+    const double d            = 0.06;
+    const double ff           = 0.03;
+    const double b            = 1.11;
+    const double max_integral = 1000.0;
     set_pid_parameters(pid, p, i, d, ff, b);
 
     const double target_value = 3.14159;
