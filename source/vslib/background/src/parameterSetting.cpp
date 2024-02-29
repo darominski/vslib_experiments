@@ -38,7 +38,7 @@ namespace vslib
             {
                 BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
                 // synchronise new background to new active buffer
-                triggerReadBufferSynchronisation();
+                triggerBufferSynchronisation();
             }
             // else: message already logged, buffers will not be synchronised and state flipped
         }
@@ -131,19 +131,20 @@ namespace vslib
         }
 
         // execute the command, parameter will handle the validation of provided value.
-        auto const has_warning = (*parameter).second.get().setJsonValue(command["value"]);
-        if (!has_warning.has_value())
+        auto const maybe_warning = (*parameter).second.get().setJsonValue(command["value"]);
+        std::cout << "name: " << parameter_name << " " << maybe_warning.has_value() << std::endl;
+        if (!maybe_warning.has_value())
         {
             // success, otherwise: failure and Warning message already logged by setJsonValue
             // synchronise the write buffer with the background buffer
-            (*parameter).second.get().synchroniseWriteBuffer();
+            (*parameter).second.get().synchroniseBuffers();
             utils::writeStringToMessageQueue("Parameter value updated successfully.\n", m_write_command_status);
 
             // TODO: do we need to mark children of the modified component?
         }
         else
         {
-            utils::writeStringToMessageQueue(has_warning.value().warning_str.data(), m_write_command_status);
+            utils::writeStringToMessageQueue(maybe_warning.value().warning_str.data(), m_write_command_status);
         }
     }
 
@@ -164,7 +165,7 @@ namespace vslib
                     // validation did not pass, roll back background buffer update and return a warning
                     for (auto& parameter : component.getParameters())
                     {
-                        parameter.second.get().synchroniseReadBuffers();
+                        parameter.second.get().synchroniseBuffers();
                     }
                     return maybe_warning.value();
                 }
@@ -175,11 +176,11 @@ namespace vslib
     }
 
     //! Calls each registered parameter to synchronise background with real-time buffers
-    void ParameterSetting::triggerReadBufferSynchronisation()
+    void ParameterSetting::triggerBufferSynchronisation()
     {
         for (const auto& parameter : ParameterRegistry::instance().getParameters())
         {
-            parameter.second.get().synchroniseReadBuffers();
+            parameter.second.get().synchroniseBuffers();
         }
     }
 }   // namespace vslib

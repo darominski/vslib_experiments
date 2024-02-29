@@ -30,8 +30,7 @@ namespace vslib
 {
     // ************************************************************
     // Convenience constants for parameter class
-    constexpr uint16_t number_buffers  = 3;                    // number of buffers for settable parameters
-    constexpr uint16_t write_buffer_id = number_buffers - 1;   // write buffer is always the last one
+    constexpr uint16_t number_buffers = 2;   // number of buffers for settable parameters
 
     // ************************************************************
     // Helper definitions to define the type for min/max limits for parameters
@@ -285,26 +284,22 @@ namespace vslib
         }
 
         // ************************************************************
-        // Methods for synchronizing buffers
-
-        //! Copies all contents of a write buffer to the background buffer, which is not currently used.
-        void synchroniseWriteBuffer() override
-        {
-            m_value[BufferSwitch::getState() ^ 1] = m_value[write_buffer_id];
-        }
+        // Method for synchronizing buffers
 
         //! Copies all contents of the currently used buffer to the background buffer to synchronise them.
-        void synchroniseReadBuffers() override
+        void synchroniseBuffers() override
         {
             const auto& buffer_switch  = BufferSwitch::getState();
             m_value[buffer_switch ^ 1] = m_value[buffer_switch];
         }
 
+        // ************************************************************
+
       private:
         const std::string m_name;     // Unique ID indicating component type, its name and the variable name
         Component&        m_parent;   // parent of this Parameter
 
-        std::array<T, number_buffers> m_value{T{}, T{}, T{}};   // default-initialized values
+        std::array<T, number_buffers> m_value{T{}, T{}};   // default-initialized values
 
         LimitType<T> m_limit_min;                  // minimum numerical value that can be stored
         LimitType<T> m_limit_max;                  // maximal numerical value that can be stroed
@@ -383,7 +378,7 @@ namespace vslib
             auto const unsigned_check = utils::checkIfUnsigned<T>(json_value);
             if (unsigned_check.has_value())
             {
-                return integral_check.value();
+                return unsigned_check.value();
             }
 
             auto const boolean_check = utils::checkIfBoolean<T>(json_value);
@@ -432,7 +427,7 @@ namespace vslib
             }
             else   // no issues, value can be safely set
             {
-                m_value[write_buffer_id] = command_value;
+                m_value[BufferSwitch::getState() ^ 1] = command_value;
                 return {};
             }
         }
@@ -448,7 +443,7 @@ namespace vslib
             auto const enum_element = magic_enum::enum_cast<T>(std::string(json_value));
             if (enum_element.has_value())
             {
-                m_value[write_buffer_id] = enum_element.value();
+                m_value[BufferSwitch::getState() ^ 1] = enum_element.value();
             }
             else
             {

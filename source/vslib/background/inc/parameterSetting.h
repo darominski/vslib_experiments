@@ -43,7 +43,7 @@ namespace vslib
         fgc4::utils::MessageQueueWriter<void>                              m_write_command_status;
         std::array<uint8_t, fgc4::utils::constants::json_memory_pool_size> m_read_commands_buffer;
 
-        void triggerReadBufferSynchronisation();
+        void triggerBufferSynchronisation();
     };
 
 }   // namespace vslib
