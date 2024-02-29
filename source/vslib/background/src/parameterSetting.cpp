@@ -33,14 +33,13 @@ namespace vslib
             // after the processing, validate all touched Components
             auto const maybe_error = validateModifiedComponents();
 
-            // TO-DO: wait a little in case more commands come before flipping state
-            if (maybe_error.has_value())
+            if (!maybe_error.has_value())
             {
                 BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
                 // synchronise new background to new active buffer
                 triggerBufferSynchronisation();
             }
-            // else: message already logged, buffers will not be synchronised and state flipped
+            // else: message already logged, buffers will not be synchronised and state not flipped
         }
     }
 
@@ -132,14 +131,11 @@ namespace vslib
 
         // execute the command, parameter will handle the validation of provided value.
         auto const maybe_warning = (*parameter).second.get().setJsonValue(command["value"]);
-        std::cout << "name: " << parameter_name << " " << maybe_warning.has_value() << std::endl;
         if (!maybe_warning.has_value())
         {
             // success, otherwise: failure and Warning message already logged by setJsonValue
             // synchronise the write buffer with the background buffer
-            (*parameter).second.get().syncInactiveBuffer();
             utils::writeStringToMessageQueue("Parameter value updated successfully.\n", m_write_command_status);
-
             // TODO: do we need to mark children of the modified component?
         }
         else
