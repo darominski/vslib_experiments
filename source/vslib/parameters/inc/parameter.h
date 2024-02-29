@@ -105,7 +105,7 @@ namespace vslib
         //!
         //! @param index Index of the array to be accessed. If invalid, an out_of_range exception will be thrown
         //! @return Value stored at the provided index
-        auto& operator[](uint64_t index) const
+        const auto& operator[](uint64_t index) const
             requires fgc4::utils::StdArray<T>
         {
             if (index >= std::tuple_size_v<T>)
