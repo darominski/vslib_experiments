@@ -31,9 +31,9 @@ namespace vslib
             processJsonCommands(json_object);
 
             // after the processing, validate all touched Components
-            auto const maybe_error = validateModifiedComponents();
+            const auto& warning = validateModifiedComponents();
 
-            if (!maybe_error.has_value())
+            if (!warning.has_value())
             {
                 BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
                 // synchronise new background to new active buffer
@@ -130,8 +130,8 @@ namespace vslib
         }
 
         // execute the command, parameter will handle the validation of provided value.
-        auto const maybe_warning = (*parameter).second.get().setJsonValue(command["value"]);
-        if (!maybe_warning.has_value())
+        const auto& warning = (*parameter).second.get().setJsonValue(command["value"]);
+        if (!warning.has_value())
         {
             // success, otherwise: failure and Warning message already logged by setJsonValue
             // synchronise the write buffer with the background buffer
@@ -140,7 +140,7 @@ namespace vslib
         }
         else
         {
-            utils::writeStringToMessageQueue(maybe_warning.value().warning_str.data(), m_write_command_status);
+            utils::writeStringToMessageQueue(warning.value().warning_str.data(), m_write_command_status);
         }
     }
 
@@ -155,15 +155,15 @@ namespace vslib
             auto& component = entry.second.get();
             if (component.parametersModified())
             {
-                auto const maybe_warning = component.verifyParameters();
-                if (maybe_warning.has_value())
+                const auto& warning = component.verifyParameters();
+                if (warning.has_value())
                 {
                     // validation did not pass, roll back background buffer update and return a warning
                     for (auto& parameter : component.getParameters())
                     {
                         parameter.second.get().syncInactiveBuffer();
                     }
-                    return maybe_warning.value();
+                    return warning.value();
                 }
                 component.setParametersModified(false);
             }

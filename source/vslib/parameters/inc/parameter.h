@@ -303,8 +303,8 @@ namespace vslib
 
         LimitType<T> m_limit_min;                  // minimum numerical value that can be stored
         LimitType<T> m_limit_max;                  // maximal numerical value that can be stroed
-        bool         m_limit_min_defined{false};   // flag defining whether the minimum limit has been set
-        bool         m_limit_max_defined{false};   // flag defining whether the maximum limit has been set
+        bool         m_limit_min_defined{false};   // flag whether the minimum limit has been set, used in serialization
+        bool         m_limit_max_defined{false};   // flag whether the maximum limit has been set, used in serialization
 
         bool m_initialized{false};   // flag defining whether the Parameter has been initialized
 
@@ -412,10 +412,10 @@ namespace vslib
             // integral vs floating point agreement and signedness are checked
             if constexpr (fgc4::utils::NumericScalar<T> || fgc4::utils::Boolean<T> || fgc4::utils::NumericArray<T>)
             {
-                auto const has_warning = verifyTypeAgrees(json_value);
-                if (has_warning.has_value())
+                auto const warning = verifyTypeAgrees(json_value);
+                if (warning.has_value())
                 {
-                    return has_warning.value();
+                    return warning.value();
                 }
             }
             // When types and their details are in agreement, the command value needs to fit in the Parameter's (and the
