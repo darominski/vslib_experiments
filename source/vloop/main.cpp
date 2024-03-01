@@ -124,19 +124,20 @@ int main()
 
     // write_queue.write({parameter_map, parameter_map.size()}, {});
     // std::cout << "Uploading parameter map\n";
-    // parameter_map.uploadParameterMap();
+    parameter_map.uploadParameterMap();
     // 1 us  -> 1 kHz
     // 50 us -> 20 kHz
     // 20 us -> 50 kHz
     // 10 us -> 100 kHz
     // 1 us  -> 1 MHz
-    int            interrupt_delay = 600;   // us
+    int            interrupt_delay = 50;   // us
     TimerInterrupt timer("timer", independent_component, user::realTimeTask);
-    nlohmann::json value = {{"value", interrupt_delay}};
+    nlohmann::json value = {interrupt_delay};
 
-    timer.delay.setJsonValue(value);
+    timer.delay.setJsonValue(value[0]);
     BufferSwitch::flipState();
     timer.delay.syncInactiveBuffer();
+    timer.verifyParameters();
 
     timer.start();
 
