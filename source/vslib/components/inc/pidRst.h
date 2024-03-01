@@ -164,16 +164,16 @@ namespace vslib
                 return fgc4::utils::Warning("First element of t coefficients is zero.");
             }
 
-            const auto& maybe_warning_s = rst.jurysStabilityTest(m_r);
-            if (maybe_warning_s.has_value())
+            const auto& warning_s = rst.jurysStabilityTest(m_r);
+            if (warning_s.has_value())
             {
-                return maybe_warning_s.value();
+                return warning_s.value();
             }
 
-            const auto& maybe_warning_t = rst.jurysStabilityTest(m_t);
-            if (maybe_warning_t.has_value())
+            const auto& warning_t = rst.jurysStabilityTest(m_t);
+            if (warning_t.has_value())
             {
-                return maybe_warning_t.value();
+                return warning_t.value();
             }
 
             // All tests passed, the calculated parameters can be forwarded to the RST
