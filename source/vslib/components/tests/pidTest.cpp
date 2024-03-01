@@ -31,32 +31,26 @@ class PIDTest : public ::testing::Test
     {
         StaticJson p_value = p;
         pid.kp.setJsonValue(p_value);
-        pid.kp.synchroniseWriteBuffer();
 
         StaticJson i_value = i;
         pid.ki.setJsonValue(i_value);
-        pid.ki.synchroniseWriteBuffer();
 
         StaticJson d_value = d;
         pid.kd.setJsonValue(d_value);
-        pid.kd.synchroniseWriteBuffer();
 
         StaticJson ff_value = ff;
         pid.kff.setJsonValue(ff_value);
-        pid.kff.synchroniseWriteBuffer();
 
         StaticJson b_value = b;
         pid.b.setJsonValue(b_value);
-        pid.b.synchroniseWriteBuffer();
 
         StaticJson c_value = c;
         pid.c.setJsonValue(c_value);
-        pid.c.synchroniseWriteBuffer();
 
         StaticJson integral_limit_value = max_integral;
         pid.integral_limit.setJsonValue(integral_limit_value);
-        pid.integral_limit.synchroniseWriteBuffer();
         BufferSwitch::flipState();
+        pid.integral_limit.syncInactiveBuffer();
     }
 };
 

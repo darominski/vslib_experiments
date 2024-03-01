@@ -34,38 +34,31 @@ class LimitTest : public ::testing::Test
     {
         StaticJson min_val = min;
         limit.min.setJsonValue(min_val);
-        limit.min.synchroniseWriteBuffer();
 
         StaticJson max_val = max;
         limit.max.setJsonValue(max_val);
-        limit.max.synchroniseWriteBuffer();
 
         StaticJson dead_zone_val = dead_zone;
         limit.dead_zone.setJsonValue(dead_zone_val);
-        limit.dead_zone.synchroniseWriteBuffer();
 
         StaticJson change_rate_val = change_rate;
         limit.change_rate.setJsonValue(change_rate_val);
-        limit.change_rate.synchroniseWriteBuffer();
 
         StaticJson integral_limit_value = integral_limit;
         limit.integral_limit.setJsonValue(integral_limit_value);
-        limit.integral_limit.synchroniseWriteBuffer();
 
         StaticJson integral_limit_window_length_val = integral_limit_window_length;
         limit.integral_limit_window_length.setJsonValue(integral_limit_window_length_val);
-        limit.integral_limit_window_length.synchroniseWriteBuffer();
 
         StaticJson rms_val = rms;
         limit.rms.setJsonValue(rms_val);
-        limit.rms.synchroniseWriteBuffer();
 
         StaticJson rms_time_constant_val = rms_time_constant;
         limit.rms_time_constant.setJsonValue(rms_time_constant_val);
-        limit.rms_time_constant.synchroniseWriteBuffer();
 
         BufferSwitch::flipState();
         limit.verifyParameters();
+        limit.rms_time_constant.syncInactiveBuffer();
     }
 };
 

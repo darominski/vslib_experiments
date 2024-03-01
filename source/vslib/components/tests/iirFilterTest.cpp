@@ -33,9 +33,8 @@ class IIRFilterTest : public ::testing::Test
     {
         StaticJson values = parameter_values;
         filter.numerator.setJsonValue(values);
-        filter.numerator.synchroniseWriteBuffer();
         BufferSwitch::flipState();
-        filter.numerator.synchroniseReadBuffers();
+        filter.numerator.syncInactiveBuffer();
     }
 
     //! Helper method to set denominator values
@@ -44,9 +43,8 @@ class IIRFilterTest : public ::testing::Test
     {
         StaticJson values = parameter_values;
         filter.denominator.setJsonValue(values);
-        filter.denominator.synchroniseWriteBuffer();
         BufferSwitch::flipState();
-        filter.denominator.synchroniseReadBuffers();
+        filter.denominator.syncInactiveBuffer();
     }
 };
 

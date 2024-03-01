@@ -160,8 +160,7 @@ TEST_F(ParameterTest, BoolParameterSetValue)
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
+    BufferSwitch::flipState();   // switches between read and background buffer
 
     EXPECT_EQ(parameter.value(), new_value);
     EXPECT_EQ(parameter.isInitialized(), true);
@@ -180,8 +179,7 @@ TEST_F(ParameterTest, IntParameterSetValue)
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
+    BufferSwitch::flipState();   // switches between read and background buffer
 
     EXPECT_EQ(parameter.value(), new_value);
     EXPECT_EQ(parameter.isInitialized(), true);
@@ -200,8 +198,7 @@ TEST_F(ParameterTest, DoubleParameterSetValue)
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
+    BufferSwitch::flipState();   // switches between read and background buffer
 
     EXPECT_EQ(parameter.value(), new_value);
     EXPECT_EQ(parameter, new_value);               // tests implicit conversion operator
@@ -223,8 +220,7 @@ TEST_F(ParameterTest, StringParameterSetValue)
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
+    BufferSwitch::flipState();   // switches between read and background buffer
 
     EXPECT_EQ(parameter.value(), new_value);
     EXPECT_EQ(parameter.isInitialized(), true);
@@ -250,8 +246,7 @@ TEST_F(ParameterTest, EnumParameterSetValue)
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
+    BufferSwitch::flipState();   // switches between read and background buffer
 
     EXPECT_EQ(parameter.value(), TestEnum::field2);   // tests explicit access
     EXPECT_EQ(parameter.isInitialized(), true);
@@ -271,8 +266,7 @@ TEST_F(ParameterTest, DoubleArrayParameterSetValue)
     nlohmann::json        command   = {{"value", new_value}};
     auto                  output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
+    BufferSwitch::flipState();   // switches between read and background buffer
 
     size_t counter = 0;
     // tests begin() and end() methods of Parameter
@@ -303,8 +297,7 @@ TEST_F(ParameterTest, DoubleParameterSetInvalidValue)
     auto           output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), true);   // there is a warning message
     EXPECT_EQ(fmt::format("{}", output.value()), "Warning: Provided value: 10 is outside the limits: -1, 5!");
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
+    BufferSwitch::flipState();   // switches between read and background buffer
 
     EXPECT_NE(parameter.value(), new_value);
     EXPECT_EQ(parameter.isInitialized(), false);
@@ -347,8 +340,7 @@ TEST_F(ParameterTest, DoubleArrayParameterSetInvalidValue)
     nlohmann::json        command   = {{"value", new_value}};
     auto                  output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), true);
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
+    BufferSwitch::flipState();   // switches between read and background buffer
 
     size_t counter = 0;
     // implicitly tests begin() and end() methods of Parameter
@@ -412,9 +404,8 @@ TEST_F(ParameterTest, IntParameterSynchronizeBuffers)
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
 
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
-    parameter.synchroniseReadBuffers();   // synchronises background buffer with read
+    BufferSwitch::flipState();        // switches between read and background buffer
+    parameter.syncInactiveBuffer();   // synchronises background buffer with read
 
     EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
     EXPECT_EQ(parameter, new_value);           // tests overloaded operator()
@@ -432,9 +423,8 @@ TEST_F(ParameterTest, FloatParameterSynchronizeBuffers)
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
 
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
-    parameter.synchroniseReadBuffers();
+    BufferSwitch::flipState();   // switches between read and background buffer
+    parameter.syncInactiveBuffer();
 
     EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
     EXPECT_EQ(parameter, new_value);           // tests overloaded operator()
@@ -452,9 +442,8 @@ TEST_F(ParameterTest, StringParameterSynchronizeBuffers)
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
 
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
-    parameter.synchroniseReadBuffers();
+    BufferSwitch::flipState();   // switches between read and background buffer
+    parameter.syncInactiveBuffer();
 
     EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
 }
@@ -471,9 +460,8 @@ TEST_F(ParameterTest, DoubleArrayParameterSynchronizeBuffers)
     auto                  output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
 
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
-    parameter.synchroniseReadBuffers();
+    BufferSwitch::flipState();   // switches between read and background buffer
+    parameter.syncInactiveBuffer();
 
     size_t counter = 0;
     // implicitly tests begin() and end() methods of Parameter
@@ -497,9 +485,8 @@ TEST_F(ParameterTest, StringArrayParameterSynchronizeBuffers)
     auto                       output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
 
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
-    parameter.synchroniseReadBuffers();
+    BufferSwitch::flipState();   // switches between read and background buffer
+    parameter.syncInactiveBuffer();
 
     size_t counter = 0;
     // implicitly tests begin() and end() methods of Parameter
@@ -529,9 +516,8 @@ TEST_F(ParameterTest, EnumParameterSynchronizeBuffers)
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
 
-    parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-    BufferSwitch::flipState();            // switches between read and background buffer
-    parameter.synchroniseReadBuffers();
+    BufferSwitch::flipState();   // switches between read and background buffer
+    parameter.syncInactiveBuffer();
 
     EXPECT_EQ(parameter.value(), TestEnum::field2);   // tests explicit access
 }
@@ -550,9 +536,8 @@ TEST_F(ParameterTest, FloatParameterSendManyCommands)
         auto           output    = parameter.setJsonValue(command["value"]);
         EXPECT_EQ(output.has_value(), false);
 
-        parameter.synchroniseWriteBuffer();   // synchronises write buffer with background
-        BufferSwitch::flipState();            // switches between read and background buffer
-        parameter.synchroniseReadBuffers();
+        BufferSwitch::flipState();   // switches between read and background buffer
+        parameter.syncInactiveBuffer();
 
         EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
         EXPECT_EQ(parameter, new_value);           // tests implicit access
@@ -579,11 +564,9 @@ TEST_F(ParameterTest, DoubleParameterValueOperations)
     auto           output_rhs  = rhs.setJsonValue(command_rhs["value"]);
     EXPECT_EQ(output_rhs.has_value(), false);
 
-    lhs.synchroniseWriteBuffer();   // synchronises write buffer with background
-    rhs.synchroniseWriteBuffer();
-    BufferSwitch::flipState();      // switches between read and background buffer
-    lhs.synchroniseReadBuffers();   // synchronises background buffer with read
-    rhs.synchroniseReadBuffers();
+    BufferSwitch::flipState();   // switches between read and background buffer
+    lhs.syncInactiveBuffer();    // synchronises background buffer with read
+    rhs.syncInactiveBuffer();
 
     ASSERT_EQ(lhs.value(), new_lhs);
     ASSERT_EQ(rhs.value(), new_rhs);

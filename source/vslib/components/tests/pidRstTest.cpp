@@ -32,42 +32,34 @@ class PIDRSTTest : public ::testing::Test
     {
         StaticJson p_value = p;
         pidRst.kp.setJsonValue(p_value);
-        pidRst.kp.synchroniseWriteBuffer();
 
         StaticJson i_value = i;
         pidRst.ki.setJsonValue(i_value);
-        pidRst.ki.synchroniseWriteBuffer();
 
         StaticJson d_value = d;
         pidRst.kd.setJsonValue(d_value);
-        pidRst.kd.synchroniseWriteBuffer();
 
         StaticJson ff_value = ff;
         pidRst.kff.setJsonValue(ff_value);
-        pidRst.kff.synchroniseWriteBuffer();
 
         StaticJson b_value = b;
         pidRst.b.setJsonValue(b_value);
-        pidRst.b.synchroniseWriteBuffer();
 
         StaticJson c_value = c;
         pidRst.c.setJsonValue(c_value);
-        pidRst.c.synchroniseWriteBuffer();
 
         StaticJson N_value = N;
         pidRst.N.setJsonValue(N_value);
-        pidRst.N.synchroniseWriteBuffer();
 
         StaticJson ts_value = ts;
         pidRst.ts.setJsonValue(ts_value);
-        pidRst.ts.synchroniseWriteBuffer();
 
         StaticJson f0_value = f0;
         pidRst.f0.setJsonValue(f0_value);
-        pidRst.f0.synchroniseWriteBuffer();
 
         BufferSwitch::flipState();
         pidRst.verifyParameters();
+        pidRst.f0.syncInactiveBuffer();
     }
 };
 

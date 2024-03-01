@@ -32,17 +32,15 @@ class RSTTest : public ::testing::Test
     {
         StaticJson r_value = r;
         rst.r.setJsonValue(r_value);
-        rst.r.synchroniseWriteBuffer();
 
         StaticJson s_value = s;
         rst.s.setJsonValue(s_value);
-        rst.s.synchroniseWriteBuffer();
 
         StaticJson t_value = t;
         rst.t.setJsonValue(t_value);
-        rst.t.synchroniseWriteBuffer();
 
         BufferSwitch::flipState();
+        rst.t.syncInactiveBuffer();
     }
 };
 
