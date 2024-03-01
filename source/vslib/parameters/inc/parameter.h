@@ -112,7 +112,7 @@ namespace vslib
             {
                 fgc4::utils::Error message(
                     fmt::
-                        format("Out of bounds access attempted at index: {}, array size: {}.", index, std::tuple_size_v<T>),
+                        format("Out of bounds access attempted at index: {}, array size: {}.\n", index, std::tuple_size_v<T>),
                     fgc4::utils::errorCodes::out_of_bounds_access
                 );
                 throw std::out_of_range(fmt::format("{}", message));
@@ -325,7 +325,7 @@ namespace vslib
                 if (m_limit_min > element || element > m_limit_max)
                 {
                     fgc4::utils::Warning message(fmt::format(
-                        "Value in the provided array: {} is outside the limits: {}, {}!", element, m_limit_min,
+                        "Value in the provided array: {} is outside the limits: {}, {}.\n", element, m_limit_min,
                         m_limit_max
                     ));
                     return message;
@@ -344,7 +344,7 @@ namespace vslib
             if (value < m_limit_min || value > m_limit_max)
             {
                 fgc4::utils::Warning message(
-                    fmt::format("Provided value: {} is outside the limits: {}, {}!", value, m_limit_min, m_limit_max)
+                    fmt::format("Provided value: {} is outside the limits: {}, {}.\n", value, m_limit_min, m_limit_max)
                 );
                 return message;
             }
@@ -447,7 +447,7 @@ namespace vslib
             }
             else
             {
-                fgc4::utils::Warning message("The provided enum value is not one of the allowed values.");
+                fgc4::utils::Warning message("The provided enum value is not one of the allowed values.\n");
                 return message;
             }
             return {};
