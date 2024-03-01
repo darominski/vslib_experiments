@@ -49,7 +49,7 @@ TEST_F(FIRFilterTest, FilterSingleValue)
 {
     constexpr int                     filter_length = 4;
     FIRFilter<filter_length>          filter("filter");
-    std::array<double, filter_length> coefficient_array{0.05, 0.8, 0.025, 0.025};
+    std::array<double, filter_length> coefficient_array{0.05, 0.8, 0.025, 0.057};
     setValues<filter_length>(filter, coefficient_array);
     for (int index = 0; index < filter_length; index++)
     {
@@ -85,7 +85,7 @@ TEST_F(FIRFilterTest, SecondOrderFilterSingleValue)
 //! Checks that a FIRFilter object can filter a number of provided values
 TEST_F(FIRFilterTest, FilterMultipleValues)
 {
-    constexpr int                     filter_length = 4;
+    constexpr int                     filter_length = 8;
     FIRFilter<filter_length>          filter("filter");
     std::array<double, filter_length> coefficient_array{0.1, 0.8, 0.05, 0.05};
     setValues<filter_length>(filter, coefficient_array);
@@ -133,7 +133,7 @@ TEST_F(FIRFilterTest, SecondOrderFilterMultipleValues)
 //! Checks that a FIRFilter object filters correctly a number of provided values larger than the number of coefficients
 TEST_F(FIRFilterTest, FilterMultipleValuesWrapAround)
 {
-    constexpr int                     filter_length = 4;
+    constexpr int                     filter_length = 2;
     FIRFilter<filter_length>          filter("filter");
     std::array<double, filter_length> coefficient_array{0.2, 0.8};
     setValues<filter_length>(filter, coefficient_array);
@@ -207,9 +207,9 @@ TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
 
 //! Checks the behaviour of fifth-order FIR filter on a real data coming from
 //! GPS power converter, and compared with filtering in Matlab
-TEST_F(FIRFilterTest, FilterBMeasDataFifthOrder)
+TEST_F(FIRFilterTest, FilterBMeasDataSeventhOrder)
 {
-    constexpr int                     filter_length = 6;
+    constexpr int                     filter_length = 8;
     FIRFilter<filter_length>          filter("filter");
     std::array<double, filter_length> coefficient_array{
         -7.776e-3, 6.445e-2, 4.433e-1,
@@ -285,7 +285,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
 {
-    constexpr int            filter_length = 11;
+    constexpr int            filter_length = 5;
     FIRFilter<filter_length> filter("filter");
     // calculated with coefficients = designLowpassFIR(FilterOrder=2,CutoffFrequency=0.5,Window="hann"); command in
     // Matlab:
@@ -357,7 +357,7 @@ TEST_F(FIRFilterTest, FilterBMeasData80thOrder)
         -0.00241224807836754,  0.002095270978624,     0.00181238858594903,   -0.00156147967635684,
         -0.00134061421815078,  0.00114801745795324,   0.000982040919065611,  -0.00084113894367772,
         -0.000723849715913591, 0.00062877993267011,   0.000554592463829041,  -0.000499996477092942,
-        -0.000463739605799769, 0.000444601818173842};   // calculated by fir1 Matlab function with n=10, and Wn=0.5
+        -0.000463739605799769, 0.000444601818173842};   // calculated by fir1 Matlab function with n=80, and Wn=0.5
     setValues<filter_length>(filter, coefficient_array);
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points

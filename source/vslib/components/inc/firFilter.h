@@ -12,7 +12,7 @@
 
 namespace vslib
 {
-    template<size_t BufferLength>
+    template<size_t BufferLength, typename = void>
     class FIRFilter : public Filter
     {
       public:
@@ -89,10 +89,85 @@ namespace vslib
     };
 
     // ************************************************************
+    // Partial class template specialization for filters with buffer length being power of 2. This allows to avoid
+    // branching when calculating buffer_index and leads to a significant speed-up gain.
+
+    template<size_t BufferLength>
+    class FIRFilter<BufferLength, typename std::enable_if<(BufferLength & (BufferLength - 1)) == 0>::type>
+        : public Filter
+    {
+      public:
+        //! Constructor of the FIR filter component, initializing one Parameter: coefficients
+        FIRFilter(std::string_view name, Component* parent = nullptr)
+            : Filter("FIRFilter", name, parent),
+              coefficients(*this, "coefficients")
+        {
+            static_assert(
+                BufferLength > 1, "Buffer length needs to be a positive number larger than one and divisible by two."
+            );
+        }
+
+        //! Filters the provided input by convolving coefficients and the input, including previous inputs
+        //!
+        //! @param input Input value to be filtered
+        //! @return Filtered value
+        double filter(double input) override
+        {
+            shiftBuffer(input);
+            double output(0);
+
+            for (int64_t index = 0; index < BufferLength; index++)
+            {
+                const int64_t buffer_index = (m_head - 1 - index) & (BufferLength - 1);
+                // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
+                // when if statement is used instead of modulo to perform the shift below
+                // tertiary operator does not improve the efficiency by more than 2% at a cost to readability
+                // Binary-shift is around 38% more efficient (15th order) than if-statement.
+                output                     += m_buffer[buffer_index] * coefficients[index];
+            }
+
+            return output;
+        }
+
+        //! Filters the provided input array by convolving coefficients and the input.
+        //!
+        //! @param input Input values to be filtered
+        //! @return Filtered values
+        template<size_t N>
+        std::array<double, N> filter(const std::array<double, N>& inputs)
+        {
+            std::array<double, N> outputs{0};
+            std::transform(
+                inputs.cbegin(), inputs.cend(), outputs.begin(),
+                [&](const auto& input)
+                {
+                    return filter(input);
+                }
+            );
+            return outputs;
+        }
+
+        Parameter<std::array<double, BufferLength>> coefficients;
+
+      private:
+        std::array<double, BufferLength> m_buffer{0};
+        int64_t                          m_head{0};
+
+        //! Pushes the provided value into the front of the buffer and removes the oldest value
+        //!
+        //! @param input Input value to be added to the front of the buffer
+        void shiftBuffer(double input)
+        {
+            m_buffer[m_head] = input;
+
+            m_head = (m_head + 1) & (BufferLength - 1);
+        }
+    };
+
+
+    // ************************************************************
     // Partial template specialization for low-order filters. Specialization of functions avoids repetition
     // of the entire class structure.
-    //
-    // Benchmarking showed 44% gain for the first order, and 72% for the 2nd order.
 
     template<>
     double FIRFilter<2>::filter(const double input)
@@ -103,6 +178,8 @@ namespace vslib
 
         return output;
     }
+
+    // Benchmarking showed 12% gain for the first order, and 72% for the 2nd order.
 
     template<>
     double FIRFilter<3>::filter(const double input)
