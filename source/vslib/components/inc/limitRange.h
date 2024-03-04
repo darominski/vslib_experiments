@@ -12,7 +12,7 @@
 
 namespace vslib
 {
-    template<typename T, size_t RMSBufferLength = 16>
+    template<typename T>
     class Limit : public Component
     {
       public:
@@ -20,9 +20,7 @@ namespace vslib
             : Component("Limit", name, parent),
               min(*this, "lower_threshold"),
               max(*this, "upper_threshold"),
-              dead_zone(*this, "dead_zone"),
-              rms(*this, "rms_threshold"),
-              rms_time_constant(*this, "rms_time_constant", 0, RMSBufferLength)
+              dead_zone(*this, "dead_zone")
         {
         }
 
@@ -30,7 +28,7 @@ namespace vslib
         //!
         //! @param input Numerical input to be checked
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> check_min_max_limit(T input) noexcept
+        std::optional<fgc4::utils::Warning> limit(T input) noexcept
         {
             if (m_dead_zone_defined && (input >= dead_zone[0] && input <= dead_zone[1]))
             {
@@ -55,74 +53,9 @@ namespace vslib
             return {};
         }
 
-        //! Checks the RMS limits
-        //!
-        //! @param input Numerical input to be checked against set RMS limit
-        //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> check_rms_limit(T input) noexcept
-        {
-            rms_buffer[m_head_rms] = input;
-            m_head_rms++;
-            if (m_head_rms >= rms_time_constant)
-            {
-                m_head_rms -= rms_time_constant;
-            }
-
-            if (sqrt(
-                    std::accumulate(
-                        std::begin(rms_buffer), std::begin(rms_buffer) + rms_time_constant, 0.0,
-                        [](auto lhs, auto const& element)
-                        {
-                            return lhs + pow(element, 2);
-                        }
-                    )
-                    / RMSBufferLength
-                )
-                >= rms)
-            {
-                return fgc4::utils::Warning(
-                    fmt::format("Value: {} deviates too far from the RMS limit of {}.\n", input, rms)
-                );
-            }
-
-            return {};
-        }
-
-        //! Checks all the specified limits
-        //!
-        //! @param input Value to be checked against all specified limits
-        //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> limit(T input) noexcept
-            requires fgc4::utils::Numeric<decltype(input)>
-        {
-            // checking straight min/max thresholds with a possible dead-zone
-            const auto& maybe_warning_min_max = check_min_max_limit(input);
-            if (maybe_warning_min_max.has_value())
-            {
-                return maybe_warning_min_max.value();
-            }
-
-            const auto& maybe_warning_rms = check_rms_limit(input);
-            if (maybe_warning_rms.has_value())
-            {
-                return maybe_warning_rms.value();
-            }
-
-            return {};
-        }
-
-        //! Resets the component to the initial state of buffers and buffer pointers
-        void reset() noexcept
-        {
-            m_head_rms = 0;
-            std::fill(std::begin(rms_buffer), std::end(rms_buffer), 0);
-        }
-
         Parameter<T>                min;
         Parameter<T>                max;
         Parameter<std::array<T, 2>> dead_zone;
-        Parameter<double>           rms;
-        Parameter<size_t>           rms_time_constant;
 
         //! Verifies parameters after any Parameter has been modified
         //!
@@ -152,12 +85,6 @@ namespace vslib
         }
 
       private:
-        int64_t m_head_rms{0};
-
-        T m_previous_value{};
-
-        std::array<T, RMSBufferLength> rms_buffer{0};
-
         bool m_dead_zone_defined{false};
     };
 }   // namespace vslib
