@@ -37,26 +37,23 @@ namespace vslib
 
             for (int64_t index = 1; index < BufferLength; index++)
             {
+                int64_t buffer_index;
                 if constexpr ((BufferLength & (BufferLength - 1)) == 0)
                 {
-                    const int64_t buffer_index = (m_head - index) & (BufferLength - 1);
-
-                    output += m_inputs_buffer[buffer_index] * numerator[index]
-                              - m_outputs_buffer[buffer_index] * denominator[index];
+                    buffer_index = (m_head - index) & (BufferLength - 1);
                 }
                 else
                 {
-                    int64_t buffer_index = (m_head - index);
+                    buffer_index = (m_head - index);
                     // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
                     // when if statement is used instead of modulo to perform the shift below
                     if (buffer_index < 0)
                     {
                         buffer_index += BufferLength;
                     }
-
-                    output += m_inputs_buffer[buffer_index] * numerator[index]
-                              - m_outputs_buffer[buffer_index] * denominator[index];
                 }
+                output += m_inputs_buffer[buffer_index] * numerator[index]
+                          - m_outputs_buffer[buffer_index] * denominator[index];
             }
 
             shiftOutputBuffer(output);
