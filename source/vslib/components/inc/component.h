@@ -31,8 +31,9 @@ namespace vslib
         //! @param component_type Type of the Component
         //! @param name Name of the Component, needs to be unique in the type
         //! @param parent Possible parent of this Component, if Component is independent, the parent should be nullptr
-        Component(std::string_view component_type, std::string_view name, Component* parent) noexcept
+        Component(std::string_view component_type, std::string_view name, Component* parent = nullptr) noexcept
             : m_component_type(component_type),
+              m_parent(parent),
               m_name(name)
         {
             if (parent == nullptr)   // independent Component
@@ -41,7 +42,6 @@ namespace vslib
             }
             else
             {
-                m_parent_name = std::string(parent->getFullName());
                 parent->addChild((*this));
             }
         }
@@ -115,12 +115,8 @@ namespace vslib
         //! @return String with the full component name
         [[nodiscard]] std::string getFullName() const noexcept
         {
-            std::string full_name = m_component_type + "." + m_name;
-            if (m_parent_name != "")
-            {
-                full_name = m_parent_name + "." + full_name;
-            }
-            return full_name;
+            const std::string full_name = m_component_type + "." + m_name;
+            return (m_parent == nullptr) ? full_name : m_parent->getFullName() + "." + full_name;
         }
 
         //! Provides the map with all names and references to all parameters registered to this component
@@ -143,6 +139,11 @@ namespace vslib
         //! @param modified_status New status of whether the parameters of this Component have been modified
         void setParametersModified(bool modified_status) noexcept
         {
+            if (modified_status && m_parent != nullptr)
+            {
+                m_parent->setParametersModified(true);
+                // do all children also need to be flagged as modified?
+            }
             m_parameters_modified = modified_status;
         }
 
@@ -156,7 +157,7 @@ namespace vslib
 
       protected:
         std::string const m_component_type;
-        std::string       m_parent_name{""};
+        Component*        m_parent{nullptr};
         std::string const m_name;
         ParameterList     m_parameters;
         ChildrenList      m_children;
