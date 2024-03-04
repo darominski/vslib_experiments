@@ -12,7 +12,7 @@
 
 namespace vslib
 {
-    template<uint64_t BufferLength>
+    template<size_t BufferLength>
     class IIRFilter : public Filter
     {
       public:
@@ -35,17 +35,28 @@ namespace vslib
             updateInputBuffer(input);
             double output = m_inputs_buffer[m_head] * numerator[0];
 
-            for (uint64_t index = 1; index < BufferLength; index++)
+            for (int64_t index = 1; index < BufferLength; index++)
             {
-                int64_t buffer_index = (m_head - index);
-                // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
-                // when if statement is used instead of modulo to perform the shift below
-                if (buffer_index < 0)
+                if constexpr ((BufferLength & (BufferLength - 1)) == 0)
                 {
-                    buffer_index += BufferLength;
+                    const int64_t buffer_index = (m_head - index) & (BufferLength - 1);
+
+                    output += m_inputs_buffer[buffer_index] * numerator[index]
+                              - m_outputs_buffer[buffer_index] * denominator[index];
                 }
-                output += m_inputs_buffer[buffer_index] * numerator[index]
-                          - m_outputs_buffer[buffer_index] * denominator[index];
+                else
+                {
+                    int64_t buffer_index = (m_head - index);
+                    // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
+                    // when if statement is used instead of modulo to perform the shift below
+                    if (buffer_index < 0)
+                    {
+                        buffer_index += BufferLength;
+                    }
+
+                    output += m_inputs_buffer[buffer_index] * numerator[index]
+                              - m_outputs_buffer[buffer_index] * denominator[index];
+                }
             }
 
             shiftOutputBuffer(output);
@@ -78,7 +89,7 @@ namespace vslib
       private:
         std::array<double, BufferLength> m_inputs_buffer{0};
         std::array<double, BufferLength> m_outputs_buffer{0};
-        int64_t                          m_head{BufferLength - 1};
+        int64_t                          m_head{0};
 
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
@@ -94,10 +105,20 @@ namespace vslib
         void shiftOutputBuffer(double output)
         {
             m_outputs_buffer[m_head] = output;
-            m_head++;
-            if (m_head >= BufferLength)
+
+            if constexpr ((BufferLength & (BufferLength - 1)) == 0)
             {
-                m_head -= BufferLength;
+                // When BufferLength is a power of 2, the binary shift can improve the efficiency
+                // of this calculation by around 4% in comparison with the else case
+                m_head = (m_head + 1) & (BufferLength - 1);
+            }
+            else
+            {
+                m_head++;
+                if (m_head >= BufferLength)
+                {
+                    m_head -= BufferLength;
+                }
             }
         }
     };

@@ -130,9 +130,9 @@ TEST_F(IIRFilterTest, FilterSingleValueSetDenominator)
 //! Checks that a IIRFilter object can filter a number of provided values, without wrapping around the buffers
 TEST_F(IIRFilterTest, FilterMultipleValues)
 {
-    constexpr int                     filter_length = 3;
+    constexpr int                     filter_length = 4;
     IIRFilter<filter_length>          filter("filter");
-    std::array<double, filter_length> numerator_values{0.1, 0.8, 0.1};
+    std::array<double, filter_length> numerator_values{0.1, 0.8, 0.05, 0.05};
     setNumeratorValues<filter_length>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};
     setDenominatorValues<filter_length>(filter, denominator_values);
