@@ -12,7 +12,7 @@
 
 namespace vslib
 {
-    template<typename T, size_t TimeWindowLength = 16, size_t RMSBufferLength = 16>
+    template<typename T, size_t RMSBufferLength = 16>
     class Limit : public Component
     {
       public:
@@ -21,8 +21,6 @@ namespace vslib
               min(*this, "lower_threshold"),
               max(*this, "upper_threshold"),
               dead_zone(*this, "dead_zone"),
-              integral_limit(*this, "integral_limit"),
-              integral_limit_window_length(*this, "integral_limit_time_window", 0, TimeWindowLength),
               rms(*this, "rms_threshold"),
               rms_time_constant(*this, "rms_time_constant", 0, RMSBufferLength)
         {
@@ -54,31 +52,6 @@ namespace vslib
                 );
             }
 
-            return {};
-        }
-
-        //! Checks cumulative (integral) limits
-        //!
-        //! @param input Numerical input to be checked
-        //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> check_integral_limit(T input) noexcept
-        {
-            integral_buffer[m_head_integral] = input;
-            m_head_integral++;
-            if (m_head_integral >= integral_limit_window_length)
-            {
-                m_head_integral -= integral_limit_window_length;
-            }
-
-            if (std::accumulate(
-                    std::cbegin(integral_buffer), std::cbegin(integral_buffer) + integral_limit_window_length, 0
-                )
-                >= integral_limit)
-            {
-                return fgc4::utils::Warning(
-                    fmt::format("Value: {} leads to overflow of the integral limit of {}.\n", input, integral_limit)
-                );
-            }
             return {};
         }
 
@@ -129,12 +102,6 @@ namespace vslib
                 return maybe_warning_min_max.value();
             }
 
-            const auto& maybe_warning_integral = check_integral_limit(input);
-            if (maybe_warning_integral.has_value())
-            {
-                return maybe_warning_integral.value();
-            }
-
             const auto& maybe_warning_rms = check_rms_limit(input);
             if (maybe_warning_rms.has_value())
             {
@@ -147,17 +114,13 @@ namespace vslib
         //! Resets the component to the initial state of buffers and buffer pointers
         void reset() noexcept
         {
-            m_head_integral = 0;
-            m_head_rms      = 0;
-            std::fill(std::begin(integral_buffer), std::end(integral_buffer), 0);
+            m_head_rms = 0;
             std::fill(std::begin(rms_buffer), std::end(rms_buffer), 0);
         }
 
         Parameter<T>                min;
         Parameter<T>                max;
         Parameter<std::array<T, 2>> dead_zone;
-        Parameter<T>                integral_limit;
-        Parameter<size_t>           integral_limit_window_length;
         Parameter<double>           rms;
         Parameter<size_t>           rms_time_constant;
 
@@ -189,14 +152,12 @@ namespace vslib
         }
 
       private:
-        int64_t m_head_integral{0};
         int64_t m_head_rms{0};
 
         T m_previous_value{};
 
-        std::array<T, TimeWindowLength> integral_buffer{0};
-        std::array<T, RMSBufferLength>  rms_buffer{0};
+        std::array<T, RMSBufferLength> rms_buffer{0};
 
         bool m_dead_zone_defined{false};
     };
-}
+}   // namespace vslib
