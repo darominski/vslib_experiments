@@ -21,7 +21,6 @@ namespace vslib
               min(*this, "lower_threshold"),
               max(*this, "upper_threshold"),
               dead_zone(*this, "dead_zone"),
-              change_rate(*this, "change_rate"),
               integral_limit(*this, "integral_limit"),
               integral_limit_window_length(*this, "integral_limit_time_window", 0, TimeWindowLength),
               rms(*this, "rms_threshold"),
@@ -55,25 +54,6 @@ namespace vslib
                 );
             }
 
-            return {};
-        }
-
-        //! Checks the rate of change of the input
-        //!
-        //! @param input Numerical input to be checked
-        //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> check_change_rate_limit(T input)
-        {
-            if (input - m_previous_value > change_rate)
-            {
-                auto const& warning_msg = fgc4::utils::Warning(fmt::format(
-                    "Value: {} with difference of {} is above the maximal rate of change of: {}.\n", input,
-                    input - m_previous_value, change_rate
-                ));
-                m_previous_value        = input;
-                return warning_msg;
-            }
-            m_previous_value = input;
             return {};
         }
 
@@ -149,12 +129,6 @@ namespace vslib
                 return maybe_warning_min_max.value();
             }
 
-            const auto& maybe_warning_change_rate = check_change_rate_limit(input);
-            if (maybe_warning_change_rate.has_value())
-            {
-                return maybe_warning_change_rate.value();
-            }
-
             const auto& maybe_warning_integral = check_integral_limit(input);
             if (maybe_warning_integral.has_value())
             {
@@ -182,7 +156,6 @@ namespace vslib
         Parameter<T>                min;
         Parameter<T>                max;
         Parameter<std::array<T, 2>> dead_zone;
-        Parameter<T>                change_rate;
         Parameter<T>                integral_limit;
         Parameter<size_t>           integral_limit_window_length;
         Parameter<double>           rms;
