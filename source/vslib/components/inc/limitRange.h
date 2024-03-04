@@ -13,11 +13,11 @@
 namespace vslib
 {
     template<typename T>
-    class Limit : public Component
+    class LimitRange : public Component
     {
       public:
-        Limit(std::string_view name, Component* parent = nullptr)
-            : Component("Limit", name, parent),
+        LimitRange(std::string_view name, Component* parent = nullptr)
+            : Component("LimitRange", name, parent),
               min(*this, "lower_threshold"),
               max(*this, "upper_threshold"),
               dead_zone(*this, "dead_zone")
