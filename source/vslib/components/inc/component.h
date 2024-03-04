@@ -141,6 +141,8 @@ namespace vslib
         {
             if (modified_status && m_parent != nullptr)
             {
+                // only setting upwards to the parent if modified_status is true, to avoid setting the chain to false
+                // while going through the validation workflow
                 m_parent->setParametersModified(true);
                 // do all children also need to be flagged as modified?
             }
