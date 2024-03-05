@@ -10,7 +10,7 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/iirFilterTest.cpp
   # ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitIntegralTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRangeTest.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRateTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRateTest.cpp
   # ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRmsTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidRstTest.cpp
