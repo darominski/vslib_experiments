@@ -125,6 +125,15 @@ TEST_F(ComponentTest, HierarchicalComponent)
     EXPECT_EQ(child_components["type"], child_type);
     EXPECT_EQ(child_components["parameters"], nlohmann::json::array());
     EXPECT_EQ(child_components["components"], nlohmann::json::array());
+
+    // test also that flagging components as modified works as expected in the hierarchy
+    child.setParametersModified(true);
+    EXPECT_TRUE(child.parametersModified());
+    EXPECT_TRUE(parent.parametersModified());
+
+    child.setParametersModified(false);
+    EXPECT_FALSE(child.parametersModified());
+    EXPECT_TRUE(parent.parametersModified());   // parent should not be modified
 }
 
 //! Checks derived component with a single integer parameter
