@@ -17,7 +17,7 @@ namespace vslib
     {
       public:
         LimitIntegral(std::string_view name, Component* parent = nullptr)
-            : Component("Limit", name, parent),
+            : Component("LimitIntegral", name, parent),
               integral_limit(*this, "integral_limit"),
               integral_limit_window_length(*this, "integral_limit_time_window", 0, TimeWindowLength)
         {

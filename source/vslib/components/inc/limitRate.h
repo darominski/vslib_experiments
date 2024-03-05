@@ -21,9 +21,10 @@ namespace vslib
         //! @param name Name of the LimitRange component
         //! @param parent Optional parent of the LimitRange component
         LimitRate(std::string_view name, Component* parent = nullptr)
-            : Component("Limit", name, parent),
+            : Component("LimitRate", name, parent),
               change_rate(*this, "change_rate")
         {
+            static_assert(!std::is_unsigned_v<T>, "Unsigned integer is not a safe type to use for a rate of change.");
         }
 
         //! Checks the rate of change of the input
@@ -38,11 +39,17 @@ namespace vslib
                 return fgc4::utils::Warning("Time difference is equal to zero in rate limit calculation.\n");
             }
 
-            if ((input - m_previous_value) / time_difference > change_rate)
+            if (!m_previous_value_set)   // avoids failure at first call to limit
+            {
+                m_previous_value     = input;
+                m_previous_value_set = true;
+                return {};
+            }
+            const double rate = (input - m_previous_value) / time_difference;
+            if (rate > change_rate)
             {
                 auto const& warning_msg = fgc4::utils::Warning(fmt::format(
-                    "Value: {} with difference of {} is above the maximal rate of change of: {}.\n", input,
-                    input - m_previous_value, change_rate
+                    "Value: {} with rate of {} is above the maximal rate of change of: {}.\n", input, rate, change_rate
                 ));
                 m_previous_value        = input;
                 return warning_msg;
@@ -54,6 +61,8 @@ namespace vslib
         Parameter<T> change_rate;
 
       private:
-        T m_previous_value{};
-    }
+        T m_previous_value{T{}};
+
+        bool m_previous_value_set{false};
+    };
 }   // namespace vslib
