@@ -30,24 +30,20 @@ namespace vslib
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
         std::optional<fgc4::utils::Warning> limit(T input) noexcept
         {
-            if (m_dead_zone_defined && (input >= dead_zone[0] && input <= dead_zone[1]))
+            if (m_dead_zone_defined && (input > dead_zone[0] && input < dead_zone[1]))
             {
                 return fgc4::utils::Warning(fmt::format(
                     "Value: {} is inside the defined dead zone of [{}, {}].\n", input, dead_zone[0], dead_zone[1]
                 ));
             }
 
-            if (input <= min)
+            if (input < min)
             {
-                return fgc4::utils::Warning(
-                    fmt::format("Value: {} is below or equal to the minimal value of {}.\n", input, min)
-                );
+                return fgc4::utils::Warning(fmt::format("Value: {} is below the minimal value of {}.\n", input, min));
             }
-            if (input >= max)
+            if (input > max)
             {
-                return fgc4::utils::Warning(
-                    fmt::format("Value: {} is above of equal to the maximal value of {}.\n", input, max)
-                );
+                return fgc4::utils::Warning(fmt::format("Value: {} is above the maximal value of {}.\n", input, max));
             }
 
             return {};
