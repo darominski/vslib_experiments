@@ -61,7 +61,7 @@ namespace vslib
                 }
                 else
                 {
-                    int64_t buffer_index = (m_head - index);
+                    buffer_index = (m_head - index);
                     if (buffer_index < 0)
                     {
                         buffer_index += ControllerLength;
@@ -111,7 +111,7 @@ namespace vslib
                 }
                 else
                 {
-                    int64_t buffer_index = (m_head - 1 - index);
+                    buffer_index = (m_head - 1 - index);
                     if (buffer_index < 0)
                     {
                         buffer_index += ControllerLength;
