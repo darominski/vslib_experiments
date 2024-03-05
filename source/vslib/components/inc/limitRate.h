@@ -29,10 +29,16 @@ namespace vslib
         //! Checks the rate of change of the input
         //!
         //! @param input Numerical input to be checked
+        //! @param time_difference Time difference between function calls
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> limit(T input)
+        std::optional<fgc4::utils::Warning> limit(T input, double time_difference)
         {
-            if (input - m_previous_value > change_rate)
+            if (time_difference == 0)
+            {
+                return fgc4::utils::Warning("Time difference is equal to zero in rate limit calculation.\n");
+            }
+
+            if ((input - m_previous_value) / time_difference > change_rate)
             {
                 auto const& warning_msg = fgc4::utils::Warning(fmt::format(
                     "Value: {} with difference of {} is above the maximal rate of change of: {}.\n", input,
