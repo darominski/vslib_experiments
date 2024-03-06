@@ -33,8 +33,8 @@ namespace vslib
         //! @param parent Possible parent of this Component, if Component is independent, the parent should be nullptr
         Component(std::string_view component_type, std::string_view name, Component* parent = nullptr) noexcept
             : m_component_type(component_type),
-              m_parent(parent),
-              m_name(name)
+              m_name(name),
+              m_parent(parent)
         {
             if (parent == nullptr)   // independent Component
             {
@@ -157,13 +157,40 @@ namespace vslib
             return m_parameters_modified;
         }
 
+        //! Returns the buffer switch state
+        //!
+        //! @return Buffer switch state, either 0 or 1
+        [[nodiscard]] unsigned short getBufferState() const noexcept
+        {
+            return m_buffer_switch;
+        }
+
+        //! Flips the buffer switch state between 0 and 1
+        void flipBufferState() noexcept
+        {
+            m_buffer_switch ^= 1;
+        }
+
+        //! Synchronises buffers for all Parameters registered with this Component
+        void synchroniseParameterBuffers() noexcept
+        {
+            for (auto& parameter : m_parameters)
+            {
+                parameter.second.get().syncInactiveBuffer();
+            }
+        }
+
       protected:
         std::string const m_component_type;
-        Component*        m_parent{nullptr};
         std::string const m_name;
-        ParameterList     m_parameters;
-        ChildrenList      m_children;
-        bool              m_parameters_modified{false};
+        Component*        m_parent{nullptr};
+
+        ParameterList m_parameters;
+        ChildrenList  m_children;
+
+        bool m_parameters_modified{false};
+
+        unsigned short m_buffer_switch{0};
 
         //! Registers this component in the ComponentRegistry
         void registerComponent() noexcept

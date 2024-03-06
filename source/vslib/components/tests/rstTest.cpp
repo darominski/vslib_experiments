@@ -39,7 +39,9 @@ class RSTTest : public ::testing::Test
         StaticJson t_value = t;
         rst.t.setJsonValue(t_value);
 
-        BufferSwitch::flipState();
+        rst.flipBufferState();
+        rst.r.syncInactiveBuffer();
+        rst.s.syncInactiveBuffer();
         rst.t.syncInactiveBuffer();
     }
 };

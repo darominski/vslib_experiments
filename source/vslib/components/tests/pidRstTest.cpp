@@ -57,7 +57,7 @@ class PIDRSTTest : public ::testing::Test
         StaticJson f0_value = f0;
         pidRst.f0.setJsonValue(f0_value);
 
-        BufferSwitch::flipState();
+        pidRst.flipBufferState();
         pidRst.verifyParameters();
         pidRst.f0.syncInactiveBuffer();
     }

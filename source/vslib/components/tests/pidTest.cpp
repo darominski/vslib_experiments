@@ -49,7 +49,7 @@ class PIDTest : public ::testing::Test
 
         StaticJson integral_limit_value = max_integral;
         pid.integral_limit.setJsonValue(integral_limit_value);
-        BufferSwitch::flipState();
+        pid.flipBufferState();
         pid.integral_limit.syncInactiveBuffer();
     }
 };

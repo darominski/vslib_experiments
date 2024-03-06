@@ -38,7 +38,7 @@ class LimitRangeTest : public ::testing::Test
         StaticJson dead_zone_val = dead_zone;
         limit.dead_zone.setJsonValue(dead_zone_val);
 
-        BufferSwitch::flipState();
+        limit.flipBufferState();
         limit.verifyParameters();
     }
 };

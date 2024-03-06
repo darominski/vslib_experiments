@@ -35,7 +35,7 @@ class LimitIntegralTest : public ::testing::Test
         StaticJson integral_limit_window_length_val = integral_limit_window_length;
         limit.integral_limit_window_length.setJsonValue(integral_limit_window_length_val);
 
-        BufferSwitch::flipState();
+        limit.flipBufferState();
         limit.verifyParameters();
     }
 };

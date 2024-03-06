@@ -35,15 +35,13 @@ namespace vslib
         bool validateJsonCommand(const fgc4::utils::StaticJson&);
         void executeJsonCommand(const fgc4::utils::StaticJson&);
 
-        std::optional<fgc4::utils::Warning> validateModifiedComponents();
+        void validateModifiedComponents();
 
       private:
         nlohmann::json_schema::json_validator                              m_validator;
         fgc4::utils::MessageQueueReader<void>                              m_read_commands_queue;
         fgc4::utils::MessageQueueWriter<void>                              m_write_command_status;
         std::array<uint8_t, fgc4::utils::constants::json_memory_pool_size> m_read_commands_buffer;
-
-        void triggerBufferSynchronisation();
     };
 
 }   // namespace vslib

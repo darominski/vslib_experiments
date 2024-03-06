@@ -13,7 +13,6 @@
 #include <string>
 #include <type_traits>
 
-#include "bufferSwitch.h"
 #include "component.h"
 #include "constants.h"
 #include "errorCodes.h"
@@ -98,7 +97,7 @@ namespace vslib
         //! Provides the access to the value and performs an implicit conversion to the desired type
         operator T() const
         {
-            return m_value[BufferSwitch::getState()];
+            return m_value[m_parent.getBufferState()];
         }
 
         //! Provides element-access to the values stored in the value, provided the type stored is a std::array
@@ -117,7 +116,7 @@ namespace vslib
                 );
                 throw std::out_of_range(fmt::format("{}", message));
             }
-            return m_value[BufferSwitch::getState()][index];
+            return m_value[m_parent.getBufferState()][index];
         }
 
         //! Provides ordering for the Parameters, allowing to compare them to interact as if they were of the stored
@@ -129,7 +128,7 @@ namespace vslib
         {
             // parameters are compared based on the values stored
             // in the currently active buffer
-            auto const& buffer_switch = BufferSwitch::getState();
+            auto const& buffer_switch = m_parent.getBufferState();
             auto const& lhs           = this->m_value[buffer_switch];
             auto const& rhs           = other.m_value[buffer_switch];
             if (lhs == rhs)
@@ -157,7 +156,7 @@ namespace vslib
         //! @return Value stored cast explictly to the underlying type
         [[nodiscard]] const T& value() const noexcept
         {
-            return m_value[BufferSwitch::getState()];
+            return m_value[m_parent.getBufferState()];
         }
 
         //! Getter for the initialization flag of the Parameter
@@ -219,7 +218,7 @@ namespace vslib
         auto begin()
             requires fgc4::utils::StdArray<T>
         {
-            return m_value[BufferSwitch::getState()].begin();
+            return m_value[m_parent.getBufferState()].begin();
         }
 
         //! Provides connection to cbegin() method of underlying container
@@ -228,7 +227,7 @@ namespace vslib
         auto const cbegin() const
             requires fgc4::utils::StdArray<T>
         {
-            return m_value[BufferSwitch::getState()].cbegin();
+            return m_value[m_parent.getBufferState()].cbegin();
         }
 
         //! Provides connection to end() method of underlying container
@@ -237,7 +236,7 @@ namespace vslib
         auto end()
             requires fgc4::utils::StdArray<T>
         {
-            return m_value[BufferSwitch::getState()].end();
+            return m_value[m_parent.getBufferState()].end();
         }
 
         //! Provides connection to cend() method of underlying container
@@ -246,7 +245,7 @@ namespace vslib
         auto const cend() const
             requires fgc4::utils::StdArray<T>
         {
-            return m_value[BufferSwitch::getState()].cend();
+            return m_value[m_parent.getBufferState()].cend();
         }
 
         // ************************************************************
@@ -289,7 +288,7 @@ namespace vslib
         //! Copies all contents of the currently used buffer to the inactive buffer to synchronise them.
         void syncInactiveBuffer() override
         {
-            const auto& buffer_switch  = BufferSwitch::getState();
+            const auto& buffer_switch  = m_parent.getBufferState();
             m_value[buffer_switch ^ 1] = m_value[buffer_switch];
         }
 
@@ -404,7 +403,7 @@ namespace vslib
             }
             catch (nlohmann::json::exception& e)
             {
-                fgc4::utils::Warning message(e.what());
+                fgc4::utils::Warning message(fmt::format("{}.\n", e.what()));
                 return message;
             }
 
@@ -427,7 +426,7 @@ namespace vslib
             }
             else   // no issues, value can be safely set
             {
-                m_value[BufferSwitch::getState() ^ 1] = command_value;
+                m_value[m_parent.getBufferState() ^ 1] = command_value;
                 return {};
             }
         }
@@ -443,7 +442,7 @@ namespace vslib
             auto const enum_element = magic_enum::enum_cast<T>(std::string(json_value));
             if (enum_element.has_value())
             {
-                m_value[BufferSwitch::getState() ^ 1] = enum_element.value();
+                m_value[m_parent.getBufferState() ^ 1] = enum_element.value();
             }
             else
             {

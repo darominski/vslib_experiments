@@ -32,7 +32,7 @@ class LimitRateTest : public ::testing::Test
         StaticJson change_rate_val = change_rate;
         limit.change_rate.setJsonValue(change_rate_val);
 
-        BufferSwitch::flipState();
+        limit.flipBufferState();
         limit.verifyParameters();
     }
 };

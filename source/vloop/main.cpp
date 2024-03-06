@@ -16,7 +16,6 @@
 #include "firFilter.h"
 #include "iirFilter.h"
 #include "interruptRegistry.h"
-#include "limit.h"
 #include "logString.h"
 #include "parameterMap.h"
 #include "parameterRegistry.h"
@@ -135,7 +134,7 @@ int main()
     nlohmann::json value = {interrupt_delay};
 
     timer.delay.setJsonValue(value[0]);
-    BufferSwitch::flipState();
+    timer.flipBufferState();
     timer.delay.syncInactiveBuffer();
     timer.verifyParameters();
 

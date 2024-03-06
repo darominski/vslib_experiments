@@ -33,7 +33,7 @@ class IIRFilterTest : public ::testing::Test
     {
         StaticJson values = parameter_values;
         filter.numerator.setJsonValue(values);
-        BufferSwitch::flipState();
+        filter.flipBufferState();
         filter.numerator.syncInactiveBuffer();
     }
 
@@ -43,7 +43,7 @@ class IIRFilterTest : public ::testing::Test
     {
         StaticJson values = parameter_values;
         filter.denominator.setJsonValue(values);
-        BufferSwitch::flipState();
+        filter.flipBufferState();
         filter.denominator.syncInactiveBuffer();
     }
 };

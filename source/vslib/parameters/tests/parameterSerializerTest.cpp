@@ -4,7 +4,6 @@
 
 #include <gtest/gtest.h>
 
-#include "bufferSwitch.h"
 #include "component.h"
 #include "json/json.hpp"
 #include "parameter.h"
@@ -22,10 +21,6 @@ class ParameterTest : public ::testing::Test
         // the registry would persist between tests
         ParameterRegistry& registry = ParameterRegistry::instance();
         registry.clearRegistry();
-        if (BufferSwitch::getState() != 0)
-        {
-            BufferSwitch::flipState();   // resets the global buffer switch to known state
-        }
     }
 
     void TearDown() override
@@ -197,7 +192,7 @@ TEST_F(ParameterTest, BoolParameterSerializationWithValue)
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), false);
-    BufferSwitch::flipState();        // switches between read and background buffer
+    component.flipBufferState();      // switches between read and background buffer
     parameter.syncInactiveBuffer();   // synchronises inactive buffer with active one
 
     auto const& serialized_parameter = serializer.serialize(static_cast<std::reference_wrapper<IParameter>>(parameter));
@@ -224,7 +219,7 @@ TEST_F(ParameterTest, DoubleArrayParameterSerializationWithValue)
     nlohmann::json        command   = {{"value", new_value}};
     auto                  output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), false);
-    BufferSwitch::flipState();        // switches between read and background buffer
+    component.flipBufferState();
     parameter.syncInactiveBuffer();   // synchronises inactive buffer with active one
 
     auto const& serialized_parameter = serializer.serialize(static_cast<std::reference_wrapper<IParameter>>(parameter));
@@ -261,7 +256,7 @@ TEST_F(ParameterTest, EnumParameterSerializationWithValue)
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
-    BufferSwitch::flipState();        // switches between read and background buffer
+    component.flipBufferState();
     parameter.syncInactiveBuffer();   // synchronises inactive buffer with active one
 
     EXPECT_EQ(parameter.value(), TestEnum::field2);   // tests explicit access

@@ -31,14 +31,7 @@ namespace vslib
             processJsonCommands(json_object);
 
             // after the processing, validate all touched Components
-            const auto& warning = validateModifiedComponents();
-
-            if (!warning.has_value())
-            {
-                BufferSwitch::flipState();   // flip the buffer pointer of all settable parameters
-                // synchronise new background to new active buffer
-                triggerBufferSynchronisation();
-            }
+            validateModifiedComponents();
             // else: message already logged, buffers will not be synchronised and state not flipped
         }
     }
@@ -134,7 +127,6 @@ namespace vslib
         if (!warning.has_value())
         {
             // success, otherwise: failure and Warning message already logged by setJsonValue
-            // synchronise the write buffer with the background buffer
             utils::writeStringToMessageQueue("Parameter value updated successfully.\n", m_write_command_status);
             // TODO: do we need to mark children of the modified component?
         }
@@ -147,7 +139,7 @@ namespace vslib
     //! Calls verifyParameters of all modified components in the registry
     //!
     //! @return Optionally returns a Warning if validation has failed.
-    std::optional<fgc4::utils::Warning> ParameterSetting::validateModifiedComponents()
+    void ParameterSetting::validateModifiedComponents()
     {
         auto const& component_registry = ComponentRegistry::instance().getComponents();
         for (const auto& entry : component_registry)
@@ -156,27 +148,14 @@ namespace vslib
             if (component.parametersModified())
             {
                 const auto& warning = component.verifyParameters();
-                if (warning.has_value())
+                if (!warning.has_value())
                 {
-                    // validation did not pass, roll back background buffer update and return a warning
-                    for (auto& parameter : component.getParameters())
-                    {
-                        parameter.second.get().syncInactiveBuffer();
-                    }
-                    return warning.value();
+                    component.flipBufferState();
                 }
+                // if there is an issue: it is logged, the component's buffer is not flipped
+                component.synchroniseParameterBuffers();
                 component.setParametersModified(false);
             }
-        }
-        return {};
-    }
-
-    //! Calls each registered parameter to synchronise background with real-time buffers
-    void ParameterSetting::triggerBufferSynchronisation()
-    {
-        for (const auto& parameter : ParameterRegistry::instance().getParameters())
-        {
-            parameter.second.get().syncInactiveBuffer();
         }
     }
 }   // namespace vslib

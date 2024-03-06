@@ -35,7 +35,7 @@ class LimitRmsTest : public ::testing::Test
         StaticJson rms_time_constant_val = rms_time_constant;
         limit.rms_time_constant.setJsonValue(rms_time_constant_val);
 
-        BufferSwitch::flipState();
+        limit.flipBufferState();
         limit.verifyParameters();
     }
 };
