@@ -124,6 +124,7 @@ if(BUILD_TESTS)
 
   # Include your components and parameters
   add_subdirectory(components)
+  add_subdirectory(background)
   add_subdirectory(parameters)
   add_subdirectory(utils)
 
