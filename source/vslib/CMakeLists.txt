@@ -14,7 +14,7 @@ if (NOT DEFINED LIBRARIES_HOME)
   message(FATAL_ERROR "LIBRARIES_HOME path needs to be defined.")
 endif()
 
-set(BMBOOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../bmboot)
+set(BMBOOT_DIR ${LIBRARIES_HOME}/bmboot)
 
 include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
 
@@ -28,7 +28,7 @@ if (NOT BUILD_TESTS)
 
   set(BMBOOT_BUILD_PAYLOAD 1)   # TODO: This is *bad*. It should probably be a separate CMakeLists instead.
 
-  add_subdirectory(../bmboot ${CMAKE_CURRENT_BINARY_DIR}/bmboot)
+  add_subdirectory(${BMBOOT_DIR} ${CMAKE_CURRENT_BINARY_DIR}/bmboot)
 
   ### END bumbleboot
 

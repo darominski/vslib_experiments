@@ -22,7 +22,7 @@ project(${APP} C CXX ASM)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(BMBOOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../bmboot)
+set(BMBOOT_DIR ${LIBRARIES_HOME}/bmboot)
 
 include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
 
