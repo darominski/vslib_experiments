@@ -3,7 +3,6 @@
 //! validation of incoming commands, their execution, and triggering synchronisation of buffers.
 //! @author Dominik Arominski
 
-#include "bufferSwitch.h"
 #include "constants.h"
 #include "errorCodes.h"
 #include "fmt/format.h"
