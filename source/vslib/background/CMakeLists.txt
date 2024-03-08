@@ -3,10 +3,13 @@ set(APP backgroundTests)
 add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/backgroundTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/parameterMapTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/parameterSettingTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/parameterMap.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/parameterSetting.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../../utils/messageQueue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../utils/src/vslibMessageQueue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../components/src/componentRegistry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
 )
 
 # TODO: the messy include structure below could be avoided if the entire vslib was compiled
@@ -24,6 +27,6 @@ target_include_directories(${APP} PUBLIC
     ${LIBRARIES_HOME}/magic_enum-0.9.3
 )
 
-target_link_libraries(${APP} PUBLIC ${GTEST_LIBRARIES} GTest::gtest pthread dl fmt::fmt)
+target_link_libraries(${APP} PUBLIC ${GTEST_LIBRARIES} GTest::gtest GTest::gmock pthread dl fmt::fmt nlohmann_json_schema_validator)
 target_link_options(${APP} PUBLIC  -Wl,-dynamic-linker,/my-lib/ld-2.33.so -Wl,-rpath,/my-lib)
 target_link_options(${APP} PRIVATE -static -static-libgcc -static-libstdc++)

@@ -117,6 +117,8 @@ endif()
 if(BUILD_TESTS)
 
   add_subdirectory("${LIBRARIES_HOME}/googletest-1.11.0" "${CMAKE_CURRENT_BINARY_DIR}/googletest")
+
+  add_subdirectory("${LIBRARIES_HOME}/json-schema-validator-2.2.0" ${CMAKE_CURRENT_BINARY_DIR}/json-schema-validator)
   # FMT has to be recompiled here due to use of different compiler than in the upstream CMake
   add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
   include(GoogleTest)
