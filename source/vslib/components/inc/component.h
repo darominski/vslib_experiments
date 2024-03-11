@@ -36,14 +36,11 @@ namespace vslib
               m_name(name),
               m_parent(parent)
         {
-            if (parent == nullptr)   // independent Component
-            {
-                registerComponent();
-            }
-            else
+            if (parent != nullptr)
             {
                 parent->addChild((*this));
             }
+            registerComponent();
         }
 
         // ************************************************************

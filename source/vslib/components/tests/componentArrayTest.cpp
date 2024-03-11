@@ -40,15 +40,16 @@ class Derived : public Component
 //! serialized
 TEST_F(ComponentArrayTest, BasicArray)
 {
-    const std::string          component_name = "array";
-    ComponentArray<Derived, 3> component(component_name, nullptr);
+    const std::string                     component_name = "array";
+    constexpr size_t                      array_length   = 3;
+    ComponentArray<Derived, array_length> component(component_name, nullptr);
 
     EXPECT_EQ(component.getName(), component_name);
     EXPECT_EQ(component.getFullName(), std::string("ComponentArray.") + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
 
     ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
+    EXPECT_EQ(registry.getComponents().size(), array_length + 1);   // ComponentArray + 3 children components
     EXPECT_NE(registry.getComponents().find(component.getFullName()), registry.getComponents().end());
 
     auto serialized_component = component.serialize();
@@ -65,10 +66,11 @@ TEST_F(ComponentArrayTest, BasicArray)
 //! Checks that a basic component array can be interacted with as if it is an array
 TEST_F(ComponentArrayTest, BasicArrayInteractions)
 {
-    const std::string          component_name = "array";
-    ComponentArray<Derived, 3> component(component_name, nullptr);
-    const std::string          component_type = "ComponentArray";
-    const std::string          held_type_name = "Derived";
+    const std::string                     component_name = "array";
+    constexpr size_t                      array_length   = 4;
+    ComponentArray<Derived, array_length> component(component_name, nullptr);
+    const std::string                     component_type = "ComponentArray";
+    const std::string                     held_type_name = "Derived";
 
     size_t counter = 0;
     for (const auto& element : component)   // tests begin() and end() operators
@@ -87,26 +89,28 @@ TEST_F(ComponentArrayTest, BasicArrayInteractions)
 //! Checks that ComponentArray can hold a ComponentArray
 TEST_F(ComponentArrayTest, HierarchicalArrayTest)
 {
-    const std::string                             component_name = "array";
-    ComponentArray<ComponentArray<Derived, 3>, 1> component(component_name, nullptr);
+    const std::string                                                               component_name     = "array";
+    constexpr size_t                                                                inner_array_length = 4;
+    constexpr size_t                                                                outer_array_length = 2;
+    ComponentArray<ComponentArray<Derived, inner_array_length>, outer_array_length> component(component_name, nullptr);
 
     EXPECT_EQ(component.getName(), component_name);
     EXPECT_EQ(component.getFullName(), std::string("ComponentArray.") + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
 
     ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
+    EXPECT_EQ(registry.getComponents().size(), outer_array_length * (inner_array_length + 1) + 1);
     EXPECT_NE(registry.getComponents().find(component.getFullName()), registry.getComponents().end());
 
     auto serialized_component = component.serialize();
     EXPECT_EQ(serialized_component["name"], component_name);
     EXPECT_EQ(serialized_component["type"], "ComponentArray");
     EXPECT_EQ(serialized_component["parameters"], nlohmann::json::array());
-    EXPECT_EQ(serialized_component["components"].size(), 1);
+    EXPECT_EQ(serialized_component["components"].size(), outer_array_length);
     EXPECT_EQ(serialized_component["components"][0]["type"], "ComponentArray");
     EXPECT_EQ(serialized_component["components"][0]["name"], "array[0]");
     EXPECT_EQ(serialized_component["components"][0]["parameters"], nlohmann::json::array());
-    EXPECT_EQ(serialized_component["components"][0]["components"].size(), 3);
+    EXPECT_EQ(serialized_component["components"][0]["components"].size(), inner_array_length);
     EXPECT_EQ(serialized_component["components"][0]["components"][0]["type"], "Derived");
     EXPECT_EQ(serialized_component["components"][0]["components"][0]["name"], "array[0][0]");
     EXPECT_EQ(serialized_component["components"][0]["components"][0]["parameters"], nlohmann::json::array());

@@ -112,7 +112,7 @@ TEST_F(ComponentTest, HierarchicalComponent)
     EXPECT_EQ(child.getParameters().size(), 0);
 
     ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
+    EXPECT_EQ(registry.getComponents().size(), 2);   // two components = two entries
     EXPECT_NE(registry.getComponents().find(parent.getFullName()), registry.getComponents().end());
 
     auto serialized_component = parent.serialize();
