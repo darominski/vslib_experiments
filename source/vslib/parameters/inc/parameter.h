@@ -159,6 +159,14 @@ namespace vslib
             return m_value[m_parent.getBufferState()];
         }
 
+        //! Returns inactive buffer value.
+        //!
+        //! @return Inactive buffer value with explict cast to the underlying type
+        [[nodiscard]] const T& inactiveValue() const noexcept
+        {
+            return m_value[m_parent.getBufferState() ^ 1];
+        }
+
         //! Getter for the initialization flag of the Parameter
         //!
         //! @return True if the Parameter has been initialized, false otherwise
