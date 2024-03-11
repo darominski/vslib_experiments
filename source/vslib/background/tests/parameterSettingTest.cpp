@@ -11,6 +11,7 @@
 #include "parameter.h"
 #include "parameterSetting.h"
 #include "staticJson.h"
+#include "typeTraits.h"
 
 using namespace vslib;
 
@@ -41,6 +42,19 @@ class MockComponent : public Component
     }
 
     Parameter<T> parameter;
+
+    //! Validation workflow, for integral types checks if the value is even, pass-through otherwise
+    std::optional<fgc4::utils::Warning> verifyParameters() override
+    {
+        if constexpr (fgc4::utils::Integral<T>)
+        {
+            if (parameter.inactiveValue() % 2 != 0)
+            {
+                return fgc4::utils::Warning("Parameter value must be even\n");
+            }
+        }
+        return {};
+    }
 };
 
 //! Checks that a ParameterSetting object can be constructed
@@ -293,20 +307,214 @@ TEST_F(ParameterSettingTest, ParameterMapProcessArrayInvalidCommand)
     EXPECT_EQ(test.parameter, new_accepted_value);
 }
 
-// //! Checks that a ParameterSetting executes json commands
-// TEST_F(ParameterSettingTest, ParameterMapExecuteJsonCommand)
-// {
-//     constexpr size_t                queue_size = 100;   // 100 bytes
-//     std::array<uint8_t, queue_size> read_buffer{};
-//     std::array<uint8_t, queue_size> write_buffer{};
-//     ASSERT_NO_THROW(ParameterSetting(read_buffer.data(), write_buffer.data()));
-// }
+//! Checks that a ParameterSetting executes a json command correctly
+TEST_F(ParameterSettingTest, ParameterMapExecuteCorrectCommand)
+{
+    constexpr size_t                queue_size = 100;   // 100 bytes
+    std::array<uint8_t, queue_size> read_buffer{};
+    std::array<uint8_t, queue_size> write_buffer{};
+    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
 
-// //! Checks that a ParameterSetting validates modified components correctly
-// TEST_F(ParameterSettingTest, ParameterMapValidateModifiedComponents)
-// {
-//     constexpr size_t                queue_size = 100;   // 100 bytes
-//     std::array<uint8_t, queue_size> read_buffer{};
-//     std::array<uint8_t, queue_size> write_buffer{};
-//     ASSERT_NO_THROW(ParameterSetting(read_buffer.data(), write_buffer.data()));
-// }
+    std::string            type = "type";
+    std::string            name = "name";
+    MockComponent<int32_t> test(type, name);
+    int32_t                value = 1;
+
+    std::array<uint8_t, queue_size> read_message_buffer;
+    auto                            read_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
+        (uint8_t*)write_buffer.data(), queue_size
+    );
+
+    nlohmann::json single_command
+        = {{"name", type + '.' + name + ".parameter"}, {"value", value}, {"version", std::array<int, 2>{0, 1}}};
+
+    ASSERT_NO_THROW(parameter_setting.executeJsonCommand(single_command));
+
+    auto message = read_queue.read(read_message_buffer);
+    ASSERT_TRUE(message.has_value());
+    EXPECT_EQ(std::string(message.value().begin(), message.value().end()), "Parameter value updated successfully.\n");
+
+    test.flipBufferState();
+    EXPECT_EQ(test.parameter, value);
+    EXPECT_TRUE(test.parametersModified());
+}
+
+//! Checks that a ParameterSetting catches an invalid json command correctly
+TEST_F(ParameterSettingTest, ParameterMapExecuteIncorrectCommand)
+{
+    constexpr size_t                queue_size = 100;   // 100 bytes
+    std::array<uint8_t, queue_size> read_buffer{};
+    std::array<uint8_t, queue_size> write_buffer{};
+    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+
+    std::string            type = "type";
+    std::string            name = "name";
+    MockComponent<int32_t> test(type, name);
+    int32_t                value = 1;
+
+    std::array<uint8_t, queue_size> read_message_buffer;
+    auto                            read_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
+        (uint8_t*)write_buffer.data(), queue_size
+    );
+
+    nlohmann::json single_command = {{"name", "invalid"}, {"value", value}, {"version", std::array<int, 2>{0, 1}}};
+
+    ASSERT_NO_THROW(parameter_setting.executeJsonCommand(single_command));
+
+    auto message = read_queue.read(read_message_buffer);
+    ASSERT_TRUE(message.has_value());
+    EXPECT_EQ(
+        std::string(message.value().begin(), message.value().end()),
+        "Parameter ID: invalid not found. Command ignored.\n"
+    );
+
+    test.flipBufferState();
+    EXPECT_NE(test.parameter, value);
+    EXPECT_FALSE(test.parametersModified());
+}
+
+//! Checks that a ParameterSetting validates modified components correctly
+TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedComponents)
+{
+    constexpr size_t                queue_size = 100;   // 100 bytes
+    std::array<uint8_t, queue_size> read_buffer{};
+    std::array<uint8_t, queue_size> write_buffer{};
+    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+
+    std::string            type  = "type";
+    std::string            name1 = "name1";
+    std::string            name2 = "name2";
+    MockComponent<int32_t> component_1(type, name1);
+    MockComponent<int32_t> component_2(type, name2);
+    int32_t                value = 2;
+
+    std::array<uint8_t, queue_size> read_message_buffer;
+    auto                            read_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
+        (uint8_t*)write_buffer.data(), queue_size
+    );
+
+    nlohmann::json single_command = value;
+    component_1.parameter.setJsonValue(single_command);
+
+    EXPECT_TRUE(component_1.parametersModified());
+    EXPECT_FALSE(component_2.parametersModified());   // unrelated component should not be flagged as modified
+
+    parameter_setting.validateModifiedComponents();
+
+    EXPECT_EQ(component_1.parameter, value);
+    EXPECT_NE(component_2.parameter, value);
+    EXPECT_FALSE(component_1.parametersModified());
+    EXPECT_FALSE(component_2.parametersModified());
+}
+
+//! Checks that a ParameterSetting validates modified hierarchical components correctly
+TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedHierarchicalComponents)
+{
+    constexpr size_t                queue_size = 100;   // 100 bytes
+    std::array<uint8_t, queue_size> read_buffer{};
+    std::array<uint8_t, queue_size> write_buffer{};
+    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+
+    std::string            type  = "type";
+    std::string            name1 = "name1";
+    std::string            name2 = "name2";
+    MockComponent<int32_t> component_1(type, name1);
+    MockComponent<int32_t> component_2(type, name2, &component_1);
+    int32_t                value = 2;
+
+    std::array<uint8_t, queue_size> read_message_buffer;
+    auto                            read_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
+        (uint8_t*)write_buffer.data(), queue_size
+    );
+
+    nlohmann::json single_command = value;
+    component_2.parameter.setJsonValue(single_command);
+
+    // both comoponents should be flagged as modified along the hierarchy
+    EXPECT_TRUE(component_1.parametersModified());
+    EXPECT_TRUE(component_2.parametersModified());
+
+    parameter_setting.validateModifiedComponents();
+
+    EXPECT_NE(component_1.parameter, value);   // not expected to be modified
+    EXPECT_EQ(component_2.parameter, value);
+    EXPECT_FALSE(component_1.parametersModified());
+    EXPECT_FALSE(component_2.parametersModified());
+}
+
+//! Checks that a ParameterSetting validates modified components correctly
+TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedComponents)
+{
+    constexpr size_t                queue_size = 100;   // 100 bytes
+    std::array<uint8_t, queue_size> read_buffer{};
+    std::array<uint8_t, queue_size> write_buffer{};
+    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+
+    std::string            type  = "type";
+    std::string            name1 = "name1";
+    std::string            name2 = "name2";
+    MockComponent<int32_t> component_1(type, name1);
+    MockComponent<int32_t> component_2(type, name2);
+    int32_t                value = 3;
+
+    std::array<uint8_t, queue_size> read_message_buffer;
+    auto                            read_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
+        (uint8_t*)write_buffer.data(), queue_size
+    );
+
+    nlohmann::json single_command = value;
+    component_1.parameter.setJsonValue(single_command);
+
+    EXPECT_TRUE(component_1.parametersModified());
+    EXPECT_FALSE(component_2.parametersModified());   // unrelated component should not be flagged as modified
+
+    parameter_setting.validateModifiedComponents();
+
+    EXPECT_NE(component_1.parameter, value);
+    EXPECT_NE(component_2.parameter, value);
+    EXPECT_FALSE(component_1.parametersModified());
+    EXPECT_FALSE(component_2.parametersModified());
+
+    // ensures that despite incorrect input, the value has not been modified after flipping the buffer:
+    component_1.flipBufferState();
+    EXPECT_NE(component_1.parameter, value);
+}
+
+//! Checks that a ParameterSetting validates modified hierarchical components correctly
+TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedHierarchicalComponents)
+{
+    constexpr size_t                queue_size = 100;   // 100 bytes
+    std::array<uint8_t, queue_size> read_buffer{};
+    std::array<uint8_t, queue_size> write_buffer{};
+    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+
+    std::string            type  = "type";
+    std::string            name1 = "name1";
+    std::string            name2 = "name2";
+    MockComponent<int32_t> component_1(type, name1);
+    MockComponent<int32_t> component_2(type, name2, &component_1);
+    int32_t                value = 3;
+
+    std::array<uint8_t, queue_size> read_message_buffer;
+    auto                            read_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
+        (uint8_t*)write_buffer.data(), queue_size
+    );
+
+    nlohmann::json single_command = value;
+    component_2.parameter.setJsonValue(single_command);
+
+    EXPECT_TRUE(component_1.parametersModified());
+    EXPECT_TRUE(component_2.parametersModified());
+
+    parameter_setting.validateModifiedComponents();
+
+    EXPECT_NE(component_1.parameter, value);
+    EXPECT_NE(component_2.parameter, value);
+    EXPECT_FALSE(component_1.parametersModified());
+    EXPECT_FALSE(component_2.parametersModified());
+
+    // ensures that despite incorrect input, the value has not been modified after flipping the buffer:
+    component_1.flipBufferState();
+    EXPECT_NE(component_1.parameter, value);
+    EXPECT_NE(component_2.parameter, value);
+}
