@@ -99,7 +99,15 @@ namespace vslib
         }
 
         // ************************************************************
-        // Standard getters
+        // Getters
+
+        //! Returns the buffer switch state
+        //!
+        //! @return Buffer switch state, either 0 or 1
+        [[nodiscard]] unsigned short getBufferState() const noexcept
+        {
+            return m_buffer_switch;
+        }
 
         //! Provides the name of this component
         //!
@@ -127,11 +135,24 @@ namespace vslib
             return m_parameters;
         }
 
-        //! Verifies parameters after they are set, to be called after paramaters of this component are modified
-        virtual std::optional<fgc4::utils::Warning> verifyParameters()
+        //! Provides information whether this Component has a parent
+        //!
+        //! @return True if a parent is defined, false otherwise
+        [[nodiscard]] bool hasParent() const noexcept
         {
-            return {};
+            return (m_parent != nullptr);
         }
+
+        //! Returns the value of the flag informing whether the parameters of this Component have been recently modified
+        //!
+        //! @return True if any parameter of this Component has been recently modified, false otherwise
+        [[nodiscard]] bool parametersModified() const noexcept
+        {
+            return m_parameters_modified;
+        }
+
+        // ************************************************************
+        // Setters
 
         //! Sets the value of flag with information whether parameters belonging to this Component have been recently
         //! modified
@@ -149,21 +170,8 @@ namespace vslib
             m_parameters_modified = modified_status;
         }
 
-        //! Returns the value of the flag informing whether the parameters of this Component have been recently modified
-        //!
-        //! @return True if any parameter of this Component has been recently modified, false otherwise
-        [[nodiscard]] bool parametersModified() const noexcept
-        {
-            return m_parameters_modified;
-        }
-
-        //! Returns the buffer switch state
-        //!
-        //! @return Buffer switch state, either 0 or 1
-        [[nodiscard]] unsigned short getBufferState() const noexcept
-        {
-            return m_buffer_switch;
-        }
+        // ************************************************************
+        // Miscellaneous methods, interaction with buffers and verifying parameters
 
         //! Flips the buffer switch state between 0 and 1
         void flipBufferState() noexcept
@@ -178,6 +186,13 @@ namespace vslib
             {
                 parameter.second.get().syncInactiveBuffer();
             }
+        }
+
+        //! Verifies parameters after they are set, to be called after parameters of this component are modified.
+        //! The checks need to run on the inactive buffer values.
+        virtual std::optional<fgc4::utils::Warning> verifyParameters()
+        {
+            return {};
         }
 
       protected:
