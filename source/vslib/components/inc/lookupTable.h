@@ -24,7 +24,7 @@ namespace vslib
         //! @param values Vector with x-y pairs of the function to be stored
         LookupTable(std::string_view name, Component* parent, std::vector<std::pair<T, T>>& values)
             : Component("LookupTable", name, parent),
-              m_values{values}
+              m_values{std::move(values)}
         {
         }
 
@@ -32,20 +32,37 @@ namespace vslib
         //!
         //! @param input_x X-axis input value to interpolate
         //! @return Y-axis value result of the interpolation
-        T interpolate(T input_x) const noexcept
+        T interpolate(T input_x) noexcept
         {
             T      min_value{std::numeric_limits<T>::max()};
             size_t min_index{m_values.size()};
-            for (size_t index = 0; const auto& point : m_values)
+            // auto it = std::find_if(m_values.cbegin(), m_values.cend(), )
+            size_t min_loop_index = 0;
+            size_t max_loop_index = m_values.size();
+            if (input_x >= m_previous_value)
             {
-                auto const diff = abs(point.first - input_x);
+                min_loop_index = m_previous_index;
+            }
+            else
+            {
+                max_loop_index = m_previous_index;
+            }
+
+            for (size_t index = min_loop_index; index < max_loop_index; index++)
+            {
+                auto const diff = abs(m_values[index].first - input_x);
                 if (min_value > diff)
                 {
                     min_value = diff;
                     min_index = index;
                 }
+                else   // assuming monotonic distribution of x axis values
+                {
+                    break;
+                }
             }
-            if (min_index > (m_values.size() - 1))
+
+            if (min_index >= (m_values.size() - 1))
             {
                 fgc4::utils::Warning(fmt::format(
                     "Interpolation error: provided input value: {} outside of provided look-up table bounds of: [{}, "
@@ -54,15 +71,20 @@ namespace vslib
                 ));
                 return T{};
             }
-
             const auto& x1 = m_values[min_index].first;
             const auto& y1 = m_values[min_index].second;
             const auto& x2 = m_values[min_index + 1].first;
             const auto& y2 = m_values[min_index + 1].second;
+
+            m_previous_value = y1;
+            m_previous_index = min_index;
+
             return y1 + (input_x - x1) * (y2 - y1) / (x2 - x1);
         }
 
       private:
+        T                            m_previous_value;
+        size_t                       m_previous_index;
         std::vector<std::pair<T, T>> m_values;
     };
 }
