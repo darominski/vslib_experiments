@@ -7,7 +7,9 @@
 #include <fcntl.h>
 #include <functional>
 #include <iostream>
+#include <tuple>
 #include <unistd.h>
+#include <vector>
 
 #include "boxFilter.h"
 #include "componentArray.h"
@@ -17,6 +19,7 @@
 #include "iirFilter.h"
 #include "interruptRegistry.h"
 #include "logString.h"
+#include "lookupTable.h"
 #include "parameterMap.h"
 #include "parameterRegistry.h"
 #include "parameterSetting.h"
@@ -37,17 +40,24 @@ using namespace fgc4;
 
 namespace user
 {
-    constexpr size_t   length = 16;
-    vslib::RST<length> rst("rst");
+    constexpr size_t length = 16;
+    // vslib::RST<length> rst("rst");
     // vslib::FIRFilter<length> filter("fir");
+    std::vector<std::pair<double, double>> func{
+        std::make_pair(0.0, 0.0), std::make_pair(1, 0.5), std::make_pair(2, 1.0), std::make_pair(3, 1.5),
+        std::make_pair(4, 2.0),   std::make_pair(5, 2.5), std::make_pair(6, 3.0), std::make_pair(7, 3.5),
+        std::make_pair(8, 4.0),   std::make_pair(9, 4.5), std::make_pair(10, 5.0)};
+
+    LookupTable<double> table("table", nullptr, func);
 
     void realTimeTask()
     {
-        for (int index = 0; index < 50; index++)
+        for (int index = 0; index < 100; index++)
         {
-            auto const input       = std::rand();
+            volatile double const input    = std::rand() / 4e8;
+            volatile auto         variable = table.interpolate(input);
             // volatile auto variable = filter.filter(input);
-            volatile auto variable = rst.control(input, input + 2);
+            // volatile auto variable = rst.control(input, input + 2);
         }
     }
 
@@ -84,11 +94,11 @@ int main()
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
 
-    PID                 pid1("pid_1", independent_component);
-    PID                 pid2("pid_2", independent_component);
-    RST<5>              rst("rst_1", independent_component);
-    PIDRST              pid_rst("pid_rst_1", independent_component);
-    Limit<double, 2, 4> limit_voltage("limit_v", independent_component);
+    // PID                 pid1("pid_1", independent_component);
+    // PID                 pid2("pid_2", independent_component);
+    // RST<5>              rst("rst_1", independent_component);
+    // PIDRST              pid_rst("pid_rst_1", independent_component);
+    // Limit<double, 2, 4> limit_voltage("limit_v", independent_component);
     // PID pid3("pid_3", independent_component);
     // RST rst("rst_1", independent_component);
 
@@ -99,19 +109,21 @@ int main()
 
     // ComponentArray<ComponentArray<PID, 3>, 3> array("brick_2", nullptr);
 
+    // LookupTable<double> table("table", nullptr, function);
+
     // No parameter declarations beyond this point!
     // ************************************************************
 
     // auto parameter_map = fgc4::utils::StaticJsonFactory::getJsonObject();
     // parameter_map      = (ComponentRegistry::instance().createParameterMap()).dump();
 
-    std::array<double, user::length> r;
-    std::array<double, user::length> s;
-    std::array<double, user::length> t;
+    // std::array<double, user::length> r;
+    // std::array<double, user::length> s;
+    // std::array<double, user::length> t;
 
-    std::iota(std::begin(r), std::end(r), 0);
-    std::iota(std::begin(s), std::end(s), 0);
-    std::iota(std::begin(t), std::end(t), 0);
+    // std::iota(std::begin(r), std::end(r), 0);
+    // std::iota(std::begin(s), std::end(s), 0);
+    // std::iota(std::begin(t), std::end(t), 0);
 
     // nlohmann::json value = {{"value", r}};
     // user::rst.r.setJsonValue(value);
@@ -139,6 +151,7 @@ int main()
     timer.verifyParameters();
 
     timer.start();
+    // user::realTimeTask();
 
     int           counter        = 0;
     int           expected_delay = 210;
@@ -196,9 +209,9 @@ int main()
         // std::cout << std::string("Kp: ") + std::to_string(pid1.kp) << "\n";
         // puts(std::to_string(pid1.ki).c_str());
         //         // puts("PID3: ");
-        //         // puts(std::to_string(pid3.p).c_str());
-        //         // puts(std::to_string(pid3.i).c_str());
-        //         // puts(std::to_string(pid3.d).c_str());
+        // puts(std::to_string(pid1.kp).c_str());
+        // puts(std::to_string(pid1.ki).c_str());
+        // puts(std::to_string(pid1.kd).c_str());
         //         // puts("RST: ");
         //         // puts("");
 

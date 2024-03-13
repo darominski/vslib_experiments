@@ -49,7 +49,7 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
             // half of the values will be invalid
             // if (commands.size() % 2 == 0)
             // {
-            double value = 3.14159 * static_cast<double>(commands.size() + 2);
+            double value = 3.14159 * static_cast<double>(commands.size() % 2);
             command.push_back({"value", value});
             // }
             // else
