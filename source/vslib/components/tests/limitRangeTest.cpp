@@ -380,7 +380,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMinNumericalLimit)
     std::string        name = "float_limit";
     LimitRange<double> double_limit(name, nullptr);
 
-    const double min = std::nextafterf(std::numeric_limits<double>::lowest(), 0.0);
+    const double min = std::nexttoward(std::numeric_limits<double>::lowest(), 0.0);
     const double max = 1e3;
     set_limit_parameters<double>(double_limit, min, max);
 
@@ -390,7 +390,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMinNumericalLimit)
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(
         warning.value().warning_str,
-        "Value: -1.7976931348623157e+308 is below the minimal value of -3.4028234663852886e+38.\n"
+        "Value: -1.7976931348623157e+308 is below the minimal value of -1.7976931348623155e+308.\n"
     );
 }
 
