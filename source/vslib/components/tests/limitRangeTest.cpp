@@ -351,7 +351,7 @@ TEST_F(LimitRangeTest, LimitRangeIntMinNumericalLimit)
     const int max = 10;
     set_limit_parameters<int>(int_limit, min, max);
 
-    const double input = std::numeric_limits<int>::lowest();
+    const int input = std::numeric_limits<int>::lowest();
 
     const auto warning = int_limit.limit(input);
     ASSERT_TRUE(warning.has_value());
