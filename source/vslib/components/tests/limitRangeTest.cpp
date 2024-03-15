@@ -523,3 +523,20 @@ TEST_F(LimitRangeTest, LimitRangeDoubleInf)
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: inf is above the maximal value of 1000.\n");
 }
+
+//! Tests catching -inf being outside of limits with double type
+TEST_F(LimitRangeTest, LimitRangeDoubleNaN)
+{
+    std::string        name = "limit";
+    LimitRange<double> limit(name, nullptr);
+
+    const double min = 4;
+    const double max = 1e3;
+    set_limit_parameters<double>(limit, min, max);
+
+    const double input = std::numeric_limits<double>::quiet_NaN();
+
+    const auto warning = limit.limit(input);
+    ASSERT_TRUE(warning.has_value());
+    EXPECT_EQ(warning.value().warning_str, "Value is NaN.\n");
+}

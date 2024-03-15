@@ -30,6 +30,11 @@ namespace vslib
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
         std::optional<fgc4::utils::Warning> limit(T input) noexcept
         {
+            if (std::isnan(input))
+            {
+                return fgc4::utils::Warning("Value is NaN.\n");
+            }
+
             if (m_dead_zone_defined && (input > dead_zone[0] && input < dead_zone[1]))
             {
                 return fgc4::utils::Warning(fmt::format(
