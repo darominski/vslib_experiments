@@ -153,3 +153,20 @@ TEST_F(LimitRateTest, LimitRateDouble)
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 4 with rate of 200 is above the maximal rate of change of: 1.\n");
 }
+
+//! Tests catching input with time difference of zero with the last provided value
+TEST_F(LimitRateTest, LimitRateZeroTimeDifference)
+{
+    std::string       name = "limit";
+    LimitRate<double> limit(name, nullptr);
+
+    const double change_rate = 1.0;
+
+    set_limit_parameters<double>(limit, change_rate);
+
+    double first_input = 2.0;
+    auto   warning     = limit.limit(first_input, 0.0);
+
+    ASSERT_TRUE(warning.has_value());
+    EXPECT_EQ(warning.value().warning_str, "Time difference is equal to zero in rate limit calculation.\n");
+}
