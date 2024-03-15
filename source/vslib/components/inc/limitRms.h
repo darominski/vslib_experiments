@@ -12,14 +12,14 @@
 
 namespace vslib
 {
-    template<size_t RMSBufferLength = 16>
     class LimitRms : public Component
     {
       public:
-        LimitRms(std::string_view name, Component* parent = nullptr)
+        LimitRms(std::string_view name, Component* parent = nullptr, double iteration_period = 5e-6)
             : Component("LimitRms", name, parent),
               rms_limit(*this, "rms_threshold"),
-              rms_time_constant(*this, "rms_time_constant", 0, RMSBufferLength)
+              rms_time_constant(*this, "rms_time_constant", 1e-12),   // 1 ps limit
+              m_iteration_period(iteration_period)   // TODO: replace by iteration period information sharing solution
         {
         }
 
@@ -29,17 +29,10 @@ namespace vslib
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
         std::optional<fgc4::utils::Warning> limit(double input) noexcept
         {
-            double const new_entry = abs(input) / sqrt(RMSBufferLength);
-            m_cumulative           += new_entry - rms_buffer[m_head];
+            m_cumulative
+                += (pow(input, 2) - m_cumulative) * m_filter_factor;   // calculation re-implemented from regLimRmsRT
 
-            rms_buffer[m_head] = new_entry;
-            m_head++;
-            if (m_head >= rms_time_constant)
-            {
-                m_head -= rms_time_constant;
-            }
-
-            if (m_cumulative > rms_limit)
+            if (sqrt(m_cumulative) > rms_limit)
             {
                 return fgc4::utils::Warning(
                     fmt::format("Value: {} deviates too far from the RMS limit of {}.\n", input, rms_limit)
@@ -52,19 +45,21 @@ namespace vslib
         //! Resets the component to the initial state of buffers and buffer pointers
         void reset() noexcept
         {
-            m_head       = 0;
             m_cumulative = 0.0;
-            std::fill(std::begin(rms_buffer), std::end(rms_buffer), 0);
         }
 
         Parameter<double> rms_limit;
-        Parameter<size_t> rms_time_constant;
+        Parameter<double> rms_time_constant;
+
+        std::optional<fgc4::utils::Warning> verifyParameters() override
+        {
+            m_filter_factor = m_iteration_period / (rms_time_constant + 0.5 * m_iteration_period);
+            return {};
+        }
 
       private:
-        int64_t m_head{0};
-
+        double m_iteration_period;
         double m_cumulative{0};
-
-        std::array<double, RMSBufferLength> rms_buffer{0};
+        double m_filter_factor;
     };
 }   // namespace vslib
