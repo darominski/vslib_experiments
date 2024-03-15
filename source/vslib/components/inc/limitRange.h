@@ -58,21 +58,14 @@ namespace vslib
         //! @return Optionally returns a warning if any issues have been found
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
-            if (dead_zone.isInitialized() && (dead_zone[0] > dead_zone[1]))
+            m_dead_zone_defined = (dead_zone[0] != dead_zone[1]);
+
+            if (m_dead_zone_defined && (dead_zone[0] > dead_zone[1]))
             {
                 return fgc4::utils::Warning("Upper edge of the dead_zone is below the lower edge.\n");
             }
 
-            if (dead_zone.isInitialized() && (dead_zone[0] != dead_zone[1]))
-            {
-                m_dead_zone_defined = true;
-            }
-            else
-            {
-                m_dead_zone_defined = false;
-            }
-
-            if ((min.isInitialized() && max.isInitialized()) && (min >= max))
+            if (min >= max)
             {
                 return fgc4::utils::Warning("Attempted to set the lower limit below the upper limit.\n");
             }
