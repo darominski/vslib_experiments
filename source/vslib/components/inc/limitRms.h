@@ -52,7 +52,8 @@ namespace vslib
         //! Resets the component to the initial state of buffers and buffer pointers
         void reset() noexcept
         {
-            m_head = 0;
+            m_head       = 0;
+            m_cumulative = 0.0;
             std::fill(std::begin(rms_buffer), std::end(rms_buffer), 0);
         }
 

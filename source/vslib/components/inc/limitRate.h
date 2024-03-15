@@ -58,6 +58,13 @@ namespace vslib
             return {};
         }
 
+        //! Resets the component to the initial state of the previous_value
+        void reset() noexcept
+        {
+            m_previous_value     = T{};
+            m_previous_value_set = false;
+        }
+
         Parameter<T> change_rate;
 
       private:

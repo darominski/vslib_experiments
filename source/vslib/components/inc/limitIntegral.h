@@ -48,10 +48,11 @@ namespace vslib
             return {};
         }
 
-        //! Resets the component to the initial state of buffers and buffer pointers
+        //! Resets the component to the initial state of buffers, buffer pointers, and the cumulative value
         void reset() noexcept
         {
-            m_head = 0;
+            m_head       = 0;
+            m_cumulative = T{};
             std::fill(std::begin(m_integral_buffer), std::end(m_integral_buffer), 0);
         }
 
