@@ -27,7 +27,8 @@ class LimitRangeTest : public ::testing::Test
     }
 
     template<typename T>
-    void set_limit_parameters(LimitRange<T>& limit, T min = T{}, T max = T{}, std::array<T, 2> dead_zone = {T{}, T{}})
+    std::optional<fgc4::utils::Warning>
+    set_limit_parameters(LimitRange<T>& limit, T min = T{}, T max = T{}, std::array<T, 2> dead_zone = {T{}, T{}})
     {
         StaticJson min_val = min;
         limit.min.setJsonValue(min_val);
@@ -39,7 +40,8 @@ class LimitRangeTest : public ::testing::Test
         limit.dead_zone.setJsonValue(dead_zone_val);
 
         limit.flipBufferState();
-        limit.verifyParameters();
+
+        return limit.verifyParameters();
     }
 };
 
@@ -137,6 +139,39 @@ TEST_F(LimitRangeTest, LimitRangeDoubleDefault)
     EXPECT_EQ(serialized["parameters"][1]["type"], "Float64");
     EXPECT_EQ(serialized["parameters"][2]["name"], "dead_zone");
     EXPECT_EQ(serialized["parameters"][2]["type"], "ArrayFloat64");
+}
+
+// ************************************************************
+// Tests that the expected warnings are raised during validation of incorrect inputs
+
+//! Tests that appropriate warning is raised if an attempt is made to set min value larger than max
+TEST_F(LimitRangeTest, LimitRangeMinAboveMaxWarning)
+{
+    std::string        name = "limit";
+    LimitRange<double> limit(name);
+
+    const int min     = -10;
+    const int max     = min;
+    auto      warning = set_limit_parameters<double>(limit, min, max);
+
+    ASSERT_TRUE(warning.has_value());
+    EXPECT_EQ(warning.value().warning_str, "Attempted to set the lower limit below the upper limit.\n");
+}
+
+//! Tests that appropriate warning is raised if an attempt is made to set min value larger than max
+TEST_F(LimitRangeTest, LimitRangeDeadZoneWarning)
+{
+    std::string     name = "limit";
+    LimitRange<int> limit(name);
+
+    const int          min = -10;
+    const int          max = 10;
+    std::array<int, 2> dead_zone{4, 3};
+
+    auto warning = set_limit_parameters<int>(limit, min, max, dead_zone);
+
+    ASSERT_TRUE(warning.has_value());
+    EXPECT_EQ(warning.value().warning_str, "Upper edge of the dead_zone is below the lower edge.\n");
 }
 
 // ************************************************************
