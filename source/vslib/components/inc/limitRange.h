@@ -12,7 +12,7 @@
 
 namespace vslib
 {
-    template<typename T>
+    template<fgc4::utils::NumericScalar T>
     class LimitRange : public Component
     {
       public:

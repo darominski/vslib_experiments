@@ -12,7 +12,7 @@
 
 namespace vslib
 {
-    template<typename T, size_t TimeWindowLength = 16>
+    template<fgc4::utils::NumericScalar T, size_t TimeWindowLength = 16>
     class LimitIntegral : public Component
     {
       public:
