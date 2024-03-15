@@ -281,11 +281,8 @@ namespace vslib
                 // since parameter value has been updated sucessfully, the parent component needs to be marked as
                 // modified
                 m_parent.setParametersModified(true);
-                // flip initialized flag if it has not been initialized before
-                if (!m_initialized)
-                {
-                    m_initialized = true;
-                }
+                // set the initialized flag
+                m_initialized = true;
             }
             return maybe_warning;
         }
