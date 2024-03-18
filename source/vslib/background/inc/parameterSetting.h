@@ -35,7 +35,7 @@ namespace vslib
         bool validateJsonCommand(const fgc4::utils::StaticJson&);
         void executeJsonCommand(const fgc4::utils::StaticJson&);
 
-        void validateModifiedComponents();
+        void validateComponents();
 
       private:
         nlohmann::json_schema::json_validator                              m_validator;

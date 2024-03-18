@@ -396,15 +396,15 @@ TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedComponents)
     nlohmann::json single_command = value;
     component_1.parameter.setJsonValue(single_command);
 
-    EXPECT_TRUE(component_1.parametersModified());
-    EXPECT_FALSE(component_2.parametersModified());   // unrelated component should not be flagged as modified
+    EXPECT_TRUE(component_1.parametersInitialized());
+    EXPECT_FALSE(component_2.parametersInitialized());   // unrelated component should not be flagged as modified
 
-    parameter_setting.validateModifiedComponents();
+    parameter_setting.validateComponents();
 
     EXPECT_EQ(component_1.parameter, value);
     EXPECT_NE(component_2.parameter, value);
-    EXPECT_FALSE(component_1.parametersModified());
-    EXPECT_FALSE(component_2.parametersModified());
+    EXPECT_TRUE(component_1.parametersInitialized());
+    EXPECT_FALSE(component_2.parametersInitialized());
 }
 
 //! Checks that a ParameterSetting validates modified hierarchical components correctly
@@ -431,15 +431,15 @@ TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedHierarchicalComp
     component_2.parameter.setJsonValue(single_command);
 
     // both comoponents should be flagged as modified along the hierarchy
-    EXPECT_TRUE(component_1.parametersModified());
-    EXPECT_TRUE(component_2.parametersModified());
+    EXPECT_FALSE(component_1.parametersInitialized());
+    EXPECT_TRUE(component_2.parametersInitialized());
 
-    parameter_setting.validateModifiedComponents();
+    parameter_setting.validateComponents();
 
     EXPECT_NE(component_1.parameter, value);   // not expected to be modified
     EXPECT_EQ(component_2.parameter, value);
-    EXPECT_FALSE(component_1.parametersModified());
-    EXPECT_FALSE(component_2.parametersModified());
+    EXPECT_FALSE(component_1.parametersInitialized());
+    EXPECT_TRUE(component_2.parametersInitialized());
 }
 
 //! Checks that a ParameterSetting validates modified components correctly
@@ -465,15 +465,15 @@ TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedComponents)
     nlohmann::json single_command = value;
     component_1.parameter.setJsonValue(single_command);
 
-    EXPECT_TRUE(component_1.parametersModified());
-    EXPECT_FALSE(component_2.parametersModified());   // unrelated component should not be flagged as modified
+    EXPECT_TRUE(component_1.parametersInitialized());
+    EXPECT_FALSE(component_2.parametersInitialized());   // unrelated component should not be flagged as modified
 
-    parameter_setting.validateModifiedComponents();
+    parameter_setting.validateComponents();
 
     EXPECT_NE(component_1.parameter, value);
     EXPECT_NE(component_2.parameter, value);
-    EXPECT_FALSE(component_1.parametersModified());
-    EXPECT_FALSE(component_2.parametersModified());
+    EXPECT_TRUE(component_1.parametersInitialized());
+    EXPECT_FALSE(component_2.parametersInitialized());
 
     // ensures that despite incorrect input, the value has not been modified after flipping the buffer:
     component_1.flipBufferState();
@@ -503,15 +503,16 @@ TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedHierarchicalCo
     nlohmann::json single_command = value;
     component_2.parameter.setJsonValue(single_command);
 
-    EXPECT_TRUE(component_1.parametersModified());
-    EXPECT_TRUE(component_2.parametersModified());
+    EXPECT_FALSE(component_1.parametersInitialized());
+    EXPECT_TRUE(component_2.parametersInitialized());
 
-    parameter_setting.validateModifiedComponents();
+    parameter_setting.validateComponents();
+
+    EXPECT_FALSE(component_1.parametersInitialized());
+    EXPECT_TRUE(component_2.parametersInitialized());
 
     EXPECT_NE(component_1.parameter, value);
     EXPECT_NE(component_2.parameter, value);
-    EXPECT_FALSE(component_1.parametersModified());
-    EXPECT_FALSE(component_2.parametersModified());
 
     // ensures that despite incorrect input, the value has not been modified after flipping the buffer:
     component_1.flipBufferState();

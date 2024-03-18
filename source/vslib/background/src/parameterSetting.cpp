@@ -29,9 +29,8 @@ namespace vslib
             // execute the command from the incoming stream, synchronises write and background buffers
             processJsonCommands(json_object);
 
-            // after the processing, validate all touched Components
-            validateModifiedComponents();
-            // else: message already logged, buffers will not be synchronised and state not flipped
+            // after the processing, validate all Components
+            validateComponents();
         }
     }
 
@@ -136,16 +135,16 @@ namespace vslib
         }
     }
 
-    //! Calls verifyParameters of all modified components in the registry
+    //! Calls verifyParameters of all components with initialized Parameters in the registry
     //!
     //! @return Optionally returns a Warning if validation has failed.
-    void ParameterSetting::validateModifiedComponents()
+    void ParameterSetting::validateComponents()
     {
         auto const& component_registry = ComponentRegistry::instance().getComponents();
         for (const auto& entry : component_registry)
         {
             auto& component = entry.second.get();
-            if (component.parametersModified())
+            if (component.parametersInitialized())
             {
                 const auto& warning = component.verifyParameters();
                 if (!warning.has_value())
@@ -154,7 +153,6 @@ namespace vslib
                 }
                 // if there is an issue: it is logged, the component's buffer is not flipped
                 component.synchroniseParameterBuffers();
-                component.setParametersModified(false);
             }
         }
     }
