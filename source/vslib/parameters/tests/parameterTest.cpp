@@ -46,8 +46,8 @@ TEST_F(ParameterTest, BoolParameterDefinition)
     const std::string parameter_name = "bool";
     Parameter<bool>   parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 }
 
 //! Checks that integer Parameter can be registered to a component
@@ -57,8 +57,8 @@ TEST_F(ParameterTest, IntParameterDefinition)
     const std::string parameter_name = "int";
     Parameter<int>    parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 }
 
 //! Checks that float Parameter can be registered to a component
@@ -68,8 +68,8 @@ TEST_F(ParameterTest, FloatParameterDefinition)
     const std::string parameter_name = "float";
     Parameter<float>  parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 }
 
 //! Checks that std::string Parameter can be registered to a component
@@ -79,8 +79,8 @@ TEST_F(ParameterTest, StringParameterDefinition)
     const std::string      parameter_name = "string";
     Parameter<std::string> parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 }
 //! Checks that enum Parameter can be registered to a component
 TEST_F(ParameterTest, EnumParameterDefinition)
@@ -94,8 +94,8 @@ TEST_F(ParameterTest, EnumParameterDefinition)
     };
     Parameter<TestEnum> parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 }
 
 //! Checks that double Parameter with limits can be attached to a component
@@ -105,8 +105,8 @@ TEST_F(ParameterTest, DoubleParameterWithLimits)
     const std::string parameter_name = "double";
     Parameter<double> parameter(component, parameter_name, -10, 10);
     EXPECT_EQ(parameter.getName(), parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
     EXPECT_TRUE((std::is_same_v<decltype(parameter.getLimitMin()), const double&>));
     EXPECT_TRUE((std::is_same_v<decltype(parameter.getLimitMax()), const double&>));
     EXPECT_EQ(parameter.getLimitMin(), -10);
@@ -120,8 +120,8 @@ TEST_F(ParameterTest, IntArrayParameterWithLimits)
     const std::string                  parameter_name = "array_int";
     Parameter<std::array<uint64_t, 5>> parameter(component, parameter_name, -1, 1);
     EXPECT_EQ(parameter.getName(), parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
     EXPECT_TRUE((std::is_same_v<decltype(parameter.getLimitMin()), const uint64_t&>));
     EXPECT_TRUE((std::is_same_v<decltype(parameter.getLimitMax()), const uint64_t&>));
     EXPECT_EQ(parameter.getLimitMin(), -1);
@@ -135,8 +135,8 @@ TEST_F(ParameterTest, StringArrayParameter)
     const std::string                     parameter_name = "array_string";
     Parameter<std::array<std::string, 5>> parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 }
 
 // ************************************************************
@@ -148,8 +148,8 @@ TEST_F(ParameterTest, BoolParameterSetValue)
     MockComponent     component;   // component to attach parameters to
     const std::string parameter_name = "bool";
     Parameter<bool>   parameter(component, parameter_name, -5, 10);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 
     bool           new_value = true;
     nlohmann::json command   = {{"value", new_value}};
@@ -158,8 +158,8 @@ TEST_F(ParameterTest, BoolParameterSetValue)
     component.flipBufferState();
 
     EXPECT_EQ(parameter.value(), new_value);
-    EXPECT_EQ(parameter.isInitialized(), true);
-    EXPECT_EQ(component.parametersModified(), true);
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
 }
 
 // Tests setting value to int Parameter from a JSON command
@@ -168,7 +168,8 @@ TEST_F(ParameterTest, IntParameterSetValue)
     MockComponent     component;   // component to attach parameters to
     const std::string parameter_name = "int";
     Parameter<int>    parameter(component, parameter_name, -5, 10);
-    EXPECT_EQ(parameter.isInitialized(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 
     int            new_value = 2;
     nlohmann::json command   = {{"value", new_value}};
@@ -177,7 +178,8 @@ TEST_F(ParameterTest, IntParameterSetValue)
     component.flipBufferState();
 
     EXPECT_EQ(parameter.value(), new_value);
-    EXPECT_EQ(parameter.isInitialized(), true);
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
 }
 
 //! Tests setting value to double Parameter from a JSON command
@@ -186,8 +188,8 @@ TEST_F(ParameterTest, DoubleParameterSetValue)
     MockComponent     component;   // component to attach parameters to
     const std::string parameter_name = "double";
     Parameter<double> parameter(component, parameter_name, -1, 5);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 
     double         new_value = 3.14159;
     nlohmann::json command   = {{"value", new_value}};
@@ -198,8 +200,8 @@ TEST_F(ParameterTest, DoubleParameterSetValue)
     EXPECT_EQ(parameter.value(), new_value);
     EXPECT_EQ(parameter, new_value);               // tests implicit conversion operator
     EXPECT_EQ(parameter + 1.1, new_value + 1.1);   // tests access to parameter as if it was double
-    EXPECT_EQ(parameter.isInitialized(), true);
-    EXPECT_EQ(component.parametersModified(), true);
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
 }
 
 //! Tests setting value to std::string Parameter from a JSON command
@@ -208,8 +210,8 @@ TEST_F(ParameterTest, StringParameterSetValue)
     MockComponent          component;   // component to attach parameters to
     const std::string      parameter_name = "string";
     Parameter<std::string> parameter(component, parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 
     std::string    new_value = "text";
     nlohmann::json command   = {{"value", new_value}};
@@ -218,8 +220,8 @@ TEST_F(ParameterTest, StringParameterSetValue)
     component.flipBufferState();
 
     EXPECT_EQ(parameter.value(), new_value);
-    EXPECT_EQ(parameter.isInitialized(), true);
-    EXPECT_EQ(component.parametersModified(), true);
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
 }
 
 //! Tests setting value to enum Parameter from a JSON command
@@ -234,8 +236,8 @@ TEST_F(ParameterTest, EnumParameterSetValue)
         field3
     };
     Parameter<TestEnum> parameter(component, parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 
     std::string    new_value = "field2";   // enums are serialized as strings
     nlohmann::json command   = {{"value", new_value}};
@@ -244,8 +246,8 @@ TEST_F(ParameterTest, EnumParameterSetValue)
     component.flipBufferState();
 
     EXPECT_EQ(parameter.value(), TestEnum::field2);   // tests explicit access
-    EXPECT_EQ(parameter.isInitialized(), true);
-    EXPECT_EQ(component.parametersModified(), true);
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
 }
 
 //! Tests setting value to array of double Parameter from a JSON command
@@ -254,8 +256,8 @@ TEST_F(ParameterTest, DoubleArrayParameterSetValue)
     MockComponent                    component;   // component to attach parameters to
     const std::string                parameter_name = "double_array";
     Parameter<std::array<double, 3>> parameter(component, parameter_name, -5, 5);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 
     std::array<double, 3> new_value = {0.1, 1.2, 2.3};
     nlohmann::json        command   = {{"value", new_value}};
@@ -271,8 +273,8 @@ TEST_F(ParameterTest, DoubleArrayParameterSetValue)
     }
     // tests overloaded operator[]
     EXPECT_EQ(parameter[2], new_value[2]);
-    EXPECT_EQ(parameter.isInitialized(), true);
-    EXPECT_EQ(component.parametersModified(), true);
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
 }
 
 // ************************************************************
@@ -284,8 +286,8 @@ TEST_F(ParameterTest, DoubleParameterSetInvalidValue)
     MockComponent     component;   // component to attach parameters to
     const std::string parameter_name = "double";
     Parameter<double> parameter(component, parameter_name, -1, 5);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 
     double         new_value = 10;   // out of limits
     nlohmann::json command   = {{"value", new_value}};
@@ -295,8 +297,8 @@ TEST_F(ParameterTest, DoubleParameterSetInvalidValue)
     component.flipBufferState();
 
     EXPECT_NE(parameter.value(), new_value);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
 }
 
 //! Tests setting value to enum Parameter from a JSON command
@@ -310,8 +312,8 @@ TEST_F(ParameterTest, EnumParameterSetInvalidValue)
         field2
     };
     Parameter<TestEnum> parameter(component, parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 
     std::string    new_value = "field5";   // enums are serialized as strings
     nlohmann::json command   = {{"value", new_value}};
@@ -320,8 +322,8 @@ TEST_F(ParameterTest, EnumParameterSetInvalidValue)
     EXPECT_EQ(
         fmt::format("{}", output.value()), "Warning: The provided enum value is not one of the allowed values.\n"
     );
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
 }
 
 //! Tests setting out-of-limits value to array of double Parameter from a JSON command
@@ -330,8 +332,8 @@ TEST_F(ParameterTest, DoubleArrayParameterSetInvalidValue)
     MockComponent                    component;   // component to attach parameters to
     const std::string                parameter_name = "double_array";
     Parameter<std::array<double, 3>> parameter(component, parameter_name, -1, 1);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 
     std::array<double, 3> new_value = {0.1, 1.2, 2.3};
     nlohmann::json        command   = {{"value", new_value}};
@@ -347,8 +349,8 @@ TEST_F(ParameterTest, DoubleArrayParameterSetInvalidValue)
     }
     // tests overloaded operator[]
     EXPECT_NE(parameter[2], new_value[2]);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
 }
 
 //! Tests setting wrong type value to double Parameter from a JSON command
@@ -357,16 +359,16 @@ TEST_F(ParameterTest, ParameterSetInvalidTypeValue)
     MockComponent     component;   // component to attach parameters to
     const std::string parameter_name = "double";
     Parameter<double> parameter(component, parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 
     std::string    new_value = "invalid";
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), true);   // there is a warning message
     EXPECT_EQ(output.value().warning_str, "[json.exception.type_error.302] type must be number, but is string.\n");
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
 }
 
 // ************************************************************
@@ -377,8 +379,8 @@ TEST_F(ParameterTest, IntArrayParameterOutOfBounds)
     MockComponent                 component;   // component to attach parameters to
     const std::string             parameter_name = "int_array";
     Parameter<std::array<int, 5>> parameter(component, parameter_name);
-    EXPECT_EQ(parameter.isInitialized(), false);
-    EXPECT_EQ(component.parametersModified(), false);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 
     // tests the correct exception is thrown from the overloaded operator[]
     ASSERT_THROW(parameter[6], std::out_of_range);

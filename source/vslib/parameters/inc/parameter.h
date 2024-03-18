@@ -170,7 +170,7 @@ namespace vslib
         //! Getter for the initialization flag of the Parameter
         //!
         //! @return True if the Parameter has been initialized, false otherwise
-        [[nodiscard]] bool isInitialized() const noexcept
+        [[nodiscard]] bool isInitialized() const noexcept override
         {
             return m_initialized;
         }
@@ -178,7 +178,7 @@ namespace vslib
         //! Getter for the Parameter name
         //!
         //! @return Parameter name
-        [[nodiscard]] std::string_view getName() const noexcept
+        [[nodiscard]] std::string_view getName() const noexcept override
         {
             return m_name;
         }
@@ -278,9 +278,6 @@ namespace vslib
             auto const& maybe_warning = setJsonValueImpl(json_value);
             if (!maybe_warning.has_value())
             {
-                // since parameter value has been updated sucessfully, the parent component needs to be marked as
-                // modified
-                m_parent.setParametersModified(true);
                 // set the initialized flag
                 m_initialized = true;
             }

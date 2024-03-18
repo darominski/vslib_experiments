@@ -336,7 +336,7 @@ TEST_F(ParameterSettingTest, ParameterMapExecuteCorrectCommand)
 
     test.flipBufferState();
     EXPECT_EQ(test.parameter, value);
-    EXPECT_TRUE(test.parametersModified());
+    EXPECT_TRUE(test.parametersInitialized());
 }
 
 //! Checks that a ParameterSetting catches an invalid json command correctly
@@ -370,7 +370,7 @@ TEST_F(ParameterSettingTest, ParameterMapExecuteIncorrectCommand)
 
     test.flipBufferState();
     EXPECT_NE(test.parameter, value);
-    EXPECT_FALSE(test.parametersModified());
+    EXPECT_FALSE(test.parametersInitialized());
 }
 
 //! Checks that a ParameterSetting validates modified components correctly

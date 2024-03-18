@@ -143,14 +143,6 @@ namespace vslib
         //! Returns the value of the flag informing whether the parameters of this Component have been recently modified
         //!
         //! @return True if any parameter of this Component has been recently modified, false otherwise
-        [[nodiscard]] bool parametersModified() const noexcept
-        {
-            return m_parameters_modified;
-        }
-
-        //! Returns the value of the flag informing whether the parameters of this Component have been recently modified
-        //!
-        //! @return True if any parameter of this Component has been recently modified, false otherwise
         [[nodiscard]] bool parametersInitialized() const noexcept
         {
             for (const auto& parameter : m_parameters)
@@ -162,25 +154,6 @@ namespace vslib
                 }
             }
             return true;
-        }
-
-        // ************************************************************
-        // Setters
-
-        //! Sets the value of flag with information whether parameters belonging to this Component have been recently
-        //! modified
-        //!
-        //! @param modified_status New status of whether the parameters of this Component have been modified
-        void setParametersModified(bool modified_status) noexcept
-        {
-            if (modified_status && m_parent != nullptr)
-            {
-                // only setting upwards to the parent if modified_status is true, to avoid setting the chain to false
-                // while going through the validation workflow
-                m_parent->setParametersModified(true);
-                // do all children also need to be flagged as modified?
-            }
-            m_parameters_modified = modified_status;
         }
 
         // ************************************************************
@@ -215,8 +188,6 @@ namespace vslib
 
         ParameterList m_parameters;
         ChildrenList  m_children;
-
-        bool m_parameters_modified{false};
 
         unsigned short m_buffer_switch{0};
 
