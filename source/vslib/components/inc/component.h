@@ -148,6 +148,22 @@ namespace vslib
             return m_parameters_modified;
         }
 
+        //! Returns the value of the flag informing whether the parameters of this Component have been recently modified
+        //!
+        //! @return True if any parameter of this Component has been recently modified, false otherwise
+        [[nodiscard]] bool parametersInitialized() const noexcept
+        {
+            for (const auto& parameter : m_parameters)
+            {
+                if (!parameter.second.get().isInitialized())
+                {
+                    return false;
+                    break;
+                }
+            }
+            return true;
+        }
+
         // ************************************************************
         // Setters
 
