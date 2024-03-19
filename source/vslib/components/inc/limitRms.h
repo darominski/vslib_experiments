@@ -29,6 +29,11 @@ namespace vslib
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
         std::optional<fgc4::utils::Warning> limit(double input) noexcept
         {
+            if (std::isnan(input))
+            {
+                return fgc4::utils::Warning(fmt::format("Value is a NaN.\n"));
+            }
+
             m_cumulative
                 += (pow(input, 2) - m_cumulative) * m_filter_factor;   // calculation re-implemented from regLimRmsRT
 
