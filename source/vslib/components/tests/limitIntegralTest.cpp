@@ -228,3 +228,37 @@ TEST_F(LimitIntegralTest, LimitIntegralIntWrapAround)
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 71 leads to overflow of the integral limit of 100.\n");
 }
+
+//! Tests catching excessive infinite value
+TEST_F(LimitIntegralTest, LimitIntegralInfDouble)
+{
+    std::string           name = "limit";
+    LimitIntegral<double> limit(name, nullptr);
+
+    double integral_limit     = 100;
+    size_t time_window_length = 5;
+
+    set_limit_parameters<double>(limit, integral_limit, time_window_length);
+
+    double     input   = std::numeric_limits<double>::infinity();
+    const auto warning = limit.limit(input);
+    ASSERT_TRUE(warning.has_value());
+    EXPECT_EQ(warning.value().warning_str, "Value: inf leads to overflow of the integral limit of 100.\n");
+}
+
+//! Tests catching excessive infinite value
+TEST_F(LimitIntegralTest, LimitIntegralNaNDouble)
+{
+    std::string           name = "limit";
+    LimitIntegral<double> limit(name, nullptr);
+
+    double integral_limit     = 100;
+    size_t time_window_length = 5;
+
+    set_limit_parameters<double>(limit, integral_limit, time_window_length);
+
+    double     input   = std::numeric_limits<double>::quiet_NaN();
+    const auto warning = limit.limit(input);
+    ASSERT_TRUE(warning.has_value());
+    EXPECT_EQ(warning.value().warning_str, "Value is NaN.\n");
+}

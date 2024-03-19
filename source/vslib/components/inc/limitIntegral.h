@@ -29,6 +29,14 @@ namespace vslib
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
         std::optional<fgc4::utils::Warning> limit(T input) noexcept
         {
+            if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
+            {
+                if (std::isnan(input))
+                {
+                    return fgc4::utils::Warning("Value is NaN.\n");
+                }
+            }
+
             m_cumulative += (input - m_integral_buffer[m_head]);
 
             m_integral_buffer[m_head] = input;
