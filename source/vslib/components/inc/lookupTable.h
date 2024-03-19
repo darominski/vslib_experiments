@@ -65,7 +65,7 @@ namespace vslib
             {
                 fgc4::utils::Warning(fmt::format(
                     "Interpolation error: provided input value: {} outside of provided look-up table bounds of: [{}, "
-                    "{}]",
+                    "{}].\n",
                     input_x, m_values[0].first, m_values[m_values.size() - 1].first
                 ));
                 return T{};
