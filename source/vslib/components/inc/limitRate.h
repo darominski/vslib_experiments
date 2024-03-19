@@ -60,7 +60,7 @@ namespace vslib
                 m_previous_value_set = true;
                 return {};
             }
-            const double rate = (input - m_previous_value) / time_difference;
+            const double rate = abs(input - m_previous_value) / time_difference;
             if (rate > change_rate)
             {
                 auto const& warning_msg = fgc4::utils::Warning(fmt::format(
