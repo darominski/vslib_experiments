@@ -64,7 +64,7 @@ TEST_F(LookupTableTest, LookupTableDoubleDefault)
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
-//! Tests setting up LookupTable component with a meaningful integer table and then interpolating with trivial case of
+//! Tests LookupTable component with a meaningful integer table and then interpolating with trivial case of
 //! hitting the provided points
 TEST_F(LookupTableTest, LookupTableIntInterpolateProvidedData)
 {
@@ -81,7 +81,7 @@ TEST_F(LookupTableTest, LookupTableIntInterpolateProvidedData)
     EXPECT_EQ(table.interpolate(0), 0);
 }
 
-//! Tests setting up LookupTable component with a meaningful integer table and then interpolating with trivial case of
+//! Tests LookupTable component with a meaningful integer table and then interpolating with trivial case of
 //! hitting the provided points
 TEST_F(LookupTableTest, LookupTableIntInterpolateProvidedDataNegativeAxis)
 {
@@ -98,7 +98,7 @@ TEST_F(LookupTableTest, LookupTableIntInterpolateProvidedDataNegativeAxis)
     EXPECT_EQ(table.interpolate(0), 0);
 }
 
-//! Tests setting up LookupTable component with a meaningful double table and then interpolating with trivial case of
+//! Tests LookupTable component with a meaningful double table and then interpolating with trivial case of
 //! hitting the provided points
 TEST_F(LookupTableTest, LookupTableDoubleProvidedData)
 {
@@ -115,7 +115,7 @@ TEST_F(LookupTableTest, LookupTableDoubleProvidedData)
     EXPECT_EQ(table.interpolate(0.0), 0.3);
 }
 
-//! Tests setting up LookupTable component with a meaningful double table and then interpolating with trivial case of
+//! Tests LookupTable component with a meaningful double table and then interpolating with trivial case of
 //! hitting the provided points
 TEST_F(LookupTableTest, LookupTableDoubleProvidedDataNegativeAxis)
 {
@@ -133,19 +133,13 @@ TEST_F(LookupTableTest, LookupTableDoubleProvidedDataNegativeAxis)
     EXPECT_EQ(table.interpolate(-3.0), 3.3);
 }
 
-//! Tests that LookupTable raises the expected warning with a meaningful integer table and then interpolating with
-//! trivial case of hitting the provided points
-TEST_F(LookupTableTest, LookupTableIntInterpolateProvidedDataNegativeAxis)
+//! Tests LookupTable raises the expected warning when the input is outside the
+//! bounds of the input table
+TEST_F(LookupTableTest, LookupTableIntInterpolateProvidedDataOutOfLimits)
 {
     std::string                      name = "table";
     std::vector<std::pair<int, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     LookupTable<int>                 table(name, nullptr, std::move(values));
 
-    EXPECT_EQ(table.interpolate(0), 0);
-    EXPECT_EQ(table.interpolate(-1), 1);
-    EXPECT_EQ(table.interpolate(-2), 2);
-    // and check that nothing goes wrong if we do the same in reverse order:
-    EXPECT_EQ(table.interpolate(-2), 2);
-    EXPECT_EQ(table.interpolate(-1), 1);
-    EXPECT_EQ(table.interpolate(0), 0);
+    EXPECT_EQ(table.interpolate(1), int());
 }
