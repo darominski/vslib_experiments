@@ -24,5 +24,6 @@ namespace vslib
         virtual std::optional<fgc4::utils::Warning> setJsonValue(const fgc4::utils::StaticJson&)         = 0;
         virtual fgc4::utils::StaticJson             serialize(const ParameterSerializer&) const noexcept = 0;
         virtual void                                syncInactiveBuffer()                                 = 0;
+        virtual void                                swapBuffers()                                        = 0;
     };
 }   // namespace vslib

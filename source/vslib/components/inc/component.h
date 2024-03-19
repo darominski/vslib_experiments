@@ -98,14 +98,6 @@ namespace vslib
         // ************************************************************
         // Getters
 
-        //! Returns the buffer switch state
-        //!
-        //! @return Buffer switch state, either 0 or 1
-        [[nodiscard]] unsigned short getBufferState() const noexcept
-        {
-            return m_buffer_switch;
-        }
-
         //! Provides the name of this component
         //!
         //! @return String_view of the component name
@@ -159,10 +151,13 @@ namespace vslib
         // ************************************************************
         // Miscellaneous methods, interaction with buffers and verifying parameters
 
-        //! Flips the buffer switch state between 0 and 1
+        //! Flips the buffer state of all Parameters registered with this Component
         void flipBufferState() noexcept
         {
-            m_buffer_switch ^= 1;
+            for (auto& parameter : m_parameters)
+            {
+                parameter.second.get().swapBuffers();
+            }
         }
 
         //! Synchronises buffers for all Parameters registered with this Component
@@ -188,8 +183,6 @@ namespace vslib
 
         ParameterList m_parameters;
         ChildrenList  m_children;
-
-        unsigned short m_buffer_switch{0};
 
         //! Registers this component in the ComponentRegistry
         void registerComponent() noexcept
