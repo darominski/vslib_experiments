@@ -297,8 +297,8 @@ TEST_F(ParameterTest, DoubleParameterSetInvalidValue)
     component.flipBufferState();
 
     EXPECT_NE(parameter.value(), new_value);
-    EXPECT_TRUE(parameter.isInitialized());
-    EXPECT_TRUE(component.parametersInitialized());
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 }
 
 //! Tests setting value to enum Parameter from a JSON command
@@ -322,8 +322,9 @@ TEST_F(ParameterTest, EnumParameterSetInvalidValue)
     EXPECT_EQ(
         fmt::format("{}", output.value()), "Warning: The provided enum value is not one of the allowed values.\n"
     );
-    EXPECT_TRUE(parameter.isInitialized());
-    EXPECT_TRUE(component.parametersInitialized());
+
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 }
 
 //! Tests setting out-of-limits value to array of double Parameter from a JSON command
@@ -349,8 +350,8 @@ TEST_F(ParameterTest, DoubleArrayParameterSetInvalidValue)
     }
     // tests overloaded operator[]
     EXPECT_NE(parameter[2], new_value[2]);
-    EXPECT_TRUE(parameter.isInitialized());
-    EXPECT_TRUE(component.parametersInitialized());
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 }
 
 //! Tests setting wrong type value to double Parameter from a JSON command
@@ -367,8 +368,8 @@ TEST_F(ParameterTest, ParameterSetInvalidTypeValue)
     auto           output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), true);   // there is a warning message
     EXPECT_EQ(output.value().warning_str, "[json.exception.type_error.302] type must be number, but is string.\n");
-    EXPECT_TRUE(parameter.isInitialized());
-    EXPECT_TRUE(component.parametersInitialized());
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
 }
 
 // ************************************************************
