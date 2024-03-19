@@ -34,6 +34,14 @@ namespace vslib
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
         std::optional<fgc4::utils::Warning> limit(T input, double time_difference)
         {
+            if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
+            {
+                if (std::isnan(input))
+                {
+                    return fgc4::utils::Warning("Value is NaN.\n");
+                }
+            }
+
             if (time_difference == 0)
             {
                 return fgc4::utils::Warning("Time difference is equal to zero in rate limit calculation.\n");
@@ -41,6 +49,13 @@ namespace vslib
 
             if (!m_previous_value_set)   // avoids failure at first call to limit
             {
+                if constexpr ((std::is_same_v<T, float> || std::is_same_v<T, double>))
+                {
+                    if (std::isinf(input))
+                    {
+                        return fgc4::utils::Warning("Value is inf.\n");
+                    }
+                }
                 m_previous_value     = input;
                 m_previous_value_set = true;
                 return {};
