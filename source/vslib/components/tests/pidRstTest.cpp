@@ -59,7 +59,7 @@ class PIDRSTTest : public ::testing::Test
 
         pidRst.flipBufferState();
         pidRst.verifyParameters();
-        pidRst.f0.syncInactiveBuffer();
+        pidRst.synchroniseParameterBuffers();
     }
 };
 

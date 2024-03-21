@@ -165,7 +165,7 @@ namespace vslib
         {
             for (auto& parameter : m_parameters)
             {
-                parameter.second.get().syncInactiveBuffer();
+                parameter.second.get().syncWriteBuffer();
             }
         }
 

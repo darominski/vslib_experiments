@@ -158,10 +158,10 @@ namespace vslib
             return *m_read_buffer;
         }
 
-        //! Returns inactive buffer value.
+        //! Returns buffer the write buffer value to be validated.
         //!
-        //! @return Inactive buffer value with explict cast to the underlying type
-        [[nodiscard]] const T& inactiveValue() const noexcept
+        //! @return Write buffer value with explict cast to the underlying type
+        [[nodiscard]] const T& toValidate() const noexcept
         {
             return *m_write_buffer;
         }
@@ -286,8 +286,8 @@ namespace vslib
         // ************************************************************
         // Method for synchronizing buffers
 
-        //! Copies all contents of the currently used buffer to the inactive buffer to synchronise them.
-        void syncInactiveBuffer() override
+        //! Copies all contents of the write buffer to the read buffer to synchronise them.
+        void syncWriteBuffer() override
         {
             *m_write_buffer = *m_read_buffer;
         }

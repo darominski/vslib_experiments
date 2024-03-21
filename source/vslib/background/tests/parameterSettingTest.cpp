@@ -48,7 +48,7 @@ class MockComponent : public Component
     {
         if constexpr (fgc4::utils::Integral<T>)
         {
-            if (parameter.inactiveValue() % 2 != 0)
+            if (parameter.toValidate() % 2 != 0)
             {
                 return fgc4::utils::Warning("Parameter value must be even\n");
             }

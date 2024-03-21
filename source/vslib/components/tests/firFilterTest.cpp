@@ -33,7 +33,7 @@ class FIRFilterTest : public ::testing::Test
         StaticJson values = parameter_values;
         filter.coefficients.setJsonValue(values);
         filter.flipBufferState();
-        filter.coefficients.syncInactiveBuffer();
+        filter.coefficients.syncWriteBuffer();
     }
 };
 

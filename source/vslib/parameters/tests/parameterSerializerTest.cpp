@@ -192,8 +192,8 @@ TEST_F(ParameterTest, BoolParameterSerializationWithValue)
     nlohmann::json command   = {{"value", new_value}};
     auto           output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), false);
-    component.flipBufferState();      // switches between read and background buffer
-    parameter.syncInactiveBuffer();   // synchronises inactive buffer with active one
+    component.flipBufferState();   // switches between read and background buffer
+    parameter.syncWriteBuffer();   // synchronises inactive buffer with active one
 
     auto const& serialized_parameter = serializer.serialize(static_cast<std::reference_wrapper<IParameter>>(parameter));
     EXPECT_TRUE(serialized_parameter.is_object());
@@ -220,7 +220,7 @@ TEST_F(ParameterTest, DoubleArrayParameterSerializationWithValue)
     auto                  output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), false);
     component.flipBufferState();
-    parameter.syncInactiveBuffer();   // synchronises inactive buffer with active one
+    parameter.syncWriteBuffer();   // synchronises inactive buffer with active one
 
     auto const& serialized_parameter = serializer.serialize(static_cast<std::reference_wrapper<IParameter>>(parameter));
     EXPECT_TRUE(serialized_parameter.is_object());
@@ -257,7 +257,7 @@ TEST_F(ParameterTest, EnumParameterSerializationWithValue)
     auto           output    = parameter.setJsonValue(command["value"]);
     EXPECT_EQ(output.has_value(), false);
     component.flipBufferState();
-    parameter.syncInactiveBuffer();   // synchronises inactive buffer with active one
+    parameter.syncWriteBuffer();   // synchronises inactive buffer with active one
 
     EXPECT_EQ(parameter.value(), TestEnum::field2);   // tests explicit access
 

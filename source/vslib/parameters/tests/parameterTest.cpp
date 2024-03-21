@@ -403,7 +403,7 @@ TEST_F(ParameterTest, IntParameterSynchronizeBuffers)
     EXPECT_EQ(output.has_value(), false);
 
     component.flipBufferState();
-    parameter.syncInactiveBuffer();   // synchronises background buffer with read
+    parameter.syncWriteBuffer();   // synchronises background buffer with read
 
     EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
     EXPECT_EQ(parameter, new_value);           // tests overloaded operator()
@@ -422,7 +422,7 @@ TEST_F(ParameterTest, FloatParameterSynchronizeBuffers)
     EXPECT_EQ(output.has_value(), false);
 
     component.flipBufferState();
-    parameter.syncInactiveBuffer();
+    parameter.syncWriteBuffer();
 
     EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
     EXPECT_EQ(parameter, new_value);           // tests overloaded operator()
@@ -441,7 +441,7 @@ TEST_F(ParameterTest, StringParameterSynchronizeBuffers)
     EXPECT_EQ(output.has_value(), false);
 
     component.flipBufferState();
-    parameter.syncInactiveBuffer();
+    parameter.syncWriteBuffer();
 
     EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
 }
@@ -459,7 +459,7 @@ TEST_F(ParameterTest, DoubleArrayParameterSynchronizeBuffers)
     EXPECT_EQ(output.has_value(), false);
 
     component.flipBufferState();
-    parameter.syncInactiveBuffer();
+    parameter.syncWriteBuffer();
 
     size_t counter = 0;
     // implicitly tests begin() and end() methods of Parameter
@@ -484,7 +484,7 @@ TEST_F(ParameterTest, StringArrayParameterSynchronizeBuffers)
     EXPECT_EQ(output.has_value(), false);
 
     component.flipBufferState();
-    parameter.syncInactiveBuffer();
+    parameter.syncWriteBuffer();
 
     size_t counter = 0;
     // implicitly tests begin() and end() methods of Parameter
@@ -515,7 +515,7 @@ TEST_F(ParameterTest, EnumParameterSynchronizeBuffers)
     EXPECT_EQ(output.has_value(), false);
 
     component.flipBufferState();
-    parameter.syncInactiveBuffer();
+    parameter.syncWriteBuffer();
 
     EXPECT_EQ(parameter.value(), TestEnum::field2);   // tests explicit access
 }
@@ -535,7 +535,7 @@ TEST_F(ParameterTest, FloatParameterSendManyCommands)
         EXPECT_EQ(output.has_value(), false);
 
         component.flipBufferState();
-        parameter.syncInactiveBuffer();
+        parameter.syncWriteBuffer();
 
         EXPECT_EQ(parameter.value(), new_value);   // tests explicit access
         EXPECT_EQ(parameter, new_value);           // tests implicit access
@@ -563,8 +563,8 @@ TEST_F(ParameterTest, DoubleParameterValueOperations)
     EXPECT_EQ(output_rhs.has_value(), false);
 
     component.flipBufferState();
-    lhs.syncInactiveBuffer();   // synchronises background buffer with read
-    rhs.syncInactiveBuffer();
+    lhs.syncWriteBuffer();   // synchronises background buffer with read
+    rhs.syncWriteBuffer();
 
     ASSERT_EQ(lhs.value(), new_lhs);
     ASSERT_EQ(rhs.value(), new_rhs);

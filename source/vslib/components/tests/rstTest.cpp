@@ -40,9 +40,7 @@ class RSTTest : public ::testing::Test
         rst.t.setJsonValue(t_value);
 
         rst.flipBufferState();
-        rst.r.syncInactiveBuffer();
-        rst.s.syncInactiveBuffer();
-        rst.t.syncInactiveBuffer();
+        rst.synchroniseParameterBuffers();
     }
 };
 

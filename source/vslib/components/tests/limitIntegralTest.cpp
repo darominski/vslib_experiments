@@ -37,6 +37,7 @@ class LimitIntegralTest : public ::testing::Test
 
         limit.flipBufferState();
         limit.verifyParameters();
+        limit.synchroniseParameterBuffers();
     }
 };
 
