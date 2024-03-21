@@ -40,34 +40,34 @@ using namespace fgc4;
 
 namespace user
 {
-    constexpr size_t length = 16;
+    // constexpr size_t length = 5;
     // vslib::RST<length> rst("rst");
-    // vslib::FIRFilter<length> filter("fir");
-    std::vector<std::pair<double, double>> func{
-        std::make_pair(0.0, 0.0), std::make_pair(1, 0.5), std::make_pair(2, 1.0), std::make_pair(3, 1.5),
-        std::make_pair(4, 2.0),   std::make_pair(5, 2.5), std::make_pair(6, 3.0), std::make_pair(7, 3.5),
-        std::make_pair(8, 4.0),   std::make_pair(9, 4.5), std::make_pair(10, 5.0)};
+    // vslib::FIRFilter<length>               filter("fir");
 
-    LookupTable<double> table("table", nullptr, func);
+    std::vector<std::pair<double, double>> function()
+    {
+        constexpr size_t                       length = 1000;
+        std::vector<std::pair<double, double>> func(length);
+        // func.reserve(length);
+        for (size_t index = 0; index < length; index++)
+        {
+            func[index] = std::make_pair(index / 10.0, index * 1.1 / 10);
+        }
+        return func;
+    }
+    LookupTable<double> table("table", nullptr, function());
 
     void realTimeTask()
     {
         for (int index = 0; index < 100; index++)
         {
-            volatile double const input    = std::rand() / 4e8;
+            // volatile double const input    = std::rand() / 1e6;
+            volatile double const input    = index;
             volatile auto         variable = table.interpolate(input);
-            // volatile auto variable = filter.filter(input);
+            // volatile auto variable = filter.filter(std::rand());
             // volatile auto variable = rst.control(input, input + 2);
         }
     }
-
-    // static int peripheral_counter = 0;
-    // void       peripheralTask()
-    // {
-    //     printf("%dth event\n", ++peripheral_counter);
-
-    //     usleep(5);   // 5 us
-    // }
 
 }   // namespace user
 
@@ -90,6 +90,7 @@ int main()
     ParameterMap parameter_map(
         (uint8_t*)write_parameter_map_queue_address, fgc4::utils::constants::json_memory_pool_size
     );
+
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
@@ -114,27 +115,7 @@ int main()
     // No parameter declarations beyond this point!
     // ************************************************************
 
-    // auto parameter_map = fgc4::utils::StaticJsonFactory::getJsonObject();
-    // parameter_map      = (ComponentRegistry::instance().createParameterMap()).dump();
 
-    // std::array<double, user::length> r;
-    // std::array<double, user::length> s;
-    // std::array<double, user::length> t;
-
-    // std::iota(std::begin(r), std::end(r), 0);
-    // std::iota(std::begin(s), std::end(s), 0);
-    // std::iota(std::begin(t), std::end(t), 0);
-
-    // nlohmann::json value = {{"value", r}};
-    // user::rst.r.setJsonValue(value);
-    // value = {{"value", s}};
-    // user::rst.s.setJsonValue(value);
-    // value = {{"value", t}};
-    // user::rst.t.setJsonValue(value);
-    // BufferSwitch::flipState();
-
-    // write_queue.write({parameter_map, parameter_map.size()}, {});
-    // std::cout << "Uploading parameter map\n";
     parameter_map.uploadParameterMap();
     // 1 us  -> 1 kHz
     // 50 us -> 20 kHz
@@ -147,11 +128,10 @@ int main()
 
     timer.delay.setJsonValue(value[0]);
     timer.flipBufferState();
-    timer.delay.syncInactiveBuffer();
+    timer.delay.syncWriteBuffer();
     timer.verifyParameters();
 
     timer.start();
-    // user::realTimeTask();
 
     int           counter        = 0;
     int           expected_delay = 210;
@@ -203,17 +183,6 @@ int main()
         // std::cout << counter << std::endl;
         __asm volatile("wfi");
         counter++;
-        // puts(std::to_string(counter++).c_str());
-        //         // TEST CODE, verbose parameters signalling on thread 1
-        // puts("PID1: ");
-        // std::cout << std::string("Kp: ") + std::to_string(pid1.kp) << "\n";
-        // puts(std::to_string(pid1.ki).c_str());
-        //         // puts("PID3: ");
-        // puts(std::to_string(pid1.kp).c_str());
-        // puts(std::to_string(pid1.ki).c_str());
-        // puts(std::to_string(pid1.kd).c_str());
-        //         // puts("RST: ");
-        //         // puts("");
 
         // parameter_setting_task.receiveJsonCommand();
         // usleep(500'000);   // 500 ms
