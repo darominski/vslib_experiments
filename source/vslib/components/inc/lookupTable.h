@@ -26,6 +26,9 @@ namespace vslib
             : Component("LookupTable", name, parent),
               m_values{std::move(values)}
         {
+            assert(m_values.size() >= 1);
+            m_lower_edge_x = m_values[0].first;
+            m_upper_edge_x = m_values[m_values.size() - 1].first;
         }
 
         //! For provided x-axis input provides an interpolated y-axis value from the stored values
@@ -34,49 +37,50 @@ namespace vslib
         //! @return Y-axis value result of the interpolation
         StoredType interpolate(IndexType input_x) noexcept
         {
-            size_t start_loop_index = 0;
-            size_t end_loop_index   = m_values.size();
-            if (input_x >= m_previous_input)
+            // handle interpolation saturation cases: return the function value at the edge in case of under or overflow
+            if (input_x <= m_lower_edge_x)
             {
-                start_loop_index = m_previous_index;
-            }
-            else
-            {
-                end_loop_index = m_previous_index;
+                return m_values[0].second;
             }
 
-            T      min_value{std::numeric_limits<T>::max()};
-            size_t min_index{m_values.size()};
-            for (size_t index = start_loop_index; index < end_loop_index; index++)
+            if (input_x >= m_upper_edge_x)
             {
-                auto const diff = abs(m_values[index].first - input_x);
-                if (min_value > diff)
+                return m_values[m_values.size() - 1].second;
+            }
+
+            size_t start_loop_index = 0;
+            if (input_x >= m_previous_section_x)
+            {
+                start_loop_index = m_previous_section_x;
+            }
+
+            size_t min_index;
+            for (size_t index = start_loop_index; index < m_values.size(); index++)
+            {
+                if (m_values[index].first >= input_x)   // assumes monotonic x-axis distribution
                 {
-                    min_value = diff;
                     min_index = index;
-                }
-                else   // assuming monotonic distribution of x axis values
-                {
                     break;
                 }
             }
 
-            if (min_index > (m_values.size() - 2))
-            {
-                fgc4::utils::Warning(fmt::format(
-                    "Interpolation error: provided input value: {} outside of provided look-up table bounds of: [{}, "
-                    "{}].\n",
-                    input_x, m_values[0].first, m_values[m_values.size() - 1].first
-                ));
-                return T{};
-            }
             const auto& x1 = m_values[min_index].first;
             const auto& y1 = m_values[min_index].second;
             const auto& x2 = m_values[min_index + 1].first;
             const auto& y2 = m_values[min_index + 1].second;
 
-            m_previous_input = x1;
-            m_previous_index = min_index;
+            m_previous_section_x = x1;
+            m_previous_section_y = y1;
+
+            // const auto& it = std::find_if(m_values.cbegin(), m_values.cend(), [&input_x](const auto& point){return
+            // input_x >= point.first;});
+
+            // const auto& x1 = it->first;
+            // const auto& y1 = it->second;
+            // const auto& x2 = (it+1)->first;
+            // const auto& y2 = (it+1)->second;
+            // m_previous_section_x     = x1;
+            // m_previous_section_y     = y1;
 
             return y1 + (input_x - x1) * (y2 - y1) / (x2 - x1);
         }
