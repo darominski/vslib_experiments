@@ -13,7 +13,7 @@
 
 namespace vslib
 {
-    template<fgc4::utils::NumericScalar T>
+    template<fgc4::utils::NumericScalar IndexType, fgc4::utils::NumericScalar StoredType = IndexType>
     class LookupTable : public Component
     {
       public:
@@ -22,7 +22,7 @@ namespace vslib
         //! @param name Name of the LookupTable component object
         //! @param parent Pointer to the parent of this table
         //! @param values Vector with x-y pairs of the function to be stored
-        LookupTable(std::string_view name, Component* parent, std::vector<std::pair<T, T>>&& values)
+        LookupTable(std::string_view name, Component* parent, std::vector<std::pair<IndexType, StoredType>>&& values)
             : Component("LookupTable", name, parent),
               m_values{std::move(values)}
         {
@@ -32,7 +32,7 @@ namespace vslib
         //!
         //! @param input_x X-axis input value to interpolate
         //! @return Y-axis value result of the interpolation
-        T interpolate(T input_x) noexcept
+        StoredType interpolate(IndexType input_x) noexcept
         {
             size_t start_loop_index = 0;
             size_t end_loop_index   = m_values.size();
@@ -82,8 +82,12 @@ namespace vslib
         }
 
       private:
-        T                            m_previous_input{std::numeric_limits<T>::lowest()};
-        size_t                       m_previous_index{0};
-        std::vector<std::pair<T, T>> m_values;
+        IndexType  m_previous_section_x;
+        StoredType m_previous_section_y;
+
+        IndexType m_lower_edge_x;
+        IndexType m_upper_edge_x;
+
+        std::vector<std::pair<IndexType, StoredType>> m_values;
     };
 }
