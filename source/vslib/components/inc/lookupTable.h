@@ -85,6 +85,13 @@ namespace vslib
             return y1 + (input_x - x1) * (y2 - y1) / (x2 - x1);
         }
 
+        //! Resets the Component to its initial state
+        void reset() noexcept
+        {
+            m_previous_section_x     = m_values[0];
+            m_previous_section_index = 0;
+        }
+
       private:
         IndexType m_previous_section_x;
         size_t    m_previous_section_index{0};
