@@ -76,8 +76,8 @@ namespace vslib
 
             const auto& x1 = it->first;
             const auto& y1 = it->second;
-            const auto& x2 = (it + 1)->first;
-            const auto& y2 = (it + 1)->second;
+            const auto& x2 = (it - 1)->first;
+            const auto& y2 = (it - 1)->second;
 
             m_previous_section_x     = x1;
             m_previous_section_index = std::distance(m_values.cbegin(), it);
