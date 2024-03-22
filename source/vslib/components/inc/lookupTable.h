@@ -34,8 +34,10 @@ namespace vslib
         //! For provided x-axis input provides an interpolated y-axis value from the stored values
         //!
         //! @param input_x X-axis input value to interpolate
+        //! @param random_access Switch informing if the input_x is coming linearly or randomly, allows for binary
+        //! search optimisation in the latter case
         //! @return Y-axis value result of the interpolation
-        StoredType interpolate(IndexType input_x) noexcept
+        StoredType interpolate(IndexType input_x, bool random_access = false) noexcept
         {
             // handle interpolation saturation cases: return the function value at the edge in case of under or overflow
             if (input_x <= m_lower_edge_x)
@@ -51,43 +53,41 @@ namespace vslib
             size_t start_loop_index = 0;
             if (input_x >= m_previous_section_x)
             {
-                start_loop_index = m_previous_section_x;
+                start_loop_index = m_previous_section_index;
             }
 
-            size_t min_index;
-            for (size_t index = start_loop_index; index < m_values.size(); index++)
-            {
-                if (m_values[index].first >= input_x)   // assumes monotonic x-axis distribution
-                {
-                    min_index = index;
-                    break;
-                }
-            }
+            // lower_bound performs a binary search, more efficient with random access, while
+            // for monotonic access the linear find_if should be more efficient assuming that the next
+            // point is relatively close to the previously interpolated one
+            const auto& it = random_access ? std::lower_bound(
+                                 m_values.cbegin() + start_loop_index, m_values.cend(), input_x,
+                                 [](const auto& point, const auto& input)
+                                 {
+                                     return point.first < input;
+                                 }
+                             )
+                                           : std::find_if(
+                                               m_values.cbegin() + start_loop_index, m_values.cend(),
+                                               [&input_x](const auto& point)
+                                               {
+                                                   return point.first >= input_x;
+                                               }
+                                           );
 
-            const auto& x1 = m_values[min_index].first;
-            const auto& y1 = m_values[min_index].second;
-            const auto& x2 = m_values[min_index + 1].first;
-            const auto& y2 = m_values[min_index + 1].second;
+            const auto& x1 = it->first;
+            const auto& y1 = it->second;
+            const auto& x2 = (it + 1)->first;
+            const auto& y2 = (it + 1)->second;
 
-            m_previous_section_x = x1;
-            m_previous_section_y = y1;
-
-            // const auto& it = std::find_if(m_values.cbegin(), m_values.cend(), [&input_x](const auto& point){return
-            // input_x >= point.first;});
-
-            // const auto& x1 = it->first;
-            // const auto& y1 = it->second;
-            // const auto& x2 = (it+1)->first;
-            // const auto& y2 = (it+1)->second;
-            // m_previous_section_x     = x1;
-            // m_previous_section_y     = y1;
+            m_previous_section_x     = x1;
+            m_previous_section_index = std::distance(m_values.cbegin(), it);
 
             return y1 + (input_x - x1) * (y2 - y1) / (x2 - x1);
         }
 
       private:
-        IndexType  m_previous_section_x;
-        StoredType m_previous_section_y;
+        IndexType m_previous_section_x;
+        size_t    m_previous_section_index{0};
 
         IndexType m_lower_edge_x;
         IndexType m_upper_edge_x;

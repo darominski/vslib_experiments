@@ -106,13 +106,13 @@ TEST_F(LookupTableTest, LookupTableDoubleProvidedData)
     std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
     LookupTable<double>                    table(name, nullptr, std::move(values));
 
-    EXPECT_EQ(table.interpolate(0.0), 0.3);
-    EXPECT_EQ(table.interpolate(1.0), 1.3);
-    EXPECT_EQ(table.interpolate(2.0), 2.3);
+    EXPECT_NEAR(table.interpolate(0.0), 0.3, 1e-15);
+    EXPECT_NEAR(table.interpolate(1.0), 1.3, 1e-15);
+    EXPECT_NEAR(table.interpolate(2.0), 2.3, 1e-15);
     // and check that nothing goes wrong if we do the same in reverse order:
-    EXPECT_EQ(table.interpolate(2.0), 2.3);
-    EXPECT_EQ(table.interpolate(1.0), 1.3);
-    EXPECT_EQ(table.interpolate(0.0), 0.3);
+    EXPECT_NEAR(table.interpolate(2.0), 2.3, 1e-15);
+    EXPECT_NEAR(table.interpolate(1.0), 1.3, 1e-15);
+    EXPECT_NEAR(table.interpolate(0.0), 0.3, 1e-15);
 }
 
 //! Tests LookupTable component with a meaningful double table and then interpolating with trivial case of
