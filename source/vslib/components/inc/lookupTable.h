@@ -98,7 +98,7 @@ namespace vslib
         //!
         //! @param index Index of the element to be returned
         //! @return Y-value of the function at the index
-        StoredType& operator[](size_t index) const
+        const StoredType& operator[](size_t index) const
         {
             return m_values[index].second;
         }
