@@ -115,6 +115,19 @@ TEST_F(LookupTableTest, LookupTableDoubleProvidedData)
     EXPECT_NEAR(table.interpolate(0.0), 0.3, 1e-15);
 }
 
+//! Tests LookupTable's random access operator overload
+TEST_F(LookupTableTest, LookupTableDoubleAccessOperatorOverload)
+{
+    std::string                            name = "table";
+    std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
+    LookupTable<double>                    table(name, nullptr, std::move(values));
+
+    EXPECT_EQ(table[0], 0.3);
+    EXPECT_EQ(table[1], 1.3);
+    EXPECT_EQ(table[2], 2.3);
+    EXPECT_EQ(table[3], 3.3);
+}
+
 //! Tests LookupTable component with a meaningful double table and then interpolating with trivial case of
 //! hitting the provided points
 TEST_F(LookupTableTest, LookupTableDoubleNegativeAxis)
