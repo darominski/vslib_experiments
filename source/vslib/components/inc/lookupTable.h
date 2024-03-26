@@ -27,8 +27,10 @@ namespace vslib
               m_values{std::move(values)}
         {
             assert(m_values.size() >= 1);
-            m_lower_edge_x = m_values[0].first;
-            m_upper_edge_x = m_values[m_values.size() - 1].first;
+            m_lower_edge_x          = m_values[0].first;
+            m_upper_edge_x          = m_values[m_values.size() - 1].first;
+            m_previous_section_x[0] = m_lower_edge_x;
+            m_previous_section_x[1] = m_lower_edge_x;
         }
 
         //! For provided x-axis input provides an interpolated y-axis value from the stored values
@@ -51,8 +53,12 @@ namespace vslib
             }
 
             size_t start_loop_index = 0;
-            if (input_x >= m_previous_section_x)
+            if (input_x >= m_previous_section_x[0])
             {
+                if (input_x <= m_previous_section_x[1])   // same section
+                {
+                    return m_previous_section_y + (input_x - m_previous_section_x[1]) * m_interpolation_factor;
+                }   // else: new section and we need to find new edges
                 start_loop_index = m_previous_section_index;
             }
 
@@ -79,26 +85,34 @@ namespace vslib
             const auto& x2 = (it - 1)->first;
             const auto& y2 = (it - 1)->second;
 
-            m_previous_section_x     = x1;
+            m_previous_section_y     = y1;
+            m_previous_section_x[1]  = x1;
+            m_previous_section_x[0]  = x2;
             m_previous_section_index = std::distance(m_values.cbegin(), it);
+            m_interpolation_factor   = (y2 - y1) / (x2 - x1);
 
-            return y1 + (input_x - x1) * (y2 - y1) / (x2 - x1);
+            return y1 + (input_x - x1) * m_interpolation_factor;
         }
 
         //! Resets the Component to its initial state
         void reset() noexcept
         {
-            m_previous_section_x     = m_values[0];
+            m_previous_section_x[0]  = m_lower_edge_x;
+            m_previous_section_x[1]  = m_lower_edge_x;
             m_previous_section_index = 0;
         }
 
       private:
-        IndexType m_previous_section_x;
-        size_t    m_previous_section_index{0};
+        std::array<IndexType, 2> m_previous_section_x;   //! Edges of the previous section
+        StoredType               m_previous_section_y;   //! Function's value at the upper edge of the previous section
+
+        size_t     m_previous_section_index{0};
+        StoredType m_interpolation_factor;
 
         IndexType m_lower_edge_x;
         IndexType m_upper_edge_x;
 
         std::vector<std::pair<IndexType, StoredType>> m_values;
     };
-}
+
+}   // namespace vslib
