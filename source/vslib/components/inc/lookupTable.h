@@ -94,6 +94,15 @@ namespace vslib
             return y1 + (input_x - x1) * m_interpolation_factor;
         }
 
+        //! Provides random-access operator overload to the index-th element of the stored lookup table
+        //!
+        //! @param index Index of the element to be returned
+        //! @return Y-value of the function at the index
+        StoredType& operator[](size_t index) const
+        {
+            return m_values[index].second;
+        }
+
         //! Resets the Component to its initial state
         void reset() noexcept
         {
