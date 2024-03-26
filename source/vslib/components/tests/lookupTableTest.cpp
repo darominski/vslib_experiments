@@ -151,6 +151,62 @@ TEST_F(LookupTableTest, LookupTableDoubleInterpolateBetweenPoints)
     EXPECT_NEAR(table.interpolate(-2.5), 0.5 * (3.3 + 2.3), 1e-15);
 }
 
+//! Tests LookupTable provides the same answer when repeatedly accessing the exact same point
+TEST_F(LookupTableTest, LookupTableIntRepeatedInput)
+{
+    std::string                         name = "table";
+    std::vector<std::pair<double, int>> data{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
+    LookupTable<double, int>            table(name, nullptr, std::move(data));
+
+    EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
+    EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
+    EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
+    EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
+}
+
+//! Tests LookupTable provides the same answer when repeatedly accessing the exact same point
+TEST_F(LookupTableTest, LookupTableDoubleRepeatedInput)
+{
+    std::string                            name = "table";
+    std::vector<std::pair<double, double>> data{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
+    LookupTable<double, double>            table(name, nullptr, std::move(data));
+
+    EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
+    EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
+    EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
+    EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
+}
+
+//! Tests LookupTable provides the same answer when repeatedly accessing the exact same section
+TEST_F(LookupTableTest, LookupTableDoubleRepeatedSectionMonotonicallyIncreasing)
+{
+    std::string                            name = "table";
+    std::vector<std::pair<double, double>> data{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
+    LookupTable<double, double>            table(name, nullptr, std::move(data));
+
+    const double interpolation_factor = (2.2 - 3.3) / (-2 + 3);
+    for (int index = 1; index <= 10; index++)
+    {
+        double input = -3 + index / 10.0;
+        EXPECT_NEAR(table.interpolate(input), 2.2 + (input + 2) * interpolation_factor, 1e-15);
+    }
+}
+
+//! Tests LookupTable provides the same answer when repeatedly accessing the exact same section
+TEST_F(LookupTableTest, LookupTableDoubleRepeatedSectionMonotonicallyDecreasing)
+{
+    std::string                            name = "table";
+    std::vector<std::pair<double, double>> data{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
+    LookupTable<double, double>            table(name, nullptr, std::move(data));
+
+    const double interpolation_factor = (2.2 - 3.3) / (-2 + 3);
+    for (int index = 1; index <= 10; index++)
+    {
+        double input = -2 - index / 10.0;
+        EXPECT_NEAR(table.interpolate(input), 2.2 + (input + 2) * interpolation_factor, 1e-15);
+    }
+}
+
 
 //! Tests LookupTable provides the expected saturation behaviour the input is below the provided data limits
 TEST_F(LookupTableTest, LookupTableIntInterpolateBelowLimitsConsistency)
