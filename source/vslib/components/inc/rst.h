@@ -19,9 +19,9 @@ namespace vslib
       public:
         RST(std::string_view name, Component* parent = nullptr)
             : Component("RST", name, parent),
-              r(*this, "r", -12.0, 10.0),
-              s(*this, "s", -12.0, 10.0),
-              t(*this, "t", -12.0, 10.0)
+              r(*this, "r"),
+              s(*this, "s"),
+              t(*this, "t")
         {
         }
 
