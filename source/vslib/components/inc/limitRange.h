@@ -63,9 +63,9 @@ namespace vslib
         //! @return Optionally returns a warning if any issues have been found
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
-            m_dead_zone_defined = (dead_zone[0] != dead_zone[1]);
+            m_dead_zone_defined = (dead_zone.toValidate()[0] != dead_zone.toValidate()[1]);
 
-            if (m_dead_zone_defined && (dead_zone[0] > dead_zone[1]))
+            if (m_dead_zone_defined && (dead_zone.toValidate()[0] > dead_zone.toValidate()[1]))
             {
                 return fgc4::utils::Warning("Upper edge of the dead_zone is below the lower edge.\n");
             }
