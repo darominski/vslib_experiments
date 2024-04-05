@@ -108,6 +108,7 @@ namespace vslib
         {
             m_previous_section_x[0]  = m_lower_edge_x;
             m_previous_section_x[1]  = m_lower_edge_x;
+            m_previous_section_y     = m_values[0].second;
             m_previous_section_index = 0;
         }
 
