@@ -4,7 +4,6 @@
 
 #include <gtest/gtest.h>
 
-#include "componentRegistry.h"
 #include "rst.h"
 #include "staticJson.h"
 
@@ -19,8 +18,6 @@ class RSTTest : public ::testing::Test
 
     void TearDown() override
     {
-        ComponentRegistry& component_registry = ComponentRegistry::instance();
-        component_registry.clearRegistry();
         ParameterRegistry& parameter_registry = ParameterRegistry::instance();
         parameter_registry.clearRegistry();
     }
@@ -57,10 +54,6 @@ TEST_F(RSTTest, RSTDefaultConstruction)
     EXPECT_EQ(rst.s.isInitialized(), false);
     EXPECT_EQ(rst.t.isInitialized(), false);
     EXPECT_EQ(rst.isReady(), false);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(rst.getFullName()), registry.getComponents().end());
 
     auto serialized = rst.serialize();
     EXPECT_EQ(serialized["name"], name);

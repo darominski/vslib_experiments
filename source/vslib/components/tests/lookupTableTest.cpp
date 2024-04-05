@@ -5,7 +5,6 @@
 #include <array>
 #include <gtest/gtest.h>
 
-#include "componentRegistry.h"
 #include "lookupTable.h"
 #include "staticJson.h"
 
@@ -20,8 +19,6 @@ class LookupTableTest : public ::testing::Test
 
     void TearDown() override
     {
-        ComponentRegistry& component_registry = ComponentRegistry::instance();
-        component_registry.clearRegistry();
     }
 };
 
@@ -33,10 +30,6 @@ TEST_F(LookupTableTest, LookupTableIntDefault)
     std::vector<std::pair<int32_t, int32_t>> data_table{std::make_pair(0, 0)};
     LookupTable<int32_t>                     table(name, nullptr, std::move(data_table));
     EXPECT_EQ(table.getName(), name);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(table.getFullName()), registry.getComponents().end());
 
     auto serialized = table.serialize();
     EXPECT_EQ(serialized["name"], name);
@@ -52,10 +45,6 @@ TEST_F(LookupTableTest, LookupTableDoubleDefault)
     std::vector<std::pair<double, double>> data_table{std::make_pair(0.0, 0.0)};
     LookupTable<double>                    table(name, nullptr, std::move(data_table));
     EXPECT_EQ(table.getName(), name);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(table.getFullName()), registry.getComponents().end());
 
     auto serialized = table.serialize();
     EXPECT_EQ(serialized["name"], name);

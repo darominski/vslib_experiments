@@ -20,8 +20,6 @@ class ParameterSettingTest : public ::testing::Test
   protected:
     void SetUp() override
     {
-        ComponentRegistry& component_registry = ComponentRegistry::instance();
-        component_registry.clearRegistry();
         ParameterRegistry& parameter_registry = ParameterRegistry::instance();
         parameter_registry.clearRegistry();
     }
@@ -35,7 +33,7 @@ template<typename T>
 class MockComponent : public Component
 {
   public:
-    MockComponent(std::string_view type, std::string_view name, Component* parent = nullptr)
+    MockComponent(std::string_view type, std::string_view name, Component* parent)
         : Component(type, name, parent),
           parameter(*this, "parameter")
     {
@@ -63,7 +61,9 @@ TEST_F(ParameterSettingTest, ParameterSettingDefaultConstruction)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ASSERT_NO_THROW(ParameterSetting(read_buffer.data(), write_buffer.data()));
+    Component                       root_component("test_type", "test_name");
+
+    ASSERT_NO_THROW(ParameterSetting(read_buffer.data(), write_buffer.data(), root_component));
 }
 
 //! Checks that a ParameterSetting correct commadn is properly validated
@@ -72,7 +72,9 @@ TEST_F(ParameterSettingTest, ParameterSettingValidateCorrectCommand)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("test_type", "test_name");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     nlohmann::json test_command = {{"name", "test"}, {"value", 1.0}, {"version", std::array<int, 2>{0, 1}}};
     ASSERT_TRUE(parameter_setting.validateJsonCommand(test_command));
@@ -84,7 +86,9 @@ TEST_F(ParameterSettingTest, ParameterSettingValidateIncorrectCommand)
     constexpr size_t                queue_size = 1024;   // 1024 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("test_type", "test_name");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     auto read_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
         (uint8_t*)write_buffer.data(), queue_size
@@ -146,14 +150,16 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIntCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string            type = "type";
     std::string            name = "name";
-    MockComponent<int16_t> test(type, name);
+    MockComponent<int16_t> test(type, name, &root_component);
 
-    nlohmann::json single_command
-        = {{"name", type + '.' + name + ".parameter"}, {"value", 1}, {"version", std::array<int, 2>{0, 1}}};
+    nlohmann::json single_command = {
+        {"name", "root.root." + type + '.' + name + ".parameter"}, {"value", 1}, {"version", std::array<int, 2>{0, 1}}};
     ASSERT_NO_THROW(parameter_setting.processJsonCommands(single_command));
     test.flipBufferState();
     EXPECT_EQ(test.parameter, (int16_t)single_command["value"]);
@@ -165,14 +171,17 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleUintCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string             type = "type";
     std::string             name = "name";
-    MockComponent<uint32_t> test(type, name);
+    MockComponent<uint32_t> test(type, name, &root_component);
 
     nlohmann::json single_command
-        = {{"name", type + '.' + name + ".parameter"}, {"value", (uint32_t)5}, {"version", std::array<int, 2>{0, 1}}};
+        = {{"name", root_component.getFullName() + '.' + type + '.' + name + ".parameter"},
+           {"value", (uint32_t)5},
+           {"version", std::array<int, 2>{0, 1}}};
     ASSERT_NO_THROW(parameter_setting.processJsonCommands(single_command));
     test.flipBufferState();
     EXPECT_EQ(test.parameter, (uint32_t)single_command["value"]);
@@ -184,14 +193,18 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleDoubleCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string           type = "type";
     std::string           name = "name";
-    MockComponent<double> test(type, name);
+    MockComponent<double> test(type, name, &root_component);
 
     nlohmann::json single_command
-        = {{"name", type + '.' + name + ".parameter"}, {"value", 3.14159}, {"version", std::array<int, 2>{0, 1}}};
+        = {{"name", root_component.getFullName() + '.' + type + '.' + name + ".parameter"},
+           {"value", 3.14159},
+           {"version", std::array<int, 2>{0, 1}}};
     ASSERT_NO_THROW(parameter_setting.processJsonCommands(single_command));
     test.flipBufferState();
     EXPECT_EQ(test.parameter, (double)single_command["value"]);
@@ -203,11 +216,13 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectUintCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string             type = "type";
     std::string             name = "name";
-    MockComponent<uint32_t> test(type, name);
+    MockComponent<uint32_t> test(type, name, &root_component);
 
     std::array<uint8_t, queue_size> read_message_buffer;
     auto                            read_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
@@ -215,7 +230,9 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectUintCommand)
     );
 
     nlohmann::json single_command
-        = {{"name", type + '.' + name + ".parameter"}, {"value", -5}, {"version", std::array<int, 2>{0, 1}}};
+        = {{"name", root_component.getFullName() + '.' + type + '.' + name + ".parameter"},
+           {"value", -5},
+           {"version", std::array<int, 2>{0, 1}}};
     parameter_setting.processJsonCommands(single_command);
 
     auto message = read_queue.read(read_message_buffer);
@@ -235,11 +252,13 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectIntCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string            type = "type";
     std::string            name = "name";
-    MockComponent<int64_t> test(type, name);
+    MockComponent<int64_t> test(type, name, &root_component);
 
     std::array<uint8_t, queue_size> read_message_buffer;
     auto                            read_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
@@ -247,7 +266,9 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectIntCommand)
     );
 
     nlohmann::json single_command
-        = {{"name", type + '.' + name + ".parameter"}, {"value", 3.14159}, {"version", std::array<int, 2>{0, 1}}};
+        = {{"name", root_component.getFullName() + '.' + type + '.' + name + ".parameter"},
+           {"value", 3.14159},
+           {"version", std::array<int, 2>{0, 1}}};
     parameter_setting.processJsonCommands(single_command);
 
     auto message = read_queue.read(read_message_buffer);
@@ -265,14 +286,18 @@ TEST_F(ParameterSettingTest, ParameterMapProcessArrayCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string            type = "type";
     std::string            name = "name";
-    MockComponent<int32_t> test(type, name);
+    MockComponent<int32_t> test(type, name, &root_component);
 
     nlohmann::json single_command
-        = {{"name", type + '.' + name + ".parameter"}, {"value", 1}, {"version", std::array<int, 2>{0, 1}}};
+        = {{"name", root_component.getFullName() + '.' + type + '.' + name + ".parameter"},
+           {"value", 1},
+           {"version", std::array<int, 2>{0, 1}}};
     nlohmann::json multiple_commands = {single_command, single_command, single_command};
     int32_t        new_value         = 5;
     multiple_commands[2]["value"]    = new_value;
@@ -287,14 +312,18 @@ TEST_F(ParameterSettingTest, ParameterMapProcessArrayInvalidCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string            type = "type";
     std::string            name = "name";
-    MockComponent<int32_t> test(type, name);
+    MockComponent<int32_t> test(type, name, &root_component);
 
     nlohmann::json single_command
-        = {{"name", type + '.' + name + ".parameter"}, {"value", 1}, {"version", std::array<int, 2>{0, 1}}};
+        = {{"name", root_component.getFullName() + '.' + type + '.' + name + ".parameter"},
+           {"value", 1},
+           {"version", std::array<int, 2>{0, 1}}};
     nlohmann::json multiple_commands  = {single_command, single_command, single_command};
     int32_t        new_accepted_value = 2;
     int32_t        new_refused_value  = 5;
@@ -313,11 +342,13 @@ TEST_F(ParameterSettingTest, ParameterMapExecuteCorrectCommand)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string            type = "type";
     std::string            name = "name";
-    MockComponent<int32_t> test(type, name);
+    MockComponent<int32_t> test(type, name, &root_component);
     int32_t                value = 1;
 
     std::array<uint8_t, queue_size> read_message_buffer;
@@ -326,7 +357,9 @@ TEST_F(ParameterSettingTest, ParameterMapExecuteCorrectCommand)
     );
 
     nlohmann::json single_command
-        = {{"name", type + '.' + name + ".parameter"}, {"value", value}, {"version", std::array<int, 2>{0, 1}}};
+        = {{"name", root_component.getFullName() + '.' + type + '.' + name + ".parameter"},
+           {"value", value},
+           {"version", std::array<int, 2>{0, 1}}};
 
     ASSERT_NO_THROW(parameter_setting.executeJsonCommand(single_command));
 
@@ -345,11 +378,13 @@ TEST_F(ParameterSettingTest, ParameterMapExecuteIncorrectCommand)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string            type = "type";
     std::string            name = "name";
-    MockComponent<int32_t> test(type, name);
+    MockComponent<int32_t> test(type, name, &root_component);
     int32_t                value = 1;
 
     std::array<uint8_t, queue_size> read_message_buffer;
@@ -379,13 +414,15 @@ TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedComponents)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string            type  = "type";
     std::string            name1 = "name1";
     std::string            name2 = "name2";
-    MockComponent<int32_t> component_1(type, name1);
-    MockComponent<int32_t> component_2(type, name2);
+    MockComponent<int32_t> component_1(type, name1, &root_component);
+    MockComponent<int32_t> component_2(type, name2, &root_component);
     int32_t                value = 2;
 
     std::array<uint8_t, queue_size> read_message_buffer;
@@ -413,12 +450,14 @@ TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedHierarchicalComp
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string            type  = "type";
     std::string            name1 = "name1";
     std::string            name2 = "name2";
-    MockComponent<int32_t> component_1(type, name1);
+    MockComponent<int32_t> component_1(type, name1, &root_component);
     MockComponent<int32_t> component_2(type, name2, &component_1);
     int32_t                value = 2;
 
@@ -438,6 +477,8 @@ TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedHierarchicalComp
 
     EXPECT_NE(component_1.parameter, value);   // not expected to be modified
     EXPECT_EQ(component_2.parameter, value);
+
+    // flags should not be changed by running the validation of components
     EXPECT_FALSE(component_1.parametersInitialized());
     EXPECT_TRUE(component_2.parametersInitialized());
 }
@@ -448,13 +489,15 @@ TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedComponents)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string            type  = "type";
     std::string            name1 = "name1";
     std::string            name2 = "name2";
-    MockComponent<int32_t> component_1(type, name1);
-    MockComponent<int32_t> component_2(type, name2);
+    MockComponent<int32_t> component_1(type, name1, &root_component);
+    MockComponent<int32_t> component_2(type, name2, &root_component);
     int32_t                value = 3;
 
     std::array<uint8_t, queue_size> read_message_buffer;
@@ -486,12 +529,14 @@ TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedHierarchicalCo
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data());
+    Component                       root_component("root", "root");
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string            type  = "type";
     std::string            name1 = "name1";
     std::string            name2 = "name2";
-    MockComponent<int32_t> component_1(type, name1);
+    MockComponent<int32_t> component_1(type, name1, &root_component);
     MockComponent<int32_t> component_2(type, name2, &component_1);
     int32_t                value = 3;
 

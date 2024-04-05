@@ -4,7 +4,6 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/boxFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentRegistryTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentArrayTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/firFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/iirFilterTest.cpp
@@ -17,7 +16,6 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidRstTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstControllerTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/componentRegistry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
 )
 

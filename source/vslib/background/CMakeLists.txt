@@ -8,7 +8,6 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/parameterSetting.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../../utils/messageQueue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../utils/src/vslibMessageQueue.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../components/src/componentRegistry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
 )
 

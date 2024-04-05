@@ -5,7 +5,6 @@
 #include <array>
 #include <gtest/gtest.h>
 
-#include "componentRegistry.h"
 #include "limitRange.h"
 #include "staticJson.h"
 
@@ -20,8 +19,6 @@ class LimitRangeTest : public ::testing::Test
 
     void TearDown() override
     {
-        ComponentRegistry& component_registry = ComponentRegistry::instance();
-        component_registry.clearRegistry();
         ParameterRegistry& parameter_registry = ParameterRegistry::instance();
         parameter_registry.clearRegistry();
     }
@@ -40,7 +37,7 @@ class LimitRangeTest : public ::testing::Test
         limit.dead_zone.setJsonValue(dead_zone_val);
 
         limit.flipBufferState();
-
+        limit.synchroniseParameterBuffers();
         return limit.verifyParameters();
     }
 };
@@ -54,10 +51,6 @@ TEST_F(LimitRangeTest, LimitIntegralDefault)
     std::string         name = "int_limit";
     LimitRange<int32_t> integral_limit(name, nullptr);
     EXPECT_EQ(integral_limit.getName(), name);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(integral_limit.getFullName()), registry.getComponents().end());
 
     auto serialized = integral_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
@@ -78,10 +71,6 @@ TEST_F(LimitRangeTest, LimitUnsignedIntegralDefault)
     std::string          name = "uint_limit";
     LimitRange<uint32_t> uint_limit(name, nullptr);
 
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(uint_limit.getFullName()), registry.getComponents().end());
-
     auto serialized = uint_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "LimitRange");
@@ -101,10 +90,6 @@ TEST_F(LimitRangeTest, LimitRangeFloatDefault)
     std::string       name = "float_limit";
     LimitRange<float> float_limit(name, nullptr);
 
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(float_limit.getFullName()), registry.getComponents().end());
-
     auto serialized = float_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "LimitRange");
@@ -123,10 +108,6 @@ TEST_F(LimitRangeTest, LimitRangeDoubleDefault)
 {
     std::string        name = "dbl_limit";
     LimitRange<double> double_limit(name, nullptr);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(double_limit.getFullName()), registry.getComponents().end());
 
     auto serialized = double_limit.serialize();
     EXPECT_EQ(serialized["name"], name);

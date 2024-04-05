@@ -36,12 +36,6 @@ class MockComponent : public Component
     }
 };
 
-// Mock the component registry addition
-void ComponentRegistry::addToRegistry(std::string_view, Component&)
-{
-    return;
-}
-
 //! Checks that an instance of the empty ParameterRegistry can be created
 TEST_F(ParameterRegistryTest, EmptyInstance)
 {

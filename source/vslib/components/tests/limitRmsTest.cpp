@@ -5,7 +5,6 @@
 #include <array>
 #include <gtest/gtest.h>
 
-#include "componentRegistry.h"
 #include "limitRms.h"
 #include "staticJson.h"
 
@@ -20,8 +19,6 @@ class LimitRmsTest : public ::testing::Test
 
     void TearDown() override
     {
-        ComponentRegistry& component_registry = ComponentRegistry::instance();
-        component_registry.clearRegistry();
         ParameterRegistry& parameter_registry = ParameterRegistry::instance();
         parameter_registry.clearRegistry();
     }
@@ -46,10 +43,6 @@ TEST_F(LimitRmsTest, LimitRmsDefault)
     std::string name = "limit";
     LimitRms    limit(name);
     EXPECT_EQ(limit.getName(), name);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(limit.getFullName()), registry.getComponents().end());
 
     auto serialized = limit.serialize();
     EXPECT_EQ(serialized["name"], name);

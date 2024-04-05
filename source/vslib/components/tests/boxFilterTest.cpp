@@ -6,7 +6,6 @@
 #include <gtest/gtest.h>
 
 #include "boxFilter.h"
-#include "componentRegistry.h"
 
 using namespace vslib;
 
@@ -19,8 +18,6 @@ class BoxFilterTest : public ::testing::Test
 
     void TearDown() override
     {
-        ComponentRegistry& registry = ComponentRegistry::instance();
-        registry.clearRegistry();
     }
 };
 

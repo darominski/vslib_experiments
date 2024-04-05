@@ -5,7 +5,6 @@
 #include <array>
 #include <gtest/gtest.h>
 
-#include "componentRegistry.h"
 #include "limitRate.h"
 #include "staticJson.h"
 
@@ -20,8 +19,6 @@ class LimitRateTest : public ::testing::Test
 
     void TearDown() override
     {
-        ComponentRegistry& component_registry = ComponentRegistry::instance();
-        component_registry.clearRegistry();
         ParameterRegistry& parameter_registry = ParameterRegistry::instance();
         parameter_registry.clearRegistry();
     }
@@ -45,10 +42,6 @@ TEST_F(LimitRateTest, LimitRateIntegralDefault)
     LimitRate<int32_t> limit(name, nullptr);
     EXPECT_EQ(limit.getName(), name);
 
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(limit.getFullName()), registry.getComponents().end());
-
     auto serialized = limit.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "LimitRate");
@@ -65,10 +58,6 @@ TEST_F(LimitRateTest, LimitRateFloatDefault)
     LimitRate<float> limit(name, nullptr);
     EXPECT_EQ(limit.getName(), name);
 
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(limit.getFullName()), registry.getComponents().end());
-
     auto serialized = limit.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "LimitRate");
@@ -84,10 +73,6 @@ TEST_F(LimitRateTest, LimitRateDoubleDefault)
     std::string       name = "limit";
     LimitRate<double> limit(name, nullptr);
     EXPECT_EQ(limit.getName(), name);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(limit.getFullName()), registry.getComponents().end());
 
     auto serialized = limit.serialize();
     EXPECT_EQ(serialized["name"], name);

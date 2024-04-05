@@ -5,7 +5,6 @@
 #include <array>
 #include <gtest/gtest.h>
 
-#include "componentRegistry.h"
 #include "limitIntegral.h"
 #include "staticJson.h"
 
@@ -20,8 +19,6 @@ class LimitIntegralTest : public ::testing::Test
 
     void TearDown() override
     {
-        ComponentRegistry& component_registry = ComponentRegistry::instance();
-        component_registry.clearRegistry();
         ParameterRegistry& parameter_registry = ParameterRegistry::instance();
         parameter_registry.clearRegistry();
     }
@@ -48,10 +45,6 @@ TEST_F(LimitIntegralTest, LimitIntegralIntDefault)
     LimitIntegral<int32_t> integral_limit(name, nullptr);
     EXPECT_EQ(integral_limit.getName(), name);
 
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(integral_limit.getFullName()), registry.getComponents().end());
-
     auto serialized = integral_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "LimitIntegral");
@@ -68,10 +61,6 @@ TEST_F(LimitIntegralTest, LimitIntegralUintDefault)
 {
     std::string             name = "uint_limit";
     LimitIntegral<uint32_t> uint_limit(name, nullptr);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(uint_limit.getFullName()), registry.getComponents().end());
 
     auto serialized = uint_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
@@ -90,10 +79,6 @@ TEST_F(LimitIntegralTest, LimitIntegralFloatDefault)
     std::string          name = "float_limit";
     LimitIntegral<float> float_limit(name, nullptr);
 
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(float_limit.getFullName()), registry.getComponents().end());
-
     auto serialized = float_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "LimitIntegral");
@@ -110,10 +95,6 @@ TEST_F(LimitIntegralTest, LimitIntegralDoubleDefault)
 {
     std::string           name = "dbl_limit";
     LimitIntegral<double> double_limit(name, nullptr);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(double_limit.getFullName()), registry.getComponents().end());
 
     auto serialized = double_limit.serialize();
     EXPECT_EQ(serialized["name"], name);

@@ -3,8 +3,8 @@
 //! map.
 //! @author Dominik Arominski
 
-#include "componentRegistry.h"
 #include "parameterMap.h"
+#include "versions.h"
 #include "vslibMessageQueue.h"
 
 namespace vslib
@@ -13,8 +13,15 @@ namespace vslib
     //! this method is called.
     void ParameterMap::uploadParameterMap()
     {
-        auto json_component_registry = fgc4::utils::StaticJsonFactory::getJsonObject();
-        json_component_registry      = ComponentRegistry::instance().createParameterMap();
-        utils::writeJsonToMessageQueue(json_component_registry, m_write_parameter_map_queue);
+        auto parameter_map = fgc4::utils::StaticJsonFactory::getJsonObject();
+        parameter_map      = nlohmann::json::array();
+        parameter_map.push_back(
+            {{"version",
+              {version::json_parameter_map.major, version::json_parameter_map.minor,
+               version::json_parameter_map.revision}}}
+        );
+        // json_component_registry      = ComponentRegistry::instance().createParameterMap();
+        parameter_map.push_back(m_root_component.serialize());
+        utils::writeJsonToMessageQueue(parameter_map, m_write_parameter_map_queue);
     }
 }   // namespace vslib

@@ -6,7 +6,6 @@
 #include <fstream>
 #include <gtest/gtest.h>
 
-#include "componentRegistry.h"
 #include "firFilter.h"
 #include "staticJson.h"
 
@@ -21,8 +20,6 @@ class FIRFilterTest : public ::testing::Test
 
     void TearDown() override
     {
-        ComponentRegistry& component_registry = ComponentRegistry::instance();
-        component_registry.clearRegistry();
         ParameterRegistry& parameter_registry = ParameterRegistry::instance();
         parameter_registry.clearRegistry();
     }

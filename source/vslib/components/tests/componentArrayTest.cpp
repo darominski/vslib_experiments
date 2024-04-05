@@ -6,7 +6,6 @@
 
 #include "component.h"
 #include "componentArray.h"
-#include "componentRegistry.h"
 #include "json/json.hpp"
 
 using namespace vslib;
@@ -16,10 +15,6 @@ class ComponentArrayTest : public ::testing::Test
   protected:
     void SetUp() override
     {
-        // cleans up the registry so every test starts anew, otherwise
-        // the registry would persist between tests
-        ComponentRegistry& registry = ComponentRegistry::instance();
-        registry.clearRegistry();
     }
 
     void TearDown() override
@@ -47,10 +42,6 @@ TEST_F(ComponentArrayTest, BasicArray)
     EXPECT_EQ(component.getName(), component_name);
     EXPECT_EQ(component.getFullName(), std::string("ComponentArray.") + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), array_length + 1);   // ComponentArray + 3 children components
-    EXPECT_NE(registry.getComponents().find(component.getFullName()), registry.getComponents().end());
 
     auto serialized_component = component.serialize();
     EXPECT_EQ(serialized_component["name"], component_name);
@@ -97,10 +88,6 @@ TEST_F(ComponentArrayTest, HierarchicalArrayTest)
     EXPECT_EQ(component.getName(), component_name);
     EXPECT_EQ(component.getFullName(), std::string("ComponentArray.") + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), outer_array_length * (inner_array_length + 1) + 1);
-    EXPECT_NE(registry.getComponents().find(component.getFullName()), registry.getComponents().end());
 
     auto serialized_component = component.serialize();
     EXPECT_EQ(serialized_component["name"], component_name);

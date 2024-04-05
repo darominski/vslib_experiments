@@ -5,7 +5,6 @@
 #include <gtest/gtest.h>
 
 #include "component.h"
-#include "componentRegistry.h"
 #include "json/json.hpp"
 #include "parameter.h"
 #include "parameterRegistry.h"
@@ -17,10 +16,8 @@ class ComponentTest : public ::testing::Test
   protected:
     void SetUp() override
     {
-        // cleans up the registries so every test starts anew, otherwise
-        // they would persist between tests
-        ComponentRegistry& component_registry = ComponentRegistry::instance();
-        component_registry.clearRegistry();
+        // cleans up the registry so every test starts anew, otherwise
+        // it would persist between tests
         ParameterRegistry& parameter_registry = ParameterRegistry::instance();
         parameter_registry.clearRegistry();
     }
@@ -65,10 +62,6 @@ TEST_F(ComponentTest, BasicComponent)
     EXPECT_TRUE(component.parametersInitialized());
     EXPECT_FALSE(component.hasParent());
 
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(component.getFullName()), registry.getComponents().end());
-
     auto serialized_component = component.serialize();
     EXPECT_EQ(serialized_component["name"], component_name);
     EXPECT_EQ(serialized_component["type"], component_type);
@@ -89,10 +82,6 @@ TEST_F(ComponentTest, DerivedComponent)
 
     EXPECT_TRUE(component.parametersInitialized());
     EXPECT_FALSE(component.hasParent());
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(component.getFullName()), registry.getComponents().end());
 
     auto serialized_component = component.serialize();
     EXPECT_EQ(serialized_component["name"], component_name);
@@ -120,10 +109,6 @@ TEST_F(ComponentTest, HierarchicalComponent)
     EXPECT_TRUE(child.parametersInitialized());
     EXPECT_TRUE(child.hasParent());
 
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 2);   // two components = two entries
-    EXPECT_NE(registry.getComponents().find(parent.getFullName()), registry.getComponents().end());
-
     auto serialized_component = parent.serialize();
     EXPECT_EQ(serialized_component["name"], parent_name);
     EXPECT_EQ(serialized_component["type"], parent_type);
@@ -149,10 +134,6 @@ TEST_F(ComponentTest, DerivedComponentIntParameter)
     EXPECT_FALSE(component.parametersInitialized());
     EXPECT_FALSE(component.hasParent());
 
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(component.getFullName()), registry.getComponents().end());
-
     auto serialized_component = component.serialize();
     EXPECT_EQ(serialized_component["name"], component_name);
     EXPECT_EQ(serialized_component["type"], component_type);
@@ -176,10 +157,6 @@ TEST_F(ComponentTest, DerivedComponentWithManyParameters)
     EXPECT_EQ(component.getName(), component_name);
     EXPECT_EQ(component.getFullName(), component_type + "." + component_name);
     EXPECT_EQ(component.getParameters().size(), 4);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(component.getFullName()), registry.getComponents().end());
 
     auto serialized_component = component.serialize();
     EXPECT_EQ(serialized_component["name"], component_name);

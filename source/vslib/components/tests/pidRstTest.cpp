@@ -4,7 +4,6 @@
 
 #include <gtest/gtest.h>
 
-#include "componentRegistry.h"
 #include "pidRst.h"
 #include "staticJson.h"
 
@@ -19,8 +18,6 @@ class PIDRSTTest : public ::testing::Test
 
     void TearDown() override
     {
-        ComponentRegistry& component_registry = ComponentRegistry::instance();
-        component_registry.clearRegistry();
         ParameterRegistry& parameter_registry = ParameterRegistry::instance();
         parameter_registry.clearRegistry();
     }
@@ -70,10 +67,6 @@ TEST_F(PIDRSTTest, PIDRSTDefaultConstruction)
     std::string name = "pid_1";
     PIDRST      pid(name);
     EXPECT_EQ(pid.getName(), name);
-
-    ComponentRegistry& registry = ComponentRegistry::instance();
-    EXPECT_EQ(registry.getComponents().size(), 1);
-    EXPECT_NE(registry.getComponents().find(pid.getFullName()), registry.getComponents().end());
 
     auto serialized_pid = pid.serialize();
     EXPECT_EQ(serialized_pid["name"], name);

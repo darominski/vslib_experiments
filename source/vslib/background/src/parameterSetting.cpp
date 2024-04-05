@@ -135,15 +135,24 @@ namespace vslib
         }
     }
 
-    //! Calls verifyParameters of all components with initialized Parameters in the registry
-    //!
-    //! @return Optionally returns a Warning if validation has failed.
     void ParameterSetting::validateComponents()
     {
-        auto const& component_registry = ComponentRegistry::instance().getComponents();
-        for (const auto& entry : component_registry)
+        // validate the root Component first:
+        const auto& root_warning = m_root_component.verifyParameters();
+        if (!root_warning.has_value())
         {
-            auto& component = entry.second.get();
+            m_root_component.flipBufferState();
+        }
+
+        // validate all children and their children tree indefinitely deeply
+        validateComponent(m_root_component.getChildren());
+    }
+
+    void ParameterSetting::validateComponent(const ChildrenList& children)
+    {
+        for (const auto& child : children)
+        {
+            auto& component = child.get();
             if (component.parametersInitialized())
             {
                 const auto& warning = component.verifyParameters();
@@ -154,6 +163,7 @@ namespace vslib
                 // if there is an issue: it is logged, the component's buffer is not flipped
                 component.synchroniseParameterBuffers();
             }
+            validateComponent(component.getChildren());
         }
     }
 }   // namespace vslib

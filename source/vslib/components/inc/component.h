@@ -8,7 +8,6 @@
 #include <string>
 #include <unordered_map>
 
-#include "componentRegistry.h"
 #include "iparameter.h"
 #include "nonCopyableNonMovable.h"
 #include "parameterRegistry.h"
@@ -40,7 +39,6 @@ namespace vslib
             {
                 parent->addChild((*this));
             }
-            registerComponent();
         }
 
         // ************************************************************
@@ -124,6 +122,14 @@ namespace vslib
             return m_parameters;
         }
 
+        //! Provides the container with all children belonging to this component
+        //!
+        //! @return Vector with references to all children of this component
+        [[nodiscard]] auto const& getChildren() const noexcept
+        {
+            return m_children;
+        }
+
         //! Provides information whether this Component has a parent
         //!
         //! @return True if a parent is defined, false otherwise
@@ -183,12 +189,6 @@ namespace vslib
 
         ParameterList m_parameters;
         ChildrenList  m_children;
-
-        //! Registers this component in the ComponentRegistry
-        void registerComponent() noexcept
-        {
-            ComponentRegistry::instance().addToRegistry(this->getFullName(), (*this));
-        }
     };
 
     // ************************************************************
