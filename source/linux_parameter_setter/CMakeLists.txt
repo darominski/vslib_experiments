@@ -12,12 +12,12 @@ set(CMAKE_CXX_STANDARD 20)
 
 ### bumbleboot
 
-set(BMBOOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../bmboot)
+set(BMBOOT_DIR ${LIBRARIES_HOME}/bmboot)
 
 include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
 
 set(BMBOOT_BUILD_PAYLOAD 0)   # TODO: This is *bad*. It should probably be a separate CMakeLists instead.
-add_subdirectory(../bmboot ${CMAKE_CURRENT_BINARY_DIR}/bmboot)
+add_subdirectory(${BMBOOT_DIR} ${CMAKE_CURRENT_BINARY_DIR}/bmboot)
 
 add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
 
@@ -58,7 +58,7 @@ include_directories(
     ${LIBRARIES_HOME}/json-3.11.2
     ${CMAKE_SOURCE_DIR}/../utils # all general fgc4-utils are stored in this directory
     ${CMAKE_SOURCE_DIR}/../vslib/utils/inc # all vslib-specific utils are stored in this directory
-    ${CMAKE_SOURCE_DIR}/../bmboot/include # all public bmboot includes are stored in this directory
+    ${LIBRARIES_HOME}/bmboot/include # all public bmboot includes are stored in this directory
 )
 
 target_compile_features(remote PUBLIC cxx_std_20)
