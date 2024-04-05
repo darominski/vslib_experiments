@@ -22,9 +22,14 @@ namespace vslib
         //! @param name Name of the LookupTable component object
         //! @param parent Pointer to the parent of this table
         //! @param values Vector with x-y pairs of the function to be stored
-        LookupTable(std::string_view name, Component* parent, std::vector<std::pair<IndexType, StoredType>>&& values)
+        LookupTable(
+            std::string_view name, Component* parent, std::vector<std::pair<IndexType, StoredType>>&& values,
+            bool equal_binning = false
+        ) noexcept
             : Component("LookupTable", name, parent),
-              m_values{std::move(values)}
+              m_bin_size{values[1].first - values[0].first},
+              m_values{std::move(values)},
+              m_equal_binning(equal_binning)
         {
             assert(m_values.size() >= 1);
             m_lower_edge_x          = m_values[0].first;
@@ -52,7 +57,9 @@ namespace vslib
                 return m_values[m_values.size() - 1].second;
             }
 
-            size_t start_loop_index = 0;
+            size_t     start_loop_index = 0;
+            IndexType  x1, x2;
+            StoredType y1, y2;
             if (input_x >= m_previous_section_x[0])
             {
                 if (input_x <= m_previous_section_x[1])   // same section
@@ -62,34 +69,54 @@ namespace vslib
                 start_loop_index = m_previous_section_index;
             }
 
-            // lower_bound performs a binary search, more efficient with random access, while
-            // for monotonic access the linear find_if should be more efficient assuming that the next
-            // point is relatively close to the previously interpolated one
-            const auto& it = random_access ? std::lower_bound(
-                                 m_values.cbegin() + start_loop_index, m_values.cend(), input_x,
-                                 [](const auto& point, const auto& input)
-                                 {
-                                     return point.first < input;
-                                 }
-                             )
-                                           : std::find_if(
-                                               m_values.cbegin() + start_loop_index, m_values.cend(),
-                                               [&input_x](const auto& point)
-                                               {
-                                                   return point.first >= input_x;
-                                               }
-                                           );
+            if (m_equal_binning)
+            {
+                // This case provides a 15% speedup for a 100-element lookup table when compared with linear
+                // time monotonic access from the 'else' case.
+                // Going branchless with constexpr if and placing m_equal_binning in the template does not provide any
+                // benefit in this case
+                const int64_t position = static_cast<int64_t>((input_x - m_lower_edge_x) / m_bin_size);
+                x1                     = m_values[position + 1].first;
+                y1                     = m_values[position + 1].second;
+                x2                     = m_values[position].first;
+                y2                     = m_values[position].second;
 
-            const auto& x1 = it->first;
-            const auto& y1 = it->second;
-            const auto& x2 = (it - 1)->first;
-            const auto& y2 = (it - 1)->second;
+                m_previous_section_index = position;
+            }
+            else
+            {
+                // Existence of this branch leads to a loss of 1% performance.
 
-            m_previous_section_y     = y1;
-            m_previous_section_x[1]  = x1;
-            m_previous_section_x[0]  = x2;
-            m_previous_section_index = std::distance(m_values.cbegin(), it);
-            m_interpolation_factor   = (y2 - y1) / (x2 - x1);
+                // lower_bound performs a binary search, more efficient with random access, while
+                // for monotonic access the linear find_if should be more efficient assuming that the next
+                // point is relatively close to the previously interpolated one
+                const auto& it = random_access ? std::lower_bound(
+                                     m_values.cbegin() + start_loop_index, m_values.cend(), input_x,
+                                     [](const auto& point, const auto& input)
+                                     {
+                                         return point.first < input;
+                                     }
+                                 )
+                                               : std::find_if(
+                                                   m_values.cbegin() + start_loop_index, m_values.cend(),
+                                                   [&input_x](const auto& point)
+                                                   {
+                                                       return point.first >= input_x;
+                                                   }
+                                               );
+
+                x1 = it->first;
+                y1 = it->second;
+                x2 = (it - 1)->first;
+                y2 = (it - 1)->second;
+
+                m_previous_section_index = std::distance(m_values.cbegin(), it);
+            }
+
+            m_previous_section_y    = y1;
+            m_previous_section_x[1] = x1;
+            m_previous_section_x[0] = x2;
+            m_interpolation_factor  = (y2 - y1) / (x2 - x1);
 
             return y1 + (input_x - x1) * m_interpolation_factor;
         }
@@ -122,7 +149,11 @@ namespace vslib
         IndexType m_lower_edge_x;
         IndexType m_upper_edge_x;
 
+        const IndexType m_bin_size{0};
+
         std::vector<std::pair<IndexType, StoredType>> m_values;
+
+        const bool m_equal_binning{false};
     };
 
 }   // namespace vslib
