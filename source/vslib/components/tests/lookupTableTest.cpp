@@ -104,6 +104,22 @@ TEST_F(LookupTableTest, LookupTableDoubleProvidedData)
     EXPECT_NEAR(table.interpolate(0.0), 0.3, 1e-15);
 }
 
+//! Tests LookupTable component with a assuming that the x-axis is constant-binned
+TEST_F(LookupTableTest, LookupTableDoubleConstantBinning)
+{
+    std::string                            name = "table";
+    std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
+    LookupTable<double>                    table(name, nullptr, std::move(values), true);
+
+    EXPECT_NEAR(table.interpolate(0.0), 0.3, 1e-15);
+    EXPECT_NEAR(table.interpolate(1.0), 1.3, 1e-15);
+    EXPECT_NEAR(table.interpolate(2.0), 2.3, 1e-15);
+    // and check that nothing goes wrong if we do the same in reverse order:
+    EXPECT_NEAR(table.interpolate(2.0), 2.3, 1e-15);
+    EXPECT_NEAR(table.interpolate(1.0), 1.3, 1e-15);
+    EXPECT_NEAR(table.interpolate(0.0), 0.3, 1e-15);
+}
+
 //! Tests LookupTable's random access operator overload
 TEST_F(LookupTableTest, LookupTableDoubleAccessOperatorOverload)
 {
@@ -166,6 +182,20 @@ TEST_F(LookupTableTest, LookupTableIntRepeatedInput)
     EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
 }
 
+//! Tests LookupTable provides the same answer when repeatedly accessing the exact same point, with constant binning
+TEST_F(LookupTableTest, LookupTableIntRepeatedInputConstantBinning)
+{
+    std::string                         name = "table";
+    std::vector<std::pair<double, int>> data{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
+    LookupTable<double, int>            table(name, nullptr, std::move(data), true);
+
+    EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
+    EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
+    EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
+    EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
+}
+
+
 //! Tests LookupTable provides the same answer when repeatedly accessing the exact same point
 TEST_F(LookupTableTest, LookupTableDoubleRepeatedInput)
 {
@@ -177,6 +207,32 @@ TEST_F(LookupTableTest, LookupTableDoubleRepeatedInput)
     EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
     EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
     EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
+}
+
+//! Tests LookupTable provides the same answer when repeatedly accessing the exact same point, with contant binning
+TEST_F(LookupTableTest, LookupTableDoubleRepeatedInputConstantBinning)
+{
+    std::string                            name = "table";
+    std::vector<std::pair<double, double>> data{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
+    LookupTable<double, double>            table(name, nullptr, std::move(data), true);
+
+    EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
+    EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
+    EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
+    EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
+}
+
+//! Tests LookupTable provides the same answer when repeatedly accessing the exact same point, with random access
+TEST_F(LookupTableTest, LookupTableDoubleRepeatedInputRandomAccess)
+{
+    std::string                            name = "table";
+    std::vector<std::pair<double, double>> data{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
+    LookupTable<double, double>            table(name, nullptr, std::move(data));
+
+    EXPECT_EQ(table.interpolate(-2.5, true), 0.5 * (3.3 + 2.2));
+    EXPECT_EQ(table.interpolate(-2.5, true), 0.5 * (3.3 + 2.2));
+    EXPECT_EQ(table.interpolate(-2.5, true), 0.5 * (3.3 + 2.2));
+    EXPECT_EQ(table.interpolate(-2.5, true), 0.5 * (3.3 + 2.2));
 }
 
 //! Tests LookupTable provides the same answer when repeatedly accessing the exact same section
@@ -208,7 +264,6 @@ TEST_F(LookupTableTest, LookupTableDoubleRepeatedSectionMonotonicallyDecreasing)
         EXPECT_NEAR(table.interpolate(input), 2.2 + (input + 2) * interpolation_factor, 1e-15);
     }
 }
-
 
 //! Tests LookupTable provides the expected saturation behaviour the input is below the provided data limits
 TEST_F(LookupTableTest, LookupTableIntInterpolateBelowLimitsConsistency)
