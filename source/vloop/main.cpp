@@ -13,7 +13,6 @@
 
 #include "boxFilter.h"
 #include "componentArray.h"
-#include "componentRegistry.h"
 #include "compositePID.h"
 #include "firFilter.h"
 #include "iirFilter.h"
