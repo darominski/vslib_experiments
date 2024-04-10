@@ -53,12 +53,12 @@ namespace vslib
             m_integral += m_error;
             m_integral = m_anti_windup_protection(m_integral);
 
-            double const feed_forward = kff * process_value;
+            double const feed_forward = kff * reference;
             double const proportional = kp * (reference * b - process_value);
             double const integral     = ki * m_integral;
             // assuming time difference denominator is included in kd:
-            double const derivative   = kd * ((reference * c - process_value) - m_previous_error);
-            double const actuation    = feed_forward + proportional + integral + derivative;
+            m_derivative              = -0.2 * m_derivative + kd * (m_error + 0.8 * m_previous_error);
+            double const actuation    = feed_forward + proportional + integral + m_derivative;
 
             // update errors for the next iteration
             m_previous_error = m_error;
@@ -137,6 +137,7 @@ namespace vslib
         double m_error{0};            //!< Current error value
         double m_previous_error{0};   //!< Previous error value
         double m_integral{0};         //!< Cumulative error over time
+        double m_derivative{0};       //!< Cumulative derivative part of actuation
 
         std::function<double(double)> m_anti_windup_protection;
     };
