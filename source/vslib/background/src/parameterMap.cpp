@@ -17,8 +17,11 @@ namespace vslib
         parameter_map      = nlohmann::json::array();
         parameter_map.push_back(
             {{"version",
-              {version::json_parameter_map.major, version::json_parameter_map.minor,
-               version::json_parameter_map.revision}}}
+              {
+                  version::json_parameter_map.major,
+                  version::json_parameter_map.minor,
+                  version::json_parameter_map.revision,
+              }}}
         );
         parameter_map.push_back(m_root_component.serialize());
         utils::writeJsonToMessageQueue(parameter_map, m_write_parameter_map_queue);
