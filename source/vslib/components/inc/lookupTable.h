@@ -60,6 +60,7 @@ namespace vslib
             size_t     start_loop_index = 0;
             IndexType  x1, x2;
             StoredType y1, y2;
+
             if (input_x >= m_previous_section_x[0])
             {
                 if (input_x <= m_previous_section_x[1])   // same section
@@ -75,42 +76,18 @@ namespace vslib
                 // time monotonic access from the 'else' case.
                 // Going branchless with constexpr if and placing m_equal_binning in the template does not provide any
                 // benefit in this case
-                const int64_t position = static_cast<int64_t>((input_x - m_lower_edge_x) / m_bin_size);
-                x1                     = m_values[position + 1].first;
-                y1                     = m_values[position + 1].second;
-                x2                     = m_values[position].first;
-                y2                     = m_values[position].second;
 
-                m_previous_section_index = position;
+                index_search(input_x, x1, y1, x2, y2);
             }
             else
             {
                 // Existence of this branch leads to a loss of 1% performance.
 
-                // lower_bound performs a binary search, more efficient with random access, while
-                // for monotonic access the linear find_if should be more efficient assuming that the next
+                // binary_search performs a binary search, more efficient with random access, while
+                // for monotonic access the linear linear_search should be more efficient assuming that the next
                 // point is relatively close to the previously interpolated one
-                const auto& it = random_access ? std::lower_bound(
-                                     m_values.cbegin() + start_loop_index, m_values.cend(), input_x,
-                                     [](const auto& point, const auto& input)
-                                     {
-                                         return point.first < input;
-                                     }
-                                 )
-                                               : std::find_if(
-                                                   m_values.cbegin() + start_loop_index, m_values.cend(),
-                                                   [&input_x](const auto& point)
-                                                   {
-                                                       return point.first >= input_x;
-                                                   }
-                                               );
-
-                x1 = it->first;
-                y1 = it->second;
-                x2 = (it - 1)->first;
-                y2 = (it - 1)->second;
-
-                m_previous_section_index = std::distance(m_values.cbegin(), it);
+                random_access ? binary_search(input_x, start_loop_index, x1, y1, x2, y2)
+                              : linear_search(input_x, start_loop_index, x1, y1, x2, y2);
             }
 
             m_previous_section_y    = y1;
@@ -154,6 +131,51 @@ namespace vslib
         std::vector<std::pair<IndexType, StoredType>> m_values;
 
         const bool m_equal_binning{false};
+
+        void index_search(IndexType input_x, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2)
+        {
+            const int64_t position = std::ceil((input_x - m_lower_edge_x) / m_bin_size);
+            x1                     = m_values[position].first;
+            y1                     = m_values[position].second;
+            x2                     = m_values[position - 1].first;
+            y2                     = m_values[position - 1].second;
+        }
+
+        void linear_search(
+            IndexType input_x, size_t start_index, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2
+        )
+        {
+            const auto& it = std::find_if(
+                m_values.cbegin() + start_index, m_values.cend(),
+                [&input_x](const auto& point)
+                {
+                    return point.first >= input_x;
+                }
+            );
+            m_previous_section_index = std::distance(m_values.cbegin(), it);
+            x1                       = it->first;
+            y1                       = it->second;
+            x2                       = (it - 1)->first;
+            y2                       = (it - 1)->second;
+        }
+
+        void binary_search(
+            IndexType input_x, size_t start_index, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2
+        )
+        {
+            const auto& it = std::lower_bound(
+                m_values.cbegin() + start_index, m_values.cend(), input_x,
+                [](const auto& point, const auto& input)
+                {
+                    return point.first < input;
+                }
+            );
+            m_previous_section_index = std::distance(m_values.cbegin(), it);
+            x1                       = it->first;
+            y1                       = it->second;
+            x2                       = (it - 1)->first;
+            y2                       = (it - 1)->second;
+        }
     };
 
 }   // namespace vslib
