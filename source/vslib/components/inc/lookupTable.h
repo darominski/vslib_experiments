@@ -72,10 +72,11 @@ namespace vslib
 
             if (m_equal_binning)
             {
-                // This case provides a 15% speedup for a 100-element lookup table when compared with linear
-                // time monotonic access from the 'else' case.
                 // Going branchless with constexpr if and placing m_equal_binning in the template does not provide any
                 // benefit in this case
+
+                // This case provides a 15% speedup for a 100-element lookup table when compared with linear
+                // time monotonic access from the 'else' case.
 
                 index_search(input_x, x1, y1, x2, y2);
             }
@@ -85,7 +86,7 @@ namespace vslib
 
                 // binary_search performs a binary search, more efficient with random access, while
                 // for monotonic access the linear linear_search should be more efficient assuming that the next
-                // point is relatively close to the previously interpolated one
+                // point is relatively close to the previously interpolated one.
                 random_access ? binary_search(input_x, start_loop_index, x1, y1, x2, y2)
                               : linear_search(input_x, start_loop_index, x1, y1, x2, y2);
             }
@@ -134,11 +135,11 @@ namespace vslib
 
         void index_search(IndexType input_x, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2)
         {
-            const int64_t position = std::ceil((input_x - m_lower_edge_x) / m_bin_size);
+            const int64_t position = static_cast<int64_t>((input_x - m_lower_edge_x) / m_bin_size);
             x1                     = m_values[position].first;
             y1                     = m_values[position].second;
-            x2                     = m_values[position - 1].first;
-            y2                     = m_values[position - 1].second;
+            x2                     = m_values[position + 1].first;
+            y2                     = m_values[position + 1].second;
         }
 
         void linear_search(
@@ -153,10 +154,10 @@ namespace vslib
                 }
             );
             m_previous_section_index = std::distance(m_values.cbegin(), it);
-            x1                       = it->first;
-            y1                       = it->second;
-            x2                       = (it - 1)->first;
-            y2                       = (it - 1)->second;
+            x1                       = (it - 1)->first;
+            y1                       = (it - 1)->second;
+            x2                       = it->first;
+            y2                       = it->second;
         }
 
         void binary_search(
@@ -167,14 +168,14 @@ namespace vslib
                 m_values.cbegin() + start_index, m_values.cend(), input_x,
                 [](const auto& point, const auto& input)
                 {
-                    return point.first < input;
+                    return point.first <= input;
                 }
             );
             m_previous_section_index = std::distance(m_values.cbegin(), it);
-            x1                       = it->first;
-            y1                       = it->second;
-            x2                       = (it - 1)->first;
-            y2                       = (it - 1)->second;
+            x1                       = (it - 1)->first;
+            y1                       = (it - 1)->second;
+            x2                       = it->first;
+            y2                       = it->second;
         }
     };
 
