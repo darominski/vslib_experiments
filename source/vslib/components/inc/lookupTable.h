@@ -133,6 +133,14 @@ namespace vslib
 
         const bool m_equal_binning{false};
 
+        //! Performs index-calculation "search" of the provided input_x in the m_values container when bins are equally
+        //! spaced
+        //!
+        //! @param input_x Input x-axis value to be searched for
+        //! @param x1 X-axis value of the lower section edge
+        //! @param y1 Y-axis value of the lower section edge
+        //! @param x2 X-axis value of the upper section edge
+        //! @param y2 Y-axis value of the upper section edge
         void index_search(IndexType input_x, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2)
         {
             const int64_t position = static_cast<int64_t>((input_x - m_lower_edge_x) / m_bin_size);
@@ -142,6 +150,14 @@ namespace vslib
             y2                     = m_values[position + 1].second;
         }
 
+        //! Performs linear search of the provided input_x in the m_values container
+        //!
+        //! @param input_x Input x-axis value to be searched for
+        //! @param start_index Index to start the search from
+        //! @param x1 X-axis value of the lower section edge
+        //! @param y1 Y-axis value of the lower section edge
+        //! @param x2 X-axis value of the upper section edge
+        //! @param y2 Y-axis value of the upper section edge
         void linear_search(
             IndexType input_x, size_t start_index, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2
         )
@@ -160,6 +176,14 @@ namespace vslib
             y2                       = it->second;
         }
 
+        //! Performs binary search of the provided input_x in the m_values container
+        //!
+        //! @param input_x Input x-axis value to be searched for
+        //! @param start_index Index to start the search from
+        //! @param x1 X-axis value of the lower section edge
+        //! @param y1 Y-axis value of the lower section edge
+        //! @param x2 X-axis value of the upper section edge
+        //! @param y2 Y-axis value of the upper section edge
         void binary_search(
             IndexType input_x, size_t start_index, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2
         )
