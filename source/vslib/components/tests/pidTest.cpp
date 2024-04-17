@@ -138,9 +138,7 @@ TEST_F(PIDTest, PIDSingleIteration)
     pid.setStartingValue(starting_value);
 
     const double error          = target_value - starting_value;
-    const double expected_value = (target_value * b - starting_value) * p + error * i
-                                  + d * (target_value * c - starting_value) + starting_value * ff;
-
+    const double expected_value = (target_value * b - starting_value) * p + error * i + d * error + target_value * ff;
     EXPECT_NEAR(pid.control(starting_value, target_value), expected_value, 1e-6);
 }
 
@@ -163,21 +161,27 @@ TEST_F(PIDTest, PIDControlIteration)
     pid.setStartingValue(starting_value);
 
     double       current_error = target_value - starting_value;
+    double       derivative    = -0.2 * 0.0 + d * (current_error + 0.8 * 0);
     const double first_actuation
-        = (target_value * b - starting_value) * p + current_error * i + current_error * d + starting_value * ff;
+        = (target_value * b - starting_value) * p + current_error * i + derivative + target_value * ff;
     EXPECT_NEAR(pid.control(starting_value, target_value), first_actuation, 1e-6);
 
-    double previous_error = target_value;
+    double previous_error = current_error;
     current_error         = target_value - first_actuation;
+    derivative            = -0.2 * derivative + d * (current_error + 0.8 * previous_error);
 
     const double second_actuation = (target_value * b - first_actuation) * p + (2 * target_value - first_actuation) * i
-                                    + (current_error - previous_error) * d + first_actuation * ff;
+                                    + derivative + target_value * ff;
+
+
     EXPECT_NEAR(pid.control(first_actuation, target_value), second_actuation, 1e-6);
 
-    previous_error               = current_error;
-    current_error                = target_value - second_actuation;
+    previous_error = current_error;
+    current_error  = target_value - second_actuation;
+    derivative     = -0.2 * derivative + d * (current_error + 0.8 * previous_error);
+
     const double third_actuation = (target_value * b - second_actuation) * p
-                                   + (3 * target_value - first_actuation - second_actuation) * i
-                                   + (current_error - previous_error) * d + second_actuation * ff;
+                                   + (3 * target_value - first_actuation - second_actuation) * i + derivative
+                                   + target_value * ff;
     EXPECT_NEAR(pid.control(second_actuation, target_value), third_actuation, 1e-6);
 }

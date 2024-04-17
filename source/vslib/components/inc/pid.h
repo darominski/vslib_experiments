@@ -75,6 +75,7 @@ namespace vslib
             m_error          = 0;
             m_integral       = 0;
             m_previous_error = 0;
+            m_derivative     = 0;
         }
 
         // ************************************************************
