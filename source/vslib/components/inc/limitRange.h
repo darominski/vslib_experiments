@@ -41,7 +41,15 @@ namespace vslib
 
             if (m_dead_zone_defined && (input > dead_zone[0] && input < dead_zone[1]))
             {
-                return (abs(dead_zone[0] - input) > abs(dead_zone[1] - input)) ? dead_zone[1] : dead_zone[0];
+                if constexpr (std::is_unsigned_v<T>)
+                {
+                    // abs is not defined for unsigned integers
+                    return (input - dead_zone[0] > dead_zone[1] - input) ? dead_zone[1] : dead_zone[0];
+                }
+                else
+                {
+                    return (abs(dead_zone[0] - input) > abs(dead_zone[1] - input)) ? dead_zone[1] : dead_zone[0];
+                }
             }
 
             if (input < min)
@@ -63,9 +71,12 @@ namespace vslib
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
         std::optional<fgc4::utils::Warning> limitNonRT(T input) noexcept
         {
-            if (std::isnan(input))
+            if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
             {
-                return fgc4::utils::Warning("Value is NaN.\n");
+                if (std::isnan(input))
+                {
+                    return fgc4::utils::Warning("Value is NaN.\n");
+                }
             }
 
             if (m_dead_zone_defined && (input > dead_zone[0] && input < dead_zone[1]))
