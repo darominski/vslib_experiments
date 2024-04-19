@@ -35,23 +35,13 @@ namespace vslib
 
             for (int64_t index = 0; index < BufferLength; index++)
             {
-                int64_t buffer_index;
-                if constexpr ((BufferLength & (BufferLength - 1)) == 0)
+                int64_t buffer_index = (m_head - 1 - index);
+                // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
+                // when if statement is used instead of modulo to perform the shift below
+                // tertiary operator does not improve the efficiency by more than 2% at a cost to readability
+                if (buffer_index < 0)
                 {
-                    // When BufferLength is a power of 2, the binary shift can improve the efficiency
-                    // of this calculation by around 30% in comparison with the else case
-                    buffer_index = (m_head - 1 - index) & (BufferLength - 1);
-                }
-                else
-                {
-                    buffer_index = (m_head - 1 - index);
-                    // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
-                    // when if statement is used instead of modulo to perform the shift below
-                    // tertiary operator does not improve the efficiency by more than 2% at a cost to readability
-                    if (buffer_index < 0)
-                    {
-                        buffer_index += BufferLength;
-                    }
+                    buffer_index += BufferLength;
                 }
                 output += m_buffer[buffer_index] * coefficients[index];
             }
