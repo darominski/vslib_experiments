@@ -2,6 +2,7 @@
 #include <array>
 #include <bmboot/payload_runtime.hpp>
 #include <cerrno>
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
@@ -14,9 +15,11 @@
 #include "boxFilter.h"
 #include "componentArray.h"
 #include "compositePID.h"
+#include "converter.h"
 #include "firFilter.h"
 #include "iirFilter.h"
 #include "interruptRegistry.h"
+#include "limitRange.h"
 #include "logString.h"
 #include "lookupTable.h"
 #include "parameterMap.h"
@@ -39,37 +42,44 @@ using namespace fgc4;
 
 namespace user
 {
-    // constexpr size_t length = 5;
-    // vslib::RST<length> rst("rst");
-    // vslib::FIRFilter<length>               filter("fir");
+    // vslib::RST<3> controller("rst");
+    vslib::IIRFilter<81> filter("filter");
 
-    std::vector<std::pair<double, double>> function()
-    {
-        constexpr size_t                       length = 1000;
-        std::vector<std::pair<double, double>> func(length);
-        // func.reserve(length);
-        for (size_t index = 0; index < length; index++)
-        {
-            func[index] = std::make_pair(index / 10.0, index * 1.1 / 10);
-        }
-        return func;
-    }
-    LookupTable<double> table("table", nullptr, function());
+    // std::vector<std::pair<double, double>> function()
+    // {
+    //     constexpr size_t                       length = 1000;
+    //     std::vector<std::pair<double, double>> func(length);
+    //     for (size_t index = 0; index < length; index++)
+    //     {
+    //         func[index] = std::make_pair(index * 1.0, sin(index * 2 * M_PI / static_cast<double>(length)));
+    //     }
+    //     return func;
+    // }
+
+    // LookupTable<double> table("table", nullptr, function(), true);
 
     void realTimeTask()
     {
-        for (int index = 0; index < 100; index++)
+        for (int index = 0; index < 50; index++)
         {
-            // volatile double const input    = std::rand() / 1e6;
-            volatile double const input    = index;
-            volatile auto         variable = table.interpolate(input);
-            // volatile auto variable = filter.filter(std::rand());
-            // volatile auto variable = rst.control(input, input + 2);
+            volatile double const input = std::rand();
+            // volatile double const input    = index;
+            // volatile auto         variable = table.interpolate(input);
+            // volatile auto variable      = table[input];
+            volatile auto variable      = filter.filter(input);
+            // volatile auto variable      = controller.control(input, input + 2);
+            // volatile auto variable = limit.limit(input);
         }
     }
 
 }   // namespace user
 
+// namespace user
+// {
+//     class SpecificConverter; // forward declaration of Specific converter class
+// }
+
+// extern user::Converter converter;
 
 int main()
 {
@@ -83,13 +93,28 @@ int main()
                                                          + fgc4::utils::constants::json_memory_pool_size
                                                          + fgc4::utils::constants::string_memory_pool_size;
 
-    ParameterSetting parameter_setting_task(
-        (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address
-    );
-    ParameterMap parameter_map(
-        (uint8_t*)write_parameter_map_queue_address, fgc4::utils::constants::json_memory_pool_size
-    );
+    // ParameterSetting parameter_setting_task(
+    //     (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address,
+    //     user::limit
+    // );
 
+    // ParameterMap parameter_map(
+    //     (uint8_t*)write_parameter_map_queue_address, fgc4::utils::constants::json_memory_pool_size,
+    //     user::limit
+    // );
+
+    // user::limit.min.setJsonValue(5);
+    // user::limit.max.setJsonValue(5000);
+    // user::controller.kd.setJsonValue(0.01);
+    // user::controller.ki.setJsonValue(0.01);
+    // // user::controller.N.setJsonValue((uint32_t)1);
+    // // user::controller.f0.setJsonValue(1);
+    // // user::controller.ts.setJsonValue(1);
+
+    // user::controller.verifyParameters();
+    // user::controller.flipBufferState();
+
+    // converter.init();
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
@@ -111,17 +136,19 @@ int main()
 
     // LookupTable<double> table("table", nullptr, function);
 
+    user::filter.verifyParameters();
+
     // No parameter declarations beyond this point!
     // ************************************************************
 
-
-    parameter_map.uploadParameterMap();
+    // std::cout << converter.serialize();
+    // parameter_map.uploadParameterMap();
     // 1 us  -> 1 kHz
     // 50 us -> 20 kHz
     // 20 us -> 50 kHz
     // 10 us -> 100 kHz
     // 1 us  -> 1 MHz
-    int            interrupt_delay = 50;   // us
+    int            interrupt_delay = 100;   // us
     TimerInterrupt timer("timer", independent_component, user::realTimeTask);
     nlohmann::json value = {interrupt_delay};
 
@@ -131,6 +158,7 @@ int main()
     timer.verifyParameters();
 
     timer.start();
+    // user::realTimeTask();
 
     int           counter        = 0;
     int           expected_delay = 210;
@@ -182,8 +210,8 @@ int main()
         // std::cout << counter << std::endl;
         __asm volatile("wfi");
         counter++;
-
         // parameter_setting_task.receiveJsonCommand();
+        // converter.backgroundTask();
         // usleep(500'000);   // 500 ms
     }
 
