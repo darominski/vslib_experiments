@@ -37,6 +37,12 @@ namespace vslib
                 }
             }
 
+            if (m_cumulative + input - m_integral_buffer[m_head] > integral_limit)
+            {
+                // maximum value not violating the integral limit
+                input = integral_limit - (m_cumulative - m_integral_buffer[m_head]);
+            }
+
             m_cumulative += (input - m_integral_buffer[m_head]);
 
             m_integral_buffer[m_head] = input;
@@ -44,11 +50,6 @@ namespace vslib
             if (m_head >= integral_limit_window_length)
             {
                 m_head -= integral_limit_window_length;
-            }
-
-            if (m_cumulative >= integral_limit)
-            {
-                return m_cumulative - integral_limit;   // maximum value not violating the integral limit
             }
 
             return input;

@@ -107,6 +107,9 @@ TEST_F(LimitIntegralTest, LimitIntegralDoubleDefault)
     EXPECT_EQ(serialized["parameters"][1]["type"], "UInt64");
 }
 
+// ************************************************************
+// Non-RT methods tests
+
 //! Tests catching value with excessive integrated value
 TEST_F(LimitIntegralTest, LimitIntegralIntNonRT)
 {
@@ -243,4 +246,149 @@ TEST_F(LimitIntegralTest, LimitIntegralNaNDoubleNonRT)
     const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value is NaN.\n");
+}
+
+// ************************************************************
+// RT methods tests
+
+//! Tests catching value with excessive integrated value
+TEST_F(LimitIntegralTest, LimitIntegralInt)
+{
+    std::string        name = "limit";
+    LimitIntegral<int> limit(name, nullptr);
+
+    int    integral_limit     = 100;
+    size_t time_window_length = 5;
+
+    set_limit_parameters<int>(limit, integral_limit, time_window_length);
+
+    int        first_input  = integral_limit - 1;
+    const auto first_output = limit.limit(first_input);
+    ASSERT_EQ(first_input, first_output);
+
+    int        second_input  = first_input;
+    const auto second_output = limit.limit(second_input);
+    ASSERT_NE(second_input, second_output);
+    ASSERT_EQ(second_output, integral_limit - first_input);
+}
+
+//! Tests catching value with excessive integrated value
+TEST_F(LimitIntegralTest, LimitIntegralUInt)
+{
+    std::string             name = "limit";
+    LimitIntegral<uint32_t> limit(name, nullptr);
+
+    uint32_t integral_limit     = 100;
+    size_t   time_window_length = 5;
+
+    set_limit_parameters<uint32_t>(limit, integral_limit, time_window_length);
+
+    uint32_t   first_input  = integral_limit - 1;
+    const auto first_output = limit.limit(first_input);
+    ASSERT_EQ(first_input, first_output);
+
+    uint32_t   second_input  = first_input;
+    const auto second_output = limit.limit(second_input);
+    ASSERT_NE(second_input, second_output);
+    ASSERT_EQ(second_output, integral_limit - first_input);
+}
+
+//! Tests catching value with excessive integrated value
+TEST_F(LimitIntegralTest, LimitIntegralFloat)
+{
+    std::string          name = "limit";
+    LimitIntegral<float> limit(name, nullptr);
+
+    float  integral_limit     = 100;
+    size_t time_window_length = 5;
+
+    set_limit_parameters<float>(limit, integral_limit, time_window_length);
+
+    float      first_input  = integral_limit - 1;
+    const auto first_output = limit.limit(first_input);
+    ASSERT_EQ(first_input, first_output);
+
+    float      second_input  = first_input;
+    const auto second_output = limit.limit(second_input);
+    ASSERT_NE(second_input, second_output);
+    ASSERT_EQ(second_output, integral_limit - first_input);
+}
+
+//! Tests catching value with excessive integrated value
+TEST_F(LimitIntegralTest, LimitIntegralDouble)
+{
+    std::string           name = "limit";
+    LimitIntegral<double> limit(name, nullptr);
+
+    double integral_limit     = 100;
+    size_t time_window_length = 5;
+
+    set_limit_parameters<double>(limit, integral_limit, time_window_length);
+
+    double     first_input  = integral_limit - 1;
+    const auto first_output = limit.limit(first_input);
+    ASSERT_EQ(first_input, first_output);
+
+    float      second_input  = first_input;
+    const auto second_output = limit.limit(second_input);
+    ASSERT_NE(second_input, second_output);
+    ASSERT_EQ(second_output, integral_limit - first_input);
+}
+
+//! Tests catching value with excessive integrated value
+TEST_F(LimitIntegralTest, LimitIntegralIntWrapAround)
+{
+    std::string        name = "limit";
+    LimitIntegral<int> limit(name, nullptr);
+
+    int    integral_limit     = 100;
+    size_t time_window_length = 4;
+
+    set_limit_parameters<int>(limit, integral_limit, time_window_length);
+
+    const int input = 10;
+    for (int index = 0; index < 5; index++)
+    {
+        auto output = limit.limit(input);
+        ASSERT_EQ(input, output);
+    }
+
+    float      overflow_input  = integral_limit - input * 3 + 1;   // 71
+    const auto overflow_output = limit.limit(overflow_input);
+    ASSERT_NE(overflow_input, overflow_output);
+    ASSERT_EQ(overflow_output, integral_limit - input * 3);
+}
+
+//! Tests catching excessive infinite value
+TEST_F(LimitIntegralTest, LimitIntegralInfDouble)
+{
+    std::string           name = "limit";
+    LimitIntegral<double> limit(name, nullptr);
+
+    double integral_limit     = 100;
+    size_t time_window_length = 5;
+
+    set_limit_parameters<double>(limit, integral_limit, time_window_length);
+
+    double     input  = std::numeric_limits<double>::infinity();
+    const auto output = limit.limit(input);
+    ASSERT_NE(input, output);
+    ASSERT_EQ(output, integral_limit);
+}
+
+//! Tests catching excessive infinite value
+TEST_F(LimitIntegralTest, LimitIntegralNaNDouble)
+{
+    std::string           name = "limit";
+    LimitIntegral<double> limit(name, nullptr);
+
+    double integral_limit     = 100;
+    size_t time_window_length = 5;
+
+    set_limit_parameters<double>(limit, integral_limit, time_window_length);
+
+    double     input  = std::numeric_limits<double>::quiet_NaN();
+    const auto output = limit.limit(input);
+    ASSERT_NE(input, output);
+    ASSERT_EQ(output, 0.0);
 }
