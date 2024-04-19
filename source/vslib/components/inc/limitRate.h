@@ -20,7 +20,7 @@ namespace vslib
         //!
         //! @param name Name of the LimitRange component
         //! @param parent Optional parent of the LimitRange component
-        LimitRate(std::string_view name, Component* parent = nullptr)
+        LimitRate(std::string_view name, Component* parent)
             : Component("LimitRate", name, parent),
               change_rate(*this, "change_rate")
         {

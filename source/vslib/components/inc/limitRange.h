@@ -16,7 +16,7 @@ namespace vslib
     class LimitRange : public Component
     {
       public:
-        LimitRange(std::string_view name, Component* parent = nullptr)
+        LimitRange(std::string_view name, Component* parent)
             : Component("LimitRange", name, parent),
               min(*this, "lower_threshold"),
               max(*this, "upper_threshold"),

@@ -15,7 +15,7 @@ namespace vslib
     class LimitRms : public Component
     {
       public:
-        LimitRms(std::string_view name, Component* parent = nullptr, double iteration_period = 5e-6)
+        LimitRms(std::string_view name, Component* parent, double iteration_period = 5e-6)
             : Component("LimitRms", name, parent),
               rms_limit(*this, "rms_threshold"),
               rms_time_constant(*this, "rms_time_constant", 1e-12),   // 1 ps limit
