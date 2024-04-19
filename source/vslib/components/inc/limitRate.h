@@ -54,18 +54,22 @@ namespace vslib
                 {
                     if (std::isinf(input))
                     {
-                        return change_rate;
+                        return m_previous_value + change_rate * time_difference;
                     }
                 }
                 m_previous_value     = input;
                 m_previous_value_set = true;
-                return {};
+                return input;
             }
             const double rate = abs(input - m_previous_value) / time_difference;
             if (rate > change_rate)
             {
-                m_previous_value = input;
-                return change_rate;
+                T tmp = input;
+                // maximal input to not violate the rate of change
+                input = m_previous_value + change_rate * time_difference;
+
+                m_previous_value = tmp;
+                return input;
             }
 
             m_previous_value = input;

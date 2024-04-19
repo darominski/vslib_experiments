@@ -35,6 +35,9 @@ class LimitRateTest : public ::testing::Test
     }
 };
 
+// ************************************************************
+// Construction and serialization tests
+
 //! Tests default construction of integral type LimitRate component
 TEST_F(LimitRateTest, LimitRateIntegralDefault)
 {
@@ -83,6 +86,28 @@ TEST_F(LimitRateTest, LimitRateDoubleDefault)
     EXPECT_EQ(serialized["parameters"][0]["type"], "Float64");
 }
 
+// ************************************************************
+// Tests of limits
+
+//! Tests catching value with excessive rate of change zone with int type
+TEST_F(LimitRateTest, LimitRateIntNonRT)
+{
+    std::string    name = "limit";
+    LimitRate<int> limit(name, nullptr);
+
+    const int change_rate = 10;
+
+    set_limit_parameters<int>(limit, change_rate);
+
+    int first_input = 5;
+    ASSERT_FALSE(limit.limitNonRT(first_input, 1.0).has_value());
+
+    float      second_input = first_input + change_rate + 1;
+    const auto warning      = limit.limitNonRT(second_input, 1.0);
+    ASSERT_TRUE(warning.has_value());
+    EXPECT_EQ(warning.value().warning_str, "Value: 16 with rate of 11 is above the maximal rate of change of: 10.\n");
+}
+
 //! Tests catching value with excessive rate of change zone with int type
 TEST_F(LimitRateTest, LimitRateInt)
 {
@@ -93,13 +118,33 @@ TEST_F(LimitRateTest, LimitRateInt)
 
     set_limit_parameters<int>(limit, change_rate);
 
-    int first_input = 5;
-    ASSERT_FALSE(limit.limit(first_input, 1.0));
+    const int  first_input  = 5;
+    const auto first_output = limit.limit(first_input, 1.0);
+    ASSERT_EQ(first_output, first_input);
 
-    float      second_input = first_input + change_rate + 1;
+    float      second_input  = first_input + change_rate + 1;
+    const auto second_output = limit.limit(second_input, 1.0);
+    ASSERT_NE(second_output, second_input);
+    ASSERT_EQ(second_output, first_input + change_rate * 1.0);
+}
+
+//! Tests catching value with excessive negative rate of change zone with int type
+TEST_F(LimitRateTest, LimitRateNegativeIntNonRT)
+{
+    std::string    name = "limit";
+    LimitRate<int> limit(name, nullptr);
+
+    const int change_rate = 10;
+
+    set_limit_parameters<int>(limit, change_rate);
+
+    int first_input = -5;
+    ASSERT_FALSE(limit.limitNonRT(first_input, 1.0));
+
+    float      second_input = first_input - change_rate - 1;
     const auto warning      = limit.limitNonRT(second_input, 1.0);
     ASSERT_TRUE(warning.has_value());
-    EXPECT_EQ(warning.value().warning_str, "Value: 16 with rate of 11 is above the maximal rate of change of: 10.\n");
+    EXPECT_EQ(warning.value().warning_str, "Value: -16 with rate of 11 is above the maximal rate of change of: 10.\n");
 }
 
 //! Tests catching value with excessive negative rate of change zone with int type
@@ -112,13 +157,33 @@ TEST_F(LimitRateTest, LimitRateNegativeInt)
 
     set_limit_parameters<int>(limit, change_rate);
 
-    int first_input = -5;
-    ASSERT_FALSE(limit.limit(first_input, 1.0));
+    int        first_input  = -5;
+    const auto first_output = limit.limit(first_input, 1.0);
+    ASSERT_EQ(first_input, first_output);
 
-    float      second_input = first_input - change_rate - 1;
+    float      second_input  = first_input - change_rate - 1;
+    const auto second_output = limit.limit(second_input, 1.0);
+    ASSERT_NE(second_output, second_input);
+    ASSERT_EQ(second_output, first_input + change_rate * 1.0);
+}
+
+//! Tests catching value with excessive rate of change zone with double type
+TEST_F(LimitRateTest, LimitRateFloatNonRT)
+{
+    std::string      name = "limit";
+    LimitRate<float> limit(name, nullptr);
+
+    const float change_rate = 1.0;
+
+    set_limit_parameters<float>(limit, change_rate);
+
+    float first_input = 2.0;
+    ASSERT_FALSE(limit.limitNonRT(first_input, 0.01));
+
+    float      second_input = first_input + change_rate + 1;
     const auto warning      = limit.limitNonRT(second_input, 1.0);
     ASSERT_TRUE(warning.has_value());
-    EXPECT_EQ(warning.value().warning_str, "Value: -16 with rate of 11 is above the maximal rate of change of: 10.\n");
+    EXPECT_EQ(warning.value().warning_str, "Value: 4 with rate of 2 is above the maximal rate of change of: 1.\n");
 }
 
 //! Tests catching value with excessive rate of change zone with double type
@@ -131,13 +196,33 @@ TEST_F(LimitRateTest, LimitRateFloat)
 
     set_limit_parameters<float>(limit, change_rate);
 
-    float first_input = 2.0;
-    ASSERT_FALSE(limit.limit(first_input, 0.01));
+    float      first_input  = 2.0;
+    const auto first_output = limit.limit(first_input, 0.01);
+    ASSERT_EQ(first_input, first_output);
 
-    float      second_input = first_input + change_rate + 1;
+    float      second_input  = first_input + change_rate + 1;
+    const auto second_output = limit.limit(second_input, 1.0);
+    ASSERT_NE(second_input, second_output);
+    ASSERT_EQ(second_output, first_input + change_rate * 1.0);
+}
+
+//! Tests catching value with excessive negative rate of change zone with double type
+TEST_F(LimitRateTest, LimitRateNegativeFloatNonRT)
+{
+    std::string      name = "limit";
+    LimitRate<float> limit(name, nullptr);
+
+    const float change_rate = 1.0;
+
+    set_limit_parameters<float>(limit, change_rate);
+
+    float first_input = -2.0;
+    ASSERT_FALSE(limit.limitNonRT(first_input, 0.01));
+
+    float      second_input = first_input - change_rate - 1;
     const auto warning      = limit.limitNonRT(second_input, 1.0);
     ASSERT_TRUE(warning.has_value());
-    EXPECT_EQ(warning.value().warning_str, "Value: 4 with rate of 2 is above the maximal rate of change of: 1.\n");
+    EXPECT_EQ(warning.value().warning_str, "Value: -4 with rate of 2 is above the maximal rate of change of: 1.\n");
 }
 
 //! Tests catching value with excessive negative rate of change zone with double type
@@ -150,13 +235,33 @@ TEST_F(LimitRateTest, LimitRateNegativeFloat)
 
     set_limit_parameters<float>(limit, change_rate);
 
-    float first_input = -2.0;
-    ASSERT_FALSE(limit.limit(first_input, 0.01));
+    float      first_input  = -2.0;
+    const auto first_output = limit.limit(first_input, 0.01);
+    ASSERT_EQ(first_input, first_output);
 
-    float      second_input = first_input - change_rate - 1;
-    const auto warning      = limit.limitNonRT(second_input, 1.0);
+    float      second_input  = first_input - change_rate - 1;
+    const auto second_output = limit.limit(second_input, 1.0);
+    ASSERT_NE(second_input, second_output);
+    ASSERT_EQ(second_output, first_input + change_rate * 1.0);
+}
+
+//! Tests catching value with excessive rate of change zone with double type
+TEST_F(LimitRateTest, LimitRateDoubleNonRT)
+{
+    std::string       name = "limit";
+    LimitRate<double> limit(name, nullptr);
+
+    const double change_rate = 1.0;
+
+    set_limit_parameters<double>(limit, change_rate);
+
+    double first_input = 2.0;
+    ASSERT_FALSE(limit.limitNonRT(first_input, 0.01));
+
+    float      second_input = first_input + change_rate + 1;
+    const auto warning      = limit.limitNonRT(second_input, 0.01);
     ASSERT_TRUE(warning.has_value());
-    EXPECT_EQ(warning.value().warning_str, "Value: -4 with rate of 2 is above the maximal rate of change of: 1.\n");
+    EXPECT_EQ(warning.value().warning_str, "Value: 4 with rate of 200 is above the maximal rate of change of: 1.\n");
 }
 
 //! Tests catching value with excessive rate of change zone with double type
@@ -169,17 +274,18 @@ TEST_F(LimitRateTest, LimitRateDouble)
 
     set_limit_parameters<double>(limit, change_rate);
 
-    double first_input = 2.0;
-    ASSERT_FALSE(limit.limit(first_input, 0.01));
+    double       first_input  = 2.0;
+    double const first_output = limit.limit(first_input, 0.01);
+    ASSERT_EQ(first_input, first_output);
 
-    float      second_input = first_input + change_rate + 1;
-    const auto warning      = limit.limitNonRT(second_input, 0.01);
-    ASSERT_TRUE(warning.has_value());
-    EXPECT_EQ(warning.value().warning_str, "Value: 4 with rate of 200 is above the maximal rate of change of: 1.\n");
+    float      second_input  = first_input + change_rate + 1;
+    const auto second_output = limit.limit(second_input, 0.01);
+    ASSERT_NE(second_input, second_output);
+    ASSERT_EQ(second_output, first_input + 0.01 * change_rate);
 }
 
 //! Tests catching value with excessive negative rate of change zone with double type
-TEST_F(LimitRateTest, LimitRateNegativeDouble)
+TEST_F(LimitRateTest, LimitRateNegativeDoubleNonRT)
 {
     std::string       name = "limit";
     LimitRate<double> limit(name, nullptr);
@@ -197,8 +303,28 @@ TEST_F(LimitRateTest, LimitRateNegativeDouble)
     EXPECT_EQ(warning.value().warning_str, "Value: -4 with rate of 200 is above the maximal rate of change of: 1.\n");
 }
 
+//! Tests catching value with excessive negative rate of change zone with double type
+TEST_F(LimitRateTest, LimitRateNegativeDouble)
+{
+    std::string       name = "limit";
+    LimitRate<double> limit(name, nullptr);
+
+    const double change_rate = 1.0;
+
+    set_limit_parameters<double>(limit, change_rate);
+
+    double       first_input  = -2.0;
+    double const first_output = limit.limit(first_input, 0.01);
+    ASSERT_EQ(first_input, first_output);
+
+    float      second_input  = first_input - change_rate - 1;
+    const auto second_output = limit.limit(second_input, 0.01);
+    ASSERT_NE(second_input, second_output);
+    ASSERT_EQ(second_output, first_input + 0.01 * change_rate);
+}
+
 //! Tests catching input with time difference of zero with the last provided value
-TEST_F(LimitRateTest, LimitRateZeroTimeDifference)
+TEST_F(LimitRateTest, LimitRateZeroTimeDifferenceNonRT)
 {
     std::string       name = "limit";
     LimitRate<double> limit(name, nullptr);
@@ -214,8 +340,24 @@ TEST_F(LimitRateTest, LimitRateZeroTimeDifference)
     EXPECT_EQ(warning.value().warning_str, "Time difference is equal to zero in rate limit calculation.\n");
 }
 
+//! Tests catching input with time difference of zero with the last provided value
+TEST_F(LimitRateTest, LimitRateZeroTimeDifference)
+{
+    std::string       name = "limit";
+    LimitRate<double> limit(name, nullptr);
+
+    const double change_rate = 1.0;
+
+    set_limit_parameters<double>(limit, change_rate);
+
+    double     input  = 2.0;
+    const auto output = limit.limit(input, 0.0);
+    ASSERT_NE(input, output);
+    ASSERT_EQ(output, 0.0);
+}
+
 //! Tests that an expected warning is raised when inf input is provided
-TEST_F(LimitRateTest, LimitRateInf)
+TEST_F(LimitRateTest, LimitRateInfNonRT)
 {
     std::string       name = "limit";
     LimitRate<double> limit(name, nullptr);
@@ -234,8 +376,28 @@ TEST_F(LimitRateTest, LimitRateInf)
     EXPECT_EQ(warning.value().warning_str, "Value: inf with rate of inf is above the maximal rate of change of: 1.\n");
 }
 
+//! Tests that an expected warning is raised when inf input is provided
+TEST_F(LimitRateTest, LimitRateInf)
+{
+    std::string       name = "limit";
+    LimitRate<double> limit(name, nullptr);
+
+    const double change_rate = 1.0;
+
+    set_limit_parameters<double>(limit, change_rate);
+
+    double const first_input = 1.0;
+    auto         output      = limit.limit(first_input, 0.1);
+    ASSERT_EQ(first_input, output);
+
+    double second_input = std::numeric_limits<double>::infinity();
+    output              = limit.limit(second_input, 0.1);
+    ASSERT_NE(second_input, output);
+    ASSERT_EQ(output, first_input + 0.1 * change_rate);
+}
+
 //! Tests that an expected warning is raised when -inf input is provided
-TEST_F(LimitRateTest, LimitRateMinusInf)
+TEST_F(LimitRateTest, LimitRateMinusInfNonRT)
 {
     std::string       name = "limit";
     LimitRate<double> limit(name, nullptr);
@@ -254,8 +416,28 @@ TEST_F(LimitRateTest, LimitRateMinusInf)
     EXPECT_EQ(warning.value().warning_str, "Value: -inf with rate of inf is above the maximal rate of change of: 1.\n");
 }
 
+//! Tests that an expected warning is raised when -inf input is provided
+TEST_F(LimitRateTest, LimitRateMinusInf)
+{
+    std::string       name = "limit";
+    LimitRate<double> limit(name, nullptr);
+
+    const double change_rate = 1.0;
+
+    set_limit_parameters<double>(limit, change_rate);
+
+    double const first_input = 1.0;
+    auto         output      = limit.limit(first_input, 0.1);
+    ASSERT_EQ(first_input, output);
+
+    double second_input = -std::numeric_limits<double>::infinity();
+    output              = limit.limit(second_input, 0.1);
+    ASSERT_NE(second_input, output);
+    ASSERT_EQ(output, first_input + 0.1 * change_rate);
+}
+
 //! Tests that an expected warning is raised when NaN input is provided
-TEST_F(LimitRateTest, LimitRateNaN)
+TEST_F(LimitRateTest, LimitRateNaNNonRT)
 {
     std::string       name = "limit";
     LimitRate<double> limit(name, nullptr);
@@ -272,4 +454,24 @@ TEST_F(LimitRateTest, LimitRateNaN)
     warning             = limit.limitNonRT(second_input, 0.1);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value is NaN.\n");
+}
+
+//! Tests that an expected warning is raised when NaN input is provided
+TEST_F(LimitRateTest, LimitRateNaN)
+{
+    std::string       name = "limit";
+    LimitRate<double> limit(name, nullptr);
+
+    const double change_rate = 1.0;
+
+    set_limit_parameters<double>(limit, change_rate);
+
+    const double first_input  = 1.0;
+    const auto   first_output = limit.limit(first_input, 0.1);
+    ASSERT_EQ(first_input, first_output);
+
+    double       second_input  = std::numeric_limits<double>::quiet_NaN();
+    const double second_output = limit.limit(second_input, 0.1);
+    ASSERT_NE(second_output, second_input);
+    ASSERT_EQ(second_output, 0.0);
 }
