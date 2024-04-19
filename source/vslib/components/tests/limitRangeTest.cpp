@@ -129,11 +129,11 @@ TEST_F(LimitRangeTest, LimitRangeDoubleDefault)
 TEST_F(LimitRangeTest, LimitRangeMinAboveMaxWarningNonRT)
 {
     std::string        name = "limit";
-    LimitRange<double> limit(name);
+    LimitRange<double> limit(name, nullptr);
 
-    const int min     = -10;
-    const int max     = min;
-    auto      warning = set_limit_parameters<double>(limit, min, max);
+    const double min     = -10;
+    const double max     = min;
+    auto         warning = set_limit_parameters<double>(limit, min, max);
 
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Attempted to set the lower limit below the upper limit.\n");
@@ -143,7 +143,7 @@ TEST_F(LimitRangeTest, LimitRangeMinAboveMaxWarningNonRT)
 TEST_F(LimitRangeTest, LimitRangeDeadZoneWarningNonRT)
 {
     std::string     name = "limit";
-    LimitRange<int> limit(name);
+    LimitRange<int> limit(name, nullptr);
 
     const int          min = -10;
     const int          max = 10;

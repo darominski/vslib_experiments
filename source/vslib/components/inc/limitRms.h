@@ -34,13 +34,13 @@ namespace vslib
                 return 0.0;
             }
 
+            if (sqrt(m_cumulative + (pow(input, 2) - m_cumulative) * m_filter_factor) > rms_limit)
+            {
+                // maximal non-violating input
+                return sqrt(m_rms_limit2 / m_filter_factor + m_cumulative);
+            }
             // calculation re-implemented from regLimRmsRT
             m_cumulative += (pow(input, 2) - m_cumulative) * m_filter_factor;
-
-            if (sqrt(m_cumulative) > rms_limit)
-            {
-                return rms_limit - sqrt(m_cumulative);
-            }
 
             return input;
         }
@@ -56,8 +56,8 @@ namespace vslib
                 return fgc4::utils::Warning(fmt::format("Value is a NaN.\n"));
             }
 
-            m_cumulative
-                += (pow(input, 2) - m_cumulative) * m_filter_factor;   // calculation re-implemented from regLimRmsRT
+            // calculation re-implemented from regLimRmsRT
+            m_cumulative += (pow(input, 2) - m_cumulative) * m_filter_factor;
 
             if (sqrt(m_cumulative) > rms_limit)
             {
@@ -81,6 +81,7 @@ namespace vslib
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
             m_filter_factor = m_iteration_period / (rms_time_constant.toValidate() + 0.5 * m_iteration_period);
+            m_rms_limit2    = pow(rms_limit.toValidate(), 2);
             return {};
         }
 
@@ -88,5 +89,6 @@ namespace vslib
         double m_iteration_period;
         double m_cumulative{0};
         double m_filter_factor;
+        double m_rms_limit2;
     };
 }   // namespace vslib
