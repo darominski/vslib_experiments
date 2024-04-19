@@ -108,7 +108,7 @@ TEST_F(LimitIntegralTest, LimitIntegralDoubleDefault)
 }
 
 //! Tests catching value with excessive integrated value
-TEST_F(LimitIntegralTest, LimitIntegralInt)
+TEST_F(LimitIntegralTest, LimitIntegralIntNonRT)
 {
     std::string        name = "limit";
     LimitIntegral<int> limit(name, nullptr);
@@ -119,16 +119,16 @@ TEST_F(LimitIntegralTest, LimitIntegralInt)
     set_limit_parameters<int>(limit, integral_limit, time_window_length);
 
     int first_input = integral_limit - 1;
-    ASSERT_FALSE(limit.limit(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
 
     float      second_input = first_input;
-    const auto warning      = limit.limit(second_input);
+    const auto warning      = limit.limitNonRT(second_input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 99 leads to overflow of the integral limit of 100.\n");
 }
 
 //! Tests catching value with excessive integrated value
-TEST_F(LimitIntegralTest, LimitIntegralUInt)
+TEST_F(LimitIntegralTest, LimitIntegralUIntNonRT)
 {
     std::string             name = "limit";
     LimitIntegral<uint32_t> limit(name, nullptr);
@@ -139,16 +139,16 @@ TEST_F(LimitIntegralTest, LimitIntegralUInt)
     set_limit_parameters<uint32_t>(limit, integral_limit, time_window_length);
 
     uint32_t first_input = integral_limit - 1;
-    ASSERT_FALSE(limit.limit(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
 
     uint32_t   second_input = first_input;
-    const auto warning      = limit.limit(second_input);
+    const auto warning      = limit.limitNonRT(second_input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 99 leads to overflow of the integral limit of 100.\n");
 }
 
 //! Tests catching value with excessive integrated value
-TEST_F(LimitIntegralTest, LimitIntegralFloat)
+TEST_F(LimitIntegralTest, LimitIntegralFloatNonRT)
 {
     std::string          name = "limit";
     LimitIntegral<float> limit(name, nullptr);
@@ -159,16 +159,16 @@ TEST_F(LimitIntegralTest, LimitIntegralFloat)
     set_limit_parameters<float>(limit, integral_limit, time_window_length);
 
     float first_input = integral_limit - 1;
-    ASSERT_FALSE(limit.limit(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
 
     float      second_input = first_input;
-    const auto warning      = limit.limit(second_input);
+    const auto warning      = limit.limitNonRT(second_input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 99 leads to overflow of the integral limit of 100.\n");
 }
 
 //! Tests catching value with excessive integrated value
-TEST_F(LimitIntegralTest, LimitIntegralDouble)
+TEST_F(LimitIntegralTest, LimitIntegralDoubleNonRT)
 {
     std::string           name = "limit";
     LimitIntegral<double> limit(name, nullptr);
@@ -179,16 +179,16 @@ TEST_F(LimitIntegralTest, LimitIntegralDouble)
     set_limit_parameters<double>(limit, integral_limit, time_window_length);
 
     double first_input = integral_limit - 1;
-    ASSERT_FALSE(limit.limit(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
 
     float      second_input = first_input;
-    const auto warning      = limit.limit(second_input);
+    const auto warning      = limit.limitNonRT(second_input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 99 leads to overflow of the integral limit of 100.\n");
 }
 
 //! Tests catching value with excessive integrated value
-TEST_F(LimitIntegralTest, LimitIntegralIntWrapAround)
+TEST_F(LimitIntegralTest, LimitIntegralIntWrapAroundNonRT)
 {
     std::string        name = "limit";
     LimitIntegral<int> limit(name, nullptr);
@@ -199,20 +199,20 @@ TEST_F(LimitIntegralTest, LimitIntegralIntWrapAround)
     set_limit_parameters<int>(limit, integral_limit, time_window_length);
 
     int first_input = 10;
-    ASSERT_FALSE(limit.limit(first_input));
-    ASSERT_FALSE(limit.limit(first_input));
-    ASSERT_FALSE(limit.limit(first_input));
-    ASSERT_FALSE(limit.limit(first_input));
-    ASSERT_FALSE(limit.limit(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
 
     float      overflow_input = integral_limit - first_input * 3 + 1;
-    const auto warning        = limit.limit(overflow_input);
+    const auto warning        = limit.limitNonRT(overflow_input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 71 leads to overflow of the integral limit of 100.\n");
 }
 
 //! Tests catching excessive infinite value
-TEST_F(LimitIntegralTest, LimitIntegralInfDouble)
+TEST_F(LimitIntegralTest, LimitIntegralInfDoubleNonRT)
 {
     std::string           name = "limit";
     LimitIntegral<double> limit(name, nullptr);
@@ -223,13 +223,13 @@ TEST_F(LimitIntegralTest, LimitIntegralInfDouble)
     set_limit_parameters<double>(limit, integral_limit, time_window_length);
 
     double     input   = std::numeric_limits<double>::infinity();
-    const auto warning = limit.limit(input);
+    const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: inf leads to overflow of the integral limit of 100.\n");
 }
 
 //! Tests catching excessive infinite value
-TEST_F(LimitIntegralTest, LimitIntegralNaNDouble)
+TEST_F(LimitIntegralTest, LimitIntegralNaNDoubleNonRT)
 {
     std::string           name = "limit";
     LimitIntegral<double> limit(name, nullptr);
@@ -240,7 +240,7 @@ TEST_F(LimitIntegralTest, LimitIntegralNaNDouble)
     set_limit_parameters<double>(limit, integral_limit, time_window_length);
 
     double     input   = std::numeric_limits<double>::quiet_NaN();
-    const auto warning = limit.limit(input);
+    const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value is NaN.\n");
 }

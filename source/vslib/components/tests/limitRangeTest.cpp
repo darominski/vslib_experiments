@@ -126,7 +126,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleDefault)
 // Tests that the expected warnings are raised during validation of incorrect inputs
 
 //! Tests that appropriate warning is raised if an attempt is made to set min value larger than max
-TEST_F(LimitRangeTest, LimitRangeMinAboveMaxWarning)
+TEST_F(LimitRangeTest, LimitRangeMinAboveMaxWarningNonRT)
 {
     std::string        name = "limit";
     LimitRange<double> limit(name);
@@ -140,7 +140,7 @@ TEST_F(LimitRangeTest, LimitRangeMinAboveMaxWarning)
 }
 
 //! Tests that appropriate warning is raised if an attempt is made to set min value larger than max
-TEST_F(LimitRangeTest, LimitRangeDeadZoneWarning)
+TEST_F(LimitRangeTest, LimitRangeDeadZoneWarningNonRT)
 {
     std::string     name = "limit";
     LimitRange<int> limit(name);
@@ -159,7 +159,7 @@ TEST_F(LimitRangeTest, LimitRangeDeadZoneWarning)
 // Basic min/max tests for supported types
 
 //! Tests catching lower limit violation with int type
-TEST_F(LimitRangeTest, LimitRangeIntMin)
+TEST_F(LimitRangeTest, LimitRangeIntMinNonRT)
 {
     std::string     name = "int_limit";
     LimitRange<int> int_limit(name, nullptr);
@@ -170,13 +170,13 @@ TEST_F(LimitRangeTest, LimitRangeIntMin)
 
     const double input = min - 2;
 
-    const auto warning = int_limit.limit(input);
+    const auto warning = int_limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: -12 is below the minimal value of -10.\n");
 }
 
 //! Tests that min limit is exclusive, with int type
-TEST_F(LimitRangeTest, LimitRangeIntMinExclusive)
+TEST_F(LimitRangeTest, LimitRangeIntMinExclusiveNonRT)
 {
     std::string     name = "int_limit";
     LimitRange<int> int_limit(name, nullptr);
@@ -187,12 +187,12 @@ TEST_F(LimitRangeTest, LimitRangeIntMinExclusive)
 
     const double input = min;
 
-    const auto warning = int_limit.limit(input);
+    const auto warning = int_limit.limitNonRT(input);
     ASSERT_FALSE(warning.has_value());
 }
 
 //! Tests that min limit is exclusive, with float type
-TEST_F(LimitRangeTest, LimitRangeFloatMinExclusive)
+TEST_F(LimitRangeTest, LimitRangeFloatMinExclusiveNonRT)
 {
     std::string       name = "float_limit";
     LimitRange<float> float_limit(name, nullptr);
@@ -203,12 +203,12 @@ TEST_F(LimitRangeTest, LimitRangeFloatMinExclusive)
 
     const float input = min;
 
-    const auto warning = float_limit.limit(input);
+    const auto warning = float_limit.limitNonRT(input);
     ASSERT_FALSE(warning.has_value());
 }
 
 //! Tests catching lower limit violation with unsigned int type
-TEST_F(LimitRangeTest, LimitRangeUIntMin)
+TEST_F(LimitRangeTest, LimitRangeUIntMinNonRT)
 {
     std::string          name = "uint_limit";
     LimitRange<uint64_t> uint_limit(name, nullptr);
@@ -219,13 +219,13 @@ TEST_F(LimitRangeTest, LimitRangeUIntMin)
 
     const uint64_t input = 0;
 
-    const auto warning = uint_limit.limit(input);
+    const auto warning = uint_limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 0 is below the minimal value of 1.\n");
 }
 
 //! Tests catching lower limit violation with double type
-TEST_F(LimitRangeTest, LimitRangeDoubleMin)
+TEST_F(LimitRangeTest, LimitRangeDoubleMinNonRT)
 {
     std::string        name = "dbl_limit";
     LimitRange<double> double_limit(name, nullptr);
@@ -236,13 +236,13 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMin)
 
     const double input = min - 2;
 
-    const auto warning = double_limit.limit(input);
+    const auto warning = double_limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 2 is below the minimal value of 4.\n");
 }
 
 //! Tests catching upper limit violation with int type
-TEST_F(LimitRangeTest, LimitRangeIntMax)
+TEST_F(LimitRangeTest, LimitRangeIntMaxNonRT)
 {
     std::string     name = "int_limit";
     LimitRange<int> int_limit(name, nullptr);
@@ -253,13 +253,13 @@ TEST_F(LimitRangeTest, LimitRangeIntMax)
 
     const int input = max + 1;
 
-    const auto warning = int_limit.limit(input);
+    const auto warning = int_limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 101 is above the maximal value of 100.\n");
 }
 
 //! Tests catching upper limit violation with uint type
-TEST_F(LimitRangeTest, LimitRangeUIntMax)
+TEST_F(LimitRangeTest, LimitRangeUIntMaxNonRT)
 {
     std::string          name = "uint_limit";
     LimitRange<uint32_t> uint_limit(name, nullptr);
@@ -270,13 +270,13 @@ TEST_F(LimitRangeTest, LimitRangeUIntMax)
 
     const uint32_t input = max + 1;
 
-    const auto warning = uint_limit.limit(input);
+    const auto warning = uint_limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 101 is above the maximal value of 100.\n");
 }
 
 //! Tests catching upper limit violation with double type
-TEST_F(LimitRangeTest, LimitRangeDoubleMax)
+TEST_F(LimitRangeTest, LimitRangeDoubleMaxNonRT)
 {
     std::string        name = "dbl_limit";
     LimitRange<double> double_limit(name, nullptr);
@@ -287,7 +287,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMax)
 
     const double input = max + 1;
 
-    const auto warning = double_limit.limit(input);
+    const auto warning = double_limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 101 is above the maximal value of 100.\n");
 }
@@ -296,7 +296,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMax)
 // Basic dead-zone tests for supported types
 
 //! Tests catching value in the dead zone
-TEST_F(LimitRangeTest, LimitRangeIntDeadZone)
+TEST_F(LimitRangeTest, LimitRangeIntDeadZoneNonRT)
 {
     std::string     name = "int_limit";
     LimitRange<int> limit(name, nullptr);
@@ -309,14 +309,14 @@ TEST_F(LimitRangeTest, LimitRangeIntDeadZone)
 
     const int input = dead_zone[0] + 1;
 
-    const auto warning = limit.limit(input);
+    const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 1 is inside the defined dead zone of [0, 3].\n");
 }
 
 
 //! Tests catching value in the dead zone
-TEST_F(LimitRangeTest, LimitRangeUIntDeadZone)
+TEST_F(LimitRangeTest, LimitRangeUIntDeadZoneNonRT)
 {
     std::string          name = "int_limit";
     LimitRange<uint16_t> limit(name, nullptr);
@@ -329,14 +329,14 @@ TEST_F(LimitRangeTest, LimitRangeUIntDeadZone)
 
     const uint16_t input = dead_zone[0] + 1;
 
-    const auto warning = limit.limit(input);
+    const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 1 is inside the defined dead zone of [0, 4].\n");
 }
 
 
 //! Tests catching value in the dead zone
-TEST_F(LimitRangeTest, LimitRangeDoubleDeadZone)
+TEST_F(LimitRangeTest, LimitRangeDoubleDeadZoneNonRT)
 {
     std::string        name = "double_limit";
     LimitRange<double> limit(name, nullptr);
@@ -349,7 +349,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleDeadZone)
 
     const double input = dead_zone[0] + 0.1;
 
-    const auto warning = limit.limit(input);
+    const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: 0.1 is inside the defined dead zone of [0, 3].\n");
 }
@@ -358,7 +358,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleDeadZone)
 // Tests around numerical limits
 
 //! Tests that min limit is exclusive, with int type near the numerical limit
-TEST_F(LimitRangeTest, LimitRangeIntMinNumericalLimit)
+TEST_F(LimitRangeTest, LimitRangeIntMinNumericalLimitNonRT)
 {
     std::string     name = "int_limit";
     LimitRange<int> int_limit(name, nullptr);
@@ -369,13 +369,13 @@ TEST_F(LimitRangeTest, LimitRangeIntMinNumericalLimit)
 
     const int input = std::numeric_limits<int>::lowest();
 
-    const auto warning = int_limit.limit(input);
+    const auto warning = int_limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: -2147483648 is below the minimal value of -2147483647.\n");
 }
 
 //! Tests that min limit is exclusive, with float type near the numerical limit
-TEST_F(LimitRangeTest, LimitRangeFloatMinNumericalLimit)
+TEST_F(LimitRangeTest, LimitRangeFloatMinNumericalLimitNonRT)
 {
     std::string       name = "float_limit";
     LimitRange<float> float_limit(name, nullptr);
@@ -386,12 +386,12 @@ TEST_F(LimitRangeTest, LimitRangeFloatMinNumericalLimit)
 
     const float input = min;
 
-    const auto warning = float_limit.limit(input);
+    const auto warning = float_limit.limitNonRT(input);
     ASSERT_FALSE(warning.has_value());
 }
 
 //! Tests catching lower limit violation with double type near the numerical limit
-TEST_F(LimitRangeTest, LimitRangeDoubleMinNumericalLimit)
+TEST_F(LimitRangeTest, LimitRangeDoubleMinNumericalLimitNonRT)
 {
     std::string        name = "float_limit";
     LimitRange<double> double_limit(name, nullptr);
@@ -402,7 +402,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMinNumericalLimit)
 
     const double input = std::numeric_limits<double>::lowest();
 
-    const auto warning = double_limit.limit(input);
+    const auto warning = double_limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(
         warning.value().warning_str,
@@ -411,7 +411,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMinNumericalLimit)
 }
 
 //! Tests catching upper limit violation with int type close to the numerical limit
-TEST_F(LimitRangeTest, LimitRangeIntMaxNumericalLimit)
+TEST_F(LimitRangeTest, LimitRangeIntMaxNumericalLimitNonRT)
 {
     std::string         name = "int_limit";
     LimitRange<int64_t> int_limit(name, nullptr);
@@ -422,7 +422,7 @@ TEST_F(LimitRangeTest, LimitRangeIntMaxNumericalLimit)
 
     const int64_t input = std::numeric_limits<int64_t>::max();
 
-    const auto warning = int_limit.limit(input);
+    const auto warning = int_limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(
         warning.value().warning_str, "Value: 9223372036854775807 is above the maximal value of 9223372036854775806.\n"
@@ -430,7 +430,7 @@ TEST_F(LimitRangeTest, LimitRangeIntMaxNumericalLimit)
 }
 
 //! Tests catching upper limit violation with uint type close to the numerical limit
-TEST_F(LimitRangeTest, LimitRangeUIntMaxNumericalLimit)
+TEST_F(LimitRangeTest, LimitRangeUIntMaxNumericalLimitNonRT)
 {
     std::string          name = "uint_limit";
     LimitRange<uint64_t> uint_limit(name, nullptr);
@@ -441,7 +441,7 @@ TEST_F(LimitRangeTest, LimitRangeUIntMaxNumericalLimit)
 
     const uint64_t input = std::numeric_limits<uint64_t>::max();
 
-    const auto warning = uint_limit.limit(input);
+    const auto warning = uint_limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(
         warning.value().warning_str, "Value: 18446744073709551615 is above the maximal value of 18446744073709551614.\n"
@@ -449,7 +449,7 @@ TEST_F(LimitRangeTest, LimitRangeUIntMaxNumericalLimit)
 }
 
 //! Tests catching upper limit violation with double type
-TEST_F(LimitRangeTest, LimitRangeDoubleMaxNumericalLimit)
+TEST_F(LimitRangeTest, LimitRangeDoubleMaxNumericalLimitNonRT)
 {
     std::string        name = "dbl_limit";
     LimitRange<double> double_limit(name, nullptr);
@@ -460,7 +460,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMaxNumericalLimit)
 
     const double input = std::numeric_limits<double>::max();
 
-    const auto warning = double_limit.limit(input);
+    const auto warning = double_limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(
         warning.value().warning_str,
@@ -472,7 +472,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMaxNumericalLimit)
 // Tests with feeding infinity
 
 //! Tests catching -inf being outside of limits with double type
-TEST_F(LimitRangeTest, LimitRangeDoubleNegativeInf)
+TEST_F(LimitRangeTest, LimitRangeDoubleNegativeInfNonRT)
 {
     std::string        name = "dbl_limit";
     LimitRange<double> limit(name, nullptr);
@@ -483,13 +483,13 @@ TEST_F(LimitRangeTest, LimitRangeDoubleNegativeInf)
 
     const double input = -std::numeric_limits<double>::infinity();
 
-    const auto warning = limit.limit(input);
+    const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: -inf is below the minimal value of 4.\n");
 }
 
 //! Tests catching -inf being outside of limits with double type
-TEST_F(LimitRangeTest, LimitRangeDoubleInf)
+TEST_F(LimitRangeTest, LimitRangeDoubleInfNonRT)
 {
     std::string        name = "dbl_limit";
     LimitRange<double> limit(name, nullptr);
@@ -500,13 +500,13 @@ TEST_F(LimitRangeTest, LimitRangeDoubleInf)
 
     const double input = std::numeric_limits<double>::infinity();
 
-    const auto warning = limit.limit(input);
+    const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: inf is above the maximal value of 1000.\n");
 }
 
 //! Tests catching -inf being outside of limits with double type
-TEST_F(LimitRangeTest, LimitRangeDoubleNaN)
+TEST_F(LimitRangeTest, LimitRangeDoubleNaNNonRT)
 {
     std::string        name = "limit";
     LimitRange<double> limit(name, nullptr);
@@ -517,7 +517,7 @@ TEST_F(LimitRangeTest, LimitRangeDoubleNaN)
 
     const double input = std::numeric_limits<double>::quiet_NaN();
 
-    const auto warning = limit.limit(input);
+    const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value is NaN.\n");
 }

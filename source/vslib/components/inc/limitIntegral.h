@@ -26,8 +26,39 @@ namespace vslib
         //! Checks cumulative (integral) limit
         //!
         //! @param input Numerical input to be checked
+        //! @return Either original input if no issues were found or maximal allowed value, 0.0 if NaN was provided
+        T limit(T input) noexcept
+        {
+            if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
+            {
+                if (std::isnan(input))
+                {
+                    return 0.0;   // fixes nan input to return 0.0
+                }
+            }
+
+            m_cumulative += (input - m_integral_buffer[m_head]);
+
+            m_integral_buffer[m_head] = input;
+            m_head++;
+            if (m_head >= integral_limit_window_length)
+            {
+                m_head -= integral_limit_window_length;
+            }
+
+            if (m_cumulative >= integral_limit)
+            {
+                return m_cumulative - integral_limit;   // maximum value not violating the integral limit
+            }
+
+            return input;
+        }
+
+        //! Checks cumulative (integral) limit and produces a warning if a violation was found
+        //!
+        //! @param input Numerical input to be checked
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> limit(T input) noexcept
+        std::optional<fgc4::utils::Warning> limitNonRT(T input) noexcept
         {
             if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
             {

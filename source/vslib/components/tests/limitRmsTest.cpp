@@ -31,8 +31,8 @@ class LimitRmsTest : public ::testing::Test
         StaticJson rms_time_constant_val = rms_time_constant;
         limit.rms_time_constant.setJsonValue(rms_time_constant_val);
 
-        limit.flipBufferState();
         limit.verifyParameters();
+        limit.flipBufferState();
         limit.synchroniseParameterBuffers();
     }
 };
@@ -56,85 +56,85 @@ TEST_F(LimitRmsTest, LimitRmsDefault)
 }
 
 //! Tests catching value with excessive RMS value
-TEST_F(LimitRmsTest, LimitRms)
+TEST_F(LimitRmsTest, LimitRmsNonRT)
 {
     std::string name = "limit";
     LimitRms    limit(name);
 
     double rms               = 5;
-    double rms_time_constant = 1e-5;
+    double rms_time_constant = 5e-5;
 
     set_limit_parameters(limit, rms, rms_time_constant);
 
-    double first_input = rms;
-    ASSERT_FALSE(limit.limit(first_input));
+    double first_input = rms - 1;
+    ASSERT_FALSE(limit.limitNonRT(first_input));
 
     float      second_input = first_input + rms * rms;
-    const auto warning      = limit.limit(second_input);
+    const auto warning      = limit.limitNonRT(second_input);
     ASSERT_TRUE(warning.has_value());
-    EXPECT_EQ(warning.value().warning_str, "Value: 30 deviates too far from the RMS limit of 5.\n");
+    EXPECT_EQ(warning.value().warning_str, "Value: 29 deviates too far from the RMS limit of 5.\n");
 }
 
 //! Tests catching value with excessive RMS value coming after a number of entries
-TEST_F(LimitRmsTest, LimitRmsLongerRunning)
+TEST_F(LimitRmsTest, LimitRmsLongerRunningNonRT)
 {
     std::string name = "limit";
     LimitRms    limit(name);
 
     double rms               = 5;
-    double rms_time_constant = 1e-4;
+    double rms_time_constant = 5e-5;
 
     set_limit_parameters(limit, rms, rms_time_constant);
 
-    double first_input = 5;
-    ASSERT_FALSE(limit.limit(first_input));
-    ASSERT_FALSE(limit.limit(first_input));
-    ASSERT_FALSE(limit.limit(first_input));
-    ASSERT_FALSE(limit.limit(first_input));
-    ASSERT_FALSE(limit.limit(first_input));
+    double first_input = rms - 1;
+    ASSERT_FALSE(limit.limitNonRT(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
+    ASSERT_FALSE(limit.limitNonRT(first_input));
 
     float      second_input = first_input + rms * rms;
-    const auto warning      = limit.limit(second_input);
+    const auto warning      = limit.limitNonRT(second_input);
     ASSERT_TRUE(warning.has_value());
-    EXPECT_EQ(warning.value().warning_str, "Value: 30 deviates too far from the RMS limit of 5.\n");
+    EXPECT_EQ(warning.value().warning_str, "Value: 29 deviates too far from the RMS limit of 5.\n");
 }
 
 //! Tests catching warning when infinity is provided as input
-TEST_F(LimitRmsTest, LimitRmsInfInput)
+TEST_F(LimitRmsTest, LimitRmsInfInputNonRT)
 {
     std::string name = "limit";
     LimitRms    limit(name);
 
     double rms               = 5;
-    double rms_time_constant = 1e-4;
+    double rms_time_constant = 5e-5;
 
     set_limit_parameters(limit, rms, rms_time_constant);
 
     double     input   = std::numeric_limits<double>::infinity();
-    const auto warning = limit.limit(input);
+    const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: inf deviates too far from the RMS limit of 5.\n");
 }
 
 //! Tests catching warning when minus infinity is provided as input
-TEST_F(LimitRmsTest, LimitRmsMinusInfInput)
+TEST_F(LimitRmsTest, LimitRmsMinusInfInputNonRT)
 {
     std::string name = "limit";
     LimitRms    limit(name);
 
     double rms               = 5;
-    double rms_time_constant = 1e-4;
+    double rms_time_constant = 5e-5;
 
     set_limit_parameters(limit, rms, rms_time_constant);
 
     double     input   = -std::numeric_limits<double>::infinity();
-    const auto warning = limit.limit(input);
+    const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value: -inf deviates too far from the RMS limit of 5.\n");
 }
 
 //! Tests catching warning when NaN is provided as input
-TEST_F(LimitRmsTest, LimitRmsNanInput)
+TEST_F(LimitRmsTest, LimitRmsNanInputNonRT)
 {
     std::string name = "limit";
     LimitRms    limit(name);
@@ -145,7 +145,7 @@ TEST_F(LimitRmsTest, LimitRmsNanInput)
     set_limit_parameters(limit, rms, rms_time_constant);
 
     double     input   = std::numeric_limits<double>::quiet_NaN();
-    const auto warning = limit.limit(input);
+    const auto warning = limit.limitNonRT(input);
     ASSERT_TRUE(warning.has_value());
     EXPECT_EQ(warning.value().warning_str, "Value is a NaN.\n");
 }

@@ -23,11 +23,33 @@ namespace vslib
         {
         }
 
-        //! Checks the RMS limit
+        //! Checks the provided value against RMS limit and returns compliant value
         //!
         //! @param input Numerical input to be checked against set RMS limit
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> limit(double input) noexcept
+        double limit(double input) noexcept
+        {
+            if (std::isnan(input))
+            {
+                return 0.0;
+            }
+
+            // calculation re-implemented from regLimRmsRT
+            m_cumulative += (pow(input, 2) - m_cumulative) * m_filter_factor;
+
+            if (sqrt(m_cumulative) > rms_limit)
+            {
+                return rms_limit - sqrt(m_cumulative);
+            }
+
+            return input;
+        }
+
+        //! Checks the provided value against RMS limit and returns compliant value, non RT function
+        //!
+        //! @param input Numerical input to be checked against set RMS limit
+        //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
+        std::optional<fgc4::utils::Warning> limitNonRT(double input) noexcept
         {
             if (std::isnan(input))
             {
@@ -58,7 +80,7 @@ namespace vslib
 
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
-            m_filter_factor = m_iteration_period / (rms_time_constant + 0.5 * m_iteration_period);
+            m_filter_factor = m_iteration_period / (rms_time_constant.toValidate() + 0.5 * m_iteration_period);
             return {};
         }
 
