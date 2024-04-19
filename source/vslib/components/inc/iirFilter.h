@@ -44,8 +44,8 @@ namespace vslib
                 {
                     buffer_index += BufferLength;
                 }
-                output += m_inputs_buffer[buffer_index] * numerator[index]
-                          - m_outputs_buffer[buffer_index] * denominator[index];
+                output += m_inputs_buffer[buffer_index] * m_numerator[index]
+                          - m_outputs_buffer[buffer_index] * m_denominator[index];
             }
 
             shiftOutputBuffer(output);
@@ -75,7 +75,19 @@ namespace vslib
         Parameter<std::array<double, BufferLength>> numerator;
         Parameter<std::array<double, BufferLength>> denominator;
 
+        //! Copies Parameter values into local containers for optimised access
+        //!
+        //! @return Optionally returns a Warning if an issue was found
+        std::optional<fgc4::utils::Warning> verifyParameters() override
+        {
+            std::copy(numerator.toValidate().cbegin(), numerator.toValidate().cend(), std::begin(m_numerator));
+            std::copy(denominator.toValidate().cbegin(), denominator.toValidate().cend(), std::begin(m_denominator));
+            return {};
+        }
+
       private:
+        std::array<double, BufferLength> m_numerator;
+        std::array<double, BufferLength> m_denominator;
         std::array<double, BufferLength> m_inputs_buffer{0};
         std::array<double, BufferLength> m_outputs_buffer{0};
         int64_t                          m_head{0};
@@ -125,7 +137,8 @@ namespace vslib
         auto const previous_input  = m_inputs_buffer[0];
         auto const previous_output = m_outputs_buffer[0];
 
-        double const output = input * numerator[0] + previous_input * numerator[1] - previous_output * denominator[1];
+        double const output
+            = input * m_numerator[0] + previous_input * m_numerator[1] - previous_output * m_denominator[1];
 
         // update input and output buffers
         m_inputs_buffer[0]  = input;

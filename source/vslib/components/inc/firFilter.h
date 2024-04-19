@@ -69,7 +69,17 @@ namespace vslib
 
         Parameter<std::array<double, BufferLength>> coefficients;
 
+        //! Copies Parameter values into the local container for optimised access
+        //!
+        //! @return Optionally returns a Warning if an issue was found
+        std::optional<fgc4::utils::Warning> verifyParameters() override
+        {
+            std::copy(coefficients.toValidate().cbegin(), coefficients.toValidate().cend(), m_coefficients.begin());
+            return {};
+        }
+
       private:
+        std::array<double, BufferLength> m_coefficients{0};
         std::array<double, BufferLength> m_buffer{0};
         int64_t                          m_head{0};
 
@@ -105,7 +115,7 @@ namespace vslib
     double FIRFilter<2>::filter(const double input)
     {
         auto const   previous_input = m_buffer[0];
-        double const output         = input * coefficients[0] + previous_input * coefficients[1];
+        double const output         = input * m_coefficients[0] + previous_input * m_coefficients[1];
         m_buffer[0]                 = input;   // update input buffer
 
         return output;
@@ -120,7 +130,7 @@ namespace vslib
         auto const previous_input = m_buffer[1];
 
         double const output
-            = input * coefficients[0] + previous_input * coefficients[1] + earlier_input * coefficients[2];
+            = input * m_coefficients[0] + previous_input * m_coefficients[1] + earlier_input * m_coefficients[2];
 
         // update input buffer
         m_buffer[0] = m_buffer[1];
