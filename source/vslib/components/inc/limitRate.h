@@ -68,7 +68,7 @@ namespace vslib
                 // maximal input to not violate the rate of change
                 input = m_previous_value + change_rate * time_difference;
 
-                m_previous_value = tmp;
+                m_previous_value = input;
                 return input;
             }
 
