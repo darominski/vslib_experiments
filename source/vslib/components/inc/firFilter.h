@@ -12,16 +12,18 @@
 
 namespace vslib
 {
-    template<size_t BufferLength>
+    template<int64_t FilterOrder>
     class FIRFilter : public Filter
     {
+        constexpr static int64_t buffer_length = FilterOrder + 1;
+
       public:
         //! Constructor of the FIR filter component, initializing one Parameter: coefficients
         FIRFilter(std::string_view name, Component* parent = nullptr)
             : Filter("FIRFilter", name, parent),
               coefficients(*this, "coefficients")
         {
-            static_assert(BufferLength > 1, "Buffer length needs to be a positive number larger than one.");
+            static_assert(FilterOrder >= 1, "Filter order needs to be a positive number larger than zero.");
         }
 
         //! Filters the provided input by convolving coefficients and the input, including previous inputs
@@ -33,7 +35,7 @@ namespace vslib
             shiftBuffer(input);
             double output(0);
 
-            for (int64_t index = 0; index < BufferLength; index++)
+            for (int64_t index = 0; index < buffer_length; index++)
             {
                 int64_t buffer_index = (m_head - 1 - index);
                 // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
@@ -41,7 +43,7 @@ namespace vslib
                 // tertiary operator does not improve the efficiency by more than 2% at a cost to readability
                 if (buffer_index < 0)
                 {
-                    buffer_index += BufferLength;
+                    buffer_index += buffer_length;
                 }
                 output += m_buffer[buffer_index] * coefficients[index];
             }
@@ -67,7 +69,7 @@ namespace vslib
             return outputs;
         }
 
-        Parameter<std::array<double, BufferLength>> coefficients;
+        Parameter<std::array<double, buffer_length>> coefficients;
 
         //! Copies Parameter values into the local container for optimised access
         //!
@@ -79,9 +81,9 @@ namespace vslib
         }
 
       private:
-        std::array<double, BufferLength> m_coefficients{0};
-        std::array<double, BufferLength> m_buffer{0};
-        int64_t                          m_head{0};
+        std::array<double, buffer_length> m_coefficients{0};
+        std::array<double, buffer_length> m_buffer{0};
+        int64_t                           m_head{0};
 
         //! Pushes the provided value into the front of the buffer and removes the oldest value
         //!
@@ -90,19 +92,10 @@ namespace vslib
         {
             m_buffer[m_head] = input;
 
-            if constexpr ((BufferLength & (BufferLength - 1)) == 0)
+            m_head++;
+            if (m_head >= buffer_length)
             {
-                // When BufferLength is a power of 2, the binary shift can improve the efficiency
-                // of this calculation by around 4% in comparison with the else case
-                m_head = (m_head + 1) & (BufferLength - 1);
-            }
-            else
-            {
-                m_head++;
-                if (m_head >= BufferLength)
-                {
-                    m_head -= BufferLength;
-                }
+                m_head -= buffer_length;
             }
         }
     };
@@ -110,9 +103,11 @@ namespace vslib
     // ************************************************************
     // Partial template specialization for low-order filters. Specialization of functions avoids repetition
     // of the entire class structure.
+    //
+    // Benchmarking showed 44% gain for the first order, and 72% for the 2nd order.
 
     template<>
-    double FIRFilter<2>::filter(const double input)
+    double FIRFilter<1>::filter(const double input)
     {
         auto const   previous_input = m_buffer[0];
         double const output         = input * m_coefficients[0] + previous_input * m_coefficients[1];
@@ -121,10 +116,8 @@ namespace vslib
         return output;
     }
 
-    // Benchmarking showed 12% gain for the first order, and 72% for the 2nd order.
-
     template<>
-    double FIRFilter<3>::filter(const double input)
+    double FIRFilter<2>::filter(const double input)
     {
         auto const earlier_input  = m_buffer[0];
         auto const previous_input = m_buffer[1];

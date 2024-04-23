@@ -24,8 +24,8 @@ class FIRFilterTest : public ::testing::Test
         parameter_registry.clearRegistry();
     }
 
-    template<size_t N>
-    void setValues(FIRFilter<N>& filter, std::array<double, N>& parameter_values)
+    template<int64_t FilterOrder>
+    void setValues(FIRFilter<FilterOrder>& filter, std::array<double, FilterOrder + 1>& parameter_values)
     {
         StaticJson values = parameter_values;
         filter.coefficients.setJsonValue(values);
@@ -45,10 +45,11 @@ TEST_F(FIRFilterTest, FilterDefaultConstruction)
 //! Checks that a FIRFilter object can filter provided value
 TEST_F(FIRFilterTest, FilterSingleValue)
 {
-    constexpr int                     filter_length = 4;
-    FIRFilter<filter_length>          filter("filter");
+    constexpr int                     filter_order  = 3;
+    constexpr int                     filter_length = filter_order + 1;
+    FIRFilter<filter_order>           filter("filter");
     std::array<double, filter_length> coefficient_array{0.05, 0.8, 0.025, 0.057};
-    setValues<filter_length>(filter, coefficient_array);
+    setValues<filter_order>(filter, coefficient_array);
     for (int index = 0; index < filter_length; index++)
     {
         EXPECT_NEAR(filter.coefficients[index], coefficient_array[index], 1e-9);
@@ -61,9 +62,9 @@ TEST_F(FIRFilterTest, FilterSingleValue)
 //! Checks that a partial template specialization (1st order) object can filter provided value
 TEST_F(FIRFilterTest, FirstOrderFilterSingleValue)
 {
-    FIRFilter<2>          filter("filter");
+    FIRFilter<1>          filter("filter");
     std::array<double, 2> coefficient_array{0.2, 0.8};
-    setValues(filter, coefficient_array);
+    setValues<1>(filter, coefficient_array);
 
     double input = 3.14159;
     EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-6);
@@ -72,9 +73,9 @@ TEST_F(FIRFilterTest, FirstOrderFilterSingleValue)
 //! Checks that a partial template specialization (2nd order) object can filter provided value
 TEST_F(FIRFilterTest, SecondOrderFilterSingleValue)
 {
-    FIRFilter<3>          filter("filter");
+    FIRFilter<2>          filter("filter");
     std::array<double, 3> coefficient_array{0.05, 0.8, 0.15};
-    setValues(filter, coefficient_array);
+    setValues<2>(filter, coefficient_array);
 
     double input = 3.14159;
     EXPECT_NEAR(filter.filter(input), input * coefficient_array[0], 1e-6);
@@ -83,10 +84,11 @@ TEST_F(FIRFilterTest, SecondOrderFilterSingleValue)
 //! Checks that a FIRFilter object can filter a number of provided values
 TEST_F(FIRFilterTest, FilterMultipleValues)
 {
-    constexpr int                     filter_length = 8;
-    FIRFilter<filter_length>          filter("filter");
+    constexpr int                     filter_order  = 7;
+    constexpr int                     filter_length = filter_order + 1;
+    FIRFilter<filter_order>           filter("filter");
     std::array<double, filter_length> coefficient_array{0.1, 0.8, 0.05, 0.05};
-    setValues<filter_length>(filter, coefficient_array);
+    setValues<filter_order>(filter, coefficient_array);
 
     std::array<double, filter_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
     EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-6);
@@ -101,9 +103,9 @@ TEST_F(FIRFilterTest, FilterMultipleValues)
 TEST_F(FIRFilterTest, FirstOrderFilterMultipleValues)
 {
     constexpr int         inputs_length = 3;
-    FIRFilter<2>          filter("filter");
+    FIRFilter<1>          filter("filter");
     std::array<double, 2> coefficient_array{0.2, 0.8};
-    setValues(filter, coefficient_array);
+    setValues<1>(filter, coefficient_array);
 
     std::array<double, inputs_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
     EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-6);
@@ -115,9 +117,9 @@ TEST_F(FIRFilterTest, FirstOrderFilterMultipleValues)
 TEST_F(FIRFilterTest, SecondOrderFilterMultipleValues)
 {
     constexpr int         inputs_length = 3;
-    FIRFilter<3>          filter("filter");
+    FIRFilter<2>          filter("filter");
     std::array<double, 3> coefficient_array{0.15, 0.8, 0.05};
-    setValues(filter, coefficient_array);
+    setValues<2>(filter, coefficient_array);
 
     std::array<double, inputs_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
     EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-4);
@@ -131,10 +133,11 @@ TEST_F(FIRFilterTest, SecondOrderFilterMultipleValues)
 //! Checks that a FIRFilter object filters correctly a number of provided values larger than the number of coefficients
 TEST_F(FIRFilterTest, FilterMultipleValuesWrapAround)
 {
-    constexpr int                     filter_length = 2;
-    FIRFilter<filter_length>          filter("filter");
+    constexpr int                     filter_order  = 1;
+    constexpr int                     filter_length = filter_order + 1;
+    FIRFilter<filter_order>           filter("filter");
     std::array<double, filter_length> coefficient_array{0.2, 0.8};
-    setValues<filter_length>(filter, coefficient_array);
+    setValues<filter_order>(filter, coefficient_array);
 
     std::array<double, filter_length + 1> inputs{3.14159, 3.14159 * 2, 3.14159 * 3};
     EXPECT_NEAR(filter.filter(inputs[0]), inputs[0] * coefficient_array[0], 1e-4);
@@ -145,10 +148,11 @@ TEST_F(FIRFilterTest, FilterMultipleValuesWrapAround)
 //! Checks that a FIRFilter object can filter an array of inputs at once
 TEST_F(FIRFilterTest, FilterEntireArray)
 {
-    constexpr int                     filter_length = 4;
-    FIRFilter<filter_length>          filter("filter", nullptr);
+    constexpr int                     filter_order  = 3;
+    constexpr int                     filter_length = filter_order + 1;
+    FIRFilter<filter_order>           filter("filter", nullptr);
     std::array<double, filter_length> coefficient_array{0.1, 0.4, 0.4, 0.1};
-    setValues<filter_length>(filter, coefficient_array);
+    setValues<filter_order>(filter, coefficient_array);
 
     std::array<double, filter_length> inputs{3.14159, 3.14159 * 2, 3.14159 * 3, 3.14159 * 4};
     auto const                        output = filter.filter(inputs);
@@ -170,11 +174,12 @@ TEST_F(FIRFilterTest, FilterEntireArray)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
 {
-    constexpr int                     filter_length = 4;
-    FIRFilter<filter_length>          filter("filter");
+    constexpr int                     filter_order  = 3;
+    constexpr int                     filter_length = filter_order + 1;
+    FIRFilter<filter_order>           filter("filter");
     std::array<double, filter_length> coefficient_array{
         0.01674, 0.48326, 0.48326, 0.01674};   // calculated by fir1 Matlab function with n=3, and Wn=0.5
-    setValues<filter_length>(filter, coefficient_array);
+    setValues<filter_order>(filter, coefficient_array);
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
     std::filesystem::path inputs_path
@@ -207,12 +212,13 @@ TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, FilterBMeasDataSeventhOrder)
 {
-    constexpr int                     filter_length = 8;
-    FIRFilter<filter_length>          filter("filter");
+    constexpr int                     filter_order  = 7;
+    constexpr int                     filter_length = filter_order + 1;
+    FIRFilter<filter_order>           filter("filter");
     std::array<double, filter_length> coefficient_array{
         -7.776e-3, 6.445e-2, 4.433e-1,
         4.433e-1,  6.445e-2, -7.776e-3};   // calculated by fir1 Matlab function with n=5, and Wn=0.5
-    setValues<filter_length>(filter, coefficient_array);
+    setValues<filter_order>(filter, coefficient_array);
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
     std::filesystem::path inputs_path
@@ -245,12 +251,13 @@ TEST_F(FIRFilterTest, FilterBMeasDataSeventhOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
 {
-    constexpr int                     filter_length = 11;
-    FIRFilter<filter_length>          filter("filter");
+    constexpr int                     filter_order  = 10;
+    constexpr int                     filter_length = filter_order + 1;
+    FIRFilter<filter_order>           filter("filter");
     std::array<double, filter_length> coefficient_array{
         5.060e-3, 0.0,  -4.194e-2, 0.0, 2.885e-1, 4.968e-1,
         2.885e-1, 0.00, -4.194e-2, 0.0, 5.060e-3};   // calculated by fir1 Matlab function with n=10, and Wn=0.5
-    setValues<filter_length>(filter, coefficient_array);
+    setValues<filter_order>(filter, coefficient_array);
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
     std::filesystem::path inputs_path
@@ -283,12 +290,13 @@ TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
 {
-    constexpr int            filter_length = 5;
-    FIRFilter<filter_length> filter("filter");
+    constexpr int           filter_order  = 4;
+    constexpr int           filter_length = filter_order + 1;
+    FIRFilter<filter_order> filter("filter");
     // calculated with coefficients = designLowpassFIR(FilterOrder=2,CutoffFrequency=0.5,Window="hann"); command in
     // Matlab:
     std::array<double, filter_length> coefficient_array{0, 0.1945, 0.6110, 0.1945, 0};
-    setValues<filter_length>(filter, coefficient_array);
+    setValues<filter_order>(filter, coefficient_array);
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
     std::filesystem::path inputs_path
@@ -328,12 +336,13 @@ TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
     outputs_file.close();
 }
 
-//! Checks the behaviour of an 80th-order FIR filter on a real data coming from
+//! Checks the behaviour of an 81st-order FIR filter on a real data coming from
 //! GPS power converter, and compared with filtering in Matlab
-TEST_F(FIRFilterTest, FilterBMeasData80thOrder)
+TEST_F(FIRFilterTest, FilterBMeasData81stOrder)
 {
-    constexpr int                     filter_length = 82;
-    FIRFilter<filter_length>          filter("filter");
+    constexpr int                     filter_order  = 81;
+    constexpr int                     filter_length = filter_order + 1;
+    FIRFilter<filter_order>           filter("filter");
     std::array<double, filter_length> coefficient_array{
         0.000444601818173842,  -0.000463739605799769, -0.000499996477092942, 0.000554592463829041,
         0.00062877993267011,   -0.000723849715913591, -0.00084113894367772,  0.000982040919065611,
@@ -356,7 +365,7 @@ TEST_F(FIRFilterTest, FilterBMeasData80thOrder)
         -0.00134061421815078,  0.00114801745795324,   0.000982040919065611,  -0.00084113894367772,
         -0.000723849715913591, 0.00062877993267011,   0.000554592463829041,  -0.000499996477092942,
         -0.000463739605799769, 0.000444601818173842};   // calculated by fir1 Matlab function with n=80, and Wn=0.5
-    setValues<filter_length>(filter, coefficient_array);
+    setValues<filter_order>(filter, coefficient_array);
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
     std::filesystem::path inputs_path
