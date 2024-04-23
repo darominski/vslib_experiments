@@ -34,13 +34,15 @@ namespace vslib
                 return 0.0;
             }
 
-            if (sqrt(m_cumulative + (pow(input, 2) - m_cumulative) * m_filter_factor) > rms_limit)
+            const double new_cumulative = m_cumulative + (pow(input, 2) - m_cumulative) * m_filter_factor;
+
+            if (new_cumulative > m_rms_limit2)
             {
                 // maximal non-violating input
-                return sqrt(m_rms_limit2 / m_filter_factor + m_cumulative);
+                input = sqrt(m_rms_limit2 / m_filter_factor + m_cumulative);
             }
             // calculation re-implemented from regLimRmsRT
-            m_cumulative += (pow(input, 2) - m_cumulative) * m_filter_factor;
+            m_cumulative = new_cumulative;
 
             return input;
         }
@@ -89,6 +91,6 @@ namespace vslib
         double m_iteration_period;
         double m_cumulative{0};
         double m_filter_factor;
-        double m_rms_limit2;
+        double m_rms_limit2;   // optimisation method to not recalculate limit to the power of 2
     };
 }   // namespace vslib
