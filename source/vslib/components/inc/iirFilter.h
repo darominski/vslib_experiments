@@ -12,9 +12,11 @@
 
 namespace vslib
 {
-    template<size_t BufferLength>
+    template<int64_t FilterOrder>
     class IIRFilter : public Filter
     {
+        constexpr static int64_t buffer_length = FilterOrder + 1;
+
       public:
         //! Constructor of the IIR filter component, initializing one Parameter: coefficients
         IIRFilter(std::string_view name, Component* parent = nullptr)
@@ -22,7 +24,7 @@ namespace vslib
               numerator(*this, "numerator_coefficients"),
               denominator(*this, "denominator_coefficients")
         {
-            static_assert(BufferLength > 1, "Buffer length needs to be a positive number larger than one.");
+            static_assert(FilterOrder >= 1, "Filter order needs to be a positive number larger than zero.");
         }
 
         //! Filters the provided input by convolving coefficients and the input, including previous inputs
@@ -35,14 +37,14 @@ namespace vslib
             updateInputBuffer(input);
             double output = m_inputs_buffer[m_head] * numerator[0];
 
-            for (int64_t index = 1; index < BufferLength; index++)
+            for (int64_t index = 1; index < buffer_length; index++)
             {
                 int64_t buffer_index = (m_head - index);
                 // Benchmarking showed a significant speed-up (>30% for orders higher than 2)
                 // when if statement is used instead of modulo to perform the shift below
                 if (buffer_index < 0)
                 {
-                    buffer_index += BufferLength;
+                    buffer_index += buffer_length;
                 }
                 output += m_inputs_buffer[buffer_index] * m_numerator[index]
                           - m_outputs_buffer[buffer_index] * m_denominator[index];
@@ -72,8 +74,8 @@ namespace vslib
             return outputs;
         }
 
-        Parameter<std::array<double, BufferLength>> numerator;
-        Parameter<std::array<double, BufferLength>> denominator;
+        Parameter<std::array<double, buffer_length>> numerator;
+        Parameter<std::array<double, buffer_length>> denominator;
 
         //! Copies Parameter values into local containers for optimised access
         //!
@@ -86,11 +88,11 @@ namespace vslib
         }
 
       private:
-        std::array<double, BufferLength> m_numerator;
-        std::array<double, BufferLength> m_denominator;
-        std::array<double, BufferLength> m_inputs_buffer{0};
-        std::array<double, BufferLength> m_outputs_buffer{0};
-        int64_t                          m_head{0};
+        std::array<double, buffer_length> m_numerator;
+        std::array<double, buffer_length> m_denominator;
+        std::array<double, buffer_length> m_inputs_buffer{0};
+        std::array<double, buffer_length> m_outputs_buffer{0};
+        int64_t                           m_head{0};
 
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
@@ -108,9 +110,9 @@ namespace vslib
             m_outputs_buffer[m_head] = output;
 
             m_head++;
-            if (m_head >= BufferLength)
+            if (m_head >= buffer_length)
             {
-                m_head -= BufferLength;
+                m_head -= buffer_length;
             }
         }
     };
@@ -123,7 +125,7 @@ namespace vslib
     // the first order is specialized.
 
     template<>
-    double IIRFilter<2>::filter(const double input)
+    double IIRFilter<1>::filter(const double input)
     {
         auto const previous_input  = m_inputs_buffer[0];
         auto const previous_output = m_outputs_buffer[0];
