@@ -107,19 +107,10 @@ namespace vslib
         {
             m_outputs_buffer[m_head] = output;
 
-            if constexpr ((BufferLength & (BufferLength - 1)) == 0)
+            m_head++;
+            if (m_head >= BufferLength)
             {
-                // When BufferLength is a power of 2, the binary shift can improve the efficiency
-                // of this calculation by around 4% in comparison with the else case
-                m_head = (m_head + 1) & (BufferLength - 1);
-            }
-            else
-            {
-                m_head++;
-                if (m_head >= BufferLength)
-                {
-                    m_head -= BufferLength;
-                }
+                m_head -= BufferLength;
             }
         }
     };
