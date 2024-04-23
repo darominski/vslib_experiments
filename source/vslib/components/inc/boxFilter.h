@@ -13,19 +13,20 @@
 
 namespace vslib
 {
-    template<uint64_t BufferLength, double maximalFilteredValue = 1e5>
+    template<int64_t FilterOrder, double maximalFilteredValue = 1e5>
     class BoxFilter : public Filter
     {
+        constexpr static int64_t buffer_length = FilterOrder + 1;
 
       public:
         //! 8 is the number of bits per byte, -1 is for the sign
         constexpr uint64_t static fractional_bits = sizeof(int64_t) * 8 - 1 - std::ceil(log2(maximalFilteredValue));
 
         //! Constructor of the box filter component
-        BoxFilter(std::string_view name, Component* parent = nullptr)
+        BoxFilter(std::string_view name, Component* parent)
             : Filter("BoxFilter", name, parent)
         {
-            static_assert(BufferLength > 1, "Buffer length needs to be a positive number larger than one.");
+            static_assert(FilterOrder >= 1, "Filter order needs to be a positive number larger than zero.");
         }
 
         //! Filters the provided input by calculating the moving average of the buffer of previously
@@ -42,12 +43,12 @@ namespace vslib
 
             m_head++;
             // this if statement and subsequent shift is about 10% more efficient than a modulo operation
-            if (m_head >= BufferLength)
+            if (m_head >= buffer_length)
             {
-                m_head -= BufferLength;
+                m_head -= buffer_length;
             }
 
-            return (m_cumulative.toDouble()) / BufferLength;
+            return (m_cumulative.toDouble()) / buffer_length;
         }
 
         // ************************************************************
@@ -62,9 +63,9 @@ namespace vslib
         }
 
       private:
-        std::array<FixedPoint<fractional_bits>, BufferLength> m_buffer{0};
-        uint64_t                                              m_head{0};
-        FixedPoint<fractional_bits>                           m_cumulative{0};
+        std::array<FixedPoint<fractional_bits>, buffer_length> m_buffer{0};
+        uint64_t                                               m_head{0};
+        FixedPoint<fractional_bits>                            m_cumulative{0};
     };
 
     // ************************************************************
@@ -73,12 +74,12 @@ namespace vslib
     // Benchmarking showed 126% gain for the first order, and 50% for the 2nd order.
 
     template<>
-    class BoxFilter<2> : public Filter
+    class BoxFilter<1> : public Filter
     {
 
       public:
         //! Constructor of the box filter component
-        BoxFilter(std::string_view name, Component* parent = nullptr)
+        BoxFilter(std::string_view name, Component* parent)
             : Filter("BoxFilter", name, parent)
         {
         }
@@ -110,12 +111,12 @@ namespace vslib
     };
 
     template<>
-    class BoxFilter<3> : public Filter
+    class BoxFilter<2> : public Filter
     {
 
       public:
         //! Constructor of the box filter component
-        BoxFilter(std::string_view name, Component* parent = nullptr)
+        BoxFilter(std::string_view name, Component* parent)
             : Filter("BoxFilter", name, parent)
         {
         }
