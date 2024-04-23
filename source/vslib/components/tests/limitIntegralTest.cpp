@@ -377,6 +377,23 @@ TEST_F(LimitIntegralTest, LimitIntegralInfDouble)
 }
 
 //! Tests catching excessive infinite value
+TEST_F(LimitIntegralTest, LimitIntegralNaNFloat)
+{
+    std::string          name = "limit";
+    LimitIntegral<float> limit(name, nullptr);
+
+    float  integral_limit     = 100;
+    size_t time_window_length = 5;
+
+    set_limit_parameters<float>(limit, integral_limit, time_window_length);
+
+    float      input  = std::numeric_limits<float>::quiet_NaN();
+    const auto output = limit.limit(input);
+    ASSERT_NE(input, output);
+    ASSERT_EQ(output, std::numeric_limits<float>::min());
+}
+
+//! Tests catching excessive infinite value
 TEST_F(LimitIntegralTest, LimitIntegralNaNDouble)
 {
     std::string           name = "limit";
@@ -390,5 +407,5 @@ TEST_F(LimitIntegralTest, LimitIntegralNaNDouble)
     double     input  = std::numeric_limits<double>::quiet_NaN();
     const auto output = limit.limit(input);
     ASSERT_NE(input, output);
-    ASSERT_EQ(output, 0.0);
+    ASSERT_EQ(output, std::numeric_limits<double>::min());
 }

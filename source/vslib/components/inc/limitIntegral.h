@@ -26,24 +26,27 @@ namespace vslib
         //! Checks cumulative (integral) limit
         //!
         //! @param input Numerical input to be checked
-        //! @return Either original input if no issues were found or maximal allowed value, 0.0 if NaN was provided
+        //! @return The original input if no issues were found or maximal allowed value, smallest representable value if
+        //! NaN was provided
         T limit(T input) noexcept
         {
             if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
             {
                 if (std::isnan(input))
                 {
-                    return 0.0;   // fixes nan input to return 0.0
+                    return std::numeric_limits<T>::min();   // fixes nan input to return smallest value for the
                 }
             }
 
-            if (m_cumulative + input - m_integral_buffer[m_head] > integral_limit)
+            T output = input;   // if threshold is not violated, input will be returned
+
+            const T new_cumulative = m_cumulative + input - m_integral_buffer[m_head];
+
+            if (new_cumulative > integral_limit)
             {
                 // maximum value not violating the integral limit
-                input = integral_limit - (m_cumulative - m_integral_buffer[m_head]);
+                output = integral_limit - (m_cumulative - m_integral_buffer[m_head]);
             }
-
-            m_cumulative += (input - m_integral_buffer[m_head]);
 
             m_integral_buffer[m_head] = input;
             m_head++;
@@ -51,8 +54,9 @@ namespace vslib
             {
                 m_head -= integral_limit_window_length;
             }
+            m_cumulative = new_cumulative;
 
-            return input;
+            return output;
         }
 
         //! Checks cumulative (integral) limit and produces a warning if a violation was found
