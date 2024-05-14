@@ -128,25 +128,54 @@ namespace vslib
         {
             // recalculation of PID interface into internal RST parameters, then: stability test
 
-            double const kikpN = ki * kp * N;
-            double const a     = 2.0 * std::numbers::pi_v<double> * f0 / atan(std::numbers::pi_v<double> * f0 * ts);
-            double const a2    = pow(a, 2);   // helper a^2, which occurs often in the calculations below
+            const double k_p   = kp.toValidate();
+            const double k_i   = ki.toValidate();
+            const double k_d   = kd.toValidate();
+            const double k_ff  = kff.toValidate();
+            const double b_    = b.toValidate();
+            const double c_    = c.toValidate();
+            const double N_    = N.toValidate();
+            const double f_0   = f0.toValidate();
+            const double t_s   = ts.toValidate();
+            const double kikpN = k_i * k_p * N_;
 
-            m_r[0] = (kikpN + ki * kd * a + kd * kp * a2 + pow(kp, 2) * N * a + kd * kp * N * a2) / (4 * kikpN);
-            m_r[1] = (2 * kikpN - 2 * kd * kp * a2 * (1 + N)) / (4 * kikpN);
-            m_r[2] = (kikpN - kd * ki * a + kd * kp * a2 - pow(kp, 2) * N * a + kd * kp * N * a2) / (4 * kikpN);
+            const double a = 2.0 * std::numbers::pi_v<double> * f_0 / tan(std::numbers::pi_v<double> * f_0 * t_s);
 
-            m_s[0] = (kd * a2 + kp * N * a) / (4 * kikpN);
-            m_s[1] = (-kd * a2) / (2 * kikpN);
-            m_s[2] = (kd * a2 - kp * N * a) / (4 * kikpN);
+            if (k_p != 0 || k_d != 0)
+            {
 
-            m_t[0] = (kikpN + kd * ki * a + kd * kff * a2 + kd * kp * a2 * b + pow(kp, 2) * N * a * b + kff * kp * N * a
-                      + kd * kp * N * a2 * c)
-                     / (4 * kikpN);
-            m_t[1] = (kikpN - kd * kff * a2 - kd * kp * a2 * b - kd * kp * N * a2 * c) / (2 * kikpN);
-            m_t[2] = (kikpN - kd * ki * a + kd * kff * a2 + kd * kp * a2 * b - pow(kp, 2) * N * a * b - kff * kp * N * a
-                      + kd * kp * N * a2 * c)
-                     / (4 * kikpN);
+                const double a2 = pow(a, 2);   // helper a^2, which occurs often in the calculations below
+
+                m_r[0] = (kikpN + k_d * k_i * a + k_d * k_p * a2 + pow(k_p, 2) * N_ * a + k_d * k_p * N_ * a2) / a2;
+                m_r[1] = 2.0 * (kikpN - k_d * k_p * a2 - k_d * k_p * N_ * a2) / a2;
+                m_r[2] = (kikpN - k_d * k_i * a + k_d * k_p * a2 - pow(k_p, 2) * N_ * a + k_d * k_p * N_ * a2) / a2;
+
+                m_s[0] = (k_d * a2 + k_p * N_ * a) / a2;
+                m_s[1] = -2.0 * k_d;
+                m_s[2] = (k_d * a2 - k_p * N_ * a) / a2;
+
+                m_t[0] = (kikpN + k_d * k_i * a + k_d * k_ff * a2 + k_d * k_p * a2 * b_ + pow(k_p, 2) * N_ * a * b_
+                          + k_ff * k_p * N_ * a + k_d * k_p * N_ * a2 * c_)
+                         / a2;
+                m_t[1] = 2 * (kikpN - k_d * k_ff * a2 - k_d * k_p * a2 * b_ - k_d * k_p * N_ * a2 * c_) / a2;
+                m_t[2] = (kikpN - k_d * k_i * a + k_d * k_ff * a2 + k_d * k_p * a2 * b_ - pow(k_p, 2) * N_ * a * b_
+                          - k_ff * k_p * N_ * a + k_d * k_p * N_ * a2 * c_)
+                         / a2;
+            }
+            else   // k_p and k_d are 0.0
+            {
+                m_r[0] = k_i / a;
+                m_r[1] = k_i / a;
+                m_r[2] = 0;
+
+                m_s[0] = 1.0;
+                m_s[1] = -1.0;
+                m_s[2] = 0;
+
+                m_t[0] = k_i / a + k_ff;
+                m_t[1] = k_i / a - k_ff;
+                m_t[2] = 0;
+            }
 
             // Jury's stability test, based on logic implemented in CCLIBS regRst.c
             if (m_r[0] == 0)

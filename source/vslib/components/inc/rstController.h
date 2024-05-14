@@ -168,7 +168,7 @@ namespace vslib
             }
 
             // Stability check 1 : Sum(even coefficients) >= Sum(odd coefficients)
-            if (sum_even < sum_odd)
+            if (sum_odd > sum_even)
             {
                 return fgc4::utils::Warning(
                     "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"

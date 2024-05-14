@@ -54,8 +54,8 @@ class PIDRSTTest : public ::testing::Test
         StaticJson f0_value = f0;
         pidRst.f0.setJsonValue(f0_value);
 
-        pidRst.flipBufferState();
         pidRst.verifyParameters();
+        pidRst.flipBufferState();
         pidRst.synchroniseParameterBuffers();
     }
 };
@@ -84,30 +84,177 @@ TEST_F(PIDRSTTest, PIDRSTDefaultConstruction)
     EXPECT_EQ(serialized_pid["parameters"][8]["name"], "control_frequency");
 }
 
-//! Checks that single iteration of control method correctly calculates the gain
-TEST_F(PIDRSTTest, PIDRSTSingleIteration)
+//! Checks that the RST coefficients were correctly calculated when kp!=0 or kd!=0
+TEST_F(PIDRSTTest, PIDRSTCoefficientsDefault)
 {
     std::string  name = "pid_2";
     PIDRST       pid(name);
-    double const p  = 2.0;
-    double const i  = 1.0;
-    double const d  = 1.5;
-    double const ff = 0.0;
-    double const b  = 1.0;
-    double const c  = 1.0;
-    double const N  = 1.0;
-    double const ts = 3.0;
-    double const f0 = 2.263752;
+    const double p  = 2.0;
+    const double i  = 1.0;
+    const double d  = 1.5;
+    const double ff = 0.5;
+    const double b  = 1.0;
+    const double c  = 1.0;
+    const double N  = 1.0;
+    const double ts = 3.0;
+    const double f0 = 2.263752e-6;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
 
-    const double target_value = 3.14159;
+    const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * ts);
+    const double a2 = a * a;
 
-    const double starting_value = 1.0;
+    std::array<double, 3> expected_r, expected_s, expected_t;
 
-    const double error          = target_value - starting_value;
-    const double expected_value = (target_value * b - starting_value) * p + error * i
-                                  + d * (1 / (1 + d / (N * p))) * (target_value * c - starting_value)
-                                  + starting_value * ff;
+    expected_r[0] = (i * p * N + d * i * a + d * p * a2 + p * p * N * a + d * p * N * a2) / a2;
+    expected_r[1] = 2 * (i * p * N - d * p * a2 - d * p * N * a2) / a2;
+    expected_r[2] = (i * p * N - d * i * a + d * p * a2 - p * p * N * a + d * p * N * a2) / a2;
 
-    EXPECT_NEAR(pid.control(starting_value, target_value), expected_value, 1e-6);
+    expected_s[0] = (d * a2 + p * N * a) / a2;
+    expected_s[1] = -2 * d;
+    expected_s[2] = (d * a2 - p * N * a) / a2;
+
+    expected_t[0] = (i * p * N + d * i * a + d * ff * a2 + d * p * a2 * b + p * p * N * a * b + ff * p * N * a
+                     + d * p * N * a2 * c)
+                    / a2;
+    expected_t[1] = 2 * (i * p * N - d * ff * a2 - d * p * a2 * b - d * p * N * a2 * c) / a2;
+    expected_t[2] = (i * p * N - d * i * a + d * ff * a2 + d * p * a2 * b - p * p * N * a * b - ff * p * N * a
+                     + d * p * N * a2 * c)
+                    / a2;
+
+    for (int index = 0; index < 3; index++)
+    {
+        EXPECT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
+        EXPECT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
+        EXPECT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
+    }
+}
+
+//! Checks that the RST coefficients were correctly calculated when kp=0 and kd!=0
+TEST_F(PIDRSTTest, PIDRSTCoefficientsKpZero)
+{
+    std::string  name = "pid_2";
+    PIDRST       pid(name);
+    const double p  = 0.0;
+    const double i  = 1.0;
+    const double d  = 1.5;
+    const double ff = 0.1;
+    const double b  = 1.0;
+    const double c  = 1.0;
+    const double N  = 1.0;
+    const double ts = 3.0;
+    const double f0 = 2.263752e-6;
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+
+    const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * ts);
+    const double a2 = a * a;
+
+    std::array<double, 3> expected_r, expected_s, expected_t;
+
+    expected_r[0] = (i * p * N + d * i * a + d * p * a2 + p * p * N * a + d * p * N * a2) / a2;
+    expected_r[1] = 2 * (i * p * N - d * p * a2 - d * p * N * a2) / a2;
+    expected_r[2] = (i * p * N - d * i * a + d * p * a2 - p * p * N * a + d * p * N * a2) / a2;
+
+    expected_s[0] = (d * a2 + p * N * a) / a2;
+    expected_s[1] = -2 * d;
+    expected_s[2] = (d * a2 - p * N * a) / a2;
+
+    expected_t[0] = (i * p * N + d * i * a + d * ff * a2 + d * p * a2 * b + p * p * N * a * b + ff * p * N * a
+                     + d * p * N * a2 * c)
+                    / a2;
+    expected_t[1] = 2 * (i * p * N - d * ff * a2 - d * p * a2 * b - d * p * N * a2 * c) / a2;
+    expected_t[2] = (i * p * N - d * i * a + d * ff * a2 + d * p * a2 * b - p * p * N * a * b - ff * p * N * a
+                     + d * p * N * a2 * c)
+                    / a2;
+
+    for (int index = 0; index < 3; index++)
+    {
+        EXPECT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
+        EXPECT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
+        EXPECT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
+    }
+}
+
+//! Checks that the RST coefficients were correctly calculated when kp!=0 and kd=0
+TEST_F(PIDRSTTest, PIDRSTCoefficientsKdZero)
+{
+    std::string  name = "pid_2";
+    PIDRST       pid(name);
+    const double p  = 2.0;
+    const double i  = 1.0;
+    const double d  = 0.0;
+    const double ff = 0.2;
+    const double b  = 1.0;
+    const double c  = 1.0;
+    const double N  = 1.0;
+    const double ts = 3.0;
+    const double f0 = 2.263752e-6;
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+
+    const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * ts);
+    const double a2 = a * a;
+
+    std::array<double, 3> expected_r, expected_s, expected_t;
+
+    expected_r[0] = (i * p * N + d * i * a + d * p * a2 + p * p * N * a + d * p * N * a2) / a2;
+    expected_r[1] = 2 * (i * p * N - d * p * a2 - d * p * N * a2) / a2;
+    expected_r[2] = (i * p * N - d * i * a + d * p * a2 - p * p * N * a + d * p * N * a2) / a2;
+
+    expected_s[0] = (d * a2 + p * N * a) / a2;
+    expected_s[1] = -2 * d;
+    expected_s[2] = (d * a2 - p * N * a) / a2;
+
+    expected_t[0] = (i * p * N + d * i * a + d * ff * a2 + d * p * a2 * b + p * p * N * a * b + ff * p * N * a
+                     + d * p * N * a2 * c)
+                    / a2;
+    expected_t[1] = 2 * (i * p * N - d * ff * a2 - d * p * a2 * b - d * p * N * a2 * c) / a2;
+    expected_t[2] = (i * p * N - d * i * a + d * ff * a2 + d * p * a2 * b - p * p * N * a * b - ff * p * N * a
+                     + d * p * N * a2 * c)
+                    / a2;
+
+    for (int index = 0; index < 3; index++)
+    {
+        EXPECT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
+        EXPECT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
+        EXPECT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
+    }
+}
+
+//! Checks that the RST coefficients were correctly calculated when kp=0 and kd=0
+TEST_F(PIDRSTTest, PIDRSTCoefficientsIntegrator)
+{
+    std::string  name = "pid_2";
+    PIDRST       pid(name);
+    const double p  = 0.0;
+    const double i  = 1.0;
+    const double d  = 0.0;
+    const double ff = 0.1;
+    const double b  = 1.0;
+    const double c  = 1.0;
+    const double N  = 1.0;
+    const double ts = 3.0;
+    const double f0 = 2.263752e-6;
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+
+    const double a = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * ts);
+
+    std::array<double, 3> expected_r, expected_s, expected_t;
+
+    expected_r[0] = i / a;
+    expected_r[1] = i / a;
+    expected_r[2] = 0;
+
+    expected_s[0] = 1;
+    expected_s[1] = -1;
+    expected_s[2] = 0;
+
+    expected_t[0] = i / a + ff;
+    expected_t[1] = i / a - ff;
+    expected_t[2] = 0;
+
+    for (int index = 0; index < 3; index++)
+    {
+        EXPECT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
+        EXPECT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
+        EXPECT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
+    }
 }
