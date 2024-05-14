@@ -353,7 +353,7 @@ TEST_F(LimitRateTest, LimitRateZeroTimeDifference)
     double     input  = 2.0;
     const auto output = limit.limit(input, 0.0);
     ASSERT_NE(input, output);
-    ASSERT_EQ(output, 0.0);
+    ASSERT_EQ(output, std::numeric_limits<double>::max());
 }
 
 //! Tests that an expected warning is raised when inf input is provided
@@ -473,5 +473,5 @@ TEST_F(LimitRateTest, LimitRateNaN)
     double       second_input  = std::numeric_limits<double>::quiet_NaN();
     const double second_output = limit.limit(second_input, 0.1);
     ASSERT_NE(second_output, second_input);
-    ASSERT_EQ(second_output, 0.0);
+    ASSERT_EQ(second_output, std::numeric_limits<double>::min());
 }

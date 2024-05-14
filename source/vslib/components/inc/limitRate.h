@@ -39,13 +39,13 @@ namespace vslib
             {
                 if (std::isnan(input))
                 {
-                    return 0.0;
+                    return std::numeric_limits<T>::min();
                 }
             }
 
             if (time_difference == 0)
             {
-                return 0.0;   // no meaningful rate can be calculated
+                return std::numeric_limits<T>::max();   // no meaningful rate can be calculated
             }
 
             if (!m_previous_value_set)   // avoids failure at first call to limit

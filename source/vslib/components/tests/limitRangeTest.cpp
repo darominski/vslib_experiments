@@ -860,5 +860,5 @@ TEST_F(LimitRangeTest, LimitRangeDoubleNaN)
 
     const auto output = limit.limit(input);
     ASSERT_NE(input, output);
-    ASSERT_EQ(output, 0.0);
+    ASSERT_EQ(output, std::numeric_limits<double>::min());
 }

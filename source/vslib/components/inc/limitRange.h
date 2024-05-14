@@ -35,7 +35,7 @@ namespace vslib
             {
                 if (std::isnan(input))
                 {
-                    return 0.0;   // fixes nan input to return 0.0
+                    return std::numeric_limits<T>::min();   // fixes nan input to return min of the type
                 }
             }
 
