@@ -17,7 +17,7 @@ namespace vslib
       public:
         LimitRms(std::string_view name, Component* parent, double iteration_period = 5e-6)
             : Component("LimitRms", name, parent),
-              rms_limit(*this, "rms_threshold"),
+              rms_limit(*this, "rms_limit"),
               rms_time_constant(*this, "rms_time_constant", 1e-12),   // 1 ps limit
               m_iteration_period(iteration_period)   // TODO: replace by iteration period information sharing solution
         {

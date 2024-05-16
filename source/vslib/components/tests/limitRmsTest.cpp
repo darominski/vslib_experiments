@@ -49,7 +49,7 @@ TEST_F(LimitRmsTest, LimitRmsDefault)
     EXPECT_EQ(serialized["type"], "LimitRms");
     EXPECT_EQ(serialized["components"], nlohmann::json::array());
     EXPECT_EQ(serialized["parameters"].size(), 2);
-    EXPECT_EQ(serialized["parameters"][0]["name"], "rms_threshold");
+    EXPECT_EQ(serialized["parameters"][0]["name"], "rms_limit");
     EXPECT_EQ(serialized["parameters"][0]["type"], "Float64");
     EXPECT_EQ(serialized["parameters"][1]["name"], "rms_time_constant");
     EXPECT_EQ(serialized["parameters"][1]["type"], "Float64");
