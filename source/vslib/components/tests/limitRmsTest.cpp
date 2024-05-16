@@ -87,15 +87,11 @@ TEST_F(LimitRmsTest, LimitRms)
 
     set_limit_parameters(limit, rms_limit, rms_time_constant);
 
-    double first_input = rms_limit - 1;
-    ASSERT_EQ(first_input, limit.limit(first_input));
+    const double first_input = rms_limit - 1;
+    ASSERT_TRUE(limit.limit(first_input));
 
-    float      second_input = first_input + pow(rms_limit, 2);
-    const auto output       = limit.limit(second_input);
-    ASSERT_NE(second_input, output);
-    const double filter_factor = iteration_period / (rms_time_constant + 0.5 * iteration_period);
-    const double cumulative    = pow(first_input, 2) * filter_factor;
-    ASSERT_EQ(output, sqrt(pow(rms_limit, 2) / filter_factor + cumulative));
+    const double second_input = first_input + pow(rms_limit, 2);
+    ASSERT_FALSE(limit.limit(second_input));
 }
 
 //! Tests catching value with excessive RMS value coming after a number of entries
@@ -136,23 +132,15 @@ TEST_F(LimitRmsTest, LimitRmsLongerRunning)
 
     const double filter_factor = iteration_period / (rms_time_constant + 0.5 * iteration_period);
 
-    double first_input = rms_limit - 1;
-    double cumulative  = 0;
-    ASSERT_EQ(first_input, limit.limit(first_input));
-    cumulative += (pow(first_input, 2) - cumulative) * filter_factor;
-    ASSERT_EQ(first_input, limit.limit(first_input));
-    cumulative += (pow(first_input, 2) - cumulative) * filter_factor;
-    ASSERT_EQ(first_input, limit.limit(first_input));
-    cumulative += (pow(first_input, 2) - cumulative) * filter_factor;
-    ASSERT_EQ(first_input, limit.limit(first_input));
-    cumulative += (pow(first_input, 2) - cumulative) * filter_factor;
-    ASSERT_EQ(first_input, limit.limit(first_input));
-    cumulative += (pow(first_input, 2) - cumulative) * filter_factor;
+    const double first_input = rms_limit - 1;
+    ASSERT_TRUE(limit.limit(first_input));
+    ASSERT_TRUE(limit.limit(first_input));
+    ASSERT_TRUE(limit.limit(first_input));
+    ASSERT_TRUE(limit.limit(first_input));
+    ASSERT_TRUE(limit.limit(first_input));
 
-    float      second_input = first_input + pow(rms_limit, 2);
-    const auto output       = limit.limit(second_input);
-    ASSERT_NE(second_input, output);
-    ASSERT_EQ(output, sqrt(pow(rms_limit, 2) / filter_factor + cumulative));
+    const double second_input = first_input + pow(rms_limit, 2);
+    ASSERT_FALSE(limit.limit(second_input));
 }
 
 //! Tests catching warning when infinity is provided as input
@@ -185,10 +173,8 @@ TEST_F(LimitRmsTest, LimitRmsInfInput)
 
     set_limit_parameters(limit, rms_limit, rms_time_constant);
 
-    double     input  = std::numeric_limits<double>::infinity();
-    const auto output = limit.limit(input);
-    ASSERT_NE(input, output);
-    ASSERT_EQ(output, sqrt(pow(rms_limit, 2) / filter_factor));
+    const double input = std::numeric_limits<double>::infinity();
+    ASSERT_FALSE(limit.limit(input));
 }
 
 //! Tests catching warning when minus infinity is provided as input
@@ -221,10 +207,8 @@ TEST_F(LimitRmsTest, LimitRmsMinusInfInput)
 
     set_limit_parameters(limit, rms_limit, rms_time_constant);
 
-    double     input  = -std::numeric_limits<double>::infinity();
-    const auto output = limit.limit(input);
-    ASSERT_NE(input, output);
-    ASSERT_EQ(output, sqrt(pow(rms_limit, 2) / filter_factor));
+    const double input = -std::numeric_limits<double>::infinity();
+    ASSERT_FALSE(limit.limit(input));
 }
 
 //! Tests catching warning when NaN is provided as input
@@ -255,8 +239,6 @@ TEST_F(LimitRmsTest, LimitRmsNanInput)
 
     set_limit_parameters(limit, rms_limit, rms_time_constant);
 
-    double     input  = std::numeric_limits<double>::quiet_NaN();
-    const auto output = limit.limit(input);
-    ASSERT_NE(input, output);
-    ASSERT_EQ(output, 0);
+    const double input = std::numeric_limits<double>::quiet_NaN();
+    ASSERT_FALSE(limit.limit(input));
 }

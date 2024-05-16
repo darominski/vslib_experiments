@@ -27,24 +27,22 @@ namespace vslib
         //!
         //! @param input Numerical input to be checked against set RMS limit
         //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        double limit(double input) noexcept
+        bool limit(double input) noexcept
         {
             if (std::isnan(input))
             {
-                return 0.0;
+                return false;
             }
 
-            const double new_cumulative = m_cumulative + (pow(input, 2) - m_cumulative) * m_filter_factor;
-
-            if (new_cumulative > m_rms_limit2)
-            {
-                // maximal non-violating input
-                input = sqrt(m_rms_limit2 / m_filter_factor + m_cumulative);
-            }
             // calculation re-implemented from regLimRmsRT
-            m_cumulative = new_cumulative;
+            m_cumulative += (pow(input, 2) - m_cumulative) * m_filter_factor;
 
-            return input;
+            if (m_cumulative > m_rms_limit2)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         //! Checks the provided value against RMS limit and returns compliant value, non RT function
