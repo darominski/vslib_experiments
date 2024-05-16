@@ -77,52 +77,6 @@ namespace vslib
             return input;
         }
 
-        //! Checks the rate of change of the input
-        //!
-        //! @param input Numerical input to be checked
-        //! @param time_difference Time difference between function calls
-        //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> limitNonRT(T input, double time_difference)
-        {
-            if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
-            {
-                if (std::isnan(input))
-                {
-                    return fgc4::utils::Warning("Value is NaN.\n");
-                }
-            }
-
-            if (time_difference == 0)
-            {
-                return fgc4::utils::Warning("Time difference is equal to zero in rate limit calculation.\n");
-            }
-
-            if (!m_previous_value_set)   // avoids failure at first call to limit
-            {
-                if constexpr ((std::is_same_v<T, float> || std::is_same_v<T, double>))
-                {
-                    if (std::isinf(input))
-                    {
-                        return fgc4::utils::Warning("Value is inf.\n");
-                    }
-                }
-                m_previous_value     = input;
-                m_previous_value_set = true;
-                return {};
-            }
-            const double rate = abs(input - m_previous_value) / time_difference;
-            if (rate > change_rate)
-            {
-                auto const& warning_msg = fgc4::utils::Warning(fmt::format(
-                    "Value: {} with rate of {} is above the maximal rate of change of: {}.\n", input, rate, change_rate
-                ));
-                m_previous_value        = input;
-                return warning_msg;
-            }
-            m_previous_value = input;
-            return {};
-        }
-
         //! Resets the component to the initial state of the previous_value
         void reset() noexcept
         {

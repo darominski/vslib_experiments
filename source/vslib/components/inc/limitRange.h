@@ -65,39 +65,6 @@ namespace vslib
             return input;
         }
 
-        //! Checks minimum and maximum thresholds as well as dead_zone
-        //!
-        //! @param input Numerical input to be checked
-        //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> limitNonRT(T input) noexcept
-        {
-            if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
-            {
-                if (std::isnan(input))
-                {
-                    return fgc4::utils::Warning("Value is NaN.\n");
-                }
-            }
-
-            if (m_dead_zone_defined && (input > dead_zone[0] && input < dead_zone[1]))
-            {
-                return fgc4::utils::Warning(fmt::format(
-                    "Value: {} is inside the defined dead zone of [{}, {}].\n", input, dead_zone[0], dead_zone[1]
-                ));
-            }
-
-            if (input < min)
-            {
-                return fgc4::utils::Warning(fmt::format("Value: {} is below the minimal value of {}.\n", input, min));
-            }
-            if (input > max)
-            {
-                return fgc4::utils::Warning(fmt::format("Value: {} is above the maximal value of {}.\n", input, max));
-            }
-
-            return {};
-        }
-
         Parameter<T>                min;
         Parameter<T>                max;
         Parameter<std::array<T, 2>> dead_zone;

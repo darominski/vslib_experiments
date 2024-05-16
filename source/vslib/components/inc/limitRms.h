@@ -45,30 +45,6 @@ namespace vslib
             return true;
         }
 
-        //! Checks the provided value against RMS limit and returns compliant value, non RT function
-        //!
-        //! @param input Numerical input to be checked against set RMS limit
-        //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> limitNonRT(double input) noexcept
-        {
-            if (std::isnan(input))
-            {
-                return fgc4::utils::Warning(fmt::format("Value is a NaN.\n"));
-            }
-
-            // calculation re-implemented from regLimRmsRT
-            m_cumulative += (pow(input, 2) - m_cumulative) * m_filter_factor;
-
-            if (sqrt(m_cumulative) > rms_limit)
-            {
-                return fgc4::utils::Warning(
-                    fmt::format("Value: {} deviates too far from the RMS limit of {}.\n", input, rms_limit)
-                );
-            }
-
-            return {};
-        }
-
         //! Resets the component to the initial state of buffers and buffer pointers
         void reset() noexcept
         {

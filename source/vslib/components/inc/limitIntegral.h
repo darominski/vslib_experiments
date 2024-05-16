@@ -54,39 +54,6 @@ namespace vslib
             return true;
         }
 
-        //! Checks cumulative (integral) limit and produces a warning if a violation was found
-        //!
-        //! @param input Numerical input to be checked
-        //! @return Optionally returns a Warning with relevant infraction information, nothing otherwise
-        std::optional<fgc4::utils::Warning> limitNonRT(T input) noexcept
-        {
-            if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
-            {
-                if (std::isnan(input))
-                {
-                    return fgc4::utils::Warning("Value is NaN.\n");
-                }
-            }
-
-            m_cumulative += (input - m_integral_buffer[m_head]);
-
-            m_integral_buffer[m_head] = input;
-            m_head++;
-            if (m_head >= integral_limit_window_length)
-            {
-                m_head -= integral_limit_window_length;
-            }
-
-            if (m_cumulative >= integral_limit)
-            {
-                return fgc4::utils::Warning(
-                    fmt::format("Value: {} leads to overflow of the integral limit of {}.\n", input, integral_limit)
-                );
-            }
-
-            return {};
-        }
-
         //! Resets the component to the initial state of buffers, buffer pointers, and the cumulative value
         void reset() noexcept
         {
