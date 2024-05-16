@@ -59,7 +59,7 @@ namespace vslib
         //!
         //! @param input Array with input values to be filtered
         //! @return Array with the filtered values
-        template<uint64_t N>
+        template<size_t N>
         std::array<double, N> filter(const std::array<double, N>& inputs)
         {
             std::array<double, N> outputs{0};
