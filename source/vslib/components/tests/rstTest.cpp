@@ -36,6 +36,7 @@ class RSTTest : public ::testing::Test
         StaticJson t_value = t;
         rst.t.setJsonValue(t_value);
 
+        rst.verifyParameters();
         rst.flipBufferState();
         rst.synchroniseParameterBuffers();
     }

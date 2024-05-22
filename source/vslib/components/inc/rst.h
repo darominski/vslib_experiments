@@ -104,28 +104,28 @@ namespace vslib
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
             // Jury's stability test, based on logic implemented in CCLIBS regRst.c
-            if (r[0] == 0)
+            if (r.toValidate()[0] == 0)
             {
                 return fgc4::utils::Warning("First element of r coefficients is zero.\n");
             }
 
-            if (s[0] == 0)
+            if (s.toValidate()[0] == 0)
             {
                 return fgc4::utils::Warning("First element of s coefficients is zero.\n");
             }
 
-            if (t[0] == 0)
+            if (t.toValidate()[0] == 0)
             {
                 return fgc4::utils::Warning("First element of t coefficients is zero.\n");
             }
 
-            const auto& maybe_warning_s = rst.jurysStabilityTest(s.value());
+            const auto& maybe_warning_s = rst.jurysStabilityTest(s.toValidate());
             if (maybe_warning_s.has_value())
             {
                 return maybe_warning_s.value();
             }
 
-            const auto& maybe_warning_t = rst.jurysStabilityTest(t.value());
+            const auto& maybe_warning_t = rst.jurysStabilityTest(t.toValidate());
             if (maybe_warning_t.has_value())
             {
                 return maybe_warning_t.value();
@@ -136,9 +136,9 @@ namespace vslib
             // no issues, RST is stable, and parameters are valid
 
             // parameters can be propagated to the calculation RST class
-            rst.setR(r.value());
-            rst.setS(s.value());
-            rst.setT(t.value());
+            rst.setR(r.toValidate());
+            rst.setS(s.toValidate());
+            rst.setT(t.toValidate());
 
             return {};
         }
