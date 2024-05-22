@@ -46,16 +46,18 @@ namespace vslib::utils
     ) noexcept
     {
         const auto& it = std::find_if(
-            values.cbegin() + start_index, values.cend(),
+            values.cbegin() + 1 + start_index, values.cend(),
             [&input_x](const auto& point)
             {
                 return point.first >= input_x;
             }
         );
+
         x1 = (it - 1)->first;
         y1 = (it - 1)->second;
         x2 = it->first;
         y2 = it->second;
+
         return std::distance(values.cbegin(), it);
     }
 
@@ -73,11 +75,11 @@ namespace vslib::utils
         StoredType& y1, IndexType& x2, StoredType& y2
     ) noexcept
     {
-        const auto& it = std::lower_bound(
-            values.cbegin() + start_index, values.cend(), input_x,
-            [](const auto& point, const auto& input)
+        const auto& it = std::upper_bound(
+            values.cbegin() + 1 + start_index, values.cend(), input_x,
+            [](const auto value, const auto& point)
             {
-                return point.first <= input;
+                return value < point.first;
             }
         );
         x1 = (it - 1)->first;
