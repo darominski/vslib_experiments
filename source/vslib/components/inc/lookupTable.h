@@ -8,6 +8,7 @@
 #include <string>
 
 #include "component.h"
+#include "container_search.h"
 #include "parameter.h"
 #include "typeTraits.h"
 
@@ -78,7 +79,7 @@ namespace vslib
                 // This case provides a 15% speedup for a 100-element lookup table when compared with linear
                 // time monotonic access from the 'else' case.
 
-                index_search(input_x, x1, y1, x2, y2);
+                utils::index_search(m_values, input_x, m_lower_edge_x, m_bin_size, x1, y1, x2, y2);
             }
             else
             {
@@ -87,8 +88,9 @@ namespace vslib
                 // binary_search performs a binary search, more efficient with random access, while
                 // for monotonic access the linear linear_search should be more efficient assuming that the next
                 // point is relatively close to the previously interpolated one.
-                random_access ? binary_search(input_x, start_loop_index, x1, y1, x2, y2)
-                              : linear_search(input_x, start_loop_index, x1, y1, x2, y2);
+                m_previous_section_index
+                    = random_access ? utils::binary_search(m_values, input_x, start_loop_index, x1, y1, x2, y2)
+                                    : utils::linear_search(m_values, input_x, start_loop_index, x1, y1, x2, y2);
             }
 
             m_previous_section_y    = y1;
@@ -132,75 +134,6 @@ namespace vslib
         std::vector<std::pair<IndexType, StoredType>> m_values;
 
         const bool m_equal_binning{false};
-
-        //! Performs index-calculation "search" of the provided input_x in the m_values container when bins are equally
-        //! spaced
-        //!
-        //! @param input_x Input x-axis value to be searched for
-        //! @param x1 X-axis value of the lower section edge
-        //! @param y1 Y-axis value of the lower section edge
-        //! @param x2 X-axis value of the upper section edge
-        //! @param y2 Y-axis value of the upper section edge
-        void index_search(IndexType input_x, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2)
-        {
-            const int64_t position = static_cast<int64_t>((input_x - m_lower_edge_x) / m_bin_size);
-            x1                     = m_values[position].first;
-            y1                     = m_values[position].second;
-            x2                     = m_values[position + 1].first;
-            y2                     = m_values[position + 1].second;
-        }
-
-        //! Performs linear search of the provided input_x in the m_values container
-        //!
-        //! @param input_x Input x-axis value to be searched for
-        //! @param start_index Index to start the search from
-        //! @param x1 X-axis value of the lower section edge
-        //! @param y1 Y-axis value of the lower section edge
-        //! @param x2 X-axis value of the upper section edge
-        //! @param y2 Y-axis value of the upper section edge
-        void linear_search(
-            IndexType input_x, size_t start_index, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2
-        )
-        {
-            const auto& it = std::find_if(
-                m_values.cbegin() + start_index, m_values.cend(),
-                [&input_x](const auto& point)
-                {
-                    return point.first >= input_x;
-                }
-            );
-            m_previous_section_index = std::distance(m_values.cbegin(), it);
-            x1                       = (it - 1)->first;
-            y1                       = (it - 1)->second;
-            x2                       = it->first;
-            y2                       = it->second;
-        }
-
-        //! Performs binary search of the provided input_x in the m_values container
-        //!
-        //! @param input_x Input x-axis value to be searched for
-        //! @param start_index Index to start the search from
-        //! @param x1 X-axis value of the lower section edge
-        //! @param y1 Y-axis value of the lower section edge
-        //! @param x2 X-axis value of the upper section edge
-        //! @param y2 Y-axis value of the upper section edge
-        void binary_search(
-            IndexType input_x, size_t start_index, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2
-        )
-        {
-            const auto& it = std::lower_bound(
-                m_values.cbegin() + start_index, m_values.cend(), input_x,
-                [](const auto& point, const auto& input)
-                {
-                    return point.first <= input;
-                }
-            );
-            m_previous_section_index = std::distance(m_values.cbegin(), it);
-            x1                       = (it - 1)->first;
-            y1                       = (it - 1)->second;
-            x2                       = it->first;
-            y2                       = it->second;
-        }
     };
 
 }   // namespace vslib
