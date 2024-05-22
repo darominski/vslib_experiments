@@ -15,7 +15,6 @@
 #include "boxFilter.h"
 #include "componentArray.h"
 #include "compositePID.h"
-#include "converter.h"
 #include "firFilter.h"
 #include "iirFilter.h"
 #include "interruptRegistry.h"
