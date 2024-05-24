@@ -55,8 +55,9 @@ namespace vslib::utils
         StoredType& y1, IndexType& x2, StoredType& y2
     ) noexcept
     {
+        // begin() + 1 shift protects from underflow, while cend() -1 prevents from returning overflow value
         const auto& it = std::find_if(
-            values.cbegin() + 1 + start_index, values.cend(),
+            values.cbegin() + 1 + start_index, values.cend() - 1,
             [&input_x](const auto& point)
             {
                 return point.first >= input_x;
@@ -86,10 +87,10 @@ namespace vslib::utils
     ) noexcept
     {
         const auto& it = std::upper_bound(
-            values.cbegin() + 1 + start_index, values.cend(), input_x,
+            values.cbegin() + 1 + start_index, values.cend() - 1, input_x,
             [](const auto value, const auto& point)
             {
-                return value < point.first;
+                return value <= point.first;
             }
         );
         x1 = (it - 1)->first;
