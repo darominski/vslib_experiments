@@ -15,7 +15,6 @@ namespace vslib
     double RSTController<3>::control(double input, double reference) noexcept
     {
         // This partial template specialization allows to speed-up the calculation of the RST actuation by about 15%
-
         m_actuations[2] = m_actuations[1];
         m_actuations[1] = m_actuations[0];
 
