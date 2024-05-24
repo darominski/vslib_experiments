@@ -35,7 +35,6 @@ std::vector<std::pair<double, double>> func()
     return func;
 }
 
-
 //! Tests default construction of integral type PeriodicLookupTable component
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntDefault)
 {
