@@ -337,3 +337,41 @@ TEST_F(LookupTableTest, LookupTableDoubleRandomAccessConsistency)
     EXPECT_EQ(table.interpolate(-0.5), table.interpolate(-0.5, true));
     EXPECT_EQ(table.interpolate(0), table.interpolate(0, true));
 }
+
+//! Tests LookupTable provides the expected output regardless whether the index-search or linear search is performed
+TEST_F(LookupTableTest, LookupTableIntIndexSearchConsistency)
+{
+    std::string                         name = "table";
+    std::vector<std::pair<double, int>> data_index{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}, {1, 1}, {2, 2}};
+    std::vector<std::pair<double, int>> data_linear(data_index);
+    LookupTable<double, int>            table_linear(name, nullptr, std::move(data_linear));
+    LookupTable<double, int>            table_index(name, nullptr, std::move(data_index), true);
+
+    EXPECT_EQ(table_linear.interpolate(-3.5), table_index.interpolate(-3.5));
+    EXPECT_EQ(table_linear.interpolate(-3), table_index.interpolate(-3));
+    EXPECT_EQ(table_linear.interpolate(-2.5), table_index.interpolate(-2.5));
+    EXPECT_EQ(table_linear.interpolate(-2), table_index.interpolate(-2));
+    EXPECT_EQ(table_linear.interpolate(-1.5), table_index.interpolate(-1.5));
+    EXPECT_EQ(table_linear.interpolate(-1), table_index.interpolate(-1));
+    EXPECT_EQ(table_linear.interpolate(-0.5), table_index.interpolate(-0.5));
+    EXPECT_EQ(table_linear.interpolate(0), table_index.interpolate(0));
+}
+
+//! Tests LookupTable provides the expected output regardless whether the index-search or linear search is performed
+TEST_F(LookupTableTest, LookupTableDoubleIndexSearchConsistency)
+{
+    std::string                            name = "table";
+    std::vector<std::pair<double, double>> data_index{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}, {1, 1}, {2, 2}};
+    std::vector<std::pair<double, double>> data_linear(data_index);
+    LookupTable<double, double>            table_linear(name, nullptr, std::move(data_linear));
+    LookupTable<double, double>            table_index(name, nullptr, std::move(data_index), true);
+
+    EXPECT_EQ(table_linear.interpolate(-3.5), table_index.interpolate(-3.5));
+    EXPECT_EQ(table_linear.interpolate(-3), table_index.interpolate(-3));
+    EXPECT_EQ(table_linear.interpolate(-2.5), table_index.interpolate(-2.5));
+    EXPECT_EQ(table_linear.interpolate(-2), table_index.interpolate(-2));
+    EXPECT_EQ(table_linear.interpolate(-1.5), table_index.interpolate(-1.5));
+    EXPECT_EQ(table_linear.interpolate(-1), table_index.interpolate(-1));
+    EXPECT_EQ(table_linear.interpolate(-0.5), table_index.interpolate(-0.5));
+    EXPECT_EQ(table_linear.interpolate(0), table_index.interpolate(0));
+}
