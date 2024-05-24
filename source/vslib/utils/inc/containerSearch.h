@@ -24,11 +24,21 @@ namespace vslib::utils
         IndexType bin_size, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2
     ) noexcept
     {
-        const int64_t position = static_cast<int64_t>((input_x - lower_edge_x) / bin_size);
-        x1                     = values[position].first;
-        y1                     = values[position].second;
-        x2                     = values[position + 1].first;
-        y2                     = values[position + 1].second;
+        int64_t position = static_cast<int64_t>(bin_size + (input_x - lower_edge_x) / bin_size);
+        // limits protection, never go outside the range of the provided vector:
+        if (position >= static_cast<int64_t>(values.size()))
+        {
+            position = values.size() - 1;
+        }
+        else if (position <= 0)
+        {
+            position = 1;
+        }
+
+        x1 = values[position - 1].first;
+        y1 = values[position - 1].second;
+        x2 = values[position].first;
+        y2 = values[position].second;
     }
 
     //! Performs linear search of the provided input_x in the m_values container
