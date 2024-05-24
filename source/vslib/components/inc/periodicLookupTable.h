@@ -8,7 +8,7 @@
 #include <string>
 
 #include "component.h"
-#include "container_search.h"
+#include "containerSearch.h"
 #include "parameter.h"
 #include "typeTraits.h"
 
