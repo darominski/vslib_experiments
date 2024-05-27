@@ -291,9 +291,9 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkConsistency)
     std::cout << pid.getT()[0] << " " << pid.getT()[1] << " " << pid.getT()[2] << std::endl;
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
-    std::filesystem::path yk_path = "components/inputs/rst_yk_kp=ki=kd=1_N=2_T=1e-3.csv";
-    std::filesystem::path rk_path = "components/inputs/rst_rk_kp=ki=kd=1_N=2_T=1e-3.csv";
-    std::filesystem::path uk_path = "components/inputs/rst_uk_kp=ki=kd=1_N=2_T=1e-3.csv";
+    std::filesystem::path yk_path = "components/inputs/rst_yk_kp=ki=kd=kff=1_N=2_T=1e-3.csv";
+    std::filesystem::path rk_path = "components/inputs/rst_rk_kp=ki=kd=kff_1_N=2_T=1e-3.csv";
+    std::filesystem::path uk_path = "components/inputs/rst_uk_kp=ki=kd=kff_1_N=2_T=1e-3.csv";
 
     std::ifstream yk_file(yk_path);
     std::ifstream rk_file(rk_path);
@@ -311,7 +311,7 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkConsistency)
     {
         auto const yk_value            = std::stod(yk_str.substr(yk_str.find(",") + 1));
         auto const rk_value            = std::stod(rk_str.substr(rk_str.find(",") + 1));
-        auto const matlab_output_value = std::stod(uk_str.substr(uk_str.find(",") + 1));   // Matlab output
+        auto const matlab_output_value = std::stod(uk_str);   // Matlab output
 
         auto const actuation = pid.control(yk_value, rk_value);
         auto const relative  = (matlab_output_value - actuation) / matlab_output_value;
