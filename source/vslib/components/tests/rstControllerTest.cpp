@@ -310,3 +310,68 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkSimpleConsistency)
     rk_file.close();
     uk_file.close();
 }
+
+//! Checks that the calculated actuation of RST is as expected against Simulink model
+TEST_F(RSTControllerTest, RSTControllerSimulinkConsistency)
+{
+    // simulink model with three filters:
+    // 1. Discrete FIR Filter with T0, T1, T2 parameters with rk as input,
+    // 2. Discrete FIR FIlter with R0, R1, R2 parameters with yk as input,
+    // 3. Subtract outputs from 2. from outputs from 1.
+    // 4. Feed the subtraction output to Discrete Filter with S0, S1, S2 parameters, uk is the output
+    // Parameter values: Kp = 52.79, Ki = 0.0472, Kd = 0.0441, Kff = 6.1190, T = 1e-3, N = 17.79,
+    // recalculated to R, S, and T coefficients
+    // t has 10000 points, uniformly spaced from 0 to 9999 * T, t cutoff is max of the time
+    // yk and rk inputs are randomly generated: rk = randn(10000, 1);
+
+    constexpr size_t                 controller_length = 3;
+    RSTController<controller_length> rst;
+
+    // parameters calculated in Matlab
+    std::array<double, controller_length> r_value = {68.4926325370984, -87.4083295284352, 18.9157413184664};
+    std::array<double, controller_length> s_value = {0.51362705, -0.08812, -0.42550705};
+    std::array<double, controller_length> t_value = {41.1418629706978, -75.0215524757548, 33.8797338321866};
+
+    rst.setR(r_value);
+    rst.setS(s_value);
+    rst.setT(t_value);
+
+    auto maybe_warning = rst.jurysStabilityTest(r_value);
+    ASSERT_FALSE(maybe_warning.has_value());
+    maybe_warning = rst.jurysStabilityTest(s_value);
+    ASSERT_FALSE(maybe_warning.has_value());
+    maybe_warning = rst.jurysStabilityTest(t_value);
+    ASSERT_FALSE(maybe_warning.has_value());
+
+    // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
+    std::filesystem::path yk_path = "components/inputs/rst_yk_kp=ki=kd=kff=1_N=2_T=1e-3.csv";
+    std::filesystem::path rk_path = "components/inputs/rst_rk_kp=ki=kd=kff=1_N=2_T=1e-3.csv";
+    std::filesystem::path uk_path
+        = "components/inputs/rst_uk_kp=52p79_ki=0p0472_kd=0p0441_kff=6p1190_N=17p79_T=1e-3.csv";
+
+    std::ifstream yk_file(yk_path);
+    std::ifstream rk_file(rk_path);
+    std::ifstream uk_file(uk_path);
+
+    ASSERT_TRUE(yk_file.is_open());
+    ASSERT_TRUE(rk_file.is_open());
+    ASSERT_TRUE(uk_file.is_open());
+
+    std::string yk_str;
+    std::string rk_str;
+    std::string uk_str;
+
+    while (getline(yk_file, yk_str) && getline(rk_file, rk_str) && getline(uk_file, uk_str))
+    {
+        auto const yk_value            = std::stod(yk_str.substr(yk_str.find(",") + 1));
+        auto const rk_value            = std::stod(rk_str.substr(rk_str.find(",") + 1));
+        auto const matlab_output_value = std::stod(uk_str);   // Matlab output
+
+        auto const actuation = rst.control(yk_value, rk_value);
+        auto const relative  = (matlab_output_value - actuation) / matlab_output_value;
+        EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
+    }
+    yk_file.close();
+    rk_file.close();
+    uk_file.close();
+}
