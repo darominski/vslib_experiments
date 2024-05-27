@@ -25,7 +25,7 @@ class PIDRSTTest : public ::testing::Test
     }
 
     void set_pid_parameters(
-        PIDRST& pidRst, double p, double i, double d, double ff, double b, double c, size_t N = 1, double ts = 1,
+        PIDRST& pidRst, double p, double i, double d, double ff, double b, double c, double N = 1, double ts = 1,
         double f0 = 1
     )
     {

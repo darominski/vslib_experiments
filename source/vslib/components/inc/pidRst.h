@@ -28,15 +28,15 @@ namespace vslib
         //! @return PID controller object
         PIDRST(std::string_view name, Component* parent = nullptr)
             : Component("PID", name, parent),
-              kp(*this, "kp", -10.0, 10.0),             // min limit: -10, max limit: 10
-              ki(*this, "ki", -10.0, 10.0),             // min limit: -10, max limit: 10
-              kd(*this, "kd"),                          // default limits apply here
-              kff(*this, "kff"),                        // default limits
-              b(*this, "proportional_scaling"),         // default limits
-              c(*this, "derivative_scaling"),           // default limits
-              N(*this, "derivative_filter_order", 0),   // min limit: 0
-              ts(*this, "sampling_period", 0.0),        // min limit: 0.0
-              f0(*this, "control_frequency", 0.0)       // min limit: 0.0
+              kp(*this, "kp"),                            // default limits
+              ki(*this, "ki"),                            // default limits
+              kd(*this, "kd"),                            // default limits
+              kff(*this, "kff"),                          // default limits
+              b(*this, "proportional_scaling"),           // default limits
+              c(*this, "derivative_scaling"),             // default limits
+              N(*this, "derivative_filter_order", 0.0),   // min limit: 0
+              ts(*this, "sampling_period", 0.0),          // min limit: 0.0
+              f0(*this, "control_frequency", 0.0)         // min limit: 0.0
         {
         }
 
@@ -116,7 +116,7 @@ namespace vslib
         Parameter<double> kff;   //!< Feed-forward scaling coefficient
         Parameter<double> b;     //!< Reference signal proportional gain scaling (from DSP regFGC3)
         Parameter<double> c;     //!< Reference signal derivative gain scaling (from High-Performance Digital Control)
-        Parameter<size_t> N;     //!< Filter order for derivative input
+        Parameter<double> N;     //!< Filter order for derivative input
         Parameter<double> ts;    //!< Sampling period
         Parameter<double> f0;    //!< Control freqency
 
@@ -143,7 +143,6 @@ namespace vslib
 
             if (k_p != 0 || k_d != 0)
             {
-
                 const double a2 = pow(a, 2);   // helper a^2, which occurs often in the calculations below
 
                 m_r[0] = (kikpN + k_d * k_i * a + k_d * k_p * a2 + pow(k_p, 2) * N_ * a + k_d * k_p * N_ * a2) / a2;
