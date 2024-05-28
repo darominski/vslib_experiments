@@ -55,6 +55,8 @@ if (NOT BUILD_TESTS)
   set(${LIB}_SOURCES
       components/src/interruptRegistry.cpp
       components/src/rstController.cpp
+      components/src/firFilter.cpp
+      components/src/iirFilter.cpp
       parameters/src/parameterRegistry.cpp
       background/src/parameterSetting.cpp
       background/src/parameterMap.cpp
