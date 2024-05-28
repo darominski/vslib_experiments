@@ -280,8 +280,8 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkSimpleConsistency)
     ASSERT_FALSE(maybe_warning.has_value());
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
-    std::filesystem::path yk_path = "components/inputs/rst_yk_kp=ki=kd=kff=1_N=2_T=1e-3.csv";
-    std::filesystem::path rk_path = "components/inputs/rst_rk_kp=ki=kd=kff=1_N=2_T=1e-3.csv";
+    std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
+    std::filesystem::path rk_path = "components/inputs/rst_rk_random.csv";
     std::filesystem::path uk_path = "components/inputs/rst_uk_kp=ki=kd=kff=1_N=2_T=1e-3.csv";
 
     std::ifstream yk_file(yk_path);
@@ -344,8 +344,8 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkConsistency)
     ASSERT_FALSE(maybe_warning.has_value());
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
-    std::filesystem::path yk_path = "components/inputs/rst_yk_kp=ki=kd=kff=1_N=2_T=1e-3.csv";
-    std::filesystem::path rk_path = "components/inputs/rst_rk_kp=ki=kd=kff=1_N=2_T=1e-3.csv";
+    std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
+    std::filesystem::path rk_path = "components/inputs/rst_rk_random.csv";
     std::filesystem::path uk_path
         = "components/inputs/rst_uk_kp=52p79_ki=0p0472_kd=0p0441_kff=6p1190_N=17p79_T=1e-3.csv";
 
