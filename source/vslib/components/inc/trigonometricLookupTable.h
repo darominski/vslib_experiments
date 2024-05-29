@@ -29,8 +29,8 @@ namespace vslib
               m_function("data", this)
         {
             assert(number_points >= 2);
-            std::vector<std::pair<double, double>> data(number_points);
-            for (size_t index = 0; index < number_points; index++)
+            std::vector<std::pair<double, double>> data(number_points + 1);
+            for (size_t index = 0; index <= number_points; index++)
             {
                 const double x = (2.0 * M_PI * index) / number_points;   // 0 - 2pi
                 double       y;
@@ -47,7 +47,19 @@ namespace vslib
             m_function.setData(std::move(data), true);
         }
 
-        //! Operator overload providing more intuitive interaction with the underlying table
+        //! Provides intuitive interaction with the underlying table
+        //!
+        //! @param input_x Value to be looked up in the table
+        //! @return Interpolated function value closest to the input_x
+        double interpolate(double input_x)
+        {
+            return m_function.interpolate(input_x);
+        }
+
+        //! Provides intuitive interaction with the underlying table
+        //!
+        //! @param input_x Value to be looked up in the table
+        //! @return Interpolated function value closest to the input_x
         double operator()(double input_x)
         {
             return m_function.interpolate(input_x);

@@ -46,7 +46,6 @@ namespace vslib
                 }
                 input_x += this->m_lower_edge_x;
             }
-
             size_t     start_loop_index = 0;
             IndexType  x1, x2;
             StoredType y1, y2;
