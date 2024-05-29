@@ -46,6 +46,7 @@ namespace vslib
             m_function.setData(std::move(data), true);
         }
 
+        //! Operator overload providing more intuitive interaction with the underlying table
         double operator()(double input_x)
         {
             return m_function.interpolate(input_x);

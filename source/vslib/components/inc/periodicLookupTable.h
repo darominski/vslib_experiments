@@ -22,7 +22,6 @@ namespace vslib
         //!
         //! @param name Name of the PeriodicLookupTable component object
         //! @param parent Pointer to the parent of this table
-        //! @param values Vector with x-y pairs of the function to be stored
         PeriodicLookupTable(std::string_view name, Component* parent) noexcept
             : Component("PeriodicLookupTable", name, parent)
         {

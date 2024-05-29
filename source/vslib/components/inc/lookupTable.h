@@ -22,21 +22,9 @@ namespace vslib
         //!
         //! @param name Name of the LookupTable component object
         //! @param parent Pointer to the parent of this table
-        //! @param values Vector with x-y pairs of the function to be stored
-        LookupTable(
-            std::string_view name, Component* parent, std::vector<std::pair<IndexType, StoredType>>&& values,
-            bool equal_binning = false
-        ) noexcept
-            : Component("LookupTable", name, parent),
-              m_bin_size{values[1].first - values[0].first},
-              m_values{std::move(values)},
-              m_equal_binning(equal_binning)
+        LookupTable(std::string_view name, Component* parent) noexcept
+            : Component("LookupTable", name, parent)
         {
-            assert(m_values.size() >= 1);
-            m_lower_edge_x          = m_values[0].first;
-            m_upper_edge_x          = m_values[m_values.size() - 1].first;
-            m_previous_section_x[0] = m_lower_edge_x;
-            m_previous_section_x[1] = m_lower_edge_x;
         }
 
         //! For provided x-axis input provides an interpolated y-axis value from the stored values
@@ -110,6 +98,33 @@ namespace vslib
             return m_values[index].second;
         }
 
+        //! Sets the provided data table to the internal values
+        //!
+        //! @param data Vector of index-value pairs to be set as lookup table
+        //! @param equal_binning Flag to signal that the provided data has constant bin spacing
+        void setData(std::vector<std::pair<IndexType, StoredType>>&& data, bool equal_binning = false) noexcept
+        {
+            assert(data.size() >= 1);
+
+            m_lower_edge_x          = data[0].first;
+            m_upper_edge_x          = data[data.size() - 1].first;
+            m_previous_section_x[0] = m_lower_edge_x;
+            m_previous_section_x[1] = m_lower_edge_x;
+
+            m_bin_size = data[1].first - data[0].first;
+
+            m_equal_binning = equal_binning;
+            m_values        = std::move(data);
+        }
+
+        //! Provides a reference to the data table
+        //!
+        //! @return Data table of index-value pairs
+        auto& getData()
+        {
+            return m_values;
+        }
+
         //! Resets the Component to its initial state
         void reset() noexcept
         {
@@ -119,7 +134,7 @@ namespace vslib
             m_previous_section_index = 0;
         }
 
-      private:
+      protected:
         std::array<IndexType, 2> m_previous_section_x;   //! Edges of the previous section
         StoredType               m_previous_section_y;   //! Function's value at the upper edge of the previous section
 
@@ -129,11 +144,11 @@ namespace vslib
         IndexType m_lower_edge_x;
         IndexType m_upper_edge_x;
 
-        const IndexType m_bin_size{0};
+        IndexType m_bin_size{0};
 
         std::vector<std::pair<IndexType, StoredType>> m_values;
 
-        const bool m_equal_binning{false};
+        bool m_equal_binning{false};
     };
 
 }   // namespace vslib
