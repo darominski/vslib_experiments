@@ -44,7 +44,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntDefault)
 
     auto serialized = table.serialize();
     EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "PeriodicLookupTable");
+    EXPECT_EQ(serialized["type"], "LookupTable");
     EXPECT_EQ(serialized["components"], nlohmann::json::array());
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
@@ -58,7 +58,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleDefault)
 
     auto serialized = table.serialize();
     EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "PeriodicLookupTable");
+    EXPECT_EQ(serialized["type"], "LookupTable");
     EXPECT_EQ(serialized["components"], nlohmann::json::array());
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
