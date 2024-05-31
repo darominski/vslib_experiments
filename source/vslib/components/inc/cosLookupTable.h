@@ -1,5 +1,5 @@
 //! @file
-//! @brief Defines the Component class for a look-up table holding trigonometry functions.
+//! @brief Defines the Component class for a look-up table holding cosine function.
 //! @author Dominik Arominski
 
 #pragma once
@@ -13,19 +13,12 @@
 
 namespace vslib
 {
-    enum class TrigonometricFunctions
-    {
-        sin,
-        cos
-    };
 
-    class TrigonometricLookupTable : public Component
+    class CosLookupTable : public Component
     {
       public:
-        TrigonometricLookupTable(
-            std::string_view name, Component* parent, TrigonometricFunctions choice, size_t number_points
-        )
-            : Component("TrigonometricLookupTable", name, parent),
+        CosLookupTable(std::string_view name, Component* parent, size_t number_points)
+            : Component("CosLookupTable", name, parent),
               m_function("data", this)
         {
             assert(number_points >= 2);
@@ -33,16 +26,8 @@ namespace vslib
             for (size_t index = 0; index <= number_points; index++)
             {
                 const double x = (2.0 * M_PI * index) / number_points;   // 0 - 2pi
-                double       y;
-                if (choice == TrigonometricFunctions::sin)
-                {
-                    y = sin(x);
-                }
-                else if (choice == TrigonometricFunctions::cos)
-                {
-                    y = cos(x);
-                }
-                data[index] = std::make_pair(x, y);
+                double       y = cos(x);
+                data[index]    = std::make_pair(x, y);
             }
             m_function.setData(std::move(data), true);
         }
@@ -65,6 +50,7 @@ namespace vslib
             return m_function.interpolate(input_x);
         }
 
+      private:
         PeriodicLookupTable<double, double> m_function;
     };
 }
