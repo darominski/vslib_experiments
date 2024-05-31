@@ -36,12 +36,18 @@ namespace vslib
 
         //! Calculates one iteration of the controller algorithm
         //!
-        //! @param process_value Current process value (measurement)
+        //! @param measurement Current process value (measurement)
         //! @param reference Reference value for the controller
         //! @return Controller output of the iteration
-        double control(double process_value, double reference) noexcept
+        double control(double measurement, double reference) noexcept
         {
-            return rst.control(process_value, reference);
+            if (!rst.isReady())
+            {
+                rst.update_input_histories(measurement, reference);
+                return 0;
+            }
+            const double actuation = rst.control(measurement, reference);
+            return actuation;
         }
 
         //! Updates the most recent reference in the history, used in cases actuation goes over the limit

@@ -33,7 +33,7 @@ namespace vslib
             if (m_head == ControllerLength)
             {
                 m_history_ready = true;
-                m_head          -= ControllerLength;
+                m_head          = 0;
             }
         }
 

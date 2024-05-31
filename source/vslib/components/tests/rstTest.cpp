@@ -242,6 +242,12 @@ TEST_F(RSTTest, RSTCalculateActuation)
     const auto maybe_warning = rst.verifyParameters();
     ASSERT_FALSE(maybe_warning.has_value());
 
+    // fill the histories to enable RST:
+    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_EQ(rst.control(0, 0), 0);
+    // now the RST is enabled and actuation can be calculated
+
     double const set_point_value   = 3.14159;
     double const measurement_value = 1.111;
 
@@ -274,6 +280,12 @@ TEST_F(RSTTest, RSTCalculateMultipleActuations)
     set_rst_parameters<controller_length>(rst, r_value, s_value, t_value);
     const auto maybe_warning = rst.verifyParameters();
     ASSERT_FALSE(maybe_warning.has_value());
+
+    // fill the histories to enable RST:
+    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_EQ(rst.control(0, 0), 0);
+    // now the RST is enabled and actuation can be calculated
 
     double const set_point_value   = 3.14159;
     double const measurement_value = 1.111;

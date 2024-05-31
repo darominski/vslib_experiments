@@ -286,6 +286,12 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkSimpleConsistency)
     const double f0 = 1e-15;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
 
+    // fill the histories to enable the controller:
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    // now, the controller is enabled and actuations can be calculated
+
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
     std::filesystem::path rk_path = "components/inputs/rst_rk_random.csv";
@@ -343,6 +349,12 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkConsistency)
     const double ts = 1.0e-3;
     const double f0 = 1e-15;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+
+    // fill the histories to enable the controller:
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    // now, the controller is enabled and actuations can be calculated
 
     // the input files are randomly generated numbers
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
@@ -402,6 +414,12 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkIntegratorConsistency)
     const double ts = 1.0e-3;
     const double f0 = 1e-15;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+
+    // fill the histories to enable the controller:
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    // now, the controller is enabled and actuations can be calculated
 
     // the input files are randomly generated numbers
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
