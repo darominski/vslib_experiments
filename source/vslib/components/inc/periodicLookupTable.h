@@ -23,9 +23,15 @@ namespace vslib
         //!
         //! @param name Name of the PeriodicLookupTable component object
         //! @param parent Pointer to the parent of this table
-        PeriodicLookupTable(std::string_view name, Component* parent) noexcept
-            : LookupTable<IndexType, StoredType>(name, parent)
+        //! @param values Vector with lookup table index-value pairs
+        //! @param equal_binning Flag signalling whether the lookup table indexing has equal spaced binning
+        PeriodicLookupTable(
+            std::string_view name, Component* parent, std::vector<std::pair<IndexType, StoredType>>&& values,
+            bool equal_binning = false
+        ) noexcept
+            : LookupTable<IndexType, StoredType>(name, parent, std::move(values), equal_binning)
         {
+            m_span_x = abs(this->m_upper_edge_x - this->m_lower_edge_x);
         }
 
         //! For provided x-axis input provides an interpolated y-axis value from the stored values

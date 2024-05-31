@@ -22,9 +22,23 @@ namespace vslib
         //!
         //! @param name Name of the LookupTable component object
         //! @param parent Pointer to the parent of this table
-        LookupTable(std::string_view name, Component* parent) noexcept
-            : Component("LookupTable", name, parent)
+        //! @param values Vector with lookup table index-value pairs
+        //! @param equal_binning Flag signalling whether the lookup table indexing has equal spaced binning
+        LookupTable(
+            std::string_view name, Component* parent, std::vector<std::pair<IndexType, StoredType>>&& values,
+            bool equal_binning = false
+        ) noexcept
+            : Component("LookupTable", name, parent),
+              m_values{std::move(values)}
         {
+            m_lower_edge_x          = m_values[0].first;
+            m_upper_edge_x          = m_values[m_values.size() - 1].first;
+            m_previous_section_x[0] = m_lower_edge_x;
+            m_previous_section_x[1] = m_lower_edge_x;
+
+            m_bin_size = m_values[1].first - m_values[0].first;
+
+            m_equal_binning = equal_binning;
         }
 
         //! For provided x-axis input provides an interpolated y-axis value from the stored values
