@@ -112,25 +112,6 @@ namespace vslib
             return m_values[index].second;
         }
 
-        //! Sets the provided data table to the internal values
-        //!
-        //! @param data Vector of index-value pairs to be set as lookup table
-        //! @param equal_binning Flag to signal that the provided data has constant bin spacing
-        void setData(std::vector<std::pair<IndexType, StoredType>>&& data, bool equal_binning = false) noexcept
-        {
-            assert(data.size() >= 1);
-
-            m_lower_edge_x          = data[0].first;
-            m_upper_edge_x          = data[data.size() - 1].first;
-            m_previous_section_x[0] = m_lower_edge_x;
-            m_previous_section_x[1] = m_lower_edge_x;
-
-            m_bin_size = data[1].first - data[0].first;
-
-            m_equal_binning = equal_binning;
-            m_values        = std::move(data);
-        }
-
         //! Provides a reference to the data table
         //!
         //! @return Data table of index-value pairs

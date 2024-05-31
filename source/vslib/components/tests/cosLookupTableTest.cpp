@@ -10,7 +10,7 @@
 
 using namespace vslib;
 
-class TrigonometricLookupTableTest : public ::testing::Test
+class CosLookupTableTest : public ::testing::Test
 {
   protected:
     void SetUp() override
@@ -22,8 +22,8 @@ class TrigonometricLookupTableTest : public ::testing::Test
     }
 };
 
-//! Tests default construction of integral type TrigonometricLookupTable component
-TEST_F(TrigonometricLookupTableTest, TrigonometricLookupTableCos)
+//! Tests default construction of integral type CosLookupTable component
+TEST_F(CosLookupTableTest, CosLookupTable)
 {
     std::string    name = "table";
     CosLookupTable table(name, nullptr, 2);
@@ -39,8 +39,8 @@ TEST_F(TrigonometricLookupTableTest, TrigonometricLookupTableCos)
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
-//! Tests TrigonometricLookupTable component interpolating a couple of points
-TEST_F(TrigonometricLookupTableTest, TrigonometricLookupTableCosInterpolation)
+//! Tests CosLookupTable component interpolating a couple of points
+TEST_F(CosLookupTableTest, CosLookupTableInterpolation)
 {
     std::string    name = "table";
     CosLookupTable table(name, nullptr, 10000);
@@ -52,8 +52,8 @@ TEST_F(TrigonometricLookupTableTest, TrigonometricLookupTableCosInterpolation)
     EXPECT_NEAR(table.interpolate(2.0 * M_PI - 0.01), cos(2.0 * M_PI - 0.01), 1e-6);
 }
 
-//! Tests TrigonometricLookupTable component interpolating a couple of points that fall out of 0 - 2pi range
-TEST_F(TrigonometricLookupTableTest, TrigonometricLookupTableCosInterpolationOutOfBounds)
+//! Tests CosLookupTable component interpolating a couple of points that fall out of 0 - 2pi range
+TEST_F(CosLookupTableTest, CosLookupTableInterpolationOutOfBounds)
 {
     std::string    name = "table";
     CosLookupTable table(name, nullptr, 10000);
@@ -73,8 +73,8 @@ TEST_F(TrigonometricLookupTableTest, TrigonometricLookupTableCosInterpolationOut
     EXPECT_NEAR(table.interpolate(123 * 2.0 * M_PI), cos(123 * 2.0 * M_PI), 1e-3);
 }
 
-//! Tests TrigonometricLookupTable consistency of interface
-TEST_F(TrigonometricLookupTableTest, TrigonometricLookupTableCosConsistency)
+//! Tests CosLookupTable consistency of interface
+TEST_F(CosLookupTableTest, CosLookupTableConsistency)
 {
     std::string    name = "table";
     CosLookupTable table(name, nullptr, 10000);

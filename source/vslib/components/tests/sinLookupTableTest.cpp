@@ -73,7 +73,6 @@ TEST_F(SinLookupTableTest, SinLookupTableInterpolationOutOfBounds)
     EXPECT_NEAR(table.interpolate(123 * 2.0 * M_PI), sin(123 * 2.0 * M_PI), 1e-3);
 }
 
-
 //! Tests SinLookupTable consistency of interface
 TEST_F(SinLookupTableTest, SinLookupTableConsistency)
 {

@@ -95,16 +95,6 @@ namespace vslib
             return y1 + (input_x - x1) * this->m_interpolation_factor;
         }
 
-        //! Sets the provided data table to the internal values
-        //!
-        //! @param data Vector of index-value pairs to be set as lookup table
-        //! @param equal_binning Flag to signal that the provided data has constant bin spacing
-        void setData(std::vector<std::pair<IndexType, StoredType>>&& data, bool equal_binning = false) noexcept
-        {
-            LookupTable<IndexType, StoredType>::setData(std::move(data), equal_binning);
-            m_span_x = abs(this->m_upper_edge_x - this->m_lower_edge_x);
-        }
-
       private:
         IndexType m_span_x;
     };
