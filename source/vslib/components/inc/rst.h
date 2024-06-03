@@ -8,6 +8,7 @@
 #include <string>
 
 #include "component.h"
+#include "limitRange.h"
 #include "parameter.h"
 #include "rstController.h"
 
@@ -21,7 +22,8 @@ namespace vslib
             : Component("RST", name, parent),
               r(*this, "r"),
               s(*this, "s"),
-              t(*this, "t")
+              t(*this, "t"),
+              actuation_limits("actuation_limits", this)
         {
         }
 
@@ -46,8 +48,13 @@ namespace vslib
                 rst.update_input_histories(measurement, reference);
                 return 0;
             }
-            const double actuation = rst.control(measurement, reference);
-            return actuation;
+            const double actuation         = rst.control(measurement, reference);
+            const double clipped_actuation = actuation_limits.limit(actuation);
+            if (clipped_actuation != actuation)
+            {
+                update_reference(clipped_actuation);
+            }
+            return clipped_actuation;
         }
 
         //! Updates the most recent reference in the history, used in cases actuation goes over the limit
@@ -106,6 +113,12 @@ namespace vslib
         Parameter<std::array<double, ControllerLength>> s;   //<! disturbance coefficients
         Parameter<std::array<double, ControllerLength>> t;   //<! control coefficients
 
+        // ************************************************************
+        // Limits of the controller's actuation
+
+        LimitRange<double> actuation_limits;
+
+        // ************************************************************
         //! Update parameters method, called after paramaters of this component are modified
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {

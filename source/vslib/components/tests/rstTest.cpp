@@ -24,7 +24,8 @@ class RSTTest : public ::testing::Test
 
     template<size_t length>
     void set_rst_parameters(
-        RST<length>& rst, std::array<double, length>& r, std::array<double, length>& s, std::array<double, length>& t
+        RST<length>& rst, std::array<double, length>& r, std::array<double, length>& s, std::array<double, length>& t,
+        double act_min = 0, double act_max = 1e9
     )
     {
         StaticJson r_value = r;
@@ -35,6 +36,15 @@ class RSTTest : public ::testing::Test
 
         StaticJson t_value = t;
         rst.t.setJsonValue(t_value);
+
+        StaticJson act_min_value = act_min;
+        rst.actuation_limits.min.setJsonValue(act_min_value);
+
+        StaticJson act_max_value = act_max;
+        rst.actuation_limits.max.setJsonValue(act_max_value);
+        rst.actuation_limits.verifyParameters();
+        rst.actuation_limits.flipBufferState();
+        rst.actuation_limits.synchroniseParameterBuffers();
 
         rst.verifyParameters();
         rst.flipBufferState();
@@ -59,7 +69,13 @@ TEST_F(RSTTest, RSTDefaultConstruction)
     auto serialized = rst.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "RST");
-    EXPECT_EQ(serialized["components"], nlohmann::json::array());
+    EXPECT_EQ(
+        serialized["components"].dump(),
+        "[{\"name\":\"actuation_limits\",\"type\":\"LimitRange\",\"parameters\":[{\"name\":\"lower_threshold\","
+        "\"type\":\"Float64\",\"length\":1,\"value\":{}},{\"name\":\"upper_threshold\",\"type\":\"Float64\",\"length\":"
+        "1,\"value\":{}},{\"name\":\"dead_zone\",\"type\":\"ArrayFloat64\",\"length\":2,\"value\":[]}],\"components\":["
+        "]}]"
+    );
     EXPECT_EQ(serialized["parameters"].size(), 3);
     EXPECT_EQ(serialized["parameters"][0]["name"], "r");
     EXPECT_EQ(serialized["parameters"][0]["length"], controller_length);
