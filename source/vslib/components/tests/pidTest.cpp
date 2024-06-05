@@ -55,7 +55,7 @@ class PIDTest : public ::testing::Test
 TEST_F(PIDTest, PIDDefaultConstruction)
 {
     std::string name = "pid_1";
-    PID         pid(name);
+    PID         pid(name, nullptr);
     EXPECT_EQ(pid.getName(), name);
     EXPECT_EQ(pid.getError(), 0.0);
     EXPECT_EQ(pid.getPreviousError(), 0.0);
@@ -97,7 +97,7 @@ TEST_F(PIDTest, PIDAntiWindupConstruction)
 TEST_F(PIDTest, PIDSetters)
 {
     std::string name = "pid_3";
-    PID         pid(name);
+    PID         pid(name, nullptr);
 
     const double starting_value = 2 * 3.14159;
     pid.setStartingValue(starting_value);
@@ -108,7 +108,7 @@ TEST_F(PIDTest, PIDSetters)
 TEST_F(PIDTest, PIDReset)
 {
     std::string name = "pid_4";
-    PID         pid(name);
+    PID         pid(name, nullptr);
 
     const double starting_value = 2 * 3.14159;
     pid.setStartingValue(starting_value);
@@ -123,7 +123,7 @@ TEST_F(PIDTest, PIDReset)
 TEST_F(PIDTest, PIDSingleIteration)
 {
     std::string  name = "pid_5";
-    PID          pid(name);
+    PID          pid(name, nullptr);
     const double p  = 2.0;
     const double i  = 1.0;
     const double d  = 1.5;
@@ -146,7 +146,7 @@ TEST_F(PIDTest, PIDSingleIteration)
 TEST_F(PIDTest, PIDControlIteration)
 {
     std::string  name = "pid_6";
-    PID          pid(name);
+    PID          pid(name, nullptr);
     const double p            = 0.6;
     const double i            = 0.3;
     const double d            = 0.06;

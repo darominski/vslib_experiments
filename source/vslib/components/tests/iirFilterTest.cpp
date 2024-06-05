@@ -50,7 +50,7 @@ class IIRFilterTest : public ::testing::Test
 //! Checks that a IIRFilter object can be constructed
 TEST_F(IIRFilterTest, FilterDefaultConstruction)
 {
-    IIRFilter<1> filter("filter");
+    IIRFilter<1> filter("filter", nullptr);
     EXPECT_EQ(filter.getName(), "filter");
 }
 
@@ -60,7 +60,7 @@ TEST_F(IIRFilterTest, FilterSingleValue)
 {
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
-    IIRFilter<filter_order>           filter("filter");
+    IIRFilter<filter_order>           filter("filter", nullptr);
     std::array<double, filter_length> numerator_values{0.1, 0.8, 0.1};
     setNumeratorValues<filter_order>(filter, numerator_values);
 
@@ -75,7 +75,7 @@ TEST_F(IIRFilterTest, FirstOrderFilterSingleValueSetDenominator)
     constexpr int                     filter_order  = 1;
     constexpr int                     filter_length = filter_order + 1;
     constexpr int                     inputs_length = 3;
-    IIRFilter<filter_order>           filter("filter");
+    IIRFilter<filter_order>           filter("filter", nullptr);
     std::array<double, filter_length> numerator_values{0.3, 0.7};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37};   // from Matlab: Butterworth IIR filter
@@ -91,7 +91,7 @@ TEST_F(IIRFilterTest, FirstOrderFilterMultipleValues)
     constexpr int                     filter_order  = 1;
     constexpr int                     filter_length = filter_order + 1;
     constexpr int                     input_length  = 3;
-    IIRFilter<filter_order>           filter("filter");
+    IIRFilter<filter_order>           filter("filter", nullptr);
     std::array<double, filter_length> numerator_values{0.2, 0.8};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37};
@@ -122,7 +122,7 @@ TEST_F(IIRFilterTest, FilterSingleValueSetDenominator)
 {
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
-    IIRFilter<filter_order>           filter("filter");
+    IIRFilter<filter_order>           filter("filter", nullptr);
     std::array<double, filter_length> numerator_values{0.1, 0.8, 0.1};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};   // from Matlab: Butterworth IIR filter
@@ -137,7 +137,7 @@ TEST_F(IIRFilterTest, FilterMultipleValues)
 {
     constexpr int                     filter_order  = 3;
     constexpr int                     filter_length = filter_order + 1;
-    IIRFilter<filter_order>           filter("filter");
+    IIRFilter<filter_order>           filter("filter", nullptr);
     std::array<double, filter_length> numerator_values{0.1, 0.8, 0.05, 0.05};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};
@@ -169,7 +169,7 @@ TEST_F(IIRFilterTest, FilterMultipleValuesBufferWrapAround)
 {
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
-    IIRFilter<filter_order>           filter("filter");
+    IIRFilter<filter_order>           filter("filter", nullptr);
     std::array<double, filter_length> numerator_values{0.1, 0.8, 0.1};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};
@@ -209,7 +209,7 @@ TEST_F(IIRFilterTest, FilterEntireArrayCompareWithMatlab)
 {
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
-    IIRFilter<filter_order>           filter("filter");
+    IIRFilter<filter_order>           filter("filter", nullptr);
     std::array<double, filter_length> numerator_values{0.1, 0.8, 0.1};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};

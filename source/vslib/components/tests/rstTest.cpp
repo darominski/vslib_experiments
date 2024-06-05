@@ -58,7 +58,7 @@ TEST_F(RSTTest, RSTDefaultConstruction)
     std::string      name              = "rst_1";
     constexpr size_t controller_length = 3;
 
-    RST<controller_length> rst(name);
+    RST<controller_length> rst(name, nullptr);
 
     EXPECT_EQ(rst.getName(), name);
     EXPECT_EQ(rst.r.isInitialized(), false);
@@ -93,7 +93,7 @@ TEST_F(RSTTest, RSTUpdateInputHistories)
     std::string      name              = "rst_2";
     constexpr size_t controller_length = 5;
 
-    RST<controller_length> rst(name);
+    RST<controller_length> rst(name, nullptr);
 
     for (size_t index = 0; index < controller_length; index++)
     {
@@ -110,7 +110,7 @@ TEST_F(RSTTest, RSTReset)
     std::string      name              = "rst_3";
     constexpr size_t controller_length = 7;
 
-    RST<controller_length> rst(name);
+    RST<controller_length> rst(name, nullptr);
     EXPECT_EQ(rst.isReady(), false);
 
     for (size_t index = 0; index < controller_length; index++)
@@ -131,7 +131,7 @@ TEST_F(RSTTest, RSTSetParameters)
     std::string      name              = "rst_3";
     constexpr size_t controller_length = 4;
 
-    RST<controller_length> rst(name);
+    RST<controller_length> rst(name, nullptr);
 
     // ensure the initial state is as expected:
     EXPECT_EQ(rst.r.isInitialized(), false);
@@ -168,7 +168,7 @@ TEST_F(RSTTest, RSTVerifyParameters)
     std::string      name              = "rst_3";
     constexpr size_t controller_length = 4;
 
-    RST<controller_length> rst(name);
+    RST<controller_length> rst(name, nullptr);
 
     // set parameters
     std::array<double, controller_length> r_value = {0.0, 0.2, 0.3, 0.4};
@@ -247,7 +247,7 @@ TEST_F(RSTTest, RSTCalculateActuation)
     std::string      name              = "rst_3";
     constexpr size_t controller_length = 3;
 
-    RST<controller_length> rst(name);
+    RST<controller_length> rst(name, nullptr);
 
     // set parameters
     std::array<double, controller_length> r_value = {0.1, 0.2, 0.3};
@@ -286,7 +286,7 @@ TEST_F(RSTTest, RSTCalculateMultipleActuations)
     std::string      name              = "rst_3";
     constexpr size_t controller_length = 3;
 
-    RST<controller_length> rst(name);
+    RST<controller_length> rst(name, nullptr);
 
     // set parameters
     std::array<double, controller_length> r_value = {0.1, 0.2, 0.3};
@@ -339,7 +339,7 @@ TEST_F(RSTTest, RSTReCalculateReference)
     std::string      name              = "rst_3";
     constexpr size_t controller_length = 3;
 
-    RST<controller_length> rst(name);
+    RST<controller_length> rst(name, nullptr);
 
     // set parameters
     std::array<double, controller_length> r_value = {0.1, 0.2, 0.3};

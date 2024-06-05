@@ -19,7 +19,7 @@ namespace vslib
 
       public:
         //! Constructor of the IIR filter component, initializing one Parameter: coefficients
-        IIRFilter(std::string_view name, Component* parent = nullptr)
+        IIRFilter(std::string_view name, Component* parent)
             : Filter("IIRFilter", name, parent),
               numerator(*this, "numerator_coefficients"),
               denominator(*this, "denominator_coefficients")

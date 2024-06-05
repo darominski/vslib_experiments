@@ -17,7 +17,7 @@ namespace vslib
         //! @param handler_function Function to be called when an interrupt triggers
         //! @param microsecond_delay Delay between interrupts in integer increments of a microsecond
         TimerInterrupt(
-            std::string_view name, Component* parent = nullptr,
+            std::string_view name, Component* parent,
             std::function<void(void)> handler_function =
                 []()
             {

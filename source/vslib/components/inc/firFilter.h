@@ -19,7 +19,7 @@ namespace vslib
 
       public:
         //! Constructor of the FIR filter component, initializing one Parameter: coefficients
-        FIRFilter(std::string_view name, Component* parent = nullptr)
+        FIRFilter(std::string_view name, Component* parent)
             : Filter("FIRFilter", name, parent),
               coefficients(*this, "coefficients")
         {

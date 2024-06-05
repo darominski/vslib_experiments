@@ -23,7 +23,7 @@ namespace vslib
         //! value) and return a double (corrected integral value)
         //! @return PID controller object
         PID(
-            std::string_view name, Component* parent = nullptr,
+            std::string_view name, Component* parent,
             std::function<double(double)> anti_windup_protection =
                 [](double input)
             {

@@ -76,7 +76,7 @@ class PIDRSTTest : public ::testing::Test
 TEST_F(PIDRSTTest, PIDRSTDefaultConstruction)
 {
     std::string name = "pid_1";
-    PIDRST      pid(name);
+    PIDRST      pid(name, nullptr);
     EXPECT_EQ(pid.getName(), name);
 
     auto serialized_pid = pid.serialize();
@@ -105,7 +105,7 @@ TEST_F(PIDRSTTest, PIDRSTDefaultConstruction)
 TEST_F(PIDRSTTest, PIDRSTCoefficientsDefault)
 {
     std::string  name = "pid_2";
-    PIDRST       pid(name);
+    PIDRST       pid(name, nullptr);
     const double p  = 2.0;
     const double i  = 1.0;
     const double d  = 1.5;
@@ -150,7 +150,7 @@ TEST_F(PIDRSTTest, PIDRSTCoefficientsDefault)
 TEST_F(PIDRSTTest, PIDRSTCoefficientsKpZero)
 {
     std::string  name = "pid_2";
-    PIDRST       pid(name);
+    PIDRST       pid(name, nullptr);
     const double p  = 0.0;
     const double i  = 1.0;
     const double d  = 1.5;
@@ -195,7 +195,7 @@ TEST_F(PIDRSTTest, PIDRSTCoefficientsKpZero)
 TEST_F(PIDRSTTest, PIDRSTCoefficientsKdZero)
 {
     std::string  name = "pid_2";
-    PIDRST       pid(name);
+    PIDRST       pid(name, nullptr);
     const double p  = 2.0;
     const double i  = 1.0;
     const double d  = 0.0;
@@ -240,7 +240,7 @@ TEST_F(PIDRSTTest, PIDRSTCoefficientsKdZero)
 TEST_F(PIDRSTTest, PIDRSTCoefficientsIntegrator)
 {
     std::string  name = "pid_2";
-    PIDRST       pid(name);
+    PIDRST       pid(name, nullptr);
     const double p  = 0.0;
     const double i  = 1.0;
     const double d  = 0.0;
@@ -289,7 +289,7 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkSimpleConsistency)
     // yk and rk inputs are randomly generated: rk = randn(10000, 1);
 
     std::string  name = "pid";
-    PIDRST       pid(name);
+    PIDRST       pid(name, nullptr);
     const double p             = 1.0;
     const double i             = 1.0;
     const double d             = 1.0;
@@ -354,7 +354,7 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkConsistency)
     // yk and rk inputs are randomly generated: rk = randn(10000, 1);
 
     std::string  name = "pid";
-    PIDRST       pid(name);
+    PIDRST       pid(name, nullptr);
     const double p             = 52.79;
     const double i             = 0.0472;
     const double d             = 0.04406;
@@ -421,7 +421,7 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkIntegratorConsistency)
     // yk and rk inputs are randomly generated: rk = randn(10000, 1);
 
     std::string  name = "pid";
-    PIDRST       pid(name);
+    PIDRST       pid(name, nullptr);
     const double p             = 0;
     const double i             = 0.0472;
     const double d             = 0;

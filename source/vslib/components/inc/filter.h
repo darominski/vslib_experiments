@@ -13,7 +13,7 @@ namespace vslib
     class Filter : public Component
     {
       public:
-        Filter(std::string_view type, std::string_view name, Component* parent = nullptr)
+        Filter(std::string_view type, std::string_view name, Component* parent)
             : Component(type, name, parent)
         {
         }

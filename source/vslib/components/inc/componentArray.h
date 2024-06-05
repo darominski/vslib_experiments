@@ -22,7 +22,7 @@ namespace vslib
         //! @param parent Specifies whether a parent of this object exists, optional: object independent by default
         //! @param settings All settings that are forwarded to construct Components held in the array
         template<typename... ComponentSettings>
-        ComponentArray(const std::string& name, Component* parent = nullptr, ComponentSettings... settings)
+        ComponentArray(const std::string& name, Component* parent, ComponentSettings... settings)
             : Component("ComponentArray", name, parent)
         {
             static_assert(std::derived_from<ComponentType, Component>, "ComponentType must be derived from Component");
