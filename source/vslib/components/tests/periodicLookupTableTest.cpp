@@ -38,8 +38,9 @@ std::vector<std::pair<double, double>> func()
 //! Tests default construction of integral type PeriodicLookupTable component
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntDefault)
 {
-    std::string                  name = "table";
-    PeriodicLookupTable<int32_t> table(name, nullptr);
+    std::string                      name = "table";
+    std::vector<std::pair<int, int>> values{{0, 0}, {1, 1}, {2, 2}, {3, 3}};
+    PeriodicLookupTable<int32_t>     table(name, nullptr, std::move(values));
     EXPECT_EQ(table.getName(), name);
 
     auto serialized = table.serialize();
@@ -52,8 +53,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntDefault)
 //! Tests default construction of double type PeriodicLookupTable component
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleDefault)
 {
-    std::string                 name = "table";
-    PeriodicLookupTable<double> table(name, nullptr);
+    std::string                            name = "table";
+    std::vector<std::pair<double, double>> values{{0, 0}, {1, 1}, {2, 2}, {3, 3}};
+    PeriodicLookupTable<double>            table(name, nullptr, std::move(values));
     EXPECT_EQ(table.getName(), name);
 
     auto serialized = table.serialize();
@@ -67,11 +69,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleDefault)
 //! hitting the provided points
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateProvidedData)
 {
-    std::string              name = "table";
-    PeriodicLookupTable<int> table(name, nullptr);
-
+    std::string                      name = "table";
     std::vector<std::pair<int, int>> values{{0, 0}, {1, 1}, {2, 2}, {3, 3}};
-    table.setData(std::move(values));
+    PeriodicLookupTable<int>         table(name, nullptr, std::move(values));
 
     EXPECT_EQ(table.interpolate(0), 0);
     EXPECT_EQ(table.interpolate(1), 1);
@@ -86,11 +86,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateProvidedData)
 //! hitting the provided points
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateProvidedDataNegativeAxis)
 {
-    std::string              name = "table";
-    PeriodicLookupTable<int> table(name, nullptr);
-
+    std::string                      name = "table";
     std::vector<std::pair<int, int>> values{{-3.0, 3}, {-2.0, 2}, {-1.0, 1}, {0.0, 0}};
-    table.setData(std::move(values));
+    PeriodicLookupTable<int>         table(name, nullptr, std::move(values));
 
     EXPECT_EQ(table.interpolate(0), 0);
     EXPECT_EQ(table.interpolate(-1), 1);
@@ -105,11 +103,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateProvidedDataNeg
 //! hitting the provided points
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleProvidedData)
 {
-    std::string                 name = "table";
-    PeriodicLookupTable<double> table(name, nullptr);
-
+    std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
-    table.setData(std::move(values));
+    PeriodicLookupTable<double>            table(name, nullptr, std::move(values));
 
     EXPECT_NEAR(table.interpolate(0.0), 0.3, 1e-15);
     EXPECT_NEAR(table.interpolate(1.0), 1.3, 1e-15);
@@ -123,11 +119,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleProvidedData)
 //! Tests PeriodicLookupTable component with a assuming that the x-axis is constant-binned
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleConstantBinning)
 {
-    std::string                 name = "table";
-    PeriodicLookupTable<double> table(name, nullptr);
-
+    std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
-    table.setData(std::move(values), true);
+    PeriodicLookupTable<double>            table(name, nullptr, std::move(values), true);
 
     EXPECT_NEAR(table.interpolate(0.0), 0.3, 1e-15);
     EXPECT_NEAR(table.interpolate(1.0), 1.3, 1e-15);
@@ -141,11 +135,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleConstantBinning)
 //! Tests PeriodicLookupTable's random access operator overload
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleAccessOperatorOverload)
 {
-    std::string                 name = "table";
-    PeriodicLookupTable<double> table(name, nullptr);
-
+    std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
-    table.setData(std::move(values));
+    PeriodicLookupTable<double>            table(name, nullptr, std::move(values));
 
     EXPECT_EQ(table[0], 0.3);
     EXPECT_EQ(table[1], 1.3);
@@ -157,11 +149,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleAccessOperatorOverload)
 //! hitting the provided points
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleNegativeAxis)
 {
-    std::string                 name = "table";
-    PeriodicLookupTable<double> table(name, nullptr);
-
+    std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3.0, 3.3}, {-2.0, 2.3}, {-1.0, 1.3}, {0.0, 0.3}};
-    table.setData(std::move(values));
+    PeriodicLookupTable<double>            table(name, nullptr, std::move(values));
 
     EXPECT_NEAR(table.interpolate(-3.0), 3.3, 1e-15);
     EXPECT_NEAR(table.interpolate(-2.0), 2.3, 1e-15);
@@ -177,11 +167,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleNegativeAxis)
 //! of interpolation input being somewhere between the data points
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleInterpolateBetweenPoints)
 {
-    std::string                 name = "table";
-    PeriodicLookupTable<double> table(name, nullptr);
-
+    std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3.0, 3.3}, {-2.0, 2.3}, {-1.0, 1.3}, {0.0, 0.3}};
-    table.setData(std::move(values));
+    PeriodicLookupTable<double>            table(name, nullptr, std::move(values));
 
     EXPECT_NEAR(table.interpolate(-2.5), 0.5 * (3.3 + 2.3), 1e-15);
     EXPECT_NEAR(table.interpolate(-1.5), 0.5 * (2.3 + 1.3), 1e-15);
@@ -196,11 +184,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleInterpolateBetweenPoint
 //! Tests PeriodicLookupTable provides the same answer when repeatedly accessing the exact same point
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRepeatedInput)
 {
-    std::string                      name = "table";
-    PeriodicLookupTable<double, int> table(name, nullptr);
-
+    std::string                         name = "table";
     std::vector<std::pair<double, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
-    table.setData(std::move(values));
+    PeriodicLookupTable<double, int>    table(name, nullptr, std::move(values));
 
     EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
     EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
@@ -212,11 +198,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRepeatedInput)
 //! binning
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRepeatedInputConstantBinning)
 {
-    std::string                      name = "table";
-    PeriodicLookupTable<double, int> table(name, nullptr);
-
+    std::string                         name = "table";
     std::vector<std::pair<double, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
-    table.setData(std::move(values), true);
+    PeriodicLookupTable<double, int>    table(name, nullptr, std::move(values), true);
 
     EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
     EXPECT_EQ(table.interpolate(-2.5), static_cast<int>(0.5 * (3 + 2)));
@@ -228,11 +212,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRepeatedInputConstantBinni
 //! Tests PeriodicLookupTable provides the same answer when repeatedly accessing the exact same point
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInput)
 {
-    std::string                         name = "table";
-    PeriodicLookupTable<double, double> table(name, nullptr);
-
+    std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
-    table.setData(std::move(values));
+    PeriodicLookupTable<double, double>    table(name, nullptr, std::move(values));
 
     EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
     EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
@@ -244,11 +226,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInput)
 //! binning
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInputConstantBinning)
 {
-    std::string                         name = "table";
-    PeriodicLookupTable<double, double> table(name, nullptr);
-
+    std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
-    table.setData(std::move(values), true);
+    PeriodicLookupTable<double, double>    table(name, nullptr, std::move(values));
 
     EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
     EXPECT_EQ(table.interpolate(-2.5), 0.5 * (3.3 + 2.2));
@@ -260,11 +240,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInputConstantBi
 //! access
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInputRandomAccess)
 {
-    std::string                         name = "table";
-    PeriodicLookupTable<double, double> table(name, nullptr);
-
+    std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
-    table.setData(std::move(values));
+    PeriodicLookupTable<double, double>    table(name, nullptr, std::move(values));
 
     EXPECT_EQ(table.interpolate(-2.5, true), 0.5 * (3.3 + 2.2));
     EXPECT_EQ(table.interpolate(-2.5, true), 0.5 * (3.3 + 2.2));
@@ -275,11 +253,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInputRandomAcce
 //! Tests PeriodicLookupTable provides the same answer when repeatedly accessing the exact same section
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedSectionMonotonicallyIncreasing)
 {
-    std::string                         name = "table";
-    PeriodicLookupTable<double, double> table(name, nullptr);
-
+    std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
-    table.setData(std::move(values));
+    PeriodicLookupTable<double, double>    table(name, nullptr, std::move(values));
 
     const double interpolation_factor = (2.2 - 3.3) / (-2 + 3);
     for (int index = 1; index <= 10; index++)
@@ -292,11 +268,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedSectionMonotoni
 //! Tests PeriodicLookupTable provides the same answer when repeatedly accessing the exact same section
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedSectionMonotonicallyDecreasing)
 {
-    std::string                         name = "table";
-    PeriodicLookupTable<double, double> table(name, nullptr);
-
+    std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
-    table.setData(std::move(values));
+    PeriodicLookupTable<double, double>    table(name, nullptr, std::move(values));
 
     const double interpolation_factor = (2.2 - 3.3) / (-2 + 3);
     for (int index = 1; index <= 10; index++)
@@ -310,8 +284,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedSectionMonotoni
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleInterpolateBelowLimitsConsistency)
 {
     std::string                 name = "table";
-    PeriodicLookupTable<double> table(name, nullptr);
-    table.setData(func());
+    PeriodicLookupTable<double> table(name, nullptr, func());
 
     EXPECT_NEAR(table.interpolate(-2 * M_PI), table.interpolate(0), 1e-6);
     EXPECT_NEAR(table.interpolate(-3 * M_PI), table.interpolate(M_PI), 1e-6);
@@ -325,8 +298,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleInterpolateBelowLimitsC
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateAboveLimits)
 {
     std::string                 name = "table";
-    PeriodicLookupTable<double> table(name, nullptr);
-    table.setData(func());
+    PeriodicLookupTable<double> table(name, nullptr, func());
 
     EXPECT_NEAR(table.interpolate(3 * M_PI), table.interpolate(M_PI), 1e-6);
     EXPECT_NEAR(table.interpolate(4 * M_PI), table.interpolate(0), 1e-6);
@@ -340,11 +312,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateAboveLimits)
 //! not
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRandomAccessConsistency)
 {
-    std::string                      name = "table";
-    PeriodicLookupTable<double, int> table(name, nullptr);
-
-    std::vector<std::pair<double, int>> data{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
-    table.setData(std::move(data));
+    std::string                         name = "table";
+    std::vector<std::pair<double, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
+    PeriodicLookupTable<double, int>    table(name, nullptr, std::move(values));
 
     EXPECT_EQ(table.interpolate(-3.5), table.interpolate(-3.5, true));
     EXPECT_EQ(table.interpolate(-3), table.interpolate(-3, true));
@@ -360,11 +330,9 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRandomAccessConsistency)
 //! not
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRandomAccessConsistency)
 {
-    std::string                 name = "table";
-    PeriodicLookupTable<double> table(name, nullptr);
-
-    std::vector<std::pair<double, double>> data{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
-    table.setData(std::move(data));
+    std::string                            name = "table";
+    std::vector<std::pair<double, double>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
+    PeriodicLookupTable<double>            table(name, nullptr, std::move(values));
 
     EXPECT_EQ(table.interpolate(-3.5), table.interpolate(-3.5, true));
     EXPECT_EQ(table.interpolate(-3), table.interpolate(-3, true));

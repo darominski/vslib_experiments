@@ -9,7 +9,8 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/iirFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/lookupTableTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/periodicLookupTableTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/trigonometricLookupTableTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/sinLookupTableTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/cosLookupTableTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitIntegralTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRangeTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRateTest.cpp

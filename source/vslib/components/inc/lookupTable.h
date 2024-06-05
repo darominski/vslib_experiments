@@ -22,9 +22,23 @@ namespace vslib
         //!
         //! @param name Name of the LookupTable component object
         //! @param parent Pointer to the parent of this table
-        LookupTable(std::string_view name, Component* parent) noexcept
-            : Component("LookupTable", name, parent)
+        //! @param values Vector with lookup table index-value pairs
+        //! @param equal_binning Flag signalling whether the lookup table indexing has equal spaced binning
+        LookupTable(
+            std::string_view name, Component* parent, std::vector<std::pair<IndexType, StoredType>>&& values,
+            bool equal_binning = false
+        ) noexcept
+            : Component("LookupTable", name, parent),
+              m_values{std::move(values)}
         {
+            m_lower_edge_x          = m_values[0].first;
+            m_upper_edge_x          = m_values[m_values.size() - 1].first;
+            m_previous_section_x[0] = m_lower_edge_x;
+            m_previous_section_x[1] = m_lower_edge_x;
+
+            m_bin_size = m_values[1].first - m_values[0].first;
+
+            m_equal_binning = equal_binning;
         }
 
         //! For provided x-axis input provides an interpolated y-axis value from the stored values
@@ -46,47 +60,7 @@ namespace vslib
                 return m_values[m_values.size() - 1].second;
             }
 
-            size_t     start_loop_index = 0;
-            IndexType  x1, x2;
-            StoredType y1, y2;
-
-            if (input_x >= m_previous_section_x[0])
-            {
-                if (input_x <= m_previous_section_x[1])   // same section
-                {
-                    return m_previous_section_y + (input_x - m_previous_section_x[1]) * m_interpolation_factor;
-                }   // else: new section and we need to find new edges
-                start_loop_index = m_previous_section_index;
-            }
-
-            if (m_equal_binning)
-            {
-                // Going branchless with constexpr if and placing m_equal_binning in the template does not provide any
-                // benefit in this case
-
-                // This case provides a 15% speedup for a 100-element lookup table when compared with linear
-                // time monotonic access from the 'else' case.
-
-                utils::index_search(m_values, input_x, m_lower_edge_x, m_bin_size, x1, y1, x2, y2);
-            }
-            else
-            {
-                // Existence of this branch leads to a loss of 1% performance.
-
-                // binary_search performs a binary search, more efficient with random access, while
-                // for monotonic access the linear linear_search should be more efficient assuming that the next
-                // point is relatively close to the previously interpolated one.
-                m_previous_section_index
-                    = random_access ? utils::binary_search(m_values, input_x, start_loop_index, x1, y1, x2, y2)
-                                    : utils::linear_search(m_values, input_x, start_loop_index, x1, y1, x2, y2);
-            }
-
-            m_previous_section_y    = y1;
-            m_previous_section_x[1] = x1;
-            m_previous_section_x[0] = x2;
-            m_interpolation_factor  = (y2 - y1) / (x2 - x1);
-
-            return y1 + (input_x - x1) * m_interpolation_factor;
+            return interpolate_data(input_x, random_access);
         }
 
         //! Provides random-access operator overload to the index-th element of the stored lookup table
@@ -96,25 +70,6 @@ namespace vslib
         const StoredType& operator[](size_t index) const
         {
             return m_values[index].second;
-        }
-
-        //! Sets the provided data table to the internal values
-        //!
-        //! @param data Vector of index-value pairs to be set as lookup table
-        //! @param equal_binning Flag to signal that the provided data has constant bin spacing
-        void setData(std::vector<std::pair<IndexType, StoredType>>&& data, bool equal_binning = false) noexcept
-        {
-            assert(data.size() >= 1);
-
-            m_lower_edge_x          = data[0].first;
-            m_upper_edge_x          = data[data.size() - 1].first;
-            m_previous_section_x[0] = m_lower_edge_x;
-            m_previous_section_x[1] = m_lower_edge_x;
-
-            m_bin_size = data[1].first - data[0].first;
-
-            m_equal_binning = equal_binning;
-            m_values        = std::move(data);
         }
 
         //! Provides a reference to the data table
@@ -149,6 +104,51 @@ namespace vslib
         std::vector<std::pair<IndexType, StoredType>> m_values;
 
         bool m_equal_binning{false};
+
+        //! Helper method performing actual interpolation
+        StoredType interpolate_data(IndexType input_x, bool random_access)
+        {
+            size_t start_loop_index = 0;
+            if (input_x >= m_previous_section_x[0])
+            {
+                if (input_x < m_previous_section_x[1])   // same section
+                {
+                    return m_previous_section_y + (input_x - m_previous_section_x[1]) * m_interpolation_factor;
+                }   // else: new section and we need to find new edges
+                start_loop_index = m_previous_section_index;
+            }
+
+            IndexType  x1, x2;
+            StoredType y1, y2;
+            if (m_equal_binning)
+            {
+                // Going branchless with constexpr if and placing m_equal_binning in the template does not provide any
+                // benefit in this case
+
+                // This case provides a 15% speedup for a 100-element lookup table when compared with linear
+                // time monotonic access from the 'else' case.
+
+                utils::index_search(m_values, input_x, m_lower_edge_x, m_bin_size, x1, y1, x2, y2);
+            }
+            else
+            {
+                // Existence of this branch leads to a loss of 1% performance.
+
+                // binary_search performs a binary search, more efficient with random access, while
+                // for monotonic access the linear linear_search should be more efficient assuming that the next
+                // point is relatively close to the previously interpolated one.
+                m_previous_section_index
+                    = random_access ? utils::binary_search(m_values, input_x, start_loop_index, x1, y1, x2, y2)
+                                    : utils::linear_search(m_values, input_x, start_loop_index, x1, y1, x2, y2);
+            }
+
+            m_previous_section_y    = y1;
+            m_previous_section_x[1] = x1;
+            m_previous_section_x[0] = x2;
+            m_interpolation_factor  = (y2 - y1) / (x2 - x1);
+
+            return y1 + (input_x - x1) * m_interpolation_factor;
+        }
     };
 
 }   // namespace vslib

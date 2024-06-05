@@ -9,6 +9,7 @@
 #include <string>
 
 #include "component.h"
+#include "limitRange.h"
 #include "parameter.h"
 #include "rstController.h"
 
@@ -28,6 +29,7 @@ namespace vslib
         //! @return PID controller object
         PIDRST(std::string_view name, Component* parent = nullptr)
             : Component("PID", name, parent),
+              actuation_limits("actuation_limits", this),
               kp(*this, "kp"),                            // default limits
               ki(*this, "ki"),                            // default limits
               kd(*this, "kd"),                            // default limits
@@ -51,11 +53,22 @@ namespace vslib
 
         //! Computes one iteration of the controller
         //!
-        //! @param process_value Value of the controlled
+        //! @param measurement Value of the controlled process
         //! @return Result of this iteration
-        double control(double process_value, double reference) noexcept
+        double control(double measurement, double reference) noexcept
         {
-            return rst.control(process_value, reference);
+            if (!rst.isReady())
+            {
+                rst.update_input_histories(measurement, reference);
+                return 0;
+            }
+            const double actuation         = rst.control(measurement, reference);
+            const double clipped_actuation = actuation_limits.limit(actuation);
+            if (clipped_actuation != actuation)
+            {
+                update_reference(clipped_actuation);
+            }
+            return clipped_actuation;
         }
 
         //! Updates the most recent reference in the history, used in cases actuation goes over the limit
@@ -119,6 +132,13 @@ namespace vslib
         Parameter<double> N;     //!< Filter order for derivative input
         Parameter<double> ts;    //!< Sampling period
         Parameter<double> f0;    //!< Control freqency
+
+        // ************************************************************
+        // Limits of the controller's actuation
+
+        LimitRange<double> actuation_limits;
+
+        // ************************************************************
 
         //! Update parameters method, called after parameters of this component are modified
         //!

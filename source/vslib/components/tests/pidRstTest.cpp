@@ -26,7 +26,7 @@ class PIDRSTTest : public ::testing::Test
 
     void set_pid_parameters(
         PIDRST& pidRst, double p, double i, double d, double ff, double b, double c, double N = 1, double ts = 1,
-        double f0 = 1
+        double f0 = 1, double act_min = 0, double act_max = 1e9
     )
     {
         StaticJson p_value = p;
@@ -56,6 +56,15 @@ class PIDRSTTest : public ::testing::Test
         StaticJson f0_value = f0;
         pidRst.f0.setJsonValue(f0_value);
 
+        StaticJson act_min_value = act_min;
+        pidRst.actuation_limits.min.setJsonValue(act_min_value);
+
+        StaticJson act_max_value = act_max;
+        pidRst.actuation_limits.max.setJsonValue(act_max_value);
+        pidRst.actuation_limits.verifyParameters();
+        pidRst.actuation_limits.flipBufferState();
+        pidRst.actuation_limits.synchroniseParameterBuffers();
+
         pidRst.verifyParameters();
         pidRst.flipBufferState();
         pidRst.synchroniseParameterBuffers();
@@ -73,7 +82,13 @@ TEST_F(PIDRSTTest, PIDRSTDefaultConstruction)
     auto serialized_pid = pid.serialize();
     EXPECT_EQ(serialized_pid["name"], name);
     EXPECT_EQ(serialized_pid["type"], "PID");
-    EXPECT_EQ(serialized_pid["components"], nlohmann::json::array());
+    EXPECT_EQ(
+        serialized_pid["components"].dump(),
+        "[{\"name\":\"actuation_limits\",\"type\":\"LimitRange\",\"parameters\":[{\"name\":\"lower_threshold\","
+        "\"type\":\"Float64\",\"length\":1,\"value\":{}},{\"name\":\"upper_threshold\",\"type\":\"Float64\",\"length\":"
+        "1,\"value\":{}},{\"name\":\"dead_zone\",\"type\":\"ArrayFloat64\",\"length\":2,\"value\":[]}],\"components\":["
+        "]}]"
+    );
     EXPECT_EQ(serialized_pid["parameters"].size(), 9);
     EXPECT_EQ(serialized_pid["parameters"][0]["name"], "kp");
     EXPECT_EQ(serialized_pid["parameters"][1]["name"], "ki");
@@ -275,16 +290,23 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkSimpleConsistency)
 
     std::string  name = "pid";
     PIDRST       pid(name);
-    const double p  = 1.0;
-    const double i  = 1.0;
-    const double d  = 1.0;
-    const double ff = 1.0;
-    const double b  = 1.0;
-    const double c  = 1.0;
-    const double N  = 2.0;
-    const double ts = 1.0e-3;
-    const double f0 = 1e-15;
-    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+    const double p             = 1.0;
+    const double i             = 1.0;
+    const double d             = 1.0;
+    const double ff            = 1.0;
+    const double b             = 1.0;
+    const double c             = 1.0;
+    const double N             = 2.0;
+    const double ts            = 1.0e-3;
+    const double f0            = 1e-15;
+    const double actuation_min = -50;
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0, actuation_min);
+
+    // fill the histories to enable the controller:
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    // now, the controller is enabled and actuations can be calculated
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
@@ -333,16 +355,24 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkConsistency)
 
     std::string  name = "pid";
     PIDRST       pid(name);
-    const double p  = 52.79;
-    const double i  = 0.0472;
-    const double d  = 0.04406;
-    const double ff = 6.1190;
-    const double b  = 0.03057;
-    const double c  = 0.8983;
-    const double N  = 17.79;
-    const double ts = 1.0e-3;
-    const double f0 = 1e-15;
-    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+    const double p             = 52.79;
+    const double i             = 0.0472;
+    const double d             = 0.04406;
+    const double ff            = 6.1190;
+    const double b             = 0.03057;
+    const double c             = 0.8983;
+    const double N             = 17.79;
+    const double ts            = 1.0e-3;
+    const double f0            = 1e-15;
+    const double actuation_min = -1e13;
+    const double actuation_max = 1e13;
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0, actuation_min);
+
+    // fill the histories to enable the controller:
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    // now, the controller is enabled and actuations can be calculated
 
     // the input files are randomly generated numbers
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
@@ -392,16 +422,23 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkIntegratorConsistency)
 
     std::string  name = "pid";
     PIDRST       pid(name);
-    const double p  = 0;
-    const double i  = 0.0472;
-    const double d  = 0;
-    const double ff = 6.1190;
-    const double b  = 0.03057;
-    const double c  = 0.8983;
-    const double N  = 17.79;
-    const double ts = 1.0e-3;
-    const double f0 = 1e-15;
-    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+    const double p             = 0;
+    const double i             = 0.0472;
+    const double d             = 0;
+    const double ff            = 6.1190;
+    const double b             = 0.03057;
+    const double c             = 0.8983;
+    const double N             = 17.79;
+    const double ts            = 1.0e-3;
+    const double f0            = 1e-15;
+    const double actuation_min = -50;
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0, actuation_min);
+
+    // fill the histories to enable the controller:
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_EQ(pid.control(0, 0), 0);
+    // now, the controller is enabled and actuations can be calculated
 
     // the input files are randomly generated numbers
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";

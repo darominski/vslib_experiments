@@ -51,20 +51,23 @@ namespace user
         std::vector<std::pair<double, double>> func(length);
         for (size_t index = 0; index < length; index++)
         {
-            func[index] = std::make_pair(index * 1.0, sin(index * 2 * M_PI / static_cast<double>(length)));
+            const double x = index * 2.0 * M_PI / static_cast<double>(length);
+            func[index]    = std::make_pair(x, sin(x));
         }
         return func;
     }
 
-    PeriodicLookupTable<double> table("table", nullptr);
+    PeriodicLookupTable<double> table("table", nullptr, function(), true);
 
     void realTimeTask()
     {
         for (int index = 0; index < 100; index++)
         {
-            // volatile double const input = std::rand();
-            volatile double const input    = 2.0 * 3.14159 * index / 1000.0;
-            volatile auto         variable = table.interpolate(input);
+            volatile double const input = 2.0 * M_PI * (std::rand() / static_cast<double>(RAND_MAX));
+
+            // volatile double const input    = index;
+            // volatile auto         variable = table.interpolate(input);
+            volatile auto variable = sin(input);
             // volatile auto variable      = table[input];
             // volatile auto variable      = filter.filter(input);
             // volatile auto variable      = controller.control(input, input + 2);
@@ -135,8 +138,6 @@ int main()
     // ComponentArray<ComponentArray<PID, 3>, 3> array("brick_2", nullptr);
 
     // LookupTable<double> table("table", nullptr, function);
-
-    // user::filter.verifyParameters();
 
     // No parameter declarations beyond this point!
     // ************************************************************
