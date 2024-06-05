@@ -276,3 +276,47 @@ TEST_F(ParameterTest, EnumParameterSerializationWithValue)
     nlohmann::json fields = {"field1", "field2", "field3"};
     EXPECT_EQ(serialized_parameter["fields"], fields);
 }
+
+//! Tests serialization of std::array of enum Parameter when value has been set
+TEST_F(ParameterTest, EnumArrayParameterSerializationWithValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum class TestEnum
+    {
+        field1,
+        field2,
+        field3
+    };
+    constexpr size_t                              array_length = 4;
+    Parameter<std::array<TestEnum, array_length>> parameter(component, parameter_name);
+    ParameterSerializer                           serializer;
+
+    std::array<std::string, array_length> new_value{
+        "field2", "field2", "field2", "field2"};   // enums are serialized as strings
+    nlohmann::json command = {{"value", new_value}};
+    auto           output  = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+    component.flipBufferState();
+    parameter.syncWriteBuffer();   // synchronises inactive buffer with active one
+
+    EXPECT_EQ(parameter.value()[0], TestEnum::field2);   // tests explicit access
+    EXPECT_EQ(parameter.value()[1], TestEnum::field2);   // tests explicit access
+    EXPECT_EQ(parameter.value()[2], TestEnum::field2);   // tests explicit access
+    EXPECT_EQ(parameter.value()[3], TestEnum::field2);   // tests explicit access
+
+    auto const& serialized_parameter = serializer.serialize(static_cast<std::reference_wrapper<IParameter>>(parameter));
+    EXPECT_TRUE(serialized_parameter.is_object());
+    EXPECT_TRUE(serialized_parameter.contains("length"));
+    EXPECT_TRUE(serialized_parameter.contains("value"));
+    EXPECT_TRUE(serialized_parameter.contains("name"));
+    EXPECT_TRUE(serialized_parameter.contains("type"));
+    EXPECT_TRUE(serialized_parameter.contains("fields"));
+    EXPECT_EQ(serialized_parameter["length"], 4);
+    EXPECT_EQ(serialized_parameter["value"].dump(), "[\"field2\",\"field2\",\"field2\",\"field2\"]");
+    EXPECT_EQ(serialized_parameter["name"], parameter_name);
+    EXPECT_EQ(serialized_parameter["type"], "ArrayEnum");
+    EXPECT_TRUE(serialized_parameter["fields"].is_array());
+    nlohmann::json fields = {"field1", "field2", "field3"};
+    EXPECT_EQ(serialized_parameter["fields"], fields);
+}

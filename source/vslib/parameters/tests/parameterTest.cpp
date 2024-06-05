@@ -82,6 +82,7 @@ TEST_F(ParameterTest, StringParameterDefinition)
     EXPECT_FALSE(parameter.isInitialized());
     EXPECT_FALSE(component.parametersInitialized());
 }
+
 //! Checks that enum Parameter can be registered to a component
 TEST_F(ParameterTest, EnumParameterDefinition)
 {
@@ -93,6 +94,22 @@ TEST_F(ParameterTest, EnumParameterDefinition)
         field2
     };
     Parameter<TestEnum> parameter(component, parameter_name);
+    EXPECT_EQ(parameter.getName(), parameter_name);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
+}
+
+//! Checks that std::array of enum Parameter can be registered to a component
+TEST_F(ParameterTest, EnumArrayParameterDefinition)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum class TestEnum
+    {
+        field1,
+        field2
+    };
+    Parameter<std::array<TestEnum, 5>> parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
     EXPECT_FALSE(parameter.isInitialized());
     EXPECT_FALSE(component.parametersInitialized());
@@ -246,6 +263,35 @@ TEST_F(ParameterTest, EnumParameterSetValue)
     component.flipBufferState();
 
     EXPECT_EQ(parameter.value(), TestEnum::field2);   // tests explicit access
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
+}
+
+//! Tests setting value to std::array of enum Parameter from a JSON command
+TEST_F(ParameterTest, EnumArrayParameterSetValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum class TestEnum
+    {
+        field1,
+        field2,
+        field3
+    };
+    constexpr size_t                            array_size = 3;
+    Parameter<std::array<TestEnum, array_size>> parameter(component, parameter_name);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
+
+    std::array<std::string, array_size> new_value{"field2", "field2", "field2"};   // enums are serialized as strings
+    nlohmann::json                      command = {{"value", new_value}};
+    auto                                output  = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+    component.flipBufferState();
+
+    EXPECT_EQ(parameter.value()[0], TestEnum::field2);   // tests explicit access
+    EXPECT_EQ(parameter.value()[1], TestEnum::field2);   // tests explicit access
+    EXPECT_EQ(parameter.value()[2], TestEnum::field2);   // tests explicit access
     EXPECT_TRUE(parameter.isInitialized());
     EXPECT_TRUE(component.parametersInitialized());
 }

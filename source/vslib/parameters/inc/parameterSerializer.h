@@ -78,9 +78,31 @@ namespace vslib
                     serialized_parameter["limit_max"] = parameter.getLimitMax();
                 }
             }
+            else if constexpr (fgc4::utils::Enumeration<typename T::value_type>)
+            {
+                serialized_parameter["fields"] = magic_enum::enum_names<typename T::value_type>();
+            }
+
             if (parameter.isInitialized())
             {
-                serialized_parameter["value"] = parameter.value();
+                if constexpr (fgc4::utils::Enumeration<typename T::value_type>)
+                {
+                    // special case for the enumerations, otherwise the array would be serialized as array of integers
+                    // with index of the selected enumeration field rather than the name
+                    serialized_parameter["value"] = nlohmann::json::array();
+                    std::transform(
+                        parameter.value().cbegin(), parameter.value().cend(),
+                        std::back_inserter(serialized_parameter["value"]),
+                        [](const auto& value)
+                        {
+                            return magic_enum::enum_name(value);
+                        }
+                    );
+                }
+                else
+                {
+                    serialized_parameter["value"] = parameter.value();
+                }
             }
             else
             {

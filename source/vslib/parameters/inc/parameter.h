@@ -462,5 +462,31 @@ namespace vslib
             }
             return {};
         }
+
+        //! Sets the provided JSON value with an array of enumeration to the write buffer.
+        //!
+        //! @param json_value JSON object containing new parameter value to be set
+        //! @return If not successful returns Warning with relevant information, nothing otherwise
+        std::optional<fgc4::utils::Warning> setJsonValueImpl(const StaticJson& json_value)
+            requires fgc4::utils::StdArray<T> && fgc4::utils::Enumeration<typename T::value_type>
+        {
+            // json_value is an array of strings, try to cast every element to the enum type:
+            int counter = 0;
+            for (const auto& value : json_value)
+            {
+                auto const enum_element = magic_enum::enum_cast<typename T::value_type>(std::string(value));
+                if (enum_element.has_value())
+                {
+                    (*m_write_buffer)[counter] = enum_element.value();
+                    counter++;
+                }
+                else
+                {
+                    fgc4::utils::Warning message("The provided enum value is not one of the allowed values.\n");
+                    return message;
+                }
+            }
+            return {};
+        }
     };
 }   // namespace vslib
