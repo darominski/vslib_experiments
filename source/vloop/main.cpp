@@ -24,6 +24,7 @@
 #include "parameterMap.h"
 #include "parameterRegistry.h"
 #include "parameterSetting.h"
+#include "periodicLookupTable.h"
 #include "pid.h"
 #include "pidRst.h"
 #include "rst.h"
@@ -42,30 +43,30 @@ using namespace fgc4;
 namespace user
 {
     // vslib::RST<3> controller("rst");
-    vslib::IIRFilter<81> filter("filter");
+    // vslib::IIRFilter<81> filter("filter");
 
-    // std::vector<std::pair<double, double>> function()
-    // {
-    //     constexpr size_t                       length = 1000;
-    //     std::vector<std::pair<double, double>> func(length);
-    //     for (size_t index = 0; index < length; index++)
-    //     {
-    //         func[index] = std::make_pair(index * 1.0, sin(index * 2 * M_PI / static_cast<double>(length)));
-    //     }
-    //     return func;
-    // }
+    std::vector<std::pair<double, double>> function()
+    {
+        constexpr size_t                       length = 1000;
+        std::vector<std::pair<double, double>> func(length);
+        for (size_t index = 0; index < length; index++)
+        {
+            func[index] = std::make_pair(index * 1.0, sin(index * 2 * M_PI / static_cast<double>(length)));
+        }
+        return func;
+    }
 
-    // LookupTable<double> table("table", nullptr, function(), true);
+    PeriodicLookupTable<double> table("table", nullptr);
 
     void realTimeTask()
     {
-        for (int index = 0; index < 50; index++)
+        for (int index = 0; index < 100; index++)
         {
-            volatile double const input = std::rand();
-            // volatile double const input    = index;
-            // volatile auto         variable = table.interpolate(input);
+            // volatile double const input = std::rand();
+            volatile double const input    = 2.0 * 3.14159 * index / 1000.0;
+            volatile auto         variable = table.interpolate(input);
             // volatile auto variable      = table[input];
-            volatile auto variable      = filter.filter(input);
+            // volatile auto variable      = filter.filter(input);
             // volatile auto variable      = controller.control(input, input + 2);
             // volatile auto variable = limit.limit(input);
         }
@@ -135,7 +136,7 @@ int main()
 
     // LookupTable<double> table("table", nullptr, function);
 
-    user::filter.verifyParameters();
+    // user::filter.verifyParameters();
 
     // No parameter declarations beyond this point!
     // ************************************************************
