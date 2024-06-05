@@ -24,7 +24,7 @@ class ParkTransformTest : public ::testing::Test
 };
 
 //! Tests default construction of ParkTransform component
-TEST_F(ParkTransformTest, ParkTransformConstructionTest)
+TEST_F(ParkTransformTest, Construction)
 {
     std::string_view name = "park1";
     ParkTransform    park(name, nullptr);
@@ -45,7 +45,7 @@ TEST_F(ParkTransformTest, ParkTransformConstructionTest)
 }
 
 //! Tests custom construction of ParkTransform component
-TEST_F(ParkTransformTest, ParkTransformNonDefaultConstructionTest)
+TEST_F(ParkTransformTest, NonDefaultConstruction)
 {
     std::string_view name = "park2";
     ParkTransform    park(name, nullptr, 10000);
@@ -59,7 +59,7 @@ TEST_F(ParkTransformTest, ParkTransformNonDefaultConstructionTest)
 }
 
 //! Tests interacting with transform method of ParkTransform component, with trivial input
-TEST_F(ParkTransformTest, ParkTransformTrivialInput)
+TEST_F(ParkTransformTest, TrivialInput)
 {
     std::string_view name = "park2";
     ParkTransform    park(name, nullptr, 10000);
@@ -69,10 +69,51 @@ TEST_F(ParkTransformTest, ParkTransformTrivialInput)
     EXPECT_EQ(q, 0.0);
 }
 
-//! Tests interacting with transform method of ParkTransform component, validation against simulink
-TEST_F(ParkTransformTest, ParkTransformSimulinkConsistency)
+//! Tests interacting with transform method of ParkTransform component, with zero angle
+TEST_F(ParkTransformTest, ZeroAngle)
 {
-    std::string_view name = "park2";
+    std::string_view name = "park3";
+    ParkTransform    park(name, nullptr);
+
+    double i_a   = 1.0;
+    double i_b   = 0.0;
+    double i_c   = -1.0;
+    double theta = 0.0;
+
+    auto [i_d, i_q] = park.transform(i_a, i_b, i_c, theta);
+
+    double i_alpha = i_a;
+    double i_beta  = (i_a + 2 * i_b) / std::sqrt(3.0);
+
+    EXPECT_NEAR(i_d, i_alpha, 1e-6);
+    EXPECT_NEAR(i_q, i_beta, 1e-6);
+}
+
+//! Tests interacting with transform method of ParkTransform component, with 90 degrees angle
+TEST_F(ParkTransformTest, NinetyDegrees)
+{
+    std::string_view name = "park4";
+    ParkTransform    park(name, nullptr);
+
+    double i_a   = 1.0;
+    double i_b   = 0.0;
+    double i_c   = -1.0;
+    double theta = M_PI / 2;   // 90 degrees in radians
+
+    auto [i_d, i_q] = park.transform(i_a, i_b, i_c, theta);
+
+    // When theta is 90 degrees, i_d should be -i_beta and i_q should be i_alpha
+    double i_alpha = i_a;
+    double i_beta  = (i_a + 2 * i_b) / std::sqrt(3.0);
+
+    EXPECT_NEAR(i_d, i_beta, 1e-6);
+    EXPECT_NEAR(i_q, -i_alpha, 1e-6);
+}
+
+//! Tests interacting with transform method of ParkTransform component, validation against simulink
+TEST_F(ParkTransformTest, SimulinkConsistency)
+{
+    std::string_view name = "park5";
     ParkTransform    park(name, nullptr, 10000);
 
     auto [d, q] = park.transform(1, -0.5, 0, 0);
