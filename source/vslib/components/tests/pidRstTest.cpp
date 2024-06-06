@@ -365,7 +365,6 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkConsistency)
     const double ts            = 1.0e-3;
     const double f0            = 1e-15;
     const double actuation_min = -1e13;
-    const double actuation_max = 1e13;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0, actuation_min);
 
     // fill the histories to enable the controller:

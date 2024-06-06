@@ -36,7 +36,6 @@ namespace vslib
               m_function("data", this, sine_function(number_points), true)
         {
             assert(number_points >= 2);
-            std::cout << m_function[0] << std::endl;
         }
 
         //! Provides main access interaction with the underlying table consistent with LookupTable components
