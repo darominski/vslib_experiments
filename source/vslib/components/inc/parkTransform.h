@@ -28,6 +28,13 @@ namespace vslib
         {
         }
 
+        //! Performs Park transform on the provided inputs assuming a-phase to q-axis alignment
+        //!
+        //! @param a a-phase value
+        //! @param b b-phase value
+        //! @param c c-phase value
+        //! @param theta theta angle between d and a
+        //! @return Pair of d, q values
         std::pair<double, double> transform(double a, double b, double c, double theta) noexcept;
 
       private:
