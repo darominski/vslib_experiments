@@ -5,21 +5,22 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentArrayTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/firFilterTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/iirFilterTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/lookupTableTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/periodicLookupTableTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/sinLookupTableTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/cosLookupTableTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/firFilterTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/lookupTableTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/iirFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitIntegralTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRangeTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRateTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRmsTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/parkTransformTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/periodicLookupTableTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidRstTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstControllerTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/parkTransformTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/sinLookupTableTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/clarkeTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/rstController.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/parkTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
