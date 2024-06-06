@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <cmath>
 #include <string>
 
 #include "component.h"
@@ -13,11 +12,6 @@
 
 namespace vslib
 {
-    namespace
-    {
-        constexpr double SQRT_3 = std::sqrt(3.0);
-    }
-
     class ParkTransform : public Component
     {
       public:

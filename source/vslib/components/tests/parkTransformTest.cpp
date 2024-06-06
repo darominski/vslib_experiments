@@ -148,7 +148,7 @@ TEST_F(ParkTransformTest, SimulinkConsistency)
     // the input files are randomly generated numbers
     std::filesystem::path abc_path   = "components/inputs/park_abc_sin_120degrees.csv";
     std::filesystem::path theta_path = "components/inputs/park_theta_0_20.csv";
-    std::filesystem::path park_path  = "components/inputs/park_dq0_sin_120degrees_theta_0_2.csv";
+    std::filesystem::path park_path  = "components/inputs/park_dq0_sin_120degrees_theta_0_20.csv";
 
     std::ifstream abc_file(abc_path);
     std::ifstream theta_file(theta_path);
