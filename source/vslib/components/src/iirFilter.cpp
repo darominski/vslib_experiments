@@ -10,7 +10,7 @@ namespace vslib
     // the first order is specialized.
 
     template<>
-    double IIRFilter<1>::filter(const double input)
+    [[nodicard]] double IIRFilter<1>::filter(const double input)
     {
         auto const previous_input  = m_inputs_buffer[0];
         auto const previous_output = m_outputs_buffer[0];

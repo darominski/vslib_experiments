@@ -27,7 +27,7 @@ namespace vslib
         //!
         //! @param input Numerical input to be checked
         //! @return True if the provided value does not violate the integral limit threshold, false otherwise
-        bool limit(T input) noexcept
+        [[nodicard]] bool limit(T input) noexcept
         {
             if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
             {

@@ -47,7 +47,7 @@ namespace vslib
         //! @param process_value Value of the controlled process
         //! @param reference Value of the set-point reference
         //! @return Result of this iteration
-        double control(double process_value, double reference)
+        [[nodicard]] double control(double process_value, double reference)
         {
             m_error    = reference - process_value;
             m_integral += m_error;

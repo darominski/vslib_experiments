@@ -47,7 +47,7 @@ namespace vslib
         //! @param random_access Switch informing if the input_x is coming linearly or randomly, allows for binary
         //! search optimisation in the latter case
         //! @return Y-axis value result of the interpolation
-        StoredType interpolate(IndexType input_x, bool random_access = false) noexcept
+        [[nodicard]] StoredType interpolate(IndexType input_x, bool random_access = false) noexcept
         {
             // handle interpolation saturation cases: return the function value at the edge in case of under or overflow
             if (input_x <= m_lower_edge_x)
@@ -67,15 +67,15 @@ namespace vslib
         //!
         //! @param index Index of the element to be returned
         //! @return Y-value of the function at the index
-        const StoredType& operator[](size_t index) const
+        [[nodicard]] const StoredType& operator[](size_t index) const
         {
             return m_values[index].second;
         }
 
-        //! Provides a reference to the data table
+        //! Provides a const reference to the data table
         //!
         //! @return Data table of index-value pairs
-        auto& getData()
+        [[nodicard]] const auto& getData() const
         {
             return m_values;
         }
@@ -106,7 +106,11 @@ namespace vslib
         bool m_equal_binning{false};
 
         //! Helper method performing actual interpolation
-        StoredType interpolate_data(IndexType input_x, bool random_access)
+        //!
+        //! @param input_x X-axis value to interpolate
+        //! @param random_access Flag to inform whether the lookup table is accessed in random order
+        //! @return Y-value corresponding to lookup table close to the provided input_x
+        [[nodicard]] StoredType interpolate_data(IndexType input_x, bool random_access)
         {
             size_t start_loop_index = 0;
             if (input_x >= m_previous_section_x[0])

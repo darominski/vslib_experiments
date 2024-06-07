@@ -42,7 +42,7 @@ namespace vslib
         //! @param process_value Current process value (measurement)
         //! @param reference Reference value for the controller
         //! @return Controller output of the iteration
-        double control(double process_value, double reference) noexcept
+        [[nodicard]] double control(double process_value, double reference) noexcept
         {
             // based on logic in regRstCalcActRT from CCLIBS libreg regRst.c
             m_measurements[m_head] = process_value;
@@ -222,7 +222,7 @@ namespace vslib
         //! Returns the actuation history buffer
         //!
         //! @return Reference to the history buffer holding previous actuations
-        const auto& getActuations() noexcept
+        [[nodicard]] const auto& getActuations() noexcept
         {
             return m_actuations;
         }
@@ -230,7 +230,7 @@ namespace vslib
         //! Returns the reference history buffer
         //!
         //! @return Reference to the history buffer holding previous references
-        const auto& getReferences() noexcept
+        [[nodicard]] const auto& getReferences() noexcept
         {
             return m_references;
         }
@@ -238,7 +238,7 @@ namespace vslib
         //! Returns the measurement history buffer
         //!
         //! @return Reference to the history buffer holding previous measurements
-        const auto& getMeasurements() noexcept
+        [[nodicard]] const auto& getMeasurements() noexcept
         {
             return m_measurements;
         }
@@ -246,7 +246,7 @@ namespace vslib
         //! Gets the R polynomial
         //!
         //! @return Array with R polynomial coefficients
-        const auto& getR() const
+        [[nodicard]] const auto& getR() const
         {
             return m_r;
         }
@@ -254,7 +254,7 @@ namespace vslib
         //! Gets the S polynomial
         //!
         //! @return Array with S polynomial coefficients
-        const auto& getS() const
+        [[nodicard]] const auto& getS() const
         {
             return m_s;
         }
@@ -262,7 +262,7 @@ namespace vslib
         //! Gets the T polynomial
         //!
         //! @return Array with T polynomial coefficients
-        const auto& getT() const
+        [[nodicard]] const auto& getT() const
         {
             return m_t;
         }

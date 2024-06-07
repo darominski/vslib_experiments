@@ -30,7 +30,7 @@ namespace vslib
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
-        double filter(double input) override
+        [[nodicard]] double filter(double input) override
         {
             shiftBuffer(input);
             double output(0);
@@ -56,7 +56,7 @@ namespace vslib
         //! @param input Input values to be filtered
         //! @return Filtered values
         template<size_t N>
-        std::array<double, N> filter(const std::array<double, N>& inputs)
+        [[nodicard]] std::array<double, N> filter(const std::array<double, N>& inputs)
         {
             std::array<double, N> outputs{0};
             std::transform(

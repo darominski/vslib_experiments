@@ -10,7 +10,7 @@ namespace vslib
         constexpr double TWO_OVER_3    = 2.0 / 3.0;
     }
 
-    std::pair<double, double> ClarkeTransform::transform(double f_a, double f_b, double f_c) noexcept
+    [[nodicard]] std::pair<double, double> ClarkeTransform::transform(double f_a, double f_b, double f_c) noexcept
     {
         const double two_pi_over_3 = 2.0 * M_PI / 3.0;
 

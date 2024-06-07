@@ -29,7 +29,7 @@ namespace vslib
         //! @param c c-phase value
         //! @param theta theta angle between d and a
         //! @return Pair of d, q values
-        std::pair<double, double> transform(double a, double b, double c, double theta) noexcept;
+        [[nodicard]] std::pair<double, double> transform(double a, double b, double c, double theta) noexcept;
 
       private:
         SinLookupTable m_sin;

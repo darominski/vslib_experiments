@@ -12,7 +12,7 @@ namespace vslib
     //! @param reference Current reference value
     //! @return Next actuation value
     template<>
-    double RSTController<3>::control(double input, double reference) noexcept
+    [[nodicard]] double RSTController<3>::control(double input, double reference) noexcept
     {
         // This partial template specialization allows to speed-up the calculation of the RST actuation by about 15%
         m_actuations[2] = m_actuations[1];

@@ -41,7 +41,7 @@ namespace vslib
         //! @param measurement Current process value (measurement)
         //! @param reference Reference value for the controller
         //! @return Controller output of the iteration
-        double control(double measurement, double reference) noexcept
+        [[nodicard]] double control(double measurement, double reference) noexcept
         {
             if (!rst.isReady())
             {
@@ -77,7 +77,7 @@ namespace vslib
         //! Returns flag whether the reference and measurement histories are filled and RST is ready to regulate
         //!
         //! @return True if reference and measurement histories are filled, false otherwise
-        bool isReady() const noexcept
+        [[nodicard]] bool isReady() const noexcept
         {
             return rst.isReady();
         }
@@ -85,7 +85,7 @@ namespace vslib
         //! Returns the actuation history buffer
         //!
         //! @return Reference to the history buffer holding previous actuations
-        const auto& getActuations() noexcept
+        [[nodicard]] const auto& getActuations() noexcept
         {
             return rst.getActuations();
         }
@@ -93,7 +93,7 @@ namespace vslib
         //! Returns the reference history buffer
         //!
         //! @return Reference to the history buffer holding previous references
-        const auto& getReferences() noexcept
+        [[nodicard]] const auto& getReferences() noexcept
         {
             return rst.getReferences();
         }
@@ -101,7 +101,7 @@ namespace vslib
         //! Returns the measurement history buffer
         //!
         //! @return Reference to the history buffer holding previous measurements
-        const auto& getMeasurements() noexcept
+        [[nodicard]] const auto& getMeasurements() noexcept
         {
             return rst.getMeasurements();
         }

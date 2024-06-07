@@ -10,7 +10,7 @@ namespace vslib
         constexpr double TWO_PI_OVER_3 = M_PI * TWO_OVER_3;
     }
 
-    std::pair<double, double> ParkTransform::transform(double a, double b, double c, double theta) noexcept
+    [[nodicard]] std::pair<double, double> ParkTransform::transform(double a, double b, double c, double theta) noexcept
     {
         const double cos_theta_minus_two_thirds = m_cos(theta - TWO_PI_OVER_3);
         const double cos_theta                  = m_cos(theta);

@@ -9,7 +9,7 @@ namespace vslib
     // Benchmarking showed 44% gain for the first order, and 72% for the 2nd order.
 
     template<>
-    double FIRFilter<1>::filter(const double input)
+    [[nodicard]] double FIRFilter<1>::filter(const double input)
     {
         auto const   previous_input = m_buffer[0];
         double const output         = input * m_coefficients[0] + previous_input * m_coefficients[1];
@@ -19,7 +19,7 @@ namespace vslib
     }
 
     template<>
-    double FIRFilter<2>::filter(const double input)
+    [[nodicard]] double FIRFilter<2>::filter(const double input)
     {
         auto const earlier_input  = m_buffer[0];
         auto const previous_input = m_buffer[1];

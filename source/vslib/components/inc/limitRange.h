@@ -29,7 +29,7 @@ namespace vslib
         //! @param input Numerical input to be checked
         //! @return Either original input if no issues were found or nearest edge of allowed zone, 0.0 if NaN was
         //! provided
-        T limit(T input) noexcept
+        [[nodicard]] T limit(T input) noexcept
         {
             if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
             {

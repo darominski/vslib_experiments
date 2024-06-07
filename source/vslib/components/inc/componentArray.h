@@ -33,7 +33,7 @@ namespace vslib
         //!
         //! @param index Index of the array element to be accessed
         //! @return Reference to the Component at the specified address
-        const ComponentType& operator[](size_t index) const
+        [[nodicard]] const ComponentType& operator[](size_t index) const
         {
             return *m_components[index];
         }

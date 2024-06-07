@@ -55,7 +55,7 @@ namespace vslib
         //!
         //! @param measurement Value of the controlled process
         //! @return Result of this iteration
-        double control(double measurement, double reference) noexcept
+        [[nodicard]] double control(double measurement, double reference) noexcept
         {
             if (!rst.isReady())
             {
@@ -91,7 +91,7 @@ namespace vslib
         //! Returns flag whether the reference and measurement histories are filled and RST is ready to regulate
         //!
         //! @return True if reference and measurement histories are filled, false otherwise
-        bool isReady() const noexcept
+        [[nodicard]] bool isReady() const noexcept
         {
             return rst.isReady();
         }
@@ -99,7 +99,7 @@ namespace vslib
         //! Returns the r polynomial coefficients
         //!
         //! @return r polynomial coefficients
-        const auto& getR() const
+        [[nodicard]] const auto& getR() const
         {
             return rst.getR();
         }
@@ -107,7 +107,7 @@ namespace vslib
         //! Returns the s polynomial coefficients
         //!
         //! @return s polynomial coefficients
-        const auto& getS() const
+        [[nodicard]] const auto& getS() const
         {
             return rst.getS();
         }
@@ -115,7 +115,7 @@ namespace vslib
         //! Returns the t polynomial coefficients
         //!
         //! @return t polynomial coefficients
-        const auto& getT() const
+        [[nodicard]] const auto& getT() const
         {
             return rst.getT();
         }
