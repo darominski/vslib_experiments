@@ -27,6 +27,6 @@ namespace vslib
         //! @param f_b b-phase value of abs-frame component
         //! @param f_c c-phase value of abs-frame component
         //! @return Pair of alpha, beta orthogonal values in the stationary reference frame
-        [[nodicard]] std::pair<double, double> transform(double f_a, double f_b, double f_c) noexcept;
+        [[nodiscard]] std::pair<double, double> transform(double f_a, double f_b, double f_c) noexcept;
     };
 }   // namespace vslib

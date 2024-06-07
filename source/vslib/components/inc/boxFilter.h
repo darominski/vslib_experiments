@@ -34,7 +34,7 @@ namespace vslib
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
-        [[nodicard]] double filter(double input) override
+        [[nodiscard]] double filter(double input) override
         {
             auto const oldest_value = m_buffer[m_head];
 
@@ -89,7 +89,7 @@ namespace vslib
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
-        [[nodicard]] double filter(double input) override
+        [[nodiscard]] double filter(double input) override
         {
             double const result = input + m_previous_value;
 
@@ -126,7 +126,7 @@ namespace vslib
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
-        [[nodicard]] double filter(double input) override
+        [[nodiscard]] double filter(double input) override
         {
             double const result = input + m_previous_value + m_earlier_value;
 

@@ -40,7 +40,7 @@ namespace vslib
         //! @param random_access Switch informing if the input_x is coming linearly or randomly, allows for binary
         //! search optimisation in the latter case
         //! @return Y-axis value result of the interpolation
-        [[nodicard]] StoredType interpolate(IndexType input_x, bool random_access = false)
+        [[nodiscard]] StoredType interpolate(IndexType input_x, bool random_access = false)
         {
             // handle interpolation saturation cases: bring back the value to inside the range
             if (input_x < this->m_lower_edge_x || input_x > this->m_upper_edge_x)

@@ -27,7 +27,7 @@ namespace vslib
         //!
         //! @param input Numerical input to be checked against set RMS limit
         //! @return Returns true if the provided input does not violate the limit, false otherwise
-        [[nodicard]] bool limit(double input) noexcept
+        [[nodiscard]] bool limit(double input) noexcept
         {
             if (std::isnan(input))
             {
