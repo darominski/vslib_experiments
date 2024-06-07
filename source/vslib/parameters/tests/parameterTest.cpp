@@ -366,7 +366,36 @@ TEST_F(ParameterTest, EnumParameterSetInvalidValue)
     auto           output    = parameter.setJsonValue(command["value"]);
     ASSERT_EQ(output.has_value(), true);   // there is a warning message
     EXPECT_EQ(
-        fmt::format("{}", output.value()), "Warning: The provided enum value is not one of the allowed values.\n"
+        fmt::format("{}", output.value()),
+        "Warning: The provided value: field5 is not one of the allowed enum values.\n"
+    );
+
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
+}
+
+//! Tests setting value to array of enum Parameter from a JSON command
+TEST_F(ParameterTest, EnumArrayParameterSetInvalidValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum class TestEnum
+    {
+        field1,
+        field2
+    };
+    constexpr size_t                            array_size = 3;
+    Parameter<std::array<TestEnum, array_size>> parameter(component, parameter_name);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
+
+    std::array<std::string, array_size> new_value{"field5", "field5", "field5"};   // enums are serialized as strings
+    nlohmann::json                      command = {{"value", new_value}};
+    auto                                output  = parameter.setJsonValue(command["value"]);
+    ASSERT_EQ(output.has_value(), true);   // there is a warning message
+    EXPECT_EQ(
+        fmt::format("{}", output.value()),
+        "Warning: The provided value: field5 is not one of the allowed enum values.\n"
     );
 
     EXPECT_FALSE(parameter.isInitialized());
