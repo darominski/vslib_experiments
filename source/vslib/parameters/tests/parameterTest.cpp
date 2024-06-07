@@ -99,6 +99,22 @@ TEST_F(ParameterTest, EnumParameterDefinition)
     EXPECT_FALSE(component.parametersInitialized());
 }
 
+//! Checks that bitmask enum Parameter can be registered to a component
+TEST_F(ParameterTest, EnumBitMaskParameterDefinition)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum BitMask
+    {
+        mask1 = 0xFFFF,
+        mask2 = 0x0000
+    };
+    Parameter<BitMask> parameter(component, parameter_name);
+    EXPECT_EQ(parameter.getName(), parameter_name);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
+}
+
 //! Checks that std::array of enum Parameter can be registered to a component
 TEST_F(ParameterTest, EnumArrayParameterDefinition)
 {
@@ -267,6 +283,33 @@ TEST_F(ParameterTest, EnumParameterSetValue)
     EXPECT_TRUE(component.parametersInitialized());
 }
 
+//! Tests setting value to enum Parameter from a JSON command
+TEST_F(ParameterTest, EnumBitMaskParameterSetValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum BitMask
+    {
+        field1 = 0x00,
+        field2 = 0x05,
+        field3 = 0xFF
+    };
+    Parameter<BitMask> parameter(component, parameter_name);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
+
+    std::string    new_value = "field2";   // enums are serialized as strings
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    EXPECT_EQ(output.has_value(), false);
+    component.flipBufferState();
+
+    EXPECT_EQ(parameter.value(), BitMask::field2);         // tests explicit access
+    EXPECT_EQ(parameter & 0xAA, BitMask::field2 & 0xAA);   // tests explicit access
+    EXPECT_TRUE(parameter.isInitialized());
+    EXPECT_TRUE(component.parametersInitialized());
+}
+
 //! Tests setting value to std::array of enum Parameter from a JSON command
 TEST_F(ParameterTest, EnumArrayParameterSetValue)
 {
@@ -374,6 +417,33 @@ TEST_F(ParameterTest, EnumParameterSetInvalidValue)
     EXPECT_FALSE(component.parametersInitialized());
 }
 
+//! Tests setting value to enum Parameter from a JSON command
+TEST_F(ParameterTest, EnumBitMaskParameterSetInvalidValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum class BitMask
+    {
+        field1 = 0x01,
+        field2 = 0xFF
+    };
+    Parameter<BitMask> parameter(component, parameter_name);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
+
+    std::string    new_value = "field5";   // enums are serialized as strings
+    nlohmann::json command   = {{"value", new_value}};
+    auto           output    = parameter.setJsonValue(command["value"]);
+    ASSERT_EQ(output.has_value(), true);   // there is a warning message
+    EXPECT_EQ(
+        fmt::format("{}", output.value()),
+        "Warning: The provided value: field5 is not one of the allowed enum values.\n"
+    );
+
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
+}
+
 //! Tests setting value to array of enum Parameter from a JSON command
 TEST_F(ParameterTest, EnumArrayParameterSetInvalidValue)
 {
@@ -386,6 +456,34 @@ TEST_F(ParameterTest, EnumArrayParameterSetInvalidValue)
     };
     constexpr size_t                            array_size = 3;
     Parameter<std::array<TestEnum, array_size>> parameter(component, parameter_name);
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
+
+    std::array<std::string, array_size> new_value{"field5", "field5", "field5"};   // enums are serialized as strings
+    nlohmann::json                      command = {{"value", new_value}};
+    auto                                output  = parameter.setJsonValue(command["value"]);
+    ASSERT_EQ(output.has_value(), true);   // there is a warning message
+    EXPECT_EQ(
+        fmt::format("{}", output.value()),
+        "Warning: The provided value: field5 is not one of the allowed enum values.\n"
+    );
+
+    EXPECT_FALSE(parameter.isInitialized());
+    EXPECT_FALSE(component.parametersInitialized());
+}
+
+//! Tests setting value to array of enum Parameter from a JSON command
+TEST_F(ParameterTest, EnumBitMaskArrayParameterSetInvalidValue)
+{
+    MockComponent     component;   // component to attach parameters to
+    const std::string parameter_name = "enum";
+    enum BitMask
+    {
+        field1 = 0x00,
+        field2 = 0xFF
+    };
+    constexpr size_t                           array_size = 3;
+    Parameter<std::array<BitMask, array_size>> parameter(component, parameter_name);
     EXPECT_FALSE(parameter.isInitialized());
     EXPECT_FALSE(component.parametersInitialized());
 
