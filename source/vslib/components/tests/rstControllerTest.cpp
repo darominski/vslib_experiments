@@ -50,7 +50,7 @@ TEST_F(RSTControllerTest, RSTControllerUpdateInputHistories)
     for (size_t index = 0; index < controller_length; index++)
     {
         EXPECT_EQ(rst.isReady(), false);
-        rst.update_input_histories(index, index + 1);
+        rst.updateInputHistories(index, index + 1);
     }
     // when the history buffers are filled: the RST should be ready
     EXPECT_EQ(rst.isReady(), true);
@@ -67,7 +67,7 @@ TEST_F(RSTControllerTest, RSTControllerReset)
     for (size_t index = 0; index < controller_length; index++)
     {
         EXPECT_EQ(rst.isReady(), false);
-        rst.update_input_histories(index, index + 1);
+        rst.updateInputHistories(index, index + 1);
     }
     // when the history buffers are filled: the RST should be ready
     EXPECT_EQ(rst.isReady(), true);
@@ -231,7 +231,7 @@ TEST_F(RSTControllerTest, RSTControllerReCalculateReference)
 
     const double actuation         = rst.control(measurement_value, set_point_value);
     double const limited_actuation = actuation - 2.0;   // simulates clamping of possible actuations
-    rst.update_reference(limited_actuation);
+    rst.updateReference(limited_actuation);
 
     // measurements should not be modified
     std::array<double, controller_length> expected_measurement_history = {measurement_value, 0, 0};

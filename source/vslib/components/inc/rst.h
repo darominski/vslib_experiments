@@ -31,9 +31,9 @@ namespace vslib
         //!
         //! @param measurement Current value of the process value
         //! @param reference Current value of the set-point reference
-        void update_input_histories(double measurement, double reference) noexcept
+        void updateInputHistories(double measurement, double reference) noexcept
         {
-            rst.update_input_histories(measurement, reference);
+            rst.updateInputHistories(measurement, reference);
         }
 
         //! Calculates one iteration of the controller algorithm
@@ -45,14 +45,14 @@ namespace vslib
         {
             if (!rst.isReady())
             {
-                rst.update_input_histories(measurement, reference);
+                rst.updateInputHistories(measurement, reference);
                 return 0;
             }
             const double actuation         = rst.control(measurement, reference);
             const double clipped_actuation = actuation_limits.limit(actuation);
             if (clipped_actuation != actuation)
             {
-                update_reference(clipped_actuation);
+                updateReference(clipped_actuation);
             }
             return clipped_actuation;
         }
@@ -60,9 +60,9 @@ namespace vslib
         //! Updates the most recent reference in the history, used in cases actuation goes over the limit
         //!
         //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
-        void update_reference(double updated_actuation)
+        void updateReference(double updated_actuation)
         {
-            rst.update_reference(updated_actuation);
+            rst.updateReference(updated_actuation);
         }
 
         //! Resets the controller to the initial state by zeroing the history.

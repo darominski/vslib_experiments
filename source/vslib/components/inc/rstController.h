@@ -24,7 +24,7 @@ namespace vslib
         //!
         //! @param measurement Current value of the process value
         //! @param reference Current value of the set-point reference
-        void update_input_histories(double measurement, double reference) noexcept
+        void updateInputHistories(double measurement, double reference) noexcept
         {
             m_measurements[m_head] = measurement;
             m_references[m_head]   = reference;
@@ -94,7 +94,7 @@ namespace vslib
         //! Updates the most recent reference in the history, used in cases actuation goes over the limit
         //!
         //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
-        void update_reference(double updated_actuation)
+        void updateReference(double updated_actuation)
         {
             // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
             m_actuations[m_head - 1] = updated_actuation;

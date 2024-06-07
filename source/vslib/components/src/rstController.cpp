@@ -37,7 +37,7 @@ namespace vslib
     //!
     //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
     template<>
-    void RSTController<3>::update_reference(double updated_actuation)
+    void RSTController<3>::updateReference(double updated_actuation)
     {
         // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
         m_actuations[0] = updated_actuation;
