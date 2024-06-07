@@ -33,7 +33,7 @@ namespace vslib
       public:
         CosLookupTable(std::string_view name, Component* parent, size_t number_points)
             : Component("CosLookupTable", name, parent),
-              m_function("data", this, cosine_function(number_points))
+              m_function("data", this, cosine_function(number_points), true)
         {
             assert(number_points >= 2);
         }
