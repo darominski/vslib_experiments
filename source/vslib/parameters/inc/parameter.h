@@ -457,7 +457,9 @@ namespace vslib
             }
             else
             {
-                fgc4::utils::Warning message("The provided enum value is not one of the allowed values.\n");
+                fgc4::utils::Warning message(
+                    fmt::format("The provided value: {} is not one of the allowed enum values.\n", json_value)
+                );
                 return message;
             }
             return {};
@@ -482,7 +484,9 @@ namespace vslib
                 }
                 else
                 {
-                    fgc4::utils::Warning message("The provided enum value is not one of the allowed values.\n");
+                    fgc4::utils::Warning message(
+                        fmt::format("The provided value: {} is not one of the allowed enum values.\n", value)
+                    );
                     return message;
                 }
             }
