@@ -49,4 +49,4 @@ namespace fgc4::utils::constants
     // errors. The exact value stems from CCLIBS.
     constexpr double floating_point_min_threshold = 1E-7F;
 
-}   // namespace utils::constants
+}   // namespace fgc4::utils::constants

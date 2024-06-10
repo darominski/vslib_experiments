@@ -140,4 +140,4 @@ namespace fgc4::utils
         return TypeLabel()(T{});
     }
 
-}   // namespace Utils
+}   // namespace fgc4::utils

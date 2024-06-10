@@ -146,4 +146,4 @@ namespace fgc4::utils
     template<typename BufferType, size_t BufferSize>
     alignas(std::max_align_t) std::byte RingBuffer<BufferType, BufferSize>::m_buffer[];
 
-}   // namespace utils
+}   // namespace fgc4::utils

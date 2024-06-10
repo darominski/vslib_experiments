@@ -34,4 +34,4 @@ namespace fgc4::utils
             return {};   // This is important, to always get the fresh object
         }
     };
-}   // namespace utils
+}   // namespace fgc4::utils

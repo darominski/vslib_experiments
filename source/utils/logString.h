@@ -16,4 +16,4 @@ namespace fgc4::utils
 
     using LogString = std::basic_string<char, std::char_traits<char>, StringAllocator>;
 
-}   // namespace utils
+}   // namespace fgc4::utils

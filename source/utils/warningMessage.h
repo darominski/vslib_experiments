@@ -23,7 +23,7 @@ namespace fgc4::utils
 
         LogString warning_str;
     };
-}
+}   // namespace fgc4::utils
 
 // ************************************************************
 // Convenience formatter for the Warning class

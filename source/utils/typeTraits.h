@@ -95,4 +95,4 @@ namespace fgc4::utils
 
     template<typename T>
     concept Boolean = std::is_same_v<T, bool>;
-}
+}   // fgc4::utils

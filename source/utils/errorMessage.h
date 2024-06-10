@@ -30,7 +30,7 @@ namespace fgc4::utils
         LogString   error_str;
         std::size_t error_code;
     };
-}
+}   // namespace fgc4::utils
 
 // ************************************************************
 // Convenience formatter for the Error class
