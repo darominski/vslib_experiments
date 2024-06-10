@@ -66,6 +66,19 @@ TEST(GenerateFunction, LinearDoubleFunction)
     ));
 }
 
+//! Checks that assert is raised when max < min
+TEST(GenerateFunction, MinOverMax)
+{
+    auto fun = [](const auto x)
+    {
+        return 2 * x;
+    };
+    const double min      = -15;
+    const double max      = min - 5;
+    const size_t n_points = 20000;
+    ASSERT_DEATH((generateFunction<double, double>(fun, min, max, n_points)), "Assertion `max > min' failed.");
+}
+
 //! Checks that trigonometric sin function over the expected range can be created
 TEST(GenerateFunction, SinFunction)
 {
