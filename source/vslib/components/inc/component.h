@@ -30,7 +30,7 @@ namespace vslib
         //! @param component_type Type of the Component
         //! @param name Name of the Component, needs to be unique in the type
         //! @param parent Possible parent of this Component, if Component is independent, the parent should be nullptr
-        Component(std::string_view component_type, std::string_view name, Component* parent = nullptr) noexcept
+        Component(std::string_view component_type, std::string_view name, Component* parent) noexcept
             : m_component_type(component_type),
               m_name(name),
               m_parent(parent)

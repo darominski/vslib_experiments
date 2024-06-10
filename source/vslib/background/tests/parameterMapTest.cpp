@@ -28,7 +28,7 @@ TEST_F(ParameterMapTest, ParameterMapDefaultConstruction)
 {
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> buffer{};
-    Component                       root_component("test_type", "test_name");
+    Component                       root_component("test_type", "test_name", nullptr);
     ASSERT_NO_THROW(ParameterMap(buffer.data(), queue_size, root_component));
 }
 
@@ -37,7 +37,7 @@ TEST_F(ParameterMapTest, ParameterMapUploadSimpleMap)
 {
     constexpr size_t                queue_size = 1000;   // 1000 bytes
     std::array<uint8_t, queue_size> buffer{};
-    Component                       root_component("type", "name");
+    Component                       root_component("type", "name", nullptr);
     ParameterMap                    parameter_map(buffer.data(), queue_size, root_component);
 
     auto read_queue

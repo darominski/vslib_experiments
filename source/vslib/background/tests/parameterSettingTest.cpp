@@ -61,7 +61,7 @@ TEST_F(ParameterSettingTest, ParameterSettingDefaultConstruction)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("test_type", "test_name");
+    Component                       root_component("test_type", "test_name", nullptr);
 
     ASSERT_NO_THROW(ParameterSetting(read_buffer.data(), write_buffer.data(), root_component));
 }
@@ -72,7 +72,7 @@ TEST_F(ParameterSettingTest, ParameterSettingValidateCorrectCommand)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("test_type", "test_name");
+    Component                       root_component("test_type", "test_name", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -86,7 +86,7 @@ TEST_F(ParameterSettingTest, ParameterSettingValidateIncorrectCommand)
     constexpr size_t                queue_size = 1024;   // 1024 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("test_type", "test_name");
+    Component                       root_component("test_type", "test_name", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -150,7 +150,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIntCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -171,7 +171,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleUintCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
     ParameterSetting                parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
     std::string             type = "type";
@@ -193,7 +193,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleDoubleCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -216,7 +216,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectUintCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -252,7 +252,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectIntCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -286,7 +286,7 @@ TEST_F(ParameterSettingTest, ParameterMapProcessArrayCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -312,7 +312,7 @@ TEST_F(ParameterSettingTest, ParameterMapProcessArrayInvalidCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -342,7 +342,7 @@ TEST_F(ParameterSettingTest, ParameterMapExecuteCorrectCommand)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -378,7 +378,7 @@ TEST_F(ParameterSettingTest, ParameterMapExecuteIncorrectCommand)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -414,7 +414,7 @@ TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedComponents)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -450,7 +450,7 @@ TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedHierarchicalComp
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -489,7 +489,7 @@ TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedComponents)
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
@@ -529,7 +529,7 @@ TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedHierarchicalCo
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       root_component("root", "root");
+    Component                       root_component("root", "root", nullptr);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root_component);
 
