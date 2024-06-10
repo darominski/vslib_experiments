@@ -9,31 +9,19 @@
 #include <string>
 
 #include "component.h"
+#include "functionGenerator.h"
 #include "periodicLookupTable.h"
 
 namespace vslib
 {
-    namespace
-    {
-        std::vector<std::pair<double, double>> cosine_function(size_t number_points)
-        {
-            std::vector<std::pair<double, double>> data(number_points + 1);
-            for (size_t index = 0; index <= number_points; index++)
-            {
-                const double x = (2.0 * M_PI * index) / number_points;   // 0 - 2pi
-                const double y = cos(x);
-                data[index]    = std::make_pair(x, y);
-            }
-            return data;
-        }
-    }
-
     class CosLookupTable : public Component
     {
       public:
         CosLookupTable(std::string_view name, Component* parent, size_t number_points)
             : Component("CosLookupTable", name, parent),
-              m_function("data", this, cosine_function(number_points), true)
+              m_function(
+                  "data", this, fgc4::utils::generateFunction<double, double>(cos, 0.0, 2.0 * M_PI, number_points), true
+              )
         {
             assert(number_points >= 2);
         }
