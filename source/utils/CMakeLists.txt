@@ -16,6 +16,7 @@ add_executable(utilsTests
   tests/staticJsonTest.cpp
   tests/typeLabelTest.cpp
   tests/warningMessageTest.cpp
+  tests/functionGeneratorTest.cpp
 )
 
 target_include_directories(utilsTests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${LIBRARIES_HOME}/json-3.11.2)
