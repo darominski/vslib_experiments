@@ -99,8 +99,8 @@ namespace vslib
             // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
             m_actuations[m_head - 1] = updated_actuation;
 
-            double reference = 0;
-            for (int64_t index = 0; index < ControllerLength; index++)
+            double reference = m_s[0] * updated_actuation + m_r[0] * m_measurements[m_head - 1];
+            for (int64_t index = 1; index < ControllerLength; index++)
             {
                 int64_t buffer_index;
                 if constexpr ((ControllerLength & (ControllerLength - 1)) == 0)
@@ -118,8 +118,8 @@ namespace vslib
                     }
                 }
 
-                reference += m_t[index] * m_references[buffer_index] - m_r[index] * m_measurements[buffer_index]
-                             - m_s[index] * m_actuations[buffer_index];
+                reference += m_s[index] * m_actuations[buffer_index] + m_r[index] * m_measurements[buffer_index]
+                             - m_t[index] * m_references[buffer_index];
             }
             m_references[m_head - 1] = reference;
         }

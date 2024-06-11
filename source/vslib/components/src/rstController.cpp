@@ -14,10 +14,7 @@ namespace vslib
     template<>
     [[nodiscard]] double RSTController<3>::control(double input, double reference) noexcept
     {
-        // This partial template specialization allows to speed-up the calculation of the RST actuation by about 15%
-        m_actuations[2] = m_actuations[1];
-        m_actuations[1] = m_actuations[0];
-
+        // This specialization allows to speed-up the calculation of the RST actuation by about 15%
         m_measurements[2] = m_measurements[1];
         m_measurements[1] = m_measurements[0];
         m_measurements[0] = input;
@@ -26,6 +23,8 @@ namespace vslib
         m_references[1] = m_references[0];
         m_references[0] = reference;
 
+        m_actuations[2] = m_actuations[1];
+        m_actuations[1] = m_actuations[0];
         m_actuations[0] = (m_t[0] * reference - m_r[0] * input + m_t[1] * m_references[1] - m_r[1] * m_measurements[1]
                            + m_t[2] * m_references[2] - m_r[2] * m_measurements[2]
                            - (m_s[1] * m_actuations[1] + m_s[2] * m_actuations[2]))
@@ -41,9 +40,9 @@ namespace vslib
     {
         // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
         m_actuations[0] = updated_actuation;
-        m_references[0] = m_t[0] * m_references[0] - m_r[0] * m_measurements[0] - m_s[0] * m_actuations[0]
-                          + m_t[1] * m_references[1] - m_r[1] * m_measurements[1] - m_s[1] * m_actuations[1]
-                          + m_t[2] * m_references[2] - m_r[2] * m_measurements[2] - m_s[2] * m_actuations[2];
+        m_references[0] = m_s[0] * updated_actuation + m_r[0] * m_measurements[0] + m_s[1] * m_actuations[1]
+                          + m_r[1] * m_measurements[1] - m_t[1] * m_references[1] + m_s[2] * m_actuations[2]
+                          + m_r[2] * m_measurements[2] - m_t[2] * m_references[2];
     }
 
 }   // namespace vslib

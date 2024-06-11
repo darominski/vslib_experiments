@@ -242,8 +242,7 @@ TEST_F(RSTControllerTest, RSTControllerReCalculateReference)
     EXPECT_EQ(rst.getActuations(), expected_actuation_history);
 
     // reference should be back-calculated
-    double const corrected_reference
-        = t_value[0] * set_point_value - r_value[0] * measurement_value - s_value[0] * limited_actuation;
+    double const corrected_reference = s_value[0] * limited_actuation + r_value[0] * measurement_value;
     std::array<double, controller_length> expected_reference_history = {corrected_reference, 0, 0};
     EXPECT_EQ(rst.getReferences(), expected_reference_history);
 }
