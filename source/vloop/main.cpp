@@ -42,35 +42,36 @@ using namespace fgc4;
 
 namespace user
 {
-    // vslib::RST<3> controller("rst");
+    vslib::PIDRST controller("pid", nullptr);
     // vslib::IIRFilter<81> filter("filter");
 
-    std::vector<std::pair<double, double>> function()
-    {
-        constexpr size_t                       length = 1000;
-        std::vector<std::pair<double, double>> func(length);
-        for (size_t index = 0; index < length; index++)
-        {
-            const double x = index * 2.0 * M_PI / static_cast<double>(length);
-            func[index]    = std::make_pair(x, sin(x));
-        }
-        return func;
-    }
+    // std::vector<std::pair<double, double>> function()
+    // {
+    //     constexpr size_t                       length = 1000;
+    //     std::vector<std::pair<double, double>> func(length);
+    //     for (size_t index = 0; index < length; index++)
+    //     {
+    //         const double x = index * 2.0 * M_PI / static_cast<double>(length);
+    //         func[index]    = std::make_pair(x, sin(x));
+    //     }
+    //     return func;
+    // }
 
-    PeriodicLookupTable<double> table("table", nullptr, function(), true);
+    // PeriodicLookupTable<double> table("table", nullptr, function(), true);
 
     void realTimeTask()
     {
         for (int index = 0; index < 100; index++)
         {
-            volatile double const input = 2.0 * M_PI * (std::rand() / static_cast<double>(RAND_MAX));
+            // volatile double const input = 2.0 * M_PI * (std::rand() / static_cast<double>(RAND_MAX));
+            // volatile double const input = 2.0 * M_PI * (std::rand() / static_cast<double>(RAND_MAX));
 
-            // volatile double const input    = index;
+            volatile double const input = index;
             // volatile auto         variable = table.interpolate(input);
-            volatile auto variable = sin(input);
+            // volatile auto variable = sin(input);
             // volatile auto variable      = table[input];
             // volatile auto variable      = filter.filter(input);
-            // volatile auto variable      = controller.control(input, input + 2);
+            volatile auto variable      = controller.control(input, input + 2);
             // volatile auto variable = limit.limit(input);
         }
     }
@@ -106,16 +107,33 @@ int main()
     //     user::limit
     // );
 
-    // user::limit.min.setJsonValue(5);
-    // user::limit.max.setJsonValue(5000);
-    // user::controller.kd.setJsonValue(0.01);
-    // user::controller.ki.setJsonValue(0.01);
-    // // user::controller.N.setJsonValue((uint32_t)1);
-    // // user::controller.f0.setJsonValue(1);
-    // // user::controller.ts.setJsonValue(1);
+    const double p  = 52.79;
+    const double i  = 0.0472;
+    const double d  = 0.04406;
+    const double ff = 6.1190;
+    const double b  = 0.03057;
+    const double c  = 0.8983;
+    const double N  = 17.79;
+    const double ts = 1.0e-3;
+    const double f0 = 1e-15;
 
-    // user::controller.verifyParameters();
-    // user::controller.flipBufferState();
+    user::controller.actuation_limits.min.setJsonValue(-100);
+    user::controller.actuation_limits.max.setJsonValue(100);
+    user::controller.actuation_limits.verifyParameters();
+    user::controller.actuation_limits.flipBufferState();
+
+    user::controller.kp.setJsonValue(p);
+    user::controller.kd.setJsonValue(d);
+    user::controller.ki.setJsonValue(i);
+    user::controller.kff.setJsonValue(ff);
+    user::controller.b.setJsonValue(b);
+    user::controller.c.setJsonValue(c);
+    user::controller.N.setJsonValue(N);
+    user::controller.f0.setJsonValue(f0);
+    user::controller.ts.setJsonValue(ts);
+
+    user::controller.verifyParameters();
+    user::controller.flipBufferState();
 
     // converter.init();
 
