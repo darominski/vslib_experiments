@@ -39,13 +39,13 @@ namespace vslib
 
         //! Calculates one iteration of the controller algorithm
         //!
-        //! @param process_value Current process value (measurement)
+        //! @param measurement Current process value (measurement)
         //! @param reference Reference value for the controller
         //! @return Controller output of the iteration
-        [[nodiscard]] double control(double process_value, double reference) noexcept
+        [[nodiscard]] double control(double measurement, double reference) noexcept
         {
             // based on logic in regRstCalcActRT from CCLIBS libreg regRst.c
-            m_measurements[m_head] = process_value;
+            m_measurements[m_head] = measurement;
             m_references[m_head]   = reference;
 
             double actuation = m_t[0] * m_references[m_head] - m_r[0] * m_measurements[m_head];
@@ -121,7 +121,7 @@ namespace vslib
                 reference += m_s[index] * m_actuations[buffer_index] + m_r[index] * m_measurements[buffer_index]
                              - m_t[index] * m_references[buffer_index];
             }
-            m_references[m_head - 1] = reference;
+            m_references[m_head - 1] = reference / m_t[0];
         }
 
         //! Resets the controller to the initial state by zeroing the history.
@@ -313,5 +313,46 @@ namespace vslib
         std::array<double, ControllerLength> m_a{0};   // variable used in Jury's test, declaring them here avoids
                                                        // allocation whenever jurysStabilityTest is called
     };
+
+    //! Control method returning the next actuation
+    //!
+    //! @param measurement Current measurement value
+    //! @param reference Current reference value
+    //! @return Next actuation value
+    template<>
+    [[nodiscard]] inline double RSTController<3>::control(double measurement, double reference) noexcept
+    {
+        // This specialization allows to speed-up the calculation of the RST actuation by about 15%
+        m_measurements[2] = m_measurements[1];
+        m_measurements[1] = m_measurements[0];
+        m_measurements[0] = measurement;
+
+        m_references[2] = m_references[1];
+        m_references[1] = m_references[0];
+        m_references[0] = reference;
+
+        m_actuations[2] = m_actuations[1];
+        m_actuations[1] = m_actuations[0];
+        m_actuations[0] = (m_t[0] * reference - m_r[0] * measurement + m_t[1] * m_references[1]
+                           - m_r[1] * m_measurements[1] + m_t[2] * m_references[2] - m_r[2] * m_measurements[2]
+                           - (m_s[1] * m_actuations[1] + m_s[2] * m_actuations[2]))
+                          / m_s[0];
+        return m_actuations[0];
+    }
+
+    //! Updates the most recent reference in the history, used in cases actuation goes over the limit
+    //!
+    //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
+    template<>
+    inline void RSTController<3>::updateReference(double updated_actuation)
+    {
+        // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
+        m_actuations[0]      = updated_actuation;
+        const double old_ref = m_references[0];
+        m_references[0]      = (m_s[0] * updated_actuation + m_r[0] * m_measurements[0] + m_s[1] * m_actuations[1]
+                           + m_r[1] * m_measurements[1] - m_t[1] * m_references[1] + m_s[2] * m_actuations[2]
+                           + m_r[2] * m_measurements[2] - m_t[2] * m_references[2])
+                          / m_t[0];
+    }
 
 }   // namespace vslib

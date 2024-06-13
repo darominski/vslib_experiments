@@ -18,11 +18,10 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/periodicLookupTableTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidRstTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstControllerTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstControllerTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/sinLookupTableTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clarkeTransform.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/rstController.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/parkTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
 )

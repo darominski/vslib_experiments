@@ -366,7 +366,7 @@ TEST_F(RSTTest, RSTReCalculateReference)
     EXPECT_EQ(rst.getActuations(), expected_actuation_history);
 
     // reference should be back-calculated
-    double const corrected_reference = s_value[0] * limited_actuation + r_value[0] * measurement_value;
+    double const corrected_reference = (s_value[0] * limited_actuation + r_value[0] * measurement_value) / t_value[0];
     std::array<double, controller_length> expected_reference_history = {corrected_reference, 0, 0};
     EXPECT_EQ(rst.getReferences(), expected_reference_history);
 }
@@ -405,7 +405,8 @@ TEST_F(RSTTest, RSTLimitedActuation)
     EXPECT_NE(calculated_actuation, unlimited_calculation);
     EXPECT_NEAR(calculated_actuation, max_actuation, 1e-6);
 
-    const double corrected_reference = s_value[0] * calculated_actuation + r_value[0] * measurement_value;
+    const double corrected_reference
+        = (s_value[0] * calculated_actuation + r_value[0] * measurement_value) / t_value[0];
     std::array<double, controller_length> expected_reference_history = {corrected_reference, 0, 0};
     EXPECT_EQ(rst.getReferences(), expected_reference_history);
 
@@ -418,9 +419,10 @@ TEST_F(RSTTest, RSTLimitedActuation)
     EXPECT_NE(second_calculated_actuation, second_unlimited_calculation);
     EXPECT_NEAR(second_calculated_actuation, max_actuation, 1e-6);
 
-    const double second_corrected_reference = s_value[0] * second_calculated_actuation + r_value[0] * measurement_value
-                                              + s_value[1] * calculated_actuation + r_value[1] * measurement_value
-                                              - t_value[1] * corrected_reference;
+    const double second_corrected_reference
+        = (s_value[0] * second_calculated_actuation + r_value[0] * measurement_value + s_value[1] * calculated_actuation
+           + r_value[1] * measurement_value - t_value[1] * corrected_reference)
+          / t_value[0];
 
     expected_reference_history = {second_corrected_reference, corrected_reference, 0};
     EXPECT_EQ(rst.getReferences(), expected_reference_history);
@@ -429,11 +431,12 @@ TEST_F(RSTTest, RSTLimitedActuation)
     const double third_calculated_actuation = rst.control(measurement_value, set_point_value);
     EXPECT_NEAR(third_calculated_actuation, max_actuation, 1e-6);
 
-    const double third_corrected_reference = s_value[0] * third_calculated_actuation + r_value[0] * measurement_value
-                                             + s_value[1] * second_calculated_actuation + r_value[1] * measurement_value
-                                             - t_value[1] * second_corrected_reference
-                                             + s_value[2] * calculated_actuation + r_value[2] * measurement_value
-                                             - t_value[2] * corrected_reference;
+    const double third_corrected_reference
+        = (s_value[0] * third_calculated_actuation + r_value[0] * measurement_value
+           + s_value[1] * second_calculated_actuation + r_value[1] * measurement_value
+           - t_value[1] * second_corrected_reference + s_value[2] * calculated_actuation
+           + r_value[2] * measurement_value - t_value[2] * corrected_reference)
+          / t_value[0];
 
     expected_reference_history = {third_corrected_reference, second_corrected_reference, corrected_reference};
     EXPECT_EQ(rst.getReferences(), expected_reference_history);
@@ -443,10 +446,11 @@ TEST_F(RSTTest, RSTLimitedActuation)
     EXPECT_NEAR(fourth_calculated_actuation, max_actuation, 1e-6);
 
     const double fourth_corrected_reference
-        = s_value[0] * fourth_calculated_actuation + r_value[0] * measurement_value
-          + s_value[1] * third_calculated_actuation + r_value[1] * measurement_value
-          - t_value[1] * third_corrected_reference + s_value[2] * second_calculated_actuation
-          + r_value[2] * measurement_value - t_value[2] * second_corrected_reference;
+        = (s_value[0] * fourth_calculated_actuation + r_value[0] * measurement_value
+           + s_value[1] * third_calculated_actuation + r_value[1] * measurement_value
+           - t_value[1] * third_corrected_reference + s_value[2] * second_calculated_actuation
+           + r_value[2] * measurement_value - t_value[2] * second_corrected_reference)
+          / t_value[0];
 
     expected_reference_history = {fourth_corrected_reference, third_corrected_reference, second_corrected_reference};
     EXPECT_EQ(rst.getReferences(), expected_reference_history);

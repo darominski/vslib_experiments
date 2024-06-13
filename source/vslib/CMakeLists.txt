@@ -58,7 +58,6 @@ if (NOT BUILD_TESTS)
       components/src/firFilter.cpp
       components/src/iirFilter.cpp
       components/src/interruptRegistry.cpp
-      components/src/rstController.cpp
       components/src/parkTransform.cpp
       parameters/src/parameterRegistry.cpp
       background/src/parameterSetting.cpp
