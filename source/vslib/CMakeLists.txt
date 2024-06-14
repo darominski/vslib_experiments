@@ -55,8 +55,6 @@ if (NOT BUILD_TESTS)
   set(${LIB}_SOURCES
       components/src/clarkeTransform.cpp
       components/src/boxFilter.cpp
-      components/src/firFilter.cpp
-      components/src/iirFilter.cpp
       components/src/interruptRegistry.cpp
       components/src/parkTransform.cpp
       parameters/src/parameterRegistry.cpp

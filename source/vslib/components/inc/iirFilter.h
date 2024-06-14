@@ -74,8 +74,8 @@ namespace vslib
             return outputs;
         }
 
-        Parameter<std::array<double, buffer_length>> numerator;
-        Parameter<std::array<double, buffer_length>> denominator;
+        Parameter<std::array<double, buffer_length>> numerator;     //!< Coefficients applied to inputs
+        Parameter<std::array<double, buffer_length>> denominator;   //!< Coefficients applied to outputs
 
         //! Copies Parameter values into local containers for optimised access
         //!
@@ -88,11 +88,11 @@ namespace vslib
         }
 
       private:
-        std::array<double, buffer_length> m_numerator;
-        std::array<double, buffer_length> m_denominator;
-        std::array<double, buffer_length> m_inputs_buffer{0};
-        std::array<double, buffer_length> m_outputs_buffer{0};
-        int64_t                           m_head{0};
+        std::array<double, buffer_length> m_numerator;           //!< Local copy of coefficients applied to inputs
+        std::array<double, buffer_length> m_denominator;         //!< Local copy of coefficients applied to outputs
+        std::array<double, buffer_length> m_inputs_buffer{0};    //!< History of provided inputs
+        std::array<double, buffer_length> m_outputs_buffer{0};   //!< History of outputs
+        int64_t                           m_head{0};   //!< Points to where is the current head of the history buffers
 
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
         //!
