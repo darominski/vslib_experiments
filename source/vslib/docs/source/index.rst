@@ -10,14 +10,26 @@ Welcome to VSlib's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-Docs
-====
+API Documentation
+=================
 
 `API Documentation <../doxygen/html/index.html>`_
+
+.. doxygenfile:: component.h
+   :project: VSlib
+
+
+Examples
+========
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   usage_examples/*
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
