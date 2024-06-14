@@ -16,7 +16,11 @@ namespace vslib
     class ClarkeTransform : public Component
     {
       public:
-        ClarkeTransform(std::string_view name, Component* parent, uint64_t number_points = 1000)
+        //! Creates the Clarke transformation Component
+        //!
+        //! @param name Name of the Component
+        //! @param parent Parent of this Component
+        ClarkeTransform(std::string_view name, Component* parent)
             : Component("ClarkeTransform", name, parent)
         {
         }

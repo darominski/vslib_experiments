@@ -56,7 +56,7 @@ TEST_F(ClarkeTransformTest, BasicTest)
 TEST_F(ClarkeTransformTest, SimulinkConsistency)
 {
     std::string_view name = "clarke3";
-    ClarkeTransform  clarke(name, nullptr, 10000);
+    ClarkeTransform  clarke(name, nullptr);
 
     // the input files are randomly generated numbers
     std::filesystem::path abc_path    = "components/inputs/park_abc_sin_120degrees.csv";
