@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "boxFilter.h"
+#include "clarkeTransform.h"
 #include "componentArray.h"
 #include "compositePID.h"
 #include "firFilter.h"
@@ -24,6 +25,7 @@
 #include "parameterMap.h"
 #include "parameterRegistry.h"
 #include "parameterSetting.h"
+#include "parkTransform.h"
 #include "periodicLookupTable.h"
 #include "pid.h"
 #include "pidRst.h"
@@ -187,7 +189,8 @@ int main()
 
     while (true)
     {
-        if (counter == n_elements + 50)
+        if (counter == 1)
+        // if (counter == n_elements + 50)
         {
             timer.stop();
 #ifdef PERFORMANCE_TESTS

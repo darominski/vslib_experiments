@@ -59,8 +59,8 @@ namespace vslib
         {
             if (!rst.isReady())
             {
-                rst.updateInputHistories(measurement, reference);
-                return 0;
+                updateInputHistories(measurement, reference);
+                return 0.0;
             }
             const double actuation         = rst.control(measurement, reference);
             const double clipped_actuation = actuation_limits.limit(actuation);

@@ -20,10 +20,10 @@ namespace vslib
       public:
         RST(std::string_view name, Component* parent)
             : Component("RST", name, parent),
+              actuation_limits("actuation_limits", this),
               r(*this, "r"),
               s(*this, "s"),
-              t(*this, "t"),
-              actuation_limits("actuation_limits", this)
+              t(*this, "t")
         {
         }
 

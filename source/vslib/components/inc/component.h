@@ -44,10 +44,10 @@ namespace vslib
         // ************************************************************
         // Methods for registering Parameters belonging to this Component and serializing it
 
-        //! Adds a child Component to this Component
+        //! Adds a child Component to this Component.
         //!
         //! @param child Child Component to be added to this Component
-        void addChild(Component& child)
+        void addChild(Component& child) noexcept
         {
             m_children.emplace_back(child);
         }
@@ -96,7 +96,7 @@ namespace vslib
         // ************************************************************
         // Getters
 
-        //! Provides the name of this component
+        //! Provides the name of this component.
         //!
         //! @return String_view of the component name
         [[nodiscard]] std::string_view getName() const noexcept
@@ -105,7 +105,7 @@ namespace vslib
         }
 
         //! Provides the full name of this component, including component
-        //! type and parent name (if existing)
+        //! type and parent name (if existing).
         //!
         //! @return String with the full component name
         [[nodiscard]] std::string getFullName() const noexcept
@@ -114,7 +114,7 @@ namespace vslib
             return (m_parent == nullptr) ? full_name : m_parent->getFullName() + "." + full_name;
         }
 
-        //! Provides the map with all names and references to all parameters registered to this component
+        //! Provides the map with all names and references to all parameters registered to this Component.
         //!
         //! @return Map with names and references to all parameters of this component
         [[nodiscard]] auto const& getParameters() const noexcept
@@ -122,9 +122,9 @@ namespace vslib
             return m_parameters;
         }
 
-        //! Provides the container with all children belonging to this component
+        //! Provides the container with all children belonging to this Component.
         //!
-        //! @return Vector with references to all children of this component
+        //! @return Vector with references to all children of this Component
         [[nodiscard]] auto const& getChildren() const noexcept
         {
             return m_children;

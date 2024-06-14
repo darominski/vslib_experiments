@@ -42,11 +42,11 @@ namespace vslib
         {
         }
 
-        //! Computes one iteration of the controller
+        //! Computes one actuation calculation iteration of the controller
         //!
         //! @param process_value Value of the controlled process
         //! @param reference Value of the set-point reference
-        //! @return Result of this iteration
+        //! @return Actuation value of this iteration
         [[nodiscard]] double control(double process_value, double reference)
         {
             m_error    = reference - process_value;
@@ -66,7 +66,7 @@ namespace vslib
             return actuation;
         }
 
-        //! Allows for resetting errors of the controller and setting new starting value
+        //! Allows for resetting errors of the controller and setting new starting value.
         //!
         //! @param start_value New starting value of the controller
         void reset(double start_value) noexcept
@@ -81,7 +81,7 @@ namespace vslib
         // ************************************************************
         // Standard getters and setters
 
-        //! Returns the target value of the controller
+        //! Returns the target value of the controller.
         //!
         //! @return Target value of the controller
         [[nodiscard]] double getError() const noexcept
@@ -89,7 +89,7 @@ namespace vslib
             return m_error;
         }
 
-        //! Returns the target value of the controller
+        //! Returns the target value of the controller.
         //!
         //! @return Integral error value of the controller
         [[nodiscard]] double getIntegral() const noexcept
@@ -97,7 +97,7 @@ namespace vslib
             return m_integral;
         }
 
-        //! Returns the target value of the controller
+        //! Returns the target value of the controller.
         //!
         //! @return Target value of the controller
         [[nodiscard]] double getPreviousError() const noexcept
@@ -105,7 +105,7 @@ namespace vslib
             return m_previous_error;
         }
 
-        //! Returns the starting value of the controller
+        //! Returns the starting value of the controller.
         //!
         //! @return Starting value of the controller
         [[nodiscard]] double getStartingValue() const noexcept
@@ -113,7 +113,7 @@ namespace vslib
             return m_starting_value;
         }
 
-        //! Sets the starting value of the controller
+        //! Sets the starting value of the controller.
         //!
         //! @param value Starting value for the controller
         void setStartingValue(double value) noexcept
@@ -129,7 +129,7 @@ namespace vslib
         Parameter<double> kd;    //!< Derivative gain coefficient
         Parameter<double> kff;   //!< Feed-forward scaling coefficient
         Parameter<double> b;     //!< Gain of the proportional stage reference signal
-        Parameter<double> c;     //!< Gain of the proportional stage reference signal
+        Parameter<double> c;     //!< Gain of the derivative stage reference signal
 
         Parameter<double> integral_limit;   //!< limit of the integral error
 
