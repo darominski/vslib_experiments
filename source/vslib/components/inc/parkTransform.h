@@ -15,6 +15,11 @@ namespace vslib
     class ParkTransform : public Component
     {
       public:
+        //! Creates the Park transformation Component with the LookupTables of the requested size
+        //!
+        //! @param name Name of the Component
+        //! @param parent Parent of this Component
+        //! @param number_points Number of points for the sine and cosine lookup tables
         ParkTransform(std::string_view name, Component* parent, uint64_t number_points = 1000)
             : Component("ParkTransform", name, parent),
               m_sin("sin", this, number_points),
