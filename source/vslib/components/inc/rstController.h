@@ -186,16 +186,9 @@ namespace vslib
             m_b = coefficients;
             while (coefficient_length > 2)
             {
-                m_a            = m_b;
-                double const d = m_a[coefficient_length - 1] / m_a[0];
-
-                for (size_t index = 0; index <= coefficient_length; index++)
-                {
-                    m_b[index] = m_a[index] - d * m_a[coefficient_length - index];
-                }
-
+                double const d = m_b[coefficient_length - 1] / m_b[0];
                 // First element of every row of Jury's array > 0 for stability
-                if (m_b[0] <= 0.0F)
+                if ((m_b[0] - d * m_b[coefficient_length]) <= 0.0F)
                 {
                     return fgc4::utils::Warning("RST unstable: the first element of Jury's array is not above zero.\n");
                 }
