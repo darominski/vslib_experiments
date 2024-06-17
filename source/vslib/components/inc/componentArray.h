@@ -16,10 +16,10 @@ namespace vslib
     class ComponentArray : public Component
     {
       public:
-        //! Constructor for the ComponentArray component
+        //! Constructor for the ComponentArray component.
         //!
         //! @param name Name of the object
-        //! @param parent Specifies whether a parent of this object exists, optional: object independent by default
+        //! @param parent Pointer to the parent of this Component
         //! @param settings All settings that are forwarded to construct Components held in the array
         template<typename... ComponentSettings>
         ComponentArray(const std::string& name, Component* parent, ComponentSettings... settings)
@@ -52,7 +52,7 @@ namespace vslib
         }
 
       private:
-        std::array<std::unique_ptr<ComponentType>, N> m_components;
+        std::array<std::unique_ptr<ComponentType>, N> m_components;   //!< Array of owned Components
 
         template<typename... CurrentSettings>
         void createComponents(const std::string& name_base, size_t index, CurrentSettings... settings)
@@ -69,6 +69,7 @@ namespace vslib
 
         // ************************************************************
         //! Helper class for wrapping dereferencing of the pointers stored in the std::array
+
         class IteratorWrapper
         {
           public:

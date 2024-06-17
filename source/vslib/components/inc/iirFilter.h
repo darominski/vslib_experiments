@@ -18,7 +18,11 @@ namespace vslib
         constexpr static int64_t buffer_length = FilterOrder + 1;
 
       public:
-        //! Constructor of the IIR filter component, initializing one Parameter: coefficients
+        //! Constructor of the IIR filter Component, initializing two Parameters: numerator and denominator coefficient
+        //! arrays.
+        //!
+        //! @param name Name of this Filter Component
+        //! @param parent Parent of this Filter Component
         IIRFilter(std::string_view name, Component* parent)
             : Filter("IIRFilter", name, parent),
               numerator(*this, "numerator_coefficients"),
@@ -77,7 +81,7 @@ namespace vslib
         Parameter<std::array<double, buffer_length>> numerator;     //!< Coefficients applied to inputs
         Parameter<std::array<double, buffer_length>> denominator;   //!< Coefficients applied to outputs
 
-        //! Copies Parameter values into local containers for optimised access
+        //! Copies Parameter values into local containers for optimised access.
         //!
         //! @return Optionally returns a Warning if an issue was found
         std::optional<fgc4::utils::Warning> verifyParameters() override
@@ -90,11 +94,11 @@ namespace vslib
       private:
         std::array<double, buffer_length> m_numerator;           //!< Local copy of coefficients applied to inputs
         std::array<double, buffer_length> m_denominator;         //!< Local copy of coefficients applied to outputs
-        std::array<double, buffer_length> m_inputs_buffer{0};    //!< History of provided inputs
-        std::array<double, buffer_length> m_outputs_buffer{0};   //!< History of outputs
+        std::array<double, buffer_length> m_inputs_buffer{0};    //!< History of the provided inputs
+        std::array<double, buffer_length> m_outputs_buffer{0};   //!< History of the outputs
         int64_t                           m_head{0};   //!< Points to where is the current head of the history buffers
 
-        //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect
+        //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect.
         //!
         //! @param input Input value to be added to the front of the inputs buffer
         void updateInputBuffer(double input)
@@ -102,7 +106,7 @@ namespace vslib
             m_inputs_buffer[m_head] = input;
         }
 
-        //! Pushes the provided value into the front of the output buffer, overriding the oldest value in effect
+        //! Pushes the provided value into the front of the output buffer, overriding the oldest value in effect.
         //!
         //! @param output Output value to be added to the front of the outputs buffer
         void shiftOutputBuffer(double output)
@@ -124,6 +128,10 @@ namespace vslib
     // Benchmarking showed 19% gain for the first order, and only 4% for the 2nd order. Therefore, only
     // the first order is specialized.
 
+    //! Filters the provided input array by filtering each element of the input.
+    //!
+    //! @param input Array with input values to be filtered
+    //! @return Array with the filtered values
     template<>
     [[nodiscard]] inline double IIRFilter<1>::filter(const double input)
     {

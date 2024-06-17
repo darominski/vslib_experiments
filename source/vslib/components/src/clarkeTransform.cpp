@@ -6,7 +6,7 @@ namespace vslib
 {
     namespace
     {
-        constexpr double sqrt_3_over_3 = sqrt(3) / 3.0;
+        constexpr double sqrt_3_over_3 = sqrt(3.0) / 3.0;
         constexpr double two_over_3    = 2.0 / 3.0;
     }
 

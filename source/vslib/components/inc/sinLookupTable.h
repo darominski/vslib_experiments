@@ -18,6 +18,11 @@ namespace vslib
     class SinLookupTable : public Component
     {
       public:
+        //! Constructor for the SinLookupTable Component.
+        //!
+        //! @param name Name of this Component
+        //! @param parent Parent of this Component
+        //! @param number_points Length of the lookup table vector
         SinLookupTable(std::string_view name, Component* parent, size_t number_points)
             : Component("SinLookupTable", name, parent),
               m_function(
@@ -27,7 +32,7 @@ namespace vslib
             assert(number_points >= 2);
         }
 
-        //! Provides main access interaction with the underlying table consistent with LookupTable components
+        //! Provides the main access interaction with the underlying table consistent with LookupTable components.
         //!
         //! @param input_x Value to be looked up in the table
         //! @return Interpolated function value closest to the input_x
@@ -36,7 +41,7 @@ namespace vslib
             return m_function.interpolate(input_x);
         }
 
-        //! Provides intuitive interaction with the underlying table
+        //! Provides intuitive interaction with the underlying table.
         //!
         //! @param input_x Value to be looked up in the table
         //! @return Interpolated function value closest to the input_x
@@ -46,6 +51,7 @@ namespace vslib
         }
 
       private:
+        //!< Component providing the sine function storage and interpolation functionalities
         PeriodicLookupTable<double, double> m_function;
     };
 }   // namespace vslib

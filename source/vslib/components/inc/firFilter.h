@@ -18,7 +18,10 @@ namespace vslib
         constexpr static int64_t buffer_length = FilterOrder + 1;
 
       public:
-        //! Constructor of the FIR filter component, initializing one Parameter: coefficients
+        //! Constructor of the FIR filter component, initializing one Parameter: coefficients.
+        //!
+        //! @param name Name of this Filter Component
+        //! @param parent Parent of this Filter Component
         FIRFilter(std::string_view name, Component* parent)
             : Filter("FIRFilter", name, parent),
               coefficients(*this, "coefficients")
@@ -26,7 +29,7 @@ namespace vslib
             static_assert(FilterOrder >= 1, "Filter order needs to be a positive number larger than zero.");
         }
 
-        //! Filters the provided input by convolving coefficients and the input, including previous inputs
+        //! Filters the provided input by convolving coefficients and the input, including previous inputs.
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
@@ -69,9 +72,9 @@ namespace vslib
             return outputs;
         }
 
-        Parameter<std::array<double, buffer_length>> coefficients;
+        Parameter<std::array<double, buffer_length>> coefficients;   //!< Array of coefficients of this Filter
 
-        //! Copies Parameter values into the local container for optimised access
+        //! Copies Parameter values into the local container for optimised access.
         //!
         //! @return Optionally returns a Warning if an issue was found
         std::optional<fgc4::utils::Warning> verifyParameters() override
@@ -81,11 +84,11 @@ namespace vslib
         }
 
       private:
-        std::array<double, buffer_length> m_coefficients{0};
-        std::array<double, buffer_length> m_buffer{0};
-        int64_t                           m_head{0};
+        std::array<double, buffer_length> m_coefficients{0};   //!< Local copy of the coefficient array
+        std::array<double, buffer_length> m_buffer{0};         //!< History of previous inputs
+        int64_t                           m_head{0};           //!< Points to where the oldest entry to history is
 
-        //! Pushes the provided value into the front of the buffer and removes the oldest value
+        //! Pushes the provided value into the front of the buffer and removes the oldest value.
         //!
         //! @param input Input value to be added to the front of the buffer
         void shiftBuffer(double input)
@@ -107,7 +110,7 @@ namespace vslib
     // Benchmarking showed 44% gain for the first order, and 72% for the 2nd order.
 
     //! Filters the provided input using 1st order specialization by convolving coefficients and the input, including
-    //! previous input
+    //! previous input.
     //!
     //! @param input Input value to be filtered
     //! @return Filtered value
@@ -122,7 +125,7 @@ namespace vslib
     }
 
     //! Filters the provided input using 2nd order specialization by convolving coefficients and the input, including
-    //! previous inputs
+    //! previous inputs.
     //!
     //! @param input Input value to be filtered
     //! @return Filtered value

@@ -9,8 +9,6 @@
 
 namespace vslib
 {
-    //! Creates and uploads the parameter map to the shared memory. The memory is reinitialized each time
-    //! this method is called.
     void ParameterMap::uploadParameterMap()
     {
         auto parameter_map = fgc4::utils::StaticJsonFactory::getJsonObject();

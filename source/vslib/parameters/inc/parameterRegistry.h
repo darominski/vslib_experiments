@@ -30,23 +30,28 @@ namespace vslib
             return m_instance;
         }
 
-        //! Provides map of all created parameter names and references to them
+        //! Provides map of all created parameter names and references to them.
         //!
         //! @return Map with full parameter names and their references
-        [[nodiscard("Parameters should not be discarded.")]] auto const& getParameters() const
+        [[nodiscard]] auto const& getParameters() const
         {
             return m_parameters;
         }
 
-        void addToRegistry(std::string_view, IParameter&);
+        //! Adds a new entry to the Parameter registry.
+        //!
+        //! @param parameter_name Name of the parameter to be added to the parameter registry
+        //! @param parameter_reference Reference to the parameter being added to the parameter registry
+        void addToRegistry(std::string_view parameter_name, IParameter& parameter_reference);
 
+        //! Clears the registry.
         void clearRegistry() noexcept
         {
             m_parameters.clear();
         }
 
       private:
-        ParameterRegistry() = default;
-        std::map<std::string, ParameterReference> m_parameters;
+        ParameterRegistry() = default;                            //!< Default constructor
+        std::map<std::string, ParameterReference> m_parameters;   //!< Map holding references to all Parameters
     };
 }   // namespace vslib

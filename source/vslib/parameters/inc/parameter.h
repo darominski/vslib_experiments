@@ -95,15 +95,17 @@ namespace vslib
         // Operator overloads to seamless interactions with held values
 
         //! Provides the access to the value and performs an implicit conversion to the desired type
+        //!
+        //! @return Read-buffer value.
         operator T() const
         {
             return *m_read_buffer;
         }
 
-        //! Provides element-access to the values stored in the value, provided the type stored is a std::array
+        //! Provides element-access to the values stored in the value, provided the type stored is a std::array.
         //!
         //! @param index Index of the array to be accessed. If invalid, an out_of_range exception will be thrown
-        //! @return Value stored at the provided index
+        //! @return Value stored at the requested index
         const auto& operator[](uint64_t index) const
             requires fgc4::utils::StdArray<T>
         {
@@ -119,8 +121,8 @@ namespace vslib
             return (*m_read_buffer)[index];
         }
 
-        //! Provides ordering for the Parameters, allowing to compare them to interact as if they were of the stored
-        //! type
+        //! Provides ordering for the Parameters, allowing to compare them to allow interactions as if they were of the
+        //! stored type.
         //!
         //! @param other Right-hand side Parameter to compare this Parameter against
         //! @return Ordering between the current Parameter and the one we compared the object to
@@ -152,13 +154,13 @@ namespace vslib
         //! Explicit conversion value getter function. It removes issues with
         //! implicit conversion of a complex type, e.g. arrays, enums, etc.
         //!
-        //! @return Value stored cast explictly to the underlying type
+        //! @return Value held in the read buffer cast explictly to the Parameter type
         [[nodiscard]] const T& value() const noexcept
         {
             return *m_read_buffer;
         }
 
-        //! Returns buffer the write buffer value to be validated.
+        //! Returns the write buffer value to be validated.
         //!
         //! @return Write buffer value with explict cast to the underlying type
         [[nodiscard]] const T& toValidate() const noexcept
@@ -166,7 +168,7 @@ namespace vslib
             return *m_write_buffer;
         }
 
-        //! Getter for the initialization flag of the Parameter
+        //! Getter for the initialization flag of the Parameter.
         //!
         //! @return True if the Parameter has been initialized, false otherwise
         [[nodiscard]] bool isInitialized() const noexcept override
@@ -174,7 +176,7 @@ namespace vslib
             return m_initialized;
         }
 
-        //! Getter for the Parameter name
+        //! Getter for the Parameter name.
         //!
         //! @return Parameter name
         [[nodiscard]] std::string_view getName() const noexcept override
@@ -182,7 +184,7 @@ namespace vslib
             return m_name;
         }
 
-        //! Getter for whether the lower numerical limit is defined
+        //! Getter for whether the lower numerical limit is defined.
         //!
         //! @return True if the lower limit is defined, false otherwise
         [[nodiscard]] bool isLimitMinDefined() const noexcept
@@ -190,7 +192,7 @@ namespace vslib
             return m_limit_min_defined;
         }
 
-        //! Getter for whether the upper numerical limit is defined
+        //! Getter for whether the upper numerical limit is defined.
         //!
         //! @return True if the upper limit is defined, false otherwise
         [[nodiscard]] bool isLimitMaxDefined() const noexcept
@@ -198,7 +200,7 @@ namespace vslib
             return m_limit_max_defined;
         }
 
-        //! Getter for the lower limit of the held value
+        //! Getter for the lower limit of the held value.
         //!
         //! @return Lower limit of allowed stored value
         [[nodiscard]] const LimitType<T>& getLimitMin() const noexcept
@@ -207,7 +209,7 @@ namespace vslib
             return m_limit_min;
         }
 
-        //! Getter for the upper limit of the held value
+        //! Getter for the upper limit of the held value.
         //!
         //! @return Upper limit of allowed stored value
         [[nodiscard]] const LimitType<T>& getLimitMax() const noexcept
@@ -219,7 +221,7 @@ namespace vslib
         // ************************************************************
         // Methods used in case the type T is an STL container, so it requires a begin and end methods for iteration
 
-        //! Provides connection to begin() method of underlying container
+        //! Provides connection to begin() method of underlying container, if the Parameter type is an array.
         //!
         //! @return Mutable access to the beginning of the stored std::array
         auto begin()
@@ -228,7 +230,7 @@ namespace vslib
             return m_read_buffer->begin();
         }
 
-        //! Provides connection to cbegin() method of underlying container
+        //! Provides connection to cbegin() method of underlying container, if the Parameter type is an array.
         //!
         //! @return Non-mutable access to the beginning of the stored std::array
         auto const cbegin() const
@@ -237,7 +239,7 @@ namespace vslib
             return m_read_buffer->cbegin();
         }
 
-        //! Provides connection to end() method of underlying container
+        //! Provides connection to end() method of underlying container, if the Parameter type is an array.
         //!
         //! @return Mutable access to the end of the stored std::array
         auto end()
@@ -246,7 +248,7 @@ namespace vslib
             return m_read_buffer->end();
         }
 
-        //! Provides connection to cend() method of underlying container
+        //! Provides connection to cend() method of underlying container, if the Parameter type is an array.
         //!
         //! @return Non-mutable access to the end of the stored std::array
         auto const cend() const
@@ -271,7 +273,7 @@ namespace vslib
         //! Sets the provided JSON-serialized value to the parameter-held value.
         //!
         //! @param json_value JSON-serialized value to be set
-        //! @return If not successful, returns Warning with relevant information, nothing otherwise
+        //! @return Returns a Warning with relevant information if setting not successful, nothing otherwise
         std::optional<fgc4::utils::Warning> setJsonValue(const StaticJson& json_value) override
         {
             auto const& maybe_warning = setJsonValueImpl(json_value);
@@ -286,13 +288,13 @@ namespace vslib
         // ************************************************************
         // Method for synchronizing buffers
 
-        //! Copies all contents of the write buffer to the read buffer to synchronise them.
+        //! Copies contents of the write buffer to the read buffer to synchronise them.
         void syncWriteBuffer() override
         {
             *m_write_buffer = *m_read_buffer;
         }
 
-        //! Swaps buffer pointers
+        //! Swaps the buffer pointers.
         void swapBuffers() override
         {
             T* tmp         = m_write_buffer;
@@ -303,20 +305,20 @@ namespace vslib
         // ************************************************************
 
       private:
-        const std::string m_name;     // Unique ID indicating component type, its name and the variable name
-        Component&        m_parent;   // parent of this Parameter
+        const std::string m_name;     //!< Name of this Parameter
+        Component&        m_parent;   //!< Component owning this Parameter
 
-        std::array<T, number_buffers> m_value{T{}, T{}};   // default-initialized values
+        std::array<T, number_buffers> m_value{T{}, T{}};   //!< Double-buffered value stored by this Parameter
 
-        T* m_read_buffer{&m_value[0]};
-        T* m_write_buffer{&m_value[1]};
+        T* m_read_buffer{&m_value[0]};    //!< Pointer to the read buffer
+        T* m_write_buffer{&m_value[1]};   //!< Pointer to the write buffer
 
-        LimitType<T> m_limit_min;                  // minimum numerical value that can be stored
-        LimitType<T> m_limit_max;                  // maximal numerical value that can be stroed
-        bool         m_limit_min_defined{false};   // flag whether the minimum limit has been set, used in serialization
-        bool         m_limit_max_defined{false};   // flag whether the maximum limit has been set, used in serialization
+        LimitType<T> m_limit_min;          //!< Minimum numerical value that can be stored
+        LimitType<T> m_limit_max;          //!< Maximal numerical value that can be stored
+        bool m_limit_min_defined{false};   //!< Flag whether the minimum limit has been set, used in serialization
+        bool m_limit_max_defined{false};   //!< Flag whether the maximum limit has been set, used in serialization
 
-        bool m_initialized{false};   // flag defining whether the Parameter has been initialized
+        bool m_initialized{false};   //!< Flag defining whether the Parameter has been initialized
 
         // ************************************************************
         // Methods related to checking the numerical limits of the parameter during parameter setting
@@ -344,7 +346,7 @@ namespace vslib
             return {};
         }
 
-        //! Checks limits of all arithmetic types, if they are defined
+        //! Checks limits of all arithmetic types, if they are defined.
         //!
         //! @param value New parameter value to be checked
         //! @return Warning with relevant information if check not successful, nothing otherwise
@@ -399,7 +401,7 @@ namespace vslib
             return {};
         }
 
-        //! Sets the provided JSON value to the write buffer. Handles boolean, std::string, numerical types, and arrays
+        //! Sets the provided JSON value to the write buffer. Handles boolean, std::string, numerical types, and arrays.
         //!
         //! @param json_value JSON object containing new parameter value to be set
         //! @return If not successful returns Warning with relevant information, nothing otherwise

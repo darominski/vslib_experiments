@@ -11,14 +11,17 @@ namespace vslib
     {
 
       public:
-        //! Constructor of the box filter component
+        //! Constructor of the BoxFilter Component.
+        //!
+        //! @param name Name of this Filter Component
+        //! @param parent Parent of this Filter Component
         BoxFilter(std::string_view name, Component* parent)
             : Filter("BoxFilter", name, parent)
         {
         }
 
         //! Filters the provided input by calculating the moving average of the buffer of previously
-        //! provided inputs
+        //! provided inputs.
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
@@ -31,16 +34,16 @@ namespace vslib
             return result / 2.0;
         }
 
-        //! Returns the maximum value that can be filtered by this filter
+        //! Returns the maximum value that can be filtered.
         //!
-        //! @return Maximal value that can be filter by this filter
+        //! @return Maximal value that can be filtered
         [[nodiscard]] static auto constexpr getMaxInputValue()
         {
             return std::numeric_limits<double>::max();
         }
 
       private:
-        double m_previous_value{0};   // input value one iteration earlier
+        double m_previous_value{0};   //!< input value one iteration earlier
     };
 
     template<>
@@ -55,7 +58,7 @@ namespace vslib
         }
 
         //! Filters the provided input by calculating the moving average of the buffer of previously
-        //! provided inputs
+        //! provided inputs.
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
@@ -69,16 +72,16 @@ namespace vslib
             return result / 3.0;
         }
 
-        //! Returns the maximum value that can be filtered by this filter
+        //! Returns the maximum value that can be filtered.
         //!
-        //! @return Maximal value that can be filter by this filter
+        //! @return Maximal value that can be filtered.
         [[nodiscard]] static auto constexpr getMaxInputValue()
         {
             return std::numeric_limits<double>::max();
         }
 
       private:
-        double m_previous_value{0};   // input value one iteration earlier
-        double m_earlier_value{0};    // input value two iterations earlier
+        double m_previous_value{0};   //!< input value one iteration earlier
+        double m_earlier_value{0};    //!< input value two iterations earlier
     };
 }   // namespace vslib

@@ -42,19 +42,19 @@ namespace vslib
         {
         }
 
-        //! Computes one actuation calculation iteration of the controller
+        //! Computes one actuation calculation iteration of the controller.
         //!
-        //! @param process_value Value of the controlled process
+        //! @param measurement Value of the controlled process
         //! @param reference Value of the set-point reference
         //! @return Actuation value of this iteration
-        [[nodiscard]] double control(double process_value, double reference)
+        [[nodiscard]] double control(double measurement, double reference)
         {
-            m_error    = reference - process_value;
+            m_error    = reference - measurement;
             m_integral += m_error;
             m_integral = m_anti_windup_protection(m_integral);
 
             double const feed_forward = kff * reference;
-            double const proportional = kp * (reference * b - process_value);
+            double const proportional = kp * (reference * b - measurement);
             double const integral     = ki * m_integral;
             // assuming time difference denominator is included in kd:
             m_derivative              = -0.2 * m_derivative + kd * (m_error + 0.8 * m_previous_error);

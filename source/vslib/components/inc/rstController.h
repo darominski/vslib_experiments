@@ -16,11 +16,12 @@ namespace vslib
     class RSTController
     {
       public:
+        //! Default constructor for RSTController class.
         RSTController()
         {
         }
 
-        //! Updates histories of measurements and references and moves the head of the history buffer
+        //! Updates histories of measurements and references and moves the head of the history buffer.
         //!
         //! @param measurement Current value of the process value
         //! @param reference Current value of the set-point reference
@@ -37,7 +38,7 @@ namespace vslib
             }
         }
 
-        //! Calculates one iteration of the controller algorithm
+        //! Calculates one iteration of the controller algorithm.
         //!
         //! @param measurement Current process value (measurement)
         //! @param reference Reference value for the controller
@@ -91,7 +92,7 @@ namespace vslib
             return actuation;
         }
 
-        //! Updates the most recent reference in the history, used in cases actuation goes over the limit
+        //! Updates the most recent reference in the history, used in cases actuation goes over the limit.
         //!
         //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
         void updateReference(double updated_actuation)
@@ -132,7 +133,7 @@ namespace vslib
             m_history_ready = false;
         }
 
-        //! Performs the Jury's stability test on the provided array of coefficients
+        //! Performs the Jury's stability test on the provided array of coefficients.
         //!
         //! @param coefficients Coefficients to be tested
         //! @return Optionally returns a Warning with relevant information if test failed, nothing otherwise
@@ -209,7 +210,7 @@ namespace vslib
         // ************************************************************
         // Getters
 
-        //! Returns flag whether the reference and measurement histories are filled and RST is ready to regulate
+        //! Returns flag whether the reference and measurement histories are filled and RST is ready to regulate.
         //!
         //! @return True if reference and measurement histories are filled, false otherwise
         [[nodiscard]] bool isReady() const noexcept
@@ -217,7 +218,7 @@ namespace vslib
             return m_history_ready;
         }
 
-        //! Returns the actuation history buffer
+        //! Returns the actuation history buffer.
         //!
         //! @return Reference to the history buffer holding previous actuations
         [[nodiscard]] const auto& getActuations() noexcept
@@ -225,7 +226,7 @@ namespace vslib
             return m_actuations;
         }
 
-        //! Returns the reference history buffer
+        //! Returns the reference history buffer.
         //!
         //! @return Reference to the history buffer holding previous references
         [[nodiscard]] const auto& getReferences() noexcept
@@ -233,7 +234,7 @@ namespace vslib
             return m_references;
         }
 
-        //! Returns the measurement history buffer
+        //! Returns the measurement history buffer.
         //!
         //! @return Reference to the history buffer holding previous measurements
         [[nodiscard]] const auto& getMeasurements() noexcept
@@ -241,7 +242,7 @@ namespace vslib
             return m_measurements;
         }
 
-        //! Gets the R polynomial
+        //! Gets the R polynomial.
         //!
         //! @return Array with R polynomial coefficients
         [[nodiscard]] const auto& getR() const
@@ -249,7 +250,7 @@ namespace vslib
             return m_r;
         }
 
-        //! Gets the S polynomial
+        //! Gets the S polynomial.
         //!
         //! @return Array with S polynomial coefficients
         [[nodiscard]] const auto& getS() const
@@ -257,7 +258,7 @@ namespace vslib
             return m_s;
         }
 
-        //! Gets the T polynomial
+        //! Gets the T polynomial.
         //!
         //! @return Array with T polynomial coefficients
         [[nodiscard]] const auto& getT() const
@@ -268,7 +269,7 @@ namespace vslib
         // ************************************************************
         // Setters
 
-        //! Sets the R polynomial
+        //! Sets the R polynomial.
         //!
         //! @param r Array with R polynomial values to be set
         void setR(const std::array<double, ControllerLength>& r)
@@ -276,7 +277,7 @@ namespace vslib
             m_r = r;
         }
 
-        //! Sets the S polynomial
+        //! Sets the S polynomial.
         //!
         //! @param s Array with S polynomial values to be set
         void setS(const std::array<double, ControllerLength>& s)
@@ -284,7 +285,7 @@ namespace vslib
             m_s = s;
         }
 
-        //! Sets the T polynomial
+        //! Sets the T polynomial.
         //!
         //! @param t Array with T polynomial values to be set
         void setT(const std::array<double, ControllerLength>& t)
@@ -293,26 +294,24 @@ namespace vslib
         }
 
       private:
-        int64_t m_head{0};   // Index to latest entry in the history
+        int64_t m_head{0};   //!< Index to oldest entry in the history
 
-        std::array<double, ControllerLength> m_r{0};
-        std::array<double, ControllerLength> m_s{0};
-        std::array<double, ControllerLength> m_t{0};
+        std::array<double, ControllerLength> m_r{0};   //!< R-polynomial coefficients
+        std::array<double, ControllerLength> m_s{0};   //!< S-polynomial coefficients
+        std::array<double, ControllerLength> m_t{0};   //!< T-polynomial coefficients
 
-        std::array<double, ControllerLength> m_measurements{0};   // RST measurement history
-        std::array<double, ControllerLength> m_references{0};     // RST reference history
-        std::array<double, ControllerLength> m_actuations{0};     // RST actuation history.
+        std::array<double, ControllerLength> m_measurements{0};   //!< RST measurement history
+        std::array<double, ControllerLength> m_references{0};     //!< RST reference history
+        std::array<double, ControllerLength> m_actuations{0};     //!< RST actuation history.
 
-        bool m_history_ready{false};   // flag to mark RST ref and meas histories are filled
+        bool m_history_ready{false};   //!< flag to mark RST ref and meas histories are filled
 
         // helper variables used in Jury's test
         std::array<double, ControllerLength> m_b{0};   // variable used in Jury's test, declaring them here avoids
                                                        // allocation whenever jurysStabilityTest is called
-        std::array<double, ControllerLength> m_a{0};   // variable used in Jury's test, declaring them here avoids
-                                                       // allocation whenever jurysStabilityTest is called
     };
 
-    //! Control method returning the next actuation
+    //! Control method returning the next actuation.
     //!
     //! @param measurement Current measurement value
     //! @param reference Current reference value
@@ -338,7 +337,7 @@ namespace vslib
         return m_actuations[0];
     }
 
-    //! Updates the most recent reference in the history, used in cases actuation goes over the limit
+    //! Updates the most recent reference in the history, used in cases actuation goes over the limit.
     //!
     //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
     template<>

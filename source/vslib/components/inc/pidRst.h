@@ -42,7 +42,7 @@ namespace vslib
         {
         }
 
-        //! Updates histories of measurements and references and moves the head of the history buffer
+        //! Updates histories of measurements and references and moves the head of the history buffer.
         //!
         //! @param measurement Current value of the process value
         //! @param reference Current value of the set-point reference
@@ -51,7 +51,7 @@ namespace vslib
             rst.updateInputHistories(measurement, reference);
         }
 
-        //! Computes one iteration of the controller
+        //! Computes one iteration of the controller.
         //!
         //! @param measurement Value of the controlled process
         //! @return Result of this iteration
@@ -71,7 +71,7 @@ namespace vslib
             return clipped_actuation;
         }
 
-        //! Updates the most recent reference in the history, used in cases actuation goes over the limit
+        //! Updates the most recent reference in the history, used in cases actuation goes over the limit.
         //!
         //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
         void updateReference(double updated_actuation)
@@ -88,7 +88,7 @@ namespace vslib
         // ************************************************************
         // Getters
 
-        //! Returns flag whether the reference and measurement histories are filled and RST is ready to regulate
+        //! Returns flag whether the reference and measurement histories are filled and RST is ready to regulate.
         //!
         //! @return True if reference and measurement histories are filled, false otherwise
         [[nodiscard]] bool isReady() const noexcept
@@ -96,7 +96,7 @@ namespace vslib
             return rst.isReady();
         }
 
-        //! Returns the r polynomial coefficients
+        //! Returns the r polynomial coefficients.
         //!
         //! @return r polynomial coefficients
         [[nodiscard]] const auto& getR() const
@@ -104,7 +104,7 @@ namespace vslib
             return rst.getR();
         }
 
-        //! Returns the s polynomial coefficients
+        //! Returns the s polynomial coefficients.
         //!
         //! @return s polynomial coefficients
         [[nodiscard]] const auto& getS() const
@@ -112,7 +112,7 @@ namespace vslib
             return rst.getS();
         }
 
-        //! Returns the t polynomial coefficients
+        //! Returns the t polynomial coefficients.
         //!
         //! @return t polynomial coefficients
         [[nodiscard]] const auto& getT() const
@@ -136,11 +136,11 @@ namespace vslib
         // ************************************************************
         // Limits of the controller's actuation
 
-        LimitRange<double> actuation_limits;
+        LimitRange<double> actuation_limits;   //!< Range limiting of the actuation output
 
         // ************************************************************
 
-        //! Update parameters method, called after parameters of this component are modified
+        //! Update parameters method, called after any Parameter of this Component is modified.
         //!
         //! @return Optionally returns a Warning with pertinent information if verification was unsuccessful, nothing
         //! otherwise
@@ -233,10 +233,10 @@ namespace vslib
         }
 
       private:
-        std::array<double, buffer_length> m_r;
-        std::array<double, buffer_length> m_s;
-        std::array<double, buffer_length> m_t;
+        std::array<double, buffer_length> m_r;   //!< Array holding a local copy of R coefficients
+        std::array<double, buffer_length> m_s;   //!< Array holding a local copy of S coefficients
+        std::array<double, buffer_length> m_t;   //!< Array holding a local copy of T coefficients
 
-        RSTController<buffer_length> rst;
+        RSTController<buffer_length> rst;   //!< RST controller responsible for the control logic
     };
 }   // namespace vslib

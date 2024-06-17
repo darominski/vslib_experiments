@@ -24,6 +24,10 @@ namespace vslib
     class ParameterSerializer
     {
       public:
+        //! Serializes the provided Parameter.
+        //!
+        //! @param parameter Parameter to be serialized
+        //! @return JSON with serialized Parameter
         [[nodiscard]] StaticJson serialize(const IParameter& parameter) const noexcept
         {
             // all parameters have a name and a type that can be fetched the same way
@@ -34,9 +38,10 @@ namespace vslib
             return serialized_parameter;
         }
 
+        // ************************************************************
         // Methods related to type-dependent serialization
 
-        //! Serializes enumerations by providing number of objects of the type ('length') and enumeration values
+        //! Serializes enumerations by providing number of objects of the type ('length') and enumeration values.
         //!
         //! @return JSON object with information about the stored enumeration
         template<typename T>
@@ -58,7 +63,8 @@ namespace vslib
             return serialized_parameter;
         }
 
-        //! Serializes std::array type by exposing the length of the array
+        //! Serializes std::array type by exposing the length of the array, individual limits in case of a numeric
+        //! type or available fields in case of an enumeration.
         //!
         //! @return JSON object with information about the stored std::array
         template<typename T>
@@ -111,7 +117,7 @@ namespace vslib
             return serialized_parameter;
         }
 
-        //! Serializes std::string type by exposing the length of the string
+        //! Serializes std::string type by exposing its length.
         //!
         //! @return JSON object with information about the stored std::array
         template<typename T>
@@ -131,7 +137,7 @@ namespace vslib
             return serialized_parameter;
         }
 
-        //! Serializes numeric types: integers and floating point numbers
+        //! Serializes numeric types: integers and floating point numbers.
         //!
         //! @return JSON object with informaton about the stored numerical values
         template<typename T>
@@ -158,7 +164,7 @@ namespace vslib
             return serialized_parameter;
         }
 
-        //! Default overload for catching unsupported types. Blocks compilation for those types
+        //! Default overload for catching unsupported types. Blocks compilation for those types.
         //!
         //! @return Empty JSON for unsupported type
         template<typename T>

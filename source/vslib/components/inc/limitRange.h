@@ -16,6 +16,10 @@ namespace vslib
     class LimitRange : public Component
     {
       public:
+        //! Constructor of LimitRange Component, initializes min, max, and dead_zone Parameters.
+        //!
+        //! @param name Name of this Limit Component
+        //! @param parent Parent of this Limit Component
         LimitRange(std::string_view name, Component* parent)
             : Component("LimitRange", name, parent),
               min(*this, "lower_threshold"),
@@ -24,11 +28,11 @@ namespace vslib
         {
         }
 
-        //! Checks minimum and maximum thresholds as well as dead_zone and returns the processed value
+        //! Checks minimum and maximum thresholds as well as the dead zone and returns the processed value.
         //!
         //! @param input Numerical input to be checked
-        //! @return Either original input if no issues were found or nearest edge of allowed zone, 0.0 if NaN was
-        //! provided
+        //! @return Either original input if no issues were found or nearest edge of allowed zone, minimum representable
+        //! value if NaN was provided
         [[nodiscard]] T limit(T input) noexcept
         {
             if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
@@ -65,11 +69,11 @@ namespace vslib
             return input;
         }
 
-        Parameter<T>                min;
-        Parameter<T>                max;
-        Parameter<std::array<T, 2>> dead_zone;
+        Parameter<T>                min;         //!< Minimum allowed value
+        Parameter<T>                max;         //!< Maximum allowed value
+        Parameter<std::array<T, 2>> dead_zone;   //!< Two edges (min, max) of the dead zone
 
-        //! Verifies parameters after any Parameter has been modified
+        //! Verifies parameters after any Parameter has been modified.
         //!
         //! @return Optionally returns a warning if any issues have been found
         std::optional<fgc4::utils::Warning> verifyParameters() override
@@ -90,6 +94,6 @@ namespace vslib
         }
 
       private:
-        bool m_dead_zone_defined{false};
+        bool m_dead_zone_defined{false};   //!< Flag whether the optional dead zone has been defined
     };
 }   // namespace vslib

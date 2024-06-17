@@ -15,13 +15,17 @@ namespace vslib
     class InterruptRegistry : public Component
     {
       public:
+        //! Constructor for the InterruptRegistry Component.
+        //!
+        //! @param name Name of this Component
+        //! @param parent Parent of this Component
         InterruptRegistry(std::string_view name, Component* parent) noexcept
             : Component("InterruptRegistry", name, parent)
         {
         }
 
         //! Creates an interrupt with provided parameters and registers it in the internal container under the given
-        //! name id
+        //! name id.
         //!
         //! @param interrupt_name Name identifier for the peripheral interrupt
         //! @param handler_function Function to be called when this interrupt triggers
@@ -32,21 +36,21 @@ namespace vslib
             InterruptPriority priority
         ) noexcept;
 
-        //! Starts the chosen interrupt
+        //! Starts the chosen interrupt.
         //!
         //! @param interrupt_name Name identifier for the peripheral interrupt
         void startInterrupt(std::string_view interrupt_name) noexcept;
 
-        //! Stops the chosen interrupt
+        //! Stops the chosen interrupt.
         //!
         //! @param interrupt_name Name identifier for the peripheral interrupt
         void stopInterrupt(std::string_view interrupt_name) noexcept;
 
       private:
-        // holds all Peripheral interrupts
+        //!< Container with all registered Peripheral interrupts
         std::map<std::string_view, std::reference_wrapper<PeripheralInterrupt>> m_interrupts;
 
-        //! Returns a reference to the chosen interrupt
+        //! Returns a reference to the chosen interrupt.
         //!
         //! @param interrupt_name Name identifier for the peripheral interrupt
         PeripheralInterrupt& getInterrupt(std::string_view interrupt_name) noexcept;

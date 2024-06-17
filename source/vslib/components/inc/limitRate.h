@@ -16,10 +16,10 @@ namespace vslib
     class LimitRate : public Component
     {
       public:
-        //! Constructor for the LimitRate component
+        //! Constructor for the LimitRate component, initializes change_rate Parameter.
         //!
-        //! @param name Name of the LimitRange component
-        //! @param parent Optional parent of the LimitRange component
+        //! @param name Name of this Limit Component
+        //! @param parent Parent of this Limit Component
         LimitRate(std::string_view name, Component* parent)
             : Component("LimitRate", name, parent),
               change_rate(*this, "change_rate")
@@ -27,7 +27,7 @@ namespace vslib
             static_assert(!std::is_unsigned_v<T>, "Unsigned integer is not a safe type to use for a rate of change.");
         }
 
-        //! Checks the rate of change of the input
+        //! Checks the input against the maximal rate of change.
         //!
         //! @param input Numerical input to be checked
         //! @param time_difference Time difference between function calls
@@ -77,18 +77,18 @@ namespace vslib
             return input;
         }
 
-        //! Resets the component to the initial state of the previous_value
+        //! Resets the component to the initial state of the previous_value.
         void reset() noexcept
         {
             m_previous_value     = T{};
             m_previous_value_set = false;
         }
 
-        Parameter<T> change_rate;
+        Parameter<T> change_rate;   //!< Maximal allowed rate of change
 
       private:
-        T m_previous_value{T{}};
+        T m_previous_value{T{}};   //!< Holds previous input value
 
-        bool m_previous_value_set{false};
+        bool m_previous_value_set{false};   //!< Flag informing whether the previous value has been set
     };
 }   // namespace vslib

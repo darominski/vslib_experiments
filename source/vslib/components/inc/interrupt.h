@@ -19,8 +19,11 @@ namespace vslib
     class Interrupt : public Component
     {
       public:
-        //! Constructor for the Interrupt object
+        //! Constructor for the Interrupt Component.
         //!
+        //! @param component_type Type of this Interrupt Component
+        //! @param name Name of this Interrupt Component
+        //! @param parent Parent of this Interrupt Component
         //! @param handler_function Function to be executed when an interrupt is triggered
         Interrupt(
             std::string_view component_type, std::string_view name, Component* parent,
@@ -57,19 +60,25 @@ namespace vslib
 
 #ifdef PERFORMANCE_TESTS
 
-        //! Returns the average of interrupt time measurements
+        //! Returns the average of interrupt time measurements.
         double average() const
         {
             return utils::calculateAverage(m_measurements);
         }
 
-        //! Returns the standard deviation of interrupt time measurements
+        //! Returns the standard deviation of interrupt time measurements.
+        //!
+        //! @param mean Average of interrupt time measurements
         double standardDeviation(const double mean) const
         {
             return utils::calculateStandardDeviation(m_measurements, mean);
         }
 
-        //! Returns the histogram with interrupt time measurements
+        //! Returns the histogram with interrupt time measurements.
+        //!
+        //! @param min Minimum range for the histogram
+        //! @param max Maximum range for the histogram
+        //! @return Histogrammed data
         template<size_t nBins = 32>   // std::ceil(sqrt(1000)) = 32
         utils::Histogram<nBins> histogramMeasurements(double min, double max) const
         {
@@ -83,13 +92,13 @@ namespace vslib
 
 #endif
       protected:
-        std::function<void(void)> m_interrupt_handler;
+        std::function<void(void)> m_interrupt_handler;   //!< Function to be called during the interrupt
 
 #ifdef PERFORMANCE_TESTS
-        std::array<uint64_t, number_measurements> m_measurements{0};
-        int32_t                                   m_measurement_counter;
+        std::array<uint64_t, number_measurements> m_measurements{0};   //!< Container holding interrupt execution time
+        int32_t                                   m_measurement_counter;   //!< Counter of interrupt calls
 
-        //! Defines the preconditions necessary to estimate the execution time of the interrupt handler
+        //! Defines the preconditions necessary to estimate the execution time of the interrupt handler.
         //!
         //! @return Clock value at the time of the call
         uint64_t preConditions()
@@ -97,7 +106,7 @@ namespace vslib
             return fgc4::utils::read_CNTPCT();
         }
 
-        //! Defines the postconditions necessary to estimate the execution time of the interrupt handler
+        //! Defines the postconditions necessary to estimate the execution time of the interrupt handler.
         //!
         //! @param starting_point Clock value at the start of the interrupt
         //! @return Difference between the starting and current clock values

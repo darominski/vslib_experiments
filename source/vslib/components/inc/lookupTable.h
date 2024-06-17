@@ -18,10 +18,10 @@ namespace vslib
     class LookupTable : public Component
     {
       public:
-        //! Defines constructor for LookupTable component
+        //! Defines constructor for LookupTable Component.
         //!
-        //! @param name Name of the LookupTable component object
-        //! @param parent Pointer to the parent of this table
+        //! @param name Name of this Component
+        //! @param parent Parent of this Component
         //! @param values Vector with lookup table index-value pairs
         //! @param equal_binning Flag signalling whether the lookup table indexing has equal spaced binning
         LookupTable(
@@ -41,9 +41,9 @@ namespace vslib
             m_equal_binning = equal_binning;
         }
 
-        //! For provided x-axis input provides an interpolated y-axis value from the stored values
+        //! Provides an interpolated y-axis value from the stored values closest to the provided x-axis input.
         //!
-        //! @param input_x X-axis input value to interpolate
+        //! @param input_x X-axis input value
         //! @param random_access Switch informing if the input_x is coming linearly or randomly, allows for binary
         //! search optimisation in the latter case
         //! @return Y-axis value result of the interpolation
@@ -63,16 +63,16 @@ namespace vslib
             return interpolate_data(input_x, random_access);
         }
 
-        //! Provides random-access operator overload to the index-th element of the stored lookup table
+        //! Provides random-access operator overload to the index-th element of the stored lookup table's y-axis value.
         //!
         //! @param index Index of the element to be returned
-        //! @return Y-value of the function at the index
+        //! @return Y-axis value of the function at the index
         [[nodiscard]] const StoredType& operator[](size_t index) const
         {
             return m_values[index].second;
         }
 
-        //! Provides a const reference to the data table
+        //! Provides a const reference to the data table.
         //!
         //! @return Data table of index-value pairs
         [[nodiscard]] const auto& getData() const
@@ -80,7 +80,7 @@ namespace vslib
             return m_values;
         }
 
-        //! Resets the Component to its initial state
+        //! Resets the Component to its initial state.
         void reset() noexcept
         {
             m_previous_section_x[0]  = m_lower_edge_x;
@@ -90,24 +90,25 @@ namespace vslib
         }
 
       protected:
-        std::array<IndexType, 2> m_previous_section_x;   //! Edges of the previous section
-        StoredType               m_previous_section_y;   //! Function's value at the upper edge of the previous section
+        std::array<IndexType, 2> m_previous_section_x;   //!< Edges of the previous section
+        StoredType               m_previous_section_y;   //!< Function's value at the upper edge of the previous section
 
-        size_t     m_previous_section_index{0};
+        size_t m_previous_section_index{0};   //!< Index of the last found section
+        //!< Interpolation helper factor to avoid re-calculation if the same sector is hit
         StoredType m_interpolation_factor;
 
-        IndexType m_lower_edge_x;
-        IndexType m_upper_edge_x;
+        IndexType m_lower_edge_x;   //!< Minimum x-axis value of the stored table
+        IndexType m_upper_edge_x;   //!< Maximum x-axis value of the stored table
 
-        IndexType m_bin_size{0};
+        IndexType m_bin_size{0};   //!< Bin size in equal-binning case
 
-        std::vector<std::pair<IndexType, StoredType>> m_values;
+        std::vector<std::pair<IndexType, StoredType>> m_values;   //!< Stored table of x-y value pairs
 
-        bool m_equal_binning{false};
+        bool m_equal_binning{false};   //!< Flag informing whether the stored table has equally-binned x-axis
 
-        //! Helper method performing actual interpolation
+        //! Helper method performing the interpolation.
         //!
-        //! @param input_x X-axis value to interpolate
+        //! @param input_x X-axis input value
         //! @param random_access Flag to inform whether the lookup table is accessed in random order
         //! @return Y-value corresponding to lookup table close to the provided input_x
         [[nodiscard]] StoredType interpolate_data(IndexType input_x, bool random_access)

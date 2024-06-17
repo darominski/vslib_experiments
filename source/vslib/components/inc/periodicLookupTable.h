@@ -19,7 +19,7 @@ namespace vslib
     class PeriodicLookupTable : public LookupTable<IndexType, StoredType>
     {
       public:
-        //! Defines constructor for PeriodicLookupTable component
+        //! Constructor for PeriodicLookupTable Component.
         //!
         //! @param name Name of the PeriodicLookupTable component object
         //! @param parent Pointer to the parent of this table
@@ -34,9 +34,9 @@ namespace vslib
             m_span_x = abs(this->m_upper_edge_x - this->m_lower_edge_x);
         }
 
-        //! For provided x-axis input provides an interpolated y-axis value from the stored values
+        //! Provides an interpolated y-axis value from the stored values closest to the provided x-axis input.
         //!
-        //! @param input_x X-axis input value to interpolate
+        //! @param input_x X-axis input value
         //! @param random_access Switch informing if the input_x is coming linearly or randomly, allows for binary
         //! search optimisation in the latter case
         //! @return Y-axis value result of the interpolation
@@ -57,7 +57,7 @@ namespace vslib
         }
 
       private:
-        IndexType m_span_x;
+        IndexType m_span_x;   //!< Range of x values covered by the held data table
     };
 
 }   // namespace vslib

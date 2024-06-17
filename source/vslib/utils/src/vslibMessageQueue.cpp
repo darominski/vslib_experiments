@@ -11,10 +11,6 @@
 
 namespace vslib::utils
 {
-    //! Helper function to serialize JSON object and write to the message queue
-    //!
-    //! @param json_object JSON object to be copied to the shared memory
-    //! @param message_queue Reference to the shared memory object
     void writeJsonToMessageQueue(
         const fgc4::utils::StaticJson& json_object, fgc4::utils::MessageQueueWriter<void>& message_queue
     )
@@ -33,10 +29,6 @@ namespace vslib::utils
         }
     }
 
-    //! Helper function to read JSON object from the message and deserialize it
-    //!
-    //! @param message Reference to the shared memory object
-    //! @return Static JSON object parsed from shared memory
     fgc4::utils::StaticJson readJsonFromMessageQueue(std::span<uint8_t>& message)
     {
         auto json_object = fgc4::utils::StaticJsonFactory::getJsonObject();
@@ -52,10 +44,6 @@ namespace vslib::utils
         return json_object;
     }
 
-    //! Helper function to write string object from the message and deserialize it
-    //!
-    //! @param message Reference to the shared memory object
-    //! @return Static JSON object parsed from shared memory
     void writeStringToMessageQueue(const std::string& message, fgc4::utils::MessageQueueWriter<void>& message_queue)
     {
         if (message.size() < fgc4::utils::constants::string_memory_pool_size)

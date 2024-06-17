@@ -25,11 +25,11 @@ namespace vslib
         using StaticJson         = fgc4::utils::StaticJson;
 
       public:
-        //! Creates the Component object with the provided type, name, and inside the hierarchy specified by parent
+        //! Creates the Component object with the provided type, name, and inside the hierarchy specified by parent.
         //!
         //! @param component_type Type of the Component
         //! @param name Name of the Component, needs to be unique in the type
-        //! @param parent Possible parent of this Component, if Component is independent, the parent should be nullptr
+        //! @param parent Possible parent of this Component, for the root Component should be nullptr
         Component(std::string_view component_type, std::string_view name, Component* parent) noexcept
             : m_component_type(component_type),
               m_name(name),
@@ -52,23 +52,23 @@ namespace vslib
             m_children.emplace_back(child);
         }
 
-        //! Registers the parameter belonging to this component in the parameter registry, simultaneously adding it to
-        //! the parameters vector.
+        //! Registers the Parameter to this Component, adding it to the parameters vector and the registry.
         //!
-        //! @param parameter_name Name of the parameter to be added to the parameter registry
-        //! @param parameter Reference to the parameter being added to the parameter registry
+        //! @param parameter Reference to the added Parameter
         void registerParameter(std::string_view parameter_name, IParameter& parameter)
         {
+
             ParameterRegistry::instance().addToRegistry(
-                this->getFullName() + "." + std::string(parameter_name), parameter
+                this->getFullName() + "." + std::string(parameter.getName()), parameter
             );
-            m_parameters.emplace_back(parameter_name, parameter);
+            m_parameters.emplace_back(parameter.getName(), parameter);
         }
 
-        //! Serializes this component to JSON, including all children components and parameters
-        //! of the entire hierarchy.
+
+        //! Serializes this Component to JSON, including all children Components and Parameters
+        //! across the entire hierarchy.
         //!
-        //! @return Returns a fully-serialized component as a JSON object
+        //! @return Returns a fully-serialized Component as a JSON object
         [[nodiscard]] StaticJson serialize() const noexcept
         {
             StaticJson          serialized_component  = nlohmann::json::array();
@@ -96,7 +96,7 @@ namespace vslib
         // ************************************************************
         // Getters
 
-        //! Provides the name of this component.
+        //! Provides the name of this Component.
         //!
         //! @return String_view of the component name
         [[nodiscard]] std::string_view getName() const noexcept
@@ -104,7 +104,7 @@ namespace vslib
             return m_name;
         }
 
-        //! Provides the full name of this component, including component
+        //! Provides the full name of this Component, including component
         //! type and parent name (if existing).
         //!
         //! @return String with the full component name
@@ -116,7 +116,7 @@ namespace vslib
 
         //! Provides the map with all names and references to all parameters registered to this Component.
         //!
-        //! @return Map with names and references to all parameters of this component
+        //! @return Map with names and references to all parameters of this Component
         [[nodiscard]] auto const& getParameters() const noexcept
         {
             return m_parameters;
@@ -130,7 +130,7 @@ namespace vslib
             return m_children;
         }
 
-        //! Provides information whether this Component has a parent
+        //! Provides information whether this Component has a parent.
         //!
         //! @return True if a parent is defined, false otherwise
         [[nodiscard]] bool hasParent() const noexcept
@@ -157,7 +157,7 @@ namespace vslib
         // ************************************************************
         // Miscellaneous methods, interaction with buffers and verifying parameters
 
-        //! Flips the buffer state of all Parameters registered with this Component
+        //! Flips the buffer state of all Parameters registered with this Component.
         void flipBufferState() noexcept
         {
             for (auto& parameter : m_parameters)
@@ -166,7 +166,7 @@ namespace vslib
             }
         }
 
-        //! Synchronises buffers for all Parameters registered with this Component
+        //! Synchronises buffers for all Parameters registered with this Component.
         void synchroniseParameterBuffers() noexcept
         {
             for (auto& parameter : m_parameters)
@@ -183,16 +183,12 @@ namespace vslib
         }
 
       protected:
-        std::string const m_component_type;
-        std::string const m_name;
-        Component*        m_parent{nullptr};
+        std::string const m_component_type;    //!< Type of this Component
+        std::string const m_name;              //!< Name of this Component
+        Component*        m_parent{nullptr};   //!< Parent of this Component, nullptr if this Component is the root
 
-        ParameterList m_parameters;
-        ChildrenList  m_children;
+        ParameterList m_parameters;   //!< Container with all Parameters registered to this Component
+        ChildrenList  m_children;     //!< Container with all children Components registered to this Component
     };
-
-    // ************************************************************
-    // Constant for denoting that the component constructed is independent (has no parents)
-    constexpr Component* independent_component = nullptr;
 
 }   // namespace vslib

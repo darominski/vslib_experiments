@@ -19,10 +19,13 @@ namespace vslib
         constexpr static int64_t buffer_length = FilterOrder + 1;
 
       public:
-        //! 8 is the number of bits per byte, -1 is for the sign
+        //!< 8 is the number of bits per byte, -1 is for the sign
         constexpr uint64_t static fractional_bits = sizeof(int64_t) * 8 - 1 - std::ceil(log2(maximalFilteredValue));
 
-        //! Constructor of the box filter component
+        //! Constructor of the Box filter Component.
+        //!
+        //! @param name Name of this Component
+        //! @param parent Pointer to the parent of this Component
         BoxFilter(std::string_view name, Component* parent)
             : Filter("BoxFilter", name, parent)
         {
@@ -30,7 +33,7 @@ namespace vslib
         }
 
         //! Filters the provided input by calculating the moving average of the buffer of previously
-        //! provided inputs
+        //! provided inputs.
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
@@ -54,7 +57,7 @@ namespace vslib
         // ************************************************************
         // Getters
 
-        //! Returns the maximum value that can be filtered by this filter
+        //! Returns the maximum value that can be filtered by this filter.
         //!
         //! @return Maximal value that can be filter by this filter
         [[nodiscard]] static auto constexpr getMaxInputValue()
@@ -63,8 +66,8 @@ namespace vslib
         }
 
       private:
-        std::array<FixedPoint<fractional_bits>, buffer_length> m_buffer{0};
-        uint64_t                                               m_head{0};
-        FixedPoint<fractional_bits>                            m_cumulative{0};
+        std::array<FixedPoint<fractional_bits>, buffer_length> m_buffer{0};   //!< Inputs history buffer
+        uint64_t                                               m_head{0};     //!< Points to where the oldest entry is
+        FixedPoint<fractional_bits>                            m_cumulative{0};   //!< Cumulative of the inputs
     };
 }   // namespace vslib

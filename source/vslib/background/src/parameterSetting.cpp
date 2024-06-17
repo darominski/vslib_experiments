@@ -17,8 +17,6 @@ using namespace fgc4::utils;
 namespace vslib
 {
 
-    //! Checks if a new command has arrived in shared memory, processes it, and when
-    //! new command has come previously switches buffers and calls to synchronise them
     void ParameterSetting::receiveJsonCommand()
     {
         auto message = m_read_commands_queue.read(m_read_commands_buffer);
@@ -34,9 +32,6 @@ namespace vslib
         }
     }
 
-    //! Processes the received JSON commands, checking whether one or many commands were received.
-    //!
-    //! @param command JSON object containing one or more JSON commands to be executed
     void ParameterSetting::processJsonCommands(const fgc4::utils::StaticJson& commands)
     {
         if (commands.is_object())   // single command
@@ -52,10 +47,6 @@ namespace vslib
         }
     }
 
-    //! Validates the provided json command.
-    //!
-    //! @param command JSON object to be validated as a valid command
-    //! @return True if the command contains all expected fields, false otherwise.
     bool ParameterSetting::validateJsonCommand(const fgc4::utils::StaticJson& command)
     {
         bool valid = true;
@@ -99,11 +90,6 @@ namespace vslib
         return valid;
     }
 
-    //! Executes a single JSON command by setting the received command value to the parameter reference
-    //! stored in ParameterRegistry identified by the command's parameter name.
-    //!
-    //! @param command JSON object containing name of the parameter to be modified, and the new value with its type to
-    //! be inserted
     void ParameterSetting::executeJsonCommand(const fgc4::utils::StaticJson& command)
     {
         if (!validateJsonCommand(command))
@@ -127,7 +113,6 @@ namespace vslib
         {
             // success, otherwise: failure and Warning message already logged by setJsonValue
             utils::writeStringToMessageQueue("Parameter value updated successfully.\n", m_write_command_status);
-            // TODO: do we need to mark children of the modified component?
         }
         else
         {

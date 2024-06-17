@@ -18,6 +18,11 @@ namespace vslib
     class RST : public Component
     {
       public:
+        //! Constructor for the RST controller Component, initialzes r, s, t coefficients Parameters and
+        //! actuation_limits LimitRange Component.
+        //!
+        //! @param name Name of this Controller Component
+        //! @param parent Parent of this Controller Component
         RST(std::string_view name, Component* parent)
             : Component("RST", name, parent),
               actuation_limits("actuation_limits", this),
@@ -27,16 +32,16 @@ namespace vslib
         {
         }
 
-        //! Updates histories of measurements and references and moves the head of the history buffer
+        //! Updates histories of measurements and references and moves the head of the history buffer.
         //!
-        //! @param measurement Current value of the process value
+        //! @param measurement Current value of the process value (measurement)
         //! @param reference Current value of the set-point reference
         void updateInputHistories(double measurement, double reference) noexcept
         {
             rst.updateInputHistories(measurement, reference);
         }
 
-        //! Calculates one iteration of the controller algorithm
+        //! Calculates one iteration of the controller algorithm.
         //!
         //! @param measurement Current process value (measurement)
         //! @param reference Reference value for the controller
@@ -57,7 +62,7 @@ namespace vslib
             return clipped_actuation;
         }
 
-        //! Updates the most recent reference in the history, used in cases actuation goes over the limit
+        //! Updates the most recent reference in the history, used in cases actuation goes over the limit.
         //!
         //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
         void updateReference(double updated_actuation)
@@ -109,14 +114,14 @@ namespace vslib
         // ************************************************************
         // Settable Parameters
 
-        Parameter<std::array<double, ControllerLength>> r;   //<! reference coefficients
-        Parameter<std::array<double, ControllerLength>> s;   //<! disturbance coefficients
-        Parameter<std::array<double, ControllerLength>> t;   //<! control coefficients
+        Parameter<std::array<double, ControllerLength>> r;   //!< reference coefficients
+        Parameter<std::array<double, ControllerLength>> s;   //!< disturbance coefficients
+        Parameter<std::array<double, ControllerLength>> t;   //!< control coefficients
 
         // ************************************************************
         // Limits of the controller's actuation
 
-        LimitRange<double> actuation_limits;
+        LimitRange<double> actuation_limits;   //!< Range limiting of the actuation output
 
         // ************************************************************
         //! Update parameters method, called after paramaters of this component are modified
@@ -163,6 +168,6 @@ namespace vslib
         }
 
       private:
-        RSTController<ControllerLength> rst;
+        RSTController<ControllerLength> rst;   //!< RST controller responsible for the control logic
     };
 }   // namespace vslib

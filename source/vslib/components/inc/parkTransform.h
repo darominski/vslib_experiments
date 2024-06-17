@@ -15,7 +15,7 @@ namespace vslib
     class ParkTransform : public Component
     {
       public:
-        //! Creates the Park transformation Component with the LookupTables of the requested size
+        //! Creates the Park transformation Component with the LookupTables of the requested size.
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
@@ -27,7 +27,7 @@ namespace vslib
         {
         }
 
-        //! Performs Park transform on the provided inputs assuming a-phase to q-axis alignment
+        //! Performs Park transform on the provided inputs assuming a-phase to q-axis alignment.
         //!
         //! @param a a-phase value
         //! @param b b-phase value
@@ -37,7 +37,7 @@ namespace vslib
         [[nodiscard]] std::pair<double, double> transform(double a, double b, double c, double theta) noexcept;
 
       private:
-        SinLookupTable m_sin;
-        CosLookupTable m_cos;
+        SinLookupTable m_sin;   //!< Lookup table holding sine function
+        CosLookupTable m_cos;   //!< Lookup table holding cosine function
     };
 }   // namespace vslib

@@ -12,10 +12,11 @@ namespace vslib
     class TimerInterrupt : public Interrupt
     {
       public:
-        //! Constructor for TimerInterrupt
+        //! Constructor for TimerInterrupt Component.
         //!
+        //! @param name Name of this Interrupt Component
+        //! @param parent Parent of this Interrupt Component
         //! @param handler_function Function to be called when an interrupt triggers
-        //! @param microsecond_delay Delay between interrupts in integer increments of a microsecond
         TimerInterrupt(
             std::string_view name, Component* parent,
             std::function<void(void)> handler_function =
@@ -29,18 +30,19 @@ namespace vslib
         {
         }
 
-        //! Starts periodic interrupt
+        //! Starts periodic interrupt.
         void start() override
         {
             bmboot::startPeriodicInterrupt();
         }
 
-        //! Stops periodic interrupt from triggering
+        //! Stops periodic interrupt from triggering.
         void stop() override
         {
             bmboot::stopPeriodicInterrupt();
         }
 
+        //! Method called whenever any Parameter of this Component is modified.
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
             bmboot::setupPeriodicInterrupt(std::chrono::microseconds(delay.value()), m_interrupt_handler);
@@ -48,6 +50,6 @@ namespace vslib
             return {};
         }
 
-        Parameter<int64_t> delay;
+        Parameter<int64_t> delay;   //!< delay in microseconds
     };
 }   // namespace vslib

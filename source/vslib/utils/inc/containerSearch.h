@@ -11,7 +11,7 @@
 namespace vslib::utils
 {
     //! Performs index-calculation "search" of the provided input_x in the values container when bins are equally
-    //! spaced
+    //! spaced.
     //!
     //! @param input_x Input x-axis value to be searched for
     //! @param x1 X-axis value of the lower section edge
@@ -41,7 +41,7 @@ namespace vslib::utils
         y2 = values[position].second;
     }
 
-    //! Performs linear search of the provided input_x in the m_values container
+    //! Performs linear search of the provided input_x in the m_values container.
     //!
     //! @param input_x Input x-axis value to be searched for
     //! @param start_index Index to start the search from
@@ -72,7 +72,7 @@ namespace vslib::utils
         return std::distance(values.cbegin(), it);
     }
 
-    //! Performs binary search of the provided input_x in the values container
+    //! Performs binary search of the provided input_x in the values container.
     //!
     //! @param input_x Input x-axis value to be searched for
     //! @param start_index Index to start the search from

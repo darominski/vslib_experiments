@@ -12,12 +12,21 @@
 
 namespace vslib::utils
 {
+    //! Calculates an average of the data stored in the provided container.
+    //!
+    //! @param data Input container
+    //! @return Average value stored in the provided container.
     double calculateAverage(auto& data)
         requires fgc4::utils::Iterable<decltype(data)>
     {
         return std::accumulate(data.cbegin(), data.cend(), 0.0) / static_cast<double>(data.size());
     }
 
+    //! Calculates a standard deviation of the data stored in the provided container.
+    //!
+    //! @param data Input container
+    //! @param mean Average value of the data
+    //! @return Standard deviation of the data stored in the container
     double calculateStandardDeviation(auto& data, const double mean)
         requires fgc4::utils::Iterable<decltype(data)>
     {

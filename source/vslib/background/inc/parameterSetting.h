@@ -36,22 +36,41 @@ namespace vslib
             m_validator.set_root_schema(utils::json_command_schema);
         }
 
+        //! Checks if a new command has arrived in shared memory, processes it, and when
+        //! new command has come previously switches buffers and calls to synchronise them
         void receiveJsonCommand();
-        void processJsonCommands(const fgc4::utils::StaticJson&);
-        bool validateJsonCommand(const fgc4::utils::StaticJson&);
-        void executeJsonCommand(const fgc4::utils::StaticJson&);
 
-        //! Calls verifyParameters of all components with initialized Parameters in the registry
-        //! Raised warnings are forwarded to the output status queue
+        //! Processes the received JSON commands, checking whether one or many commands were received.
+        //!
+        //! @param command JSON object containing one or more JSON commands to be executed
+        void processJsonCommands(const fgc4::utils::StaticJson& command);
+
+        //! Validates the provided json command.
+        //!
+        //! @param command JSON object to be validated as a valid command
+        //! @return True if the command contains all expected fields, false otherwise.
+        bool validateJsonCommand(const fgc4::utils::StaticJson& command);
+
+        //! Executes a single JSON command by setting the received command value to the parameter reference
+        //! stored in ParameterRegistry identified by the command's parameter name.
+        //!
+        //! @param command JSON object containing name of the parameter to be modified, and the new value with its type
+        //! to be inserted
+        void executeJsonCommand(const fgc4::utils::StaticJson& command);
+
+        //! Calls verifyParameters of all Components with initialized Parameters attached to the root Component.
+        //! Any raised warnings are forwarded to the output status queue.
         void validateComponents();
 
       private:
-        nlohmann::json_schema::json_validator                              m_validator;
-        fgc4::utils::MessageQueueReader<void>                              m_read_commands_queue;
-        fgc4::utils::MessageQueueWriter<void>                              m_write_command_status;
+        nlohmann::json_schema::json_validator m_validator;              //!< JSON schema for incoming commands
+        fgc4::utils::MessageQueueReader<void> m_read_commands_queue;    //!< Incoming commands queue
+        fgc4::utils::MessageQueueWriter<void> m_write_command_status;   //!< Command execution status queue
+
+        //!< Buffer for the incoming commands
         std::array<uint8_t, fgc4::utils::constants::json_memory_pool_size> m_read_commands_buffer;
 
-        Component& m_root_component;   //! Root Component
+        Component& m_root_component;   //!< Root Component
 
         //! Recursive function to call verifyParameters on the component and its children
         void validateComponent(const ChildrenList&);

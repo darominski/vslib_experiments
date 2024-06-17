@@ -15,6 +15,11 @@ namespace vslib
     class LimitRms : public Component
     {
       public:
+        //! Constructor for the LimitRms Component, initializes rms_limit, and rms_time_constant Parameters.
+        //!
+        //! @param name Name of this Limit Component
+        //! @param parent Parent of this Limit Component
+        //! @param iteration_period Iteration period at which this Limit Component is called
         LimitRms(std::string_view name, Component* parent, double iteration_period = 5e-6)
             : Component("LimitRms", name, parent),
               rms_limit(*this, "rms_limit"),
@@ -45,14 +50,14 @@ namespace vslib
             return true;
         }
 
-        //! Resets the component to the initial state of buffers and buffer pointers
+        //! Resets this Limit Component to the initial state of buffers and buffer pointers.
         void reset() noexcept
         {
             m_cumulative = 0.0;
         }
 
-        Parameter<double> rms_limit;
-        Parameter<double> rms_time_constant;
+        Parameter<double> rms_limit;           //!< Maximal value of root-mean square
+        Parameter<double> rms_time_constant;   //!< Time constant to calculate filter factor
 
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
@@ -62,9 +67,9 @@ namespace vslib
         }
 
       private:
-        double m_iteration_period;
-        double m_cumulative{0};
-        double m_filter_factor;
-        double m_rms_limit2;   // optimisation method to not recalculate limit to the power of 2
+        double m_iteration_period;   //!< Iteration period for this Limit
+        double m_cumulative{0};      //!< Cumulative of the squared inputs
+        double m_filter_factor;      //!< Convenience factor to avoid re-calculation each call to limit
+        double m_rms_limit2;         //!< optimisation method to not recalculate limit to the power of 2
     };
 }   // namespace vslib

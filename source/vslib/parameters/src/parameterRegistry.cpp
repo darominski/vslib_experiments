@@ -12,10 +12,6 @@ using namespace fgc4::utils;
 
 namespace vslib
 {
-    //! Adds a new entry to the parameter registry
-    //!
-    //! @param parameter_name Name of the parameter to be added to the parameter registry
-    //! @param parameter_reference Reference to the parameter being added to the parameter registry
     void ParameterRegistry::addToRegistry(std::string_view parameter_name, IParameter& parameter_reference)
     {
         if (m_parameters.find(std::string(parameter_name)) != m_parameters.end())
