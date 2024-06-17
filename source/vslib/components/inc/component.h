@@ -111,7 +111,7 @@ namespace vslib
         [[nodiscard]] std::string getFullName() const noexcept
         {
             const std::string full_name = m_component_type + "." + m_name;
-            return (m_parent == nullptr) ? full_name : m_parent->getFullName() + "." + full_name;
+            return hasParent() ? m_parent->getFullName() + "." + full_name : full_name;
         }
 
         //! Provides the map with all names and references to all parameters registered to this Component.
