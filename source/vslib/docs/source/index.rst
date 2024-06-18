@@ -13,11 +13,19 @@ Welcome to VSlib's documentation!
 API Documentation
 =================
 
+Doxygen API
+-----------
+
 `API Documentation <../doxygen/html/index.html>`_
 
-.. doxygenfile:: component.h
-   :project: VSlib
+Sphinx API
+----------
 
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   api/*
 
 Examples
 ========
