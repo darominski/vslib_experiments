@@ -25,16 +25,16 @@ namespace vslib::utils
     template<fgc4::utils::Enumeration UserStates>
     class VSMachine
     {
-        using StateMachine = ::utils::Fsm<VSStates, UserStates, VSMachine, false>;
+        using StateMachine = ::utils::Fsm<VSStates, UserStates, false>;
 
-        using TransResVS = ::utils::FsmTransitionResult<std::variant<VSStates, UserStates>>;
+        using TransResVS = ::utils::FsmTransitionResult<VSStates, UserStates>;
 
         // using StateFunc = void (VSMachine::*)();
         using StateFunc = std::function<void(void)>;
 
         //! Convenience alias representing pointer to a member function of the Parent class, for a transition function.
         // using TransitionFunc = ::utils::FsmTransitionResult<VSStates> (VSMachine::*)();
-        using TransitionFunc = ::utils::FsmTransitionResult<UserStates> (*)();
+        using TransitionFunc = ::utils::FsmTransitionResult<VSStates, UserStates> (*)();
 
       public:
         VSMachine()

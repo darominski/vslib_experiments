@@ -7,6 +7,7 @@
 #include <functional>
 #include <map>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace utils
@@ -92,7 +93,7 @@ namespace utils
         using StateFunc = void (*)();
 
         //! Convenience alias representing pointer to a member function of the Parent class, for a transition function.
-        using TransitionFunc = FsmTransitionResult<stState> (*)();
+        using TransitionFunc = FsmTransitionResult<BaseStates, ExtraStates> (*)();
 
         // **********************************************************
 
@@ -124,7 +125,7 @@ namespace utils
         // **********************************************************
 
         //! @return Current state of the FSM.
-        State getState() const
+        BaseStates getState() const
         {
             return m_state;
         }
@@ -137,8 +138,8 @@ namespace utils
         //! Note: this has potential to become an infinite loop, if the FSM design is flawed.
         void update()
         {
-            FsmTransitionResult<State> transition_result;
-            bool                       state_changed = false;
+            FsmTransitionResult<BaseStates, ExtraStates> transition_result;
+            bool                                         state_changed = false;
 
             do
             {
@@ -155,7 +156,7 @@ namespace utils
                 for (const auto& transition : m_states[m_state].transitions)
                 {
                     // Invoke transition
-                    transition_result = std::invoke(transition, m_parent);
+                    transition_result = std::invoke(transition);
 
                     if (not transition_result.isDefault())
                     {
@@ -194,7 +195,7 @@ namespace utils
             auto state_func = m_states[m_state].state_func;
             if (state_func != nullptr)
             {
-                std::invoke(state_func, m_parent);
+                std::invoke(state_func);
             }
         }
 
@@ -220,9 +221,10 @@ namespace utils
 
         // **********************************************************
 
-        State                     m_state;            //!< Current state of the FSM.
-        State                     m_starting_state;   //!< Starting state of the FSM.
-        std::map<State, StateObj> m_states;   //!< Mapping between each state and its state and transition functions.
+        BaseStates m_state;            //!< Current state of the FSM.
+        BaseStates m_starting_state;   //!< Starting state of the FSM.
+        std::map<BaseStates, StateObj>
+            m_states;   //!< Mapping between each state and its state and transition functions.
     };
 }
 

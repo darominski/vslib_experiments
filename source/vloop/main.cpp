@@ -89,7 +89,7 @@ namespace user
         std::cout << "cycling!\n";
     }
 
-    using TransRes = ::utils::FsmTransitionResult<ControllerStates>;
+    using TransRes = ::utils::FsmTransitionResult<VSStates, ControllerStates>;
 
     TransRes toPreCharge()
     {
