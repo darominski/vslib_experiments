@@ -10,16 +10,17 @@ namespace vslib
         constexpr double TWO_PI_OVER_3 = M_PI * TWO_OVER_3;
     }
 
-    [[nodiscard]] std::pair<double, double>
-    ParkTransform::transform(double a, double b, double c, double theta) noexcept
+    [[nodiscard]] std::pair<double, double> ParkTransform::transform(
+        const double a, const double b, const double c, const double theta, const double offset
+    ) noexcept
     {
-        const double cos_theta_minus_two_thirds = m_cos(theta - TWO_PI_OVER_3);
-        const double cos_theta                  = m_cos(theta);
-        const double cos_theta_plus_two_thirds  = m_cos(theta + TWO_PI_OVER_3);
+        const double cos_theta_minus_two_thirds = m_cos(theta - TWO_PI_OVER_3 + offset);
+        const double cos_theta                  = m_cos(theta + offset);
+        const double cos_theta_plus_two_thirds  = m_cos(theta + TWO_PI_OVER_3 + offset);
 
-        const double sin_theta_minus_two_thirds = m_sin(theta - TWO_PI_OVER_3);
-        const double sin_theta                  = m_sin(theta);
-        const double sin_theta_plus_two_thirds  = m_sin(theta + TWO_PI_OVER_3);
+        const double sin_theta_minus_two_thirds = m_sin(theta - TWO_PI_OVER_3 + offset);
+        const double sin_theta                  = m_sin(theta + offset);
+        const double sin_theta_plus_two_thirds  = m_sin(theta + TWO_PI_OVER_3 + offset);
 
         const double d = TWO_OVER_3 * (a * sin_theta + b * sin_theta_minus_two_thirds + c * sin_theta_plus_two_thirds);
         const double q = TWO_OVER_3 * (a * cos_theta + b * cos_theta_minus_two_thirds + c * cos_theta_plus_two_thirds);
