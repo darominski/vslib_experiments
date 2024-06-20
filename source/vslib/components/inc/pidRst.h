@@ -131,7 +131,7 @@ namespace vslib
         Parameter<double> c;     //!< Reference signal derivative gain scaling (from High-Performance Digital Control)
         Parameter<double> N;     //!< Filter order for derivative input
         Parameter<double> ts;    //!< Sampling period
-        Parameter<double> f0;    //!< Control freqency
+        Parameter<double> f0;    //!< Control frequency
 
         // ************************************************************
         // Limits of the controller's actuation
