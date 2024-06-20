@@ -92,8 +92,7 @@ namespace utils
         using StateFunc = void (Parent::*)();
 
         //! Convenience alias representing pointer to a member function of the Parent class, for a transition function.
-        using TransitionFunc  = FsmTransitionResult<State> (Parent::*)();
-        using TransitionFunc2 = FsmTransitionResult<State> (*)();
+        using TransitionFunc = FsmTransitionResult<State> (Parent::*)();
 
         // **********************************************************
 
@@ -118,12 +117,6 @@ namespace utils
         void addState(const State& state, const StateFunc& state_func, const std::vector<TransitionFunc>& transitions)
         {
             m_states.emplace(state, StateObj{state_func, transitions});
-        }
-
-        void
-        addState(const State& state, std::function<void(void)> func, const std::vector<TransitionFunc2>& transitions)
-        {
-            m_states.emplace(state, StateObj{func, transitions});
         }
 
         // **********************************************************

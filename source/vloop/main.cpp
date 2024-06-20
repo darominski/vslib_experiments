@@ -47,34 +47,14 @@ namespace user
     vslib::PIDRST controller("pid", nullptr);
     // vslib::IIRFilter<81> filter("filter");
 
-    // std::vector<std::pair<double, double>> function()
-    // {
-    //     constexpr size_t                       length = 1000;
-    //     std::vector<std::pair<double, double>> func(length);
-    //     for (size_t index = 0; index < length; index++)
-    //     {
-    //         const double x = index * 2.0 * M_PI / static_cast<double>(length);
-    //         func[index]    = std::make_pair(x, sin(x));
-    //     }
-    //     return func;
-    // }
-
-    // PeriodicLookupTable<double> table("table", nullptr, function(), true);
-
     void realTimeTask()
     {
         for (int index = 0; index < 100; index++)
         {
             // volatile double const input = 2.0 * M_PI * (std::rand() / static_cast<double>(RAND_MAX));
-            // volatile double const input = 2.0 * M_PI * (std::rand() / static_cast<double>(RAND_MAX));
 
-            volatile double const input = index;
-            // volatile auto         variable = table.interpolate(input);
-            // volatile auto variable = sin(input);
-            // volatile auto variable      = table[input];
-            // volatile auto variable      = filter.filter(input);
-            volatile auto variable      = controller.control(input, input + 2);
-            // volatile auto variable = limit.limit(input);
+            volatile double const input    = index;
+            volatile auto         variable = controller.control(input, input + 2);
         }
     }
 
@@ -97,14 +77,57 @@ namespace user
         return {ControllerStates::precharge};
     }
 
+    void setParameters(vslib::PIDRST& controller, TimerInterrupt& timer)
+    {
+        const double p  = 52.79;
+        const double i  = 0.0472;
+        const double d  = 0.04406;
+        const double ff = 6.1190;
+        const double b  = 0.03057;
+        const double c  = 0.8983;
+        const double N  = 17.79;
+        const double ts = 1.0e-3;
+        const double f0 = 1e-15;
+
+        controller.actuation_limits.min.setJsonValue(-100);
+        controller.actuation_limits.max.setJsonValue(100);
+        controller.actuation_limits.dead_zone.setJsonValue(std::array<double, 2>{0, 0});
+        controller.actuation_limits.verifyParameters();
+        controller.actuation_limits.flipBufferState();
+
+        controller.kp.setJsonValue(p);
+        controller.kd.setJsonValue(d);
+        controller.ki.setJsonValue(i);
+        controller.kff.setJsonValue(ff);
+        controller.b.setJsonValue(b);
+        controller.c.setJsonValue(c);
+        controller.N.setJsonValue(N);
+        controller.f0.setJsonValue(f0);
+        controller.ts.setJsonValue(ts);
+
+        controller.verifyParameters();
+        controller.flipBufferState();
+
+        const int      interrupt_delay = 100;   // us
+        nlohmann::json value           = {interrupt_delay};
+        timer.delay.setJsonValue(value[0]);
+        timer.flipBufferState();
+        timer.delay.syncWriteBuffer();
+        timer.verifyParameters();
+    }
+
 }   // namespace user
 
 // extern user::Converter converter;
 
 int main()
 {
+    vslib::utils::VSMachine vs_state;   // initial state: initalization
+
+    // VSlib-side initialization:
     bmboot::notifyPayloadStarted();
     puts("Hello world from vloop running on cpu1!");
+    Component root("root", "root", nullptr);
 
     constexpr size_t read_commands_queue_address = app_data_0_1_ADDRESS;
     constexpr size_t write_commands_status_queue_address
@@ -112,18 +135,6 @@ int main()
     constexpr size_t write_parameter_map_queue_address = read_commands_queue_address
                                                          + fgc4::utils::constants::json_memory_pool_size
                                                          + fgc4::utils::constants::string_memory_pool_size;
-
-    Component root("root", "root", nullptr);
-
-    // 1 us  -> 1 kHz
-    // 50 us -> 20 kHz
-    // 20 us -> 50 kHz
-    // 10 us -> 100 kHz
-    // 1 us  -> 1 MHz
-    TimerInterrupt timer("timer", &root, user::realTimeTask);
-
-    // std::cout << magic_enum::enum_name(vs_state.getState()) << std::endl;
-
     ParameterSetting parameter_setting_task(
         (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address, root
     );
@@ -132,52 +143,16 @@ int main()
         (uint8_t*)write_parameter_map_queue_address, fgc4::utils::constants::json_memory_pool_size, root
     );
 
-    // vslib::utils::VSMachine<user::ControllerStates> vs_state;
-    vslib::utils::VSMachine<user::ControllerStates> vs_state;
-    std::cout << std::boolalpha << "Configured? " << vs_state.isConfigured() << std::endl;
-    vs_state.update();
-    std::cout << std::boolalpha << "Configured? " << vs_state.isConfigured() << std::endl;
-    // vs_state.addState(user::ControllerStates::cycling, &user::onCycling, std::vector{&user::toPreCharge});
-
-    const double p  = 52.79;
-    const double i  = 0.0472;
-    const double d  = 0.04406;
-    const double ff = 6.1190;
-    const double b  = 0.03057;
-    const double c  = 0.8983;
-    const double N  = 17.79;
-    const double ts = 1.0e-3;
-    const double f0 = 1e-15;
-
-    user::controller.actuation_limits.min.setJsonValue(-100);
-    user::controller.actuation_limits.max.setJsonValue(100);
-    user::controller.actuation_limits.verifyParameters();
-    user::controller.actuation_limits.flipBufferState();
-
-    user::controller.kp.setJsonValue(p);
-    user::controller.kd.setJsonValue(d);
-    user::controller.ki.setJsonValue(i);
-    user::controller.kff.setJsonValue(ff);
-    user::controller.b.setJsonValue(b);
-    user::controller.c.setJsonValue(c);
-    user::controller.N.setJsonValue(N);
-    user::controller.f0.setJsonValue(f0);
-    user::controller.ts.setJsonValue(ts);
-
-    user::controller.verifyParameters();
-    user::controller.flipBufferState();
-
-    int            interrupt_delay = 100;   // us
-    nlohmann::json value           = {interrupt_delay};
-    timer.delay.setJsonValue(value[0]);
-    timer.flipBufferState();
-    timer.delay.syncWriteBuffer();
-    timer.verifyParameters();
-
-    vs_state.update();
-    std::cout << std::boolalpha << "Configured? " << vs_state.isConfigured() << std::endl;
+    // User-side initialization:
 
     // converter.init();
+
+    // 1 us  -> 1 kHz
+    // 50 us -> 20 kHz
+    // 20 us -> 50 kHz
+    // 10 us -> 100 kHz
+    // 1 us  -> 1 MHz
+    TimerInterrupt timer("timer", &root, user::realTimeTask);
 
     // ************************************************************
     // Create and initialize a couple of components: 3 PIDs and an RST
@@ -199,15 +174,30 @@ int main()
 
     // LookupTable<double> table("table", nullptr, function);
 
-    // No parameter declarations beyond this point!
+    // No Component declarations beyond this point!
     // ************************************************************
 
-    // std::cout << converter.serialize();
+    // transition to unconfigured:
+    vs_state.update();
+
+    // part of unconfigured state would be to send the parameter map:
     // parameter_map.uploadParameterMap();
 
+    std::cout << std::boolalpha << "Configured? (expected false) " << vs_state.isConfigured()
+              << std::endl;   // should be false
 
-    // timer.start();
-    // user::realTimeTask();
+    // User-side configuration:
+    user::setParameters(user::controller, timer);
+
+    // transition to configured:
+    do
+    {
+        vs_state.update();
+        std::cout << std::boolalpha << "Configured? (expected true) " << vs_state.isConfigured()
+                  << std::endl;   // should be true
+    } while (!vs_state.isConfigured());
+
+    timer.start();
 
     int           counter        = 0;
     int           expected_delay = 210;
@@ -217,8 +207,7 @@ int main()
 
     while (true)
     {
-        if (counter == 1)
-        // if (counter == n_elements + 50)
+        if (counter == n_elements + 50)
         {
             timer.stop();
 #ifdef PERFORMANCE_TESTS
