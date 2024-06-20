@@ -31,7 +31,7 @@ namespace vslib
             m_references[m_head]   = reference;
 
             m_head++;
-            if (m_head == ControllerLength)
+            if (m_head == (ControllerLength - 1))
             {
                 m_history_ready = true;
                 m_head          = 0;

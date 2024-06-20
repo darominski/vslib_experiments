@@ -95,7 +95,7 @@ TEST_F(RSTTest, RSTUpdateInputHistories)
 
     RST<controller_length> rst(name, nullptr);
 
-    for (size_t index = 0; index < controller_length; index++)
+    for (size_t index = 0; index < controller_length - 1; index++)
     {
         EXPECT_EQ(rst.isReady(), false);
         rst.updateInputHistories(index, index + 1);
@@ -113,7 +113,7 @@ TEST_F(RSTTest, RSTReset)
     RST<controller_length> rst(name, nullptr);
     EXPECT_EQ(rst.isReady(), false);
 
-    for (size_t index = 0; index < controller_length; index++)
+    for (size_t index = 0; index < controller_length - 1; index++)
     {
         EXPECT_EQ(rst.isReady(), false);
         rst.updateInputHistories(index, index + 1);
@@ -300,7 +300,7 @@ TEST_F(RSTTest, RSTCalculateMultipleActuations)
     // fill the histories to enable RST:
     EXPECT_EQ(rst.control(0, 0), 0);
     EXPECT_EQ(rst.control(0, 0), 0);
-    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_TRUE(rst.isReady());
     // now the RST is enabled and actuation can be calculated
 
     double const set_point_value   = 3.14159;
@@ -394,7 +394,7 @@ TEST_F(RSTTest, RSTLimitedActuation)
     // fill the histories to enable RST:
     EXPECT_EQ(rst.control(0, 0), 0);
     EXPECT_EQ(rst.control(0, 0), 0);
-    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_TRUE(rst.isReady());
 
     // first iteration
     const double set_point_value   = 100;

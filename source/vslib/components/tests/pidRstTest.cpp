@@ -305,7 +305,7 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkSimpleConsistency)
     // fill the histories to enable the controller:
     EXPECT_EQ(pid.control(0, 0), 0);
     EXPECT_EQ(pid.control(0, 0), 0);
-    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_TRUE(pid.isReady());
     // now, the controller is enabled and actuations can be calculated
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
@@ -370,7 +370,7 @@ TEST_F(PIDRSTTest, PIDRSTSimulinkConsistency)
     // fill the histories to enable the controller:
     EXPECT_EQ(pid.control(0, 0), 0);
     EXPECT_EQ(pid.control(0, 0), 0);
-    EXPECT_EQ(pid.control(0, 0), 0);
+    EXPECT_TRUE(pid.isReady());
     // now, the controller is enabled and actuations can be calculated
 
     // the input files are randomly generated numbers

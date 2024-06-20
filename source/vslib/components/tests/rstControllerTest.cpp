@@ -47,7 +47,7 @@ TEST_F(RSTControllerTest, RSTControllerUpdateInputHistories)
 
     RSTController<controller_length> rst;
 
-    for (size_t index = 0; index < controller_length; index++)
+    for (size_t index = 0; index < controller_length - 1; index++)
     {
         EXPECT_EQ(rst.isReady(), false);
         rst.updateInputHistories(index, index + 1);
@@ -64,7 +64,7 @@ TEST_F(RSTControllerTest, RSTControllerReset)
     RSTController<controller_length> rst;
     EXPECT_EQ(rst.isReady(), false);
 
-    for (size_t index = 0; index < controller_length; index++)
+    for (size_t index = 0; index < controller_length - 1; index++)
     {
         EXPECT_EQ(rst.isReady(), false);
         rst.updateInputHistories(index, index + 1);
