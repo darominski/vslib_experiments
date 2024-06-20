@@ -15,7 +15,6 @@
 #include "boxFilter.h"
 #include "clarkeTransform.h"
 #include "componentArray.h"
-#include "compositePID.h"
 #include "firFilter.h"
 #include "iirFilter.h"
 #include "interruptRegistry.h"
@@ -30,6 +29,7 @@
 #include "pid.h"
 #include "pidRst.h"
 #include "rst.h"
+#include "state.h"
 #include "timerInterrupt.h"
 #include "vslib_shared_memory_memmap.h"
 
@@ -78,12 +78,26 @@ namespace user
         }
     }
 
-}   // namespace user
+    enum class ControllerStates
+    {
+        cycling,
+        precharge
+    };
 
-// namespace user
-// {
-//     class SpecificConverter; // forward declaration of Specific converter class
-// }
+    void onCycling()
+    {
+        std::cout << "cycling!\n";
+    }
+
+    using TransRes = ::utils::FsmTransitionResult<ControllerStates>;
+
+    TransRes toPreCharge()
+    {
+        std::cout << "to pre-charge!\n";
+        return {ControllerStates::precharge};
+    }
+
+}   // namespace user
 
 // extern user::Converter converter;
 
@@ -99,15 +113,31 @@ int main()
                                                          + fgc4::utils::constants::json_memory_pool_size
                                                          + fgc4::utils::constants::string_memory_pool_size;
 
-    // ParameterSetting parameter_setting_task(
-    //     (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address,
-    //     user::limit
-    // );
+    Component root("root", "root", nullptr);
 
-    // ParameterMap parameter_map(
-    //     (uint8_t*)write_parameter_map_queue_address, fgc4::utils::constants::json_memory_pool_size,
-    //     user::limit
-    // );
+    // 1 us  -> 1 kHz
+    // 50 us -> 20 kHz
+    // 20 us -> 50 kHz
+    // 10 us -> 100 kHz
+    // 1 us  -> 1 MHz
+    TimerInterrupt timer("timer", &root, user::realTimeTask);
+
+    // std::cout << magic_enum::enum_name(vs_state.getState()) << std::endl;
+
+    ParameterSetting parameter_setting_task(
+        (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address, root
+    );
+
+    ParameterMap parameter_map(
+        (uint8_t*)write_parameter_map_queue_address, fgc4::utils::constants::json_memory_pool_size, root
+    );
+
+    // vslib::utils::VSMachine<user::ControllerStates> vs_state;
+    vslib::utils::VSMachine<user::ControllerStates> vs_state;
+    std::cout << std::boolalpha << "Configured? " << vs_state.isConfigured() << std::endl;
+    vs_state.update();
+    std::cout << std::boolalpha << "Configured? " << vs_state.isConfigured() << std::endl;
+    // vs_state.addState(user::ControllerStates::cycling, &user::onCycling, std::vector{&user::toPreCharge});
 
     const double p  = 52.79;
     const double i  = 0.0472;
@@ -137,6 +167,16 @@ int main()
     user::controller.verifyParameters();
     user::controller.flipBufferState();
 
+    int            interrupt_delay = 100;   // us
+    nlohmann::json value           = {interrupt_delay};
+    timer.delay.setJsonValue(value[0]);
+    timer.flipBufferState();
+    timer.delay.syncWriteBuffer();
+    timer.verifyParameters();
+
+    vs_state.update();
+    std::cout << std::boolalpha << "Configured? " << vs_state.isConfigured() << std::endl;
+
     // converter.init();
 
     // ************************************************************
@@ -164,21 +204,9 @@ int main()
 
     // std::cout << converter.serialize();
     // parameter_map.uploadParameterMap();
-    // 1 us  -> 1 kHz
-    // 50 us -> 20 kHz
-    // 20 us -> 50 kHz
-    // 10 us -> 100 kHz
-    // 1 us  -> 1 MHz
-    int            interrupt_delay = 100;   // us
-    TimerInterrupt timer("timer", independent_component, user::realTimeTask);
-    nlohmann::json value = {interrupt_delay};
 
-    timer.delay.setJsonValue(value[0]);
-    timer.flipBufferState();
-    timer.delay.syncWriteBuffer();
-    timer.verifyParameters();
 
-    timer.start();
+    // timer.start();
     // user::realTimeTask();
 
     int           counter        = 0;
