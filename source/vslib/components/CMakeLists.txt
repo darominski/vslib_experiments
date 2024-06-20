@@ -16,8 +16,8 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRmsTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/parkTransformTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/periodicLookupTableTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidClassicTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidRstTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstControllerTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/sinLookupTableTest.cpp
