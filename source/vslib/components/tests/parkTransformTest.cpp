@@ -63,11 +63,11 @@ TEST_F(ParkTransformTest, BasicTest)
     std::string_view name = "park2";
     ParkTransform    park(name, nullptr);
 
-    double i_a   = 1.0;
-    double i_b   = -0.5;
-    double i_c   = -0.5;
-    double theta = M_PI / 6;   // 30 degrees in radians
-    auto [d, q]  = park.transform(i_a, i_b, i_c, theta);
+    double i_a        = 1.0;
+    double i_b        = -0.5;
+    double i_c        = -0.5;
+    double theta      = M_PI / 6;   // 30 degrees in radians
+    auto [d, q, zero] = park.transform(i_a, i_b, i_c, theta);
 
     // Expected values calculation
     const double cos_theta              = std::cos(theta);
@@ -78,11 +78,13 @@ TEST_F(ParkTransformTest, BasicTest)
     const double sin_theta_two_thirds   = std::sin(theta + 2.0 * M_PI / 3.0);
     const double sin_theta_m_two_thirds = std::sin(theta - 2.0 * M_PI / 3.0);
 
-    double expected_d = (2.0 / 3.0) * (i_a * sin_theta + i_b * sin_theta_m_two_thirds + i_c * sin_theta_two_thirds);
-    double expected_q = (2.0 / 3.0) * (i_a * cos_theta + i_b * cos_theta_m_two_thirds + i_c * cos_theta_two_thirds);
+    double expected_d    = (2.0 / 3.0) * (i_a * sin_theta + i_b * sin_theta_m_two_thirds + i_c * sin_theta_two_thirds);
+    double expected_q    = (2.0 / 3.0) * (i_a * cos_theta + i_b * cos_theta_m_two_thirds + i_c * cos_theta_two_thirds);
+    double expected_zero = (1.0 / 3.0) * (i_a + i_b + i_c);
 
-    EXPECT_NEAR(d, expected_d, 1e-3);
-    EXPECT_NEAR(q, expected_q, 1e-3);
+    EXPECT_NEAR(d, expected_d, 1e-4);
+    EXPECT_NEAR(q, expected_q, 1e-4);
+    EXPECT_NEAR(zero, expected_zero, 1e-4);
 }
 
 TEST_F(ParkTransformTest, ZeroAngleTest)
@@ -90,11 +92,11 @@ TEST_F(ParkTransformTest, ZeroAngleTest)
     std::string_view name = "park3";
     ParkTransform    park(name, nullptr);
 
-    double i_a   = 1.0;
-    double i_b   = -0.5;
-    double i_c   = -0.5;
-    double theta = 0.0;
-    auto [d, q]  = park.transform(i_a, i_b, i_c, theta);
+    double i_a        = 1.0;
+    double i_b        = -0.5;
+    double i_c        = -0.5;
+    double theta      = 0.0;
+    auto [d, q, zero] = park.transform(i_a, i_b, i_c, theta);
 
     // Expected values calculation
     const double cos_theta              = std::cos(theta);
@@ -105,11 +107,43 @@ TEST_F(ParkTransformTest, ZeroAngleTest)
     const double sin_theta_two_thirds   = std::sin(theta + 2.0 * M_PI / 3.0);
     const double sin_theta_m_two_thirds = std::sin(theta - 2.0 * M_PI / 3.0);
 
-    double expected_d = (2.0 / 3.0) * (i_a * sin_theta + i_b * sin_theta_m_two_thirds + i_c * sin_theta_two_thirds);
-    double expected_q = (2.0 / 3.0) * (i_a * cos_theta + i_b * cos_theta_m_two_thirds + i_c * cos_theta_two_thirds);
+    double expected_d    = (2.0 / 3.0) * (i_a * sin_theta + i_b * sin_theta_m_two_thirds + i_c * sin_theta_two_thirds);
+    double expected_q    = (2.0 / 3.0) * (i_a * cos_theta + i_b * cos_theta_m_two_thirds + i_c * cos_theta_two_thirds);
+    double expected_zero = (1.0 / 3.0) * (i_a + i_b + i_c);
 
-    EXPECT_NEAR(d, expected_d, 1e-3);
-    EXPECT_NEAR(q, expected_q, 1e-3);
+    EXPECT_NEAR(d, expected_d, 1e-5);
+    EXPECT_NEAR(q, expected_q, 1e-5);
+    EXPECT_NEAR(zero, expected_zero, 1e-5);
+}
+
+TEST_F(ParkTransformTest, ZeroAngle90degreesOffsetTest)
+{
+    std::string_view name = "park3";
+    ParkTransform    park(name, nullptr);
+
+    const double i_a    = 1.0;
+    const double i_b    = -0.5;
+    const double i_c    = -0.5;
+    const double theta  = 0.0;
+    const double offset = M_PI / 2.0;
+    auto [d, q, zero]   = park.transform(i_a, i_b, i_c, theta, offset);
+
+    // Expected values calculation
+    const double cos_theta              = std::cos(theta);
+    const double cos_theta_two_thirds   = std::cos(theta + 2.0 * M_PI / 3.0);
+    const double cos_theta_m_two_thirds = std::cos(theta - 2.0 * M_PI / 3.0);
+
+    const double sin_theta              = std::sin(theta);
+    const double sin_theta_two_thirds   = std::sin(theta + 2.0 * M_PI / 3.0);
+    const double sin_theta_m_two_thirds = std::sin(theta - 2.0 * M_PI / 3.0);
+
+    double expected_d    = (2.0 / 3.0) * (i_a * cos_theta + i_b * cos_theta_m_two_thirds + i_c * cos_theta_two_thirds);
+    double expected_q    = (2.0 / 3.0) * (-i_a * sin_theta - i_b * sin_theta_m_two_thirds - i_c * sin_theta_two_thirds);
+    double expected_zero = (1.0 / 3.0) * (i_a + i_b + i_c);
+
+    EXPECT_NEAR(d, expected_d, 1e-5);
+    EXPECT_NEAR(q, expected_q, 1e-5);
+    EXPECT_NEAR(zero, expected_zero, 1e-5);
 }
 
 TEST_F(ParkTransformTest, NinetyDegreesTest)
@@ -117,11 +151,11 @@ TEST_F(ParkTransformTest, NinetyDegreesTest)
     std::string_view name = "park4";
     ParkTransform    park(name, nullptr);
 
-    double i_a   = 1.0;
-    double i_b   = -0.5;
-    double i_c   = -0.5;
-    double theta = M_PI / 2;   // 90 degrees in radians
-    auto [d, q]  = park.transform(i_a, i_b, i_c, theta);
+    double i_a        = 1.0;
+    double i_b        = -0.5;
+    double i_c        = -0.5;
+    double theta      = M_PI / 2;   // 90 degrees in radians
+    auto [d, q, zero] = park.transform(i_a, i_b, i_c, theta);
 
     // Expected values calculation
     const double cos_theta              = std::cos(theta);
@@ -132,11 +166,13 @@ TEST_F(ParkTransformTest, NinetyDegreesTest)
     const double sin_theta_two_thirds   = std::sin(theta + 2.0 * M_PI / 3.0);
     const double sin_theta_m_two_thirds = std::sin(theta - 2.0 * M_PI / 3.0);
 
-    double expected_d = (2.0 / 3.0) * (i_a * sin_theta + i_b * sin_theta_m_two_thirds + i_c * sin_theta_two_thirds);
-    double expected_q = (2.0 / 3.0) * (i_a * cos_theta + i_b * cos_theta_m_two_thirds + i_c * cos_theta_two_thirds);
+    double expected_d    = (2.0 / 3.0) * (i_a * sin_theta + i_b * sin_theta_m_two_thirds + i_c * sin_theta_two_thirds);
+    double expected_q    = (2.0 / 3.0) * (i_a * cos_theta + i_b * cos_theta_m_two_thirds + i_c * cos_theta_two_thirds);
+    double expected_zero = (1.0 / 3.0) * (i_a + i_b + i_c);
 
-    EXPECT_NEAR(d, expected_d, 1e-3);
-    EXPECT_NEAR(q, expected_q, 1e-3);
+    EXPECT_NEAR(d, expected_d, 1e-5);
+    EXPECT_NEAR(q, expected_q, 1e-5);
+    EXPECT_NEAR(zero, expected_zero, 1e-5);
 }
 
 //! Tests interacting with transform method of ParkTransform component, validation against simulink
@@ -199,9 +235,9 @@ TEST_F(ParkTransformTest, SimulinkConsistency)
         const auto matlab_q = std::stod(q_str);
 
         // validation
-        const auto [d, q]     = park.transform(a, b, c, theta);
-        const auto relative_d = (matlab_d - d);
-        const auto relative_q = (matlab_q - q);
+        const auto [d, q, zero] = park.transform(a, b, c, theta);
+        const auto relative_d   = (matlab_d - d);
+        const auto relative_q   = (matlab_q - q);
 
         EXPECT_NEAR(relative_d, 0.0, 1e-6);   // at least 1e-6 relative precision
         EXPECT_NEAR(relative_q, 0.0, 1e-6);   // at least 1e-6 relative precision

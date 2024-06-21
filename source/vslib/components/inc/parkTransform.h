@@ -36,8 +36,8 @@ namespace vslib
         //! @param c c-phase value
         //! @param theta theta angle (in radians) between q and a
         //! @param offset Offset angle alignment (in radians): 0 is q alignment, pi/2 for d and a alignment
-        //! @return Pair of d, q values
-        [[nodiscard]] std::pair<double, double>
+        //! @return Tuple of d, q, 0 values
+        [[nodiscard]] std::tuple<double, double, double>
         transform(double a, double b, double c, double theta, double offset = 0) noexcept;
 
       private:

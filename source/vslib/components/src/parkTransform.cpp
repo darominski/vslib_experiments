@@ -6,11 +6,12 @@ namespace vslib
 {
     namespace
     {
+        constexpr double ONE_OVER_3    = 1.0 / 3.0;
         constexpr double TWO_OVER_3    = 2.0 / 3.0;
         constexpr double TWO_PI_OVER_3 = M_PI * TWO_OVER_3;
     }
 
-    [[nodiscard]] std::pair<double, double> ParkTransform::transform(
+    [[nodiscard]] std::tuple<double, double, double> ParkTransform::transform(
         const double a, const double b, const double c, const double theta, const double offset
     ) noexcept
     {
@@ -24,8 +25,9 @@ namespace vslib
 
         const double d = TWO_OVER_3 * (a * sin_theta + b * sin_theta_minus_two_thirds + c * sin_theta_plus_two_thirds);
         const double q = TWO_OVER_3 * (a * cos_theta + b * cos_theta_minus_two_thirds + c * cos_theta_plus_two_thirds);
+        const double zero = ONE_OVER_3 * (a + b + c);
 
-        return {d, q};
+        return {d, q, zero};
     }
 
 }   // namespace vslib
