@@ -50,13 +50,45 @@ TEST_F(ClarkeTransformTest, BasicTest)
 
     EXPECT_NEAR(alpha, i_a, 1e-6);
     EXPECT_NEAR(beta, (i_a + i_b * 2.0) / sqrt(3), 1e-6);
-    EXPECT_NEAR(zero, (i_a + i_b + i_c) / 3.0, 1e-6);
+    EXPECT_NEAR(zero, 0.0, 1e-6);
+}
+
+//! Tests zero-sequence system (all phases are the same)
+TEST(ClarkeTransformationTest, ZeroSequenceTest)
+{
+    std::string_view name = "clarke3";
+    ClarkeTransform  clarke(name, nullptr);
+
+    double i_a               = 1.0;
+    double i_b               = 1.0;
+    double i_c               = 1.0;
+    auto [alpha, beta, zero] = clarke.transform(i_a, i_b, i_c);
+
+    EXPECT_NEAR(alpha, 0.0, 1e-6);
+    EXPECT_NEAR(beta, 0.0, 1e-6);
+    EXPECT_NEAR(zero, 1.0, 1e-6);
+}
+
+//! Tests an unbalanced system
+TEST(ClarkeTransformationTest, UnbalancedSystemTest)
+{
+    std::string_view name = "clarke4";
+    ClarkeTransform  clarke(name, nullptr);
+
+    double i_a               = 2.0;
+    double i_b               = -1.0;
+    double i_c               = -1.0;
+    auto [alpha, beta, zero] = clarke.transform(i_a, i_b, i_c);
+
+    EXPECT_NEAR(alpha, 2.0, 1e-6);
+    EXPECT_NEAR(beta, 0.0, 1e-6);
+    EXPECT_NEAR(zero, 0.0, 1e-6);
 }
 
 //! Tests interacting with transform method of ClarkeTransform component, validation against simulink
 TEST_F(ClarkeTransformTest, SimulinkConsistency)
 {
-    std::string_view name = "clarke3";
+    std::string_view name = "clarke5";
     ClarkeTransform  clarke(name, nullptr);
 
     // the input files are randomly generated numbers
