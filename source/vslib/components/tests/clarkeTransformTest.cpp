@@ -43,13 +43,14 @@ TEST_F(ClarkeTransformTest, BasicTest)
     std::string_view name = "clarke2";
     ClarkeTransform  clarke(name, nullptr);
 
-    double i_a         = 1.0;
-    double i_b         = -0.5;
-    double i_c         = -(i_a + i_b);
-    auto [alpha, beta] = clarke.transform(i_a, i_b, i_c);
+    double i_a               = 1.0;
+    double i_b               = -0.5;
+    double i_c               = -(i_a + i_b);
+    auto [alpha, beta, zero] = clarke.transform(i_a, i_b, i_c);
 
     EXPECT_NEAR(alpha, i_a, 1e-6);
     EXPECT_NEAR(beta, (i_a + i_b * 2.0) / sqrt(3), 1e-6);
+    EXPECT_NEAR(zero, (i_a + i_b + i_c) / 3.0, 1e-6);
 }
 
 //! Tests interacting with transform method of ClarkeTransform component, validation against simulink
@@ -102,7 +103,7 @@ TEST_F(ClarkeTransformTest, SimulinkConsistency)
         const auto matlab_beta = std::stod(beta_str);
 
         // validation
-        const auto [alpha, beta] = clarke.transform(a, b, c);
+        const auto [alpha, beta, zero] = clarke.transform(a, b, c);
 
         EXPECT_NEAR(alpha, matlab_alpha, 1e-6);   // at least 1e-6 relative precision
         EXPECT_NEAR(beta, matlab_beta, 1e-6);     // at least 1e-6 relative precision
