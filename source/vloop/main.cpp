@@ -27,7 +27,6 @@
 #include "parkTransform.h"
 #include "periodicLookupTable.h"
 #include "pid.h"
-#include "pidRst.h"
 #include "rst.h"
 #include "state.h"
 #include "timerInterrupt.h"
@@ -44,7 +43,7 @@ using namespace fgc4;
 
 namespace user
 {
-    vslib::PIDRST controller("pid", nullptr);
+    vslib::PID controller("pid", nullptr);
     // vslib::IIRFilter<81> filter("filter");
 
     void realTimeTask()
@@ -77,7 +76,7 @@ namespace user
         return {ControllerStates::precharge};
     }
 
-    void setParameters(vslib::PIDRST& controller, TimerInterrupt& timer)
+    void setParameters(vslib::PID& controller, TimerInterrupt& timer)
     {
         const double p  = 52.79;
         const double i  = 0.0472;
@@ -192,12 +191,20 @@ int main()
     // transition to configured:
     do
     {
+        parameter_setting_task.receiveJsonCommand();
         vs_state.update();
         std::cout << std::boolalpha << "Configured? (expected true) " << vs_state.isConfigured()
                   << std::endl;   // should be true
+        usleep(500'000);          // 500 ms
     } while (!vs_state.isConfigured());
 
-    timer.start();
+    // now, the Parameters are configured, control can be handed over to the user FSM while still
+    // running a background task
+
+    if (vs_state.isConfigured())
+    {
+        timer.start();
+    }
 
     int           counter        = 0;
     int           expected_delay = 210;
@@ -246,7 +253,6 @@ int main()
 #endif
             break;
         }
-        // std::cout << counter << std::endl;
         __asm volatile("wfi");
         counter++;
         // parameter_setting_task.receiveJsonCommand();

@@ -98,6 +98,8 @@ namespace vslib
         void updateReference(double updated_actuation)
         {
             // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
+            m_actuations[m_head - 1] = updated_actuation;
+
             double reference = m_s[0] * updated_actuation + m_r[0] * m_measurements[m_head - 1];
             for (int64_t index = 1; index < ControllerLength; index++)
             {
