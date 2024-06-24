@@ -92,10 +92,6 @@ namespace vslib::utils
             {
                 return {VSStates::configured};
             }
-            else
-            {
-                std::cout << "some parameters are not initialized!\n";
-            }
             // remain in the unconfigured state otherwise
             return {VSStates::unconfigured};
         }
