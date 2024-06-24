@@ -3,6 +3,7 @@ set(APP componentTests)
 add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/boxFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/clarkeTransformTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/clarkeParkTransformTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentArrayTest.cpp
@@ -22,6 +23,7 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstControllerTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/sinLookupTableTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clarkeTransform.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/clarkeParkTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/parkTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
 )

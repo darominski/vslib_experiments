@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "boxFilter.h"
+#include "clarkeParkTransform.h"
 #include "clarkeTransform.h"
 #include "componentArray.h"
 #include "firFilter.h"
