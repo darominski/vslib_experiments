@@ -1,4 +1,5 @@
 #include <cmath>
+#include <numbers>
 
 #include "parkTransform.h"
 
@@ -8,7 +9,7 @@ namespace vslib
     {
         constexpr double one_over_3    = 1.0 / 3.0;
         constexpr double two_over_3    = 2.0 * one_over_3;
-        constexpr double two_pi_over_3 = M_PI * two_over_3;
+        constexpr double two_pi_over_3 = std::numbers::pi * two_over_3;
     }
 
     [[nodiscard]] std::tuple<double, double, double> ParkTransform::transform(

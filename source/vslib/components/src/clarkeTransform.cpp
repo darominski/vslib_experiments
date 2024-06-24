@@ -1,4 +1,5 @@
 #include <cmath>
+#include <numbers>
 
 #include "clarkeTransform.h"
 
@@ -6,7 +7,7 @@ namespace vslib
 {
     namespace
     {
-        constexpr double sqrt_3_over_3 = sqrt(3.0) / 3.0;
+        constexpr double sqrt_3_over_3 = std::numbers::sqrt3 / 3.0;
         constexpr double one_over_3    = 1.0 / 3.0;
         constexpr double two_over_3    = 2.0 * one_over_3;
     }
