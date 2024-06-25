@@ -53,8 +53,8 @@ if (NOT BUILD_TESTS)
 
   # Collect source files for the vslib code
   set(${LIB}_SOURCES
+      components/src/alphaBetaZeroToDq0Transform.cpp
       components/src/clarkeTransform.cpp
-      components/src/clarkeParkTransform.cpp
       components/src/boxFilter.cpp
       components/src/interruptRegistry.cpp
       components/src/parkTransform.cpp

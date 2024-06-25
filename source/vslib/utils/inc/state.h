@@ -6,10 +6,16 @@
 
 #include <iostream>
 
+#include "bmboot.hpp"
+#include "component.h"
 #include "componentValidation.h"
+#include "constants.h"
 #include "fsm.h"
 #include "parameterInitialized.h"
+#include "parameterMap.h"
 #include "parameterRegistry.h"
+#include "parameterSetting.h"
+#include "vslib_shared_memory_memmap.h"
 
 namespace vslib::utils
 {
@@ -24,7 +30,7 @@ namespace vslib::utils
 
     class VSMachine
     {
-        using StateMachine = ::utils::Fsm<VSStates, VSMachine, false>;
+        using StateMachine = ::utils::Fsm<VSStates, VSMachine, true>;
 
         using TransResVS = ::utils::FsmTransitionResult<VSStates>;
 
@@ -33,9 +39,22 @@ namespace vslib::utils
         //! Convenience alias representing pointer to a member function of the Parent class, for a transition function.
         using TransitionFunc = ::utils::FsmTransitionResult<VSStates> (VSMachine::*)();
 
+        constexpr static size_t read_commands_queue_address = app_data_0_1_ADDRESS;
+        constexpr static size_t write_commands_status_queue_address
+            = read_commands_queue_address + fgc4::utils::constants::json_memory_pool_size;
+        constexpr static size_t write_parameter_map_queue_address = read_commands_queue_address
+                                                                    + fgc4::utils::constants::json_memory_pool_size
+                                                                    + fgc4::utils::constants::string_memory_pool_size;
+
       public:
-        VSMachine()
-            : m_fsm(*this, VSStates::unconfigured)
+        VSMachine(Component& root)
+            : m_fsm(*this, VSStates::initialization),
+              m_root(root),
+              m_parameter_setting_task{
+                  (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address, root},
+              m_parameter_map{
+                  (uint8_t*)write_parameter_map_queue_address, fgc4::utils::constants::json_memory_pool_size, m_root}
+
         {
             // CAUTION: The order of transition method matters
 
@@ -64,19 +83,33 @@ namespace vslib::utils
       private:
         StateMachine m_fsm;
 
+        ::vslib::Component&       m_root;
+        ::vslib::ParameterSetting m_parameter_setting_task;
+        ::vslib::ParameterMap     m_parameter_map;
+
         void onInitialization()
         {
+            std::cout << "triggering initialization\n";
+            bmboot::notifyPayloadStarted();
+
             // everything generic that needs to be done to initialize the vloop
         }
 
         void onUnconfigured()
         {
-            // call user-defined method: converter.init()
+            // upload the Parameter map so that GUI can be built based on it and Parameters can be eventually set
+            m_parameter_map.uploadParameterMap();
         }
 
         void onConfigured()
         {
-            // allow transitioning further
+            // background task running continuously
+            while (true)
+            {
+                // if requested, produce the parameter map:
+                // m_parameter_map;;
+                m_parameter_setting_task.receiveJsonCommand();
+            }
         }
 
         TransResVS toUnconfigured()
@@ -91,6 +124,10 @@ namespace vslib::utils
             if (vslib::utils::parametersInitialized())
             {
                 return {VSStates::configured};
+            }
+            else   // Parameters not initialized,
+            {
+                m_parameter_setting_task.receiveJsonCommand();
             }
             // remain in the unconfigured state otherwise
             return {VSStates::unconfigured};

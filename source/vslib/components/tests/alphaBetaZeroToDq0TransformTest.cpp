@@ -150,9 +150,9 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisAlignment)
     AlphaBetaZeroToDq0Transform transform(name, nullptr, 10000);
 
     // the input files are randomly generated numbers
-    std::filesystem::path abz_path    = "components/inputs/clarkePark_alpha-beta-zero_sin_120degrees.csv";
+    std::filesystem::path abz_path    = "components/inputs/alpha-beta-zero_sin_120degrees.csv";
     std::filesystem::path theta_path  = "components/inputs/park_theta_0_20.csv";
-    std::filesystem::path output_path = "components/inputs/clarkePark_dq0_sin_120degrees_theta_0_20.csv";
+    std::filesystem::path output_path = "components/inputs/alpha-beta-zero_to_dq0_sin_120degrees_theta_0_20.csv";
 
     std::ifstream abz_file(abz_path);
     std::ifstream theta_file(theta_path);
@@ -224,9 +224,10 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisNotAligned)
     AlphaBetaZeroToDq0Transform transform(name, nullptr, 10000);
 
     // the input files are randomly generated numbers
-    std::filesystem::path abz_path    = "components/inputs/clarkePark_alpha-beta-zero_sin_120degrees.csv";
-    std::filesystem::path theta_path  = "components/inputs/park_theta_0_20.csv";
-    std::filesystem::path output_path = "components/inputs/clarkePark_dq0_sin_120degrees_theta_0_20_a_notaligned.csv";
+    std::filesystem::path abz_path   = "components/inputs/alpha-beta-zero_sin_120degrees.csv";
+    std::filesystem::path theta_path = "components/inputs/park_theta_0_20.csv";
+    std::filesystem::path output_path
+        = "components/inputs/alpha-beta-zero_to_dq0_sin_120degrees_theta_0_20_a_notaligned.csv";
 
     std::ifstream abz_file(abz_path);
     std::ifstream theta_file(theta_path);

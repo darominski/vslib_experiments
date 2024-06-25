@@ -22,16 +22,13 @@
 #include "limitRange.h"
 #include "logString.h"
 #include "lookupTable.h"
-#include "parameterMap.h"
 #include "parameterRegistry.h"
-#include "parameterSetting.h"
 #include "parkTransform.h"
 #include "periodicLookupTable.h"
 #include "pid.h"
 #include "rst.h"
 #include "state.h"
 #include "timerInterrupt.h"
-#include "vslib_shared_memory_memmap.h"
 
 // This is one way to stop users from creating objects on the heap and explicit memory allocations
 #ifdef __GNUC__
@@ -66,14 +63,12 @@ namespace user
 
     void onCycling()
     {
-        std::cout << "cycling!\n";
     }
 
     using TransRes = ::utils::FsmTransitionResult<ControllerStates>;
 
     TransRes toPreCharge()
     {
-        std::cout << "to pre-charge!\n";
         return {ControllerStates::precharge};
     }
 
@@ -122,26 +117,10 @@ namespace user
 
 int main()
 {
-    vslib::utils::VSMachine vs_state;   // initial state: initalization
-
-    // VSlib-side initialization:
-    bmboot::notifyPayloadStarted();
-    puts("Hello world from vloop running on cpu1!");
     Component root("root", "root", nullptr);
 
-    constexpr size_t read_commands_queue_address = app_data_0_1_ADDRESS;
-    constexpr size_t write_commands_status_queue_address
-        = read_commands_queue_address + fgc4::utils::constants::json_memory_pool_size;
-    constexpr size_t write_parameter_map_queue_address = read_commands_queue_address
-                                                         + fgc4::utils::constants::json_memory_pool_size
-                                                         + fgc4::utils::constants::string_memory_pool_size;
-    ParameterSetting parameter_setting_task(
-        (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address, root
-    );
-
-    ParameterMap parameter_map(
-        (uint8_t*)write_parameter_map_queue_address, fgc4::utils::constants::json_memory_pool_size, root
-    );
+    // VSlib-side initialization:
+    vslib::utils::VSMachine vs_state(root);   // initial state: initalization
 
     // User-side initialization:
 
@@ -192,7 +171,6 @@ int main()
     // transition to configured:
     do
     {
-        parameter_setting_task.receiveJsonCommand();
         vs_state.update();
         std::cout << std::boolalpha << "Configured? (expected true) " << vs_state.isConfigured()
                   << std::endl;   // should be true
