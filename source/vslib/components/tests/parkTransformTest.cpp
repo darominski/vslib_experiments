@@ -176,7 +176,7 @@ TEST_F(ParkTransformTest, NinetyDegreesTest)
 }
 
 //! Tests interacting with transform method of ParkTransform component, validation against simulink
-TEST_F(ParkTransformTest, SimulinkConsistency)
+TEST_F(ParkTransformTest, BasicSimulinkConsistency)
 {
     std::string_view name = "park5";
     ParkTransform    park(name, nullptr, 10000);
@@ -185,6 +185,79 @@ TEST_F(ParkTransformTest, SimulinkConsistency)
     std::filesystem::path abc_path   = "components/inputs/park_abc_sin_120degrees.csv";
     std::filesystem::path theta_path = "components/inputs/park_theta_0_20.csv";
     std::filesystem::path park_path  = "components/inputs/park_dq0_sin_120degrees_theta_0_20.csv";
+
+    std::ifstream abc_file(abc_path);
+    std::ifstream theta_file(theta_path);
+    std::ifstream park_file(park_path);
+
+    ASSERT_TRUE(abc_file.is_open());
+    ASSERT_TRUE(theta_file.is_open());
+    ASSERT_TRUE(park_file.is_open());
+
+    std::string abc_line;
+    std::string theta_line;
+    std::string park_line;
+
+    while (getline(abc_file, abc_line) && getline(theta_file, theta_line) && getline(park_file, park_line))
+    {
+        // matlab inputs:
+        std::stringstream ss(abc_line);
+        std::string       timestamp, a_str, b_str, c_str;
+
+        // Get the timestamp (we don't need it)
+        std::getline(ss, timestamp, ',');
+
+        // Get the a value
+        std::getline(ss, a_str, ',');
+        const auto a = std::stod(a_str);
+
+        // Get the b value
+        std::getline(ss, b_str, ',');
+        const auto b = std::stod(b_str);
+
+        // Get the c value
+        std::getline(ss, c_str, ',');
+        const auto c = std::stod(c_str);
+
+        std::string       theta_str;
+        std::stringstream ss_theta(theta_line);
+        std::getline(ss_theta, timestamp, ',');
+        std::getline(ss_theta, theta_str, ',');
+        const auto theta = std::stod(theta_str);
+
+        // matlab outputs
+        std::string       d_str, q_str;
+        std::stringstream ss_park(park_line);
+        std::getline(ss_park, d_str, ',');
+        const auto matlab_d = std::stod(d_str);
+
+        std::getline(ss_park, q_str, ',');
+        const auto matlab_q = std::stod(q_str);
+
+        // validation
+        const auto [d, q, zero] = park.transform(a, b, c, theta);
+        const auto relative_d   = (matlab_d - d);
+        const auto relative_q   = (matlab_q - q);
+
+        EXPECT_NEAR(relative_d, 0.0, 1e-6);   // at least 1e-6 relative precision
+        EXPECT_NEAR(relative_q, 0.0, 1e-6);   // at least 1e-6 relative precision
+    }
+    abc_file.close();
+    theta_file.close();
+    park_file.close();
+}
+
+//! Tests interacting with transform method of ParkTransform component, validation against simulink and SVC measured
+//! data
+TEST_F(ParkTransformTest, SVCTransform)
+{
+    std::string_view name = "park5";
+    ParkTransform    park(name, nullptr, 10000);
+
+    // the input files are randomly generated numbers
+    std::filesystem::path abc_path   = "components/inputs/svc_18kV.csv";
+    std::filesystem::path theta_path = "components/inputs/theta_svc_18kV_pll.csv";
+    std::filesystem::path park_path  = "components/inputs/park_dq0_svc_18kV_pll.csv";
 
     std::ifstream abc_file(abc_path);
     std::ifstream theta_file(theta_path);

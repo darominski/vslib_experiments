@@ -217,7 +217,6 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisAlignment)
     output_file.close();
 }
 
-
 //! Tests interacting with transform method of ParkTransform component, validation against simulink
 TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisNotAligned)
 {
