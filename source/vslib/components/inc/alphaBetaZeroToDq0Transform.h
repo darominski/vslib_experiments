@@ -14,28 +14,28 @@
 
 namespace vslib
 {
-    class ClarkeParkTransform : public Component
+    class AlphaBetaZeroToDq0Transform : public Component
     {
       public:
         //! Creates the ClarkePark transformation Component
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        ClarkeParkTransform(std::string_view name, Component* parent, uint64_t number_points = 1000)
-            : Component("ClarkeParkTransform", name, parent),
+        AlphaBetaZeroToDq0Transform(std::string_view name, Component* parent, uint64_t number_points = 1000)
+            : Component("AlphaBetaZeroToDq0Transform", name, parent),
               m_sin("sin", this, number_points),
               m_cos("cos", this, number_points)
         {
         }
 
-        //! Performs ClarkePark transform on the provided inputs
+        //! Performs Alpha-Beta-Zero to dq0 transform.
         //!
-        //! @param f_alpha a-phase value of abs-frame component
-        //! @param f_beta b-phase value of abs-frame component
-        //! @param f_0 c-phase value of abs-frame component
+        //! @param f_alpha alpha-component of alpha-beta-zero-frame component
+        //! @param f_beta beta-component of alpha-beta-zero-frame component
+        //! @param f_0 zero-component of alpha-beta-zero-frame component
         //! @param theta theta angle (in radians) between q and alpha
-        //! @param a_alignment Whether the frame alignment at t=0 is aligned with A-axis (true) or degrees behind A-axis
-        //! (false)
+        //! @param a_alignment Whether the frame alignment at t=0 is aligned with A-axis (true) or 90 degrees behind
+        //! A-axis (false)
         //! @return Tuple of d, q, 0 values
         [[nodiscard]] std::tuple<double, double, double>
         transform(double f_alpha, double f_beta, double f_0, double theta, bool a_alignment = true) noexcept;

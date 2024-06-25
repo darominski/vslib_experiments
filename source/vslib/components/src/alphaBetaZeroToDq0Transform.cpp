@@ -1,7 +1,7 @@
 #include <cmath>
 #include <numbers>
 
-#include "clarkeParkTransform.h"
+#include "alphaBetaZeroToDq0Transform.h"
 
 namespace vslib
 {
@@ -12,8 +12,9 @@ namespace vslib
         constexpr double two_pi_over_3 = std::numbers::pi * two_over_3;
     }
 
-    [[nodiscard]] std::tuple<double, double, double>
-    ClarkeParkTransform::transform(double f_alpha, double f_beta, double f_0, double theta, bool a_alignment) noexcept
+    [[nodiscard]] std::tuple<double, double, double> AlphaBetaZeroToDq0Transform::transform(
+        double f_alpha, double f_beta, double f_0, double theta, bool a_alignment
+    ) noexcept
     {
 
         const double sin_theta = m_sin(theta);

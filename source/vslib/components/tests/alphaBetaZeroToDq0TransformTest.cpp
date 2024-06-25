@@ -1,5 +1,5 @@
 //! @file
-//! @brief File with unit tests for ClarkeParkTransformTest component.
+//! @brief File with unit tests for AlphaBetaZeroToDq0Transform component.
 //! @author Dominik Arominski
 
 #include <array>
@@ -7,11 +7,11 @@
 #include <fstream>
 #include <gtest/gtest.h>
 
-#include "clarkeParkTransform.h"
+#include "alphaBetaZeroToDq0Transform.h"
 
 using namespace vslib;
 
-class ClarkeParkTransformTest : public ::testing::Test
+class AlphaBetaZeroToDq0TransformTest : public ::testing::Test
 {
   protected:
     void SetUp() override
@@ -23,16 +23,16 @@ class ClarkeParkTransformTest : public ::testing::Test
     }
 };
 
-//! Tests default construction of ClarkeParkTransform component
-TEST_F(ClarkeParkTransformTest, Construction)
+//! Tests default construction of AlphaBetaZeroToDq0Transform component
+TEST_F(AlphaBetaZeroToDq0TransformTest, Construction)
 {
-    std::string_view    name = "clarkePark";
-    ClarkeParkTransform clarkePark(name, nullptr);
-    ASSERT_EQ(clarkePark.getName(), name);
+    std::string_view            name = "AlphaBetaZeroToDq0Transform";
+    AlphaBetaZeroToDq0Transform transform(name, nullptr);
+    ASSERT_EQ(transform.getName(), name);
 
-    auto serialized = clarkePark.serialize();
+    auto serialized = transform.serialize();
     EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "ClarkeParkTransform");
+    EXPECT_EQ(serialized["type"], "AlphaBetaZeroToDq0Transform");
     EXPECT_EQ(serialized["components"].size(), 2);
     EXPECT_EQ(
         serialized["components"].dump(),
@@ -44,31 +44,31 @@ TEST_F(ClarkeParkTransformTest, Construction)
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
-//! Tests custom construction of ClarkeParkTransform component
-TEST_F(ClarkeParkTransformTest, NonDefaultConstruction)
+//! Tests custom construction of AlphaBetaZeroToDq0Transform component
+TEST_F(AlphaBetaZeroToDq0TransformTest, NonDefaultConstruction)
 {
-    std::string_view    name = "clarkePark2";
-    ClarkeParkTransform clarkePark(name, nullptr, 10000);
-    ASSERT_EQ(clarkePark.getName(), name);
+    std::string_view            name = "AlphaBetaZeroToDq0Transform2";
+    AlphaBetaZeroToDq0Transform transform(name, nullptr, 10000);
+    ASSERT_EQ(transform.getName(), name);
 
-    auto serialized = clarkePark.serialize();
+    auto serialized = transform.serialize();
     EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "ClarkeParkTransform");
+    EXPECT_EQ(serialized["type"], "AlphaBetaZeroToDq0Transform");
     EXPECT_EQ(serialized["components"].size(), 2);
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
-TEST_F(ClarkeParkTransformTest, BasicTest)
+TEST_F(AlphaBetaZeroToDq0TransformTest, BasicTest)
 {
-    std::string_view    name = "clarkePark3";
-    ClarkeParkTransform clarkePark(name, nullptr);
+    std::string_view            name = "AlphaBetaZeroToDq0Transform3";
+    AlphaBetaZeroToDq0Transform transform(name, nullptr);
 
     double i_alpha     = 1.0;
     double i_beta      = -0.5;
     double i_zero      = 0.0;
     double theta       = M_PI / 6;   // 30 degrees in radians
     bool   a_alignment = true;
-    auto [d, q, zero]  = clarkePark.transform(i_alpha, i_beta, i_zero, theta, a_alignment);
+    auto [d, q, zero]  = transform.transform(i_alpha, i_beta, i_zero, theta, a_alignment);
 
     // Expected values calculation
     const double cos_theta = std::cos(theta);
@@ -83,17 +83,17 @@ TEST_F(ClarkeParkTransformTest, BasicTest)
     EXPECT_NEAR(zero, expected_zero, 1e-4);
 }
 
-TEST_F(ClarkeParkTransformTest, ZeroAngleTest)
+TEST_F(AlphaBetaZeroToDq0TransformTest, ZeroAngleTest)
 {
-    std::string_view    name = "clarkePark4";
-    ClarkeParkTransform clarkePark(name, nullptr);
+    std::string_view            name = "AlphaBetaZeroToDq0Transform4";
+    AlphaBetaZeroToDq0Transform transform(name, nullptr);
 
     double i_alpha     = 1.0;
     double i_beta      = -0.5;
     double i_zero      = -0.5;
     double theta       = 0.0;
     bool   a_alignment = true;
-    auto [d, q, zero]  = clarkePark.transform(i_alpha, i_beta, i_zero, theta);
+    auto [d, q, zero]  = transform.transform(i_alpha, i_beta, i_zero, theta);
 
     // Expected values calculation
     const double cos_theta = std::cos(theta);
@@ -108,17 +108,17 @@ TEST_F(ClarkeParkTransformTest, ZeroAngleTest)
     EXPECT_NEAR(zero, expected_zero, 1e-4);
 }
 
-TEST_F(ClarkeParkTransformTest, ZeroAngle90degreesOffsetTest)
+TEST_F(AlphaBetaZeroToDq0TransformTest, ZeroAngle90degreesOffsetTest)
 {
-    std::string_view    name = "clarkePark5";
-    ClarkeParkTransform clarkePark(name, nullptr);
+    std::string_view            name = "AlphaBetaZeroToDq0Transform5";
+    AlphaBetaZeroToDq0Transform transform(name, nullptr);
 
     const double i_alpha     = 1.0;
     const double i_beta      = -0.5;
     const double i_zero      = -0.5;
     const double theta       = 0.0;
     bool         a_alignment = false;
-    auto [d, q, zero]        = clarkePark.transform(i_alpha, i_beta, i_zero, theta, a_alignment);
+    auto [d, q, zero]        = transform.transform(i_alpha, i_beta, i_zero, theta, a_alignment);
 
     // Expected values calculation
     const double cos_theta              = std::cos(theta);
@@ -144,10 +144,10 @@ TEST_F(ClarkeParkTransformTest, ZeroAngle90degreesOffsetTest)
 }
 
 //! Tests interacting with transform method of ParkTransform component, validation against simulink
-TEST_F(ClarkeParkTransformTest, SimulinkConsistencyAaxisAlignment)
+TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisAlignment)
 {
-    std::string_view    name = "clarkePar6";
-    ClarkeParkTransform clarkePark(name, nullptr, 10000);
+    std::string_view            name = "AlphaBetaZeroToDq0Transform6";
+    AlphaBetaZeroToDq0Transform transform(name, nullptr, 10000);
 
     // the input files are randomly generated numbers
     std::filesystem::path abz_path    = "components/inputs/clarkePark_alpha-beta-zero_sin_120degrees.csv";
@@ -203,7 +203,7 @@ TEST_F(ClarkeParkTransformTest, SimulinkConsistencyAaxisAlignment)
         const auto matlab_zero = std::stod(zero_str);
 
         // validation
-        const auto [d, q, zero]  = clarkePark.transform(f_alpha, f_beta, f_zero, theta);
+        const auto [d, q, zero]  = transform.transform(f_alpha, f_beta, f_zero, theta);
         const auto relative_d    = (matlab_d - d);
         const auto relative_q    = (matlab_q - q);
         const auto relative_zero = (matlab_zero - zero);
@@ -219,10 +219,10 @@ TEST_F(ClarkeParkTransformTest, SimulinkConsistencyAaxisAlignment)
 
 
 //! Tests interacting with transform method of ParkTransform component, validation against simulink
-TEST_F(ClarkeParkTransformTest, SimulinkConsistencyAaxisNotAligned)
+TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisNotAligned)
 {
-    std::string_view    name = "clarkePar7";
-    ClarkeParkTransform clarkePark(name, nullptr, 10000);
+    std::string_view            name = "AlphaBetaZeroToDq0Transform7";
+    AlphaBetaZeroToDq0Transform transform(name, nullptr, 10000);
 
     // the input files are randomly generated numbers
     std::filesystem::path abz_path    = "components/inputs/clarkePark_alpha-beta-zero_sin_120degrees.csv";
@@ -278,7 +278,7 @@ TEST_F(ClarkeParkTransformTest, SimulinkConsistencyAaxisNotAligned)
         const auto matlab_zero = std::stod(zero_str);
 
         // validation
-        const auto [d, q, zero]  = clarkePark.transform(f_alpha, f_beta, f_zero, theta, false);
+        const auto [d, q, zero]  = transform.transform(f_alpha, f_beta, f_zero, theta, false);
         const auto relative_d    = (matlab_d - d);
         const auto relative_q    = (matlab_q - q);
         const auto relative_zero = (matlab_zero - zero);
