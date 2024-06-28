@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "bmboot.hpp"
 #include "interrupt.h"
 #include "parameter.h"
 

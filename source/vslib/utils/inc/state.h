@@ -89,7 +89,6 @@ namespace vslib::utils
 
         void onInitialization()
         {
-            std::cout << "triggering initialization\n";
             bmboot::notifyPayloadStarted();
 
             // everything generic that needs to be done to initialize the vloop

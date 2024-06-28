@@ -29,6 +29,7 @@
 #include "rst.h"
 #include "state.h"
 #include "timerInterrupt.h"
+#include "user.h"
 
 // This is one way to stop users from creating objects on the heap and explicit memory allocations
 #ifdef __GNUC__
@@ -41,38 +42,7 @@ using namespace fgc4;
 
 namespace user
 {
-    vslib::PID controller("pid", nullptr);
-    // vslib::IIRFilter<81> filter("filter");
-
-    void realTimeTask()
-    {
-        for (int index = 0; index < 100; index++)
-        {
-            // volatile double const input = 2.0 * M_PI * (std::rand() / static_cast<double>(RAND_MAX));
-
-            volatile double const input    = index;
-            volatile auto         variable = controller.control(input, input + 2);
-        }
-    }
-
-    enum class ControllerStates
-    {
-        cycling,
-        precharge
-    };
-
-    void onCycling()
-    {
-    }
-
-    using TransRes = ::utils::FsmTransitionResult<ControllerStates>;
-
-    TransRes toPreCharge()
-    {
-        return {ControllerStates::precharge};
-    }
-
-    void setParameters(vslib::PID& controller, TimerInterrupt& timer)
+    void setParameters(vslib::PID& controller, vslib::TimerInterrupt& timer)
     {
         const double p  = 52.79;
         const double i  = 0.0472;
@@ -124,34 +94,7 @@ int main()
 
     // User-side initialization:
 
-    // converter.init();
-
-    // 1 us  -> 1 kHz
-    // 50 us -> 20 kHz
-    // 20 us -> 50 kHz
-    // 10 us -> 100 kHz
-    // 1 us  -> 1 MHz
-    TimerInterrupt timer("timer", &root, user::realTimeTask);
-
-    // ************************************************************
-    // Create and initialize a couple of components: 3 PIDs and an RST
-
-    // PID                 pid1("pid_1", independent_component);
-    // PID                 pid2("pid_2", independent_component);
-    // RST<5>              rst("rst_1", independent_component);
-    // PIDRST              pid_rst("pid_rst_1", independent_component);
-    // Limit<double, 2, 4> limit_voltage("limit_v", independent_component);
-    // PID pid3("pid_3", independent_component);
-    // RST rst("rst_1", independent_component);
-
-    // FIRFilter<10> filter("fir_filter");
-    // BoxFilter<5>  bfilter("box_filter");
-
-    // std::srand(10);
-
-    // ComponentArray<ComponentArray<PID, 3>, 3> array("brick_2", nullptr);
-
-    // LookupTable<double> table("table", nullptr, function);
+    user::Converter converter(root);
 
     // No Component declarations beyond this point!
     // ************************************************************
@@ -159,30 +102,32 @@ int main()
     // transition to unconfigured:
     vs_state.update();
 
-    // part of unconfigured state would be to send the parameter map:
-    // parameter_map.uploadParameterMap();
-
+    // VERBOSE TEST CODE
     std::cout << std::boolalpha << "Configured? (expected false) " << vs_state.isConfigured()
               << std::endl;   // should be false
+    // END OF VERBOSE TEST CODE
 
     // User-side configuration:
-    user::setParameters(user::controller, timer);
+    user::setParameters(converter.pid_1, converter.interrupt_1);
 
     // transition to configured:
     do
     {
         vs_state.update();
+        // VERBOSE TEST CODE
         std::cout << std::boolalpha << "Configured? (expected true) " << vs_state.isConfigured()
                   << std::endl;   // should be true
         usleep(500'000);          // 500 ms
+        // END OF VERBOSE TEST CODE
     } while (!vs_state.isConfigured());
 
     // now, the Parameters are configured, control can be handed over to the user FSM while still
     // running a background task
 
+    // this will be handled by user-side state machine
     if (vs_state.isConfigured())
     {
-        timer.start();
+        converter.interrupt_1.start();
     }
 
     int           counter        = 0;
@@ -191,35 +136,19 @@ int main()
     int           time_range_max = expected_delay + 20;   // in clock ticks
     constexpr int n_elements     = 1000;
 
+    // end of user-side FSM code
+
+    // this while loop can also be likely transferred to VSlib FSM
     while (true)
     {
         if (counter == n_elements + 50)
         {
-            timer.stop();
+            converter.interrupt_1.stop();
 #ifdef PERFORMANCE_TESTS
-            // std::array<int64_t, n_elements> differences{0};
-            // int64_t                         starting_value = timer.m_measurements[0];
-            // for (size_t index = 0; index < timer.m_measurements.size() - 1; index++)
-            // {
-            //     int64_t expected_value = starting_value + expected_delay * index;
-            //     differences[index]     = timer.m_measurements[index] - expected_value;
-            //     // if (differences[index] < 0)
-            //     // {
-            //     //     differences[index] = expected_delay;   // loop-around hot-fix
-            //     // }
-            //     if (abs(differences[index]) > 1)
-            //     {
-            //         std::cout << index << " " << differences[index] << " " << expected_delay << std::endl;
-            //     }
-            // }
-            // for (int index = 0; index < timer.m_measurements.size(); index++)
-            // {
-            //     timer.m_measurements[index] = differences[index];
-            // }
-            // timer.m_measurements[n_elements-1] = timer.m_measurements[n_elements-2];
-            double const mean = timer.average();
-            std::cout << "Average time per interrupt: " << mean << " +- " << timer.standardDeviation(mean) << std::endl;
-            auto const histogram = timer.histogramMeasurements<100>(time_range_min, time_range_max);
+            double const mean = converter.interrupt_1.average();
+            std::cout << "Average time per interrupt: " << mean << " +- "
+                      << converter.interrupt_1.standardDeviation(mean) << std::endl;
+            auto const histogram = converter.interrupt_1.histogramMeasurements<100>(time_range_min, time_range_max);
             for (auto const& value : histogram.getData())
             {
                 std::cout << value << " ";
