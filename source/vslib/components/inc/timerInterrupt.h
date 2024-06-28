@@ -10,7 +10,8 @@
 
 namespace vslib
 {
-    class TimerInterrupt : public Interrupt
+    template<class Converter>
+    class TimerInterrupt : public Interrupt<Converter>
     {
       public:
         //! Constructor for TimerInterrupt Component.
@@ -19,14 +20,14 @@ namespace vslib
         //! @param parent Parent of this Interrupt Component
         //! @param handler_function Function to be called when an interrupt triggers
         TimerInterrupt(
-            std::string_view name, Component* parent,
-            std::function<void(void)> handler_function =
-                []()
+            std::string_view name, Component* parent, Converter& converter,
+            std::function<void(Converter&)> handler_function =
+                [](Converter&)
             {
                 ;
             }
         )
-            : Interrupt("TimerInterrupt", name, parent, std::move(handler_function)),
+            : Interrupt<Converter>("TimerInterrupt", name, parent, converter, handler_function),
               delay(*this, "delay", 0.0)
         {
         }
@@ -46,7 +47,7 @@ namespace vslib
         //! Method called whenever any Parameter of this Component is modified.
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
-            bmboot::setupPeriodicInterrupt(std::chrono::microseconds(delay.value()), m_interrupt_handler);
+            bmboot::setupPeriodicInterrupt(std::chrono::microseconds(delay.value()), this->m_interrupt_handler);
 
             return {};
         }

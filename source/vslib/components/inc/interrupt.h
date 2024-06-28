@@ -16,6 +16,7 @@ namespace vslib
     static constexpr int number_measurements = 1'000;
 #endif
 
+    template<class Converter>
     class Interrupt : public Component
     {
       public:
@@ -26,17 +27,17 @@ namespace vslib
         //! @param parent Parent of this Interrupt Component
         //! @param handler_function Function to be executed when an interrupt is triggered
         Interrupt(
-            std::string_view component_type, std::string_view name, Component* parent,
-            std::function<void(void)> handler_function
+            std::string_view component_type, std::string_view name, Component* parent, Converter& converter,
+            std::function<void(Converter&)> handler_function
         )
             : Component(component_type, name, parent)
         {
 #ifdef PERFORMANCE_TESTS
             m_measurement_counter = 0;
-            m_interrupt_handler   = [this, handler_function]()
+            m_interrupt_handler   = [this, &handler_function, &converter]()
             {
                 const auto start_time = preConditions();
-                handler_function();
+                handler_function(converter);
                 const auto total_time = postConditions(start_time);
                 if (m_measurement_counter < number_measurements)
                 {
@@ -92,7 +93,7 @@ namespace vslib
 
 #endif
       protected:
-        std::function<void(void)> m_interrupt_handler;   //!< Function to be called during the interrupt
+        std::function<void(Converter&)> m_interrupt_handler;   //!< Function to be called during the interrupt
 
 #ifdef PERFORMANCE_TESTS
         std::array<uint64_t, number_measurements> m_measurements{0};   //!< Container holding interrupt execution time

@@ -11,7 +11,7 @@ namespace user
 {
     // real-time task callbacks
     class Converter;
-    void RTTask1(Converter& converter);   // fwd declaration
+    void RTTask1(Converter&);   // fwd declaration
 
     void RTTask2()
     {
@@ -26,14 +26,14 @@ namespace user
         Converter(Component& root) noexcept
             : IConverter("Example", &root),
               pid_1("pid_1", this),
-              interrupt_1("timer_1", this, RTTask2)
+              interrupt_1("timer_1", this, *this, RTTask1)
         {
             // initialize all your objects that need initializing
         }
 
         // Define your public Components here
-        vslib::PID            pid_1;
-        vslib::TimerInterrupt interrupt_1;
+        vslib::PID                       pid_1;
+        vslib::TimerInterrupt<Converter> interrupt_1;
 
         // ...
         // end of your Components

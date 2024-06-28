@@ -18,7 +18,6 @@
 #include "componentArray.h"
 #include "firFilter.h"
 #include "iirFilter.h"
-#include "interruptRegistry.h"
 #include "limitRange.h"
 #include "logString.h"
 #include "lookupTable.h"
@@ -42,7 +41,8 @@ using namespace fgc4;
 
 namespace user
 {
-    void setParameters(vslib::PID& controller, vslib::TimerInterrupt& timer)
+    template<class Converter>
+    void setParameters(vslib::PID& controller, TimerInterrupt<Converter>& timer)
     {
         const double p  = 52.79;
         const double i  = 0.0472;
