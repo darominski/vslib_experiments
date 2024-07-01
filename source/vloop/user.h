@@ -58,9 +58,8 @@ namespace user
         for (int index = 0; index < 100; index++)
         {
             // volatile double const input = 2.0 * M_PI * (std::rand() / static_cast<double>(RAND_MAX));
-            volatile double const input = 1.0;
-            // volatile auto         variable = converter.pid_1.control(input, input + 2);
-            // std::cout << "Did a thing\n";
+            volatile double const input    = 1.0;
+            volatile auto         variable = converter.pid_1.control(input, input + 2);
             // break;
         }
     }

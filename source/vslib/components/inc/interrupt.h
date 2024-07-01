@@ -34,7 +34,7 @@ namespace vslib
         {
 #ifdef PERFORMANCE_TESTS
             m_measurement_counter = 0;
-            m_interrupt_handler   = [this, &handler_function, &converter]()
+            m_interrupt_handler   = [this, handler_function, &converter]()
             {
                 const auto start_time = preConditions();
                 handler_function(converter);
@@ -47,7 +47,10 @@ namespace vslib
             };
             m_measurements = {0};   // sets all elements to 0
 #else
-            m_interrupt_handler = handler_function;
+            m_interrupt_handler = [&converter]()
+            {
+                handler_function(converter)
+            };
 #endif
         }
 
@@ -93,7 +96,7 @@ namespace vslib
 
 #endif
       protected:
-        std::function<void(Converter&)> m_interrupt_handler;   //!< Function to be called during the interrupt
+        std::function<void(void)> m_interrupt_handler;   //!< Function to be called during the interrupt
 
 #ifdef PERFORMANCE_TESTS
         std::array<uint64_t, number_measurements> m_measurements{0};   //!< Container holding interrupt execution time
