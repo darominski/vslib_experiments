@@ -9,16 +9,6 @@
 
 namespace user
 {
-    // real-time task callbacks
-    class Converter;
-    void RTTask1(Converter&);   // fwd declaration
-
-    void RTTask2()
-    {
-        // handle interrupt
-    }
-
-    // ************************************************************
 
     class Converter : public IConverter
     {
@@ -26,7 +16,7 @@ namespace user
         Converter(Component& root) noexcept
             : IConverter("Example", &root),
               pid_1("pid_1", this),
-              interrupt_1("timer_1", this, *this, RTTask1)
+              interrupt_1("timer_1", this, 10.0, RTTask1)
         {
             // initialize all your objects that need initializing
         }
@@ -51,18 +41,17 @@ namespace user
         {
             std::cout << "Bkg task\n";
         }
-    };
 
-    void RTTask1(Converter& converter)
-    {
-        for (int index = 0; index < 100; index++)
+        static void RTTask1(Converter& converter)
         {
-            // volatile double const input = 2.0 * M_PI * (std::rand() / static_cast<double>(RAND_MAX));
-            volatile double const input    = 1.0;
-            volatile auto         variable = converter.pid_1.control(input, input + 2);
-            // break;
+            for (int index = 0; index < 100; index++)
+            {
+                // volatile double const input = 2.0 * M_PI * (std::rand() / static_cast<double>(RAND_MAX));
+                volatile double const input    = 1.0;
+                volatile auto         variable = converter.pid_1.control(input, input + 2);
+            }
         }
-    }
+    };
 
 
     void userMain()

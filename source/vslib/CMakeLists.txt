@@ -56,7 +56,6 @@ if (NOT BUILD_TESTS)
       components/src/alphaBetaZeroToDq0Transform.cpp
       components/src/clarkeTransform.cpp
       components/src/boxFilter.cpp
-      # components/src/interruptRegistry.cpp
       components/src/parkTransform.cpp
       parameters/src/parameterRegistry.cpp
       background/src/parameterSetting.cpp

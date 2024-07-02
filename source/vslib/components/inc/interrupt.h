@@ -6,7 +6,6 @@
 
 #include <functional>
 
-#include "component.h"
 #include "histogram.h"
 #include "pollCpuClock.h"
 
@@ -17,27 +16,21 @@ namespace vslib
 #endif
 
     template<class Converter>
-    class Interrupt : public Component
+    class Interrupt
     {
       public:
-        //! Constructor for the Interrupt Component.
+        //! Constructor for the Interrupt class.
         //!
-        //! @param component_type Type of this Interrupt Component
-        //! @param name Name of this Interrupt Component
-        //! @param parent Parent of this Interrupt Component
         //! @param handler_function Function to be executed when an interrupt is triggered
-        Interrupt(
-            std::string_view component_type, std::string_view name, Component* parent, Converter& converter,
-            std::function<void(Converter&)> handler_function
-        )
-            : Component(component_type, name, parent)
+        Interrupt(std::string_view name, Converter* converter, std::function<void(Converter&)> handler_function)
+            : m_name(name)
         {
 #ifdef PERFORMANCE_TESTS
             m_measurement_counter = 0;
-            m_interrupt_handler   = [this, handler_function, &converter]()
+            m_interrupt_handler   = [this, handler_function, converter]()
             {
                 const auto start_time = preConditions();
-                handler_function(converter);
+                handler_function(*converter);
                 const auto total_time = postConditions(start_time);
                 if (m_measurement_counter < number_measurements)
                 {
@@ -47,9 +40,9 @@ namespace vslib
             };
             m_measurements = {0};   // sets all elements to 0
 #else
-            m_interrupt_handler = [&converter]()
+            m_interrupt_handler = [converter]()
             {
-                handler_function(converter)
+                handler_function(*converter)
             };
 #endif
         }
@@ -96,6 +89,7 @@ namespace vslib
 
 #endif
       protected:
+        std::string const         m_name;                //!< Interrupt name
         std::function<void(void)> m_interrupt_handler;   //!< Function to be called during the interrupt
 
 #ifdef PERFORMANCE_TESTS

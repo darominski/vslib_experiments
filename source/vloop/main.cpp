@@ -73,12 +73,8 @@ namespace user
         controller.verifyParameters();
         controller.flipBufferState();
 
-        const int      interrupt_delay = 100;   // us
-        nlohmann::json value           = {interrupt_delay};
-        timer.delay.setJsonValue(value[0]);
-        timer.flipBufferState();
-        timer.delay.syncWriteBuffer();
-        timer.verifyParameters();
+        const int interrupt_delay = 100;   // us
+        timer.setDelay(interrupt_delay);
     }
 
 }   // namespace user
