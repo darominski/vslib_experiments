@@ -27,14 +27,18 @@ namespace vslib
         {
         }
 
-        //! Performs Park transform on the provided inputs assuming a-phase to q-axis alignment.
+        //! Performs Park transform  from a three-phase (abc) to a dq0 rotating reference frame. Angular position
+        //! of the rotating frame is given by input theta. By default, the a-phase to q-axis alignment is assumed
+        //! but this can be modified with the manual offset parameter.
         //!
         //! @param a a-phase value
         //! @param b b-phase value
         //! @param c c-phase value
-        //! @param theta theta angle between d and a
-        //! @return Pair of d, q values
-        [[nodiscard]] std::pair<double, double> transform(double a, double b, double c, double theta) noexcept;
+        //! @param theta theta angle (in radians) between q and a
+        //! @param offset Offset angle alignment (in radians): 0 is q alignment, pi/2 for d and a alignment
+        //! @return Tuple of d, q, 0 values
+        [[nodiscard]] std::tuple<double, double, double>
+        transform(double a, double b, double c, double theta, double offset = 0) noexcept;
 
       private:
         SinLookupTable m_sin;   //!< Lookup table holding sine function

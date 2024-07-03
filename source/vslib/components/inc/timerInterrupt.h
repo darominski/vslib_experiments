@@ -4,29 +4,29 @@
 
 #pragma once
 
+#include "bmboot.hpp"
 #include "interrupt.h"
 #include "parameter.h"
 
 namespace vslib
 {
-    class TimerInterrupt : public Interrupt
+    template<class Converter>
+    class TimerInterrupt : public Interrupt<Converter>
     {
       public:
-        //! Constructor for TimerInterrupt Component.
+        //! Constructor for TimerInterrupt.
         //!
-        //! @param name Name of this Interrupt Component
-        //! @param parent Parent of this Interrupt Component
         //! @param handler_function Function to be called when an interrupt triggers
         TimerInterrupt(
-            std::string_view name, Component* parent,
-            std::function<void(void)> handler_function =
-                []()
+            std::string_view name, Converter* converter, int64_t delay = 0.0,
+            std::function<void(Converter&)> handler_function =
+                [](Converter&)
             {
                 ;
             }
         )
-            : Interrupt("TimerInterrupt", name, parent, std::move(handler_function)),
-              delay(*this, "delay", 0.0)
+            : Interrupt<Converter>(name, converter, handler_function),
+              m_delay(std::chrono::microseconds(delay))
         {
         }
 
@@ -42,14 +42,22 @@ namespace vslib
             bmboot::stopPeriodicInterrupt();
         }
 
-        //! Method called whenever any Parameter of this Component is modified.
-        std::optional<fgc4::utils::Warning> verifyParameters() override
+        //! Sets the delay of the timer interrupt.
+        //!
+        //! @param delay Interrupt delay in microseconds
+        void setDelay(int64_t delay) noexcept
         {
-            bmboot::setupPeriodicInterrupt(std::chrono::microseconds(delay.value()), m_interrupt_handler);
-
-            return {};
+            m_delay = std::chrono::microseconds(delay);
+            bmboot::setupPeriodicInterrupt(m_delay, this->m_interrupt_handler);
         }
 
-        Parameter<int64_t> delay;   //!< delay in microseconds
+        //! Returns the delay in microseconds.
+        int64_t getDelay() const
+        {
+            return m_delay.count();
+        }
+
+      private:
+        std::chrono::microseconds m_delay;   //!< delay in microseconds
     };
 }   // namespace vslib

@@ -30,7 +30,7 @@ namespace vslib
         //! @param f_a a-phase value of abs-frame component
         //! @param f_b b-phase value of abs-frame component
         //! @param f_c c-phase value of abs-frame component
-        //! @return Pair of alpha, beta orthogonal values in the stationary reference frame
-        [[nodiscard]] std::pair<double, double> transform(double f_a, double f_b, double f_c) noexcept;
+        //! @return Tuple of alpha, beta, zero orthogonal values in the stationary alpha-beta reference frame
+        [[nodiscard]] std::tuple<double, double, double> transform(double f_a, double f_b, double f_c) noexcept;
     };
 }   // namespace vslib

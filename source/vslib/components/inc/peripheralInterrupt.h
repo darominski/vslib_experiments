@@ -28,10 +28,10 @@ namespace vslib
         //! @param interrupt_id Platform-dependent interrupt ID
         //! @param priority Priority level of the interrupt
         PeripheralInterrupt(
-            std::string_view name, Component* parent, std::function<void(void)> handler_function, int interrupt_id,
-            InterruptPriority priority
+            std::string_view name, int interrupt_id, InterruptPriority priority,
+            std::function<void(void)> handler_function,
         )
-            : Interrupt("PeripheralInterrupt", name, parent, std::move(handler_function)),
+            : Interrupt(name, std::move(handler_function)),
               m_interrupt_id{interrupt_id},
               m_priority{priority}
         {
