@@ -79,6 +79,7 @@ if (NOT BUILD_TESTS)
       background/inc
       components/inc
       parameters/inc
+      interrupts/inc
       utils/inc # vslib-specific utilities
       ../utils  # bare-metal shared utilities
       ${LIBRARIES_HOME}/json-3.11.2
