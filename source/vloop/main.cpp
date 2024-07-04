@@ -87,10 +87,12 @@ int main()
 
     // VSlib-side initialization:
     vslib::utils::VSMachine vs_state(root);   // initial state: initalization
+    vs_state.update();                        // triggers initialization
 
     // User-side initialization:
 
     user::Converter converter(root);
+    vs_state.setConverter(&converter);
 
     // No Component declarations beyond this point!
     // ************************************************************

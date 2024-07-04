@@ -62,6 +62,11 @@ namespace vslib
         //! Any raised warnings are forwarded to the output status queue.
         void validateComponents();
 
+        //! Checks if there are any new commands available in the queue.
+        //!
+        //! @return True if there are new objects in the read queue, false otherwise.
+        bool checkNewSettingsAvailable();
+
       private:
         nlohmann::json_schema::json_validator m_validator;              //!< JSON schema for incoming commands
         fgc4::utils::MessageQueueReader<void> m_read_commands_queue;    //!< Incoming commands queue

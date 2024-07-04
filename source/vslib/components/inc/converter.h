@@ -2,14 +2,13 @@
 
 #include "component.h"
 
-namespace user
+namespace vslib
 {
-
-    class IConverter : public vslib::Component
+    class IConverter : public Component
     {
       public:
         IConverter(std::string_view name, Component* root)
-            : vslib::Component("Converter", name, root)
+            : Component("Converter", name, root)
         {
         }
 

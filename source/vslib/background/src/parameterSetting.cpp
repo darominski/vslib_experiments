@@ -151,4 +151,10 @@ namespace vslib
             validateComponent(component.getChildren());
         }
     }
+
+    bool ParameterSetting::checkNewSettingsAvailable()
+    {
+        const auto message_size = m_read_commands_queue.getPendingMessageSize();
+        return (message_size.has_value() && message_size.value() != 0);
+    }
 }   // namespace vslib

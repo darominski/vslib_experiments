@@ -10,6 +10,7 @@
 #include "component.h"
 #include "componentValidation.h"
 #include "constants.h"
+#include "converter.h"
 #include "fsm.h"
 #include "parameterInitialized.h"
 #include "parameterMap.h"
@@ -22,15 +23,14 @@ namespace vslib::utils
     enum class VSStates
     {
         initialization,
-        configured,
         unconfigured,
-        user,
-        fault
+        configuring,
+        configured,
     };
 
     class VSMachine
     {
-        using StateMachine = ::utils::Fsm<VSStates, VSMachine, true>;
+        using StateMachine = ::utils::Fsm<VSStates, VSMachine, false>;
 
         using TransResVS = ::utils::FsmTransitionResult<VSStates>;
 
@@ -60,14 +60,10 @@ namespace vslib::utils
 
             // clang-format off
             m_fsm.addState(VSStates::initialization,  &VSMachine::onInitialization,  {&VSMachine::toUnconfigured});
-            m_fsm.addState(VSStates::unconfigured,    &VSMachine::onUnconfigured,  {&VSMachine::toConfigured});
-            m_fsm.addState(VSStates::configured,      &VSMachine::onConfigured,  {&VSMachine::toUser});
+            m_fsm.addState(VSStates::unconfigured,    &VSMachine::onUnconfigured,  {&VSMachine::toConfiguring});
+            m_fsm.addState(VSStates::configuring,     &VSMachine::onConfiguring,  {&VSMachine::toUnconfigured, &VSMachine::toConfigured});
+            m_fsm.addState(VSStates::configured,      &VSMachine::onConfigured,  {&VSMachine::toConfiguring});
             // clang-format on
-        }
-
-        bool isConfigured() const
-        {
-            return m_fsm.getState() == VSStates::configured;
         }
 
         void update()
@@ -80,17 +76,27 @@ namespace vslib::utils
             return m_fsm.getState();
         }
 
+        bool isConfigured() const
+        {
+            return m_fsm.getState() == VSStates::configured;
+        }
+
+        void setConverter(::vslib::IConverter* converter)
+        {
+            m_converter = converter;
+        }
+
       private:
         StateMachine m_fsm;
 
         ::vslib::Component&       m_root;
+        ::vslib::IConverter*      m_converter{nullptr};
         ::vslib::ParameterSetting m_parameter_setting_task;
         ::vslib::ParameterMap     m_parameter_map;
 
         void onInitialization()
         {
             bmboot::notifyPayloadStarted();
-
             // everything generic that needs to be done to initialize the vloop
         }
 
@@ -100,21 +106,53 @@ namespace vslib::utils
             m_parameter_map.uploadParameterMap();
         }
 
+        void onConfiguring()
+        {
+            // receive and process commands
+            m_parameter_setting_task.receiveJsonCommand();
+            // when done, transition away
+            m_fsm.update();
+        }
+
         void onConfigured()
         {
+            // initialize user code (RT)
+            m_converter->init();
             // background task running continuously
             while (true)
             {
-                // if requested, produce the parameter map:
-                // m_parameter_map;;
-                m_parameter_setting_task.receiveJsonCommand();
+
+                if (m_parameter_setting_task.checkNewSettingsAvailable())
+                {
+                    // if new settings are available, transition to configuring
+                    m_fsm.update();
+                }
+                // other background tasks
+                // ...
+                //
+
+                // user background task:
+                m_converter->backgroundTask();
+
+                // for testing purposes:
+                break;
             }
+        }
+
+        TransResVS toConfiguring()
+        {
+            return {VSStates::configuring};
         }
 
         TransResVS toUnconfigured()
         {
-            // transition logic
-            return {VSStates::unconfigured};
+            // allow transition if all Parameters have been initialized
+            if (!vslib::utils::parametersInitialized())
+            {
+                return {VSStates::unconfigured};
+            }
+            // do not transition otherwise
+            return {};
         }
 
         TransResVS toConfigured()
@@ -124,18 +162,8 @@ namespace vslib::utils
             {
                 return {VSStates::configured};
             }
-            else   // Parameters not initialized,
-            {
-                m_parameter_setting_task.receiveJsonCommand();
-            }
-            // remain in the unconfigured state otherwise
-            return {VSStates::unconfigured};
-        }
-
-        TransResVS toUser()
-        {
-            // everything is configured, allow moving to the user-defined FSM
-            return {VSStates::user};
+            // do not transition otherwise
+            return {};
         }
     };
 
