@@ -55,7 +55,7 @@ namespace vslib
         //! Registers the Parameter to this Component, adding it to the parameters vector and the registry.
         //!
         //! @param parameter Reference to the added Parameter
-        void registerParameter(std::string_view parameter_name, IParameter& parameter)
+        void registerParameter(IParameter& parameter)
         {
 
             ParameterRegistry::instance().addToRegistry(

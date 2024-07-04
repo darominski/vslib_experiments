@@ -66,7 +66,7 @@ namespace vslib
             : m_name{name},
               m_parent{parent}
         {
-            m_parent.registerParameter(name, *this);
+            m_parent.registerParameter(*this);
         }
 
         //! Constructor for parameters with optional numeric-type limits.
@@ -88,7 +88,7 @@ namespace vslib
               m_limit_min_defined{limit_min != std::numeric_limits<LimitType<T>>::lowest()},
               m_limit_max_defined(limit_max != std::numeric_limits<LimitType<T>>::max())
         {
-            m_parent.registerParameter(name, *this);
+            m_parent.registerParameter(*this);
         };
 
         // ************************************************************
