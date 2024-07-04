@@ -3,5 +3,5 @@
 FIRFilter
 ---------
 
-.. doxygenfile:: firFilter.h
-   :project: VSlib
+.. doxygenclass:: vslib::FIRFilter
+   :members:

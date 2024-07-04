@@ -3,5 +3,5 @@
 Component
 ---------
 
-.. doxygenfile:: component.h
-   :project: VSlib
+.. doxygenclass:: vslib::Component
+   :members:

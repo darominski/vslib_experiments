@@ -3,5 +3,5 @@
 IIRFilter
 ---------
 
-.. doxygenfile:: iirFilter.h
-   :project: VSlib
+.. doxygenclass:: vslib::IIRFilter
+   :members:
