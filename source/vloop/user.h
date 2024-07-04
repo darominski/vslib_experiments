@@ -10,11 +10,11 @@
 namespace user
 {
 
-    class Converter : public IConverter
+    class Converter : public vslib::IConverter
     {
       public:
         Converter(Component& root) noexcept
-            : IConverter("Example", &root),
+            : vslib::IConverter("Example", &root),
               pid_1("pid_1", this),
               interrupt_1("timer_1", this, 10.0, RTTask1)
         {
@@ -34,12 +34,42 @@ namespace user
 
         void init() override
         {
-            std::cout << "Initializing something\n";
+            interrupt_1.start();
         }
+
+        int                  counter        = 0;
+        int                  expected_delay = 210;
+        int                  time_range_min = expected_delay - 20;   // in clock ticks
+        int                  time_range_max = expected_delay + 20;   // in clock ticks
+        constexpr static int n_elements     = 1000;
 
         void backgroundTask() override
         {
-            std::cout << "Bkg task\n";
+            while (true)
+            {
+                if (counter == n_elements + 50)
+                {
+                    interrupt_1.stop();
+#ifdef PERFORMANCE_TESTS
+                    double const mean = interrupt_1.average();
+                    std::cout << "Average time per interrupt: " << mean << " +- " << interrupt_1.standardDeviation(mean)
+                              << std::endl;
+                    auto const histogram = interrupt_1.histogramMeasurements<100>(time_range_min, time_range_max);
+                    for (auto const& value : histogram.getData())
+                    {
+                        std::cout << value << " ";
+                    }
+                    std::cout << std::endl;
+                    auto const bin_with_max = histogram.getBinWithMax();
+                    auto const edges        = histogram.getBinEdges(bin_with_max);
+                    std::cout << "bin with max: " << bin_with_max
+                              << ", centered at: " << 0.5 * (edges.first + edges.second) << std::endl;
+#endif
+                    break;
+                }
+                __asm volatile("wfi");
+                counter++;
+            }
         }
 
         static void RTTask1(Converter& converter)
@@ -53,10 +83,5 @@ namespace user
         }
     };
 
-
-    void userMain()
-    {
-        // all background-task activities that need to be handled for your converter
-    }
 
 }   // namespace user::converter

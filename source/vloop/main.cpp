@@ -107,62 +107,11 @@ int main()
     user::setParameters(converter.pid_1, converter.interrupt_1);
 
     // transition to configured:
-    do
-    {
-        vs_state.update();
-        // VERBOSE TEST CODE
-        std::cout << std::boolalpha << "Configured? (expected true) " << vs_state.isConfigured()
-                  << std::endl;   // should be true
-        usleep(500'000);          // 500 ms
-        // END OF VERBOSE TEST CODE
-    } while (!vs_state.isConfigured());
-
-    // now, the Parameters are configured, control can be handed over to the user FSM while still
+    vs_state.update();
+    // now, the Parameters are configured, control has been handed over to the user FSM while still
     // running a background task
 
-    // this will be handled by user-side state machine
-    if (vs_state.isConfigured())
-    {
-        converter.interrupt_1.start();
-    }
-
-    int           counter        = 0;
-    int           expected_delay = 210;
-    int           time_range_min = expected_delay - 20;   // in clock ticks
-    int           time_range_max = expected_delay + 20;   // in clock ticks
-    constexpr int n_elements     = 1000;
-
-    // end of user-side FSM code
-
-    // this while loop can also be likely transferred to VSlib FSM
-    while (true)
-    {
-        if (counter == n_elements + 50)
-        {
-            converter.interrupt_1.stop();
-#ifdef PERFORMANCE_TESTS
-            double const mean = converter.interrupt_1.average();
-            std::cout << "Average time per interrupt: " << mean << " +- "
-                      << converter.interrupt_1.standardDeviation(mean) << std::endl;
-            auto const histogram = converter.interrupt_1.histogramMeasurements<100>(time_range_min, time_range_max);
-            for (auto const& value : histogram.getData())
-            {
-                std::cout << value << " ";
-            }
-            std::cout << std::endl;
-            auto const bin_with_max = histogram.getBinWithMax();
-            auto const edges        = histogram.getBinEdges(bin_with_max);
-            std::cout << "bin with max: " << bin_with_max << ", centered at: " << 0.5 * (edges.first + edges.second)
-                      << std::endl;
-#endif
-            break;
-        }
-        __asm volatile("wfi");
-        counter++;
-        // parameter_setting_task.receiveJsonCommand();
-        // converter.backgroundTask();
-        // usleep(500'000);   // 500 ms
-    }
+    // no code will be executed beyond this point, end of user-side FSM code
 
     return 0;
 }
