@@ -4,10 +4,10 @@
 Filters
 =======
 
-Finite-impulseilters convolve the provided input data stream with either the defined array of coefficients
+Filters convolve the provided input data stream with either the defined array of coefficients
 (finite-impulse, infinite-impulse) or the previous inputs (averaging filter). The VSlib provides three
-types of filters: FIRFilter implementing finite-impulse filter, IIRFilter implementing infinite-impulse filter,
-and BoxFilter implementing averaging filter.
+types of filters: :code:`FIRFilter` implementing finite-impulse filter, :code:`IIRFilter` implementing infinite-impulse filter,
+and :code:`BoxFilter` implementing averaging filter.
 
 General interface
 -----------------
@@ -163,3 +163,10 @@ Usage example
 
         return 0;
     }
+
+Performance
+-----------
+
+.. image:: ../figures/filters_performance.png
+  :scale: 10 %
+  :alt: Filter performance depending on the order
