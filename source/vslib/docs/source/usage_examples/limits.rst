@@ -45,6 +45,8 @@ is exactly equal to any of the limits, does not trigger a change. In case the pr
 the returne value is the smallest representable value of the templated type. If the input does not violate any of the limits, it is simply returned
 unmodified.
 
+For more details regarding the API, see the :ref:`API documentation for LimitRange <limitRange_api>`.
+
 Usage example
 ^^^^^^^^^^^^^
 
@@ -110,6 +112,8 @@ infinite, so the returned value returns the largest representable value of the t
 The :code:`reset` method brings the component to the intiial state, by unsetting the :code:`input_{i-1}` value. After it is executed, the next
 call to the :code:`limit` method will always pass and the provided value will be used as reference.
 
+For more details regarding the API, see the :ref:`API documentation for LimitRate <limitRate_api>`.
+
 Usage example
 ^^^^^^^^^^^^^
 
@@ -165,6 +169,8 @@ It returns true if the sum of provided inputs over the :code:`integral_limit_win
 otherwise it returns false. :code:`false` is also returned if the provided input is not a number.
 
 The :code:`reset` method brings the component to the intiial state, clearing the array with stored inputs.
+
+For more details regarding the API, see the :ref:`API documentation for LimitIntegral <limitIntegral_api>`.
 
 Usage example
 ^^^^^^^^^^^^^
@@ -224,6 +230,8 @@ The formula used is the following:
 where :math:`filter\_factor = \frac{iteration\_period}{rms\_time\_constant + 0.5 \cdot iteration\_period}`.
 
 The :code:`reset` method brings the component to the intiial state, clearing the information about the previous input.
+
+For more details regarding the API, see the :ref:`API documentation for LimitRms <limitRms_api>`.
 
 Usage example
 ^^^^^^^^^^^^^
