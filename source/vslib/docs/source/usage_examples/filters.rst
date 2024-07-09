@@ -40,7 +40,7 @@ Usage example
 
     #include <array>
 
-    #include "BoxFilter.h"
+    #include "boxFilter.h"
 
     using namespace vslib;
 
