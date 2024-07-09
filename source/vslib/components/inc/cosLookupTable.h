@@ -6,6 +6,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <numbers>
 #include <string>
 
 #include "component.h"
@@ -25,7 +26,8 @@ namespace vslib
         CosLookupTable(std::string_view name, Component* parent, size_t number_points)
             : Component("CosLookupTable", name, parent),
               m_function(
-                  "data", this, fgc4::utils::generateFunction<double, double>(cos, 0.0, 2.0 * M_PI, number_points), true
+                  "data", this,
+                  fgc4::utils::generateFunction<double, double>(cos, 0.0, 2.0 * std::numbers::pi, number_points), true
               )
         {
             assert(number_points >= 2);

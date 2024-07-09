@@ -4,9 +4,10 @@
 
 #pragma once
 
-#define _USE_MATH_DEFINES
+#define _USE_MATH_DEFINESs
 #include <cmath>
 #include <functional>
+#include <numbers>
 #include <string>
 
 #include "component.h"
@@ -26,7 +27,8 @@ namespace vslib
         SinLookupTable(std::string_view name, Component* parent, size_t number_points)
             : Component("SinLookupTable", name, parent),
               m_function(
-                  "data", this, fgc4::utils::generateFunction<double, double>(sin, 0.0, 2.0 * M_PI, number_points), true
+                  "data", this,
+                  fgc4::utils::generateFunction<double, double>(sin, 0.0, 2.0 * std::numbers::pi, number_points), true
               )
         {
             assert(number_points >= 2);
