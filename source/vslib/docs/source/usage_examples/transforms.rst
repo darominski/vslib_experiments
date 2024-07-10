@@ -192,16 +192,22 @@ The table below gives an overlook of the execution time that can be expected for
       - Access time [ns]
     * - ParkTransform
       - 100
-      - 548
+      - 579
     * - ParkTransform
-      - 1000
-      - 568
+      - 1'000
+      - 597
+    * - ParkTransform
+      - 10'000
+      - 679
     * - ClarkeTransform
       - N/A
-      - 20
+      - 19
     * - AlphaBetaZeroToDq0Transform
       - 100
-      -
+      - 193
     * - AlphaBetaZeroToDq0Transform
       - 1000
-      -
+      - 197
+    * - AlphaBetaZeroToDq0Transform
+      - 1000
+      - 230
