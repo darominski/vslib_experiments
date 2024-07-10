@@ -10,22 +10,7 @@ Welcome to VSlib's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-API Documentation
-=================
-
-Doxygen API
------------
-
-`API Documentation <../doxygen/html/index.html>`_
-
-Sphinx API
-----------
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   api/*
+   api
 
 Examples
 ========
@@ -35,6 +20,11 @@ Examples
    :glob:
 
    usage_examples/*
+
+Concepts
+========
+
+
 
 Indices and tables
 ==================
