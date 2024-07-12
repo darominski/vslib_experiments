@@ -159,7 +159,7 @@ namespace vslib
             const double f_0   = f0.toValidate();
             const double kikpN = k_i * k_p * N_;
 
-            const double a = 2.0 * std::numbers::pi_v<double> * f_0 / tan(std::numbers::pi_v<double> * f_0 * T);
+            const double a = 2.0 * std::numbers::pi_v<double> * f_0 / tan(std::numbers::pi_v<double> * f_0 * T_);
 
             if (k_p != 0 || k_d != 0)
             {
