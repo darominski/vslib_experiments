@@ -19,7 +19,8 @@ namespace vslib
 
     // ************************************************************
 
-    class PeripheralInterrupt : public Interrupt
+    template<class Converter>
+    class PeripheralInterrupt : public Interrupt<Converter>
     {
       public:
         //! Constructor for PeripheralInterrupt.
@@ -28,15 +29,15 @@ namespace vslib
         //! @param interrupt_id Platform-dependent interrupt ID
         //! @param priority Priority level of the interrupt
         PeripheralInterrupt(
-            std::string_view name, int interrupt_id, InterruptPriority priority,
-            std::function<void(void)> handler_function,
+            std::string_view name, Converter* converter, int interrupt_id, InterruptPriority priority,
+            std::function<void(Converter&)> handler_function
         )
-            : Interrupt(name, std::move(handler_function)),
+            : Interrupt<Converter>(name, converter, std::move(handler_function)),
               m_interrupt_id{interrupt_id},
               m_priority{priority}
         {
             translatePriority();
-            bmboot::setupInterruptHandling(m_interrupt_id, m_priority_bmboot, m_interrupt_handler);
+            bmboot::setupInterruptHandling(m_interrupt_id, m_priority_bmboot, this->m_interrupt_handler);
         }
 
         //! Starts peripheral interrupt.
