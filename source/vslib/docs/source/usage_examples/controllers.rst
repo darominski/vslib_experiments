@@ -246,3 +246,91 @@ Usage example
 Performance
 -----------
 
+Performance of the controllers depend on their order and the frequency at which the internal automatic
+anti-windup mechanism is engaged. The general numbers that can be expected for the two controllers are
+presented in the table below and also as a figure.
+
+.. list-table::
+    :header-rows: 1
+
+    * - Class
+      - Order
+      - Anti-windup
+      - Access time [ns]
+    * - PID
+      - 2
+      - None
+      - 64
+    * - PID
+      - 2
+      - Frequent
+      - 102
+    * - RST
+      - 1
+      - None
+      - 34
+    * - RST
+      - 2
+      - None
+      - 59
+    * - RST
+      - 3
+      - None
+      - 64
+    * - RST
+      - 4
+      - None
+      - 68
+    * - RST
+      - 5
+      - None
+      - 74
+    * - RST
+      - 6
+      - None
+      - 80
+    * - RST
+      - 7
+      - None
+      - 91
+    * - RST
+      - 8
+      - None
+      - 90
+    * - RST
+      - 9
+      - None
+      - 113
+    * - RST
+      - 10
+      - None
+      - 123
+    * - RST
+      - 11
+      - None
+      - 132
+    * - RST
+      - 12
+      - None
+      - 135
+    * - RST
+      - 13
+      - None
+      - 150
+    * - RST
+      - 14
+      - None
+      - 177
+    * - RST
+      - 15
+      - None
+      - 180
+    * - RST
+      - 16
+      - None
+      - 211
+
+
+.. image:: ../figures/controllers_performance.png
+ :scale: 50 %
+ :alt: Controllers performance depending on the order
