@@ -41,8 +41,7 @@ using namespace fgc4;
 
 namespace user
 {
-    template<class Converter>
-    void setParameters(vslib::PID& controller, TimerInterrupt<Converter>& timer)
+    void setParameters(vslib::PID& controller)
     {
         const double p  = 52.79;
         const double i  = 0.0472;
@@ -68,13 +67,10 @@ namespace user
         controller.c.setJsonValue(c);
         controller.N.setJsonValue(N);
         controller.f0.setJsonValue(f0);
-        controller.ts.setJsonValue(ts);
+        controller.T.setJsonValue(ts);
 
         controller.verifyParameters();
         controller.flipBufferState();
-
-        const int interrupt_delay = 100;   // us
-        timer.setDelay(interrupt_delay);
     }
 
 }   // namespace user
@@ -106,7 +102,7 @@ int main()
     // END OF VERBOSE TEST CODE
 
     // User-side configuration:
-    user::setParameters(converter.pid_1, converter.interrupt_1);
+    user::setParameters(converter.pid_1);
 
     // transition to configured:
     vs_state.update();
