@@ -39,7 +39,8 @@ namespace vslib::utils
         //! Convenience alias representing pointer to a member function of the Parent class, for a transition function.
         using TransitionFunc = ::utils::FsmTransitionResult<VSStates> (VSMachine::*)();
 
-        constexpr static size_t read_commands_queue_address = app_data_0_1_ADDRESS;
+        constexpr static size_t read_commands_queue_address
+            = app_data_2_3_ADDRESS;   // this needs to be CPU-choice dependent, or fixed to CPU3
         constexpr static size_t write_commands_status_queue_address
             = read_commands_queue_address + fgc4::utils::constants::json_memory_pool_size;
         constexpr static size_t write_parameter_map_queue_address = read_commands_queue_address
