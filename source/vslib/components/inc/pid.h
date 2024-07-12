@@ -37,8 +37,8 @@ namespace vslib
               b(*this, "proportional_scaling"),           // default limits
               c(*this, "derivative_scaling"),             // default limits
               N(*this, "derivative_filter_order", 0.0),   // min limit: 0
-              ts(*this, "sampling_period", 0.0),          // min limit: 0.0
-              f0(*this, "control_frequency", 0.0)         // min limit: 0.0
+              T(*this, "control_period", 0.0),            // min limit: 0.0
+              f0(*this, "pre-warping_frequency", 0.0)     // min limit: 0.0
         {
         }
 
@@ -130,8 +130,8 @@ namespace vslib
         Parameter<double> b;     //!< Reference signal proportional gain scaling (from DSP regFGC3)
         Parameter<double> c;     //!< Reference signal derivative gain scaling (from High-Performance Digital Control)
         Parameter<double> N;     //!< Filter order for derivative input
-        Parameter<double> ts;    //!< Sampling period
-        Parameter<double> f0;    //!< Control frequency
+        Parameter<double> T;     //!< control period
+        Parameter<double> f0;    //!< pre-warping frequency
 
         // ************************************************************
         // Limits of the controller's actuation
@@ -155,11 +155,11 @@ namespace vslib
             const double b_    = b.toValidate();
             const double c_    = c.toValidate();
             const double N_    = N.toValidate();
+            const double T_    = T.toValidate();
             const double f_0   = f0.toValidate();
-            const double t_s   = ts.toValidate();
             const double kikpN = k_i * k_p * N_;
 
-            const double a = 2.0 * std::numbers::pi_v<double> * f_0 / tan(std::numbers::pi_v<double> * f_0 * t_s);
+            const double a = 2.0 * std::numbers::pi_v<double> * f_0 / tan(std::numbers::pi_v<double> * f_0 * T);
 
             if (k_p != 0 || k_d != 0)
             {

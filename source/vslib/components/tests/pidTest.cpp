@@ -25,7 +25,7 @@ class PIDTest : public ::testing::Test
     }
 
     void set_pid_parameters(
-        PID& pidRst, double p, double i, double d, double ff, double b, double c, double N = 1, double ts = 1,
+        PID& pidRst, double p, double i, double d, double ff, double b, double c, double N = 1, double T = 1,
         double f0 = 1, double act_min = 0, double act_max = 1e9
     )
     {
@@ -50,8 +50,8 @@ class PIDTest : public ::testing::Test
         StaticJson N_value = N;
         pidRst.N.setJsonValue(N_value);
 
-        StaticJson ts_value = ts;
-        pidRst.ts.setJsonValue(ts_value);
+        StaticJson T_value = T;
+        pidRst.T.setJsonValue(T_value);
 
         StaticJson f0_value = f0;
         pidRst.f0.setJsonValue(f0_value);
@@ -97,8 +97,8 @@ TEST_F(PIDTest, PIDDefaultConstruction)
     EXPECT_EQ(serialized_pid["parameters"][4]["name"], "proportional_scaling");
     EXPECT_EQ(serialized_pid["parameters"][5]["name"], "derivative_scaling");
     EXPECT_EQ(serialized_pid["parameters"][6]["name"], "derivative_filter_order");
-    EXPECT_EQ(serialized_pid["parameters"][7]["name"], "sampling_period");
-    EXPECT_EQ(serialized_pid["parameters"][8]["name"], "control_frequency");
+    EXPECT_EQ(serialized_pid["parameters"][7]["name"], "control_period");
+    EXPECT_EQ(serialized_pid["parameters"][8]["name"], "pre-warping_frequency");
 }
 
 //! Checks that the RST coefficients were correctly calculated when kp!=0 or kd!=0
@@ -113,11 +113,11 @@ TEST_F(PIDTest, PIDCoefficientsDefault)
     const double b  = 1.0;
     const double c  = 1.0;
     const double N  = 1.0;
-    const double ts = 3.0;
+    const double T  = 3.0;
     const double f0 = 2.263752e-6;
-    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0);
 
-    const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * ts);
+    const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * T);
     const double a2 = a * a;
 
     std::array<double, 3> expected_r, expected_s, expected_t;
@@ -158,11 +158,11 @@ TEST_F(PIDTest, PIDCoefficientsKpZero)
     const double b  = 1.0;
     const double c  = 1.0;
     const double N  = 1.0;
-    const double ts = 3.0;
+    const double T  = 3.0;
     const double f0 = 2.263752e-6;
-    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0);
 
-    const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * ts);
+    const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * T);
     const double a2 = a * a;
 
     std::array<double, 3> expected_r, expected_s, expected_t;
@@ -203,11 +203,11 @@ TEST_F(PIDTest, PIDCoefficientsKdZero)
     const double b  = 1.0;
     const double c  = 1.0;
     const double N  = 1.0;
-    const double ts = 3.0;
+    const double T  = 3.0;
     const double f0 = 2.263752e-6;
-    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0);
 
-    const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * ts);
+    const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * T);
     const double a2 = a * a;
 
     std::array<double, 3> expected_r, expected_s, expected_t;
@@ -248,11 +248,11 @@ TEST_F(PIDTest, PIDCoefficientsIntegrator)
     const double b  = 1.0;
     const double c  = 1.0;
     const double N  = 1.0;
-    const double ts = 3.0;
+    const double T  = 3.0;
     const double f0 = 2.263752e-6;
-    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0);
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0);
 
-    const double a = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * ts);
+    const double a = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * T);
 
     std::array<double, 3> expected_r, expected_s, expected_t;
 
@@ -297,10 +297,10 @@ TEST_F(PIDTest, PIDSimulinkSimpleConsistency)
     const double b             = 1.0;
     const double c             = 1.0;
     const double N             = 2.0;
-    const double ts            = 1.0e-3;
+    const double T             = 1.0e-3;
     const double f0            = 1e-15;
     const double actuation_min = -50;
-    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0, actuation_min);
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0, actuation_min);
 
     // fill the histories to enable the controller:
     EXPECT_EQ(pid.control(0, 0), 0);
@@ -362,10 +362,10 @@ TEST_F(PIDTest, PIDSimulinkConsistency)
     const double b             = 0.03057;
     const double c             = 0.8983;
     const double N             = 17.79;
-    const double ts            = 1.0e-3;
+    const double T             = 1.0e-3;
     const double f0            = 1e-15;
     const double actuation_min = -1e13;
-    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0, actuation_min);
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0, actuation_min);
 
     // fill the histories to enable the controller:
     EXPECT_EQ(pid.control(0, 0), 0);
@@ -428,10 +428,10 @@ TEST_F(PIDTest, PIDSimulinkIntegratorConsistency)
     const double b             = 0.03057;
     const double c             = 0.8983;
     const double N             = 17.79;
-    const double ts            = 1.0e-3;
+    const double T             = 1.0e-3;
     const double f0            = 1e-15;
     const double actuation_min = -50;
-    set_pid_parameters(pid, p, i, d, ff, b, c, N, ts, f0, actuation_min);
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0, actuation_min);
 
     // fill the histories to enable the controller:
     EXPECT_EQ(pid.control(0, 0), 0);
