@@ -72,7 +72,7 @@ namespace vslib::utils
             m_fsm.update();
         }
 
-        [[nodiscard]] const auto& getState() const noexcept
+        [[nodiscard]] const auto getState() const noexcept
         {
             return m_fsm.getState();
         }
