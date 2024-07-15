@@ -40,9 +40,9 @@ namespace vslib
             };
             m_measurements = {0};   // sets all elements to 0
 #else
-            m_interrupt_handler = [converter]()
+            m_interrupt_handler = [converter, handler_function]()
             {
-                handler_function(*converter)
+                handler_function(*converter);
             };
 #endif
         }
