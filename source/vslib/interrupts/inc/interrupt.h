@@ -47,7 +47,9 @@ namespace vslib
 #endif
         }
 
-        virtual ~Interrupt() = default;
+        virtual ~Interrupt()   = default;
+        Interrupt(Interrupt&)  = delete;
+        Interrupt(Interrupt&&) = delete;
 
         //! Starts the interrupt
         virtual void start() = 0;
