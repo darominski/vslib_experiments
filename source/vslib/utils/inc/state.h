@@ -90,6 +90,8 @@ namespace vslib::utils
       private:
         StateMachine m_fsm;
 
+        bool m_first{true};
+
         ::vslib::Component&       m_root;
         ::vslib::IConverter*      m_converter{nullptr};
         ::vslib::ParameterSetting m_parameter_setting_task;
@@ -97,18 +99,24 @@ namespace vslib::utils
 
         void onInitialization()
         {
-            bmboot::notifyPayloadStarted();
+            if (m_first)
+            {
+                std::cout << "Startup\n";
+                bmboot::notifyPayloadStarted();
+            }
             // everything generic that needs to be done to initialize the vloop
         }
 
         void onUnconfigured()
         {
+            std::cout << "unconf\n";
             // upload the Parameter map so that GUI can be built based on it and Parameters can be eventually set
             m_parameter_map.uploadParameterMap();
         }
 
         void onConfiguring()
         {
+            std::cout << "configuring\n";
             // receive and process commands
             m_parameter_setting_task.receiveJsonCommand();
             // when done, transition away
@@ -117,8 +125,15 @@ namespace vslib::utils
 
         void onConfigured()
         {
+            std::cout << "configured ";
             // initialize user code (RT)
-            m_converter->init();
+            if (m_first)
+            {
+                m_converter->init();
+                m_first = false;
+            }
+            std::cout << "and initialized\n";
+
             // background task running continuously
             while (true)
             {
@@ -136,17 +151,19 @@ namespace vslib::utils
                 m_converter->backgroundTask();
 
                 // for testing purposes:
-                break;
+                // break;
             }
         }
 
         TransResVS toConfiguring()
         {
+            std::cout << "to conf\n";
             return {VSStates::configuring};
         }
 
         TransResVS toUnconfigured()
         {
+            std::cout << "to unconf\n";
             // allow transition if all Parameters have been initialized
             if (!vslib::utils::parametersInitialized())
             {
@@ -158,6 +175,7 @@ namespace vslib::utils
 
         TransResVS toConfigured()
         {
+            std::cout << "to conf\n";
             // allow transition if all Parameters have been initialized
             if (vslib::utils::parametersInitialized())
             {

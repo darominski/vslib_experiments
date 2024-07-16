@@ -102,7 +102,7 @@ int main()
     // END OF VERBOSE TEST CODE
 
     // User-side configuration:
-    // user::setParameters(converter.pid_1);
+    user::setParameters(converter.pid_1);
 
     // transition to configured:
     vs_state.update();
