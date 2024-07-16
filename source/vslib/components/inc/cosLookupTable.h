@@ -27,7 +27,7 @@ namespace vslib
             : Component("CosLookupTable", name, parent),
               m_function(
                   "data", this,
-                  fgc4::utils::generateFunction<double, double>(cos, 0.0, 2.0 * std::numbers::pi, number_points), true
+                  fgc4::utils::generateFunction<float, float>(cos, 0.0, 2.0 * std::numbers::pi, number_points), true
               )
         {
             assert(number_points >= 2);
@@ -37,7 +37,7 @@ namespace vslib
         //!
         //! @param input_x Value to be looked up in the table
         //! @return Interpolated function value closest to the input_x
-        [[nodiscard]] auto interpolate(double input_x)
+        [[nodiscard]] auto interpolate(float input_x)
         {
             return m_function.interpolate(input_x);
         }
@@ -46,13 +46,13 @@ namespace vslib
         //!
         //! @param input_x Value to be looked up in the table
         //! @return Interpolated function value closest to the input_x
-        [[nodiscard]] auto operator()(double input_x)
+        [[nodiscard]] auto operator()(float input_x)
         {
             return m_function.interpolate(input_x);
         }
 
       private:
         //!< Table holding the cosine function and providing interpolation functionality
-        PeriodicLookupTable<double, double> m_function;
+        PeriodicLookupTable<float, float> m_function;
     };
 }   // namespace vslib

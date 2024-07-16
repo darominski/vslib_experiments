@@ -117,35 +117,39 @@ namespace user
         static void RTTask(Converter& converter)
         {
             // TEST 1: Load data from Aurora, convert to float, send it away
-            for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
-            {
-                // const vslib::FixedPoint<fractional_bits, uint32_t> in = s2r->data[i].value;
-                volatile const uint32_t in       = converter.m_s2r->data[i].value;
-                volatile const float    modified = cast<uint32_t, float>(in) * 2.0;
-                converter.m_r2s->data[i].value   = cast<float, uint32_t>(modified);
-            }
-            converter.m_r2s->num_data = converter.m_s2r->num_data;
-            converter.m_r2s->tkeep = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;   // what does this do?
+            // for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
+            // {
+            //     // const vslib::FixedPoint<fractional_bits, uint32_t> in = s2r->data[i].value;
+            //     volatile const uint32_t in       = converter.m_s2r->data[i].value;
+            //     volatile const float    modified = cast<uint32_t, float>(in) * 2.0;
+            //     converter.m_r2s->data[i].value   = cast<float, uint32_t>(modified);
+            // }
+            // converter.m_r2s->num_data = converter.m_s2r->num_data;
+            // converter.m_r2s->tkeep = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;   // what does this
+            // do? PASSED!
 
             // TEST 2: Load data, perform operation on it, send it away
             // read data in from PL to fixed-point type
-            // constexpr int fractional_bits = 14;
-            // volatile const float a = cast<volatile float, volatile uint32_t>(converter.m_s2r->data[0].value);
-            // volatile const float b = cast<volatile float, volatile uint32_t>(converter.m_s2r->data[1].value);
-            // volatile const float c = cast<volatile float, volatile uint32_t>(converter.m_s2r->data[2].value);
-            // volatile const float wt = cast<volatile float, volatile uint32_t>(converter.m_s2r->data[3].value);
+            float a  = cast<uint32_t, float>(converter.m_s2r->data[0].value);
+            float b  = cast<uint32_t, float>(converter.m_s2r->data[1].value);
+            float c  = cast<uint32_t, float>(converter.m_s2r->data[2].value);
+            float wt = cast<uint32_t, float>(converter.m_s2r->data[3].value);
 
-            // // use the numbers
-            // auto [d, q, zero_park] = converter.park.transform(a, b, c, wt);
+            // use the numbers
+            auto [d, q, zero_park] = converter.park.transform(a, b, c, wt);
 
-            // // convert the output to Aurora-friendly uint32_t
+            // convert the output to Aurora-friendly uint32_t
 
-            // // send it away
-            // converter.m_r2s->data[0].value = cast<volatile uint32_t, double>(d);
-            // converter.m_r2s->data[1].value = cast<volatile uint32_t, double>(q);
-            // converter.m_r2s->data[2].value = cast<volatile uint32_t, double>(zero_out);
+            // send it away
+            std::cout << a << " " << b << " " << c << " " << wt << " " << d << " " << q << "\n";
 
-            // converter.m_r2s->num_data = 3;
+            for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
+            {
+                converter.m_r2s->data[i].value = converter.m_s2r->data[i].value;
+            }
+            // kria transfer rate: 100us
+            converter.m_r2s->num_data = converter.m_s2r->num_data;
+            converter.m_r2s->tkeep = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;   // what does this do?
 
             converter.m_r2s->ctrl |= REG_TO_STREAM_CTRL_START;
         }

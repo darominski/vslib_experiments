@@ -37,8 +37,8 @@ namespace vslib
         //! @param theta theta angle (in radians) between q and a
         //! @param offset Offset angle alignment (in radians): 0 is q alignment, pi/2 for d and a alignment
         //! @return Tuple of d, q, 0 values
-        [[nodiscard]] std::tuple<double, double, double>
-        transform(double a, double b, double c, double theta, double offset = 0) noexcept;
+        [[nodiscard]] std::tuple<float, float, float>
+        transform(float a, float b, float c, float theta, float offset = 0) noexcept;
 
       private:
         SinLookupTable m_sin;   //!< Lookup table holding sine function
