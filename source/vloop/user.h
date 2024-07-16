@@ -1,11 +1,8 @@
 #pragma once
 
-#include "component.h"
-#include "converter.h"
-// Fill your includes here
-#include "pid.h"
-#include "timerInterrupt.h"
-// End of your includes
+#include "peripherals/reg_to_stream.h"
+#include "peripherals/stream_to_reg.h"
+#include "vslib.h"
 
 namespace user
 {
@@ -15,15 +12,21 @@ namespace user
       public:
         Converter(Component& root) noexcept
             : vslib::IConverter("Example", &root),
-              pid_1("pid_1", this),
-              interrupt_1("timer_1", this, 10.0, RTTask1)
+              m_interrupt_id{121 + 0},   // Jonas's definition
+              interrupt_1("aurora", this, m_interrupt_id, vslib::InterruptPriority::high, RTTask),
+              clarke("transform_1", this),
+              park("transform_2", this),
+              m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
+              m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
+
         {
             // initialize all your objects that need initializing
         }
 
         // Define your public Components here
-        vslib::PID                       pid_1;
-        vslib::TimerInterrupt<Converter> interrupt_1;
+        vslib::PeripheralInterrupt<Converter> interrupt_1;
+        vslib::ClarkeTransform                clarke;
+        vslib::ParkTransform                  park;
 
         // ...
         // end of your Components
@@ -34,6 +37,37 @@ namespace user
 
         void init() override
         {
+            if (m_s2r->ctrl & STREAM_TO_REG_CTRL_PMA_INIT)
+            {
+                m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_PMA_INIT;
+            }
+            sleep(2);
+            if (m_s2r->ctrl & STREAM_TO_REG_CTRL_RESET_PB)
+            {
+                m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_RESET_PB;
+            }
+            sleep(1);
+
+            m_s2r->ctrl |= STREAM_TO_REG_CTRL_SEL_OUTPUT;
+
+            if (!(m_s2r->status
+                  & (STREAM_TO_REG_STATUS_CHANNEL_UP | STREAM_TO_REG_STATUS_GT_PLL_LOCK | STREAM_TO_REG_STATUS_LANE_UP
+                     | STREAM_TO_REG_STATUS_PLL_LOCKED | STREAM_TO_REG_STATUS_GT_POWERGOOD)))
+            {
+                printf("Unexpected status: 0x%#08x\n", m_s2r->ctrl);
+            }
+
+            if (m_s2r->status & (STREAM_TO_REG_STATUS_LINK_RESET | STREAM_TO_REG_STATUS_SYS_RESET))
+            {
+                printf("Link is in reset\n");
+            }
+
+            if (m_s2r->status & (STREAM_TO_REG_STATUS_SOFT_ERR | STREAM_TO_REG_STATUS_HARD_ERR))
+            {
+                printf("Got an error\n");
+            }
+
+            printf("Link up and good. Ready to receive data.\n");
             interrupt_1.start();
         }
 
@@ -72,15 +106,52 @@ namespace user
             }
         }
 
-        static void RTTask1(Converter& converter)
+        template<typename T, typename U>
+        T cast(U input)
         {
-            for (int index = 0; index < 100; index++)
-            {
-                // volatile double const input = 2.0 * M_PI * (std::rand() / static_cast<double>(RAND_MAX));
-                volatile double const input    = 1.0;
-                volatile auto         variable = converter.pid_1.control(input, input + 2);
-            }
+            return *reinterpret_cast<T*>(&input);
         }
+
+        static void RTTask(Converter& converter)
+        {
+            // TEST 1: Load data from Aurora, convert to float, send it away
+            for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
+            {
+                // const vslib::FixedPoint<fractional_bits, uint32_t> in = s2r->data[i].value;
+                volatile const uint32_t in     = converter.m_s2r->data[i].value;
+                converter.m_r2s->data[i].value = in;
+            }
+            converter.m_r2s->num_data = converter.m_s2r->num_data;
+            converter.m_r2s->tkeep = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;   // what does this do?
+
+            // TEST 2: Load data, perform operation on it, send it away
+            // read data in from PL to fixed-point type
+            // constexpr int fractional_bits = 14;
+            // volatile const float a = cast<volatile float, volatile uint32_t>(converter.m_s2r->data[0].value);
+            // volatile const float b = cast<volatile float, volatile uint32_t>(converter.m_s2r->data[1].value);
+            // volatile const float c = cast<volatile float, volatile uint32_t>(converter.m_s2r->data[2].value);
+            // volatile const float wt = cast<volatile float, volatile uint32_t>(converter.m_s2r->data[3].value);
+
+            // // use the numbers
+            // auto [d, q, zero_park] = converter.park.transform(a, b, c, wt);
+
+            // // convert the output to Aurora-friendly uint32_t
+
+            // // send it away
+            // converter.m_r2s->data[0].value = cast<volatile uint32_t, double>(d);
+            // converter.m_r2s->data[1].value = cast<volatile uint32_t, double>(q);
+            // converter.m_r2s->data[2].value = cast<volatile uint32_t, double>(zero_out);
+
+            // converter.m_r2s->num_data = 3;
+
+            converter.m_r2s->ctrl |= REG_TO_STREAM_CTRL_START;
+        }
+
+      private:
+        int m_interrupt_id;
+
+        volatile stream_to_reg* m_s2r;
+        volatile reg_to_stream* m_r2s;
     };
 
 

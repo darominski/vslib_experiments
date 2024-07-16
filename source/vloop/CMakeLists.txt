@@ -45,6 +45,7 @@ target_link_libraries(${APP} PRIVATE
 # Include directories for headers
 target_include_directories(${APP} PRIVATE
     ${CMAKE_SOURCE_DIR}/../utils # header files shared between fgc4 bare-metal applications
+    ${CMAKE_SOURCE_DIR}/../hal/inc
 )
 
 ############################################################
