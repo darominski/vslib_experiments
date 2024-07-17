@@ -22,6 +22,7 @@ namespace vslib::utils
 {
     enum class VSStates
     {
+        start,
         initialization,
         unconfigured,
         configuring,
@@ -49,7 +50,7 @@ namespace vslib::utils
 
       public:
         VSMachine(Component& root)
-            : m_fsm(*this, VSStates::initialization),
+            : m_fsm(*this, VSStates::start),
               m_root(root),
               m_parameter_setting_task{
                   (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address, root},
@@ -60,8 +61,9 @@ namespace vslib::utils
             // CAUTION: The order of transition method matters
 
             // clang-format off
-            m_fsm.addState(VSStates::initialization,  &VSMachine::onInitialization,  {&VSMachine::toUnconfigured});
-            m_fsm.addState(VSStates::unconfigured,    &VSMachine::onUnconfigured,  {&VSMachine::toConfiguring});
+            m_fsm.addState(VSStates::start,           &VSMachine::onStart,  {&VSMachine::toInitialization});
+            m_fsm.addState(VSStates::initialization,  &VSMachine::onInitialization,  {&VSMachine::toUnconfiguredFromInit});
+            m_fsm.addState(VSStates::unconfigured,    &VSMachine::onUnconfigured,  {&VSMachine::toConfiguring, &VSMachine::toConfigured});
             m_fsm.addState(VSStates::configuring,     &VSMachine::onConfiguring,  {&VSMachine::toUnconfigured, &VSMachine::toConfigured});
             m_fsm.addState(VSStates::configured,      &VSMachine::onConfigured,  {&VSMachine::toConfiguring});
             // clang-format on
@@ -97,26 +99,24 @@ namespace vslib::utils
         ::vslib::ParameterSetting m_parameter_setting_task;
         ::vslib::ParameterMap     m_parameter_map;
 
+        void onStart()
+        {
+        }
+
         void onInitialization()
         {
-            if (m_first)
-            {
-                std::cout << "Startup\n";
-                bmboot::notifyPayloadStarted();
-            }
+            bmboot::notifyPayloadStarted();
             // everything generic that needs to be done to initialize the vloop
         }
 
         void onUnconfigured()
         {
-            std::cout << "unconf\n";
             // upload the Parameter map so that GUI can be built based on it and Parameters can be eventually set
             m_parameter_map.uploadParameterMap();
         }
 
         void onConfiguring()
         {
-            std::cout << "configuring\n";
             // receive and process commands
             m_parameter_setting_task.receiveJsonCommand();
             // when done, transition away
@@ -125,14 +125,12 @@ namespace vslib::utils
 
         void onConfigured()
         {
-            std::cout << "configured ";
             // initialize user code (RT)
             if (m_first)
             {
                 m_converter->init();
                 m_first = false;
             }
-            std::cout << "and initialized\n";
 
             // background task running continuously
             while (true)
@@ -161,10 +159,25 @@ namespace vslib::utils
             return {VSStates::configuring};
         }
 
+        TransResVS toInitialization()
+        {
+            std::cout << "to init\n";
+            bmboot::notifyPayloadStarted();
+
+            // allow transition if all Parameters have been initialized
+            return {VSStates::initialization};
+        }
+
+        TransResVS toUnconfiguredFromInit()
+        {
+            std::cout << "to unconf from init\n";
+            return {VSStates::unconfigured};
+        }
+
         TransResVS toUnconfigured()
         {
             std::cout << "to unconf\n";
-            // allow transition if all Parameters have been initialized
+            // transition back to unconfigured if Parameters were not initialized
             if (!vslib::utils::parametersInitialized())
             {
                 return {VSStates::unconfigured};

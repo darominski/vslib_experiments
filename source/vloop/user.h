@@ -16,7 +16,6 @@ namespace user
               interrupt_1("aurora", this, m_interrupt_id, vslib::InterruptPriority::high, RTTask),
               clarke("transform_1", this),
               park("transform_2", this),
-              pid_1("pid_1", this),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
 
@@ -28,7 +27,6 @@ namespace user
         vslib::PeripheralInterrupt<Converter> interrupt_1;
         vslib::ClarkeTransform                clarke;
         vslib::ParkTransform                  park;
-        vslib::PID                            pid_1;
 
         // ...
         // end of your Components

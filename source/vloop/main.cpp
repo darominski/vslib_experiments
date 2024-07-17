@@ -83,18 +83,18 @@ int main()
 
     // VSlib-side initialization:
     vslib::utils::VSMachine vs_state(root);   // initial state: initalization
-    vs_state.update();                        // triggers initialization
+    vs_state.update();                        // start -> initialization
 
     // User-side initialization:
-
+    std::cout << "Initializing user-converter\n";
     user::Converter converter(root);
     vs_state.setConverter(&converter);
+    std::cout << "done\n";
 
     // No Component declarations beyond this point!
     // ************************************************************
 
-    // transition to unconfigured:
-    vs_state.update();
+    vs_state.update();   // initialization -> unconfigured
 
     // VERBOSE TEST CODE
     std::cout << std::boolalpha << "Configured? (expected false) " << vs_state.isConfigured()
@@ -102,7 +102,7 @@ int main()
     // END OF VERBOSE TEST CODE
 
     // User-side configuration:
-    user::setParameters(converter.pid_1);
+    // user::setParameters(converter.pid_1);
 
     // transition to configured:
     vs_state.update();
