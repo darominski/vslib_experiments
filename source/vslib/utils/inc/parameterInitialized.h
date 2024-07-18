@@ -13,7 +13,12 @@ namespace vslib::utils
             std::cbegin(parameters), std::cend(parameters),
             [](const auto& parameter)
             {
-                return parameter.second.get().isInitialized();
+                bool const initialized = parameter.second.get().isInitialized();
+                if (!initialized)
+                {
+                    std::cerr << parameter.first << std::endl;
+                }
+                return initialized;
             }
         );
     }

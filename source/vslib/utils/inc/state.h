@@ -117,6 +117,7 @@ namespace vslib::utils
 
         void onConfiguring()
         {
+            std::cout << "on configuring\n";
             // receive and process commands
             m_parameter_setting_task.receiveJsonCommand();
             // when done, transition away
@@ -126,11 +127,15 @@ namespace vslib::utils
         void onConfigured()
         {
             // initialize user code (RT)
+            std::cout << "on configured\n";
+            sleep(2);
+            std::cout << (m_converter == nullptr) << std::endl;
             if (m_first)
             {
                 m_converter->init();
                 m_first = false;
             }
+            std::cout << "converter configured\n";
 
             // background task running continuously
             while (true)
@@ -155,7 +160,7 @@ namespace vslib::utils
 
         TransResVS toConfiguring()
         {
-            std::cout << "to conf\n";
+            std::cout << "to configuring\n";
             return {VSStates::configuring};
         }
 

@@ -73,6 +73,27 @@ namespace user
         controller.flipBufferState();
     }
 
+    template<size_t N>
+    void setRSTParameters(vslib::RST<N - 1>& controller)
+    {
+        const auto r = std::array<double, N>{1.0};
+        const auto s = std::array<double, N>{1.0};
+        const auto t = std::array<double, N>{1.0};
+
+        controller.actuation_limits.min.setJsonValue(0);
+        controller.actuation_limits.max.setJsonValue(0.1);
+        controller.actuation_limits.dead_zone.setJsonValue(std::array<double, 2>{0, 0});
+        controller.actuation_limits.verifyParameters();
+        controller.actuation_limits.flipBufferState();
+
+        controller.r.setJsonValue(r);
+        controller.s.setJsonValue(s);
+        controller.t.setJsonValue(t);
+
+        controller.verifyParameters();
+        controller.flipBufferState();
+    }
+
 }   // namespace user
 
 // extern user::Converter converter;
@@ -102,7 +123,7 @@ int main()
     // END OF VERBOSE TEST CODE
 
     // User-side configuration:
-    // user::setParameters(converter.pid_1);
+    user::setRSTParameters<3>(converter.rst_1);
 
     // transition to configured:
     vs_state.update();
