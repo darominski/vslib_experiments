@@ -115,36 +115,40 @@ namespace user
         static void RTTask(Converter& converter)
         {
             // TEST 1: Load data from Aurora, convert to float, send it away
-            // for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
-            // {
-            //     // const vslib::FixedPoint<fractional_bits, uint32_t> in = s2r->data[i].value;
-            //     volatile const uint32_t in       = converter.m_s2r->data[i].value;
-            //     volatile const float    modified = cast<uint32_t, float>(in) * 2.0;
-            //     converter.m_r2s->data[i].value   = cast<float, uint32_t>(modified);
-            // }
+            for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
+            {
+                //     // const vslib::FixedPoint<fractional_bits, uint32_t> in = s2r->data[i].value;
+                volatile const uint32_t in = converter.m_s2r->data[i].value;
+                //     volatile const float    modified = cast<uint32_t, float>(in) * 10.0;
+                //     converter.m_r2s->data[i].value   = cast<float, uint32_t>(modified);
+            }
             // converter.m_r2s->num_data = converter.m_s2r->num_data;
             // converter.m_r2s->tkeep = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;   // what does this
-            // do? PASSED!
+            // // do? PASSED!
 
             // TEST 2: Load data, perform operation on it, send it away
             // read data in from PL to fixed-point type
-            float a  = cast<uint32_t, float>(converter.m_s2r->data[0].value);
-            float b  = cast<uint32_t, float>(converter.m_s2r->data[1].value);
-            float c  = cast<uint32_t, float>(converter.m_s2r->data[2].value);
-            float wt = cast<uint32_t, float>(converter.m_s2r->data[3].value);
+            float a  = cast<uint32_t, float>(converter.m_s2r->data[1].value);
+            float b  = cast<uint32_t, float>(converter.m_s2r->data[3].value);
+            float c  = cast<uint32_t, float>(converter.m_s2r->data[5].value);
+            float wt = cast<uint32_t, float>(converter.m_s2r->data[7].value);
 
             // use the numbers
-            auto [d, q, zero_park] = converter.park.transform(a, b, c, wt);
+            auto [d, q, zero] = converter.park.transform(a, b, c, wt);
 
             // convert the output to Aurora-friendly uint32_t
 
             // send it away
-            std::cout << a << " " << b << " " << c << " " << wt << " " << d << " " << q << "\n";
+            std::cout << a << " " << b << " " << c << " " << wt << " " << d << " " << q << " " << zero << "\n";
 
             for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
             {
                 converter.m_r2s->data[i].value = converter.m_s2r->data[i].value;
             }
+            converter.m_r2s->data[1].value = cast<float, uint32_t>(d);
+            converter.m_r2s->data[3].value = cast<float, uint32_t>(q);
+            converter.m_r2s->data[5].value = cast<float, uint32_t>(zero);
+
             // kria transfer rate: 100us
             converter.m_r2s->num_data = converter.m_s2r->num_data;
             converter.m_r2s->tkeep = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;   // what does this do?
