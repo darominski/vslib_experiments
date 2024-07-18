@@ -50,23 +50,12 @@ namespace vslib
             m_references[m_head]   = reference;
 
             double actuation = m_t[0] * m_references[m_head] - m_r[0] * m_measurements[m_head];
-            // int64_t buffer_index = m_head;
             for (int64_t index = 1; index < ControllerLength; index++)
             {
-                int64_t buffer_index;
-                if constexpr ((ControllerLength & (ControllerLength - 1)) == 0)
+                int64_t buffer_index = (m_head - index);
+                if (buffer_index < 0)
                 {
-                    // if ControllerLength is a power of two, the optimisation below is possible,
-                    // speeding up execution by around 10%
-                    buffer_index = (m_head - index) & ControllerLength;
-                }
-                else
-                {
-                    buffer_index = (m_head - index);
-                    if (buffer_index < 0)
-                    {
-                        buffer_index += ControllerLength;
-                    }
+                    buffer_index += ControllerLength;
                 }
 
                 actuation += m_t[index] * m_references[buffer_index] - m_r[index] * m_measurements[buffer_index]
@@ -76,17 +65,10 @@ namespace vslib
 
             m_actuations[m_head] = actuation;   // update actuations
 
-            if constexpr ((ControllerLength & (ControllerLength - 1)) == 0)
+            m_head++;
+            if (m_head == ControllerLength)
             {
-                m_head = (m_head + 1) & ControllerLength;
-            }
-            else
-            {
-                m_head++;
-                if (m_head == ControllerLength)
-                {
-                    m_head -= ControllerLength;
-                }
+                m_head -= ControllerLength;
             }
 
             return actuation;
@@ -98,31 +80,14 @@ namespace vslib
         void updateReference(double updated_actuation)
         {
             // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
-            m_actuations[m_head - 1] = updated_actuation;
-
-            double reference = m_s[0] * updated_actuation + m_r[0] * m_measurements[m_head - 1];
-            for (int64_t index = 1; index < ControllerLength; index++)
+            size_t index = m_head - 1;
+            if (m_head == 0)
             {
-                int64_t buffer_index;
-                if constexpr ((ControllerLength & (ControllerLength - 1)) == 0)
-                {
-                    // if ControllerLength is a power of two, the optimisation below is possible,
-                    // speeding up execution by around 10%
-                    buffer_index = (m_head - 1 - index) & ControllerLength;
-                }
-                else
-                {
-                    buffer_index = (m_head - 1 - index);
-                    if (buffer_index < 0)
-                    {
-                        buffer_index += ControllerLength;
-                    }
-                }
-
-                reference += m_s[index] * m_actuations[buffer_index] - m_r[index] * m_measurements[buffer_index]
-                             - m_t[index] * m_references[buffer_index];
+                index = ControllerLength - 1;
             }
-            m_references[m_head - 1] = reference / m_t[0];
+            const double delta_actuation = updated_actuation - m_actuations[index];
+            m_actuations[index]          = updated_actuation;
+            m_references[index]          += delta_actuation * m_s[0] / m_t[0];
         }
 
         //! Resets the controller to the initial state by zeroing the history.
@@ -329,6 +294,7 @@ namespace vslib
                            - m_r[1] * m_measurements[1] + m_t[2] * m_references[2] - m_r[2] * m_measurements[2]
                            - (m_s[1] * m_actuations[1] + m_s[2] * m_actuations[2]))
                           / m_s[0];
+
         return m_actuations[0];
     }
 
@@ -339,12 +305,9 @@ namespace vslib
     inline void RSTController<3>::updateReference(double updated_actuation)
     {
         // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
-        m_actuations[0]      = updated_actuation;
-        const double old_ref = m_references[0];
-        m_references[0]      = (m_s[0] * updated_actuation + m_r[0] * m_measurements[0] + m_s[1] * m_actuations[1]
-                           + m_r[1] * m_measurements[1] - m_t[1] * m_references[1] + m_s[2] * m_actuations[2]
-                           + m_r[2] * m_measurements[2] - m_t[2] * m_references[2])
-                          / m_t[0];
+        const double delta_actuation = updated_actuation - m_actuations[0];
+        m_actuations[0]              = updated_actuation;
+        m_references[0]              += delta_actuation * m_s[0] / m_t[0];
     }
 
 }   // namespace vslib

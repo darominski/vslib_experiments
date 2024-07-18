@@ -241,7 +241,7 @@ TEST_F(RSTTest, RSTVerifyParameters)
     );
 }
 
-//! Checks that the calculated actuation of RST is as expectedf
+//! Checks that the calculated actuation of RST is as expected with order 2
 TEST_F(RSTTest, RSTCalculateActuation)
 {
     std::string      name  = "rst_6";
@@ -280,10 +280,53 @@ TEST_F(RSTTest, RSTCalculateActuation)
     EXPECT_EQ(rst.getActuations(), expected_actuation_history);
 }
 
+
+//! Checks that the calculated actuation of RST is as expected with order 3
+TEST_F(RSTTest, RSTCalculateActuationOrder3)
+{
+    std::string      name  = "rst_7";
+    constexpr size_t order = 3;
+
+    RST<order> rst(name, nullptr);
+
+    // set parameters
+    std::array<double, order + 1> r_value = {0.1, 0.2, 0.3, -0.4};
+    std::array<double, order + 1> s_value = {0.5, 0.6, 0.7, 0.1};
+    std::array<double, order + 1> t_value = {0.15, 0.25, 0.35, 0.05};
+
+    set_rst_parameters<order>(rst, r_value, s_value, t_value);
+    const auto maybe_warning = rst.verifyParameters();
+    ASSERT_FALSE(maybe_warning.has_value());
+
+    // fill the histories to enable RST:
+    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_TRUE(rst.isReady());
+    // now the RST is enabled and actuation can be calculated
+
+    double const set_point_value   = 3.14159;
+    double const measurement_value = 1.111;
+
+    const double expected_actuation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
+    const double actuation          = rst.control(measurement_value, set_point_value);
+    EXPECT_EQ(actuation, expected_actuation);
+
+    std::array<double, order + 1> expected_measurement_history = {measurement_value, 0, 0};
+    EXPECT_EQ(rst.getMeasurements(), expected_measurement_history);
+
+    std::array<double, order + 1> expected_reference_history = {set_point_value, 0, 0};
+    EXPECT_EQ(rst.getReferences(), expected_reference_history);
+
+    std::array<double, order + 1> expected_actuation_history = {expected_actuation, 0, 0};
+    EXPECT_EQ(rst.getActuations(), expected_actuation_history);
+}
+
+
 //! Checks that the calculated actuation of RST is as expected
 TEST_F(RSTTest, RSTCalculateMultipleActuations)
 {
-    std::string      name  = "rst_7";
+    std::string      name  = "rst_8";
     constexpr size_t order = 2;
 
     RST<order> rst(name, nullptr);
@@ -336,7 +379,7 @@ TEST_F(RSTTest, RSTCalculateMultipleActuations)
 //! Checks that the calculated actuation of RST is as expected
 TEST_F(RSTTest, RSTReCalculateReference)
 {
-    std::string      name  = "rst_8";
+    std::string      name  = "rst_9";
     constexpr size_t order = 2;
 
     RST<order> rst(name, nullptr);
@@ -366,7 +409,7 @@ TEST_F(RSTTest, RSTReCalculateReference)
     EXPECT_EQ(rst.getActuations(), expected_actuation_history);
 
     // reference should be back-calculated
-    double const corrected_reference = (s_value[0] * limited_actuation + r_value[0] * measurement_value) / t_value[0];
+    double const corrected_reference = set_point_value + s_value[0] * (limited_actuation - actuation) / t_value[0];
     std::array<double, order + 1> expected_reference_history = {corrected_reference, 0, 0};
     EXPECT_EQ(rst.getReferences(), expected_reference_history);
 }
@@ -375,17 +418,17 @@ TEST_F(RSTTest, RSTReCalculateReference)
 //! defined max limit
 TEST_F(RSTTest, RSTLimitedActuation)
 {
-    std::string      name  = "rst_9";
+    std::string      name  = "rst_10";
     constexpr size_t order = 2;
 
     RST<order> rst(name, nullptr);
 
     // set parameters
     std::array<double, order + 1> r_value       = {0.1, 0.2, 0.3};
-    std::array<double, order + 1> s_value       = {0.5, 0.6, 0.7};
+    std::array<double, order + 1> s_value       = {0.5, 0.6, 0.2};
     std::array<double, order + 1> t_value       = {0.15, 0.25, 0.35};
     const double                  min_actuation = -1;
-    const double                  max_actuation = 10;
+    const double                  max_actuation = 1;
 
     set_rst_parameters<order>(rst, r_value, s_value, t_value, min_actuation, max_actuation);
     const auto maybe_warning = rst.verifyParameters();
@@ -397,7 +440,7 @@ TEST_F(RSTTest, RSTLimitedActuation)
     EXPECT_TRUE(rst.isReady());
 
     // first iteration
-    const double set_point_value   = 100;
+    const double set_point_value   = 1000;
     const double measurement_value = 0.5;
 
     double unlimited_calculation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
@@ -406,52 +449,153 @@ TEST_F(RSTTest, RSTLimitedActuation)
     EXPECT_NEAR(calculated_actuation, max_actuation, 1e-6);
 
     const double corrected_reference
-        = (s_value[0] * calculated_actuation + r_value[0] * measurement_value) / t_value[0];
+        = set_point_value + (calculated_actuation - unlimited_calculation) * s_value[0] / t_value[0];
     std::array<double, order + 1> expected_reference_history = {corrected_reference, 0, 0};
     EXPECT_EQ(rst.getReferences(), expected_reference_history);
 
     // second iteration
     const double second_unlimited_calculation
-        = ((t_value[0] + t_value[1]) * set_point_value
-           - (r_value[0] * calculated_actuation + r_value[1] * measurement_value) - (s_value[1] * calculated_actuation))
+        = (t_value[0] * set_point_value + t_value[1] * corrected_reference - r_value[0] * measurement_value
+           - r_value[1] * measurement_value - calculated_actuation * s_value[1])
           / s_value[0];
+
     const double second_calculated_actuation = rst.control(measurement_value, set_point_value);
     EXPECT_NE(second_calculated_actuation, second_unlimited_calculation);
     EXPECT_NEAR(second_calculated_actuation, max_actuation, 1e-6);
 
     const double second_corrected_reference
-        = (s_value[0] * second_calculated_actuation + r_value[0] * measurement_value + s_value[1] * calculated_actuation
-           + r_value[1] * measurement_value - t_value[1] * corrected_reference)
-          / t_value[0];
+        = set_point_value + (second_calculated_actuation - second_unlimited_calculation) * s_value[0] / t_value[0];
 
     expected_reference_history = {second_corrected_reference, corrected_reference, 0};
-    EXPECT_EQ(rst.getReferences(), expected_reference_history);
+    EXPECT_NEAR(rst.getReferences()[0], expected_reference_history[0], 1e-6);
+    EXPECT_NEAR(rst.getReferences()[1], expected_reference_history[1], 1e-6);
+    EXPECT_NEAR(rst.getReferences()[2], expected_reference_history[2], 1e-6);
 
     // third iteration
+    const double third_unlimited_calculation
+        = (t_value[0] * set_point_value + t_value[1] * second_corrected_reference + t_value[2] * corrected_reference
+           - (r_value[0] + r_value[1] + r_value[2]) * measurement_value
+           - (s_value[1] * second_calculated_actuation + s_value[2] * calculated_actuation))
+          / s_value[0];
     const double third_calculated_actuation = rst.control(measurement_value, set_point_value);
     EXPECT_NEAR(third_calculated_actuation, max_actuation, 1e-6);
 
     const double third_corrected_reference
-        = (s_value[0] * third_calculated_actuation + r_value[0] * measurement_value
-           + s_value[1] * second_calculated_actuation + r_value[1] * measurement_value
-           - t_value[1] * second_corrected_reference + s_value[2] * calculated_actuation
-           + r_value[2] * measurement_value - t_value[2] * corrected_reference)
-          / t_value[0];
+        = set_point_value + (third_calculated_actuation - third_unlimited_calculation) * s_value[0] / t_value[0];
 
     expected_reference_history = {third_corrected_reference, second_corrected_reference, corrected_reference};
-    EXPECT_EQ(rst.getReferences(), expected_reference_history);
+    EXPECT_NEAR(rst.getReferences()[0], expected_reference_history[0], 1e-6);
+    EXPECT_NEAR(rst.getReferences()[1], expected_reference_history[1], 1e-6);
+    EXPECT_NEAR(rst.getReferences()[2], expected_reference_history[2], 1e-6);
 
     // fourth iteration, history wraps around here
+    const double fourth_unlimited_calculation
+        = (t_value[0] * set_point_value + t_value[1] * third_corrected_reference
+           + t_value[2] * second_corrected_reference - (r_value[0] + r_value[1] + r_value[2]) * measurement_value
+           - (s_value[1] * third_calculated_actuation + s_value[2] * second_calculated_actuation))
+          / s_value[0];
     const double fourth_calculated_actuation = rst.control(measurement_value, set_point_value);
     EXPECT_NEAR(fourth_calculated_actuation, max_actuation, 1e-6);
 
     const double fourth_corrected_reference
-        = (s_value[0] * fourth_calculated_actuation + r_value[0] * measurement_value
-           + s_value[1] * third_calculated_actuation + r_value[1] * measurement_value
-           - t_value[1] * third_corrected_reference + s_value[2] * second_calculated_actuation
-           + r_value[2] * measurement_value - t_value[2] * second_corrected_reference)
-          / t_value[0];
+        = set_point_value + (fourth_calculated_actuation - fourth_unlimited_calculation) * s_value[0] / t_value[0];
 
     expected_reference_history = {fourth_corrected_reference, third_corrected_reference, second_corrected_reference};
+    EXPECT_NEAR(rst.getReferences()[0], expected_reference_history[0], 1e-6);
+    EXPECT_NEAR(rst.getReferences()[1], expected_reference_history[1], 1e-6);
+    EXPECT_NEAR(rst.getReferences()[2], expected_reference_history[2], 1e-6);
+}
+
+//! Checks that the calculated actuation of RST is as expected even if the initially calculated actuation violates the
+//! defined max limit
+TEST_F(RSTTest, RSTLimitedActuationOrder3)
+{
+    std::string      name  = "rst_11";
+    constexpr size_t order = 3;
+
+    RST<order> rst(name, nullptr);
+
+    // set parameters
+    std::array<double, order + 1> r_value       = {0.1, 0.2, 0.3, 0.01};
+    std::array<double, order + 1> s_value       = {0.5, 0.6, 0.2, 0.02};
+    std::array<double, order + 1> t_value       = {0.15, 0.25, 0.35, 0.03};
+    const double                  min_actuation = -1;
+    const double                  max_actuation = 1;
+
+    set_rst_parameters<order>(rst, r_value, s_value, t_value, min_actuation, max_actuation);
+    const auto maybe_warning = rst.verifyParameters();
+    ASSERT_FALSE(maybe_warning.has_value());
+
+    // fill the histories to enable RST:
+    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_EQ(rst.control(0, 0), 0);
+    EXPECT_TRUE(rst.isReady());
+
+    // first iteration
+    const double set_point_value   = 1000;
+    const double measurement_value = 0.5;
+
+    double unlimited_calculation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
+    double calculated_actuation  = rst.control(measurement_value, set_point_value);
+    EXPECT_NE(calculated_actuation, unlimited_calculation);
+    EXPECT_NEAR(calculated_actuation, max_actuation, 1e-6);
+
+    const double corrected_reference
+        = set_point_value + (calculated_actuation - unlimited_calculation) * s_value[0] / t_value[0];
+    std::array<double, order + 1> expected_reference_history = {corrected_reference, 0, 0};
     EXPECT_EQ(rst.getReferences(), expected_reference_history);
+
+    // second iteration
+    const double second_unlimited_calculation
+        = (t_value[0] * set_point_value + t_value[1] * corrected_reference - r_value[0] * measurement_value
+           - r_value[1] * measurement_value - calculated_actuation * s_value[1])
+          / s_value[0];
+
+    const double second_calculated_actuation = rst.control(measurement_value, set_point_value);
+    EXPECT_NE(second_calculated_actuation, second_unlimited_calculation);
+    EXPECT_NEAR(second_calculated_actuation, max_actuation, 1e-6);
+
+    const double second_corrected_reference
+        = set_point_value + (second_calculated_actuation - second_unlimited_calculation) * s_value[0] / t_value[0];
+
+    EXPECT_NEAR(rst.getReferences()[0], corrected_reference, 1e-6);
+    EXPECT_NEAR(rst.getReferences()[1], second_corrected_reference, 1e-6);
+
+    // third iteration
+    const double third_unlimited_calculation
+        = (t_value[0] * set_point_value + t_value[1] * second_corrected_reference + t_value[2] * corrected_reference
+           - (r_value[0] + r_value[1] + r_value[2]) * measurement_value
+           - (s_value[1] * second_calculated_actuation + s_value[2] * calculated_actuation))
+          / s_value[0];
+    const double third_calculated_actuation = rst.control(measurement_value, set_point_value);
+    EXPECT_NEAR(third_calculated_actuation, max_actuation, 1e-6);
+
+    const double third_corrected_reference
+        = set_point_value + (third_calculated_actuation - third_unlimited_calculation) * s_value[0] / t_value[0];
+
+    expected_reference_history = {third_corrected_reference, second_corrected_reference, corrected_reference};
+    EXPECT_NEAR(rst.getReferences()[0], corrected_reference, 1e-6);
+    EXPECT_NEAR(rst.getReferences()[1], second_corrected_reference, 1e-6);
+    EXPECT_NEAR(rst.getReferences()[2], third_corrected_reference, 1e-6);
+
+    // fourth iteration, history wraps around here
+    const double fourth_unlimited_calculation
+        = (t_value[0] * set_point_value + t_value[1] * third_corrected_reference
+           + t_value[2] * second_corrected_reference + t_value[3] * corrected_reference
+           - (r_value[0] + r_value[1] + r_value[2] + r_value[3]) * measurement_value
+           - (s_value[1] * third_calculated_actuation + s_value[2] * second_calculated_actuation
+              + s_value[3] * calculated_actuation))
+          / s_value[0];
+    std::cout << fourth_unlimited_calculation << std::endl;
+    const double fourth_calculated_actuation = rst.control(measurement_value, set_point_value);
+    EXPECT_NEAR(fourth_calculated_actuation, max_actuation, 1e-6);
+
+    const double fourth_corrected_reference
+        = set_point_value + (fourth_calculated_actuation - fourth_unlimited_calculation) * s_value[0] / t_value[0];
+
+    EXPECT_NEAR(rst.getReferences()[0], corrected_reference, 1e-6);
+    EXPECT_NEAR(rst.getReferences()[1], second_corrected_reference, 1e-6);
+    EXPECT_NEAR(rst.getReferences()[2], third_corrected_reference, 1e-6);
+    EXPECT_NEAR(rst.getReferences()[3], fourth_corrected_reference, 1e-6);
 }

@@ -48,9 +48,9 @@ namespace vslib
         //! @return Controller output of the iteration
         [[nodiscard]] double control(double measurement, double reference) noexcept
         {
-            if (!rst.isReady())
+            if (!isReady())
             {
-                rst.updateInputHistories(measurement, reference);
+                updateInputHistories(measurement, reference);
                 return 0;
             }
             const double actuation         = rst.control(measurement, reference);
