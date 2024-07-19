@@ -24,6 +24,11 @@ Examples
 Concepts
 ========
 
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   concepts/*
 
 
 Indices and tables
