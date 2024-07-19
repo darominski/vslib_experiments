@@ -45,8 +45,8 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr)
-        BoxFilter<5> filter("swd", root);
+        Component root("root", "root", nullptr);
+        BoxFilter<5> filter("swd", &root);
 
         std::array<double, 4> input = {1.0, 2.0, 3.0, 4.0};
 
@@ -90,8 +90,8 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr)
-        FIRFilter<5> filter("fir", root);
+        Component root("root", "root", nullptr);
+        FIRFilter<5> filter("fir", &root);
 
         // set filter coefficient array to the desired value
 
@@ -141,8 +141,8 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr)
-        IIRFilter<3> filter("iir", root);
+        Component root("root", "root", nullptr);
+        IIRFilter<3> filter("iir", &root);
 
         // set two filter numerator and denominator coefficient arrays to desired values
 

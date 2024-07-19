@@ -6,7 +6,6 @@ Transformations
 
 This chapter describes all electrical transformations implemented in the VSlib.
 
-
 General interface
 -----------------
 
@@ -50,8 +49,8 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component     root("root", nullptr);
-        ParkTransform park("park", root, 10000); // larger than default look-up table: 10k points
+        Component root("root", "root", nullptr);
+        ParkTransform park("park", &root, 10000); // larger than default look-up table: 10k points
         // no Parameters need setting
 
         const double i_a    = 1.0;
@@ -99,8 +98,8 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr);
-        ClarkeTransform  clarke("clarke", root);
+        Component root("root", "root", nullptr);
+        ClarkeTransform  clarke("clarke", &root);
         // no Parameters need setting
 
         const double i_a               = 2.0;
@@ -162,9 +161,9 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr);
+        Component root("root", "root", nullptr);
         // smaller than default look-up table, 100 points:
-        AlphaBetaZeroToDq0Transform transform("alpha-beta-zero_to_dq0", root, 100);
+        AlphaBetaZeroToDq0Transform transform("alpha-beta-zero_to_dq0", &root, 100);
 
         const double i_alpha     = 1.0;
         const double i_beta      = -0.5;

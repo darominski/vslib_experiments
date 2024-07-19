@@ -71,8 +71,9 @@ The :code:`LookupTable` provides a way to access the table's :math:`y` values by
 
 .. code-block:: cpp
 
-    Component root("root", nullptr)
-    LookupTable<int, double> lin_table("table", root, fgc4::utils::generateFunction<int, double>([](const auto x){return 2*x + 1.5;}, 0.0, 10.0, 100), true);
+    Component root("root", "root", nullptr);
+    LookupTable<int, double> lin_table("table", &root,
+      fgc4::utils::generateFunction<int, double>([](const auto x){return 2*x + 1.5;}, 0.0, 10.0, 100), true);
     const auto y2 = lin_table[1]; // returns y of the second element
 
 For more details regarding the API, see the :ref:`API documentation for LookupTable <lookupTable_api>`.
@@ -89,7 +90,7 @@ Usage examples
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr);
+        Component root("root", "root", nullptr);
         // manually generated small table:
         std::vector<std::pair<int, double>> values{{0, 0.5}, {2, 1.5}, {4, 2.5}, {6, 3.5}};
         LookupTable<int32_t, double>             table("small_table", root, std::move(values));
@@ -133,9 +134,10 @@ Usage examples
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr);
+        Component root("root", "root", nullptr);
         // automatially generated larger table in range 0 to 10.0, with 100 points:
-        LookupTable<double> lin_table("table", root, fgc4::utils::generateFunction<int, double>([](const auto x){return 2*x + 1.5;}, 0.0, 10.0, 100), true);
+        LookupTable<double> lin_table("table", &root,
+          fgc4::utils::generateFunction<int, double>([](const auto x){return 2*x + 1.5;}, 0.0, 10.0, 100), true);
 
         // all access done using index-search:
         auto output = lin_table.interpolate(-1);  // underflow, 1.5
@@ -175,10 +177,11 @@ Usage examples
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr);
+        Component root("root", "root", nullptr);
         auto constexpr two_pi = 2.0 * std::numbers::pi;
         // automatially generated larger table in range 0 to 2 PI, with 1000 points:
-        PeriodicLookupTable<double> sin_table("table", root, fgc4::utils::generateFunction<double, double>(std::sin, 0.0, two_pi, 1000), true);
+        PeriodicLookupTable<double> sin_table("table", &root,
+          fgc4::utils::generateFunction<double, double>(std::sin, 0.0, two_pi, 1000), true);
 
         // all access done using index-search:
         auto output = sin_table.interpolate(0);  // 0.0
@@ -225,8 +228,8 @@ Usage examples
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr)
-        SinLookupTable sin_table("sin_table", root, 1000);
+        Component root("root", "root", nullptr);
+        SinLookupTable sin_table("sin_table", &root, 1000);
 
         auto output = sin_table.interpolate(0);  // 0.0
         output = sin_table.interpolate(std::numbers::pi * 0.5); // 1.0
@@ -273,8 +276,8 @@ Usage examples
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr)
-        CosLookupTable cos_table("cos_table", root, 1000);
+        Component root("root", "root", nullptr);
+        CosLookupTable cos_table("cos_table", &root, 1000);
 
         auto output = cos_table.interpolate(0);  // 1.0
         output = cos_table.interpolate(std::numbers::pi * 0.5); // 0.0

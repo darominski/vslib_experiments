@@ -85,8 +85,8 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr)
-        RST<2> rst("rst_1", root); // 2nd order RST
+        Component root("root", "root", nullptr);
+        RST<2> rst("rst_1", &root); // 2nd order RST
 
         // set three-element array of R, S, and T to desired value
         // here, assuming:
@@ -199,8 +199,8 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr)
-        PID pid("pid", root); //
+        Component root("root", "root", nullptr);
+        PID pid("pid", &root);
 
         // set three-element array of R, S, and T to desired value
         // here, assuming:

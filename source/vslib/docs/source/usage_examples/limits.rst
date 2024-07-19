@@ -57,7 +57,7 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr)
+        Component root("root", "root", nullptr);
         LimitRange<double> limit("limit", root);
 
         // set min, max, and optionally dead_zone Parameters
@@ -124,8 +124,8 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr)
-        LimitRate<double> limit("limit", root);
+        Component root("root", "root", nullptr);
+        LimitRate<double> limit("limit", &root);
 
         // set change_rate Parameter
         // example below assumes change_rate = 10
@@ -182,8 +182,8 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr)
-        LimitIntegral<double, 5> limit("limit", root);
+        Component root("root", "root", nullptr);
+        LimitIntegral<double, 5> limit("limit", &root);
 
         // set integral_limit, and integral_limit_window_length Parameters
         // example below assumes integral_limit = 100, window_length = 3
@@ -243,8 +243,8 @@ Usage example
     using namespace vslib;
 
     int main() {
-        Component root("root", nullptr)
-        LimitRms limit("limit", root);
+        Component root("root", "root", nullptr);
+        LimitRms limit("limit", &root);
 
         // set rms_limit and rms_time_constant Parameters
         // example below assumes rms_limit = 10.0, rms_time_constant: 1e-6, iteration_period: 1e-5
