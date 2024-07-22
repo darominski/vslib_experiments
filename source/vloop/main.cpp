@@ -96,8 +96,6 @@ namespace user
 
 }   // namespace user
 
-// extern user::Converter converter;
-
 int main()
 {
     Component root("root", "root", nullptr);
