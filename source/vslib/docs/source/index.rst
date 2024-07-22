@@ -29,10 +29,3 @@ Concepts
    :glob:
 
    concepts/*
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
