@@ -23,6 +23,9 @@
 #define REG_TO_STREAM_DATA_VALUE 0x0UL
 
 #ifndef __ASSEMBLER__
+
+#include <cstdint>
+
 struct reg_to_stream
 {
     /* [0x0]: REG (rw) Control register */
