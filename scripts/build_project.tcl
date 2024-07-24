@@ -25,18 +25,18 @@ proc CreatePlatformProject {root_dir xsa_dir proc_name workspace_dir} {
     # As there are only 2 Cortexa A53 cores, the VSlib takes the 2nd (_1) bare metal one
     # tn the FGC4, with 4 A53 cores, it will be the 4th (_3).
     if (![file exists $plat_name]) {
-	# platform project is only generated once even if there are multiple application projects
-	platform create -name $plat_name\
-	    -hw $xsa_dir\
-	    -proc $proc_name\
-	    -os "standalone"\
-	    -out $workspace_dir
+		# platform project is only generated once even if there are multiple application projects
+		platform create -name $plat_name\
+	    	-hw $xsa_dir\
+	    	-proc $proc_name\
+	    	-os "standalone"\
+	    	-out $workspace_dir
 
-	# necessary for the platform project to appear in Vitis:
-	importproject $workspace_dir
-	# -domains ensures that only the specified domain will be built
-	platform generate -domains "standalone_domain"
-	PatchPlatform $root_dir $workspace_dir $plat_name
+		# necessary for the platform project to appear in Vitis:
+		importproject $workspace_dir
+		# -domains ensures that only the specified domain will be built
+		platform generate -domains "standalone_domain"
+		PatchPlatform $root_dir $workspace_dir $plat_name
     }
     platform active $plat_name
 }
@@ -57,29 +57,32 @@ proc CreateApplicationProject {app_name proc_name source_dir workspace_dir root_
     # configures correctly the location of the include files for both Release and Debug builds
     set builds {release debug}
     foreach build $builds {
-	app config -name $app_name -set build-config $build
-	app config -name $app_name -add "include-path" $source_dir/../vslib/background/inc
-	app config -name $app_name -add "include-path" $source_dir/../vslib/components/inc
-	app config -name $app_name -add "include-path" $source_dir/../vslib/parameters/inc
-	app config -name $app_name -add "include-path" $source_dir/../vslib/utils/inc
-	app config -name $app_name -add "include-path" $source_dir/../utils
-	app config -name $app_name -add "include-path" $libraries_dir/json-3.11.2
-	app config -name $app_name -add "include-path" $libraries_dir/magic_enum-0.9.3
-	app config -name $app_name -add "include-path" $libraries_dir/fmt-8.0.1/include
-	app config -name $app_name -add "include-path" $libraries_dir/json-schema-validator-2.2.0/src/
-	app config -name $app_name -add "include-path" $workspace_dir/build-vslib/_deps/nlohmann_json-src/include
-	app config -name $app_name -add "compiler-misc" "-std=c++20"
-	app config -name $app_name -set "linker-misc" "-Wl,--undefined=_close -Wl,--undefined=_fstat -Wl,--undefined=_isatty -Wl,--undefined=_lseek -Wl,--undefined=_read -Wl,--undefined=_write -Wl,--start-group,-lxil,-lgcc,-lc,-lstdc++,--end-group -specs=nosys.specs"
-	app config -name $app_name -add "include-path" $bmboot_dir
-	app config -name $app_name -add "library-search-path" $bmboot_binary_dir
-	app config -name $app_name -add "library-search-path" $vslib_build_dir
-	app config -name $app_name -add "library-search-path" $vslib_build_dir/fmt
-	app config -name $app_name -add "library-search-path" $vslib_build_dir/json-schema-validator
-	app config -name $app_name -add "libraries" fmt
-	app config -name $app_name -add "libraries" nlohmann_json_schema_validator
-	app config -name $app_name -add "libraries" vslib
-	app config -name $app_name -add "libraries" bmboot_payload_runtime
-	app config -name $app_name -set "linker-script" $root_dir/inputs/lscript.ld
+		app config -name $app_name -set build-config $build
+		app config -name $app_name -add "include-path" $source_dir/../vslib/background/inc
+		app config -name $app_name -add "include-path" $source_dir/../vslib/components/inc
+		app config -name $app_name -add "include-path" $source_dir/../vslib/parameters/inc
+		app config -name $app_name -add "include-path" $source_dir/../vslib/interrupts/inc
+		app config -name $app_name -add "include-path" $source_dir/../vslib/utils/inc
+		app config -name $app_name -add "include-path" $source_dir/../hal/inc
+		app config -name $app_name -add "include-path" $source_dir/../utils
+		app config -name $app_name -add "include-path" $libraries_dir/json-3.11.2
+		app config -name $app_name -add "include-path" $libraries_dir/magic_enum-0.9.3
+		app config -name $app_name -add "include-path" $libraries_dir/fmt-8.0.1/include
+		app config -name $app_name -add "include-path" $libraries_dir/json-schema-validator-2.2.0/src/
+		app config -name $app_name -add "include-path" $workspace_dir/build-vslib/_deps/nlohmann_json-src/include
+		app config -name $app_name -add "compiler-misc" "-std=c++20"
+		app config -name $app_name -set "linker-misc" "-Wl,--undefined=_close -Wl,--undefined=_fstat -Wl,--undefined=_isatty -Wl,--undefined=_lseek -Wl,--undefined=_read -Wl,--undefined=_write -Wl,--start-group,-lxil,-lgcc,-lc,-lstdc++,--end-group -specs=nosys.specs"
+		app config -name $app_name -add "include-path" $bmboot_dir
+		app config -name $app_name -add "library-search-path" $bmboot_binary_dir
+		app config -name $app_name -add "library-search-path" $bmboot_binary_dir/monitor_zynqmp-prefix/src/monitor_zynqmp-build
+		app config -name $app_name -add "library-search-path" $vslib_build_dir
+		app config -name $app_name -add "library-search-path" $vslib_build_dir/fmt
+		app config -name $app_name -add "library-search-path" $vslib_build_dir/json-schema-validator
+		app config -name $app_name -add "libraries" fmt
+		app config -name $app_name -add "libraries" nlohmann_json_schema_validator
+		app config -name $app_name -add "libraries" vslib
+		app config -name $app_name -add "libraries" bmboot_payload_runtime
+		app config -name $app_name -set "linker-script" $root_dir/inputs/lscript.ld
     }
 
     # builds the application
