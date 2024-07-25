@@ -8,6 +8,8 @@
 #include <compare>
 #include <cstdint>
 
+#include "typeTraits.h"
+
 namespace vslib
 {
 
@@ -16,7 +18,7 @@ namespace vslib
     //! Please note that no overflow nor underflow check is ever performed, just like with the standard C++ plain-old
     //! data types. The maximal value that can be stored without internal overflow is defined by the number of bits left
     //! for the exponent part and is accessible via maximumValue() public method.
-    template<unsigned short FractionalBits>
+    template<unsigned short FractionalBits, fgc4::utils::Integral T = int64_t>
     class FixedPoint
     {
 
@@ -31,7 +33,23 @@ namespace vslib
         //!
         //! @param float_value Floating-point value to be represented
         FixedPoint(double float_value)
-            : m_value{static_cast<int64_t>(float_value * m_fractional_shift)}
+            : m_value{static_cast<T>(float_value * m_fractional_shift)}
+        {
+        }
+
+        //! Constructor taking one single-precision floating-point value and converting it to Q notation
+        //!
+        //! @param float_value Floating-point value to be represented
+        FixedPoint(float float_value)
+            : m_value{static_cast<T>(float_value * m_float_fractional_shift)}
+        {
+        }
+
+        //! Constructor taking one double-precision floating-point value and converting it to Q notation
+        //!
+        //! @param value Floating-point value to be represented
+        FixedPoint(int value)
+            : m_value{static_cast<T>(value)}
         {
         }
 
@@ -39,6 +57,12 @@ namespace vslib
         [[nodiscard]] double toDouble() const
         {
             return static_cast<double>(m_value) / m_fractional_shift;
+        }
+
+        //! Inverse conversion from the internal Q notation to double-precision floating point.
+        [[nodiscard]] float toFloat() const
+        {
+            return static_cast<float>(m_value) / m_float_fractional_shift;
         }
 
         //! Overload to handle summing a FixedPoint object's value with the already-existing object
@@ -127,17 +151,18 @@ namespace vslib
 
         //!< Maximum value that can be stored by the fixed-point object
         inline static constexpr double maximum_value{
-            pow(2, sizeof(int64_t) * 8 - FractionalBits - 1)};   // 8 bits per byte, -1 for sign
+            pow(2, sizeof(T) * 8 - FractionalBits - 1)};   // 8 bits per byte, -1 for sign
 
         //!< Representation precision of the fixed-point object
         inline static constexpr double representation_precision{pow(2, -FractionalBits)};
 
       private:
-        int64_t m_value;   //!< value stored by the FixedPoint type
+        T m_value;   //!< value stored by the FixedPoint type
         //!< Helper method holding the fractional bit shift
-        inline static constexpr double m_fractional_shift{static_cast<double>(int64_t(1) << FractionalBits)};
+        inline static constexpr double m_fractional_shift{static_cast<double>(T(1) << FractionalBits)};
+        inline static constexpr float  m_float_fractional_shift{static_cast<float>(T(1) << FractionalBits)};
         //!< Helper method holding the fractional rounding
-        inline static constexpr int64_t m_fractional_rounding{int64_t(1) << (FractionalBits - 1)};
+        inline static constexpr T m_fractional_rounding{T(1) << (FractionalBits - 1)};
     };
 
 }   // namespace vslib
