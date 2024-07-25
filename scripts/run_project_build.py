@@ -26,14 +26,15 @@ def _create_dir(target_path: str) -> None:
                           " the chosen name" + str(e))
 
 
-def _parse_arguments() -> (str, str, str, str, str):
+def _parse_arguments() -> (str, str, str, str, str, int, str, str, str):
     """
     Parses the script arguments and returns absolute paths of the specified
     (possibly relative) paths.
 
     Returns:
-        Tuple with path to, in order, Vitis installation, XSA file, source
-    code, project creation directory, and application name.
+        Tuple with path to, in order: Vitis installation, XSA file, source
+    code, project creation directory, application name, CPU ID, path to Bmboot,
+    and path to libraries necessary to build the VSlib.
     """
     # setting up the parser for optional script arguments
     parser = argparse.ArgumentParser(
@@ -56,11 +57,10 @@ def _parse_arguments() -> (str, str, str, str, str):
                         required=False,
                         help='Target path to where the Vitis project is to'
                         ' be created (optional).')
+    parser.add_argument('-id', '--cpuId', type=int, required=True, help='CPU ID this application targets, 1 for DIOTv2, 2 or 3 for Kria K26.')
     parser.add_argument('-vslib', '--vslibPath', type=str, required=True, help='Path to the VSlib location.')
-    parser.add_argument('-bm_include', '--bmbootInclude', type=str, required=True,
-                        help='Path to bmboot include directory.')
-    parser.add_argument('-bm_binary', '--bmbootBinary', type=str, required=True,
-                        help='Path to bmboot static library binary file.')
+    parser.add_argument('-bm', '--bmboot', type=str, required=True,
+                        help='Path to bmboot directory.')
     parser.add_argument('-libs', '--librariesHome', type=str, required=True, help='Path to the dependencies location.')
 
     # Parse the arguments
@@ -71,17 +71,18 @@ def _parse_arguments() -> (str, str, str, str, str):
     xsa_path = os.path.abspath(args.xsaPath)
     source_path = os.path.abspath(args.source)
     target_path = os.path.abspath(args.targetPath)
+    cpu_id = args.cpuId
     vslib_path = os.path.abspath(args.vslibPath)
-    bmboot_include_path = os.path.abspath(args.bmbootInclude)
-    bmboot_binary_path = os.path.abspath(args.bmbootBinary)
+    bmboot_path = os.path.abspath(args.bmboot)
     libraries_path = os.path.abspath(args.librariesHome)
 
-    return vitis_path, xsa_path, source_path, target_path, args.name, vslib_path, bmboot_include_path, bmboot_binary_path, libraries_path
+    return vitis_path, xsa_path, source_path, target_path, args.name, cpu_id, vslib_path, bmboot_path, libraries_path
 
 
 def _run_project_creation(vitis_path: str, root_path: str,
                           target_path: str, xsa_path: str,
                           source_path: str, app_name: str,
+                          cpu_id: str,
                           bmboot_include: str, bmboot_binary: str,
                           libraries_path: str, vslib_build_path: str) -> None:
     """
@@ -94,6 +95,8 @@ def _run_project_creation(vitis_path: str, root_path: str,
     be created
         xsa_path (str): Path to the XSA input file location
         source_path (str): Path to the source code to be copied
+        app_name (str): Name for the application project
+        cpu_id (int): CPU ID for the platform project
         bmboot_include (str): Path to the bmboot include
         bmboot_binary_include (str): Path to the bmboot static library binary
         libraries_path (str): Path to the VSlib dependencies
@@ -103,7 +106,7 @@ def _run_project_creation(vitis_path: str, root_path: str,
     # the full Vitis project
     process = subprocess.Popen([os.path.join(vitis_path+'/bin/xsct'),
                                 os.path.join(root_path+'/build_project.tcl'),
-                                root_path, target_path, xsa_path, source_path, app_name, bmboot_include, bmboot_binary,
+                                root_path, target_path, xsa_path, source_path, app_name, cpu_id, bmboot_include, bmboot_binary,
                                 libraries_path, vslib_build_path],
                                stdout=subprocess.PIPE, universal_newlines=True)
 
@@ -177,8 +180,11 @@ def main():
     """
     logging.basicConfig(level=logging.INFO, format='%(message)s')
 
-    vitis_path, xsa_path, source_path, target_path, app_name, vslib_path, bmboot_include_path, bmboot_binary_path, libraries_path = \
+    vitis_path, xsa_path, source_path, target_path, app_name, cpu_id, vslib_path, bmboot_path, libraries_path = \
         _parse_arguments()
+
+    bmboot_include_path = os.path.join(os.path.abspath(bmboot_path), "include")
+    bmboot_binary_path = os.path.join(os.path.abspath(bmboot_path), "build-bmboot/monitor_zynqmp-prefix/src/monitor_zynqmp-build")
 
     # Try to create the directory that will house the project
     _create_dir(target_path)
@@ -200,6 +206,7 @@ def main():
         xsa_path=xsa_path,
         source_path=source_path,
         app_name=app_name,
+        cpu_id=str(cpu_id),
         bmboot_include=bmboot_include_path,
         bmboot_binary=bmboot_binary_path,
         libraries_path=libraries_path,
