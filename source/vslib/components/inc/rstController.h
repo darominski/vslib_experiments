@@ -79,7 +79,7 @@ namespace vslib
         //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
         void updateReference(double updated_actuation)
         {
-            // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
+            // based on simplified logic of regRstCalcRefRT from CCLIBS libreg's regRst.c for closed-loop
             size_t index = m_head - 1;
             if (m_head == 0)
             {
@@ -88,6 +88,34 @@ namespace vslib
             const double delta_actuation = updated_actuation - m_actuations[index];
             m_actuations[index]          = updated_actuation;
             m_references[index]          += delta_actuation * m_s[0] / m_t[0];
+        }
+
+        //! Updates the most recent reference in the history, used in cases actuation goes over the limit in the
+        //! open-loop case.
+        //!
+        //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
+        void updateReferenceOpenLoop(double updated_actuation)
+        {
+            // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c for open loop calculation
+            size_t prev_index = m_head - 1;
+            if (m_head == 0)
+            {
+                prev_index = ControllerLength - 1;
+            }
+            m_actuations[prev_index] = updated_actuation;
+
+            double reference = m_s[0] * updated_actuation + m_r[0] * m_measurements[prev_index];
+            for (int64_t index = 1; index < ControllerLength; index++)
+            {
+                int64_t buffer_index = (m_head - 1 - index);
+                if (buffer_index < 0)
+                {
+                    buffer_index += ControllerLength;
+                }
+                reference += m_s[index] * m_actuations[buffer_index] - m_r[index] * m_measurements[buffer_index]
+                             - m_t[index] * m_references[buffer_index];
+            }
+            m_references[m_head - 1] = reference / m_t[0];
         }
 
         //! Resets the controller to the initial state by zeroing the history.
