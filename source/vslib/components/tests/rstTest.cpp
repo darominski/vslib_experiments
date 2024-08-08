@@ -587,7 +587,6 @@ TEST_F(RSTTest, RSTLimitedActuationOrder3)
            - (s_value[1] * third_calculated_actuation + s_value[2] * second_calculated_actuation
               + s_value[3] * calculated_actuation))
           / s_value[0];
-    std::cout << fourth_unlimited_calculation << std::endl;
     const double fourth_calculated_actuation = rst.control(measurement_value, set_point_value);
     EXPECT_NEAR(fourth_calculated_actuation, max_actuation, 1e-6);
 
