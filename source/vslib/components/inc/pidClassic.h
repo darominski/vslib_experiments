@@ -21,7 +21,6 @@ namespace vslib
         //! @param parent Optional parent of this controller
         //! @param anti_windup_protection Optional anti-windup protection method. It needs to take double (integral
         //! value) and return a double (corrected integral value)
-        //! @return PID controller object
         PIDClassic(
             std::string_view name, Component* parent,
             std::function<double(double)> anti_windup_protection =
