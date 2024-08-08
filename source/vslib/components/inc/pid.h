@@ -28,7 +28,6 @@ namespace vslib
         //! @param parent Optional parent of this controller
         PID(std::string_view name, Component* parent)
             : Component("PID", name, parent),
-              actuation_limits("actuation_limits", this),
               kp(*this, "kp"),                            // default limits
               ki(*this, "ki"),                            // default limits
               kd(*this, "kd"),                            // default limits
@@ -37,7 +36,8 @@ namespace vslib
               c(*this, "derivative_scaling"),             // default limits
               N(*this, "derivative_filter_order", 0.0),   // min limit: 0
               T(*this, "control_period", 0.0),            // min limit: 0.0
-              f0(*this, "pre-warping_frequency", 0.0)     // min limit: 0.0
+              f0(*this, "pre-warping_frequency", 0.0),    // min limit: 0.0
+              actuation_limits("actuation_limits", this)
         {
         }
 
@@ -45,7 +45,7 @@ namespace vslib
         //!
         //! @param measurement Current value of the process value
         //! @param reference Current value of the set-point reference
-        void updateInputHistories(double measurement, double reference) noexcept
+        void updateInputHistories(const double measurement, const double reference) noexcept
         {
             rst.updateInputHistories(measurement, reference);
         }
@@ -54,7 +54,7 @@ namespace vslib
         //!
         //! @param measurement Value of the controlled process
         //! @return Result of this iteration
-        [[nodiscard]] double control(double measurement, double reference) noexcept
+        [[nodiscard]] double control(const double measurement, const double reference) noexcept
         {
             if (!rst.isReady())
             {
@@ -73,7 +73,7 @@ namespace vslib
         //! Updates the most recent reference in the history, used in cases actuation goes over the limit.
         //!
         //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
-        void updateReference(double updated_actuation)
+        void updateReference(const double updated_actuation)
         {
             rst.updateReference(updated_actuation);
         }

@@ -25,7 +25,7 @@ namespace vslib
         //!
         //! @param measurement Current value of the process value
         //! @param reference Current value of the set-point reference
-        void updateInputHistories(double measurement, double reference) noexcept
+        void updateInputHistories(const double measurement, const double reference) noexcept
         {
             m_measurements[m_head] = measurement;
             m_references[m_head]   = reference;
@@ -43,7 +43,7 @@ namespace vslib
         //! @param measurement Current process value (measurement)
         //! @param reference Reference value for the controller
         //! @return Controller output of the iteration
-        [[nodiscard]] double control(double measurement, double reference) noexcept
+        [[nodiscard]] double control(const double measurement, const double reference) noexcept
         {
             // based on logic in regRstCalcActRT from CCLIBS libreg regRst.c
             m_measurements[m_head] = measurement;
@@ -77,7 +77,7 @@ namespace vslib
         //! Updates the most recent reference in the history, used in cases actuation goes over the limit.
         //!
         //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
-        void updateReference(double updated_actuation)
+        void updateReference(const double updated_actuation)
         {
             // based on simplified logic of regRstCalcRefRT from CCLIBS libreg's regRst.c for closed-loop
             size_t index = m_head - 1;
@@ -94,7 +94,7 @@ namespace vslib
         //! open-loop case.
         //!
         //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
-        void updateReferenceOpenLoop(double updated_actuation)
+        void updateReferenceOpenLoop(const double updated_actuation)
         {
             // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c for open loop calculation
             size_t prev_index = m_head - 1;
@@ -305,7 +305,7 @@ namespace vslib
     //! @param reference Current reference value
     //! @return Next actuation value
     template<>
-    [[nodiscard]] inline double RSTController<3>::control(double measurement, double reference) noexcept
+    [[nodiscard]] inline double RSTController<3>::control(const double measurement, const double reference) noexcept
     {
         // This specialization allows to speed-up the calculation of the RST actuation by about 15%
         m_measurements[2] = m_measurements[1];
@@ -330,7 +330,7 @@ namespace vslib
     //!
     //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
     template<>
-    inline void RSTController<3>::updateReference(double updated_actuation)
+    inline void RSTController<3>::updateReference(const double updated_actuation)
     {
         // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
         const double delta_actuation = updated_actuation - m_actuations[0];

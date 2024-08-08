@@ -46,7 +46,7 @@ namespace vslib
         //! @param measurement Value of the controlled process
         //! @param reference Value of the set-point reference
         //! @return Actuation value of this iteration
-        [[nodiscard]] double control(double measurement, double reference)
+        [[nodiscard]] double control(const double measurement, const double reference)
         {
             m_error    = reference - measurement;
             m_integral += m_error;
@@ -68,7 +68,7 @@ namespace vslib
         //! Allows for resetting errors of the controller and setting new starting value.
         //!
         //! @param start_value New starting value of the controller
-        void reset(double start_value) noexcept
+        void reset(const double start_value) noexcept
         {
             m_starting_value = start_value;
             m_error          = 0;
