@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "limitIntegral.h"
+#include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
@@ -41,8 +42,9 @@ class LimitIntegralTest : public ::testing::Test
 //! Tests default construction of integral type LimitIntegral component
 TEST_F(LimitIntegralTest, LimitIntegralIntDefault)
 {
+    RootComponent          root;
     std::string            name = "int_limit";
-    LimitIntegral<int32_t> integral_limit(name, nullptr);
+    LimitIntegral<int32_t> integral_limit(name, root);
     EXPECT_EQ(integral_limit.getName(), name);
 
     auto serialized = integral_limit.serialize();
@@ -59,8 +61,9 @@ TEST_F(LimitIntegralTest, LimitIntegralIntDefault)
 //! Tests default construction of unsigned integral type Limit component
 TEST_F(LimitIntegralTest, LimitIntegralUintDefault)
 {
+    RootComponent           root;
     std::string             name = "uint_limit";
-    LimitIntegral<uint32_t> uint_limit(name, nullptr);
+    LimitIntegral<uint32_t> uint_limit(name, root);
 
     auto serialized = uint_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
@@ -76,8 +79,9 @@ TEST_F(LimitIntegralTest, LimitIntegralUintDefault)
 //! Tests default construction of float type Limit component
 TEST_F(LimitIntegralTest, LimitIntegralFloatDefault)
 {
+    RootComponent        root;
     std::string          name = "float_limit";
-    LimitIntegral<float> float_limit(name, nullptr);
+    LimitIntegral<float> float_limit(name, root);
 
     auto serialized = float_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
@@ -93,8 +97,9 @@ TEST_F(LimitIntegralTest, LimitIntegralFloatDefault)
 //! Tests default construction of integral type Limit component
 TEST_F(LimitIntegralTest, LimitIntegralDoubleDefault)
 {
+    RootComponent         root;
     std::string           name = "dbl_limit";
-    LimitIntegral<double> double_limit(name, nullptr);
+    LimitIntegral<double> double_limit(name, root);
 
     auto serialized = double_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
@@ -110,8 +115,9 @@ TEST_F(LimitIntegralTest, LimitIntegralDoubleDefault)
 //! Tests catching value with excessive integrated value
 TEST_F(LimitIntegralTest, LimitIntegralInt)
 {
+    RootComponent      root;
     std::string        name = "limit";
-    LimitIntegral<int> limit(name, nullptr);
+    LimitIntegral<int> limit(name, root);
 
     int    integral_limit     = 100;
     size_t time_window_length = 5;
@@ -128,8 +134,9 @@ TEST_F(LimitIntegralTest, LimitIntegralInt)
 //! Tests catching value with excessive integrated value
 TEST_F(LimitIntegralTest, LimitIntegralUInt)
 {
+    RootComponent           root;
     std::string             name = "limit";
-    LimitIntegral<uint32_t> limit(name, nullptr);
+    LimitIntegral<uint32_t> limit(name, root);
 
     uint32_t integral_limit     = 100;
     size_t   time_window_length = 5;
@@ -146,8 +153,9 @@ TEST_F(LimitIntegralTest, LimitIntegralUInt)
 //! Tests catching value with excessive integrated value
 TEST_F(LimitIntegralTest, LimitIntegralFloat)
 {
+    RootComponent        root;
     std::string          name = "limit";
-    LimitIntegral<float> limit(name, nullptr);
+    LimitIntegral<float> limit(name, root);
 
     float  integral_limit     = 100;
     size_t time_window_length = 5;
@@ -164,8 +172,9 @@ TEST_F(LimitIntegralTest, LimitIntegralFloat)
 //! Tests catching value with excessive integrated value
 TEST_F(LimitIntegralTest, LimitIntegralDouble)
 {
+    RootComponent         root;
     std::string           name = "limit";
-    LimitIntegral<double> limit(name, nullptr);
+    LimitIntegral<double> limit(name, root);
 
     double integral_limit     = 100;
     size_t time_window_length = 5;
@@ -182,8 +191,9 @@ TEST_F(LimitIntegralTest, LimitIntegralDouble)
 //! Tests catching value with excessive integrated value
 TEST_F(LimitIntegralTest, LimitIntegralIntWrapAround)
 {
+    RootComponent      root;
     std::string        name = "limit";
-    LimitIntegral<int> limit(name, nullptr);
+    LimitIntegral<int> limit(name, root);
 
     int    integral_limit     = 100;
     size_t time_window_length = 4;
@@ -203,8 +213,9 @@ TEST_F(LimitIntegralTest, LimitIntegralIntWrapAround)
 //! Tests catching excessive infinite value
 TEST_F(LimitIntegralTest, LimitIntegralInfDouble)
 {
+    RootComponent         root;
     std::string           name = "limit";
-    LimitIntegral<double> limit(name, nullptr);
+    LimitIntegral<double> limit(name, root);
 
     double integral_limit     = 100;
     size_t time_window_length = 5;
@@ -218,8 +229,9 @@ TEST_F(LimitIntegralTest, LimitIntegralInfDouble)
 //! Tests catching excessive infinite value
 TEST_F(LimitIntegralTest, LimitIntegralNaNFloat)
 {
+    RootComponent        root;
     std::string          name = "limit";
-    LimitIntegral<float> limit(name, nullptr);
+    LimitIntegral<float> limit(name, root);
 
     float  integral_limit     = 100;
     size_t time_window_length = 5;
@@ -233,8 +245,9 @@ TEST_F(LimitIntegralTest, LimitIntegralNaNFloat)
 //! Tests catching excessive infinite value
 TEST_F(LimitIntegralTest, LimitIntegralNaNDouble)
 {
+    RootComponent         root;
     std::string           name = "limit";
-    LimitIntegral<double> limit(name, nullptr);
+    LimitIntegral<double> limit(name, root);
 
     double integral_limit     = 100;
     size_t time_window_length = 5;

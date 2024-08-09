@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "boxFilter.h"
+#include "rootComponent.h"
 
 using namespace vslib;
 
@@ -24,7 +25,9 @@ class BoxFilterTest : public ::testing::Test
 //! Checks that a BoxFilter object can be constructed
 TEST_F(BoxFilterTest, FilterDefaultConstruction)
 {
-    BoxFilter<3> filter("filter", nullptr);
+    RootComponent root;
+    BoxFilter<3>  filter("filter", root);
+
     EXPECT_EQ(filter.getName(), "filter");
     EXPECT_EQ(filter.getMaxInputValue(), pow(2, std::ceil(log2(1e5))));
     EXPECT_EQ((BoxFilter<3, 1e5>::fractional_bits), 64 - 1 - std::ceil(log2(1e5)));
@@ -33,8 +36,10 @@ TEST_F(BoxFilterTest, FilterDefaultConstruction)
 //! Checks that a BoxFilter object can be constructed with non-default mantissa template parameter
 TEST_F(BoxFilterTest, FilterNonDefaultConstruction)
 {
+    RootComponent               root;
     constexpr double            maximal_value = 1e4;   // maximal value to be filtered
-    BoxFilter<1, maximal_value> filter("filter", nullptr);
+    BoxFilter<1, maximal_value> filter("filter", root);
+
     EXPECT_EQ(filter.getName(), "filter");
     EXPECT_EQ(filter.getMaxInputValue(), pow(2, std::ceil(log2(maximal_value))));
 }
@@ -42,20 +47,25 @@ TEST_F(BoxFilterTest, FilterNonDefaultConstruction)
 //! Checks that a partial template specialization (1st order) object can filter provided value
 TEST_F(BoxFilterTest, FirstOrderFilterSingleValue)
 {
-    BoxFilter<1> filter("filter", nullptr);
-    double       value = 3.14159;
+    RootComponent root;
+    BoxFilter<1>  filter("filter", root);
+
+    double value = 3.14159;
     EXPECT_NEAR(filter.filter(value), value / 2.0, 1e-6);
 }
 
 //! Checks that a partial template specialization (1st order) object can filter a number of provided values
 TEST_F(BoxFilterTest, FirstOrderFilterMultipleValues)
 {
-    constexpr int       inputs_length = 10;
-    BoxFilter<1>        filter("filter", nullptr);
+    RootComponent root;
+    constexpr int inputs_length = 10;
+    BoxFilter<1>  filter("filter", root);
+
     std::vector<double> values(inputs_length);
     std::iota(values.begin(), values.end(), 0);
     double previous_value = 0;
     int    counter        = 0;
+
     for (const auto& value : values)
     {
         const double average = (value + previous_value) / 2.0;
@@ -67,21 +77,26 @@ TEST_F(BoxFilterTest, FirstOrderFilterMultipleValues)
 //! Checks that a partial template specialization (2nd order) object can filter provided value
 TEST_F(BoxFilterTest, SecondOrderFilterSingleValue)
 {
-    BoxFilter<2> filter("filter", nullptr);
-    double       value = 3.14159;
+    RootComponent root;
+    BoxFilter<2>  filter("filter", root);
+
+    double value = 3.14159;
     EXPECT_NEAR(filter.filter(value), value / 3.0, 1e-6);
 }
 
 //! Checks that a partial template specialization (2nd order) object can filter a number of provided values
 TEST_F(BoxFilterTest, SecondOrderFilterMultipleValues)
 {
-    constexpr int       inputs_length = 10;
-    BoxFilter<2>        filter("filter", nullptr);
+    RootComponent root;
+    constexpr int inputs_length = 10;
+    BoxFilter<2>  filter("filter", root);
+
     std::vector<double> values(inputs_length);
     std::iota(values.begin(), values.end(), 0);
     double earlier_value  = 0;
     double previous_value = 0;
     int    counter        = 0;
+
     for (const auto& value : values)
     {
         const double average = (value + previous_value + earlier_value) / 3.0;
@@ -94,23 +109,28 @@ TEST_F(BoxFilterTest, SecondOrderFilterMultipleValues)
 //! Checks that a BoxFilter object can filter provided value
 TEST_F(BoxFilterTest, FilterSingleValue)
 {
+    RootComponent           root;
     constexpr int64_t       filter_order  = 9;
     constexpr int64_t       buffer_length = filter_order + 1;
-    BoxFilter<filter_order> filter("filter", nullptr);
-    double                  value = 3.14159;
+    BoxFilter<filter_order> filter("filter", root);
+
+    double value = 3.14159;
     EXPECT_NEAR(filter.filter(value), value / buffer_length, 1e-5);
 }
 
 //! Checks that a BoxFilter object can filter a number of provided values
 TEST_F(BoxFilterTest, FilterMultipleValues)
 {
+    RootComponent           root;
     constexpr int64_t       filter_order  = 9;
     constexpr int64_t       buffer_length = filter_order + 1;
-    BoxFilter<filter_order> filter("filter", nullptr);
-    std::vector<double>     values(filter_order);
+    BoxFilter<filter_order> filter("filter", root);
+
+    std::vector<double> values(filter_order);
     std::iota(values.begin(), values.end(), 0);
     double accumulator = 0;
     int    counter     = 0;
+
     for (const auto& value : values)
     {
         accumulator          += value;
@@ -122,13 +142,16 @@ TEST_F(BoxFilterTest, FilterMultipleValues)
 //! Checks that a BoxFilter filters correctly when buffer wraps around
 TEST_F(BoxFilterTest, FilterValuesBufferWrapAround)
 {
+    RootComponent           root;
     constexpr int64_t       filter_order  = 5;
     constexpr int64_t       buffer_length = filter_order + 1;
-    BoxFilter<filter_order> filter("filter", nullptr);
-    std::vector<double>     values(10);
+    BoxFilter<filter_order> filter("filter", root);
+
+    std::vector<double> values(10);
     std::iota(values.begin(), values.end(), 0);
     double accumulator = 0;
     int    counter     = 0;
+
     for (int index = 0; index < values.size(); index++)
     {
         double oldest_value = 0;

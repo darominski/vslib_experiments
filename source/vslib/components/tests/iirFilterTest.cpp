@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "iirFilter.h"
+#include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
@@ -50,7 +51,8 @@ class IIRFilterTest : public ::testing::Test
 //! Checks that a IIRFilter object can be constructed
 TEST_F(IIRFilterTest, FilterDefaultConstruction)
 {
-    IIRFilter<1> filter("filter", nullptr);
+    RootComponent root;
+    IIRFilter<1>  filter("filter", root);
     EXPECT_EQ(filter.getName(), "filter");
 }
 
@@ -58,9 +60,10 @@ TEST_F(IIRFilterTest, FilterDefaultConstruction)
 //! Without setting denominator values it should behave like an FIR.
 TEST_F(IIRFilterTest, FilterSingleValue)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
-    IIRFilter<filter_order>           filter("filter", nullptr);
+    IIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> numerator_values{0.1, 0.8, 0.1};
     setNumeratorValues<filter_order>(filter, numerator_values);
 
@@ -72,10 +75,11 @@ TEST_F(IIRFilterTest, FilterSingleValue)
 //! For a single input, the IIR will still behave like an FIR.
 TEST_F(IIRFilterTest, FirstOrderFilterSingleValueSetDenominator)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 1;
     constexpr int                     filter_length = filter_order + 1;
     constexpr int                     inputs_length = 3;
-    IIRFilter<filter_order>           filter("filter", nullptr);
+    IIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> numerator_values{0.3, 0.7};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37};   // from Matlab: Butterworth IIR filter
@@ -88,10 +92,11 @@ TEST_F(IIRFilterTest, FirstOrderFilterSingleValueSetDenominator)
 //! Checks that a FIRFilter object can filter a number of provided values, without wrapping around the buffers
 TEST_F(IIRFilterTest, FirstOrderFilterMultipleValues)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 1;
     constexpr int                     filter_length = filter_order + 1;
     constexpr int                     input_length  = 3;
-    IIRFilter<filter_order>           filter("filter", nullptr);
+    IIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> numerator_values{0.2, 0.8};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37};
@@ -120,9 +125,10 @@ TEST_F(IIRFilterTest, FirstOrderFilterMultipleValues)
 //! the IIR will still behave like an FIR.
 TEST_F(IIRFilterTest, FilterSingleValueSetDenominator)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
-    IIRFilter<filter_order>           filter("filter", nullptr);
+    IIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> numerator_values{0.1, 0.8, 0.1};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};   // from Matlab: Butterworth IIR filter
@@ -135,9 +141,10 @@ TEST_F(IIRFilterTest, FilterSingleValueSetDenominator)
 //! Checks that a IIRFilter object can filter a number of provided values, without wrapping around the buffers
 TEST_F(IIRFilterTest, FilterMultipleValues)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 3;
     constexpr int                     filter_length = filter_order + 1;
-    IIRFilter<filter_order>           filter("filter", nullptr);
+    IIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> numerator_values{0.1, 0.8, 0.05, 0.05};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};
@@ -167,9 +174,10 @@ TEST_F(IIRFilterTest, FilterMultipleValues)
 //! Checks that a IIRFilter object can filter a number of provided values, with buffer wrap-around
 TEST_F(IIRFilterTest, FilterMultipleValuesBufferWrapAround)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
-    IIRFilter<filter_order>           filter("filter", nullptr);
+    IIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> numerator_values{0.1, 0.8, 0.1};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};
@@ -207,9 +215,10 @@ TEST_F(IIRFilterTest, FilterMultipleValuesBufferWrapAround)
 //! Checks that a IIRFilter object can filter a number of provided values, with buffer wrap-around
 TEST_F(IIRFilterTest, FilterEntireArrayCompareWithMatlab)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
-    IIRFilter<filter_order>           filter("filter", nullptr);
+    IIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> numerator_values{0.1, 0.8, 0.1};
     setNumeratorValues<filter_order>(filter, numerator_values);
     std::array<double, filter_length> denominator_values{1.0, -0.37, 0.20};
@@ -231,9 +240,10 @@ TEST_F(IIRFilterTest, FilterEntireArrayCompareWithMatlab)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
 {
+    RootComponent           root;
     constexpr int           filter_order  = 2;
     constexpr int           filter_length = filter_order + 1;
-    IIRFilter<filter_order> filter("filter", nullptr);
+    IIRFilter<filter_order> filter("filter", root);
     // Matlab output and coefficients come from executing:
     // [b,a] = butter(2, 0.4);
     // iirFilt = dsp.IIRFilter('Numerator', b, 'Denominator', a);
@@ -274,9 +284,10 @@ TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(IIRFilterTest, ChebyIIRFilterBMeasTenthOrder)
 {
+    RootComponent           root;
     constexpr int           filter_order  = 10;
     constexpr int           filter_length = filter_order + 1;
-    IIRFilter<filter_order> filter("filter", nullptr);
+    IIRFilter<filter_order> filter("filter", root);
     // Matlab output and coefficients come from executing:
     // [b,a] = cheby1(10, 0.5, 0.5);
     // iirFilt = dsp.IIRFilter('Numerator', b, 'Denominator', a);

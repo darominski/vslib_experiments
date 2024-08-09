@@ -20,7 +20,7 @@ namespace vslib
         //!
         //! @param name Name of this Limit Component
         //! @param parent Parent of this Limit Component
-        LimitRange(std::string_view name, Component* parent)
+        LimitRange(std::string_view name, IComponent& parent)
             : Component("LimitRange", name, parent),
               min(*this, "lower_threshold"),
               max(*this, "upper_threshold"),

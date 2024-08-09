@@ -8,6 +8,7 @@
 #include "json/json.hpp"
 #include "parameter.h"
 #include "parameterRegistry.h"
+#include "rootComponent.h"
 
 using namespace vslib;
 
@@ -30,7 +31,7 @@ class ComponentTest : public ::testing::Test
 class DerivedComponent : public Component
 {
   public:
-    DerivedComponent(std::string_view type, std::string_view name, Component* parent)
+    DerivedComponent(std::string_view type, std::string_view name, RootComponent& parent)
         : Component(type, name, parent)
     {
     }
@@ -39,7 +40,7 @@ class DerivedComponent : public Component
 class DerivedComponentIntParameter : public Component
 {
   public:
-    DerivedComponentIntParameter(std::string_view type, std::string_view name, Component* parent)
+    DerivedComponentIntParameter(std::string_view type, std::string_view name, RootComponent& parent)
         : Component(type, name, parent),
           parameter(*this, "int")
     {
@@ -51,16 +52,16 @@ class DerivedComponentIntParameter : public Component
 //! Checks that a basic component of base class can be created, is registered, and can be serialized
 TEST_F(ComponentTest, BasicComponent)
 {
+    RootComponent     root;
     const std::string component_type = "type";
     const std::string component_name = "name";
-    Component         component(component_type, component_name, nullptr);
+    Component         component(component_type, component_name, root);
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), component_type + "." + component_name);
+    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_type + "." + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
 
     EXPECT_TRUE(component.parametersInitialized());
-    EXPECT_FALSE(component.hasParent());
 
     auto serialized_component = component.serialize();
     EXPECT_EQ(serialized_component["name"], component_name);
@@ -72,16 +73,16 @@ TEST_F(ComponentTest, BasicComponent)
 //! Checks that a basic derived component of base class can be created, and is registered correctly
 TEST_F(ComponentTest, DerivedComponent)
 {
+    RootComponent     root;
     const std::string component_type = "type";
     const std::string component_name = "name";
-    DerivedComponent  component(component_type, component_name, nullptr);
+    DerivedComponent  component(component_type, component_name, root);
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), component_type + "." + component_name);
+    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_type + "." + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
 
     EXPECT_TRUE(component.parametersInitialized());
-    EXPECT_FALSE(component.hasParent());
 
     auto serialized_component = component.serialize();
     EXPECT_EQ(serialized_component["name"], component_name);
@@ -94,20 +95,23 @@ TEST_F(ComponentTest, DerivedComponent)
 //! and is correctly registered and serialized
 TEST_F(ComponentTest, HierarchicalComponent)
 {
+    RootComponent     root;
     const std::string parent_type = "type";
     const std::string parent_name = "name";
-    Component         parent(parent_type, parent_name, nullptr);
+    Component         parent(parent_type, parent_name, root);
 
     const std::string child_type = "child_type";
     const std::string child_name = "child_name";
-    Component         child(child_type, child_name, &parent);
+    Component         child(child_type, child_name, parent);
 
     EXPECT_EQ(child.getName(), child_name);
-    EXPECT_EQ(child.getFullName(), parent_type + "." + parent_name + "." + child_type + "." + child_name);
+    EXPECT_EQ(
+        child.getFullName(),
+        std::string(root.getFullName()) + "." + parent_type + "." + parent_name + "." + child_type + "." + child_name
+    );
     EXPECT_EQ(child.getParameters().size(), 0);
 
     EXPECT_TRUE(child.parametersInitialized());
-    EXPECT_TRUE(child.hasParent());
 
     auto serialized_component = parent.serialize();
     EXPECT_EQ(serialized_component["name"], parent_name);
@@ -124,15 +128,15 @@ TEST_F(ComponentTest, HierarchicalComponent)
 //! Checks derived component with a single integer parameter
 TEST_F(ComponentTest, DerivedComponentIntParameter)
 {
+    RootComponent                root;
     const std::string            component_type = "type";
     const std::string            component_name = "name";
-    DerivedComponentIntParameter component(component_type, component_name, nullptr);
+    DerivedComponentIntParameter component(component_type, component_name, root);
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), component_type + "." + component_name);
+    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_type + "." + component_name);
     EXPECT_EQ(component.getParameters().size(), 1);
     EXPECT_FALSE(component.parametersInitialized());
-    EXPECT_FALSE(component.hasParent());
 
     auto serialized_component = component.serialize();
     EXPECT_EQ(serialized_component["name"], component_name);
@@ -147,15 +151,16 @@ TEST_F(ComponentTest, DerivedComponentIntParameter)
 //! Checks derived component with many parameters of various types
 TEST_F(ComponentTest, DerivedComponentWithManyParameters)
 {
+    RootComponent                    root;
     const std::string                component_type = "type";
     const std::string                component_name = "name";
-    DerivedComponentIntParameter     component(component_type, component_name, nullptr);
+    DerivedComponentIntParameter     component(component_type, component_name, root);
     Parameter<double>                doubleParameter(component, "double");
     Parameter<bool>                  boolParameter(component, "bool");
     Parameter<std::array<double, 3>> arrayParameter(component, "array");
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), component_type + "." + component_name);
+    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_type + "." + component_name);
     EXPECT_EQ(component.getParameters().size(), 4);
 
     auto serialized_component = component.serialize();

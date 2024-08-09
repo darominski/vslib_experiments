@@ -7,6 +7,7 @@
 #include "component.h"
 #include "componentArray.h"
 #include "json/json.hpp"
+#include "rootComponent.h"
 
 using namespace vslib;
 
@@ -25,7 +26,7 @@ class ComponentArrayTest : public ::testing::Test
 class Derived : public Component
 {
   public:
-    Derived(std::string_view name, Component* parent)
+    Derived(std::string_view name, IComponent& parent)
         : Component("Derived", name, parent)
     {
     }
@@ -35,12 +36,13 @@ class Derived : public Component
 //! serialized
 TEST_F(ComponentArrayTest, BasicArray)
 {
+    RootComponent                         root;
     const std::string                     component_name = "array";
     constexpr size_t                      array_length   = 3;
-    ComponentArray<Derived, array_length> component(component_name, nullptr);
+    ComponentArray<Derived, array_length> component(component_name, root);
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), std::string("ComponentArray.") + component_name);
+    EXPECT_EQ(component.getFullName(), std::string("ROOT.root.ComponentArray.") + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
 
     auto serialized_component = component.serialize();
@@ -57,9 +59,10 @@ TEST_F(ComponentArrayTest, BasicArray)
 //! Checks that a basic component array can be interacted with as if it is an array
 TEST_F(ComponentArrayTest, BasicArrayInteractions)
 {
+    RootComponent                         root;
     const std::string                     component_name = "array";
     constexpr size_t                      array_length   = 4;
-    ComponentArray<Derived, array_length> component(component_name, nullptr);
+    ComponentArray<Derived, array_length> component(component_name, root);
     const std::string                     component_type = "ComponentArray";
     const std::string                     held_type_name = "Derived";
 
@@ -69,7 +72,8 @@ TEST_F(ComponentArrayTest, BasicArrayInteractions)
         std::string element_name = std::string("array[") + std::to_string(counter++) + "]";
         EXPECT_EQ(element.getName(), element_name);
         EXPECT_EQ(
-            element.getFullName(), component_type + "." + component_name + "." + held_type_name + "." + element_name
+            element.getFullName(), std::string("ROOT.root.") + component_type + "." + component_name + "."
+                                       + held_type_name + "." + element_name
         );
         EXPECT_EQ(element.getParameters().size(), 0);
     }
@@ -80,13 +84,15 @@ TEST_F(ComponentArrayTest, BasicArrayInteractions)
 //! Checks that ComponentArray can hold a ComponentArray
 TEST_F(ComponentArrayTest, HierarchicalArrayTest)
 {
+    RootComponent root;
+
     const std::string                                                               component_name     = "array";
     constexpr size_t                                                                inner_array_length = 4;
     constexpr size_t                                                                outer_array_length = 2;
-    ComponentArray<ComponentArray<Derived, inner_array_length>, outer_array_length> component(component_name, nullptr);
+    ComponentArray<ComponentArray<Derived, inner_array_length>, outer_array_length> component(component_name, root);
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), std::string("ComponentArray.") + component_name);
+    EXPECT_EQ(component.getFullName(), std::string("ROOT.root.ComponentArray.") + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
 
     auto serialized_component = component.serialize();

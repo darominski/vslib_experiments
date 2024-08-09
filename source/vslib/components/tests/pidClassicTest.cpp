@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 
 #include "pidClassic.h"
+#include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
@@ -54,8 +55,9 @@ class PIDClassicTest : public ::testing::Test
 //! Checks that a default PID object can be constructed and is correctly added to the registry
 TEST_F(PIDClassicTest, PIDClassicDefaultConstruction)
 {
-    std::string name = "pid_1";
-    PIDClassic  pid(name, nullptr);
+    RootComponent root;
+    std::string   name = "pid_1";
+    PIDClassic    pid(name, root);
     EXPECT_EQ(pid.getName(), name);
     EXPECT_EQ(pid.getError(), 0.0);
     EXPECT_EQ(pid.getPreviousError(), 0.0);
@@ -79,13 +81,14 @@ TEST_F(PIDClassicTest, PIDClassicDefaultConstruction)
 //! Checks that a PID object with an anti-windup function defined can be constructed
 TEST_F(PIDClassicTest, PIDClassicAntiWindupConstruction)
 {
-    std::string  name                 = "pid_2";
-    double const max_integral         = 1500;
-    auto         anti_windup_function = [&max_integral](double input)
+    RootComponent root;
+    std::string   name                 = "pid_2";
+    double const  max_integral         = 1500;
+    auto          anti_windup_function = [&max_integral](double input)
     {
         return input > max_integral ? max_integral : input;
     };   // clamping anti-windup
-    PIDClassic pid(name, nullptr, anti_windup_function);
+    PIDClassic pid(name, root, anti_windup_function);
     EXPECT_EQ(pid.getName(), name);
     EXPECT_EQ(pid.getError(), 0.0);
     EXPECT_EQ(pid.getPreviousError(), 0.0);
@@ -96,8 +99,9 @@ TEST_F(PIDClassicTest, PIDClassicAntiWindupConstruction)
 //! Checks that target setter interact correctly with PID object
 TEST_F(PIDClassicTest, PIDClassicSetters)
 {
-    std::string name = "pid_3";
-    PIDClassic  pid(name, nullptr);
+    RootComponent root;
+    std::string   name = "pid_3";
+    PIDClassic    pid(name, root);
 
     const double starting_value = 2 * 3.14159;
     pid.setStartingValue(starting_value);
@@ -107,8 +111,9 @@ TEST_F(PIDClassicTest, PIDClassicSetters)
 //! Checks that reset method correctly sets all internal parameters to zero, and sets new starting value
 TEST_F(PIDClassicTest, PIDClassicReset)
 {
-    std::string name = "pid_4";
-    PIDClassic  pid(name, nullptr);
+    RootComponent root;
+    std::string   name = "pid_4";
+    PIDClassic    pid(name, root);
 
     const double starting_value = 2 * 3.14159;
     pid.setStartingValue(starting_value);
@@ -122,14 +127,15 @@ TEST_F(PIDClassicTest, PIDClassicReset)
 //! Checks that single iteration of control method correctly calculates the gain
 TEST_F(PIDClassicTest, PIDClassicSingleIteration)
 {
-    std::string  name = "pid_5";
-    PIDClassic   pid(name, nullptr);
-    const double p  = 2.0;
-    const double i  = 1.0;
-    const double d  = 1.5;
-    const double ff = 0.05;
-    const double b  = 1.2;
-    const double c  = 0.5;
+    RootComponent root;
+    std::string   name = "pid_5";
+    PIDClassic    pid(name, root);
+    const double  p  = 2.0;
+    const double  i  = 1.0;
+    const double  d  = 1.5;
+    const double  ff = 0.05;
+    const double  b  = 1.2;
+    const double  c  = 0.5;
     set_pid_parameters(pid, p, i, d, ff, b, c);
 
     const double target_value = 3.14159;
@@ -145,14 +151,15 @@ TEST_F(PIDClassicTest, PIDClassicSingleIteration)
 //! Checks that a couple of iterations of control method correctly calculates gains
 TEST_F(PIDClassicTest, PIDClassicControlIteration)
 {
-    std::string  name = "pid_6";
-    PIDClassic   pid(name, nullptr);
-    const double p            = 0.6;
-    const double i            = 0.3;
-    const double d            = 0.06;
-    const double ff           = 0.03;
-    const double b            = 1.11;
-    const double max_integral = 1000.0;
+    RootComponent root;
+    std::string   name = "pid_6";
+    PIDClassic    pid(name, root);
+    const double  p            = 0.6;
+    const double  i            = 0.3;
+    const double  d            = 0.06;
+    const double  ff           = 0.03;
+    const double  b            = 1.11;
+    const double  max_integral = 1000.0;
     set_pid_parameters(pid, p, i, d, ff, b);
 
     const double target_value = 3.14159;

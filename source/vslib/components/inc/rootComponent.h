@@ -1,0 +1,91 @@
+//! @file
+//! @brief File containing the common interface of all components.
+//! @author Dominik Arominski
+
+#pragma once
+
+#include <array>
+#include <string>
+#include <unordered_map>
+
+#include "component.h"
+#include "icomponent.h"
+#include "iparameter.h"
+#include "nonCopyableNonMovable.h"
+#include "parameterRegistry.h"
+#include "parameterSerializer.h"
+#include "staticJson.h"
+
+namespace vslib
+{
+    class RootComponent : public IComponent
+    {
+
+      public:
+        //! Creates the RootComponent with type, name as the base of the hierarchy for Components.
+        //!
+        //! @param component_type Type of the RootComponent
+        //! @param name Name of the RootComponent, needs to be unique in the type
+        RootComponent(std::string_view component_type = "ROOT", std::string_view name = "root") noexcept
+            : IComponent(component_type, name),
+              m_full_name(m_component_type + "." + m_name)
+        {
+        }
+        // ************************************************************
+        // Method for serializing this RootComponent
+
+        //! Serializes this Component to JSON, including all children Components and Parameters
+        //! across the entire hierarchy.
+        //!
+        //! @return Returns a fully-serialized Component as a JSON object
+        [[nodiscard]] StaticJson serialize() const noexcept override
+        {
+            StaticJson serialized_component = nlohmann::json::array();
+
+            StaticJson serialized_children = nlohmann::json::array();
+            for (const auto& child : m_children)
+            {
+                serialized_children.emplace_back(child.get().serialize());
+            }
+
+            serialized_component
+                = {{"name", m_name},
+                   {"type", m_component_type},
+                   {"parameters", nlohmann::json::array()},
+                   {"components", serialized_children}};
+            return serialized_component;
+        }
+
+        // ************************************************************
+        // Getters
+
+        //! Provides the full name of this RootComponent, including its type.
+        //!
+        //! @return String_view of the component name
+        [[nodiscard]] std::string_view getFullName() const noexcept override
+        {
+            return m_full_name;
+        }
+
+        //! Verifies parameters after they are set, to be called after parameters of this component are modified.
+        //! The checks need to run on the inactive buffer values. No Parameters exist, so nothing to do.
+        std::optional<fgc4::utils::Warning> verifyParameters() override
+        {
+            return {};
+        }
+
+        void synchroniseParameterBuffers() noexcept override
+        {
+            // nothing to do
+        }
+
+        void flipBufferState() noexcept override
+        {
+            // nothing to do
+        }
+
+      private:
+        std::string m_full_name;
+    };
+
+}   // namespace vslib

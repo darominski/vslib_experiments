@@ -4,6 +4,7 @@
 
 #include <gtest/gtest.h>
 
+#include "rootComponent.h"
 #include "rst.h"
 #include "staticJson.h"
 
@@ -55,10 +56,11 @@ class RSTTest : public ::testing::Test
 //! Checks that a default RST object can be constructed and is correctly added to the registry
 TEST_F(RSTTest, RSTDefaultConstruction)
 {
+    RootComponent    root;
     std::string      name  = "rst_1";
     constexpr size_t order = 2;
 
-    RST<order> rst(name, nullptr);
+    RST<order> rst(name, root);
 
     EXPECT_EQ(rst.getName(), name);
     EXPECT_EQ(rst.r.isInitialized(), false);
@@ -90,10 +92,11 @@ TEST_F(RSTTest, RSTDefaultConstruction)
 //! Checks that the input histories can be updated and when enough of points are provided, the RST is ready to control
 TEST_F(RSTTest, RSTUpdateInputHistories)
 {
+    RootComponent    root;
     std::string      name  = "rst_2";
     constexpr size_t order = 4;
 
-    RST<order> rst(name, nullptr);
+    RST<order> rst(name, root);
 
     for (size_t index = 0; index < order; index++)
     {
@@ -107,10 +110,11 @@ TEST_F(RSTTest, RSTUpdateInputHistories)
 //! Checks that the parameters of RST are set and initialized as expected
 TEST_F(RSTTest, RSTReset)
 {
+    RootComponent    root;
     std::string      name  = "rst_3";
     constexpr size_t order = 6;
 
-    RST<order> rst(name, nullptr);
+    RST<order> rst(name, root);
     EXPECT_EQ(rst.isReady(), false);
 
     for (size_t index = 0; index < order; index++)
@@ -128,10 +132,11 @@ TEST_F(RSTTest, RSTReset)
 //! Checks that the parameters of RST can be set and initialized as expected
 TEST_F(RSTTest, RSTSetParameters)
 {
+    RootComponent    root;
     std::string      name  = "rst_4";
     constexpr size_t order = 3;
 
-    RST<order> rst(name, nullptr);
+    RST<order> rst(name, root);
 
     // ensure the initial state is as expected:
     EXPECT_EQ(rst.r.isInitialized(), false);
@@ -165,10 +170,11 @@ TEST_F(RSTTest, RSTSetParameters)
 //! Checks that the verification of RST works as expected
 TEST_F(RSTTest, RSTVerifyParameters)
 {
+    RootComponent    root;
     std::string      name  = "rst_5";
     constexpr size_t order = 3;
 
-    RST<order> rst(name, nullptr);
+    RST<order> rst(name, root);
 
     // set parameters
     std::array<double, order + 1> r_value = {0.0, 0.2, 0.3, 0.4};
@@ -244,10 +250,11 @@ TEST_F(RSTTest, RSTVerifyParameters)
 //! Checks that the calculated actuation of RST is as expected with order 2
 TEST_F(RSTTest, RSTCalculateActuation)
 {
+    RootComponent    root;
     std::string      name  = "rst_6";
     constexpr size_t order = 2;
 
-    RST<order> rst(name, nullptr);
+    RST<order> rst(name, root);
 
     // set parameters
     std::array<double, order + 1> r_value = {0.1, 0.2, 0.3};
@@ -284,10 +291,11 @@ TEST_F(RSTTest, RSTCalculateActuation)
 //! Checks that the calculated actuation of RST is as expected with order 3
 TEST_F(RSTTest, RSTCalculateActuationOrder3)
 {
+    RootComponent    root;
     std::string      name  = "rst_7";
     constexpr size_t order = 3;
 
-    RST<order> rst(name, nullptr);
+    RST<order> rst(name, root);
 
     // set parameters
     std::array<double, order + 1> r_value = {0.1, 0.2, 0.3, -0.4};
@@ -326,10 +334,11 @@ TEST_F(RSTTest, RSTCalculateActuationOrder3)
 //! Checks that the calculated actuation of RST is as expected
 TEST_F(RSTTest, RSTCalculateMultipleActuations)
 {
+    RootComponent    root;
     std::string      name  = "rst_8";
     constexpr size_t order = 2;
 
-    RST<order> rst(name, nullptr);
+    RST<order> rst(name, root);
 
     // set parameters
     std::array<double, order + 1> r_value = {0.1, 0.2, 0.3};
@@ -379,10 +388,11 @@ TEST_F(RSTTest, RSTCalculateMultipleActuations)
 //! Checks that the calculated actuation of RST is as expected
 TEST_F(RSTTest, RSTReCalculateReference)
 {
+    RootComponent    root;
     std::string      name  = "rst_9";
     constexpr size_t order = 2;
 
-    RST<order> rst(name, nullptr);
+    RST<order> rst(name, root);
 
     // set parameters
     std::array<double, order + 1> r_value = {0.1, 0.2, 0.3};
@@ -418,10 +428,11 @@ TEST_F(RSTTest, RSTReCalculateReference)
 //! defined max limit
 TEST_F(RSTTest, RSTLimitedActuation)
 {
+    RootComponent    root;
     std::string      name  = "rst_10";
     constexpr size_t order = 2;
 
-    RST<order> rst(name, nullptr);
+    RST<order> rst(name, root);
 
     // set parameters
     std::array<double, order + 1> r_value       = {0.1, 0.2, 0.3};
@@ -510,10 +521,11 @@ TEST_F(RSTTest, RSTLimitedActuation)
 //! defined max limit
 TEST_F(RSTTest, RSTLimitedActuationOrder3)
 {
+    RootComponent    root;
     std::string      name  = "rst_11";
     constexpr size_t order = 3;
 
-    RST<order> rst(name, nullptr);
+    RST<order> rst(name, root);
 
     // set parameters
     std::array<double, order + 1> r_value       = {0.1, 0.2, 0.3, 0.01};

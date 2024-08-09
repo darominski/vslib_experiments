@@ -8,6 +8,7 @@
 #include "json/json.hpp"
 #include "parameter.h"
 #include "parameterRegistry.h"
+#include "rootComponent.h"
 
 using namespace vslib;
 
@@ -30,8 +31,8 @@ class ParameterTest : public ::testing::Test
 class MockComponent : public Component
 {
   public:
-    MockComponent()
-        : Component("mockType", "mockName", nullptr)
+    MockComponent(RootComponent& parent)
+        : Component("mockType", "mockName", parent)
     {
     }
 };
@@ -42,7 +43,8 @@ class MockComponent : public Component
 //! Checks that boolean Parameter can be registered to a component
 TEST_F(ParameterTest, BoolParameterDefinition)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "bool";
     Parameter<bool>   parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
@@ -53,7 +55,8 @@ TEST_F(ParameterTest, BoolParameterDefinition)
 //! Checks that integer Parameter can be registered to a component
 TEST_F(ParameterTest, IntParameterDefinition)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "int";
     Parameter<int>    parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
@@ -64,7 +67,8 @@ TEST_F(ParameterTest, IntParameterDefinition)
 //! Checks that float Parameter can be registered to a component
 TEST_F(ParameterTest, FloatParameterDefinition)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "float";
     Parameter<float>  parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
@@ -75,7 +79,8 @@ TEST_F(ParameterTest, FloatParameterDefinition)
 //! Checks that std::string Parameter can be registered to a component
 TEST_F(ParameterTest, StringParameterDefinition)
 {
-    MockComponent          component;   // component to attach parameters to
+    RootComponent          root;
+    MockComponent          component(root);   // component to attach parameters to
     const std::string      parameter_name = "string";
     Parameter<std::string> parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
@@ -86,7 +91,8 @@ TEST_F(ParameterTest, StringParameterDefinition)
 //! Checks that enum Parameter can be registered to a component
 TEST_F(ParameterTest, EnumParameterDefinition)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum class TestEnum
     {
@@ -102,7 +108,8 @@ TEST_F(ParameterTest, EnumParameterDefinition)
 //! Checks that bitmask enum Parameter can be registered to a component
 TEST_F(ParameterTest, EnumBitMaskParameterDefinition)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum BitMask
     {
@@ -118,7 +125,8 @@ TEST_F(ParameterTest, EnumBitMaskParameterDefinition)
 //! Checks that std::array of enum Parameter can be registered to a component
 TEST_F(ParameterTest, EnumArrayParameterDefinition)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum class TestEnum
     {
@@ -134,7 +142,8 @@ TEST_F(ParameterTest, EnumArrayParameterDefinition)
 //! Checks that double Parameter with limits can be attached to a component
 TEST_F(ParameterTest, DoubleParameterWithLimits)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "double";
     Parameter<double> parameter(component, parameter_name, -10, 10);
     EXPECT_EQ(parameter.getName(), parameter_name);
@@ -149,7 +158,8 @@ TEST_F(ParameterTest, DoubleParameterWithLimits)
 //! Checks that array of int Parameter with limits can be attached to a component
 TEST_F(ParameterTest, IntArrayParameterWithLimits)
 {
-    MockComponent                      component;   // component to attach parameters to
+    RootComponent                      root;
+    MockComponent                      component(root);   // component to attach parameters to
     const std::string                  parameter_name = "array_int";
     Parameter<std::array<uint64_t, 5>> parameter(component, parameter_name, -1, 1);
     EXPECT_EQ(parameter.getName(), parameter_name);
@@ -164,7 +174,8 @@ TEST_F(ParameterTest, IntArrayParameterWithLimits)
 //! Checks that array of std::string Parameter can be attached to a component
 TEST_F(ParameterTest, StringArrayParameter)
 {
-    MockComponent                         component;   // component to attach parameters to
+    RootComponent                         root;
+    MockComponent                         component(root);   // component to attach parameters to
     const std::string                     parameter_name = "array_string";
     Parameter<std::array<std::string, 5>> parameter(component, parameter_name);
     EXPECT_EQ(parameter.getName(), parameter_name);
@@ -178,7 +189,8 @@ TEST_F(ParameterTest, StringArrayParameter)
 // Tests setting value to int Parameter from a JSON command
 TEST_F(ParameterTest, BoolParameterSetValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "bool";
     Parameter<bool>   parameter(component, parameter_name, -5, 10);
     EXPECT_FALSE(parameter.isInitialized());
@@ -198,7 +210,8 @@ TEST_F(ParameterTest, BoolParameterSetValue)
 // Tests setting value to int Parameter from a JSON command
 TEST_F(ParameterTest, IntParameterSetValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "int";
     Parameter<int>    parameter(component, parameter_name, -5, 10);
     EXPECT_FALSE(parameter.isInitialized());
@@ -218,7 +231,8 @@ TEST_F(ParameterTest, IntParameterSetValue)
 //! Tests setting value to double Parameter from a JSON command
 TEST_F(ParameterTest, DoubleParameterSetValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "double";
     Parameter<double> parameter(component, parameter_name, -1, 5);
     EXPECT_FALSE(parameter.isInitialized());
@@ -240,7 +254,8 @@ TEST_F(ParameterTest, DoubleParameterSetValue)
 //! Tests setting value to std::string Parameter from a JSON command
 TEST_F(ParameterTest, StringParameterSetValue)
 {
-    MockComponent          component;   // component to attach parameters to
+    RootComponent          root;
+    MockComponent          component(root);   // component to attach parameters to
     const std::string      parameter_name = "string";
     Parameter<std::string> parameter(component, parameter_name);
     EXPECT_FALSE(parameter.isInitialized());
@@ -260,7 +275,8 @@ TEST_F(ParameterTest, StringParameterSetValue)
 //! Tests setting value to enum Parameter from a JSON command
 TEST_F(ParameterTest, EnumParameterSetValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum class TestEnum
     {
@@ -286,7 +302,8 @@ TEST_F(ParameterTest, EnumParameterSetValue)
 //! Tests setting value to enum Parameter from a JSON command
 TEST_F(ParameterTest, EnumBitMaskParameterSetValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum BitMask
     {
@@ -313,7 +330,8 @@ TEST_F(ParameterTest, EnumBitMaskParameterSetValue)
 //! Tests setting value to std::array of enum Parameter from a JSON command
 TEST_F(ParameterTest, EnumArrayParameterSetValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum class TestEnum
     {
@@ -342,7 +360,8 @@ TEST_F(ParameterTest, EnumArrayParameterSetValue)
 //! Tests setting value to array of double Parameter from a JSON command
 TEST_F(ParameterTest, DoubleArrayParameterSetValue)
 {
-    MockComponent                    component;   // component to attach parameters to
+    RootComponent                    root;
+    MockComponent                    component(root);   // component to attach parameters to
     const std::string                parameter_name = "double_array";
     Parameter<std::array<double, 3>> parameter(component, parameter_name, -5, 5);
     EXPECT_FALSE(parameter.isInitialized());
@@ -372,7 +391,8 @@ TEST_F(ParameterTest, DoubleArrayParameterSetValue)
 //! Tests setting out-of-limits value to double Parameter from a JSON command
 TEST_F(ParameterTest, DoubleParameterSetInvalidValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "double";
     Parameter<double> parameter(component, parameter_name, -1, 5);
     EXPECT_FALSE(parameter.isInitialized());
@@ -393,7 +413,8 @@ TEST_F(ParameterTest, DoubleParameterSetInvalidValue)
 //! Tests setting value to enum Parameter from a JSON command
 TEST_F(ParameterTest, EnumParameterSetInvalidValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum class TestEnum
     {
@@ -420,7 +441,8 @@ TEST_F(ParameterTest, EnumParameterSetInvalidValue)
 //! Tests setting value to enum Parameter from a JSON command
 TEST_F(ParameterTest, EnumBitMaskParameterSetInvalidValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum class BitMask
     {
@@ -447,7 +469,8 @@ TEST_F(ParameterTest, EnumBitMaskParameterSetInvalidValue)
 //! Tests setting value to array of enum Parameter from a JSON command
 TEST_F(ParameterTest, EnumArrayParameterSetInvalidValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum class TestEnum
     {
@@ -475,7 +498,8 @@ TEST_F(ParameterTest, EnumArrayParameterSetInvalidValue)
 //! Tests setting value to array of enum Parameter from a JSON command
 TEST_F(ParameterTest, EnumBitMaskArrayParameterSetInvalidValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum BitMask
     {
@@ -503,7 +527,8 @@ TEST_F(ParameterTest, EnumBitMaskArrayParameterSetInvalidValue)
 //! Tests setting out-of-limits value to array of double Parameter from a JSON command
 TEST_F(ParameterTest, DoubleArrayParameterSetInvalidValue)
 {
-    MockComponent                    component;   // component to attach parameters to
+    RootComponent                    root;
+    MockComponent                    component(root);   // component to attach parameters to
     const std::string                parameter_name = "double_array";
     Parameter<std::array<double, 3>> parameter(component, parameter_name, -1, 1);
     EXPECT_FALSE(parameter.isInitialized());
@@ -530,7 +555,8 @@ TEST_F(ParameterTest, DoubleArrayParameterSetInvalidValue)
 //! Tests setting wrong type value to double Parameter from a JSON command
 TEST_F(ParameterTest, ParameterSetInvalidTypeValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "double";
     Parameter<double> parameter(component, parameter_name);
     EXPECT_FALSE(parameter.isInitialized());
@@ -550,7 +576,8 @@ TEST_F(ParameterTest, ParameterSetInvalidTypeValue)
 //! Tests accessing out-of-bounds value of a array of ints Parameter
 TEST_F(ParameterTest, IntArrayParameterOutOfBounds)
 {
-    MockComponent                 component;   // component to attach parameters to
+    RootComponent                 root;
+    MockComponent                 component(root);   // component to attach parameters to
     const std::string             parameter_name = "int_array";
     Parameter<std::array<int, 5>> parameter(component, parameter_name);
     EXPECT_FALSE(parameter.isInitialized());
@@ -566,7 +593,8 @@ TEST_F(ParameterTest, IntArrayParameterOutOfBounds)
 //! Tests synchronising buffers of uint64 Parameter when value has been set
 TEST_F(ParameterTest, IntParameterSynchronizeBuffers)
 {
-    MockComponent       component;   // component to attach parameters to
+    RootComponent       root;
+    MockComponent       component(root);   // component to attach parameters to
     const std::string   parameter_name = "int";
     Parameter<uint64_t> parameter(component, parameter_name);
 
@@ -585,7 +613,8 @@ TEST_F(ParameterTest, IntParameterSynchronizeBuffers)
 //! Tests synchronising buffers of float Parameter when value has been set
 TEST_F(ParameterTest, FloatParameterSynchronizeBuffers)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "float";
     Parameter<float>  parameter(component, parameter_name);
 
@@ -604,7 +633,8 @@ TEST_F(ParameterTest, FloatParameterSynchronizeBuffers)
 //! Tests synchronising buffers of std::string Parameter when value has been set
 TEST_F(ParameterTest, StringParameterSynchronizeBuffers)
 {
-    MockComponent          component;   // component to attach parameters to
+    RootComponent          root;
+    MockComponent          component(root);   // component to attach parameters to
     const std::string      parameter_name = "string";
     Parameter<std::string> parameter(component, parameter_name);
 
@@ -622,7 +652,8 @@ TEST_F(ParameterTest, StringParameterSynchronizeBuffers)
 //! Tests synchronising buffers of array of double Parameter when value has been set
 TEST_F(ParameterTest, DoubleArrayParameterSynchronizeBuffers)
 {
-    MockComponent                    component;   // component to attach parameters to
+    RootComponent                    root;
+    MockComponent                    component(root);   // component to attach parameters to
     const std::string                parameter_name = "array_double";
     Parameter<std::array<double, 3>> parameter(component, parameter_name);
 
@@ -647,7 +678,8 @@ TEST_F(ParameterTest, DoubleArrayParameterSynchronizeBuffers)
 //! Tests synchronising buffers of array of std::string Parameter when value has been set
 TEST_F(ParameterTest, StringArrayParameterSynchronizeBuffers)
 {
-    MockComponent                         component;   // component to attach parameters to
+    RootComponent                         root;
+    MockComponent                         component(root);   // component to attach parameters to
     const std::string                     parameter_name = "array_double";
     Parameter<std::array<std::string, 3>> parameter(component, parameter_name);
 
@@ -672,7 +704,8 @@ TEST_F(ParameterTest, StringArrayParameterSynchronizeBuffers)
 //! Tests synchronising buffers of enum Parameter when value has been set
 TEST_F(ParameterTest, EnumParameterSynchronizeBuffers)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum class TestEnum
     {
@@ -696,7 +729,8 @@ TEST_F(ParameterTest, EnumParameterSynchronizeBuffers)
 //! Tests providing a number of commands and synchronising buffers each time
 TEST_F(ParameterTest, FloatParameterSendManyCommands)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "float";
     Parameter<float>  parameter(component, parameter_name);
 
@@ -721,7 +755,8 @@ TEST_F(ParameterTest, FloatParameterSendManyCommands)
 //! Tests spaceship operator of a double Parameter with value set via JSON command
 TEST_F(ParameterTest, DoubleParameterValueOperations)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     Parameter<double> lhs(component, "lhs");
     Parameter<double> rhs(component, "rhs");
 

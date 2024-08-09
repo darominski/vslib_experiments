@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "limitRange.h"
+#include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
@@ -48,8 +49,9 @@ class LimitRangeTest : public ::testing::Test
 //! Tests default construction of integral type LimitRange component
 TEST_F(LimitRangeTest, LimitIntegralDefault)
 {
+    RootComponent       root;
     std::string         name = "int_limit";
-    LimitRange<int32_t> integral_limit(name, nullptr);
+    LimitRange<int32_t> integral_limit(name, root);
     EXPECT_EQ(integral_limit.getName(), name);
 
     auto serialized = integral_limit.serialize();
@@ -68,8 +70,9 @@ TEST_F(LimitRangeTest, LimitIntegralDefault)
 //! Tests default construction of unsigned integral type LimitRange component
 TEST_F(LimitRangeTest, LimitUnsignedIntegralDefault)
 {
+    RootComponent        root;
     std::string          name = "uint_limit";
-    LimitRange<uint32_t> uint_limit(name, nullptr);
+    LimitRange<uint32_t> uint_limit(name, root);
 
     auto serialized = uint_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
@@ -87,8 +90,9 @@ TEST_F(LimitRangeTest, LimitUnsignedIntegralDefault)
 //! Tests default construction of float type LimitRange component
 TEST_F(LimitRangeTest, LimitRangeFloatDefault)
 {
+    RootComponent     root;
     std::string       name = "float_limit";
-    LimitRange<float> float_limit(name, nullptr);
+    LimitRange<float> float_limit(name, root);
 
     auto serialized = float_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
@@ -106,8 +110,9 @@ TEST_F(LimitRangeTest, LimitRangeFloatDefault)
 //! Tests default construction of integral type LimitRange component
 TEST_F(LimitRangeTest, LimitRangeDoubleDefault)
 {
+    RootComponent      root;
     std::string        name = "dbl_limit";
-    LimitRange<double> double_limit(name, nullptr);
+    LimitRange<double> double_limit(name, root);
 
     auto serialized = double_limit.serialize();
     EXPECT_EQ(serialized["name"], name);
@@ -128,8 +133,9 @@ TEST_F(LimitRangeTest, LimitRangeDoubleDefault)
 //! Tests catching lower limit violation with int type
 TEST_F(LimitRangeTest, LimitRangeIntMin)
 {
+    RootComponent   root;
     std::string     name = "int_limit";
-    LimitRange<int> int_limit(name, nullptr);
+    LimitRange<int> int_limit(name, root);
 
     const int min = -10;
     const int max = 10;
@@ -145,8 +151,9 @@ TEST_F(LimitRangeTest, LimitRangeIntMin)
 //! Tests that min limit is exclusive, with int type
 TEST_F(LimitRangeTest, LimitRangeIntMinExclusive)
 {
+    RootComponent   root;
     std::string     name = "int_limit";
-    LimitRange<int> int_limit(name, nullptr);
+    LimitRange<int> int_limit(name, root);
 
     const int min = -10;
     const int max = 10;
@@ -161,8 +168,9 @@ TEST_F(LimitRangeTest, LimitRangeIntMinExclusive)
 //! Tests that min limit is exclusive, with float type
 TEST_F(LimitRangeTest, LimitRangeFloatMinExclusive)
 {
+    RootComponent     root;
     std::string       name = "float_limit";
-    LimitRange<float> float_limit(name, nullptr);
+    LimitRange<float> float_limit(name, root);
 
     const float min = -3.14159;
     const float max = 3.14159;
@@ -177,8 +185,9 @@ TEST_F(LimitRangeTest, LimitRangeFloatMinExclusive)
 //! Tests catching lower limit violation with unsigned int type
 TEST_F(LimitRangeTest, LimitRangeUIntMin)
 {
+    RootComponent        root;
     std::string          name = "uint_limit";
-    LimitRange<uint64_t> uint_limit(name, nullptr);
+    LimitRange<uint64_t> uint_limit(name, root);
 
     const uint64_t min = 1;
     const uint64_t max = 1e3;
@@ -194,8 +203,9 @@ TEST_F(LimitRangeTest, LimitRangeUIntMin)
 //! Tests catching lower limit violation with double type
 TEST_F(LimitRangeTest, LimitRangeDoubleMin)
 {
+    RootComponent      root;
     std::string        name = "dbl_limit";
-    LimitRange<double> double_limit(name, nullptr);
+    LimitRange<double> double_limit(name, root);
 
     const double min = 4;
     const double max = 1e3;
@@ -211,8 +221,9 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMin)
 //! Tests catching upper limit violation with int type
 TEST_F(LimitRangeTest, LimitRangeIntMax)
 {
+    RootComponent   root;
     std::string     name = "int_limit";
-    LimitRange<int> int_limit(name, nullptr);
+    LimitRange<int> int_limit(name, root);
 
     const int min = 4;
     const int max = 1e2;
@@ -228,8 +239,9 @@ TEST_F(LimitRangeTest, LimitRangeIntMax)
 //! Tests catching upper limit violation with uint type
 TEST_F(LimitRangeTest, LimitRangeUIntMax)
 {
+    RootComponent        root;
     std::string          name = "uint_limit";
-    LimitRange<uint32_t> uint_limit(name, nullptr);
+    LimitRange<uint32_t> uint_limit(name, root);
 
     const uint32_t min = 4;
     const uint32_t max = 1e2;
@@ -245,8 +257,9 @@ TEST_F(LimitRangeTest, LimitRangeUIntMax)
 //! Tests catching upper limit violation with double type
 TEST_F(LimitRangeTest, LimitRangeDoubleMax)
 {
+    RootComponent      root;
     std::string        name = "dbl_limit";
-    LimitRange<double> double_limit(name, nullptr);
+    LimitRange<double> double_limit(name, root);
 
     const double min = 4;
     const double max = 1e2;
@@ -265,8 +278,9 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMax)
 //! Tests catching value in the dead zone
 TEST_F(LimitRangeTest, LimitRangeIntDeadZone)
 {
+    RootComponent   root;
     std::string     name = "int_limit";
-    LimitRange<int> limit(name, nullptr);
+    LimitRange<int> limit(name, root);
 
     const int          min = -10;
     const int          max = 100;
@@ -284,8 +298,9 @@ TEST_F(LimitRangeTest, LimitRangeIntDeadZone)
 //! Tests catching value in the dead zone
 TEST_F(LimitRangeTest, LimitRangeUIntDeadZone)
 {
+    RootComponent        root;
     std::string          name = "int_limit";
-    LimitRange<uint16_t> limit(name, nullptr);
+    LimitRange<uint16_t> limit(name, root);
 
     const uint16_t          min = -10;
     const uint16_t          max = 100;
@@ -303,8 +318,9 @@ TEST_F(LimitRangeTest, LimitRangeUIntDeadZone)
 //! Tests catching value in the dead zone
 TEST_F(LimitRangeTest, LimitRangeDoubleDeadZone)
 {
+    RootComponent      root;
     std::string        name = "double_limit";
-    LimitRange<double> limit(name, nullptr);
+    LimitRange<double> limit(name, root);
 
     const double          min = -10;
     const double          max = 100;
@@ -325,8 +341,9 @@ TEST_F(LimitRangeTest, LimitRangeDoubleDeadZone)
 //! Tests that min limit is exclusive, with int type near the numerical limit
 TEST_F(LimitRangeTest, LimitRangeIntMinNumericalLimit)
 {
+    RootComponent   root;
     std::string     name = "int_limit";
-    LimitRange<int> int_limit(name, nullptr);
+    LimitRange<int> int_limit(name, root);
 
     const int min = std::numeric_limits<int>::lowest() + 1;
     const int max = 10;
@@ -342,8 +359,9 @@ TEST_F(LimitRangeTest, LimitRangeIntMinNumericalLimit)
 //! Tests that min limit is exclusive, with float type near the numerical limit
 TEST_F(LimitRangeTest, LimitRangeFloatMinNumericalLimit)
 {
+    RootComponent     root;
     std::string       name = "float_limit";
-    LimitRange<float> float_limit(name, nullptr);
+    LimitRange<float> float_limit(name, root);
 
     const float min = std::nextafterf(std::numeric_limits<float>::lowest(), 0.0);
     const float max = 3.14159;
@@ -358,8 +376,9 @@ TEST_F(LimitRangeTest, LimitRangeFloatMinNumericalLimit)
 //! Tests catching lower limit violation with double type near the numerical limit
 TEST_F(LimitRangeTest, LimitRangeDoubleMinNumericalLimit)
 {
+    RootComponent      root;
     std::string        name = "float_limit";
-    LimitRange<double> double_limit(name, nullptr);
+    LimitRange<double> double_limit(name, root);
 
     const double min = std::nexttoward(std::numeric_limits<double>::lowest(), 0.0);
     const double max = 1e3;
@@ -375,8 +394,9 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMinNumericalLimit)
 //! Tests catching upper limit violation with int type close to the numerical limit
 TEST_F(LimitRangeTest, LimitRangeIntMaxNumericalLimit)
 {
+    RootComponent       root;
     std::string         name = "int_limit";
-    LimitRange<int64_t> int_limit(name, nullptr);
+    LimitRange<int64_t> int_limit(name, root);
 
     const int64_t min = 0;
     const int64_t max = std::numeric_limits<int64_t>::max() - 1;
@@ -392,8 +412,9 @@ TEST_F(LimitRangeTest, LimitRangeIntMaxNumericalLimit)
 //! Tests catching upper limit violation with uint type close to the numerical limit
 TEST_F(LimitRangeTest, LimitRangeUIntMaxNumericalLimit)
 {
+    RootComponent        root;
     std::string          name = "uint_limit";
-    LimitRange<uint64_t> uint_limit(name, nullptr);
+    LimitRange<uint64_t> uint_limit(name, root);
 
     const uint64_t min = 0;
     const uint64_t max = std::numeric_limits<uint64_t>::max() - 1;
@@ -409,8 +430,9 @@ TEST_F(LimitRangeTest, LimitRangeUIntMaxNumericalLimit)
 //! Tests catching upper limit violation with double type
 TEST_F(LimitRangeTest, LimitRangeDoubleMaxNumericalLimit)
 {
+    RootComponent      root;
     std::string        name = "dbl_limit";
-    LimitRange<double> double_limit(name, nullptr);
+    LimitRange<double> double_limit(name, root);
 
     const double min = 4;
     const double max = std::nexttoward(std::numeric_limits<double>::max(), 0);
@@ -429,8 +451,9 @@ TEST_F(LimitRangeTest, LimitRangeDoubleMaxNumericalLimit)
 //! Tests catching -inf being outside of limits with double type
 TEST_F(LimitRangeTest, LimitRangeDoubleNegativeInf)
 {
+    RootComponent      root;
     std::string        name = "dbl_limit";
-    LimitRange<double> limit(name, nullptr);
+    LimitRange<double> limit(name, root);
 
     const double min = 4;
     const double max = 1e3;
@@ -446,8 +469,9 @@ TEST_F(LimitRangeTest, LimitRangeDoubleNegativeInf)
 //! Tests catching -inf being outside of limits with double type
 TEST_F(LimitRangeTest, LimitRangeDoubleInf)
 {
+    RootComponent      root;
     std::string        name = "dbl_limit";
-    LimitRange<double> limit(name, nullptr);
+    LimitRange<double> limit(name, root);
 
     const double min = 4;
     const double max = 1e3;
@@ -463,8 +487,9 @@ TEST_F(LimitRangeTest, LimitRangeDoubleInf)
 //! Tests catching -inf being outside of limits with double type
 TEST_F(LimitRangeTest, LimitRangeDoubleNaN)
 {
+    RootComponent      root;
     std::string        name = "limit";
-    LimitRange<double> limit(name, nullptr);
+    LimitRange<double> limit(name, root);
 
     const double min = 4;
     const double max = 1e3;

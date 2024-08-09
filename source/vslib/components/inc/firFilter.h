@@ -22,7 +22,7 @@ namespace vslib
         //!
         //! @param name Name of this Filter Component
         //! @param parent Parent of this Filter Component
-        FIRFilter(std::string_view name, Component* parent)
+        FIRFilter(std::string_view name, IComponent& parent)
             : Filter("FIRFilter", name, parent),
               coefficients(*this, "coefficients")
         {

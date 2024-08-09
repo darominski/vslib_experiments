@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "cosLookupTable.h"
+#include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
@@ -25,8 +26,9 @@ class CosLookupTableTest : public ::testing::Test
 //! Tests default construction of integral type CosLookupTable component
 TEST_F(CosLookupTableTest, CosLookupTable)
 {
+    RootComponent  root;
     std::string    name = "table";
-    CosLookupTable table(name, nullptr, 2);
+    CosLookupTable table(name, root, 2);
     EXPECT_EQ(table.getName(), name);
 
     auto serialized = table.serialize();
@@ -42,8 +44,9 @@ TEST_F(CosLookupTableTest, CosLookupTable)
 //! Tests CosLookupTable component interpolating a couple of points
 TEST_F(CosLookupTableTest, CosLookupTableInterpolation)
 {
+    RootComponent  root;
     std::string    name = "table";
-    CosLookupTable table(name, nullptr, 10000);
+    CosLookupTable table(name, root, 10000);
 
     EXPECT_NEAR(table.interpolate(0.0), cos(0.0), 1e-6);
     EXPECT_NEAR(table.interpolate(M_PI / 2.0), cos(M_PI / 2.0), 1e-6);
@@ -55,8 +58,9 @@ TEST_F(CosLookupTableTest, CosLookupTableInterpolation)
 //! Tests CosLookupTable component interpolating a couple of points that fall out of 0 - 2pi range
 TEST_F(CosLookupTableTest, CosLookupTableInterpolationOutOfBounds)
 {
+    RootComponent  root;
     std::string    name = "table";
-    CosLookupTable table(name, nullptr, 10000);
+    CosLookupTable table(name, root, 10000);
 
     const double epsilon = 1e-2;
 
@@ -76,8 +80,9 @@ TEST_F(CosLookupTableTest, CosLookupTableInterpolationOutOfBounds)
 //! Tests CosLookupTable consistency of interface
 TEST_F(CosLookupTableTest, CosLookupTableConsistency)
 {
+    RootComponent  root;
     std::string    name = "table";
-    CosLookupTable table(name, nullptr, 10000);
+    CosLookupTable table(name, root, 10000);
 
     EXPECT_NEAR(table.interpolate(0.0), table(0.0), 1e-6);
     EXPECT_NEAR(table.interpolate(M_PI / 2.0), table(M_PI / 2.0), 1e-6);

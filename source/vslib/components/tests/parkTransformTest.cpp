@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "parkTransform.h"
+#include "rootComponent.h"
 
 using namespace vslib;
 
@@ -26,8 +27,9 @@ class ParkTransformTest : public ::testing::Test
 //! Tests default construction of ParkTransform component
 TEST_F(ParkTransformTest, Construction)
 {
+    RootComponent    root;
     std::string_view name = "park1";
-    ParkTransform    park(name, nullptr);
+    ParkTransform    park(name, root);
     ASSERT_EQ(park.getName(), "park1");
 
     auto serialized = park.serialize();
@@ -47,8 +49,9 @@ TEST_F(ParkTransformTest, Construction)
 //! Tests custom construction of ParkTransform component
 TEST_F(ParkTransformTest, NonDefaultConstruction)
 {
+    RootComponent    root;
     std::string_view name = "park2";
-    ParkTransform    park(name, nullptr, 10000);
+    ParkTransform    park(name, root, 10000);
     ASSERT_EQ(park.getName(), name);
 
     auto serialized = park.serialize();
@@ -60,8 +63,9 @@ TEST_F(ParkTransformTest, NonDefaultConstruction)
 
 TEST_F(ParkTransformTest, BasicTest)
 {
+    RootComponent    root;
     std::string_view name = "park2";
-    ParkTransform    park(name, nullptr);
+    ParkTransform    park(name, root);
 
     double i_a        = 1.0;
     double i_b        = -0.5;
@@ -89,8 +93,9 @@ TEST_F(ParkTransformTest, BasicTest)
 
 TEST_F(ParkTransformTest, ZeroAngleTest)
 {
+    RootComponent    root;
     std::string_view name = "park3";
-    ParkTransform    park(name, nullptr);
+    ParkTransform    park(name, root);
 
     double i_a        = 1.0;
     double i_b        = -0.5;
@@ -118,8 +123,9 @@ TEST_F(ParkTransformTest, ZeroAngleTest)
 
 TEST_F(ParkTransformTest, ZeroAngle90degreesOffsetTest)
 {
+    RootComponent    root;
     std::string_view name = "park3";
-    ParkTransform    park(name, nullptr);
+    ParkTransform    park(name, root);
 
     const double i_a    = 1.0;
     const double i_b    = -0.5;
@@ -148,8 +154,9 @@ TEST_F(ParkTransformTest, ZeroAngle90degreesOffsetTest)
 
 TEST_F(ParkTransformTest, NinetyDegreesTest)
 {
+    RootComponent    root;
     std::string_view name = "park4";
-    ParkTransform    park(name, nullptr);
+    ParkTransform    park(name, root);
 
     double i_a        = 1.0;
     double i_b        = -0.5;
@@ -178,8 +185,9 @@ TEST_F(ParkTransformTest, NinetyDegreesTest)
 //! Tests interacting with transform method of ParkTransform component, validation against simulink
 TEST_F(ParkTransformTest, BasicSimulinkConsistency)
 {
+    RootComponent    root;
     std::string_view name = "park5";
-    ParkTransform    park(name, nullptr, 10000);
+    ParkTransform    park(name, root, 10000);
 
     // the input files are randomly generated numbers
     std::filesystem::path abc_path   = "components/inputs/park_abc_sin_120degrees.csv";
@@ -251,8 +259,9 @@ TEST_F(ParkTransformTest, BasicSimulinkConsistency)
 //! data
 TEST_F(ParkTransformTest, SVCTransform)
 {
+    RootComponent    root;
     std::string_view name = "park5";
-    ParkTransform    park(name, nullptr, 10000);
+    ParkTransform    park(name, root, 10000);
 
     // the input files are randomly generated numbers
     std::filesystem::path abc_path   = "components/inputs/svc_18kV.csv";

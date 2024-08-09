@@ -21,10 +21,10 @@ namespace vslib
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        AlphaBetaZeroToDq0Transform(std::string_view name, Component* parent, uint64_t number_points = 1000)
+        AlphaBetaZeroToDq0Transform(std::string_view name, IComponent& parent, uint64_t number_points = 1000)
             : Component("AlphaBetaZeroToDq0Transform", name, parent),
-              m_sin("sin", this, number_points),
-              m_cos("cos", this, number_points)
+              m_sin("sin", *this, number_points),
+              m_cos("cos", *this, number_points)
         {
         }
 

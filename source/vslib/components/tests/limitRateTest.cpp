@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "limitRate.h"
+#include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
@@ -41,8 +42,9 @@ class LimitRateTest : public ::testing::Test
 //! Tests default construction of integral type LimitRate component
 TEST_F(LimitRateTest, LimitRateIntegralDefault)
 {
+    RootComponent      root;
     std::string        name = "limit";
-    LimitRate<int32_t> limit(name, nullptr);
+    LimitRate<int32_t> limit(name, root);
     EXPECT_EQ(limit.getName(), name);
 
     auto serialized = limit.serialize();
@@ -57,8 +59,9 @@ TEST_F(LimitRateTest, LimitRateIntegralDefault)
 //! Tests default construction of float type LimitRate component
 TEST_F(LimitRateTest, LimitRateFloatDefault)
 {
+    RootComponent    root;
     std::string      name = "limit";
-    LimitRate<float> limit(name, nullptr);
+    LimitRate<float> limit(name, root);
     EXPECT_EQ(limit.getName(), name);
 
     auto serialized = limit.serialize();
@@ -73,8 +76,9 @@ TEST_F(LimitRateTest, LimitRateFloatDefault)
 //! Tests default construction of double type LimitRate component
 TEST_F(LimitRateTest, LimitRateDoubleDefault)
 {
+    RootComponent     root;
     std::string       name = "limit";
-    LimitRate<double> limit(name, nullptr);
+    LimitRate<double> limit(name, root);
     EXPECT_EQ(limit.getName(), name);
 
     auto serialized = limit.serialize();
@@ -92,8 +96,9 @@ TEST_F(LimitRateTest, LimitRateDoubleDefault)
 //! Tests catching value with excessive rate of change zone with int type
 TEST_F(LimitRateTest, LimitRateInt)
 {
+    RootComponent  root;
     std::string    name = "limit";
-    LimitRate<int> limit(name, nullptr);
+    LimitRate<int> limit(name, root);
 
     const int change_rate = 10;
 
@@ -112,8 +117,9 @@ TEST_F(LimitRateTest, LimitRateInt)
 //! Tests catching value with excessive negative rate of change zone with int type
 TEST_F(LimitRateTest, LimitRateNegativeInt)
 {
+    RootComponent  root;
     std::string    name = "limit";
-    LimitRate<int> limit(name, nullptr);
+    LimitRate<int> limit(name, root);
 
     const int change_rate = 10;
 
@@ -132,8 +138,9 @@ TEST_F(LimitRateTest, LimitRateNegativeInt)
 //! Tests catching value with excessive rate of change zone with double type
 TEST_F(LimitRateTest, LimitRateFloat)
 {
+    RootComponent    root;
     std::string      name = "limit";
-    LimitRate<float> limit(name, nullptr);
+    LimitRate<float> limit(name, root);
 
     const float change_rate = 1.0;
 
@@ -152,8 +159,9 @@ TEST_F(LimitRateTest, LimitRateFloat)
 //! Tests catching value with excessive negative rate of change zone with double type
 TEST_F(LimitRateTest, LimitRateNegativeFloat)
 {
+    RootComponent    root;
     std::string      name = "limit";
-    LimitRate<float> limit(name, nullptr);
+    LimitRate<float> limit(name, root);
 
     const float change_rate = 1.0;
 
@@ -172,8 +180,9 @@ TEST_F(LimitRateTest, LimitRateNegativeFloat)
 //! Tests catching value with excessive rate of change zone with double type
 TEST_F(LimitRateTest, LimitRateDouble)
 {
+    RootComponent     root;
     std::string       name = "limit";
-    LimitRate<double> limit(name, nullptr);
+    LimitRate<double> limit(name, root);
 
     const double change_rate = 1.0;
 
@@ -192,8 +201,9 @@ TEST_F(LimitRateTest, LimitRateDouble)
 //! Tests catching value with excessive negative rate of change zone with double type
 TEST_F(LimitRateTest, LimitRateNegativeDouble)
 {
+    RootComponent     root;
     std::string       name = "limit";
-    LimitRate<double> limit(name, nullptr);
+    LimitRate<double> limit(name, root);
 
     const double change_rate = 1.0;
 
@@ -212,8 +222,9 @@ TEST_F(LimitRateTest, LimitRateNegativeDouble)
 //! Tests catching input with time difference of zero with the last provided value
 TEST_F(LimitRateTest, LimitRateZeroTimeDifference)
 {
+    RootComponent     root;
     std::string       name = "limit";
-    LimitRate<double> limit(name, nullptr);
+    LimitRate<double> limit(name, root);
 
     const double change_rate = 1.0;
 
@@ -228,8 +239,9 @@ TEST_F(LimitRateTest, LimitRateZeroTimeDifference)
 //! Tests that an expected warning is raised when inf input is provided
 TEST_F(LimitRateTest, LimitRateInf)
 {
+    RootComponent     root;
     std::string       name = "limit";
-    LimitRate<double> limit(name, nullptr);
+    LimitRate<double> limit(name, root);
 
     const double change_rate = 1.0;
 
@@ -248,8 +260,9 @@ TEST_F(LimitRateTest, LimitRateInf)
 //! Tests that an expected warning is raised when -inf input is provided
 TEST_F(LimitRateTest, LimitRateMinusInf)
 {
+    RootComponent     root;
     std::string       name = "limit";
-    LimitRate<double> limit(name, nullptr);
+    LimitRate<double> limit(name, root);
 
     const double change_rate = 1.0;
 
@@ -268,8 +281,9 @@ TEST_F(LimitRateTest, LimitRateMinusInf)
 //! Tests that an expected warning is raised when NaN input is provided
 TEST_F(LimitRateTest, LimitRateNaN)
 {
+    RootComponent     root;
     std::string       name = "limit";
-    LimitRate<double> limit(name, nullptr);
+    LimitRate<double> limit(name, root);
 
     const double change_rate = 1.0;
 

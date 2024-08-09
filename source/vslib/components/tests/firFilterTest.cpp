@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "firFilter.h"
+#include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
@@ -38,16 +39,18 @@ class FIRFilterTest : public ::testing::Test
 //! Checks that a FIRFilter object can be constructed
 TEST_F(FIRFilterTest, FilterDefaultConstruction)
 {
-    FIRFilter<2> filter("filter", nullptr);
+    RootComponent root;
+    FIRFilter<2>  filter("filter", root);
     EXPECT_EQ(filter.getName(), "filter");
 }
 
 //! Checks that a FIRFilter object can filter provided value
 TEST_F(FIRFilterTest, FilterSingleValue)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 3;
     constexpr int                     filter_length = filter_order + 1;
-    FIRFilter<filter_order>           filter("filter", nullptr);
+    FIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> coefficient_array{0.05, 0.8, 0.025, 0.057};
     setValues<filter_order>(filter, coefficient_array);
     for (int index = 0; index < filter_length; index++)
@@ -62,7 +65,8 @@ TEST_F(FIRFilterTest, FilterSingleValue)
 //! Checks that a partial template specialization (1st order) object can filter provided value
 TEST_F(FIRFilterTest, FirstOrderFilterSingleValue)
 {
-    FIRFilter<1>          filter("filter", nullptr);
+    RootComponent         root;
+    FIRFilter<1>          filter("filter", root);
     std::array<double, 2> coefficient_array{0.2, 0.8};
     setValues<1>(filter, coefficient_array);
 
@@ -73,7 +77,8 @@ TEST_F(FIRFilterTest, FirstOrderFilterSingleValue)
 //! Checks that a partial template specialization (2nd order) object can filter provided value
 TEST_F(FIRFilterTest, SecondOrderFilterSingleValue)
 {
-    FIRFilter<2>          filter("filter", nullptr);
+    RootComponent         root;
+    FIRFilter<2>          filter("filter", root);
     std::array<double, 3> coefficient_array{0.05, 0.8, 0.15};
     setValues<2>(filter, coefficient_array);
 
@@ -84,9 +89,10 @@ TEST_F(FIRFilterTest, SecondOrderFilterSingleValue)
 //! Checks that a FIRFilter object can filter a number of provided values
 TEST_F(FIRFilterTest, FilterMultipleValues)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 7;
     constexpr int                     filter_length = filter_order + 1;
-    FIRFilter<filter_order>           filter("filter", nullptr);
+    FIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> coefficient_array{0.1, 0.8, 0.05, 0.05};
     setValues<filter_order>(filter, coefficient_array);
 
@@ -102,8 +108,9 @@ TEST_F(FIRFilterTest, FilterMultipleValues)
 //! Checks that a partial template specialization (1st order) object can filter a number of provided values
 TEST_F(FIRFilterTest, FirstOrderFilterMultipleValues)
 {
+    RootComponent         root;
     constexpr int         inputs_length = 3;
-    FIRFilter<1>          filter("filter", nullptr);
+    FIRFilter<1>          filter("filter", root);
     std::array<double, 2> coefficient_array{0.2, 0.8};
     setValues<1>(filter, coefficient_array);
 
@@ -116,8 +123,9 @@ TEST_F(FIRFilterTest, FirstOrderFilterMultipleValues)
 //! Checks that a partial template specialization (2nd order) object can filter a number of provided values
 TEST_F(FIRFilterTest, SecondOrderFilterMultipleValues)
 {
+    RootComponent         root;
     constexpr int         inputs_length = 3;
-    FIRFilter<2>          filter("filter", nullptr);
+    FIRFilter<2>          filter("filter", root);
     std::array<double, 3> coefficient_array{0.15, 0.8, 0.05};
     setValues<2>(filter, coefficient_array);
 
@@ -133,9 +141,10 @@ TEST_F(FIRFilterTest, SecondOrderFilterMultipleValues)
 //! Checks that a FIRFilter object filters correctly a number of provided values larger than the number of coefficients
 TEST_F(FIRFilterTest, FilterMultipleValuesWrapAround)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 1;
     constexpr int                     filter_length = filter_order + 1;
-    FIRFilter<filter_order>           filter("filter", nullptr);
+    FIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> coefficient_array{0.2, 0.8};
     setValues<filter_order>(filter, coefficient_array);
 
@@ -148,9 +157,10 @@ TEST_F(FIRFilterTest, FilterMultipleValuesWrapAround)
 //! Checks that a FIRFilter object can filter an array of inputs at once
 TEST_F(FIRFilterTest, FilterEntireArray)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 3;
     constexpr int                     filter_length = filter_order + 1;
-    FIRFilter<filter_order>           filter("filter", nullptr);
+    FIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> coefficient_array{0.1, 0.4, 0.4, 0.1};
     setValues<filter_order>(filter, coefficient_array);
 
@@ -174,9 +184,10 @@ TEST_F(FIRFilterTest, FilterEntireArray)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 3;
     constexpr int                     filter_length = filter_order + 1;
-    FIRFilter<filter_order>           filter("filter", nullptr);
+    FIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> coefficient_array{
         0.01674, 0.48326, 0.48326, 0.01674};   // calculated by fir1 Matlab function with n=3, and Wn=0.5
     setValues<filter_order>(filter, coefficient_array);
@@ -212,9 +223,10 @@ TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, FilterBMeasDataSeventhOrder)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 7;
     constexpr int                     filter_length = filter_order + 1;
-    FIRFilter<filter_order>           filter("filter", nullptr);
+    FIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> coefficient_array{
         -7.776e-3, 6.445e-2, 4.433e-1,
         4.433e-1,  6.445e-2, -7.776e-3};   // calculated by fir1 Matlab function with n=5, and Wn=0.5
@@ -251,9 +263,10 @@ TEST_F(FIRFilterTest, FilterBMeasDataSeventhOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 10;
     constexpr int                     filter_length = filter_order + 1;
-    FIRFilter<filter_order>           filter("filter", nullptr);
+    FIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> coefficient_array{
         5.060e-3, 0.0,  -4.194e-2, 0.0, 2.885e-1, 4.968e-1,
         2.885e-1, 0.00, -4.194e-2, 0.0, 5.060e-3};   // calculated by fir1 Matlab function with n=10, and Wn=0.5
@@ -290,9 +303,10 @@ TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
 {
+    RootComponent           root;
     constexpr int           filter_order  = 4;
     constexpr int           filter_length = filter_order + 1;
-    FIRFilter<filter_order> filter("filter", nullptr);
+    FIRFilter<filter_order> filter("filter", root);
     // calculated with coefficients = designLowpassFIR(FilterOrder=2,CutoffFrequency=0.5,Window="hann"); command in
     // Matlab:
     std::array<double, filter_length> coefficient_array{0, 0.1945, 0.6110, 0.1945, 0};
@@ -340,9 +354,10 @@ TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, FilterBMeasData81stOrder)
 {
+    RootComponent                     root;
     constexpr int                     filter_order  = 81;
     constexpr int                     filter_length = filter_order + 1;
-    FIRFilter<filter_order>           filter("filter", nullptr);
+    FIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> coefficient_array{
         0.000444601818173842,  -0.000463739605799769, -0.000499996477092942, 0.000554592463829041,
         0.00062877993267011,   -0.000723849715913591, -0.00084113894367772,  0.000982040919065611,

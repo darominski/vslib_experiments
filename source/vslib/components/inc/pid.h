@@ -26,7 +26,7 @@ namespace vslib
         //!
         //! @param name Name identification of the PID controller
         //! @param parent Optional parent of this controller
-        PID(std::string_view name, Component* parent)
+        PID(std::string_view name, IComponent& parent)
             : Component("PID", name, parent),
               kp(*this, "kp"),                            // default limits
               ki(*this, "ki"),                            // default limits
@@ -37,7 +37,7 @@ namespace vslib
               N(*this, "derivative_filter_order", 0.0),   // min limit: 0
               T(*this, "control_period", 0.0),            // min limit: 0.0
               f0(*this, "pre-warping_frequency", 0.0),    // min limit: 0.0
-              actuation_limits("actuation_limits", this)
+              actuation_limits("actuation_limits", *this)
         {
         }
 

@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "alphaBetaZeroToDq0Transform.h"
+#include "rootComponent.h"
 
 using namespace vslib;
 
@@ -26,8 +27,9 @@ class AlphaBetaZeroToDq0TransformTest : public ::testing::Test
 //! Tests default construction of AlphaBetaZeroToDq0Transform component
 TEST_F(AlphaBetaZeroToDq0TransformTest, Construction)
 {
+    RootComponent               root;
     std::string_view            name = "AlphaBetaZeroToDq0Transform";
-    AlphaBetaZeroToDq0Transform transform(name, nullptr);
+    AlphaBetaZeroToDq0Transform transform(name, root);
     ASSERT_EQ(transform.getName(), name);
 
     auto serialized = transform.serialize();
@@ -47,8 +49,9 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, Construction)
 //! Tests custom construction of AlphaBetaZeroToDq0Transform component
 TEST_F(AlphaBetaZeroToDq0TransformTest, NonDefaultConstruction)
 {
+    RootComponent               root;
     std::string_view            name = "AlphaBetaZeroToDq0Transform2";
-    AlphaBetaZeroToDq0Transform transform(name, nullptr, 10000);
+    AlphaBetaZeroToDq0Transform transform(name, root, 10000);
     ASSERT_EQ(transform.getName(), name);
 
     auto serialized = transform.serialize();
@@ -60,8 +63,9 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, NonDefaultConstruction)
 
 TEST_F(AlphaBetaZeroToDq0TransformTest, BasicTest)
 {
+    RootComponent               root;
     std::string_view            name = "AlphaBetaZeroToDq0Transform3";
-    AlphaBetaZeroToDq0Transform transform(name, nullptr);
+    AlphaBetaZeroToDq0Transform transform(name, root);
 
     double i_alpha     = 1.0;
     double i_beta      = -0.5;
@@ -85,8 +89,9 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, BasicTest)
 
 TEST_F(AlphaBetaZeroToDq0TransformTest, ZeroAngleTest)
 {
+    RootComponent               root;
     std::string_view            name = "AlphaBetaZeroToDq0Transform4";
-    AlphaBetaZeroToDq0Transform transform(name, nullptr);
+    AlphaBetaZeroToDq0Transform transform(name, root);
 
     double i_alpha     = 1.0;
     double i_beta      = -0.5;
@@ -110,8 +115,9 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, ZeroAngleTest)
 
 TEST_F(AlphaBetaZeroToDq0TransformTest, ZeroAngle90degreesOffsetTest)
 {
+    RootComponent               root;
     std::string_view            name = "AlphaBetaZeroToDq0Transform5";
-    AlphaBetaZeroToDq0Transform transform(name, nullptr);
+    AlphaBetaZeroToDq0Transform transform(name, root);
 
     const double i_alpha     = 1.0;
     const double i_beta      = -0.5;
@@ -146,8 +152,9 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, ZeroAngle90degreesOffsetTest)
 //! Tests interacting with transform method of ParkTransform component, validation against simulink
 TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisAlignment)
 {
+    RootComponent               root;
     std::string_view            name = "AlphaBetaZeroToDq0Transform6";
-    AlphaBetaZeroToDq0Transform transform(name, nullptr, 10000);
+    AlphaBetaZeroToDq0Transform transform(name, root, 10000);
 
     // the input files are randomly generated numbers
     std::filesystem::path abz_path    = "components/inputs/alpha-beta-zero_sin_120degrees.csv";
@@ -220,8 +227,9 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisAlignment)
 //! Tests interacting with transform method of ParkTransform component, validation against simulink
 TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisNotAligned)
 {
+    RootComponent               root;
     std::string_view            name = "AlphaBetaZeroToDq0Transform7";
-    AlphaBetaZeroToDq0Transform transform(name, nullptr, 10000);
+    AlphaBetaZeroToDq0Transform transform(name, root, 10000);
 
     // the input files are randomly generated numbers
     std::filesystem::path abz_path   = "components/inputs/alpha-beta-zero_sin_120degrees.csv";

@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "pid.h"
+#include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
@@ -75,8 +76,9 @@ class PIDTest : public ::testing::Test
 //! Checks that a default PID object can be constructed and is correctly added to the registry
 TEST_F(PIDTest, PIDDefaultConstruction)
 {
-    std::string name = "pid_1";
-    PID         pid(name, nullptr);
+    RootComponent root;
+    std::string   name = "pid_1";
+    PID           pid(name, root);
     EXPECT_EQ(pid.getName(), name);
 
     auto serialized_pid = pid.serialize();
@@ -104,17 +106,18 @@ TEST_F(PIDTest, PIDDefaultConstruction)
 //! Checks that the RST coefficients were correctly calculated when kp!=0 or kd!=0
 TEST_F(PIDTest, PIDCoefficientsDefault)
 {
-    std::string  name = "pid_2";
-    PID          pid(name, nullptr);
-    const double p  = 2.0;
-    const double i  = 1.0;
-    const double d  = 1.5;
-    const double ff = 0.5;
-    const double b  = 1.0;
-    const double c  = 1.0;
-    const double N  = 1.0;
-    const double T  = 3.0;
-    const double f0 = 2.263752e-6;
+    RootComponent root;
+    std::string   name = "pid_2";
+    PID           pid(name, root);
+    const double  p  = 2.0;
+    const double  i  = 1.0;
+    const double  d  = 1.5;
+    const double  ff = 0.5;
+    const double  b  = 1.0;
+    const double  c  = 1.0;
+    const double  N  = 1.0;
+    const double  T  = 3.0;
+    const double  f0 = 2.263752e-6;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0);
 
     const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * T);
@@ -149,17 +152,18 @@ TEST_F(PIDTest, PIDCoefficientsDefault)
 //! Checks that the RST coefficients were correctly calculated when kp=0 and kd!=0
 TEST_F(PIDTest, PIDCoefficientsKpZero)
 {
-    std::string  name = "pid_3";
-    PID          pid(name, nullptr);
-    const double p  = 0.0;
-    const double i  = 1.0;
-    const double d  = 1.5;
-    const double ff = 0.1;
-    const double b  = 1.0;
-    const double c  = 1.0;
-    const double N  = 1.0;
-    const double T  = 3.0;
-    const double f0 = 2.263752e-6;
+    RootComponent root;
+    std::string   name = "pid_3";
+    PID           pid(name, root);
+    const double  p  = 0.0;
+    const double  i  = 1.0;
+    const double  d  = 1.5;
+    const double  ff = 0.1;
+    const double  b  = 1.0;
+    const double  c  = 1.0;
+    const double  N  = 1.0;
+    const double  T  = 3.0;
+    const double  f0 = 2.263752e-6;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0);
 
     const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * T);
@@ -194,17 +198,18 @@ TEST_F(PIDTest, PIDCoefficientsKpZero)
 //! Checks that the RST coefficients were correctly calculated when kp!=0 and kd=0
 TEST_F(PIDTest, PIDCoefficientsKdZero)
 {
-    std::string  name = "pid_4";
-    PID          pid(name, nullptr);
-    const double p  = 2.0;
-    const double i  = 1.0;
-    const double d  = 0.0;
-    const double ff = 0.2;
-    const double b  = 1.0;
-    const double c  = 1.0;
-    const double N  = 1.0;
-    const double T  = 3.0;
-    const double f0 = 2.263752e-6;
+    RootComponent root;
+    std::string   name = "pid_4";
+    PID           pid(name, root);
+    const double  p  = 2.0;
+    const double  i  = 1.0;
+    const double  d  = 0.0;
+    const double  ff = 0.2;
+    const double  b  = 1.0;
+    const double  c  = 1.0;
+    const double  N  = 1.0;
+    const double  T  = 3.0;
+    const double  f0 = 2.263752e-6;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0);
 
     const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * T);
@@ -239,17 +244,18 @@ TEST_F(PIDTest, PIDCoefficientsKdZero)
 //! Checks that the RST coefficients were correctly calculated when kp=0 and kd=0
 TEST_F(PIDTest, PIDCoefficientsIntegrator)
 {
-    std::string  name = "pid_5";
-    PID          pid(name, nullptr);
-    const double p  = 0.0;
-    const double i  = 1.0;
-    const double d  = 0.0;
-    const double ff = 0.1;
-    const double b  = 1.0;
-    const double c  = 1.0;
-    const double N  = 1.0;
-    const double T  = 3.0;
-    const double f0 = 2.263752e-6;
+    RootComponent root;
+    std::string   name = "pid_5";
+    PID           pid(name, root);
+    const double  p  = 0.0;
+    const double  i  = 1.0;
+    const double  d  = 0.0;
+    const double  ff = 0.1;
+    const double  b  = 1.0;
+    const double  c  = 1.0;
+    const double  N  = 1.0;
+    const double  T  = 3.0;
+    const double  f0 = 2.263752e-6;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0);
 
     const double a = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * T);
@@ -279,6 +285,7 @@ TEST_F(PIDTest, PIDCoefficientsIntegrator)
 //! Checks that the calculated actuation of RST is as expected against Simulink model
 TEST_F(PIDTest, PIDSimulinkSimpleConsistency)
 {
+    RootComponent root;
     // simulink model with three filters:
     // 1. Discrete FIR Filter with T0, T1, T2 parameters with rk as input,
     // 2. Discrete FIR FIlter with R0, R1, R2 parameters with yk as input,
@@ -289,7 +296,7 @@ TEST_F(PIDTest, PIDSimulinkSimpleConsistency)
     // yk and rk inputs are randomly generated: rk = randn(10000, 1);
 
     std::string  name = "pid";
-    PID          pid(name, nullptr);
+    PID          pid(name, root);
     const double p             = 1.0;
     const double i             = 1.0;
     const double d             = 1.0;
@@ -344,6 +351,7 @@ TEST_F(PIDTest, PIDSimulinkSimpleConsistency)
 //! Checks that the calculated actuation of RST is as expected against Simulink model
 TEST_F(PIDTest, PIDSimulinkConsistency)
 {
+    RootComponent root;
     // simulink model with three filters:
     // 1. Discrete FIR Filter with T0, T1, T2 parameters with rk as input,
     // 2. Discrete FIR FIlter with R0, R1, R2 parameters with yk as input,
@@ -354,7 +362,7 @@ TEST_F(PIDTest, PIDSimulinkConsistency)
     // yk and rk inputs are randomly generated: rk = randn(10000, 1);
 
     std::string  name = "pid";
-    PID          pid(name, nullptr);
+    PID          pid(name, root);
     const double p             = 52.79;
     const double i             = 0.0472;
     const double d             = 0.04406;
@@ -410,6 +418,7 @@ TEST_F(PIDTest, PIDSimulinkConsistency)
 //! Checks that the calculated actuation of RST is as expected against Simulink model
 TEST_F(PIDTest, PIDSimulinkIntegratorConsistency)
 {
+    RootComponent root;
     // simulink model with three filters:
     // 1. Discrete FIR Filter with T0, T1, T2 parameters with rk as input,
     // 2. Discrete FIR FIlter with R0, R1, R2 parameters with yk as input,
@@ -420,7 +429,7 @@ TEST_F(PIDTest, PIDSimulinkIntegratorConsistency)
     // yk and rk inputs are randomly generated: rk = randn(10000, 1);
 
     std::string  name = "pid";
-    PID          pid(name, nullptr);
+    PID          pid(name, root);
     const double p             = 0;
     const double i             = 0.0472;
     const double d             = 0;

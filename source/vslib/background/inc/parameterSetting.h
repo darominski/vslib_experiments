@@ -7,8 +7,10 @@
 
 #include <nlohmann/json-schema.hpp>
 
+#include "component.h"
 #include "jsonCommandSchema.h"
 #include "messageQueue.h"
+#include "rootComponent.h"
 #include "staticJson.h"
 #include "vslibMessageQueue.h"
 
@@ -16,14 +18,14 @@ namespace vslib
 {
     class ParameterSetting
     {
-        using ComponentReference = std::reference_wrapper<Component>;
+        using ComponentReference = std::reference_wrapper<IComponent>;
         using ChildrenList       = std::vector<ComponentReference>;
 
       public:
         //! Creates the ParameterSetting background task object and initializes the JSON schema validator as well as
         //! read and write JSON queues
         ParameterSetting(
-            uint8_t* read_command_queue_address, uint8_t* write_status_queue_address, Component& root_component
+            uint8_t* read_command_queue_address, uint8_t* write_status_queue_address, RootComponent& root_component
         )
             : m_read_commands_queue{fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
                 read_command_queue_address, fgc4::utils::constants::json_memory_pool_size
@@ -75,7 +77,7 @@ namespace vslib
         //!< Buffer for the incoming commands
         std::array<uint8_t, fgc4::utils::constants::json_memory_pool_size> m_read_commands_buffer;
 
-        Component& m_root_component;   //!< Root Component
+        RootComponent& m_root_component;   //!< Root Component
 
         //! Recursive function to call verifyParameters on the component and its children
         void validateComponent(const ChildrenList&);

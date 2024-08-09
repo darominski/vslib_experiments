@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "clarkeTransform.h"
+#include "rootComponent.h"
 
 using namespace vslib;
 
@@ -26,8 +27,9 @@ class ClarkeTransformTest : public ::testing::Test
 //! Tests default construction of ClarkeTransform component
 TEST_F(ClarkeTransformTest, Construction)
 {
+    RootComponent    root;
     std::string_view name = "clarke1";
-    ClarkeTransform  clarke(name, nullptr);
+    ClarkeTransform  clarke(name, root);
     ASSERT_EQ(clarke.getName(), "clarke1");
 
     auto serialized = clarke.serialize();
@@ -40,8 +42,9 @@ TEST_F(ClarkeTransformTest, Construction)
 //! Tests basic case of ClarkeTransform for a balance system
 TEST_F(ClarkeTransformTest, BasicTest)
 {
+    RootComponent    root;
     std::string_view name = "clarke2";
-    ClarkeTransform  clarke(name, nullptr);
+    ClarkeTransform  clarke(name, root);
 
     double i_a               = 1.0;
     double i_b               = -0.5;
@@ -56,8 +59,9 @@ TEST_F(ClarkeTransformTest, BasicTest)
 //! Tests zero-sequence system (all phases are the same)
 TEST(ClarkeTransformationTest, ZeroSequenceTest)
 {
+    RootComponent    root;
     std::string_view name = "clarke3";
-    ClarkeTransform  clarke(name, nullptr);
+    ClarkeTransform  clarke(name, root);
 
     double i_a               = 1.0;
     double i_b               = 1.0;
@@ -72,8 +76,9 @@ TEST(ClarkeTransformationTest, ZeroSequenceTest)
 //! Tests an unbalanced system
 TEST(ClarkeTransformationTest, UnbalancedSystemTest)
 {
+    RootComponent    root;
     std::string_view name = "clarke4";
-    ClarkeTransform  clarke(name, nullptr);
+    ClarkeTransform  clarke(name, root);
 
     double i_a               = 2.0;
     double i_b               = -1.0;
@@ -88,8 +93,9 @@ TEST(ClarkeTransformationTest, UnbalancedSystemTest)
 //! Tests interacting with transform method of ClarkeTransform component, validation against simulink
 TEST_F(ClarkeTransformTest, SimulinkConsistency)
 {
+    RootComponent    root;
     std::string_view name = "clarke5";
-    ClarkeTransform  clarke(name, nullptr);
+    ClarkeTransform  clarke(name, root);
 
     // the input files are randomly generated numbers
     std::filesystem::path abc_path    = "components/inputs/park_abc_sin_120degrees.csv";

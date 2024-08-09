@@ -20,7 +20,7 @@ namespace vslib
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        ClarkeTransform(std::string_view name, Component* parent)
+        ClarkeTransform(std::string_view name, IComponent& parent)
             : Component("ClarkeTransform", name, parent)
         {
         }

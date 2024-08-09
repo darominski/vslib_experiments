@@ -122,14 +122,9 @@ namespace vslib
 
     void ParameterSetting::validateComponents()
     {
-        // validate the root Component first:
-        const auto& root_warning = m_root_component.verifyParameters();
-        if (!root_warning.has_value())
-        {
-            m_root_component.flipBufferState();
-        }
-
-        // validate all children and their children tree indefinitely deeply
+        // The RootComponent has no Parameters, so no validation is required.
+        //
+        // Validate all children and their children tree indefinitely deeply
         validateComponent(m_root_component.getChildren());
     }
 

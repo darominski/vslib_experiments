@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "limitRms.h"
+#include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
@@ -40,8 +41,9 @@ class LimitRmsTest : public ::testing::Test
 //! Tests default construction of integral type Limit component
 TEST_F(LimitRmsTest, LimitRmsDefault)
 {
-    std::string name = "limit";
-    LimitRms    limit(name, nullptr);
+    RootComponent root;
+    std::string   name = "limit";
+    LimitRms      limit(name, root);
     EXPECT_EQ(limit.getName(), name);
 
     auto serialized = limit.serialize();
@@ -58,9 +60,10 @@ TEST_F(LimitRmsTest, LimitRmsDefault)
 //! Tests catching value with excessive RMS value
 TEST_F(LimitRmsTest, LimitRms)
 {
-    std::string  name             = "limit";
-    double const iteration_period = 1.0;
-    LimitRms     limit(name, nullptr, iteration_period);
+    RootComponent root;
+    std::string   name             = "limit";
+    double const  iteration_period = 1.0;
+    LimitRms      limit(name, root, iteration_period);
 
     double rms_limit         = 5;
     double rms_time_constant = 1;
@@ -77,9 +80,10 @@ TEST_F(LimitRmsTest, LimitRms)
 //! Tests catching value with excessive RMS value coming after a number of entries
 TEST_F(LimitRmsTest, LimitRmsLongerRunning)
 {
-    std::string  name             = "limit";
-    double const iteration_period = 1.0;
-    LimitRms     limit(name, nullptr, iteration_period);
+    RootComponent root;
+    std::string   name             = "limit";
+    double const  iteration_period = 1.0;
+    LimitRms      limit(name, root, iteration_period);
 
     double rms_limit         = 5;
     double rms_time_constant = 1.0;
@@ -102,9 +106,10 @@ TEST_F(LimitRmsTest, LimitRmsLongerRunning)
 //! Tests catching warning when infinity is provided as input
 TEST_F(LimitRmsTest, LimitRmsInfInput)
 {
-    std::string  name             = "limit";
-    const double iteration_period = 1.0;
-    LimitRms     limit(name, nullptr, iteration_period);
+    RootComponent root;
+    std::string   name             = "limit";
+    const double  iteration_period = 1.0;
+    LimitRms      limit(name, root, iteration_period);
 
     const double rms_limit         = 5;
     const double rms_time_constant = 5e-5;
@@ -119,9 +124,10 @@ TEST_F(LimitRmsTest, LimitRmsInfInput)
 //! Tests catching warning when minus infinity is provided as input
 TEST_F(LimitRmsTest, LimitRmsMinusInfInput)
 {
-    std::string  name             = "limit";
-    const double iteration_period = 1.0;
-    LimitRms     limit(name, nullptr, iteration_period);
+    RootComponent root;
+    std::string   name             = "limit";
+    const double  iteration_period = 1.0;
+    LimitRms      limit(name, root, iteration_period);
 
     double       rms_limit         = 5;
     double       rms_time_constant = 5e-5;
@@ -136,8 +142,9 @@ TEST_F(LimitRmsTest, LimitRmsMinusInfInput)
 //! Tests catching warning when NaN is provided as input
 TEST_F(LimitRmsTest, LimitRmsNanInput)
 {
-    std::string name = "limit";
-    LimitRms    limit(name, nullptr);
+    RootComponent root;
+    std::string   name = "limit";
+    LimitRms      limit(name, root);
 
     double rms_limit         = 5;
     double rms_time_constant = 1e-4;

@@ -5,6 +5,7 @@
 #include <array>
 #include <gtest/gtest.h>
 
+#include "rootComponent.h"
 #include "sinLookupTable.h"
 #include "staticJson.h"
 
@@ -25,8 +26,9 @@ class SinLookupTableTest : public ::testing::Test
 //! Tests default construction of SinLookupTableTest component
 TEST_F(SinLookupTableTest, SinLookupTable)
 {
+    RootComponent  root;
     std::string    name = "table";
-    SinLookupTable table(name, nullptr, 2);
+    SinLookupTable table(name, root, 2);
     EXPECT_EQ(table.getName(), name);
 
     auto serialized = table.serialize();
@@ -42,8 +44,9 @@ TEST_F(SinLookupTableTest, SinLookupTable)
 //! Tests SinLookupTableTest component interpolating a couple of points
 TEST_F(SinLookupTableTest, SinLookupTableInterpolation)
 {
+    RootComponent  root;
     std::string    name = "table";
-    SinLookupTable table(name, nullptr, 10000);
+    SinLookupTable table(name, root, 10000);
 
     EXPECT_NEAR(table.interpolate(0.0), sin(0.0), 1e-6);
     EXPECT_NEAR(table.interpolate(M_PI / 2.0), sin(M_PI / 2.0), 1e-6);
@@ -55,8 +58,9 @@ TEST_F(SinLookupTableTest, SinLookupTableInterpolation)
 //! Tests SinLookupTable component interpolating a couple of points that fall out of 0 - 2pi range
 TEST_F(SinLookupTableTest, SinLookupTableInterpolationOutOfBounds)
 {
+    RootComponent  root;
     std::string    name = "table";
-    SinLookupTable table(name, nullptr, 10000);
+    SinLookupTable table(name, root, 10000);
 
     const double epsilon = 1e-2;
 
@@ -76,8 +80,9 @@ TEST_F(SinLookupTableTest, SinLookupTableInterpolationOutOfBounds)
 //! Tests SinLookupTable consistency of interface
 TEST_F(SinLookupTableTest, SinLookupTableConsistency)
 {
+    RootComponent  root;
     std::string    name = "table";
-    SinLookupTable table(name, nullptr, 10000);
+    SinLookupTable table(name, root, 10000);
 
     EXPECT_NEAR(table.interpolate(0.0), table(0.0), 1e-6);
     EXPECT_NEAR(table.interpolate(M_PI / 2.0), table(M_PI / 2.0), 1e-6);

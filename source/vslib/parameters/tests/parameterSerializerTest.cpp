@@ -9,6 +9,7 @@
 #include "parameter.h"
 #include "parameterRegistry.h"
 #include "parameterSerializer.h"
+#include "rootComponent.h"
 
 using namespace vslib;
 
@@ -31,8 +32,8 @@ class ParameterTest : public ::testing::Test
 class MockComponent : public Component
 {
   public:
-    MockComponent()
-        : Component("mockType", "mockName", nullptr)
+    MockComponent(RootComponent& parent)
+        : Component("mockType", "mockName", parent)
     {
     }
 };
@@ -43,7 +44,8 @@ class MockComponent : public Component
 // Basic boolean parameter serialization
 TEST_F(ParameterTest, BoolParameterSerialization)
 {
-    MockComponent       component;   // component to attach parameters to
+    RootComponent       root;
+    MockComponent       component(root);   // component to attach parameters to
     const std::string   parameter_name = "bool";
     Parameter<bool>     parameter(component, parameter_name);
     ParameterSerializer serializer;
@@ -63,7 +65,8 @@ TEST_F(ParameterTest, BoolParameterSerialization)
 // Basic integer parameter serialization
 TEST_F(ParameterTest, IntParameterSerialization)
 {
-    MockComponent       component;   // component to attach parameters to
+    RootComponent       root;
+    MockComponent       component(root);   // component to attach parameters to
     const std::string   parameter_name = "int";
     Parameter<uint32_t> parameter(component, parameter_name);
     ParameterSerializer serializer;
@@ -83,7 +86,8 @@ TEST_F(ParameterTest, IntParameterSerialization)
 // Basic enum parameter serialization
 TEST_F(ParameterTest, EnumParameterSerialization)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum class TestEnum
     {
@@ -112,7 +116,8 @@ TEST_F(ParameterTest, EnumParameterSerialization)
 // Basic std::string parameter serialization
 TEST_F(ParameterTest, StringParameterSerialization)
 {
-    MockComponent          component;   // component to attach parameters to
+    RootComponent          root;
+    MockComponent          component(root);   // component to attach parameters to
     const std::string      parameter_name = "string";
     Parameter<std::string> parameter(component, parameter_name);
     ParameterSerializer    serializer;
@@ -132,7 +137,8 @@ TEST_F(ParameterTest, StringParameterSerialization)
 // Basic float parameter serialization, with limits
 TEST_F(ParameterTest, FloatWithLimitsParameterSerialization)
 {
-    MockComponent       component;   // component to attach parameters to
+    RootComponent       root;
+    MockComponent       component(root);   // component to attach parameters to
     const std::string   parameter_name = "float";
     Parameter<float>    parameter(component, parameter_name, -5, 10);
     ParameterSerializer serializer;
@@ -156,7 +162,8 @@ TEST_F(ParameterTest, FloatWithLimitsParameterSerialization)
 // Basic int16 array parameter serialization, with limits
 TEST_F(ParameterTest, IntArrayWithLimitsParameterSerialization)
 {
-    MockComponent                              component;   // component to attach parameters to
+    RootComponent                              root;
+    MockComponent                              component(root);   // component to attach parameters to
     const std::string                          parameter_name = "int16";
     constexpr size_t                           array_size     = 5;
     Parameter<std::array<int16_t, array_size>> parameter(component, parameter_name, -5, 10);
@@ -183,7 +190,8 @@ TEST_F(ParameterTest, IntArrayWithLimitsParameterSerialization)
 //! Tests serialization of array of double Parameter when value has been set
 TEST_F(ParameterTest, BoolParameterSerializationWithValue)
 {
-    MockComponent       component;   // component to attach parameters to
+    RootComponent       root;
+    MockComponent       component(root);   // component to attach parameters to
     const std::string   parameter_name = "bool";
     Parameter<bool>     parameter(component, parameter_name);
     ParameterSerializer serializer;
@@ -210,7 +218,8 @@ TEST_F(ParameterTest, BoolParameterSerializationWithValue)
 //! Tests serialization of array of double Parameter when value has been set
 TEST_F(ParameterTest, DoubleArrayParameterSerializationWithValue)
 {
-    MockComponent                    component;   // component to attach parameters to
+    RootComponent                    root;
+    MockComponent                    component(root);   // component to attach parameters to
     const std::string                parameter_name = "double_array";
     Parameter<std::array<double, 3>> parameter(component, parameter_name, -5, 5);
     ParameterSerializer              serializer;
@@ -241,7 +250,8 @@ TEST_F(ParameterTest, DoubleArrayParameterSerializationWithValue)
 //! Tests serialization of enum Parameter when value has been set
 TEST_F(ParameterTest, EnumParameterSerializationWithValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum class TestEnum
     {
@@ -280,7 +290,8 @@ TEST_F(ParameterTest, EnumParameterSerializationWithValue)
 //! Tests serialization of std::array of enum Parameter when value has been set
 TEST_F(ParameterTest, EnumArrayParameterSerializationWithValue)
 {
-    MockComponent     component;   // component to attach parameters to
+    RootComponent     root;
+    MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "enum";
     enum class TestEnum
     {
