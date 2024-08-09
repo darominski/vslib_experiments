@@ -27,9 +27,9 @@ namespace vslib
         //! @param parent Possible parent of this Component, for the root Component should be nullptr
         Component(std::string_view component_type, std::string_view name, IComponent& parent) noexcept
             : IComponent(component_type, name),
-              m_parent(parent),
-              m_full_name(std::string(m_parent.get().getFullName()) + "." + m_component_type + "." + m_name)
+              m_parent(parent)
         {
+            m_full_name = std::string(m_parent.get().getFullName()) + "." + m_component_type + "." + m_name;
             parent.addChild(*this);
         }
 
@@ -76,35 +76,7 @@ namespace vslib
             return serialized_component;
         }
 
-
-        //! Provides the full name of this Component, including its type and the full name of parent.
-        //!
-        //! @return String_view of the component name
-        [[nodiscard]] std::string_view getFullName() const noexcept override
-        {
-            return m_full_name;
-        }
-
         // ************************************************************
-        // Miscellaneous methods, interaction with buffers and verifying parameters
-
-        //! Flips the buffer state of all Parameters registered with this Component.
-        void flipBufferState() noexcept
-        {
-            for (auto& parameter : m_parameters)
-            {
-                parameter.second.get().swapBuffers();
-            }
-        }
-
-        //! Synchronises buffers for all Parameters registered with this Component.
-        void synchroniseParameterBuffers() noexcept
-        {
-            for (auto& parameter : m_parameters)
-            {
-                parameter.second.get().syncWriteBuffer();
-            }
-        }
 
         //! Verifies parameters after they are set, to be called after parameters of this component are modified.
         //! The checks need to run on the inactive buffer values.
@@ -115,8 +87,6 @@ namespace vslib
 
       protected:
         std::reference_wrapper<IComponent> m_parent;   //!< Parent of this Component
-
-        std::string m_full_name;   //!< Full name of this Component, including hierarchy
     };
 
 }   // namespace vslib

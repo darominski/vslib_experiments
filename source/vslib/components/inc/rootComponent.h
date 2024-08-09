@@ -27,9 +27,9 @@ namespace vslib
         //! @param component_type Type of the RootComponent
         //! @param name Name of the RootComponent, needs to be unique in the type
         RootComponent(std::string_view component_type = "ROOT", std::string_view name = "root") noexcept
-            : IComponent(component_type, name),
-              m_full_name(m_component_type + "." + m_name)
+            : IComponent(component_type, name)
         {
+            m_full_name = m_component_type + "." + m_name;
         }
         // ************************************************************
         // Method for serializing this RootComponent
@@ -57,15 +57,6 @@ namespace vslib
         }
 
         // ************************************************************
-        // Getters
-
-        //! Provides the full name of this RootComponent, including its type.
-        //!
-        //! @return String_view of the component name
-        [[nodiscard]] std::string_view getFullName() const noexcept override
-        {
-            return m_full_name;
-        }
 
         //! Verifies parameters after they are set, to be called after parameters of this component are modified.
         //! The checks need to run on the inactive buffer values. No Parameters exist, so nothing to do.
@@ -73,19 +64,6 @@ namespace vslib
         {
             return {};
         }
-
-        void synchroniseParameterBuffers() noexcept override
-        {
-            // nothing to do
-        }
-
-        void flipBufferState() noexcept override
-        {
-            // nothing to do
-        }
-
-      private:
-        std::string m_full_name;
     };
 
 }   // namespace vslib

@@ -34,24 +34,18 @@ namespace vslib
 
         virtual ~IComponent() = default;
 
-        //! Adds a child RootComponent to this RootComponent.
+        //! Adds a child component to this component.
         //!
-        //! @param child Child Component to be added to this RootComponent
+        //! @param child Child Component to be added to this component
         void addChild(IComponent& child) noexcept
         {
             m_children.emplace_back(child);
         }
 
-        //! Serializes this Component to JSON, including all children Components and Parameters
-        //! across the entire hierarchy.
-        //!
-        //! @return Returns a fully-serialized Component as a JSON object
-        virtual StaticJson serialize() const noexcept = 0;
-
         // ************************************************************
         // Getters
 
-        //! Provides the name of this RootComponent.
+        //! Provides the name of this component.
         //!
         //! @return String_view of the component name
         [[nodiscard]] std::string_view getName() const noexcept
@@ -59,30 +53,53 @@ namespace vslib
             return m_name;
         }
 
-        //! Provides the full name of this IComponent, including its type, to be overriden by derived classes.
+        //! Provides the full name of this component.
         //!
         //! @return String_view of the component name
-        virtual std::string_view getFullName() const noexcept = 0;
+        [[nodiscard]] std::string_view getFullName() const noexcept
+        {
+            return m_full_name;
+        }
 
-        //! Provides the container with all children belonging to this RootComponent.
+        //! Provides the container with all children belonging to this component.
         //!
-        //! @return Vector with references to all children of this RootComponent
+        //! @return Vector with references to all children of this component
         [[nodiscard]] auto const& getChildren() const noexcept
         {
             return m_children;
         }
 
-        //! Provides the map with all names and references to all parameters registered to this Component.
+        //! Provides the map with all names and references to all parameters registered to this component.
         //!
-        //! @return Map with names and references to all parameters of this Component
+        //! @return Map with names and references to all parameters of this component
         [[nodiscard]] auto const& getParameters() const noexcept
         {
             return m_parameters;
         }
 
-        //! Returns the value of the flag informing whether the parameters of this Component have been recently modified
+        // ************************************************************
+
+        //! Flips the buffer state of all Parameters registered with this component.
+        void flipBufferState() noexcept
+        {
+            for (auto& parameter : m_parameters)
+            {
+                parameter.second.get().swapBuffers();
+            }
+        }
+
+        //! Synchronises buffers for all Parameters registered with this component.
+        void synchroniseParameterBuffers() noexcept
+        {
+            for (auto& parameter : m_parameters)
+            {
+                parameter.second.get().syncWriteBuffer();
+            }
+        }
+
+        //! Returns the value of the flag informing whether the parameters of this component have been recently modified
         //!
-        //! @return True if any parameter of this Component has been recently modified, false otherwise
+        //! @return True if any parameter of this component has been recently modified, false otherwise
         [[nodiscard]] bool parametersInitialized() const noexcept
         {
             for (const auto& parameter : m_parameters)
@@ -96,16 +113,26 @@ namespace vslib
             return true;
         }
 
-        virtual std::optional<fgc4::utils::Warning> verifyParameters()                     = 0;
-        virtual void                                flipBufferState() noexcept             = 0;
-        virtual void                                synchroniseParameterBuffers() noexcept = 0;
+        // ************************************************************
+        // Virtual methods
+
+        //! Serializes this Component to JSON, including all children component and Parameters
+        //! across the entire hierarchy.
+        //!
+        //! @return Returns a fully-serialized Component as a JSON object
+        virtual StaticJson serialize() const noexcept = 0;
+
+        //! Verifies parameters after they are set, to be called after parameters of this component are modified.
+        //! The checks need to run on the inactive buffer values.
+        virtual std::optional<fgc4::utils::Warning> verifyParameters() = 0;
 
       protected:
         std::string m_component_type;   //!< Type of this RootComponent
         std::string m_name;             //!< Name of this RootComponent
+        std::string m_full_name;        //!< Full name of this component, including hierarchy
 
-        ChildrenList  m_children;     //!< Container with all children Components registered to this Component
-        ParameterList m_parameters;   //!< Container with all Parameters registered to this Component
+        ChildrenList  m_children;     //!< Container with all children component registered to this component
+        ParameterList m_parameters;   //!< Container with all Parameters registered to this component
     };
 
 }   // namespace vslib
