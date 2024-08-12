@@ -26,11 +26,10 @@ namespace vslib
         //! @param name Name of the Component, needs to be unique in the type
         //! @param parent Possible parent of this Component, for the root Component should be nullptr
         Component(std::string_view component_type, std::string_view name, IComponent& parent) noexcept
-            : IComponent(component_type, name),
-              m_parent(parent)
+            : IComponent(component_type, name)
         {
-            m_full_name = std::string(m_parent.get().getFullName()) + "." + std::string(m_component_type) + "."
-                          + std::string(m_name);
+            m_full_name
+                = std::string(parent.getFullName()) + "." + std::string(m_component_type) + "." + std::string(m_name);
             parent.addChild(*this);
         }
 
@@ -85,9 +84,6 @@ namespace vslib
         {
             return {};
         }
-
-      protected:
-        std::reference_wrapper<IComponent> m_parent;   //!< Parent of this Component
     };
 
 }   // namespace vslib
