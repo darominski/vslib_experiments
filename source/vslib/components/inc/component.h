@@ -29,7 +29,8 @@ namespace vslib
             : IComponent(component_type, name),
               m_parent(parent)
         {
-            m_full_name = std::string(m_parent.get().getFullName()) + "." + m_component_type + "." + m_name;
+            m_full_name = std::string(m_parent.get().getFullName()) + "." + std::string(m_component_type) + "."
+                          + std::string(m_name);
             parent.addChild(*this);
         }
 

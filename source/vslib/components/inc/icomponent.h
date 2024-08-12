@@ -28,7 +28,8 @@ namespace vslib
 
         IComponent(std::string_view type, std::string_view name)
             : m_component_type(type),
-              m_name(name)
+              m_name(name),
+              m_full_name(name)
         {
         }
 
