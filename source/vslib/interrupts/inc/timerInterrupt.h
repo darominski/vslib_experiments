@@ -28,6 +28,10 @@ namespace vslib
             : Interrupt<Converter>(name, converter, handler_function),
               m_delay(std::chrono::microseconds(delay))
         {
+            static_assert(
+                std::derived_from<Converter, IConverter>,
+                "The interrupt's template class must be derived from IConverter."
+            );
             bmboot::setupPeriodicInterrupt(m_delay, this->m_interrupt_handler);
         }
 

@@ -25,6 +25,10 @@ namespace vslib
         Interrupt(std::string_view name, Converter* converter, std::function<void(Converter&)> handler_function)
             : m_name(name)
         {
+            static_assert(
+                std::derived_from<Converter, IConverter>,
+                "The interrupt's template class must be derived from IConverter."
+            );
 #ifdef PERFORMANCE_TESTS
             m_measurement_counter = 0;
             m_interrupt_handler   = [this, handler_function, converter]()

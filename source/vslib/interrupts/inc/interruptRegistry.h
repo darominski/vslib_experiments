@@ -30,6 +30,10 @@ namespace vslib
             InterruptPriority priority
         )
         {
+            static_assert(
+                std::derived_from<Converter, IConverter>,
+                "The interrupt's template class must be derived from IConverter."
+            );
             if (m_interrupts.find(interrupt_name) != m_interrupts.end())
             {
                 fgc4::utils::Error error_message(
