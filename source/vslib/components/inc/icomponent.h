@@ -102,15 +102,13 @@ namespace vslib
         //! @return True if any parameter of this component has been recently modified, false otherwise
         [[nodiscard]] bool parametersInitialized() const noexcept
         {
-            for (const auto& parameter : m_parameters)
-            {
-                if (!parameter.second.get().isInitialized())
+            return std::all_of(
+                std::cbegin(m_parameters), std::cend(m_parameters),
+                [](const auto& parameter)
                 {
-                    return false;
-                    break;
+                    return parameter.second.get().isInitialized();
                 }
-            }
-            return true;
+            );
         }
 
         // ************************************************************
