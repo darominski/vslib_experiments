@@ -40,7 +40,7 @@ namespace vslib
         //! @return Returns a fully-serialized Component as a JSON object
         [[nodiscard]] StaticJson serialize() const noexcept override
         {
-            StaticJson serialized_component = nlohmann::json::array();
+            StaticJson serialized_component = nlohmann::json::object();
 
             StaticJson serialized_children = nlohmann::json::array();
             for (const auto& child : m_children)
