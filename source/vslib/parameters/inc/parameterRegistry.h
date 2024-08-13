@@ -53,5 +53,11 @@ namespace vslib
       private:
         ParameterRegistry() = default;                            //!< Default constructor
         std::map<std::string, ParameterReference> m_parameters;   //!< Map holding references to all Parameters
+
+        //! Checks the name formatting of the provided full parameter name and throws an exception if the name
+        //! is not-conforming.
+        //!
+        //! @param parameter_name Full name of the Parameter, including hierarchy, to be checked
+        void checkNameFormatting(const std::string& parameter_name);
     };
 }   // namespace vslib
