@@ -42,7 +42,7 @@ TEST_F(ComponentArrayTest, BasicArray)
     ComponentArray<Derived, array_length> component(component_name, root);
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), std::string("ROOT.root.ComponentArray.") + component_name);
+    EXPECT_EQ(component.getFullName(), std::string("root.") + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
 
     auto serialized_component = component.serialize();
@@ -71,10 +71,7 @@ TEST_F(ComponentArrayTest, BasicArrayInteractions)
     {
         std::string element_name = std::string("array[") + std::to_string(counter++) + "]";
         EXPECT_EQ(element.getName(), element_name);
-        EXPECT_EQ(
-            element.getFullName(), std::string("ROOT.root.") + component_type + "." + component_name + "."
-                                       + held_type_name + "." + element_name
-        );
+        EXPECT_EQ(element.getFullName(), std::string("root.") + component_name + "." + element_name);
         EXPECT_EQ(element.getParameters().size(), 0);
     }
     // tests operator[] overload:
@@ -92,7 +89,7 @@ TEST_F(ComponentArrayTest, HierarchicalArrayTest)
     ComponentArray<ComponentArray<Derived, inner_array_length>, outer_array_length> component(component_name, root);
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), std::string("ROOT.root.ComponentArray.") + component_name);
+    EXPECT_EQ(component.getFullName(), std::string("root.") + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
 
     auto serialized_component = component.serialize();

@@ -28,8 +28,7 @@ namespace vslib
         Component(std::string_view component_type, std::string_view name, IComponent& parent) noexcept
             : IComponent(component_type, name)
         {
-            m_full_name
-                = std::string(parent.getFullName()) + "." + std::string(m_component_type) + "." + std::string(m_name);
+            m_full_name = std::string(parent.getFullName()) + "." + std::string(m_name);
             parent.addChild(*this);
         }
 

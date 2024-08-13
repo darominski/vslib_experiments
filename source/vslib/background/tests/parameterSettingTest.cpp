@@ -161,9 +161,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIntCommand)
     MockComponent<int16_t> test(type, name, user_root_component);
 
     nlohmann::json single_command
-        = {{"name", "Root.root.parent_type.parent.type.name.parameter"},
-           {"value", 1},
-           {"version", std::array<int, 2>{0, 1}}};
+        = {{"name", "root.parent.name.parameter"}, {"value", 1}, {"version", std::array<int, 2>{0, 1}}};
     ASSERT_NO_THROW(parameter_setting.processJsonCommands(single_command));
     test.flipBufferState();
     EXPECT_EQ(test.parameter, (int16_t)single_command["value"]);
@@ -184,7 +182,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleUintCommand)
     MockComponent<uint32_t> test(type, name, root_component);
 
     nlohmann::json single_command
-        = {{"name", std::string(root_component.getFullName()) + '.' + type + '.' + name + ".parameter"},
+        = {{"name", std::string(root_component.getFullName()) + '.' + name + ".parameter"},
            {"value", (uint32_t)5},
            {"version", std::array<int, 2>{0, 1}}};
     ASSERT_NO_THROW(parameter_setting.processJsonCommands(single_command));
@@ -208,7 +206,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleDoubleCommand)
     MockComponent<double> test(type, name, root_component);
 
     nlohmann::json single_command
-        = {{"name", std::string(root_component.getFullName()) + '.' + type + '.' + name + ".parameter"},
+        = {{"name", std::string(root_component.getFullName()) + '.' + name + ".parameter"},
            {"value", 3.14159},
            {"version", std::array<int, 2>{0, 1}}};
     ASSERT_NO_THROW(parameter_setting.processJsonCommands(single_command));
@@ -237,7 +235,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectUintCommand)
     );
 
     nlohmann::json single_command
-        = {{"name", std::string(root_component.getFullName()) + '.' + type + '.' + name + ".parameter"},
+        = {{"name", std::string(root_component.getFullName()) + '.' + name + ".parameter"},
            {"value", -5},
            {"version", std::array<int, 2>{0, 1}}};
     parameter_setting.processJsonCommands(single_command);
@@ -274,7 +272,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectIntCommand)
     );
 
     nlohmann::json single_command
-        = {{"name", std::string(root_component.getFullName()) + '.' + type + '.' + name + ".parameter"},
+        = {{"name", std::string(root_component.getFullName()) + '.' + name + ".parameter"},
            {"value", 3.14159},
            {"version", std::array<int, 2>{0, 1}}};
     parameter_setting.processJsonCommands(single_command);
@@ -304,7 +302,7 @@ TEST_F(ParameterSettingTest, ParameterMapProcessArrayCommand)
     MockComponent<int32_t> test(type, name, root_component);
 
     nlohmann::json single_command
-        = {{"name", std::string(root_component.getFullName()) + '.' + type + '.' + name + ".parameter"},
+        = {{"name", std::string(root_component.getFullName()) + '.' + name + ".parameter"},
            {"value", 1},
            {"version", std::array<int, 2>{0, 1}}};
     nlohmann::json multiple_commands = {single_command, single_command, single_command};
@@ -331,7 +329,7 @@ TEST_F(ParameterSettingTest, ParameterMapProcessArrayInvalidCommand)
     MockComponent<int32_t> test(type, name, root_component);
 
     nlohmann::json single_command
-        = {{"name", std::string(root_component.getFullName()) + '.' + type + '.' + name + ".parameter"},
+        = {{"name", std::string(root_component.getFullName()) + '.' + name + ".parameter"},
            {"value", 1},
            {"version", std::array<int, 2>{0, 1}}};
     nlohmann::json multiple_commands  = {single_command, single_command, single_command};
@@ -368,7 +366,7 @@ TEST_F(ParameterSettingTest, ParameterMapExecuteCorrectCommand)
     );
 
     nlohmann::json single_command
-        = {{"name", std::string(root_component.getFullName()) + '.' + type + '.' + name + ".parameter"},
+        = {{"name", std::string(root_component.getFullName()) + '.' + name + ".parameter"},
            {"value", value},
            {"version", std::array<int, 2>{0, 1}}};
 

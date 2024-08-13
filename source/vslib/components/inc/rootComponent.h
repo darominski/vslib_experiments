@@ -29,7 +29,7 @@ namespace vslib
         RootComponent(std::string_view component_type = "Root", std::string_view name = "root") noexcept
             : IComponent(component_type, name)
         {
-            m_full_name = std::string(m_component_type) + "." + std::string(m_name);
+            m_full_name = m_name;
         }
         // ************************************************************
         // Method for serializing this RootComponent

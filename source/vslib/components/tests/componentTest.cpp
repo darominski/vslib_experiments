@@ -58,7 +58,7 @@ TEST_F(ComponentTest, BasicComponent)
     Component         component(component_type, component_name, root);
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_type + "." + component_name);
+    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
 
     EXPECT_TRUE(component.parametersInitialized());
@@ -79,7 +79,7 @@ TEST_F(ComponentTest, DerivedComponent)
     DerivedComponent  component(component_type, component_name, root);
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_type + "." + component_name);
+    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_name);
     EXPECT_EQ(component.getParameters().size(), 0);
 
     EXPECT_TRUE(component.parametersInitialized());
@@ -105,10 +105,7 @@ TEST_F(ComponentTest, HierarchicalComponent)
     Component         child(child_type, child_name, parent);
 
     EXPECT_EQ(child.getName(), child_name);
-    EXPECT_EQ(
-        child.getFullName(),
-        std::string(root.getFullName()) + "." + parent_type + "." + parent_name + "." + child_type + "." + child_name
-    );
+    EXPECT_EQ(child.getFullName(), std::string(root.getFullName()) + "." + parent_name + "." + child_name);
     EXPECT_EQ(child.getParameters().size(), 0);
 
     EXPECT_TRUE(child.parametersInitialized());
@@ -134,7 +131,7 @@ TEST_F(ComponentTest, DerivedComponentIntParameter)
     DerivedComponentIntParameter component(component_type, component_name, root);
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_type + "." + component_name);
+    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_name);
     EXPECT_EQ(component.getParameters().size(), 1);
     EXPECT_FALSE(component.parametersInitialized());
 
@@ -160,7 +157,7 @@ TEST_F(ComponentTest, DerivedComponentWithManyParameters)
     Parameter<std::array<double, 3>> arrayParameter(component, "array");
 
     EXPECT_EQ(component.getName(), component_name);
-    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_type + "." + component_name);
+    EXPECT_EQ(component.getFullName(), std::string(root.getFullName()) + "." + component_name);
     EXPECT_EQ(component.getParameters().size(), 4);
 
     auto serialized_component = component.serialize();

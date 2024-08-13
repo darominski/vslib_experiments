@@ -54,7 +54,7 @@ TEST_F(ParameterRegistryTest, AutomaticParameterRegistration)
     Parameter<int>    parameter(component, parameter_name);
     const auto&       parameters = ParameterRegistry::instance().getParameters();
     ASSERT_EQ(parameters.size(), 1);
-    const std::string registry_name = std::string("ROOT.root.mockType.mockName.") + parameter_name;
+    const std::string registry_name = std::string("root.mockName.") + parameter_name;
     EXPECT_NE(parameters.find(registry_name), parameters.end());
 }
 
@@ -69,7 +69,7 @@ TEST_F(ParameterRegistryTest, ExplicitAddToRegistry)
     auto& registry   = ParameterRegistry::instance();
     auto& parameters = registry.getParameters();
     ASSERT_EQ(parameters.size(), 1);
-    const std::string registry_name = std::string("ROOT.root.mockType.mockName.") + parameter_name;
+    const std::string registry_name = std::string("root.mockName.") + parameter_name;
     EXPECT_NE(parameters.find(registry_name), parameters.end());
 
     const std::string new_parameter_name = "new_name";
@@ -102,11 +102,11 @@ TEST_F(ParameterRegistryTest, AutomaticMultipleParameterRegistration)
 
     const auto& parameters = ParameterRegistry::instance().getParameters();
     ASSERT_EQ(parameters.size(), 5);
-    EXPECT_NE(parameters.find(std::string("ROOT.root.mockType.mockName.") + int_name), parameters.end());
-    EXPECT_NE(parameters.find(std::string("ROOT.root.mockType.mockName.") + double_name), parameters.end());
-    EXPECT_NE(parameters.find(std::string("ROOT.root.mockType.mockName.") + bool_name), parameters.end());
-    EXPECT_NE(parameters.find(std::string("ROOT.root.mockType.mockName.") + string_name), parameters.end());
-    EXPECT_NE(parameters.find(std::string("ROOT.root.mockType.mockName.") + enum_name), parameters.end());
+    EXPECT_NE(parameters.find(std::string("root.mockName.") + int_name), parameters.end());
+    EXPECT_NE(parameters.find(std::string("root.mockName.") + double_name), parameters.end());
+    EXPECT_NE(parameters.find(std::string("root.mockName.") + bool_name), parameters.end());
+    EXPECT_NE(parameters.find(std::string("root.mockName.") + string_name), parameters.end());
+    EXPECT_NE(parameters.find(std::string("root.mockName.") + enum_name), parameters.end());
 }
 
 //! Checks that correct exception is thrown when the name already exists in the registry
@@ -117,5 +117,5 @@ TEST_F(ParameterRegistryTest, NameExistsError)
     Parameter<int> parameter(component, "name");
 
     auto& registry = ParameterRegistry::instance();
-    EXPECT_THROW(registry.addToRegistry("ROOT.root.mockType.mockName.name", parameter), std::runtime_error);
+    EXPECT_THROW(registry.addToRegistry("root.mockName.name", parameter), std::runtime_error);
 }
