@@ -27,7 +27,7 @@ namespace vslib
         //! @param equal_binning Flag signalling whether the lookup table indexing has equal spaced binning
         PeriodicLookupTable(
             std::string_view name, IComponent& parent, std::vector<std::pair<IndexType, StoredType>>&& values,
-            bool equal_binning = false
+            const bool equal_binning = false
         ) noexcept
             : LookupTable<IndexType, StoredType>(name, parent, std::move(values), equal_binning)
         {
@@ -40,7 +40,7 @@ namespace vslib
         //! @param random_access Switch informing if the input_x is coming linearly or randomly, allows for binary
         //! search optimisation in the latter case
         //! @return Y-axis value result of the interpolation
-        [[nodiscard]] StoredType interpolate(IndexType input_x, bool random_access = false)
+        [[nodiscard]] StoredType interpolate(IndexType input_x, const bool random_access = false)
         {
             // handle interpolation saturation cases: bring back the value to inside the range
             if (input_x < this->m_lower_edge_x || input_x > this->m_upper_edge_x)

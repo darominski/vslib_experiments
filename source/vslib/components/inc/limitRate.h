@@ -33,7 +33,7 @@ namespace vslib
         //! @param time_difference Time difference between function calls
         //! @return Either original input if no issues were found or maximal allowed rate, 0.0 if NaN was provided or
         //! time_difference is 0
-        [[nodiscard]] T limit(T input, double time_difference)
+        [[nodiscard]] T limit(T input, const double time_difference)
         {
             if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
             {

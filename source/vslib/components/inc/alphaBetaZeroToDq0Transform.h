@@ -21,7 +21,7 @@ namespace vslib
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        AlphaBetaZeroToDq0Transform(std::string_view name, IComponent& parent, uint64_t number_points = 1000)
+        AlphaBetaZeroToDq0Transform(std::string_view name, IComponent& parent, const uint64_t number_points = 1000)
             : Component("AlphaBetaZeroToDq0Transform", name, parent),
               m_sin("sin", *this, number_points),
               m_cos("cos", *this, number_points)
@@ -37,8 +37,10 @@ namespace vslib
         //! @param a_alignment Whether the frame alignment at t=0 is aligned with A-axis (true) or 90 degrees behind
         //! A-axis (false)
         //! @return Tuple of d, q, 0 values
-        [[nodiscard]] std::tuple<double, double, double>
-        transform(double f_alpha, double f_beta, double f_0, double theta, bool a_alignment = true) noexcept;
+        [[nodiscard]] std::tuple<double, double, double> transform(
+            const double f_alpha, const double f_beta, const double f_0, const double theta,
+            const bool a_alignment = true
+        ) noexcept;
 
       private:
         SinLookupTable m_sin;   //!< Lookup table holding sine function

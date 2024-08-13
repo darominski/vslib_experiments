@@ -38,7 +38,7 @@ namespace vslib
         //!
         //! @param input_x Value to be looked up in the table
         //! @return Interpolated function value closest to the input_x
-        [[nodiscard]] auto interpolate(double input_x)
+        [[nodiscard]] auto interpolate(const double input_x)
         {
             return m_function.interpolate(input_x);
         }
@@ -47,7 +47,7 @@ namespace vslib
         //!
         //! @param input_x Value to be looked up in the table
         //! @return Interpolated function value closest to the input_x
-        [[nodiscard]] auto operator()(double input_x)
+        [[nodiscard]] auto operator()(const double input_x)
         {
             return m_function.interpolate(input_x);
         }

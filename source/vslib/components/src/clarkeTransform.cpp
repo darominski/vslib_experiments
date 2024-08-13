@@ -13,7 +13,7 @@ namespace vslib
     }
 
     [[nodiscard]] std::tuple<double, double, double>
-    ClarkeTransform::transform(double f_a, double f_b, double f_c) noexcept
+    ClarkeTransform::transform(const double f_a, const double f_b, const double f_c) noexcept
     {
 
         const double f_alpha = two_over_3 * (f_a - 0.5 * (f_b + f_c));

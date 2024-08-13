@@ -33,7 +33,7 @@ namespace vslib
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
-        [[nodiscard]] double filter(double input) override
+        [[nodiscard]] double filter(const double input) override
         {
             shiftBuffer(input);
             double output(0);
@@ -91,7 +91,7 @@ namespace vslib
         //! Pushes the provided value into the front of the buffer and removes the oldest value.
         //!
         //! @param input Input value to be added to the front of the buffer
-        void shiftBuffer(double input)
+        void shiftBuffer(const double input)
         {
             m_buffer[m_head] = input;
 

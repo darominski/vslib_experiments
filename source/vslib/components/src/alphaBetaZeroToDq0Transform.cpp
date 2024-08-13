@@ -13,7 +13,7 @@ namespace vslib
     }
 
     [[nodiscard]] std::tuple<double, double, double> AlphaBetaZeroToDq0Transform::transform(
-        double f_alpha, double f_beta, double f_0, double theta, bool a_alignment
+        const double f_alpha, const double f_beta, const double f_0, const double theta, const bool a_alignment
     ) noexcept
     {
 

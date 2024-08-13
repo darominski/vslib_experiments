@@ -36,7 +36,7 @@ namespace vslib
         //!
         //! @param input Input value to be filtered
         //! @return Filtered value
-        [[nodiscard]] double filter(double input) override
+        [[nodiscard]] double filter(const double input) override
         {
             updateInputBuffer(input);
             double output = m_inputs_buffer[m_head] * numerator[0];
@@ -101,7 +101,7 @@ namespace vslib
         //! Pushes the provided value into the front of the buffer, overriding the oldest value in effect.
         //!
         //! @param input Input value to be added to the front of the inputs buffer
-        void updateInputBuffer(double input)
+        void updateInputBuffer(const double input)
         {
             m_inputs_buffer[m_head] = input;
         }
@@ -109,7 +109,7 @@ namespace vslib
         //! Pushes the provided value into the front of the output buffer, overriding the oldest value in effect.
         //!
         //! @param output Output value to be added to the front of the outputs buffer
-        void shiftOutputBuffer(double output)
+        void shiftOutputBuffer(const double output)
         {
             m_outputs_buffer[m_head] = output;
 

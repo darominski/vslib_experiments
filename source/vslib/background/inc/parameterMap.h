@@ -19,7 +19,7 @@ namespace vslib
         //! @param address Pointer to the memory address to initialize the write-direction queue
         //! @param queue_size The write-direction queue size in bytes
         //! @param root_component The parent Component to all Components running in the binary
-        ParameterMap(uint8_t* address, size_t queue_size, RootComponent& root_component)
+        ParameterMap(uint8_t* address, const size_t queue_size, RootComponent& root_component)
             : m_write_parameter_map_queue{fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueWriter<void>>(
                 address, queue_size
             )},

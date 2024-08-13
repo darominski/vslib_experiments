@@ -32,7 +32,7 @@ namespace vslib
         //! Constructor taking one double-precision floating-point value and converting it to Q notation
         //!
         //! @param float_value Floating-point value to be represented
-        FixedPoint(double float_value)
+        FixedPoint(const double float_value)
             : m_value{static_cast<T>(float_value * m_fractional_shift)}
         {
         }
@@ -40,7 +40,7 @@ namespace vslib
         //! Constructor taking one single-precision floating-point value and converting it to Q notation
         //!
         //! @param float_value Floating-point value to be represented
-        FixedPoint(float float_value)
+        FixedPoint(const float float_value)
             : m_value{static_cast<T>(float_value * m_float_fractional_shift)}
         {
         }
@@ -48,7 +48,7 @@ namespace vslib
         //! Constructor taking one double-precision floating-point value and converting it to Q notation
         //!
         //! @param value Floating-point value to be represented
-        FixedPoint(int value)
+        FixedPoint(const int value)
             : m_value{static_cast<T>(value)}
         {
         }

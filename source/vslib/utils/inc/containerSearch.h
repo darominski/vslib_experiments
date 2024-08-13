@@ -20,8 +20,9 @@ namespace vslib::utils
     //! @param y2 Y-axis value of the upper section edge
     template<typename IndexType, typename StoredType = IndexType>
     inline void index_search(
-        std::vector<std::pair<IndexType, StoredType>>& values, IndexType input_x, IndexType lower_edge_x,
-        IndexType bin_size, IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2
+        const std::vector<std::pair<IndexType, StoredType>>& values, const IndexType input_x,
+        const IndexType lower_edge_x, const IndexType bin_size, IndexType& x1, StoredType& y1, IndexType& x2,
+        StoredType& y2
     ) noexcept
     {
         int64_t position = static_cast<int64_t>(bin_size + (input_x - lower_edge_x) / bin_size);
@@ -51,8 +52,8 @@ namespace vslib::utils
     //! @param y2 Y-axis value of the upper section edge
     template<typename IndexType, typename StoredType = IndexType>
     inline size_t linear_search(
-        std::vector<std::pair<IndexType, StoredType>>& values, IndexType input_x, size_t start_index, IndexType& x1,
-        StoredType& y1, IndexType& x2, StoredType& y2
+        const std::vector<std::pair<IndexType, StoredType>>& values, const IndexType input_x, const size_t start_index,
+        IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2
     ) noexcept
     {
         // begin() + 1 shift protects from underflow, while cend() -1 prevents from returning overflow value
@@ -82,8 +83,8 @@ namespace vslib::utils
     //! @param y2 Y-axis value of the upper section edge
     template<typename IndexType, typename StoredType = IndexType>
     inline size_t binary_search(
-        std::vector<std::pair<IndexType, StoredType>>& values, IndexType input_x, size_t start_index, IndexType& x1,
-        StoredType& y1, IndexType& x2, StoredType& y2
+        const std::vector<std::pair<IndexType, StoredType>>& values, const IndexType input_x, const size_t start_index,
+        IndexType& x1, StoredType& y1, IndexType& x2, StoredType& y2
     ) noexcept
     {
         const auto& it = std::upper_bound(

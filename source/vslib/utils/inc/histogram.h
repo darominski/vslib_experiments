@@ -23,7 +23,7 @@ namespace vslib::utils
         //!
         //! @param min Defines the first bin lower edge
         //! @param max Defines the final bin upper edge
-        Histogram(double min, double max) noexcept
+        Histogram(const double min, const double max) noexcept
             : m_min_value(min),
               m_max_value(max)
         {
@@ -33,7 +33,7 @@ namespace vslib::utils
         //! Adds the provided value to the histogram.
         //!
         //! @param value New value to be added to the histogram
-        void addValue(double value) noexcept
+        void addValue(const double value) noexcept
         {
             const int64_t bin_index = std::floor((value - m_min_value) / m_bin_width);
             if (bin_index < 0)   // underflow case

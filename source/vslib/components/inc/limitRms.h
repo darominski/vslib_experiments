@@ -20,7 +20,7 @@ namespace vslib
         //! @param name Name of this Limit Component
         //! @param parent Parent of this Limit Component
         //! @param iteration_period Iteration period at which this Limit Component is called
-        LimitRms(std::string_view name, IComponent& parent, double iteration_period = 5e-6)
+        LimitRms(std::string_view name, IComponent& parent, const double iteration_period = 5e-6)
             : Component("LimitRms", name, parent),
               rms_limit(*this, "rms_limit"),
               rms_time_constant(*this, "rms_time_constant", 1e-12),   // 1 ps limit
@@ -32,7 +32,7 @@ namespace vslib
         //!
         //! @param input Numerical input to be checked against set RMS limit
         //! @return Returns true if the provided input does not violate the limit, false otherwise
-        [[nodiscard]] bool limit(double input) noexcept
+        [[nodiscard]] bool limit(const double input) noexcept
         {
             if (std::isnan(input))
             {

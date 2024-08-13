@@ -26,6 +26,6 @@ namespace vslib
         //! Method to implement filtering of the provided input.
         //!
         //! @param input Value to be filtered
-        virtual double filter(double input) = 0;
+        virtual double filter(const double input) = 0;
     };
 }   // namespace vslib

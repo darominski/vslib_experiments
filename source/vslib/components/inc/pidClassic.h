@@ -115,7 +115,7 @@ namespace vslib
         //! Sets the starting value of the controller.
         //!
         //! @param value Starting value for the controller
-        void setStartingValue(double value) noexcept
+        void setStartingValue(const double value) noexcept
         {
             m_starting_value = value;
         }
