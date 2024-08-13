@@ -52,6 +52,6 @@ TEST_F(ParameterMapTest, ParameterMapUploadSimpleMap)
     auto json_object = nlohmann::json::parse(message.value().begin(), message.value().end());
     EXPECT_EQ(
         json_object.dump(),
-        "[{\"version\":[0,1,0]},{\"components\":[],\"name\":\"name\",\"parameters\":[],\"type\":\"type\"}]"
+        "[{\"version\":[0,1,0]},{\"components\":[],\"name\":\"root\",\"parameters\":[],\"type\":\"Root\"}]"
     );
 }

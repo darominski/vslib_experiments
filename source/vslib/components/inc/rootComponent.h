@@ -26,7 +26,7 @@ namespace vslib
         //!
         //! @param component_type Type of the RootComponent
         //! @param name Name of the RootComponent, needs to be unique in the type
-        RootComponent(std::string_view component_type = "ROOT", std::string_view name = "root") noexcept
+        RootComponent(std::string_view component_type = "Root", std::string_view name = "root") noexcept
             : IComponent(component_type, name)
         {
             m_full_name = std::string(m_component_type) + "." + std::string(m_name);

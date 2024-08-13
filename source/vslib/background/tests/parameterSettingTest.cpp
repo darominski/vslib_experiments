@@ -152,7 +152,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIntCommand)
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
-    Component                       user_root_component("root", "root", root);
+    Component                       user_root_component("parent_type", "parent", root);
 
     ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root);
 
@@ -160,8 +160,10 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIntCommand)
     std::string            name = "name";
     MockComponent<int16_t> test(type, name, user_root_component);
 
-    nlohmann::json single_command = {
-        {"name", "root.root." + type + '.' + name + ".parameter"}, {"value", 1}, {"version", std::array<int, 2>{0, 1}}};
+    nlohmann::json single_command
+        = {{"name", "Root.root.parent_type.parent.type.name.parameter"},
+           {"value", 1},
+           {"version", std::array<int, 2>{0, 1}}};
     ASSERT_NO_THROW(parameter_setting.processJsonCommands(single_command));
     test.flipBufferState();
     EXPECT_EQ(test.parameter, (int16_t)single_command["value"]);
