@@ -30,7 +30,6 @@ TEST_F(ParameterMapTest, ParameterMapDefaultConstruction)
     RootComponent                   root_component;
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> buffer{};
-    // Component                       root_component("test_type", "test_name", root);
     ASSERT_NO_THROW(ParameterMap(buffer.data(), queue_size, root_component));
 }
 
@@ -40,8 +39,7 @@ TEST_F(ParameterMapTest, ParameterMapUploadSimpleMap)
     RootComponent                   root_component;
     constexpr size_t                queue_size = 1000;   // 1000 bytes
     std::array<uint8_t, queue_size> buffer{};
-    // Component                       root_component("type", "name", root);
-    ParameterMap parameter_map(buffer.data(), queue_size, root_component);
+    ParameterMap                    parameter_map(buffer.data(), queue_size, root_component);
 
     auto read_queue
         = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>((uint8_t*)buffer.data(), queue_size);
