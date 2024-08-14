@@ -4,15 +4,15 @@
 
 #pragma once
 
+#include <ctime>
 #include <iostream>
+#include <unistd.h>
 
-#include "bmboot.hpp"
+#include "bmboot/payload_runtime.hpp"
 #include "component.h"
-#include "componentValidation.h"
 #include "constants.h"
 #include "converter.h"
 #include "fsm.h"
-#include "parameterInitialized.h"
 #include "parameterMap.h"
 #include "parameterRegistry.h"
 #include "parameterSetting.h"
@@ -49,13 +49,13 @@ namespace vslib::utils
                                                                     + fgc4::utils::constants::string_memory_pool_size;
 
       public:
-        VSMachine(Component& root)
+        VSMachine(RootComponent& root)
             : m_fsm(*this, VSStates::start),
               m_root(root),
               m_parameter_setting_task{
                   (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address, root},
               m_parameter_map{
-                  (uint8_t*)write_parameter_map_queue_address, fgc4::utils::constants::json_memory_pool_size, m_root}
+                  (uint8_t*)write_parameter_map_queue_address, fgc4::utils::constants::json_memory_pool_size, root}
 
         {
             // CAUTION: The order of transition method matters
@@ -94,8 +94,8 @@ namespace vslib::utils
 
         bool m_first{true};
 
-        ::vslib::Component&       m_root;
-        ::vslib::IConverter*      m_converter{nullptr};
+        ::vslib::RootComponent&   m_root;
+        ::vslib::IConverter*      m_converter;
         ::vslib::ParameterSetting m_parameter_setting_task;
         ::vslib::ParameterMap     m_parameter_map;
 
@@ -128,8 +128,7 @@ namespace vslib::utils
         {
             // initialize user code (RT)
             std::cout << "on configured\n";
-            sleep(2);
-            std::cout << (m_converter == nullptr) << std::endl;
+            usleep(10'000);   // 5 ms
             if (m_first)
             {
                 m_converter->init();
@@ -183,7 +182,9 @@ namespace vslib::utils
         {
             std::cout << "to unconf\n";
             // transition back to unconfigured if Parameters were not initialized
-            if (!vslib::utils::parametersInitialized())
+
+            const auto& parameter_registry = ParameterRegistry::instance();
+            if (!parameter_registry.parametersInitialized())
             {
                 return {VSStates::unconfigured};
             }
@@ -195,7 +196,8 @@ namespace vslib::utils
         {
             std::cout << "to conf\n";
             // allow transition if all Parameters have been initialized
-            if (vslib::utils::parametersInitialized())
+            const auto& parameter_registry = ParameterRegistry::instance();
+            if (parameter_registry.parametersInitialized())
             {
                 return {VSStates::configured};
             }

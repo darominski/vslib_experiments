@@ -10,13 +10,13 @@ namespace user
     class Converter : public vslib::IConverter
     {
       public:
-        Converter(Component& root) noexcept
-            : vslib::IConverter("Example", &root),
+        Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("Example", root),
               m_interrupt_id{121 + 0},   // Jonas's definition
               interrupt_1("cpu_clock", this, 100, RTTask2),
-              clarke("transform_1", this),
-              park("transform_2", this),
-              rst_1("rst_1", this)
+              clarke("transform_1", *this),
+              park("transform_2", *this),
+              rst_1("rst_1", *this)
         //   m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
         //   m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
 

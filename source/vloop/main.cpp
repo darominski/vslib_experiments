@@ -70,7 +70,7 @@ namespace user
 
 int main()
 {
-    Component root("root", "root", nullptr);
+    RootComponent root;
 
     // VSlib-side initialization:
     vslib::utils::VSMachine vs_state(root);   // initial state: initalization
@@ -78,7 +78,7 @@ int main()
 
     // User-side initialization:
     std::cout << "Initializing user-converter\n";
-    user::Converter converter(root);
+    user::Converter converter = user::Converter(root);
     vs_state.setConverter(&converter);
     std::cout << "done\n";
 

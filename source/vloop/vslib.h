@@ -9,6 +9,7 @@
 #include "component.h"
 #include "componentArray.h"
 #include "converter.h"
+#include "rootComponent.h"
 
 //! Transforms
 #include "alphaBetaZeroToDq0Transform.h"

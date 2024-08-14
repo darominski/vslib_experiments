@@ -55,7 +55,6 @@ if (NOT BUILD_TESTS)
   set(${LIB}_SOURCES
       components/src/alphaBetaZeroToDq0Transform.cpp
       components/src/clarkeTransform.cpp
-      components/src/boxFilter.cpp
       components/src/parkTransform.cpp
       parameters/src/parameterRegistry.cpp
       background/src/parameterSetting.cpp
