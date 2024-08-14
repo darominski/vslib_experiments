@@ -11,7 +11,7 @@ namespace user
     {
       public:
         Converter(vslib::RootComponent& root) noexcept
-            : vslib::IConverter("Example", root),
+            : vslib::IConverter("example", root),
               m_interrupt_id{121 + 0},   // Jonas's definition
               interrupt_1("cpu_clock", this, 100, RTTask2),
               clarke("transform_1", *this),
