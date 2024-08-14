@@ -14,6 +14,17 @@ using namespace fgc4::utils;
 
 namespace vslib
 {
+    bool ParameterRegistry::parametersInitialized() const noexcept
+    {
+        return std::all_of(
+            std::cbegin(m_parameters), std::cend(m_parameters),
+            [](const auto& parameter)
+            {
+                return parameter.second.get().isInitialized();
+            }
+        );
+    }
+
     void ParameterRegistry::checkNameFormatting(const std::string& parameter_name)
     {
         const std::regex re("^([a-z0-9]+(_[a-z0-9]+)*)(.([a-z0-9]+(_[a-z0-9]+)*))*$");

@@ -50,6 +50,11 @@ namespace vslib
             m_parameters.clear();
         }
 
+        //! Checks if all parameters in the registry have been initialized.
+        //!
+        //! @return True if all parameters in the registry have been initialized, false otherwise.
+        bool parametersInitialized() const noexcept;
+
       private:
         ParameterRegistry() = default;                            //!< Default constructor
         std::map<std::string, ParameterReference> m_parameters;   //!< Map holding references to all Parameters
