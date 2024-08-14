@@ -23,11 +23,8 @@ namespace vslib
 
       public:
         //! Creates the RootComponent with type, name as the base of the hierarchy for Components.
-        //!
-        //! @param component_type Type of the RootComponent
-        //! @param name Name of the RootComponent, needs to be unique in the type
-        RootComponent(std::string_view component_type = "Root", std::string_view name = "root") noexcept
-            : IComponent(component_type, name)
+        RootComponent() noexcept
+            : IComponent("Root", "root")
         {
             m_full_name = m_name;
         }
