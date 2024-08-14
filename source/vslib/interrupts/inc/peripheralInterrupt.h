@@ -29,7 +29,7 @@ namespace vslib
         //! @param interrupt_id Platform-dependent interrupt ID
         //! @param priority Priority level of the interrupt
         PeripheralInterrupt(
-            std::string_view name, Converter* converter, int interrupt_id, InterruptPriority priority,
+            std::string_view name, Converter& converter, int interrupt_id, InterruptPriority priority,
             std::function<void(Converter&)> handler_function
         )
             : Interrupt<Converter>(name, converter, std::move(handler_function)),

@@ -18,7 +18,7 @@ namespace vslib
         //!
         //! @param handler_function Function to be called when an interrupt triggers
         TimerInterrupt(
-            std::string_view name, Converter* converter, int64_t delay,
+            std::string_view name, Converter& converter, int64_t delay,
             std::function<void(Converter&)> handler_function =
                 [](Converter&)
             {

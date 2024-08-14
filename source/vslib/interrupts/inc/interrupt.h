@@ -22,7 +22,7 @@ namespace vslib
         //! Constructor for the Interrupt class.
         //!
         //! @param handler_function Function to be executed when an interrupt is triggered
-        Interrupt(std::string_view name, Converter* converter, std::function<void(Converter&)> handler_function)
+        Interrupt(std::string_view name, Converter& converter, std::function<void(Converter&)> handler_function)
             : m_name(name)
         {
             static_assert(
@@ -31,10 +31,10 @@ namespace vslib
             );
 #ifdef PERFORMANCE_TESTS
             m_measurement_counter = 0;
-            m_interrupt_handler   = [this, handler_function, converter]()
+            m_interrupt_handler   = [this, handler_function, &converter]()
             {
                 const auto start_time = preConditions();
-                handler_function(*converter);
+                handler_function(converter);
                 const auto total_time = postConditions(start_time);
                 if (m_measurement_counter < number_measurements)
                 {
@@ -44,9 +44,9 @@ namespace vslib
             };
             m_measurements = {0};   // sets all elements to 0
 #else
-            m_interrupt_handler = [converter, handler_function]()
+            m_interrupt_handler = [&converter, handler_function]()
             {
-                handler_function(*converter);
+                handler_function(converter);
             };
 #endif
         }
