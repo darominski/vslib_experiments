@@ -1,33 +1,5 @@
-#include <algorithm>
-#include <array>
-#include <bmboot/payload_runtime.hpp>
-#include <cerrno>
-#include <cmath>
-#include <cstdlib>
-#include <cstring>
-#include <fcntl.h>
-#include <functional>
-#include <iostream>
-#include <tuple>
-#include <unistd.h>
-#include <vector>
-
-#include "alphaBetaZeroToDq0Transform.h"
-#include "boxFilter.h"
-#include "clarkeTransform.h"
-#include "componentArray.h"
-#include "firFilter.h"
-#include "iirFilter.h"
-#include "limitRange.h"
-#include "logString.h"
-#include "lookupTable.h"
-#include "parameterRegistry.h"
-#include "parkTransform.h"
-#include "periodicLookupTable.h"
-#include "pid.h"
-#include "rst.h"
+#include "rootComponent.h"
 #include "state.h"
-#include "timerInterrupt.h"
 #include "user.h"
 
 // This is one way to stop users from creating objects on the heap and explicit memory allocations
