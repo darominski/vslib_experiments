@@ -93,7 +93,7 @@ int main()
     // END OF VERBOSE TEST CODE
 
     // User-side configuration:
-    user::setRSTParameters<3>(converter.rst_1);
+    // user::setRSTParameters<3>(converter.rst_1);
 
     // transition to configured:
     vs_state.update();

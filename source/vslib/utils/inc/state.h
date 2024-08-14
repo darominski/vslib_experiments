@@ -128,7 +128,7 @@ namespace vslib::utils
         {
             // initialize user code (RT)
             std::cout << "on configured\n";
-            usleep(10'000);   // 5 ms
+            // usleep(10'000);   // 5 ms
             if (m_first)
             {
                 m_converter->init();
