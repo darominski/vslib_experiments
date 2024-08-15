@@ -4,11 +4,6 @@
 
 #pragma once
 
-#include <ctime>
-#include <iostream>
-#include <unistd.h>
-
-#include "bmboot/payload_runtime.hpp"
 #include "component.h"
 #include "constants.h"
 #include "converter.h"
@@ -111,7 +106,6 @@ namespace vslib::utils
         void onConfigured()
         {
             // initialize user code (RT)
-            // usleep(10'000);   // 5 ms
             if (m_first)
             {
                 m_converter.init();

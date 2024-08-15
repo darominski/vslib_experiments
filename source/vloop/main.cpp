@@ -79,7 +79,6 @@ int main()
     vslib::utils::VSMachine vs_state(root, converter);   // initial state: initalization
     while (true)
     {
-        usleep(100'000);
         vs_state.update();
     }
 
