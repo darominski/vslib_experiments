@@ -27,10 +27,12 @@ namespace vslib
 
     void ParameterRegistry::checkNameFormatting(const std::string& parameter_name)
     {
-        const std::regex re("^([a-z0-9]+(_[a-z0-9]+)*)(.([a-z0-9]+(_[a-z0-9]+)*))*$");
-        std::smatch      m;
-
-        const auto match = std::regex_match(parameter_name, m, re);
+        // Regex to match the expected full name formatting of Components
+        // "root" is always expected to be the first element, as all Components should derive
+        // from VSlib-controlled RootComponent, followed by arbitrarily long sequence of snake_case
+        // words separated by dots.
+        const std::regex re("^(root)(.([a-z0-9]+(_[a-z0-9]+)*))*$");
+        const auto       match = std::regex_match(parameter_name, re);
 
         if (!match)
         {
