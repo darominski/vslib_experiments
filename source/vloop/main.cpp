@@ -70,37 +70,18 @@ namespace user
 
 int main()
 {
-    RootComponent root;
+    bmboot::notifyPayloadStarted();
+
+    RootComponent   root;
+    user::Converter converter = user::Converter(root);
 
     // VSlib-side initialization:
-    vslib::utils::VSMachine vs_state(root);   // initial state: initalization
-    vs_state.update();                        // start -> initialization
-
-    // User-side initialization:
-    std::cout << "Initializing user-converter\n";
-    user::Converter converter = user::Converter(root);
-    vs_state.setConverter(&converter);
-    std::cout << "done\n";
-
-    // No Component declarations beyond this point!
-    // ************************************************************
-
-    vs_state.update();   // initialization -> unconfigured
-
-    // VERBOSE TEST CODE
-    std::cout << std::boolalpha << "Configured? (expected false) " << vs_state.isConfigured()
-              << std::endl;   // should be false
-    // END OF VERBOSE TEST CODE
-
-    // User-side configuration:
-    // user::setRSTParameters<3>(converter.rst_1);
-
-    // transition to configured:
-    vs_state.update();
-    // now, the Parameters are configured, control has been handed over to the user FSM while still
-    // running a background task
-
-    // no code will be executed beyond this point, end of user-side FSM code
+    vslib::utils::VSMachine vs_state(root, converter);   // initial state: initalization
+    while (true)
+    {
+        usleep(100'000);
+        vs_state.update();
+    }
 
     return 0;
 }

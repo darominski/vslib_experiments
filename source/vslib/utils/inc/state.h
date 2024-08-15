@@ -22,7 +22,6 @@ namespace vslib::utils
 {
     enum class VSStates
     {
-        start,
         initialization,
         unconfigured,
         configuring,
@@ -49,9 +48,10 @@ namespace vslib::utils
                                                                     + fgc4::utils::constants::string_memory_pool_size;
 
       public:
-        VSMachine(RootComponent& root)
-            : m_fsm(*this, VSStates::start),
+        VSMachine(RootComponent& root, IConverter& converter)
+            : m_fsm(*this, VSStates::initialization),
               m_root(root),
+              m_converter(converter),
               m_parameter_setting_task{
                   (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address, root},
               m_parameter_map{
@@ -61,11 +61,10 @@ namespace vslib::utils
             // CAUTION: The order of transition method matters
 
             // clang-format off
-            m_fsm.addState(VSStates::start,           &VSMachine::onStart,  {&VSMachine::toInitialization});
             m_fsm.addState(VSStates::initialization,  &VSMachine::onInitialization,  {&VSMachine::toUnconfiguredFromInit});
-            m_fsm.addState(VSStates::unconfigured,    &VSMachine::onUnconfigured,  {&VSMachine::toConfiguring, &VSMachine::toConfigured});
-            m_fsm.addState(VSStates::configuring,     &VSMachine::onConfiguring,  {&VSMachine::toUnconfigured, &VSMachine::toConfigured});
-            m_fsm.addState(VSStates::configured,      &VSMachine::onConfigured,  {&VSMachine::toConfiguring});
+            m_fsm.addState(VSStates::unconfigured,    &VSMachine::onUnconfigured,    {&VSMachine::toConfiguring, &VSMachine::toConfigured});
+            m_fsm.addState(VSStates::configuring,     &VSMachine::onConfiguring,     {&VSMachine::toUnconfigured, &VSMachine::toConfigured});
+            m_fsm.addState(VSStates::configured,      &VSMachine::onConfigured,      {&VSMachine::toConfiguring});
             // clang-format on
         }
 
@@ -79,34 +78,21 @@ namespace vslib::utils
             return m_fsm.getState();
         }
 
-        bool isConfigured() const
-        {
-            return m_fsm.getState() == VSStates::configured;
-        }
-
-        void setConverter(::vslib::IConverter* converter)
-        {
-            m_converter = converter;
-        }
-
       private:
         StateMachine m_fsm;
 
+        bool m_init_done{false};
         bool m_first{true};
 
         ::vslib::RootComponent&   m_root;
-        ::vslib::IConverter*      m_converter;
+        ::vslib::IConverter&      m_converter;
         ::vslib::ParameterSetting m_parameter_setting_task;
         ::vslib::ParameterMap     m_parameter_map;
 
-        void onStart()
-        {
-        }
-
         void onInitialization()
         {
-            bmboot::notifyPayloadStarted();
             // everything generic that needs to be done to initialize the vloop
+            m_init_done = true;
         }
 
         void onUnconfigured()
@@ -117,92 +103,60 @@ namespace vslib::utils
 
         void onConfiguring()
         {
-            std::cout << "on configuring\n";
             // receive and process commands
             m_parameter_setting_task.receiveJsonCommand();
             // when done, transition away
-            m_fsm.update();
         }
 
         void onConfigured()
         {
             // initialize user code (RT)
-            std::cout << "on configured\n";
             // usleep(10'000);   // 5 ms
             if (m_first)
             {
-                m_converter->init();
+                m_converter.init();
                 m_first = false;
             }
-            std::cout << "converter configured\n";
 
             // background task running continuously
-            while (true)
-            {
+            // other background tasks
+            // ...
+            //
 
-                if (m_parameter_setting_task.checkNewSettingsAvailable())
-                {
-                    // if new settings are available, transition to configuring
-                    m_fsm.update();
-                }
-                // other background tasks
-                // ...
-                //
+            // user background task:
+            m_converter.backgroundTask();
 
-                // user background task:
-                m_converter->backgroundTask();
-
-                // for testing purposes:
-                // break;
-            }
+            // for testing purposes:
+            // break;
         }
 
         TransResVS toConfiguring()
         {
-            std::cout << "to configuring\n";
-            return {VSStates::configuring};
+            return m_parameter_setting_task.checkNewSettingsAvailable() ? TransResVS{VSStates::configuring}
+                                                                        : TransResVS{};
         }
 
         TransResVS toInitialization()
         {
-            std::cout << "to init\n";
-            bmboot::notifyPayloadStarted();
-
             // allow transition if all Parameters have been initialized
             return {VSStates::initialization};
         }
 
         TransResVS toUnconfiguredFromInit()
         {
-            std::cout << "to unconf from init\n";
-            return {VSStates::unconfigured};
+            return (m_init_done) ? VSStates::unconfigured : VSStates::initialization;
         }
 
         TransResVS toUnconfigured()
         {
-            std::cout << "to unconf\n";
-            // transition back to unconfigured if Parameters were not initialized
-
             const auto& parameter_registry = ParameterRegistry::instance();
-            if (!parameter_registry.parametersInitialized())
-            {
-                return {VSStates::unconfigured};
-            }
-            // do not transition otherwise
-            return {};
+            return parameter_registry.parametersInitialized() ? VSStates::configured : VSStates::unconfigured;
         }
 
         TransResVS toConfigured()
         {
-            std::cout << "to conf\n";
-            // allow transition if all Parameters have been initialized
             const auto& parameter_registry = ParameterRegistry::instance();
-            if (parameter_registry.parametersInitialized())
-            {
-                return {VSStates::configured};
-            }
-            // do not transition otherwise
-            return {};
+            return parameter_registry.parametersInitialized() ? VSStates::configured : VSStates::unconfigured;
         }
     };
 
