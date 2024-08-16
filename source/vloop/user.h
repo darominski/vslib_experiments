@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unistd.h>
+
 #include "peripherals/reg_to_stream.h"
 #include "peripherals/stream_to_reg.h"
 #include "vslib.h"

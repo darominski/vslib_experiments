@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include "component.h"
 #include "constants.h"
 #include "converter.h"
 #include "fsm.h"
 #include "parameterMap.h"
 #include "parameterRegistry.h"
 #include "parameterSetting.h"
+#include "rootComponent.h"
 #include "vslib_shared_memory_memmap.h"
 
 namespace vslib::utils
@@ -119,9 +119,6 @@ namespace vslib::utils
 
             // user background task:
             m_converter.backgroundTask();
-
-            // for testing purposes:
-            // break;
         }
 
         TransResVS toConfiguring()

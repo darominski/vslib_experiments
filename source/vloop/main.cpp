@@ -1,3 +1,4 @@
+#include "bmboot/payload_runtime.hpp"
 #include "rootComponent.h"
 #include "state.h"
 #include "user.h"
