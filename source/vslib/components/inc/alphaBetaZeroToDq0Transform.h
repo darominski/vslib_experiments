@@ -43,7 +43,7 @@ namespace vslib
         ) noexcept;
 
       private:
-        SinLookupTable m_sin;   //!< Lookup table holding sine function
-        CosLookupTable m_cos;   //!< Lookup table holding cosine function
+        SinLookupTable<> m_sin;   //!< Lookup table holding sine function
+        CosLookupTable   m_cos;   //!< Lookup table holding cosine function
     };
 }   // namespace vslib

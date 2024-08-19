@@ -41,7 +41,7 @@ namespace vslib
         transform(const double a, const double b, const double c, const double theta, const double offset = 0) noexcept;
 
       private:
-        SinLookupTable m_sin;   //!< Lookup table holding sine function
-        CosLookupTable m_cos;   //!< Lookup table holding cosine function
+        SinLookupTable<> m_sin;   //!< Lookup table holding sine function
+        CosLookupTable   m_cos;   //!< Lookup table holding cosine function
     };
 }   // namespace vslib

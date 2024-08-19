@@ -90,3 +90,109 @@ TEST_F(SinLookupTableTest, SinLookupTableConsistency)
     EXPECT_NEAR(table.interpolate(4.0 / 3.0 * M_PI), table(4.0 / 3.0 * M_PI), 1e-6);
     EXPECT_NEAR(table.interpolate(2.0 * M_PI - 0.01), table(2.0 * M_PI - 0.01), 1e-6);
 }
+
+//! Tests SinLookupTableTest component interpolating a long array of points, with a wide
+//! range of values for a table of length 100
+TEST_F(SinLookupTableTest, SinLookupTableSize100LongInterpolation)
+{
+    RootComponent  root;
+    std::string    name = "table";
+    SinLookupTable table(name, root, 100);
+
+    const int    n_points           = 10000;
+    const double min                = -10 * std::numbers::pi;
+    const double max                = 10 * std::numbers::pi;
+    const double bin_size           = (max - min) / static_cast<double>(n_points);
+    const double expected_precision = 3.95e-3;
+
+    for (int index = 0; index < n_points; index++)
+    {
+        const double x = min + index * bin_size;
+        EXPECT_NEAR(table.interpolate(x), sin(x), expected_precision);
+    }
+}
+
+//! Tests SinLookupTableTest component interpolating a long array of points, with a wide
+//! range of values for a table of length 1000
+TEST_F(SinLookupTableTest, SinLookupTableSize1000LongInterpolation)
+{
+    RootComponent  root;
+    std::string    name = "table";
+    SinLookupTable table(name, root, 1000);
+
+    const int    n_points           = 100000;
+    const double min                = -9.5 * std::numbers::pi;
+    const double max                = 11.2 * std::numbers::pi;
+    const double bin_size           = (max - min) / static_cast<double>(n_points);
+    const double expected_precision = 4e-5;
+
+    for (int index = 0; index < n_points; index++)
+    {
+        const double x = min + index * bin_size;
+        EXPECT_NEAR(table.interpolate(x), sin(x), expected_precision);
+    }
+}
+
+
+//! Tests SinLookupTableTest component interpolating a long array of points, with a wide
+//! range of values for a table of length 10000
+TEST_F(SinLookupTableTest, SinLookupTableSize10000LongInterpolation)
+{
+    RootComponent  root;
+    std::string    name = "table";
+    SinLookupTable table(name, root, 10000);
+
+    const int    n_points           = 100000;
+    const double min                = -13.5 * std::numbers::pi;
+    const double max                = 11.7 * std::numbers::pi;
+    const double bin_size           = (max - min) / static_cast<double>(n_points);
+    const double expected_precision = 4e-7;
+
+    for (int index = 0; index < n_points; index++)
+    {
+        const double x = min + index * bin_size;
+        EXPECT_NEAR(table.interpolate(x), sin(x), expected_precision);
+    }
+}
+
+//! Tests SinLookupTableTest component interpolating a long array of points, with a wide
+//! range of values for a table of length 1000
+TEST_F(SinLookupTableTest, SinLookupTableFloatSize1000LongInterpolation)
+{
+    RootComponent         root;
+    std::string           name = "table";
+    SinLookupTable<float> table(name, root, 1000);
+
+    const int   n_points           = 10000000;
+    const float min                = -23.5 * std::numbers::pi;
+    const float max                = 21.7 * std::numbers::pi;
+    const float bin_size           = (max - min) / static_cast<double>(n_points);
+    const float expected_precision = 4e-5;
+
+    for (int index = 0; index < n_points; index++)
+    {
+        const float x = min + index * bin_size;
+        EXPECT_NEAR((float)table.interpolate(x), (float)sin(x), expected_precision);
+    }
+}
+
+//! Tests SinLookupTableTest component interpolating a long array of points, with a wide
+//! range of values for a table of length 10000
+TEST_F(SinLookupTableTest, SinLookupTableFloatSize10000LongInterpolation)
+{
+    RootComponent         root;
+    std::string           name = "table";
+    SinLookupTable<float> table(name, root, 10000);
+
+    const int   n_points           = 10000000;
+    const float min                = -23.5 * std::numbers::pi;
+    const float max                = 21.7 * std::numbers::pi;
+    const float bin_size           = (max - min) / static_cast<double>(n_points);
+    const float expected_precision = 9e-6;
+
+    for (int index = 0; index < n_points; index++)
+    {
+        const float x = min + index * bin_size;
+        EXPECT_NEAR((float)table.interpolate(x), (float)sin(x), expected_precision);
+    }
+}

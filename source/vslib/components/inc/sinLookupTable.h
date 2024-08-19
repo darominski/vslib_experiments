@@ -16,6 +16,7 @@
 
 namespace vslib
 {
+    template<typename T = double>
     class SinLookupTable : public Component
     {
       public:
@@ -27,8 +28,8 @@ namespace vslib
         SinLookupTable(std::string_view name, IComponent& parent, size_t number_points)
             : Component("SinLookupTable", name, parent),
               m_function(
-                  "data", *this,
-                  fgc4::utils::generateFunction<double, double>(sin, 0.0, 2.0 * std::numbers::pi, number_points), true
+                  "data", *this, fgc4::utils::generateFunction<T, T>(sin, 0.0, 2.0 * std::numbers::pi, number_points),
+                  true
               )
         {
             assert(number_points >= 2);
@@ -38,7 +39,7 @@ namespace vslib
         //!
         //! @param input_x Value to be looked up in the table
         //! @return Interpolated function value closest to the input_x
-        [[nodiscard]] auto interpolate(const double input_x)
+        [[nodiscard]] auto interpolate(const T input_x)
         {
             return m_function.interpolate(input_x);
         }
@@ -47,13 +48,13 @@ namespace vslib
         //!
         //! @param input_x Value to be looked up in the table
         //! @return Interpolated function value closest to the input_x
-        [[nodiscard]] auto operator()(const double input_x)
+        [[nodiscard]] auto operator()(const T input_x)
         {
             return m_function.interpolate(input_x);
         }
 
       private:
         //!< Component providing the sine function storage and interpolation functionalities
-        PeriodicLookupTable<double, double> m_function;
+        PeriodicLookupTable<T, T> m_function;
     };
 }   // namespace vslib
