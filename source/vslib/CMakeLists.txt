@@ -54,8 +54,8 @@ if (NOT BUILD_TESTS)
   # Collect source files for the vslib code
   set(${LIB}_SOURCES
       components/src/alphaBetaZeroToDq0Transform.cpp
-      components/src/clarkeTransform.cpp
-      components/src/parkTransform.cpp
+      components/src/abcToAlphaBetaTransform.cpp
+      components/src/abcToDq0Transform.cpp
       parameters/src/parameterRegistry.cpp
       background/src/parameterSetting.cpp
       background/src/parameterMap.cpp

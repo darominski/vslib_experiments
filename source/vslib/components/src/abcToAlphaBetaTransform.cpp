@@ -1,7 +1,7 @@
 #include <cmath>
 #include <numbers>
 
-#include "clarkeTransform.h"
+#include "abcToAlphaBetaTransform.h"
 
 namespace vslib
 {

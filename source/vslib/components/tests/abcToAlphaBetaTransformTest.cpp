@@ -7,7 +7,7 @@
 #include <fstream>
 #include <gtest/gtest.h>
 
-#include "clarkeTransform.h"
+#include "abcToAlphaBetaTransform.h"
 #include "rootComponent.h"
 
 using namespace vslib;
