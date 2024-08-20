@@ -3,7 +3,8 @@ set(APP componentTests)
 add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/boxFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/abcToAlphaBetaTransformTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/alphaBetaZeroToDq0TransformTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/abcToDq0TransformTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/alphaBetaToDq0TransformTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/componentArrayTest.cpp
@@ -15,7 +16,6 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRangeTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRateTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRmsTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/abcToDq0TransformTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/periodicLookupTableTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidClassicTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidTest.cpp
@@ -23,8 +23,8 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstControllerTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/sinLookupTableTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/abcToAlphaBetaTransform.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/alphaBetaZeroToDq0Transform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/abcToDq0Transform.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/alphaBetaToDq0Transform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
 )
 

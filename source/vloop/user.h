@@ -17,7 +17,6 @@ namespace user
               m_interrupt_id{121 + 0},   // Jonas's definition
                                          //   interrupt_2("cpu_clock", this, 100, RTTask),
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              clarke("transform_1", *this),
               park("transform_2", *this),
               //   rst_1("rst_1", *this),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
@@ -29,8 +28,7 @@ namespace user
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
         // vslib::TimerInterrupt<Converter> interrupt_2;
-        vslib::ClarkeTransform clarke;
-        vslib::ParkTransform   park;
+        vslib::AbcToDq0Transform park;
         // vslib::RST<2>          rst_1;
 
         // ...

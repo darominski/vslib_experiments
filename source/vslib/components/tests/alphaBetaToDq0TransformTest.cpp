@@ -1,5 +1,5 @@
 //! @file
-//! @brief File with unit tests for AlphaBetaZeroToDq0Transform component.
+//! @brief File with unit tests for AlphaBetaToDq0Transform component.
 //! @author Dominik Arominski
 
 #include <array>
@@ -7,12 +7,12 @@
 #include <fstream>
 #include <gtest/gtest.h>
 
-#include "alphaBetaZeroToDq0Transform.h"
+#include "alphaBetaToDq0Transform.h"
 #include "rootComponent.h"
 
 using namespace vslib;
 
-class AlphaBetaZeroToDq0TransformTest : public ::testing::Test
+class AlphaBetaToDq0TransformTest : public ::testing::Test
 {
   protected:
     void SetUp() override
@@ -24,17 +24,17 @@ class AlphaBetaZeroToDq0TransformTest : public ::testing::Test
     }
 };
 
-//! Tests default construction of AlphaBetaZeroToDq0Transform component
-TEST_F(AlphaBetaZeroToDq0TransformTest, Construction)
+//! Tests default construction of AlphaBetaToDq0Transform component
+TEST_F(AlphaBetaToDq0TransformTest, Construction)
 {
-    RootComponent               root;
-    std::string_view            name = "AlphaBetaZeroToDq0Transform";
-    AlphaBetaZeroToDq0Transform transform(name, root);
+    RootComponent           root;
+    std::string_view        name = "AlphaBetaToDq0Transform";
+    AlphaBetaToDq0Transform transform(name, root);
     ASSERT_EQ(transform.getName(), name);
 
     auto serialized = transform.serialize();
     EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "AlphaBetaZeroToDq0Transform");
+    EXPECT_EQ(serialized["type"], "AlphaBetaToDq0Transform");
     EXPECT_EQ(serialized["components"].size(), 2);
     EXPECT_EQ(
         serialized["components"].dump(),
@@ -46,26 +46,26 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, Construction)
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
-//! Tests custom construction of AlphaBetaZeroToDq0Transform component
-TEST_F(AlphaBetaZeroToDq0TransformTest, NonDefaultConstruction)
+//! Tests custom construction of AlphaBetaToDq0Transform component
+TEST_F(AlphaBetaToDq0TransformTest, NonDefaultConstruction)
 {
-    RootComponent               root;
-    std::string_view            name = "AlphaBetaZeroToDq0Transform2";
-    AlphaBetaZeroToDq0Transform transform(name, root, 10000);
+    RootComponent           root;
+    std::string_view        name = "AlphaBetaToDq0Transform2";
+    AlphaBetaToDq0Transform transform(name, root, 10000);
     ASSERT_EQ(transform.getName(), name);
 
     auto serialized = transform.serialize();
     EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "AlphaBetaZeroToDq0Transform");
+    EXPECT_EQ(serialized["type"], "AlphaBetaToDq0Transform");
     EXPECT_EQ(serialized["components"].size(), 2);
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
-TEST_F(AlphaBetaZeroToDq0TransformTest, BasicTest)
+TEST_F(AlphaBetaToDq0TransformTest, BasicTest)
 {
-    RootComponent               root;
-    std::string_view            name = "AlphaBetaZeroToDq0Transform3";
-    AlphaBetaZeroToDq0Transform transform(name, root);
+    RootComponent           root;
+    std::string_view        name = "AlphaBetaToDq0Transform3";
+    AlphaBetaToDq0Transform transform(name, root);
 
     double i_alpha     = 1.0;
     double i_beta      = -0.5;
@@ -87,11 +87,11 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, BasicTest)
     EXPECT_NEAR(zero, expected_zero, 1e-4);
 }
 
-TEST_F(AlphaBetaZeroToDq0TransformTest, ZeroAngleTest)
+TEST_F(AlphaBetaToDq0TransformTest, ZeroAngleTest)
 {
-    RootComponent               root;
-    std::string_view            name = "AlphaBetaZeroToDq0Transform4";
-    AlphaBetaZeroToDq0Transform transform(name, root);
+    RootComponent           root;
+    std::string_view        name = "AlphaBetaToDq0Transform4";
+    AlphaBetaToDq0Transform transform(name, root);
 
     double i_alpha     = 1.0;
     double i_beta      = -0.5;
@@ -113,11 +113,11 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, ZeroAngleTest)
     EXPECT_NEAR(zero, expected_zero, 1e-4);
 }
 
-TEST_F(AlphaBetaZeroToDq0TransformTest, ZeroAngle90degreesOffsetTest)
+TEST_F(AlphaBetaToDq0TransformTest, ZeroAngle90degreesOffsetTest)
 {
-    RootComponent               root;
-    std::string_view            name = "AlphaBetaZeroToDq0Transform5";
-    AlphaBetaZeroToDq0Transform transform(name, root);
+    RootComponent           root;
+    std::string_view        name = "AlphaBetaToDq0Transform5";
+    AlphaBetaToDq0Transform transform(name, root);
 
     const double i_alpha     = 1.0;
     const double i_beta      = -0.5;
@@ -150,11 +150,11 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, ZeroAngle90degreesOffsetTest)
 }
 
 //! Tests interacting with transform method of ParkTransform component, validation against simulink
-TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisAlignment)
+TEST_F(AlphaBetaToDq0TransformTest, SimulinkConsistencyAaxisAlignment)
 {
-    RootComponent               root;
-    std::string_view            name = "AlphaBetaZeroToDq0Transform6";
-    AlphaBetaZeroToDq0Transform transform(name, root, 10000);
+    RootComponent           root;
+    std::string_view        name = "AlphaBetaToDq0Transform6";
+    AlphaBetaToDq0Transform transform(name, root, 10000);
 
     // the input files are randomly generated numbers
     std::filesystem::path abz_path    = "components/inputs/alpha-beta-zero_sin_120degrees.csv";
@@ -225,11 +225,11 @@ TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisAlignment)
 }
 
 //! Tests interacting with transform method of ParkTransform component, validation against simulink
-TEST_F(AlphaBetaZeroToDq0TransformTest, SimulinkConsistencyAaxisNotAligned)
+TEST_F(AlphaBetaToDq0TransformTest, SimulinkConsistencyAaxisNotAligned)
 {
-    RootComponent               root;
-    std::string_view            name = "AlphaBetaZeroToDq0Transform7";
-    AlphaBetaZeroToDq0Transform transform(name, root, 10000);
+    RootComponent           root;
+    std::string_view        name = "AlphaBetaToDq0Transform7";
+    AlphaBetaToDq0Transform transform(name, root, 10000);
 
     // the input files are randomly generated numbers
     std::filesystem::path abz_path   = "components/inputs/alpha-beta-zero_sin_120degrees.csv";

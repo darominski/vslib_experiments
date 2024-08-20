@@ -13,15 +13,15 @@
 
 namespace vslib
 {
-    class AlphaBetaZeroToDq0Transform : public Component
+    class AlphaBetaToDq0Transform : public Component
     {
       public:
         //! Creates the alpha-beta to dq0 transformation Component.
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        AlphaBetaZeroToDq0Transform(std::string_view name, IComponent& parent, const uint64_t number_points = 1000)
-            : Component("AlphaBetaZeroToDq0Transform", name, parent),
+        AlphaBetaToDq0Transform(std::string_view name, IComponent& parent, const uint64_t number_points = 1000)
+            : Component("AlphaBetaToDq0Transform", name, parent),
               m_sin("sin", *this, number_points),
               m_cos("cos", *this, number_points)
         {
