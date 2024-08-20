@@ -77,7 +77,7 @@ namespace vslib::utils
         StateMachine m_fsm;
 
         bool m_init_done{false};
-        bool m_first{true};
+        bool m_user_converter_initialized{false};
 
         ::vslib::RootComponent&   m_root;
         ::vslib::IConverter&      m_converter;
@@ -105,11 +105,11 @@ namespace vslib::utils
 
         void onConfigured()
         {
-            // initialize user code (RT)
-            if (m_first)
+            // initialize user Converter, including startup of interrupts
+            if (!m_user_converter_initialized)
             {
                 m_converter.init();
-                m_first = false;
+                m_user_converter_initialized = true;
             }
 
             // background task running continuously
