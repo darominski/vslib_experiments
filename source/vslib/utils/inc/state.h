@@ -86,6 +86,7 @@ namespace vslib::utils
 
         void onInitialization()
         {
+            bmboot::notifyPayloadStarted();
             // everything generic that needs to be done to initialize the vloop
             m_init_done = true;
         }
@@ -124,8 +125,9 @@ namespace vslib::utils
 
         TransResVS toConfiguring()
         {
-            return m_parameter_setting_task.checkNewSettingsAvailable() ? TransResVS{VSStates::configuring}
-                                                                        : TransResVS{};
+            return m_parameter_setting_task.checkNewSettingsAvailable()
+                       ? TransResVS{VSStates::configuring, ::utils::FsmCascade}
+                       : TransResVS{};
         }
 
         TransResVS toInitialization()
@@ -136,19 +138,21 @@ namespace vslib::utils
 
         TransResVS toUnconfiguredFromInit()
         {
-            return (m_init_done) ? VSStates::unconfigured : VSStates::initialization;
+            return (m_init_done) ? TransResVS{VSStates::unconfigured} : TransResVS{VSStates::initialization};
         }
 
         TransResVS toUnconfigured()
         {
             const auto& parameter_registry = ParameterRegistry::instance();
-            return parameter_registry.parametersInitialized() ? VSStates::configured : VSStates::unconfigured;
+            return parameter_registry.parametersInitialized() ? TransResVS{VSStates::configured}
+                                                              : TransResVS{VSStates::unconfigured, ::utils::FsmCascade};
         }
 
         TransResVS toConfigured()
         {
             const auto& parameter_registry = ParameterRegistry::instance();
-            return parameter_registry.parametersInitialized() ? VSStates::configured : VSStates::unconfigured;
+            return parameter_registry.parametersInitialized() ? TransResVS{VSStates::configured}
+                                                              : TransResVS{VSStates::unconfigured, ::utils::FsmCascade};
         }
     };
 
