@@ -1,5 +1,5 @@
 //! @file
-//! @brief Defines the Component implementing the Park transform from three phase to two-phase.
+//! @brief Defines the Component implementing the abc to dq0 transform from three phase to two-phase.
 //! @author Dominik Arominski
 
 #pragma once
@@ -12,24 +12,24 @@
 
 namespace vslib
 {
-    class ParkTransform : public Component
+    class AbcToDq0Transform : public Component
     {
       public:
-        //! Creates the Park transformation Component with the LookupTables of the requested size.
+        //! Creates the AbcToDq0Transform Component with the LookupTables of the requested size.
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
         //! @param number_points Number of points for the sine and cosine lookup tables
-        ParkTransform(std::string_view name, IComponent& parent, const uint64_t number_points = 1000)
-            : Component("ParkTransform", name, parent),
+        AbcToDq0Transform(std::string_view name, IComponent& parent, const uint64_t number_points = 1000)
+            : Component("AbcToDq0Transform", name, parent),
               m_sin("sin", *this, number_points),
               m_cos("cos", *this, number_points)
         {
         }
 
-        //! Performs Park transform  from a three-phase (abc) to a dq0 rotating reference frame. Angular position
-        //! of the rotating frame is given by input theta. By default, the a-phase to q-axis alignment is assumed
-        //! but this can be modified with the manual offset parameter.
+        //! Performs a-b-c to d-q-0 transform from a three-phase (abc) to a dq0 rotating reference frame. Angular
+        //! position of the rotating frame is given by input theta. By default, the a-phase to q-axis alignment is
+        //! assumed but this can be modified with the manual offset parameter.
         //!
         //! @param a a-phase value
         //! @param b b-phase value
@@ -41,7 +41,7 @@ namespace vslib
         transform(const double a, const double b, const double c, const double theta, const double offset = 0) noexcept;
 
       private:
-        SinLookupTable<> m_sin;   //!< Lookup table holding sine function
-        CosLookupTable   m_cos;   //!< Lookup table holding cosine function
+        SinLookupTable m_sin;   //!< Lookup table holding sine function
+        CosLookupTable m_cos;   //!< Lookup table holding cosine function
     };
 }   // namespace vslib
