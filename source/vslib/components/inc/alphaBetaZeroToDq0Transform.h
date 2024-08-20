@@ -1,6 +1,5 @@
 //! @file
-//! @brief Defines the Component implementing the alpha-beta-zero to dq0 (Clarke components to Park components)
-//! transformation.
+//! @brief Defines the Component implementing the alpha-beta-zero to dq0 transformation.
 //! @author Dominik Arominski
 
 #pragma once
@@ -17,7 +16,7 @@ namespace vslib
     class AlphaBetaZeroToDq0Transform : public Component
     {
       public:
-        //! Creates the ClarkePark transformation Component
+        //! Creates the alpha-beta to dq0 transformation Component.
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
@@ -43,7 +42,7 @@ namespace vslib
         ) noexcept;
 
       private:
-        SinLookupTable<> m_sin;   //!< Lookup table holding sine function
-        CosLookupTable   m_cos;   //!< Lookup table holding cosine function
+        SinLookupTable m_sin;   //!< Lookup table holding sine function
+        CosLookupTable m_cos;   //!< Lookup table holding cosine function
     };
 }   // namespace vslib

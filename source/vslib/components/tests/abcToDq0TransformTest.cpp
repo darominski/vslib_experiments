@@ -12,7 +12,7 @@
 
 using namespace vslib;
 
-class ParkTransformTest : public ::testing::Test
+class AbcToDq0TransformTest : public ::testing::Test
 {
   protected:
     void SetUp() override
@@ -25,7 +25,7 @@ class ParkTransformTest : public ::testing::Test
 };
 
 //! Tests default construction of AbcToDq0Transform component
-TEST_F(ParkTransformTest, Construction)
+TEST_F(AbcToDq0TransformTest, Construction)
 {
     RootComponent     root;
     std::string_view  name = "park1";
@@ -47,7 +47,7 @@ TEST_F(ParkTransformTest, Construction)
 }
 
 //! Tests custom construction of AbcToDq0Transform component
-TEST_F(ParkTransformTest, NonDefaultConstruction)
+TEST_F(AbcToDq0TransformTest, NonDefaultConstruction)
 {
     RootComponent     root;
     std::string_view  name = "park2";
@@ -61,7 +61,7 @@ TEST_F(ParkTransformTest, NonDefaultConstruction)
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
-TEST_F(ParkTransformTest, BasicTest)
+TEST_F(AbcToDq0TransformTest, BasicTest)
 {
     RootComponent     root;
     std::string_view  name = "park2";
@@ -91,7 +91,7 @@ TEST_F(ParkTransformTest, BasicTest)
     EXPECT_NEAR(zero, expected_zero, 1e-4);
 }
 
-TEST_F(ParkTransformTest, ZeroAngleTest)
+TEST_F(AbcToDq0TransformTest, ZeroAngleTest)
 {
     RootComponent     root;
     std::string_view  name = "park3";
@@ -121,7 +121,7 @@ TEST_F(ParkTransformTest, ZeroAngleTest)
     EXPECT_NEAR(zero, expected_zero, 1e-5);
 }
 
-TEST_F(ParkTransformTest, ZeroAngle90degreesOffsetTest)
+TEST_F(AbcToDq0TransformTest, ZeroAngle90degreesOffsetTest)
 {
     RootComponent     root;
     std::string_view  name = "park3";
@@ -152,7 +152,7 @@ TEST_F(ParkTransformTest, ZeroAngle90degreesOffsetTest)
     EXPECT_NEAR(zero, expected_zero, 1e-5);
 }
 
-TEST_F(ParkTransformTest, NinetyDegreesTest)
+TEST_F(AbcToDq0TransformTest, NinetyDegreesTest)
 {
     RootComponent     root;
     std::string_view  name = "park4";
@@ -183,7 +183,7 @@ TEST_F(ParkTransformTest, NinetyDegreesTest)
 }
 
 //! Tests interacting with transform method of AbcToDq0Transform component, validation against simulink
-TEST_F(ParkTransformTest, BasicSimulinkConsistency)
+TEST_F(AbcToDq0TransformTest, BasicSimulinkConsistency)
 {
     RootComponent     root;
     std::string_view  name = "park5";
@@ -257,7 +257,7 @@ TEST_F(ParkTransformTest, BasicSimulinkConsistency)
 
 //! Tests interacting with transform method of AbcToDq0Transform component, validation against simulink and SVC measured
 //! data
-TEST_F(ParkTransformTest, SVCTransform)
+TEST_F(AbcToDq0TransformTest, SVCTransform)
 {
     RootComponent     root;
     std::string_view  name = "park5";
