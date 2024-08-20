@@ -1,5 +1,5 @@
 //! @file
-//! @brief File with unit tests for ClarkeTransform component.
+//! @brief File with unit tests for AbcToAlphaBetaTransform component.
 //! @author Dominik Arominski
 
 #include <array>
@@ -7,12 +7,12 @@
 #include <fstream>
 #include <gtest/gtest.h>
 
-#include "clarkeTransform.h"
+#include "abcToAlphaBetaTransform.h"
 #include "rootComponent.h"
 
 using namespace vslib;
 
-class ClarkeTransformTest : public ::testing::Test
+class AbcToAlphaBetaTransformTest : public ::testing::Test
 {
   protected:
     void SetUp() override
@@ -24,27 +24,27 @@ class ClarkeTransformTest : public ::testing::Test
     }
 };
 
-//! Tests default construction of ClarkeTransform component
-TEST_F(ClarkeTransformTest, Construction)
+//! Tests default construction of AbcToAlphaBetaTransform component
+TEST_F(AbcToAlphaBetaTransformTest, Construction)
 {
-    RootComponent    root;
-    std::string_view name = "clarke1";
-    ClarkeTransform  clarke(name, root);
+    RootComponent           root;
+    std::string_view        name = "clarke1";
+    AbcToAlphaBetaTransform clarke(name, root);
     ASSERT_EQ(clarke.getName(), "clarke1");
 
     auto serialized = clarke.serialize();
     EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "ClarkeTransform");
+    EXPECT_EQ(serialized["type"], "AbcToAlphaBetaTransform");
     EXPECT_EQ(serialized["components"], nlohmann::json::array());
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
-//! Tests basic case of ClarkeTransform for a balance system
-TEST_F(ClarkeTransformTest, BasicTest)
+//! Tests basic case of AbcToAlphaBetaTransform for a balance system
+TEST_F(AbcToAlphaBetaTransformTest, BasicTest)
 {
-    RootComponent    root;
-    std::string_view name = "clarke2";
-    ClarkeTransform  clarke(name, root);
+    RootComponent           root;
+    std::string_view        name = "clarke2";
+    AbcToAlphaBetaTransform clarke(name, root);
 
     double i_a               = 1.0;
     double i_b               = -0.5;
@@ -57,11 +57,11 @@ TEST_F(ClarkeTransformTest, BasicTest)
 }
 
 //! Tests zero-sequence system (all phases are the same)
-TEST(ClarkeTransformationTest, ZeroSequenceTest)
+TEST(AbcToAlphaBetaTransformationTest, ZeroSequenceTest)
 {
-    RootComponent    root;
-    std::string_view name = "clarke3";
-    ClarkeTransform  clarke(name, root);
+    RootComponent           root;
+    std::string_view        name = "clarke3";
+    AbcToAlphaBetaTransform clarke(name, root);
 
     double i_a               = 1.0;
     double i_b               = 1.0;
@@ -74,11 +74,11 @@ TEST(ClarkeTransformationTest, ZeroSequenceTest)
 }
 
 //! Tests an unbalanced system
-TEST(ClarkeTransformationTest, UnbalancedSystemTest)
+TEST(AbcToAlphaBetaTransformationTest, UnbalancedSystemTest)
 {
-    RootComponent    root;
-    std::string_view name = "clarke4";
-    ClarkeTransform  clarke(name, root);
+    RootComponent           root;
+    std::string_view        name = "clarke4";
+    AbcToAlphaBetaTransform clarke(name, root);
 
     double i_a               = 2.0;
     double i_b               = -1.0;
@@ -90,12 +90,12 @@ TEST(ClarkeTransformationTest, UnbalancedSystemTest)
     EXPECT_NEAR(zero, 0.0, 1e-6);
 }
 
-//! Tests interacting with transform method of ClarkeTransform component, validation against simulink
-TEST_F(ClarkeTransformTest, SimulinkConsistency)
+//! Tests interacting with transform method of AbcToAlphaBetaTransform component, validation against simulink
+TEST_F(AbcToAlphaBetaTransformTest, SimulinkConsistency)
 {
-    RootComponent    root;
-    std::string_view name = "clarke5";
-    ClarkeTransform  clarke(name, root);
+    RootComponent           root;
+    std::string_view        name = "clarke5";
+    AbcToAlphaBetaTransform clarke(name, root);
 
     // the input files are randomly generated numbers
     std::filesystem::path abc_path    = "components/inputs/park_abc_sin_120degrees.csv";

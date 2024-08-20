@@ -1,7 +1,7 @@
 #include <cmath>
 #include <numbers>
 
-#include "parkTransform.h"
+#include "abcToDq0Transform.h"
 
 namespace vslib
 {
@@ -12,7 +12,7 @@ namespace vslib
         constexpr double two_pi_over_3 = std::numbers::pi * two_over_3;
     }
 
-    [[nodiscard]] std::tuple<double, double, double> ParkTransform::transform(
+    [[nodiscard]] std::tuple<double, double, double> AbcToDq0Transform::transform(
         const double a, const double b, const double c, const double theta, const double offset
     ) noexcept
     {

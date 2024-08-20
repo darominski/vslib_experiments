@@ -5,6 +5,7 @@
 #include <array>
 #include <gtest/gtest.h>
 
+#include "functionGenerator.h"
 #include "periodicLookupTable.h"
 #include "rootComponent.h"
 #include "staticJson.h"
@@ -363,4 +364,23 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRandomAccessConsistency
     EXPECT_EQ(table.interpolate(-1), table.interpolate(-1, true));
     EXPECT_EQ(table.interpolate(-0.5), table.interpolate(-0.5, true));
     EXPECT_EQ(table.interpolate(0), table.interpolate(0, true));
+}
+
+//! Tests PeriodicLookupTable provides the expected output of interpolation when compared with an arbitrary
+//! function over a wide range
+TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleLargeArraynNegativeRange)
+{
+    RootComponent               root;
+    const double                min      = -2 * std::numbers::pi;
+    const double                max      = 0;
+    const int                   n_points = 10000;
+    auto                        values   = fgc4::utils::generateFunction<double, double>(sin, min, max, n_points);
+    std::string                 name     = "table";
+    PeriodicLookupTable<double> table(name, root, std::move(values));
+
+    for (int index = 0; index < 20000; index++)
+    {
+        const int x = index * (max - min) / static_cast<double>(n_points);
+        EXPECT_NEAR(table.interpolate(x), sin(x), 1e-4);
+    }
 }

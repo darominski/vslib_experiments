@@ -1,7 +1,7 @@
 #include <cmath>
 #include <numbers>
 
-#include "alphaBetaZeroToDq0Transform.h"
+#include "alphaBetaToDq0Transform.h"
 
 namespace vslib
 {
@@ -12,7 +12,7 @@ namespace vslib
         constexpr double two_pi_over_3 = std::numbers::pi * two_over_3;
     }
 
-    [[nodiscard]] std::tuple<double, double, double> AlphaBetaZeroToDq0Transform::transform(
+    [[nodiscard]] std::tuple<double, double, double> AlphaBetaToDq0Transform::transform(
         const double f_alpha, const double f_beta, const double f_0, const double theta, const bool a_alignment
     ) noexcept
     {

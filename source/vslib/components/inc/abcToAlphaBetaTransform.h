@@ -1,5 +1,5 @@
 //! @file
-//! @brief Defines the Component implementing the Clarke transform from three phase to two-phase.
+//! @brief Defines the Component implementing the abc to alpha-beta transform from three phase to two-phase.
 //! @author Dominik Arominski
 
 #pragma once
@@ -13,19 +13,19 @@
 
 namespace vslib
 {
-    class ClarkeTransform : public Component
+    class AbcToAlphaBetaTransform : public Component
     {
       public:
-        //! Creates the Clarke transformation Component
+        //! Creates the abc to alpha-beta transformation Component
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        ClarkeTransform(std::string_view name, IComponent& parent)
-            : Component("ClarkeTransform", name, parent)
+        AbcToAlphaBetaTransform(std::string_view name, IComponent& parent)
+            : Component("AbcToAlphaBetaTransform", name, parent)
         {
         }
 
-        //! Performs Clarke transform on the provided inputs
+        //! Performs a-b-c to alpha-beta transform on the provided inputs
         //!
         //! @param f_a a-phase value of abs-frame component
         //! @param f_b b-phase value of abs-frame component

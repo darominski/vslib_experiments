@@ -1,5 +1,5 @@
 //! @file
-//! @brief File with unit tests for ParkTransform component.
+//! @brief File with unit tests for AbcToDq0Transform component.
 //! @author Dominik Arominski
 
 #include <array>
@@ -7,12 +7,12 @@
 #include <fstream>
 #include <gtest/gtest.h>
 
-#include "parkTransform.h"
+#include "abcToDq0Transform.h"
 #include "rootComponent.h"
 
 using namespace vslib;
 
-class ParkTransformTest : public ::testing::Test
+class AbcToDq0TransformTest : public ::testing::Test
 {
   protected:
     void SetUp() override
@@ -24,17 +24,17 @@ class ParkTransformTest : public ::testing::Test
     }
 };
 
-//! Tests default construction of ParkTransform component
-TEST_F(ParkTransformTest, Construction)
+//! Tests default construction of AbcToDq0Transform component
+TEST_F(AbcToDq0TransformTest, Construction)
 {
-    RootComponent    root;
-    std::string_view name = "park1";
-    ParkTransform    park(name, root);
+    RootComponent     root;
+    std::string_view  name = "park1";
+    AbcToDq0Transform park(name, root);
     ASSERT_EQ(park.getName(), "park1");
 
     auto serialized = park.serialize();
     EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "ParkTransform");
+    EXPECT_EQ(serialized["type"], "AbcToDq0Transform");
     EXPECT_EQ(serialized["components"].size(), 2);
     EXPECT_EQ(
         serialized["components"].dump(),
@@ -46,26 +46,26 @@ TEST_F(ParkTransformTest, Construction)
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
-//! Tests custom construction of ParkTransform component
-TEST_F(ParkTransformTest, NonDefaultConstruction)
+//! Tests custom construction of AbcToDq0Transform component
+TEST_F(AbcToDq0TransformTest, NonDefaultConstruction)
 {
-    RootComponent    root;
-    std::string_view name = "park2";
-    ParkTransform    park(name, root, 10000);
+    RootComponent     root;
+    std::string_view  name = "park2";
+    AbcToDq0Transform park(name, root, 10000);
     ASSERT_EQ(park.getName(), name);
 
     auto serialized = park.serialize();
     EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "ParkTransform");
+    EXPECT_EQ(serialized["type"], "AbcToDq0Transform");
     EXPECT_EQ(serialized["components"].size(), 2);
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
-TEST_F(ParkTransformTest, BasicTest)
+TEST_F(AbcToDq0TransformTest, BasicTest)
 {
-    RootComponent    root;
-    std::string_view name = "park2";
-    ParkTransform    park(name, root);
+    RootComponent     root;
+    std::string_view  name = "park2";
+    AbcToDq0Transform park(name, root);
 
     double i_a        = 1.0;
     double i_b        = -0.5;
@@ -91,11 +91,11 @@ TEST_F(ParkTransformTest, BasicTest)
     EXPECT_NEAR(zero, expected_zero, 1e-4);
 }
 
-TEST_F(ParkTransformTest, ZeroAngleTest)
+TEST_F(AbcToDq0TransformTest, ZeroAngleTest)
 {
-    RootComponent    root;
-    std::string_view name = "park3";
-    ParkTransform    park(name, root);
+    RootComponent     root;
+    std::string_view  name = "park3";
+    AbcToDq0Transform park(name, root);
 
     double i_a        = 1.0;
     double i_b        = -0.5;
@@ -121,11 +121,11 @@ TEST_F(ParkTransformTest, ZeroAngleTest)
     EXPECT_NEAR(zero, expected_zero, 1e-5);
 }
 
-TEST_F(ParkTransformTest, ZeroAngle90degreesOffsetTest)
+TEST_F(AbcToDq0TransformTest, ZeroAngle90degreesOffsetTest)
 {
-    RootComponent    root;
-    std::string_view name = "park3";
-    ParkTransform    park(name, root);
+    RootComponent     root;
+    std::string_view  name = "park3";
+    AbcToDq0Transform park(name, root);
 
     const double i_a    = 1.0;
     const double i_b    = -0.5;
@@ -152,11 +152,11 @@ TEST_F(ParkTransformTest, ZeroAngle90degreesOffsetTest)
     EXPECT_NEAR(zero, expected_zero, 1e-5);
 }
 
-TEST_F(ParkTransformTest, NinetyDegreesTest)
+TEST_F(AbcToDq0TransformTest, NinetyDegreesTest)
 {
-    RootComponent    root;
-    std::string_view name = "park4";
-    ParkTransform    park(name, root);
+    RootComponent     root;
+    std::string_view  name = "park4";
+    AbcToDq0Transform park(name, root);
 
     double i_a        = 1.0;
     double i_b        = -0.5;
@@ -182,12 +182,12 @@ TEST_F(ParkTransformTest, NinetyDegreesTest)
     EXPECT_NEAR(zero, expected_zero, 1e-5);
 }
 
-//! Tests interacting with transform method of ParkTransform component, validation against simulink
-TEST_F(ParkTransformTest, BasicSimulinkConsistency)
+//! Tests interacting with transform method of AbcToDq0Transform component, validation against simulink
+TEST_F(AbcToDq0TransformTest, BasicSimulinkConsistency)
 {
-    RootComponent    root;
-    std::string_view name = "park5";
-    ParkTransform    park(name, root, 10000);
+    RootComponent     root;
+    std::string_view  name = "park5";
+    AbcToDq0Transform park(name, root, 10000);
 
     // the input files are randomly generated numbers
     std::filesystem::path abc_path   = "components/inputs/park_abc_sin_120degrees.csv";
@@ -255,13 +255,13 @@ TEST_F(ParkTransformTest, BasicSimulinkConsistency)
     park_file.close();
 }
 
-//! Tests interacting with transform method of ParkTransform component, validation against simulink and SVC measured
+//! Tests interacting with transform method of AbcToDq0Transform component, validation against simulink and SVC measured
 //! data
-TEST_F(ParkTransformTest, SVCTransform)
+TEST_F(AbcToDq0TransformTest, SVCTransform)
 {
-    RootComponent    root;
-    std::string_view name = "park5";
-    ParkTransform    park(name, root, 10000);
+    RootComponent     root;
+    std::string_view  name = "park5";
+    AbcToDq0Transform park(name, root, 10000);
 
     // the input files are randomly generated numbers
     std::filesystem::path abc_path   = "components/inputs/svc_18kV.csv";

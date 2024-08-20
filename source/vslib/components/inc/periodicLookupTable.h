@@ -31,7 +31,16 @@ namespace vslib
         ) noexcept
             : LookupTable<IndexType, StoredType>(name, parent, std::move(values), equal_binning)
         {
-            m_span_x = abs(this->m_upper_edge_x - this->m_lower_edge_x);
+            m_span_x = this->m_upper_edge_x - this->m_lower_edge_x;
+
+            if constexpr (fgc4::utils::Integral<IndexType>)
+            {
+                m_span_x = abs(m_span_x);
+            }
+            else
+            {
+                m_span_x = fabs(m_span_x);
+            }
         }
 
         //! Provides an interpolated y-axis value from the stored values closest to the provided x-axis input.

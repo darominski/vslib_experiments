@@ -12,9 +12,9 @@
 #include "rootComponent.h"
 
 //! Transforms
-#include "alphaBetaZeroToDq0Transform.h"
-#include "clarkeTransform.h"
-#include "parkTransform.h"
+#include "abcToAlphaBetaTransform.h"
+#include "abcToDq0Transform.h"
+#include "alphaBetaToDq0Transform.h"
 
 //! Controllers
 #include "pid.h"
