@@ -15,10 +15,8 @@ namespace user
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
               m_interrupt_id{121 + 0},   // Jonas's definition
-                                         //   interrupt_2("cpu_clock", this, 100, RTTask),
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
               pid("pid_1", *this),
-              //   rst_1("rst_1", *this),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
         {
@@ -130,6 +128,7 @@ namespace user
             converter.m_r2s->data[2].value = cast<float, uint32_t>(actuation);
 
             // send it away
+
             // kria transfer rate: 100us
             converter.m_r2s->num_data = converter.m_s2r->num_data;
             converter.m_r2s->tkeep    = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;
