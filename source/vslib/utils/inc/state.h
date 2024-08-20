@@ -106,6 +106,7 @@ namespace vslib::utils
         void onConfigured()
         {
             // initialize user Converter, including startup of interrupts
+
             if (!m_user_converter_initialized)
             {
                 m_converter.init();

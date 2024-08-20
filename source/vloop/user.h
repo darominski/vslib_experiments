@@ -17,7 +17,7 @@ namespace user
               m_interrupt_id{121 + 0},   // Jonas's definition
                                          //   interrupt_2("cpu_clock", this, 100, RTTask),
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              park("transform_2", *this),
+              pid("pid_1", *this),
               //   rst_1("rst_1", *this),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
@@ -27,9 +27,7 @@ namespace user
 
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
-        // vslib::TimerInterrupt<Converter> interrupt_2;
-        vslib::AbcToDq0Transform park;
-        // vslib::RST<2>          rst_1;
+        vslib::PID                            pid;
 
         // ...
         // end of your Components
@@ -110,20 +108,6 @@ namespace user
             //             }
         }
 
-        // static void RTTask2(Converter& converter)
-        // {
-        //     for (size_t index = 0; index < 100; index++)
-        //     {
-        //         // asm volatile("isb; dsb sy");
-        //         volatile const double measurement = 1.0;
-        //         volatile const double reference   = 1000.0;
-
-        //         // converter.rst_1.control(measurement, reference);
-
-        //         // asm volatile("isb; dsb sy");
-        //     }
-        // }
-
         template<typename SourceType, typename TargetType>
         static TargetType cast(SourceType input)
         {
@@ -132,42 +116,20 @@ namespace user
 
         static void RTTask(Converter& converter)
         {
-            // TEST 1: Load data from Aurora, convert to float, send it away
-            // for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
-            // {
-            //     //     // const vslib::FixedPoint<fractional_bits, uint32_t> in = s2r->data[i].value;
-            //     volatile const uint32_t in = converter.m_s2r->data[i].value;
-            //     //     volatile const float    modified = cast<uint32_t, float>(in) * 10.0;
-            //     //     converter.m_r2s->data[i].value   = cast<float, uint32_t>(modified);
-            // }
-            // converter.m_r2s->num_data = converter.m_s2r->num_data;
-            // converter.m_r2s->tkeep = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;
-
-            // PASSED!
-
-            // TEST 2: Load data, perform operation on it, send it away
-            // read data in from PL to fixed-point type
-            volatile float a  = cast<uint32_t, float>(converter.m_s2r->data[0].value);
-            volatile float b  = cast<uint32_t, float>(converter.m_s2r->data[1].value);
-            volatile float c  = cast<uint32_t, float>(converter.m_s2r->data[2].value);
-            volatile float wt = cast<uint32_t, float>(converter.m_s2r->data[3].value);
+            // TEST 3: Control simple system using PID+
+            volatile const float measurement = cast<uint32_t, float>(converter.m_s2r->data[0].value);
+            volatile const float reference   = cast<uint32_t, float>(converter.m_s2r->data[1].value);
 
             // use the numbers
-            const auto [d, q, zero] = converter.park.transform(a, b, c, wt);
-
-            // convert the output to Aurora-friendly uint32_t
-
-            // send it away
-            std::cout << a << " " << b << " " << c << " " << wt << " " << d << " " << q << " " << zero << "\n";
+            const float actuation = converter.pid.control(measurement, reference);
 
             for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
             {
                 converter.m_r2s->data[i].value = converter.m_s2r->data[i].value;
             }
-            converter.m_r2s->data[4].value = cast<float, uint32_t>(d);
-            converter.m_r2s->data[5].value = cast<float, uint32_t>(q);
-            converter.m_r2s->data[6].value = cast<float, uint32_t>(zero);
+            converter.m_r2s->data[2].value = cast<float, uint32_t>(actuation);
 
+            // send it away
             // kria transfer rate: 100us
             converter.m_r2s->num_data = converter.m_s2r->num_data;
             converter.m_r2s->tkeep    = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;

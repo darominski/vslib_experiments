@@ -71,8 +71,6 @@ namespace user
 
 int main()
 {
-    bmboot::notifyPayloadStarted();
-
     RootComponent   root;
     user::Converter converter = user::Converter(root);
 
