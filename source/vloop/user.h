@@ -17,9 +17,10 @@ namespace user
               m_interrupt_id{121 + 0},   // Jonas's definition
                                          //   interrupt_2("cpu_clock", this, 100, RTTask),
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              clarke("transform_1", *this),
-              park("transform_2", *this),
+              // clarke("transform_1", *this),
+              park("transform_2", *this, 10000),
               //   rst_1("rst_1", *this),
+	      sine("aurora", *this, 1000),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
         {
@@ -29,7 +30,8 @@ namespace user
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
         // vslib::TimerInterrupt<Converter> interrupt_2;
-        vslib::ClarkeTransform clarke;
+        vslib::SinLookupTable<double>       sine;
+        // vslib::ClarkeTransform clarke;
         vslib::ParkTransform   park;
         // vslib::RST<2>          rst_1;
 
@@ -135,12 +137,13 @@ namespace user
         static void RTTask(Converter& converter)
         {
             // TEST 1: Load data from Aurora, convert to float, send it away
-            // for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
+            // for (uint32_t i = 0; i < converter.m_s2r->num_data-1; i++)
             // {
             //     //     // const vslib::FixedPoint<fractional_bits, uint32_t> in = s2r->data[i].value;
             //     volatile const uint32_t in = converter.m_s2r->data[i].value;
-            //     //     volatile const float    modified = cast<uint32_t, float>(in) * 10.0;
-            //     //     converter.m_r2s->data[i].value   = cast<float, uint32_t>(modified);
+	    // 	volatile const float    modified = cast<uint32_t, float>(in) * (float)i;
+	    // 	std::cout << i+1 << " " << cast<uint32_t, float>(in) << std::endl;
+            //     converter.m_r2s->data[i].value   = cast<float, uint32_t>(modified);
             // }
             // converter.m_r2s->num_data = converter.m_s2r->num_data;
             // converter.m_r2s->tkeep = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;
@@ -149,27 +152,37 @@ namespace user
 
             // TEST 2: Load data, perform operation on it, send it away
             // read data in from PL to fixed-point type
-            volatile float a  = cast<uint32_t, float>(converter.m_s2r->data[0].value);
-            volatile float b  = cast<uint32_t, float>(converter.m_s2r->data[1].value);
-            volatile float c  = cast<uint32_t, float>(converter.m_s2r->data[2].value);
-            volatile float wt = cast<uint32_t, float>(converter.m_s2r->data[3].value);
+            const volatile float a  = cast<uint32_t, float>(converter.m_s2r->data[0].value);
+            const volatile float b  = cast<uint32_t, float>(converter.m_s2r->data[1].value);
+            const volatile float c  = cast<uint32_t, float>(converter.m_s2r->data[2].value);
+            const volatile float wt = cast<uint32_t, float>(converter.m_s2r->data[3].value);
+	    // const float sum = a + b + c;
 
+	    // const float stdlib_sine = std::sin(wt);
+	    // const float vslib_sine = converter.sine(wt);
+	    
             // use the numbers
             const auto [d, q, zero] = converter.park.transform(a, b, c, wt);
-
+	    
             // convert the output to Aurora-friendly uint32_t
 
             // send it away
-            std::cout << a << " " << b << " " << c << " " << wt << " " << d << " " << q << " " << zero << "\n";
+            // std::cout << a << " " << b << " " << c << " " << wt << " " << d << " " << q << " " << zero << "\n";
 
-            for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
+            for (uint32_t i = 0; i < 4; i++)
             {
                 converter.m_r2s->data[i].value = converter.m_s2r->data[i].value;
             }
-            converter.m_r2s->data[4].value = cast<float, uint32_t>(d);
+	    converter.m_r2s->data[4].value = cast<float, uint32_t>(d);
             converter.m_r2s->data[5].value = cast<float, uint32_t>(q);
             converter.m_r2s->data[6].value = cast<float, uint32_t>(zero);
-
+	    // converter.m_r2s->data[7].value = cast<float, uint32_t>(stdlib_sine);
+	    // converter.m_r2s->data[8].value = cast<float, uint32_t>(vslib_sine);
+            for (uint32_t i = 7; i < converter.m_s2r->num_data; i++)
+            {
+                converter.m_r2s->data[i].value = converter.m_s2r->data[i].value;
+            }
+	    
             // kria transfer rate: 100us
             converter.m_r2s->num_data = converter.m_s2r->num_data;
             converter.m_r2s->tkeep    = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;
