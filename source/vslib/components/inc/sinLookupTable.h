@@ -4,9 +4,8 @@
 
 #pragma once
 
-#define _USE_MATH_DEFINESs
+#define _USE_MATH_DEFINES
 #include <cmath>
-#include <functional>
 #include <numbers>
 #include <string>
 
