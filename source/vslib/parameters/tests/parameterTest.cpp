@@ -28,15 +28,17 @@ class ParameterTest : public ::testing::Test
     }
 };
 
-class MockComponent : public Component
+namespace
 {
-  public:
-    MockComponent(RootComponent& parent)
-        : Component("mockType", "mockName", parent)
+    class MockComponent : public Component
     {
-    }
-};
-
+      public:
+        MockComponent(RootComponent& parent)
+            : Component("mockType", "mock_name", parent)
+        {
+        }
+    };
+}
 // ************************************************************
 // Tests of basic Parameter creation of all supported types
 

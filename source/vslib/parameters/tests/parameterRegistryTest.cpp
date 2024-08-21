@@ -28,14 +28,17 @@ class ParameterRegistryTest : public ::testing::Test
     }
 };
 
-class MockComponent : public Component
+namespace
 {
-  public:
-    MockComponent(RootComponent& parent)
-        : Component("mockType", "mockName", parent)
+    class MockComponent : public Component
     {
-    }
-};
+      public:
+        MockComponent(RootComponent& parent)
+            : Component("MockType", "mock_name", parent)
+        {
+        }
+    };
+}
 
 //! Checks that an instance of the empty ParameterRegistry can be created
 TEST_F(ParameterRegistryTest, EmptyInstance)
@@ -54,7 +57,7 @@ TEST_F(ParameterRegistryTest, AutomaticParameterRegistration)
     Parameter<int>    parameter(component, parameter_name);
     const auto&       parameters = ParameterRegistry::instance().getParameters();
     ASSERT_EQ(parameters.size(), 1);
-    const std::string registry_name = std::string("root.mockName.") + parameter_name;
+    const std::string registry_name = std::string("root.mock_name.") + parameter_name;
     EXPECT_NE(parameters.find(registry_name), parameters.end());
 }
 
@@ -69,10 +72,10 @@ TEST_F(ParameterRegistryTest, ExplicitAddToRegistry)
     auto& registry   = ParameterRegistry::instance();
     auto& parameters = registry.getParameters();
     ASSERT_EQ(parameters.size(), 1);
-    const std::string registry_name = std::string("root.mockName.") + parameter_name;
+    const std::string registry_name = std::string("root.mock_name.") + parameter_name;
     EXPECT_NE(parameters.find(registry_name), parameters.end());
 
-    const std::string new_parameter_name = "new_name";
+    const std::string new_parameter_name = "root.new_name";
     registry.addToRegistry(new_parameter_name, parameter);
     EXPECT_EQ(parameters.size(), 2);
     EXPECT_NE(parameters.find(registry_name), parameters.end());
@@ -102,11 +105,11 @@ TEST_F(ParameterRegistryTest, AutomaticMultipleParameterRegistration)
 
     const auto& parameters = ParameterRegistry::instance().getParameters();
     ASSERT_EQ(parameters.size(), 5);
-    EXPECT_NE(parameters.find(std::string("root.mockName.") + int_name), parameters.end());
-    EXPECT_NE(parameters.find(std::string("root.mockName.") + double_name), parameters.end());
-    EXPECT_NE(parameters.find(std::string("root.mockName.") + bool_name), parameters.end());
-    EXPECT_NE(parameters.find(std::string("root.mockName.") + string_name), parameters.end());
-    EXPECT_NE(parameters.find(std::string("root.mockName.") + enum_name), parameters.end());
+    EXPECT_NE(parameters.find(std::string("root.mock_name.") + int_name), parameters.end());
+    EXPECT_NE(parameters.find(std::string("root.mock_name.") + double_name), parameters.end());
+    EXPECT_NE(parameters.find(std::string("root.mock_name.") + bool_name), parameters.end());
+    EXPECT_NE(parameters.find(std::string("root.mock_name.") + string_name), parameters.end());
+    EXPECT_NE(parameters.find(std::string("root.mock_name.") + enum_name), parameters.end());
 }
 
 //! Checks that correct exception is thrown when the name already exists in the registry
@@ -117,5 +120,21 @@ TEST_F(ParameterRegistryTest, NameExistsError)
     Parameter<int> parameter(component, "name");
 
     auto& registry = ParameterRegistry::instance();
-    EXPECT_THROW(registry.addToRegistry("root.mockName.name", parameter), std::runtime_error);
+    EXPECT_THROW(registry.addToRegistry("root.mock_name.name", parameter), std::runtime_error);
+}
+
+//! Checks that correct exception is thrown when the name of a Parameter does not follow the snake_case formatting
+TEST_F(ParameterRegistryTest, NameInvalidError)
+{
+    RootComponent  root;
+    MockComponent  component(root);   // component to attach parameters to
+    Parameter<int> parameter(component, "name");
+
+    auto& registry = ParameterRegistry::instance();
+    // capital letters:
+    EXPECT_THROW(registry.addToRegistry("root.mock_name.Name", parameter), std::runtime_error);
+    // empty spaces:
+    EXPECT_THROW(registry.addToRegistry("root.mock_name.name second", parameter), std::runtime_error);
+    // other characters than alphanumeric:
+    EXPECT_THROW(registry.addToRegistry("root.mock_name.offending!char$", parameter), std::runtime_error);
 }
