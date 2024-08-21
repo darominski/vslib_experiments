@@ -58,6 +58,7 @@ if (NOT BUILD_TESTS)
       components/src/alphaBetaToDq0Transform.cpp
       components/src/alphaBetaToAbcTransform.cpp
       components/src/dq0ToAbcTransform.cpp
+      components/src/dq0ToAlphaBetaTransform.cpp
       parameters/src/parameterRegistry.cpp
       background/src/parameterSetting.cpp
       background/src/parameterMap.cpp
