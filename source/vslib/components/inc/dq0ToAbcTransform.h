@@ -1,5 +1,5 @@
 //! @file
-//! @brief Defines the Component implementing the abc to dq0 transform from three phase to two-phase.
+//! @brief Defines the Component implementing the dq0 to abc transform.
 //! @author Dominik Arominski
 
 #pragma once
@@ -17,7 +17,6 @@ namespace vslib
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        //! @param number_points Number of points for the sine and cosine lookup tables
         Dq0ToAbcTransform(std::string_view name, IComponent& parent)
             : Component("Dq0ToAbcTransform", name, parent)
         {

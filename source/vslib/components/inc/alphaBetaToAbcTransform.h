@@ -28,7 +28,7 @@ namespace vslib
         //! @param f_alpha alpha-component of alpha-beta-zero-frame component
         //! @param f_beta beta-component of alpha-beta-zero-frame component
         //! @param f_0 zero-component of alpha-beta-zero-frame component
-        //! @return Tuple of alpha, beta, zero values
+        //! @return Tuple of a, b, and c values
         [[nodiscard]] std::tuple<double, double, double>
         transform(const double f_alpha, const double f_beta, const double f_0) noexcept;
     };

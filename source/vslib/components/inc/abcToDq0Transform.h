@@ -17,7 +17,6 @@ namespace vslib
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        //! @param number_points Number of points for the sine and cosine lookup tables
         AbcToDq0Transform(std::string_view name, IComponent& parent)
             : Component("AbcToDq0Transform", name, parent)
         {

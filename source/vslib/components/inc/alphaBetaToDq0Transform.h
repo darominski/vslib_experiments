@@ -25,7 +25,7 @@ namespace vslib
         {
         }
 
-        //! Performs Alpha-Beta-Zero to dq0 transform.
+        //! Performs alpha-beta-zero to dq0 transform.
         //!
         //! @param f_alpha alpha-component of alpha-beta-zero-frame component
         //! @param f_beta beta-component of alpha-beta-zero-frame component
