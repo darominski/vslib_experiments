@@ -75,7 +75,7 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["derivative_scaling"]      = 1.5;
     values_to_set["derivative_filter_order"] = 1.6;
     values_to_set["control_period"]          = 1.7;
-    values_to_set["pre-warping_frequency"]   = 1.8;
+    values_to_set["pre_warping_frequency"]   = 1.8;
     values_to_set["lower_threshold"]         = -1.0e9;
     values_to_set["upper_threshold"]         = 1.0e9;
     values_to_set["dead_zone"]               = std::array<double, 2>{0, 0};
