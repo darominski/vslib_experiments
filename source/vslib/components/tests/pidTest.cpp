@@ -100,7 +100,7 @@ TEST_F(PIDTest, PIDDefaultConstruction)
     EXPECT_EQ(serialized_pid["parameters"][5]["name"], "derivative_scaling");
     EXPECT_EQ(serialized_pid["parameters"][6]["name"], "derivative_filter_order");
     EXPECT_EQ(serialized_pid["parameters"][7]["name"], "control_period");
-    EXPECT_EQ(serialized_pid["parameters"][8]["name"], "pre-warping_frequency");
+    EXPECT_EQ(serialized_pid["parameters"][8]["name"], "pre_warping_frequency");
 }
 
 //! Checks that the RST coefficients were correctly calculated when kp!=0 or kd!=0

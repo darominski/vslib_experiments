@@ -36,7 +36,7 @@ namespace vslib
               c(*this, "derivative_scaling"),             // default limits
               N(*this, "derivative_filter_order", 0.0),   // min limit: 0
               T(*this, "control_period", 0.0),            // min limit: 0.0
-              f0(*this, "pre-warping_frequency", 0.0),    // min limit: 0.0
+              f0(*this, "pre_warping_frequency", 0.0),    // min limit: 0.0
               actuation_limits("actuation_limits", *this)
         {
         }
@@ -129,8 +129,8 @@ namespace vslib
         Parameter<double> b;     //!< Reference signal proportional gain scaling (from DSP regFGC3)
         Parameter<double> c;     //!< Reference signal derivative gain scaling (from High-Performance Digital Control)
         Parameter<double> N;     //!< Filter order for derivative input
-        Parameter<double> T;     //!< control period
-        Parameter<double> f0;    //!< pre-warping frequency
+        Parameter<double> T;     //!< Control period
+        Parameter<double> f0;    //!< Pre-warping frequency
 
         // ************************************************************
         // Limits of the controller's actuation
