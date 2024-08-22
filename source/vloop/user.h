@@ -115,8 +115,8 @@ namespace user
         static void RTTask(Converter& converter)
         {
             // TEST 3: Control simple system using PID+
-            volatile const float measurement = cast<uint32_t, float>(converter.m_s2r->data[0].value);
-            volatile const float reference   = cast<uint32_t, float>(converter.m_s2r->data[1].value);
+            volatile const float reference = cast<uint32_t, float>(converter.m_s2r->data[0].value);
+            volatile const float measurement   = cast<uint32_t, float>(converter.m_s2r->data[1].value);
 
             // use the numbers
             const float actuation = converter.pid.control(measurement, reference);
@@ -125,7 +125,7 @@ namespace user
             {
                 converter.m_r2s->data[i].value = converter.m_s2r->data[i].value;
             }
-            converter.m_r2s->data[2].value = cast<float, uint32_t>(actuation);
+            converter.m_r2s->data[0].value = cast<float, uint32_t>(actuation);
 
             // send it away
 
