@@ -14,7 +14,7 @@ namespace vslib
 
     [[nodiscard]] std::tuple<double, double, double> AlphaBetaToDq0Transform::transform(
         const double f_alpha, const double f_beta, const double f_0, const double wt, const bool a_alignment
-    ) noexcept
+    ) const noexcept
     {
 
         const double sin_theta = sin(wt);

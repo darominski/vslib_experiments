@@ -7,7 +7,7 @@ namespace vslib
 
     [[nodiscard]] std::tuple<double, double, double> Dq0ToAlphaBetaTransform::transform(
         const double d, const double q, const double zero, const double theta, const bool a_alignment
-    ) noexcept
+    ) const noexcept
     {
         const double sin_theta = sin(theta);
         const double cos_theta = cos(theta);

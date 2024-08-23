@@ -14,7 +14,7 @@ namespace vslib
 
     [[nodiscard]] std::tuple<double, double, double> Dq0ToAbcTransform::transform(
         const double d, const double q, const double zero, const double wt, const double offset
-    ) noexcept
+    ) const noexcept
     {
         const double theta                  = wt + offset;
         const double theta_minus_two_thirds = theta - two_pi_over_3;

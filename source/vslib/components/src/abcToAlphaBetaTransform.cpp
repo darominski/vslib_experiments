@@ -13,7 +13,7 @@ namespace vslib
     }
 
     [[nodiscard]] std::tuple<double, double, double>
-    AbcToAlphaBetaTransform::transform(const double f_a, const double f_b, const double f_c) noexcept
+    AbcToAlphaBetaTransform::transform(const double f_a, const double f_b, const double f_c) const noexcept
     {
 
         const double f_alpha = two_over_3 * (f_a - 0.5 * (f_b + f_c));
