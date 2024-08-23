@@ -34,7 +34,7 @@ to be equal to :math:`\frac{\pi}{2}`. The method returns a tuple of d, q, zero v
     q &= \frac{2}{3} \left(a \cdot cos(\theta) + b \cdot cos \left(\theta - \frac{2}{3} \pi \right) + c \cdot cos \left(\theta + \frac{2}{3} \pi \right) \right) \\
     zero &= \frac{1}{3} \left( a + b + c \right) \\
 
-For more details regarding the API, see the :ref:`API documentation for ParkTransform <abcToDq0Transform_api>`.
+For more details regarding the API, see the :ref:`API documentation for AbcToDq0Transform <abcToDq0Transform_api>`.
 
 Usage example
 ^^^^^^^^^^^^^
@@ -44,12 +44,13 @@ Usage example
     #include <numbers>
 
     #include "abcToDq0Transform.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
-        AbcToDq0Transform abc_to_dq0("abc_to_dq0", &root);
+        RootComponent root;
+        AbcToDq0Transform abc_to_dq0("abc_to_dq0", root);
         // no Parameter needs setting
 
         const double i_a    = 1.0;
@@ -93,12 +94,13 @@ Usage example
 .. code-block:: cpp
 
     #include "abcToAlphaBetaTransform.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
-        AbcToAlphaBetaTransform  abc_to_alphabeta("abc_to_alphabeta", &root);
+        RootComponent root;
+        AbcToAlphaBetaTransform  abc_to_alphabeta("abc_to_alphabeta", root);
         // no Parameters need setting
 
         const double i_a               = 2.0;
@@ -152,13 +154,13 @@ Usage example
     #include <numbers>
 
     #include "alphaBetaToDq0Transform.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
-        // smaller than default look-up table, 100 points:
-        AlphaBetaToDq0Transform transform("alpha-beta_to_dq0", &root, 100);
+        Component root;
+        AlphaBetaToDq0Transform transform("alpha-beta_to_dq0", root);
 
         const double i_alpha     = 1.0;
         const double i_beta      = -0.5;
@@ -189,7 +191,6 @@ The table below gives an overlook of the execution time that can be expected for
       - 797
     * - AlphaBetaToDq0Transform
       - 272
-
 
 The implementation of all algorithms followed equations available in Matlab documentation. However, it can be clearly seen
 that a boost in execution time can be achieved if :code:`AbcToDq0Transform` was implemented as a composite of :code:`AbcToAlphaBetaTransform`,
