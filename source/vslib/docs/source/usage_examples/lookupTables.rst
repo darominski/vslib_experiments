@@ -71,7 +71,7 @@ The :code:`LookupTable` provides a way to access the table's :math:`y` values by
 
 .. code-block:: cpp
 
-    Component root("root", "root", nullptr);
+    RootComponent root;
     LookupTable<int, double> lin_table("table", &root,
       fgc4::utils::generateFunction<int, double>([](const auto x){return 2*x + 1.5;}, 0.0, 10.0, 100), true);
     const auto y2 = lin_table[1]; // returns y of the second element
@@ -86,11 +86,12 @@ Usage examples
     #include <vector>
 
     #include "lookupTable.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
+        RootComponent root;
         // manually generated small table:
         std::vector<std::pair<int, double>> values{{0, 0.5}, {2, 1.5}, {4, 2.5}, {6, 3.5}};
         LookupTable<int32_t, double>             table("small_table", root, std::move(values));
@@ -130,13 +131,14 @@ Usage examples
 
     #include "lookupTable.h"
     #include "generateFunction.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
+        RootComponent root;
         // automatially generated larger table in range 0 to 10.0, with 100 points:
-        LookupTable<double> lin_table("table", &root,
+        LookupTable<double> lin_table("table", root,
           fgc4::utils::generateFunction<int, double>([](const auto x){return 2*x + 1.5;}, 0.0, 10.0, 100), true);
 
         // all access done using index-search:
@@ -177,7 +179,7 @@ Usage examples
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
+        RootComponent root;
         auto constexpr two_pi = 2.0 * std::numbers::pi;
         // automatially generated larger table in range 0 to 2 PI, with 1000 points:
         PeriodicLookupTable<double> sin_table("table", &root,
@@ -228,7 +230,7 @@ Usage examples
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
+        RootComponent root;
         SinLookupTable sin_table("sin_table", &root, 1000);
 
         auto output = sin_table.interpolate(0);  // 0.0
@@ -276,8 +278,8 @@ Usage examples
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
-        CosLookupTable cos_table("cos_table", &root, 1000);
+        RootComponent root;
+        CosLookupTable cos_table("cos_table", root, 1000);
 
         auto output = cos_table.interpolate(0);  // 1.0
         output = cos_table.interpolate(std::numbers::pi * 0.5); // 0.0

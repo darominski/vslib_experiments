@@ -46,12 +46,13 @@ Usage example
 
     #include "timerInterrupt.h"
     #include "converter.h"
+    #include "rootComponent.h"
 
     class Converter : public vslib::IConverter
     {
       public:
-        Converter(Component& root) noexcept
-            : vslib::IConverter("Example", &root),
+        Converter(RootComponent& root) noexcept
+            : vslib::IConverter("your_converter", root),
               interrupt_1("cpu_timer", this, 10.0, RTTask) // 10 microseconds
         {
             // initialize all your objects that need initializing
@@ -96,12 +97,13 @@ Usage example
 
     #include "peripheralInterrupt.h"
     #include "converter.h"
+    #include "rootComponent.h"
 
     class Converter : public vslib::IConverter
     {
       public:
-        Converter(Component& root) noexcept
-            : vslib::IConverter("Example", &root),
+        Converter(RootComponent& root) noexcept
+            : vslib::IConverter("your_converter", root),
               m_interrupt_id{121 + 0},   // interrupt ID
               interrupt_1("AuroraLink", this, m_interrupt_id, vslib::InterruptPriority::high, RTTask)
         {

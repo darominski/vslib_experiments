@@ -30,6 +30,6 @@ namespace vslib
         //! @param f_0 zero-component of alpha-beta-zero-frame component
         //! @return Tuple of a, b, and c values
         [[nodiscard]] std::tuple<double, double, double>
-        transform(const double f_alpha, const double f_beta, const double f_0) noexcept;
+        transform(const double f_alpha, const double f_beta, const double f_0) const noexcept;
     };
 }   // namespace vslib

@@ -32,7 +32,8 @@ namespace vslib
         //! @param wt angle (in radians) between q and a
         //! @param offset Offset angle alignment (in radians): 0 is q alignment, pi/2 for d and a alignment
         //! @return Tuple of d, q, 0 values
-        [[nodiscard]] std::tuple<double, double, double>
-        transform(const double a, const double b, const double c, const double wt, const double offset = 0) noexcept;
+        [[nodiscard]] std::tuple<double, double, double> transform(
+            const double a, const double b, const double c, const double wt, const double offset = 0
+        ) const noexcept;
     };
 }   // namespace vslib

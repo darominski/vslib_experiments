@@ -32,6 +32,6 @@ namespace vslib
         //! @param f_c c-phase value of abs-frame component
         //! @return Tuple of alpha, beta, zero orthogonal values in the stationary alpha-beta reference frame
         [[nodiscard]] std::tuple<double, double, double>
-        transform(const double f_a, const double f_b, const double f_c) noexcept;
+        transform(const double f_a, const double f_b, const double f_c) const noexcept;
     };
 }   // namespace vslib

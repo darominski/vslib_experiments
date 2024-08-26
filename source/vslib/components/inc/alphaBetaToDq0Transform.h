@@ -36,6 +36,6 @@ namespace vslib
         //! @return Tuple of d, q, 0 values
         [[nodiscard]] std::tuple<double, double, double> transform(
             const double f_alpha, const double f_beta, const double f_0, const double wt, const bool a_alignment = true
-        ) noexcept;
+        ) const noexcept;
     };
 }   // namespace vslib

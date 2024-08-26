@@ -4,20 +4,23 @@
 Components
 ==========
 
-This section describes the fundamental VSlib interface of a :code:`Component`. This interface
-serves as a base to most of library's classes that you, the user, interacts with, such as filters,
+This section describes the fundamental VSlib interface of :code:`Component`. This interface
+serves as a base to most of library's classes that you, the user, interact with, such as filters,
 controllers, limits, etc.
 
 General interface
 -----------------
 
-A :code:`Component` is any VSlib class that needs to have runtime-settable :ref:`Parameters <parameter>`.
-All of the user-defined classes are intended to be derived from the :code:`Component` interface.
+The :code:`Component` class is designed for you to extend and use whenever you need to have
+settable :ref:`Parameters <parameter>`. All of the classes defined by you are intended to be derived
+from the :code:`Component` interface. However, this is no the most baseline interface, as :code:`Component`
+derives from :code:`IComponent`. Another class derived from the :code:`IComponent` is the VSlib-defined
+:code:`RootComponent`, intended to serve as the base of the hierarchy of Components.
 
 :code:`Component` class defines a constructor that takes three parameters: the component's type (:code:`std::string`),
-the name of this instance (:code:`std::string`, needs to be unique), and a pointer to parent of this :code:`Component`.
-There should be only one parent-less :code:`Component`, a so-called root, and it is defined in the VSlib main function
-and passed to the user as a reference.
+the name of this instance (:code:`std::string`, snake_case formatting is enforced), and a reference to parent of this :code:`Component`.
+Every :code:`Component` has a parent, ultimately a :code:`RootComponent`, that is defined in the VSlib main function
+and passed to the user by reference.
 
 Using :code:`std::string` for types and names allows for semantic identification of :code:`Components` and their
 :code:`Parameters`, when the latter are registered in the :code:`ParameterRegistry`. The definition of a parent,
@@ -50,24 +53,22 @@ Usage examples
 .. code-block:: cpp
 
     #include "component.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root_type", "root", nullptr);
+        RootComponent root;
 
-        const std::string child_type = "child_type";
-        const std::string child_name = "child_name";
-        Component         child(child_type, child_name, &parent);
+        const std::string child_type = "child_type"; // free string
+        const std::string child_name = "child_name"; // needs to follow snake_case
+        Component         child(child_type, child_name, root);
 
         auto name = child.getName();          // "child_name"
-        auto full_name = child.getFullName(); // "root_type.root.child_type.child_name"
+        auto full_name = child.getFullName(); // "root.child_name"
 
         auto parameters_size = child.getParameters().size();         // no parameters, 0
         auto parameters_initialized = child.parametersInitialized(); // no parameters, true
-
-        root.hasParent();  // false
-        child.hasParent(); // true
 
         auto serialized_component = parent.serialize(); // JSON containing all information needed by the parameter setting interface
 
@@ -80,6 +81,7 @@ Usage examples
 
     #include "component.h"
     #include "parameter.h"
+    #include "rootComponent.h"
 
     #include <array>
 
@@ -95,7 +97,7 @@ Usage examples
     class Derived : public Component
     {
         public:
-            Derived(std::string_view name, Component* parent)
+            Derived(std::string_view name, IComponent& parent)
                 : Component("Derived", name, parent),
                 scalar_factor(*this, "scalar_factor", 0.0, 10.0), // min = 0.0, max = 10.0
                 array_factor(*this, "array_factor"),
@@ -127,8 +129,8 @@ Usage examples
 
     int main()
     {
-        Component root("root", "root", nullptr);
-        Derived derived("derived", &root);
+        RootComponent root;
+        Derived derived("derived", root);
 
         // set your defined Parameters in the parameter setting GUI,
         // each time any Parameter is changed, the verifyParameters method is called.
@@ -166,6 +168,7 @@ Using :code:`Derived` defined above.
 
     #include "componentArray.h"
     #include "parameter.h"
+    #include "rootComponent.h"
 
     #include <array>
 
@@ -173,10 +176,10 @@ Using :code:`Derived` defined above.
 
     int main()
     {
-        Component                             root("root", "root", nullptr);
+        RootComponent                         root;
         const std::string                     component_name = "array";
         constexpr size_t                      array_length   = 4;
-        ComponentArray<Derived, array_length> array(component_name, nullptr);
+        ComponentArray<Derived, array_length> array(component_name, root);
 
         // set all the Parameters of the Components in the array
 

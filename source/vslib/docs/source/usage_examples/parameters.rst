@@ -47,7 +47,7 @@ lower and upper limits.
 
     class CustomComponent : public Component
     {
-        CustomComponent(std::string_view name, Component* parent)
+        CustomComponent(std::string_view name, Component& parent)
           : Component("CustomType", name, parent),
             param(*this, "scalar", 0.0, 10.0)
         {
@@ -68,8 +68,8 @@ you can use the :code:`Parameter` as if it was the scalar type it stores:
 
     int main()
     {
-        Component root("root", "root", nullptr);
-        CustomComponent component("custom", &root);
+        RootComponent root;
+        CustomComponent component("custom", root);
 
         component.param; // returns the current double-type value of the CustomComponent's param
         component.param.value(); // returns the same value as above but explicitly
@@ -88,7 +88,7 @@ Assuming the following definition:
 
     class CustomComponent : public Component
     {
-        CustomComponent(std::string_view name, Component* parent)
+        CustomComponent(std::string_view name, Component& parent)
           : Component("CustomType", name, parent),
             param(*this, "array", 0.0, 10.0)
         {
@@ -105,8 +105,8 @@ where limits :code:`0.0` and :code:`10.0` apply to each array element, individua
 
     int main()
     {
-        Component root("root", "root", nullptr);
-        CustomComponent component("custom", &root);
+        RootComponent root;
+        CustomComponent component("custom", root);
 
         // 1. Get the reference to the entire array:
         auto& array = component.param.value();
