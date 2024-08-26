@@ -68,9 +68,9 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     std::array<int, 2>          version{0, 1};
     std::map<std::string, Json> values_to_set;
     values_to_set["kp"]                      = 10.0;
-    values_to_set["ki"]                      = 5.0;
     values_to_set["kd"]                      = 2.0;
-    values_to_set["kff"]                     = 0;
+    values_to_set["ki"]                      = 5.0;
+    values_to_set["kff"]                     = 0.0;
     values_to_set["proportional_scaling"]    = 1.0;
     values_to_set["derivative_scaling"]      = 1.0;
     values_to_set["derivative_filter_order"] = 0.25;
