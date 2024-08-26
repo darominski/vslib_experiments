@@ -16,7 +16,7 @@ namespace user
             : vslib::IConverter("example", root),
               m_interrupt_id{121 + 0},   // Jonas's definition
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              pid("pid_1", *this),
+              //   pid("pid_1", *this),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
         {
@@ -25,7 +25,7 @@ namespace user
 
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
-        vslib::PID                            pid;
+        // vslib::PID                            pid;
 
         // ...
         // end of your Components
@@ -114,18 +114,36 @@ namespace user
 
         static void RTTask(Converter& converter)
         {
-            // TEST 3: Control simple system using PID+
-            volatile const float reference = cast<uint32_t, float>(converter.m_s2r->data[0].value);
-            volatile const float measurement   = cast<uint32_t, float>(converter.m_s2r->data[1].value);
-
-            // use the numbers
-            const float actuation = converter.pid.control(measurement, reference);
-
-            for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
+            // back to TEST1: read data and send it back
+            for (uint32_t i = 0; i < (converter.m_s2r->num_data - 1); i += 2)
             {
-                converter.m_r2s->data[i].value = converter.m_s2r->data[i].value;
+                volatile uint32_t low    = converter.m_s2r->data[i].value;
+                volatile uint32_t high   = converter.m_s2r->data[i + 1].value;
+                const uint64_t    in64   = ((uint64_t)high) << 32 | low;
+                const double      output = cast<uint64_t, double>(in64);
+                std::cout << (i / 2.0) << " " << output << std::endl;
+
+                const uint64_t output64   = cast<double, uint64_t>(output);
+                uint32_t       out32_high = (uint32_t)(output64 >> 32);
+                uint32_t       out32_low  = (uint32_t)output64;
+
+                converter.m_r2s->data[i].value     = out32_low;
+                converter.m_r2s->data[i + 1].value = out32_high;
             }
-            converter.m_r2s->data[0].value = cast<float, uint32_t>(actuation);
+
+
+            //            // TEST 3: Control simple system using PID+
+            // volatile const float reference = cast<uint32_t, float>(converter.m_s2r->data[0].value);
+            // volatile const float measurement   = cast<uint32_t, float>(converter.m_s2r->data[1].value);
+
+            // // use the numbers
+            // const float actuation = converter.pid.control(measurement, reference);
+
+            // for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
+            // {
+            //     converter.m_r2s->data[i].value = converter.m_s2r->data[i].value;
+            // }
+            // converter.m_r2s->data[0].value = cast<float, uint32_t>(actuation);
 
             // send it away
 
