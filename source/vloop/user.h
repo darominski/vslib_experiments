@@ -16,7 +16,7 @@ namespace user
             : vslib::IConverter("example", root),
               m_interrupt_id{121 + 0},   // Jonas's definition
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              //   pid("pid_1", *this),
+              pid("pid_1", *this),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
         {
@@ -25,7 +25,7 @@ namespace user
 
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
-        // vslib::PID                            pid;
+        vslib::PID                            pid;
 
         // ...
         // end of your Components
@@ -78,6 +78,14 @@ namespace user
 
         void backgroundTask() override
         {
+            // reset the PID every 2 minutes
+            if(!m_recently_used)
+            {
+                sleep(120);
+                std::cout << "resetting pid\n";
+                pid.reset();
+            }
+            m_recently_used = false;
             //             while (true)
             //             {
             //                 if (counter == n_elements + 50)
@@ -112,38 +120,59 @@ namespace user
             return *reinterpret_cast<TargetType*>(&input);
         }
 
+        static double getDouble(const uint32_t low, const uint32_t high)
+        {
+            const uint64_t    uint64_value   = ((uint64_t)high) << 32 | low;
+            return cast<uint64_t, double>(uint64_value);
+        }
+
+        static std::tuple<uint32_t, uint32_t> splitDouble(const double input)
+        {
+            const uint64_t output  = cast<double, uint64_t>(input);
+            const uint32_t high      = (uint32_t)(output >> 32);
+            const uint32_t low       = (uint32_t)output;
+            return std::make_tuple(low, high);
+        }
+
+        static double readDouble(volatile stream_to_reg* s2r, const uint32_t speedgoat_index)
+        {
+            volatile uint32_t low    = s2r->data[2 * speedgoat_index].value;
+            volatile uint32_t high   = s2r->data[2 * speedgoat_index + 1].value;
+            return getDouble(low, high);
+        }
+
+        static void writeDouble(const double value, volatile reg_to_stream* r2s, const uint32_t speedgoat_index)
+        {
+            auto [out32_low, out32_high] = splitDouble(value);
+            r2s->data[2 * speedgoat_index].value     = out32_low;
+            r2s->data[2 * speedgoat_index + 1].value = out32_high;
+        }
+
         static void RTTask(Converter& converter)
         {
             // back to TEST1: read data and send it back
-            for (uint32_t i = 0; i < (converter.m_s2r->num_data - 1); i += 2)
-            {
-                volatile uint32_t low    = converter.m_s2r->data[i].value;
-                volatile uint32_t high   = converter.m_s2r->data[i + 1].value;
-                const uint64_t    in64   = ((uint64_t)high) << 32 | low;
-                const double      output = cast<uint64_t, double>(in64);
-                std::cout << (i / 2.0) << " " << output << std::endl;
-
-                const uint64_t output64   = cast<double, uint64_t>(output);
-                uint32_t       out32_high = (uint32_t)(output64 >> 32);
-                uint32_t       out32_low  = (uint32_t)output64;
-
-                converter.m_r2s->data[i].value     = out32_low;
-                converter.m_r2s->data[i + 1].value = out32_high;
-            }
-
-
-            //            // TEST 3: Control simple system using PID+
-            // volatile const float reference = cast<uint32_t, float>(converter.m_s2r->data[0].value);
-            // volatile const float measurement   = cast<uint32_t, float>(converter.m_s2r->data[1].value);
-
-            // // use the numbers
-            // const float actuation = converter.pid.control(measurement, reference);
-
-            // for (uint32_t i = 0; i < converter.m_s2r->num_data; i++)
+            // for (uint32_t i = 0; i < (converter.m_s2r->num_data - 1); i += 2)
             // {
-            //     converter.m_r2s->data[i].value = converter.m_s2r->data[i].value;
+            //     double output = readDouble(converter.m_s2r, i);
+            //     output        *= 2.0;
+            //     writeDouble(output, converter.m_r2s, i);
             // }
-            // converter.m_r2s->data[0].value = cast<float, uint32_t>(actuation);
+
+            // TEST 4: Control simple system using PID with double-precision variables
+            const auto reference = readDouble(converter.m_s2r, 0);
+            const auto measurement = readDouble(converter.m_s2r, 1);
+
+            // use the numbers
+            const auto actuation = converter.pid.control(measurement, reference);
+
+            // write them to stream
+            writeDouble(actuation, converter.m_r2s, 0);
+
+            // write everything else
+            for (uint32_t i = 2; i < converter.m_s2r->num_data; i++)
+            {
+                converter.m_r2s->data[i].value = converter.m_s2r->data[i].value;
+            }
 
             // send it away
 
@@ -153,7 +182,10 @@ namespace user
 
             // trigger connection
             converter.m_r2s->ctrl |= REG_TO_STREAM_CTRL_START;
+            converter.m_recently_used = true;
         }
+
+        bool m_recently_used{false};
 
       private:
         int m_interrupt_id;
