@@ -63,6 +63,16 @@ namespace vslib
 
 #ifdef PERFORMANCE_TESTS
 
+        auto min() const
+        {
+            return *std::min_element(m_measurements.cbegin(), m_measurements.cend());
+        }
+
+        auto max() const
+        {
+            return *std::max_element(m_measurements.cbegin(), m_measurements.cend());
+        }
+
         //! Returns the average of interrupt time measurements.
         double average() const
         {
