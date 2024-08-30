@@ -13,19 +13,17 @@ namespace vslib
     }
 
     [[nodiscard]] std::tuple<double, double, double> AbcToDq0Transform::transform(
-        const double a, const double b, const double c, const double theta, const double offset
-    ) noexcept
+        const double a, const double b, const double c, const double wt, const double offset
+    ) const noexcept
     {
-        const double cos_theta_minus_two_thirds = m_cos(theta - two_pi_over_3 + offset);
-        const double cos_theta                  = m_cos(theta + offset);
-        const double cos_theta_plus_two_thirds  = m_cos(theta + two_pi_over_3 + offset);
+        const double theta                  = wt + offset;
+        const double theta_minus_two_thirds = theta - two_pi_over_3;
+        const double theta_plus_two_thirds  = theta + two_pi_over_3;
 
-        const double sin_theta_minus_two_thirds = m_sin(theta - two_pi_over_3 + offset);
-        const double sin_theta                  = m_sin(theta + offset);
-        const double sin_theta_plus_two_thirds  = m_sin(theta + two_pi_over_3 + offset);
-
-        const double d = two_over_3 * (a * sin_theta + b * sin_theta_minus_two_thirds + c * sin_theta_plus_two_thirds);
-        const double q = two_over_3 * (a * cos_theta + b * cos_theta_minus_two_thirds + c * cos_theta_plus_two_thirds);
+        const double d
+            = two_over_3 * (a * sin(theta) + b * sin(theta_minus_two_thirds) + c * sin(theta_plus_two_thirds));
+        const double q
+            = two_over_3 * (a * cos(theta) + b * cos(theta_minus_two_thirds) + c * cos(theta_plus_two_thirds));
         const double zero = one_over_3 * (a + b + c);
 
         return {d, q, zero};

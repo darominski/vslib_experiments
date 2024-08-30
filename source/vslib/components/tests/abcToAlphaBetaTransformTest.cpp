@@ -39,7 +39,7 @@ TEST_F(AbcToAlphaBetaTransformTest, Construction)
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
-//! Tests basic case of AbcToAlphaBetaTransform for a balance system
+//! Tests basic case of AbcToAlphaBetaTransform for a balanced system
 TEST_F(AbcToAlphaBetaTransformTest, BasicTest)
 {
     RootComponent           root;

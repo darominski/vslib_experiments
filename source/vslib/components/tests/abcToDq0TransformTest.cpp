@@ -35,29 +35,8 @@ TEST_F(AbcToDq0TransformTest, Construction)
     auto serialized = park.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "AbcToDq0Transform");
-    EXPECT_EQ(serialized["components"].size(), 2);
-    EXPECT_EQ(
-        serialized["components"].dump(),
-        "[{\"name\":\"sin\",\"type\":\"SinLookupTable\",\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":"
-        "\"LookupTable\",\"parameters\":[],\"components\":[]}]},{\"name\":\"cos\",\"type\":\"CosLookupTable\","
-        "\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":\"LookupTable\",\"parameters\":[],"
-        "\"components\":[]}]}]"
-    );
-    EXPECT_EQ(serialized["parameters"].size(), 0);
-}
-
-//! Tests custom construction of AbcToDq0Transform component
-TEST_F(AbcToDq0TransformTest, NonDefaultConstruction)
-{
-    RootComponent     root;
-    std::string_view  name = "park2";
-    AbcToDq0Transform park(name, root, 10000);
-    ASSERT_EQ(park.getName(), name);
-
-    auto serialized = park.serialize();
-    EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "AbcToDq0Transform");
-    EXPECT_EQ(serialized["components"].size(), 2);
+    EXPECT_EQ(serialized["components"].size(), 0);
+    EXPECT_EQ(serialized["components"].dump(), "[]");
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
@@ -187,7 +166,7 @@ TEST_F(AbcToDq0TransformTest, BasicSimulinkConsistency)
 {
     RootComponent     root;
     std::string_view  name = "park5";
-    AbcToDq0Transform park(name, root, 10000);
+    AbcToDq0Transform park(name, root);
 
     // the input files are randomly generated numbers
     std::filesystem::path abc_path   = "components/inputs/park_abc_sin_120degrees.csv";
@@ -261,7 +240,7 @@ TEST_F(AbcToDq0TransformTest, SVCTransform)
 {
     RootComponent     root;
     std::string_view  name = "park5";
-    AbcToDq0Transform park(name, root, 10000);
+    AbcToDq0Transform park(name, root);
 
     // the input files are randomly generated numbers
     std::filesystem::path abc_path   = "components/inputs/svc_18kV.csv";

@@ -35,29 +35,8 @@ TEST_F(AlphaBetaToDq0TransformTest, Construction)
     auto serialized = transform.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "AlphaBetaToDq0Transform");
-    EXPECT_EQ(serialized["components"].size(), 2);
-    EXPECT_EQ(
-        serialized["components"].dump(),
-        "[{\"name\":\"sin\",\"type\":\"SinLookupTable\",\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":"
-        "\"LookupTable\",\"parameters\":[],\"components\":[]}]},{\"name\":\"cos\",\"type\":\"CosLookupTable\","
-        "\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":\"LookupTable\",\"parameters\":[],"
-        "\"components\":[]}]}]"
-    );
-    EXPECT_EQ(serialized["parameters"].size(), 0);
-}
-
-//! Tests custom construction of AlphaBetaToDq0Transform component
-TEST_F(AlphaBetaToDq0TransformTest, NonDefaultConstruction)
-{
-    RootComponent           root;
-    std::string_view        name = "AlphaBetaToDq0Transform2";
-    AlphaBetaToDq0Transform transform(name, root, 10000);
-    ASSERT_EQ(transform.getName(), name);
-
-    auto serialized = transform.serialize();
-    EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "AlphaBetaToDq0Transform");
-    EXPECT_EQ(serialized["components"].size(), 2);
+    EXPECT_EQ(serialized["components"].size(), 0);
+    EXPECT_EQ(serialized["components"].dump(), "[]");
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
@@ -154,7 +133,7 @@ TEST_F(AlphaBetaToDq0TransformTest, SimulinkConsistencyAaxisAlignment)
 {
     RootComponent           root;
     std::string_view        name = "AlphaBetaToDq0Transform6";
-    AlphaBetaToDq0Transform transform(name, root, 10000);
+    AlphaBetaToDq0Transform transform(name, root);
 
     // the input files are randomly generated numbers
     std::filesystem::path abz_path    = "components/inputs/alpha-beta-zero_sin_120degrees.csv";
@@ -229,7 +208,7 @@ TEST_F(AlphaBetaToDq0TransformTest, SimulinkConsistencyAaxisNotAligned)
 {
     RootComponent           root;
     std::string_view        name = "AlphaBetaToDq0Transform7";
-    AlphaBetaToDq0Transform transform(name, root, 10000);
+    AlphaBetaToDq0Transform transform(name, root);
 
     // the input files are randomly generated numbers
     std::filesystem::path abz_path   = "components/inputs/alpha-beta-zero_sin_120degrees.csv";

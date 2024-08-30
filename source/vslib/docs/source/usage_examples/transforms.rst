@@ -14,28 +14,27 @@ They all have a single access method, called :code:`transform`. The number of ar
 takes depends on the use-case, as well as the returned structure may vary. This method is intended to perform
 transformation on the set of values at a point of time rather than arrays or vectors of values in one execution.
 
-.. _parkTransform_component:
+.. _abcToDq0Transform_component:
 
-Park transformation
--------------------
+abc to dq0 transformation
+-------------------------
 
-:code:`ParkTransform` implements the Park transformation (abc to dq0) from three time-domain signals of a three-phase
-system to an `abc` reference frame. Internally, it uses two :ref:`look-up tables <lookupTable_component>`: one for
-sine and the other for cosine that are required by the algorithm. The algorithm follows the implementation
-and nomeclature of the `Matlab implementation <https://ch.mathworks.com/help/sps/ref/parktransform.html>`_.
+:code:`AbcToDq0Transform` implements the from three time-domain signals of a three-phase
+system (`abc`) to an `dq0` reference frame. The algorithm follows the implementation
+and nomeclature of the `Park transformation matlab implementation <https://ch.mathworks.com/help/sps/ref/parktransform.html>`_.
 
-The :code:`transform` method takes four obligatory and one optional :code:`double`-type arguments, three for each phase,
-the :math:`theta` (:math:`=\omega t`) angle in radians between the `q` and `a` axes, and an optional offset in radians.
+The :code:`transform` method takes four obligatory and one optional :code:`double`-type arguments, one for each phase,
+the :math:`theta` (:math:`=\omega t`) angle in radians between the `q` and `a` axes, and an optional offset (:math:`\phi`) in radians.
 The offset can be used to change the default alignment from `q` and `a` axis alignment to `d` and `a` by setting the offset
 to be equal to :math:`\frac{\pi}{2}`. The method returns a tuple of d, q, zero values. The calculation is as follows:
 
 .. math::
 
-    d &= \frac{2}{3} \left( a \cdot sin(\theta) + b \cdot sin \left( \theta - \frac{2}{3} \pi \right) + c \cdot sin \left(\theta + \frac{2}{3} \pi \right) \right) \\
-    q &= \frac{2}{3} \left(a \cdot cos(\theta) + b \cdot cos \left(\theta - \frac{2}{3} \pi \right) + c \cdot cos \left(\theta + \frac{2}{3} \pi \right) \right) \\
+    d &= \frac{2}{3} \left( a \cdot sin(\theta + \phi) + b \cdot sin \left( \theta + \phi - \frac{2}{3} \pi \right) + c \cdot sin \left(\theta + \phi + \frac{2}{3} \pi \right) \right) \\
+    q &= \frac{2}{3} \left(a \cdot cos(\theta + \phi) + b \cdot cos \left(\theta + \phi - \frac{2}{3} \pi \right) + c \cdot cos \left(\theta + \phi + \frac{2}{3} \pi \right) \right) \\
     zero &= \frac{1}{3} \left( a + b + c \right) \\
 
-For more details regarding the API, see the :ref:`API documentation for ParkTransform <parkTransform_api>`.
+For more details regarding the API, see the :ref:`API documentation for AbcToDq0Transform <abcToDq0Transform_api>`.
 
 Usage example
 ^^^^^^^^^^^^^
@@ -44,14 +43,15 @@ Usage example
 
     #include <numbers>
 
-    #include "parkTransform.h"
+    #include "abcToDq0Transform.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
-        ParkTransform park("park", &root, 10000); // larger than default look-up table: 10k points
-        // no Parameters need setting
+        RootComponent root;
+        AbcToDq0Transform abc_to_dq0("abc_to_dq0", root);
+        // no Parameter needs setting
 
         const double i_a    = 1.0;
         const double i_b    = -0.5;
@@ -60,22 +60,76 @@ Usage example
         const double offset = std::numbers::pi / 2.0;
 
         // no offset, q and a alignment:
-        auto [d_1, q_1, zero_1]   = park.transform(i_a, i_b, i_c, theta);
+        auto [d_1, q_1, zero_1]   = abc_to_dq0.transform(i_a, i_b, i_c, theta);
 
         // 90 degrees offset, d and a alignment:
-        auto [d_2, q_2, zero_2]   = park.transform(i_a, i_b, i_c, theta, offset);
+        auto [d_2, q_2, zero_2]   = abc_to_dq0.transform(i_a, i_b, i_c, theta, offset);
 
         return 0;
     }
 
-.. _clarkeTransform_component:
+.. _dq0ToAbcTransform_component:
 
-Clarke transformation
----------------------
+dq0 to abc transformation
+-------------------------
 
-:code:`ClarkeTransform` implements the Clarke transformation (`abc` to :math:`\alpha\beta0`) from three-phase components in the `abc`
-reference frame to the stationary :math:`\alpha\beta0`. The algorithm follows the implementation
-and nomeclature of the `Matlab implementation <https://ch.mathworks.com/help/mcb/ref/clarketransform.html>`_.
+:code:`Dq0ToAbcTransform` implements the transformation from `dq0` reference frame to three-phase
+system (`abc`) `dq0`, an inverse of :ref:`AbcToDq0Transform <abcToDq0Transform_component>`. The algorithm follows the implementation
+and nomeclature of the `Inverse Park transformation Matlab implementation <https://ch.mathworks.com/help/sps/ref/inverseparktransform.html>`_.
+
+The :code:`transform` method takes four obligatory and one optional :code:`double`-type arguments, one for each `dq0` component,
+the :math:`theta` (:math:`=\omega t`) angle in radians between the `q` and `a` axes, and an optional offset in radians.
+The offset can be used to change the default alignment from `q` and `a` axis alignment to `d` and `a` by setting the offset
+to be equal to :math:`\frac{\pi}{2}`. The method returns a tuple of a, b, and c values. The calculation is as follows:
+
+.. math::
+
+    a &= d \cdot sin(\theta + \phi) + q \cdot cos(theta + \phi) + zero \\
+    b &= d \cdot sin(\theta + \phi - \frac{2}{3} \pi) + q \cdot cos(\theta + \phi - \frac{2}{3} \pi) + zero; \\
+    c &= d \cdot sin(\theta + \phi + \frac{2}{3} \pi) + q \cdot cos(\theta + \phi + \frac{2}{3} \pi) + zero; \\
+
+For more details regarding the API, see the :ref:`API documentation for Dq0ToAbcTransform <dq0ToAbcTransform_api>`.
+
+Usage example
+^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    #include <numbers>
+
+    #include "dq0ToAbcTransform.h"
+    #include "rootComponent.h"
+
+    using namespace vslib;
+
+    int main() {
+        RootComponent root;
+        Dq0ToAbcTransform dq0_to_abc("dq0_to_abc", root);
+        // no Parameter needs setting
+
+        const double d      = 1.0;
+        const double q      = 0.05;
+        const double zero   = 0.05;
+        const double theta  = 0.0;
+        const double offset = std::numbers::pi / 2.0;
+
+        // no offset, q and a alignment:
+        auto [a_1, b_2, c_2]   = dq0_to_abc.transform(d, q, zero, theta);
+
+        // 90 degrees offset, d and a alignment:
+        auto [a_2, b_2, c_2]   = dq0_to_abc.transform(d, q, zero, theta, offset);
+
+        return 0;
+    }
+
+.. _abcToAlphaBetaTransform_component:
+
+abc to alpha-beta transformation
+--------------------------------
+
+:code:`AbcToAlphaBetaTransform` implements the `abc` to :math:`\alpha\beta0` (Clarke) transformation from three-phase components in the `abc`
+reference frame to the rotating :math:`\alpha\beta0` frame. The algorithm follows the implementation
+and nomeclature of the `Inverse Clarke Matlab implementation <https://ch.mathworks.com/help/mcb/ref/inverseclarketransform.html>`_.
 
 The :code:`transform` method takes three obligatory :code:`double`-type arguments, one for each `a`, `b`, and `c` component in the `abc`
 frame of reference. The method returns a tuple of :math:`\alpha`, :math:`\beta`, and `0` values. The calculation is as follows:
@@ -86,51 +140,94 @@ frame of reference. The method returns a tuple of :math:`\alpha`, :math:`\beta`,
     \beta  &= \frac{\sqrt{3}}{3} (b - c) \\
     zero   &= \frac{1}{3} (a + b + c)
 
-For more details regarding the API, see the :ref:`API documentation for ClarkeTransform <clarkeTransform_api>`.
+For more details regarding the API, see the :ref:`API documentation for AbcToAlphaBetaTransform <abcToAlphaBetaTransform_api>`.
 
 Usage example
 ^^^^^^^^^^^^^
 
 .. code-block:: cpp
 
-    #include "clarkeTransform.h"
+    #include "abcToAlphaBetaTransform.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
-        ClarkeTransform  clarke("clarke", &root);
+        RootComponent root;
+        AbcToAlphaBetaTransform  abc_to_alphabeta("abc_to_alphabeta", root);
         // no Parameters need setting
 
-        const double i_a               = 2.0;
-        const double i_b               = -1.0;
-        const double i_c               = -1.0;
+        const double i_a  = 2.0;
+        const double i_b  = -1.0;
+        const double i_c  = -1.0;
 
-        auto [alpha, beta, zero] = clarke.transform(i_a, i_b, i_c);
+        auto [alpha, beta, zero] = abc_to_alphabeta.transform(i_a, i_b, i_c);
         // alpha = 2.0, beta = 0, zero = 0
 
         return 0;
     }
 
-.. _alphaBetaZeroToDq0_component:
+.. _alphaBetaToAbcTransform_component:
 
-Alpha-beta-zero to dq0
-----------------------
+alpha-beta to abc transformation
+--------------------------------
 
-:code:`alphaBetaZeroToDq0Transform` implements the :math:`\alpha\beta0` transformation from three stationary
+:code:`AbcToAlphaBetaTransform` implements the :math:`\alpha\beta0` to abc (inverse Clarke) transformation from
+the rotating :math:`\alpha\beta0` frame to the three-phase components in the time domain. The algorithm follows the implementation
+and nomeclature of the `Inverse Clarke Matlab implementation <https://ch.mathworks.com/help/mcb/ref/clarketransform.html>`_.
+
+The :code:`transform` method takes three obligatory :code:`double`-type arguments, one for each :math:`\alpha`, :math:`\beta`, and `zero`
+components in the rotating :math:`\alpha\beta0` frame of reference. The method returns a tuple of `a`, `b`, and `c` values.
+The calculation is as follows:
+
+.. math::
+
+    a &=  \left( \alpha + zero \right) \\
+    b &= -\frac{1}{2} \alpha + \frac{\sqrt{3}}{2} \beta + zero \\
+    c &= -\frac{1}{2} \alpha - \frac{\sqrt{3}}{2} \beta + zero
+
+For more details regarding the API, see the :ref:`API documentation for AlphaBetaToAbcTransform <abcToAlphaBetaTransform_api>`.
+
+Usage example
+^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    #include "alphaBetaToAbcTransform.h"
+    #include "rootComponent.h"
+
+    using namespace vslib;
+
+    int main() {
+        RootComponent root;
+        AlphaBetaToAbcTransform  transform("alphabeta_to_abc", root);
+        // no Parameters need setting
+
+        const double alpha  = 2.0;
+        const double beta  = 0.0;
+        const double zero  = 0.0;
+
+        auto [a, b, c] = transform.transform(alpha, beta, zero);
+        // a = 2.0, b = -1.0, c = -1.0
+
+        return 0;
+    }
+
+.. _alphaBetaToDq0Transform_component:
+
+Alpha-beta to dq0
+-----------------
+
+:code:`alphaBetaToDq0Transform` implements the :math:`\alpha\beta0` transformation from three stationary
 components in the :math:`\alpha\beta0` reference frame to the rotating `dq0` reference frame, an equivalent
-of the inverse Clarke and then Park transform. Internally, the sine and cosine functions, needed to perform
-the Park part of the transform, are :ref:`SinLookupTable <sinLookupTable_component>`
-and :ref:`CosLookupTable <cosLookupTable_component>`, respectively. The optional constructor argument allows
-to define the number of points the look-up tables should have for the desired precision, with :code:`1000`
-being the default value.
+of the inverse Clarke and then Park transform.
 
 The :code:`transform` method takes four obligatory :code:`double`-type arguments and one optional boolean argument:
 one for each :math:`\alpha`, :math:`\beta`, and `0` component in the :math:`\alpha\beta0` frame of reference,
 the :math:`theta` angle (in radians) between `q` and :math:`alpha`, and optionally specify alignment: :code:`true`
 for a-axis alignment or :code:`false` for 90 degrees behind a-axis. The method returns a tuple of `d`, `q`, and `0` values.
 The algorithm follows the implementation and nomeclature  of the
-`Matlab implementation <https://ch.mathworks.com/help/sps/powersys/ref/alphabetazerotodq0dq0toalphabetazero.html>`_.
+`alpha-beta to dq0 Matlab implementation <https://ch.mathworks.com/help/sps/powersys/ref/alphabetazerotodq0dq0toalphabetazero.html>`_.
 The calculation is as follows if the a-axis alignment is chosen:
 
 .. math::
@@ -147,7 +244,7 @@ and if the the 90-degrees behind a-axis alignment is preferred:
     q &= \alpha \cdot cos(\theta) + \beta \cdot sin(\theta) \\
     zero &= zero
 
-For more details regarding the API, see the :ref:`API documentation for AlphaBetaZeroToDq0Transform <alphaBetaZeroToDq0Transform_api>`.
+For more details regarding the API, see the :ref:`API documentation for AlphaBetaToDq0Transform <alphaBetaToDq0Transform_api>`.
 
 Usage example
 ^^^^^^^^^^^^^
@@ -156,21 +253,81 @@ Usage example
 
     #include <numbers>
 
-    #include "alphaBetaZeroToDq0Transform.h"
+    #include "alphaBetaToDq0Transform.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
-        // smaller than default look-up table, 100 points:
-        AlphaBetaZeroToDq0Transform transform("alpha-beta-zero_to_dq0", &root, 100);
+        Component root;
+        AlphaBetaToDq0Transform transform("alpha-beta_to_dq0", root);
 
         const double i_alpha     = 1.0;
         const double i_beta      = -0.5;
         const double i_zero      = 0.0;
         const double theta       = std::numbers::pi / 6;   // 30 degrees in radians
-        bool   a_alignment = true;
-        auto [d, q, zero]  = transform.transform(i_alpha, i_beta, i_zero, theta, a_alignment);
+        bool   a_alignment       = true;
+        auto [d, q, zero]        = transform.transform(i_alpha, i_beta, i_zero, theta, a_alignment);
+
+        return 0;
+    }
+
+
+.. _dq0ToAlphaBetaTransform_component:
+
+dq0 to alpha-beta
+-----------------
+
+:code:`Dq0ToAlphaBetaTransform` implements the transformation of components in `dq0` frame of reference to
+the :math:`\alpha\beta0` reference frame, an inverse of :ref:`AlphaBetaToDq0Transformation <Dq0ToAlphaBetaTransform_component>`.
+
+The :code:`transform` method takes four obligatory :code:`double`-type arguments and one optional boolean argument:
+one for each `d`, `q`, `zero`, and `theta`, and optionally a boolean alignment argument: :code:`true` for a-axis
+alignment or :code:`false` for 90 degrees behind a-axis. :math:`theta` is the angle (in radians) between `q`
+and :math:`alpha`. The method returns a tuple of :math:`\alpha`, :math:`\beta`, and `zero` values.
+The algorithm follows the implementation and nomeclature  of the
+`alpha-beta to dq0 Matlab implementation (inverse) <https://ch.mathworks.com/help/sps/powersys/ref/alphabetazerotodq0dq0toalphabetazero.html>`_.
+
+The calculation is as follows if the a-axis alignment is chosen:
+
+.. math::
+
+    \alpha &= d \cdot cos(\theta) - q \cdot sin(\theta) \\
+    \beta  &= d \cdot sin(\theta) + q \cdot cos(\theta) \\
+    zero   &= i_zero
+
+and if the the 90-degrees behind a-axis alignment is preferred:
+
+.. math::
+
+    \alpha &= d \cdot sin(\theta) + q \cdot cos(\theta) \\
+    \beta  &= -d \cdot cos(\theta) + q \cdot sin(\theta) \\
+    zero   &= i_zero
+
+For more details regarding the API, see the :ref:`API documentation for Dq0ToAlphaBetaTransform <dq0ToAlphaBetaTransform_api>`.
+
+Usage example
+^^^^^^^^^^^^^
+
+.. code-block:: cpp
+
+    #include <numbers>
+
+    #include "dq0ToAlphaBetaTransform.h"
+    #include "rootComponent.h"
+
+    using namespace vslib;
+
+    int main() {
+        Component root;
+        dq0ToAlphaBetaTransform transform("dq0_to_alphabeta", root);
+
+        const double d           = 1.0;
+        const double q           = -0.5;
+        const double i_zero      = 0.0;
+        const double theta       = std::numbers::pi / 6;   // 30 degrees in radians
+        bool   a_alignment       = true;
+        auto [alpha, beta, zero] = transform.transform(d, q, i_zero, theta, a_alignment);
 
         return 0;
     }
@@ -178,35 +335,29 @@ Usage example
 Performance
 -----------
 
-The execution time of each :code:`Component` depends on a number of factors. In the case of :ref:`ClarkeTransform <clarkeTransform_component>`,
-there no look-up tables and the execution time is independent of the inputs. For :ref:`ParkTransform <parkTransform_component>` and
-:ref:`AlphaBetaZeroToDq0Transform <alphaBetaZeroToDq0_component>`, the execution will depend on the size of the internal look-up tables.
+The execution time of each :code:`Component` depends on a number of factors. In the case of :ref:`AbcToAlphaBetaTransform <abcToAlphaBetaTransform_component>`,
+there no look-up tables and the execution time is independent of the inputs. For :ref:`AbcToDq0Transform <abcToDq0Transform_component>` and
+:ref:`AlphaBetaToDq0Transform <alphaBetaToDq0Transform_component>`, the execution will depend on the size of the internal look-up tables.
 The table below gives an overlook of the execution time that can be expected for each of the :code:`Components`.
 
 .. list-table::
     :header-rows: 1
 
     * - Class
-      - Size
       - Access time [ns]
-    * - ParkTransform
-      - 100
-      - 579
-    * - ParkTransform
-      - 1'000
-      - 597
-    * - ParkTransform
-      - 10'000
-      - 679
-    * - ClarkeTransform
-      - N/A
-      - 19
-    * - AlphaBetaZeroToDq0Transform
-      - 100
-      - 193
-    * - AlphaBetaZeroToDq0Transform
-      - 1000
-      - 197
-    * - AlphaBetaZeroToDq0Transform
-      - 1000
-      - 230
+    * - AbcToAlphaBetaTransform
+      - 33
+    * - AbcToDq0Transform
+      - 797
+    * - AlphaBetaToDq0Transform
+      - 272
+    * - AlphaBetaToAbcTransform
+      - 27
+    * - Dq0ToAbcTransform
+      - 788
+    * - Dq0ToAlphaBetaTransform
+      - 272
+
+The implementation of all algorithms followed equations available in Matlab documentation. However, it can be clearly seen
+that a boost in execution time can be achieved if :code:`AbcToDq0Transform` was implemented as a composite of :code:`AbcToAlphaBetaTransform`,
+followed up by :code:`AlphaBetaToDq0Transform`. This is due to 6 calculations of trigonometric functions inside the :code:`AbcToDq0Transform`.

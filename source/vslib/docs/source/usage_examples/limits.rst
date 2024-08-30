@@ -53,11 +53,12 @@ Usage example
 .. code-block:: cpp
 
     #include "limitRange.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
+        RootComponent root;
         LimitRange<double> limit("limit", root);
 
         // set min, max, and optionally dead_zone Parameters
@@ -120,12 +121,13 @@ Usage example
 .. code-block:: cpp
 
     #include "limitRate.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
-        LimitRate<double> limit("limit", &root);
+        RootComponent root;
+        LimitRate<double> limit("limit", root);
 
         // set change_rate Parameter
         // example below assumes change_rate = 10
@@ -178,12 +180,13 @@ Usage example
 .. code-block:: cpp
 
     #include "limitIntegral.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
-        LimitIntegral<double, 5> limit("limit", &root);
+        RootComponent root;
+        LimitIntegral<double, 5> limit("limit", root);
 
         // set integral_limit, and integral_limit_window_length Parameters
         // example below assumes integral_limit = 100, window_length = 3
@@ -239,12 +242,13 @@ Usage example
 .. code-block:: cpp
 
     #include "limitRms.h"
+    #include "rootComponent.h"
 
     using namespace vslib;
 
     int main() {
-        Component root("root", "root", nullptr);
-        LimitRms limit("limit", &root);
+        RootComponent root;
+        LimitRms limit("limit", root);
 
         // set rms_limit and rms_time_constant Parameters
         // example below assumes rms_limit = 10.0, rms_time_constant: 1e-6, iteration_period: 1e-5
