@@ -15,6 +15,9 @@
 #include "abcToAlphaBetaTransform.h"
 #include "abcToDq0Transform.h"
 #include "alphaBetaToDq0Transform.h"
+#include "alphaBetaToAbcTransform.h"
+#include "dq0ToAbcTransform.h"
+#include "dq0ToAlphaBetaTransform.h"
 
 //! Controllers
 #include "pid.h"
