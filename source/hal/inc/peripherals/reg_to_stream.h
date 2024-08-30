@@ -44,8 +44,8 @@ struct reg_to_stream
     struct data
     {
         /* [0x0]: REG (rw) (no description) */
-        uint32_t value;
-    } data[200];
+        uint64_t value;
+    } data[100];
 
     /* padding to: 1024 Bytes */
     uint32_t __padding_1[56];
