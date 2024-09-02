@@ -158,12 +158,51 @@ namespace vslib
             const double f_0   = f0.toValidate();
             const double kikpN = k_i * k_p * N_;
 
-            const double a = 2.0 * std::numbers::pi_v<double> * f_0 / tan(std::numbers::pi_v<double> * f_0 * T_);
+            const double a  = 2.0 * std::numbers::pi_v<double> * f_0 / tan(std::numbers::pi_v<double> * f_0 * T_);
+            const double a2 = pow(a, 2);   // helper a^2, which occurs often in the calculations below
 
-            if (k_p != 0 || k_d != 0)
+            if (a == 0 || std::isnan(a))
             {
-                const double a2 = pow(a, 2);   // helper a^2, which occurs often in the calculations below
+                return fgc4::utils::Warning(
+                    fmt::format("Incorrect inputs to calculate RST coefficients: f_0: {}, T: {}.\n", f_0, T_)
+                );
+            }
 
+            if (k_d == 0.0)
+            {
+                // there is no derivative element, N is assumed to be 1.0
+                if (k_p != 0 && k_ff == 0.0 && b_ == 1)
+                {
+                    // 1DOF PI
+                    m_r[0] = (k_p * k_i * (1 + k_p * a / k_i)) / a2;
+                    m_r[1] = (k_p * k_i * (1 - k_p * a / k_i)) / a2;
+
+                    m_s[0] = k_p / a;
+                    m_s[1] = -k_p / a;
+
+                    m_t[0] = m_r[0];
+                    m_t[1] = m_r[1];
+                }
+                else if (k_p == 0.0)
+                {
+                    // 1DOF I: simple integrator
+                    m_r[0] = k_i / a;
+                    m_r[1] = k_i / a;
+
+                    m_s[0] = 1.0;
+                    m_s[1] = -1.0;
+
+                    m_t[0] = k_i / a + k_ff;
+                    m_t[1] = k_i / a - k_ff;
+                }
+
+                // for all 1st order controllers, the last elements are 0.0
+                m_r[2] = 0;
+                m_s[2] = 0;
+                m_t[2] = 0;
+            }
+            else if (k_p != 0.0)
+            {
                 m_r[0] = (kikpN + k_d * k_i * a + k_d * k_p * a2 + pow(k_p, 2) * N_ * a + k_d * k_p * N_ * a2) / a2;
                 m_r[1] = 2.0 * (kikpN - k_d * k_p * a2 - k_d * k_p * N_ * a2) / a2;
                 m_r[2] = (kikpN - k_d * k_i * a + k_d * k_p * a2 - pow(k_p, 2) * N_ * a + k_d * k_p * N_ * a2) / a2;
@@ -180,19 +219,11 @@ namespace vslib
                           - k_ff * k_p * N_ * a + k_d * k_p * N_ * a2 * c_)
                          / a2;
             }
-            else   // k_p and k_d are 0.0
+            else
             {
-                m_r[0] = k_i / a;
-                m_r[1] = k_i / a;
-                m_r[2] = 0;
-
-                m_s[0] = 1.0;
-                m_s[1] = -1.0;
-                m_s[2] = 0;
-
-                m_t[0] = k_i / a + k_ff;
-                m_t[1] = k_i / a - k_ff;
-                m_t[2] = 0;
+                return fgc4::utils::Warning(
+                    fmt::format("Unsupported input case: kp: {}, ki: {}, kd: {}, kff: {}.", k_p, k_i, k_d, k_ff)
+                );
             }
 
             // Jury's stability test, based on logic implemented in CCLIBS regRst.c
@@ -211,7 +242,7 @@ namespace vslib
                 return fgc4::utils::Warning("First element of t coefficients is zero.");
             }
 
-            const auto& warning_s = rst.jurysStabilityTest(m_r);
+            const auto& warning_s = rst.jurysStabilityTest(m_s);
             if (warning_s.has_value())
             {
                 return warning_s.value();
@@ -232,9 +263,9 @@ namespace vslib
         }
 
       private:
-        std::array<double, buffer_length> m_r;   //!< Array holding a local copy of R coefficients
-        std::array<double, buffer_length> m_s;   //!< Array holding a local copy of S coefficients
-        std::array<double, buffer_length> m_t;   //!< Array holding a local copy of T coefficients
+        std::array<double, buffer_length> m_r{0};   //!< Array holding a local copy of R coefficients
+        std::array<double, buffer_length> m_s{0};   //!< Array holding a local copy of S coefficients
+        std::array<double, buffer_length> m_t{0};   //!< Array holding a local copy of T coefficients
 
         RSTController<buffer_length> rst;   //!< RST controller responsible for the control logic
     };
