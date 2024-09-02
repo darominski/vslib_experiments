@@ -176,6 +176,14 @@ namespace vslib
             return m_initialized;
         }
 
+        //! Getter for the validate flag of the Parameter.
+        //!
+        //! @return True if the Parameter has been validated, false otherwise
+        [[nodiscard]] bool isValidated() const noexcept override
+        {
+            return m_validated;
+        }
+
         //! Getter for the Parameter name.
         //!
         //! @return Parameter name
@@ -279,10 +287,27 @@ namespace vslib
             auto const& maybe_warning = setJsonValueImpl(json_value);
             if (!maybe_warning.has_value())
             {
-                // set the initialized flag
+                // set the initialized flag, uncheck the validation which is done by Component
                 m_initialized = true;
+                m_validated   = false;
             }
             return maybe_warning;
+        }
+
+        //! Sets the initialization flag to the chosen value.
+        //!
+        //! @param initialized New value of the initialized flag of this Parameter.
+        void setInitialized(const bool initialized) noexcept override
+        {
+            m_initialized = initialized;
+        }
+
+        //! Sets the validation flag to the provided value by the owning Component.
+        //!
+        //! @param value New value for the validated flag.
+        void setValidated(const bool value) noexcept override
+        {
+            m_validated = value;
         }
 
         // ************************************************************
@@ -319,6 +344,7 @@ namespace vslib
         bool m_limit_max_defined{false};   //!< Flag whether the maximum limit has been set, used in serialization
 
         bool m_initialized{false};   //!< Flag defining whether the Parameter has been initialized
+        bool m_validated{false};     //!< Flag defining whether the Parameter has been initialized and validated
 
         // ************************************************************
         // Methods related to checking the numerical limits of the parameter during parameter setting

@@ -139,6 +139,12 @@ namespace vslib
                 if (!warning.has_value())
                 {
                     component.flipBufferState();
+                    component.setParametersValidated();
+                }
+                else
+                {
+                    // if Parameters have been marked as initialized but are not valid
+                    component.revokeValidation();
                 }
                 // if there is an issue: it is logged, the component's buffer is not flipped
                 component.synchroniseParameterBuffers();

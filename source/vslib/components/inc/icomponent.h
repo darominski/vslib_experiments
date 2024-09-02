@@ -112,6 +112,43 @@ namespace vslib
             );
         }
 
+        //! Sets the validation flag of owned Parameters to true when the validation has been successfully.
+        void setParametersValidated() noexcept
+        {
+            std::for_each(
+                getParameters().begin(), getParameters().end(),
+                [](auto parameter)
+                {
+                    parameter.second.get().setValidated(true);
+                }
+            );
+        }
+
+        //! Sets either the validation or the initialization flag of owned Parameters to false 
+        //! when the validation on the Component level has failed. If they were previously not
+        //! successfully validated, the initialization flag is set to false. This is especially
+        //! relevant during startup.
+        void revokeValidation() noexcept
+        {
+            std::for_each(
+                getParameters().begin(), getParameters().end(),
+                [](auto parameter)
+                {
+                    if (!parameter.second.get().isValidated())
+                    {
+                        // if Parameter has not been previously validated, the currently set Parameters
+                        // are not correct and the entire initialization process needs revoking
+                        parameter.second.get().setInitialized(false);                        
+                    }
+                    else
+                    {
+                        parameter.second.get().setValidated(false);
+                    }
+                }
+            );
+        }
+
+
         // ************************************************************
         // Virtual methods
 

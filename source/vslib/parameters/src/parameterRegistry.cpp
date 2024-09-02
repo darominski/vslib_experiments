@@ -25,6 +25,18 @@ namespace vslib
         );
     }
 
+    bool ParameterRegistry::parametersValidated() const noexcept
+    {
+        return std::all_of(
+            std::cbegin(m_parameters), std::cend(m_parameters),
+            [](const auto& parameter)
+            {
+                // std::cout << parameter.first << " " <<  parameter.second.get().isValidated() << std::endl;
+                return parameter.second.get().isValidated();
+            }
+        );
+    }
+
     void ParameterRegistry::checkNameFormatting(const std::string& parameter_name)
     {
         // Regex to match the expected full name formatting of Components
