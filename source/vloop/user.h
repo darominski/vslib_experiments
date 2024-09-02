@@ -16,7 +16,7 @@ namespace user
             : vslib::IConverter("example", root),
               m_interrupt_id{121 + 0},   // Jonas's definition
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              pid("pid_1", *this),
+              pll("pll", *this),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
         {
@@ -25,8 +25,7 @@ namespace user
 
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
-        vslib::PID                            pid;
-
+        vslib::PLL                            pll;
         // ...
         // end of your Components
 
@@ -74,44 +73,42 @@ namespace user
         int                  expected_delay = 210;
         int                  time_range_min = expected_delay - 20;   // in clock ticks
         int                  time_range_max = expected_delay + 20;   // in clock ticks
-        constexpr static int n_elements     = 1000;
+        constexpr static int n_elements     = 10'000;
 
         void backgroundTask() override
         {
             // reset the PID every 2 minutes
-            if(!m_recently_used)
+            // if(!m_recently_used)
+            // {
+            //     sleep(120);
+            //     std::cout << "resetting pid\n";
+            //     pid.reset();
+            // }
+            // m_recently_used = false;
+#ifdef PERFORMANCE_TESTS
+            if (counter > n_elements)
             {
-                sleep(120);
-                std::cout << "resetting pid\n";
-                pid.reset();
+                std::cout << "counter: " << counter << " " << n_elements << " " << (counter > n_elements) << std::endl;
+                interrupt_1.stop();
+                double const mean = interrupt_1.average();
+                std::cout << "Average time per interrupt: " << mean << " +- " << interrupt_1.standardDeviation(mean)
+                          << std::endl;
+                // auto const histogram = interrupt_1.histogramMeasurements<100>(time_range_min,
+                // time_range_max); for (auto const& value : histogram.getData())
+                //             {
+                //                 std::cout << value << " ";
+                //             }
+                //             std::cout << std::endl;
+                //             auto const bin_with_max = histogram.getBinWithMax();
+                //             auto const edges        = histogram.getBinEdges(bin_with_max);
+                //             std::cout << "bin with max: " << bin_with_max
+                //                       << ", centered at: " << 0.5 * (edges.first + edges.second) << std::endl;
+                const auto min = interrupt_1.min();
+                const auto max = interrupt_1.max();
+                std::cout << "min: " << min << ", max: " << max << std::endl;
+                exit(0);
             }
-            m_recently_used = false;
-            //             while (true)
-            //             {
-            //                 if (counter == n_elements + 50)
-            //                 {
-            //                     interrupt_1.stop();
-            // #ifdef PERFORMANCE_TESTS
-            //                     double const mean = interrupt_1.average();
-            //                     std::cout << "Average time per interrupt: " << mean << " +- " <<
-            //                     interrupt_1.standardDeviation(mean)
-            //                               << std::endl;
-            //                     auto const histogram = interrupt_1.histogramMeasurements<100>(time_range_min,
-            //                     time_range_max); for (auto const& value : histogram.getData())
-            //                     {
-            //                         std::cout << value << " ";
-            //                     }
-            //                     std::cout << std::endl;
-            //                     auto const bin_with_max = histogram.getBinWithMax();
-            //                     auto const edges        = histogram.getBinEdges(bin_with_max);
-            //                     std::cout << "bin with max: " << bin_with_max
-            //                               << ", centered at: " << 0.5 * (edges.first + edges.second) << std::endl;
-            // #endif
-            //                     break;
-            //                 }
-            //                 __asm volatile("wfi");
-            //                 counter++;
-            //             }
+#endif
         }
 
         template<typename SourceType, typename TargetType>
@@ -120,72 +117,42 @@ namespace user
             return *reinterpret_cast<TargetType*>(&input);
         }
 
-        static double getDouble(const uint32_t low, const uint32_t high)
-        {
-            const uint64_t    uint64_value   = ((uint64_t)high) << 32 | low;
-            return cast<uint64_t, double>(uint64_value);
-        }
-
-        static std::tuple<uint32_t, uint32_t> splitDouble(const double input)
-        {
-            const uint64_t output  = cast<double, uint64_t>(input);
-            const uint32_t high      = (uint32_t)(output >> 32);
-            const uint32_t low       = (uint32_t)output;
-            return std::make_tuple(low, high);
-        }
-
-        static double readDouble(volatile stream_to_reg* s2r, const uint32_t speedgoat_index)
-        {
-            volatile uint32_t low    = s2r->data[2 * speedgoat_index].value;
-            volatile uint32_t high   = s2r->data[2 * speedgoat_index + 1].value;
-            return getDouble(low, high);
-        }
-
-        static void writeDouble(const double value, volatile reg_to_stream* r2s, const uint32_t speedgoat_index)
-        {
-            auto [out32_low, out32_high] = splitDouble(value);
-            r2s->data[2 * speedgoat_index].value     = out32_low;
-            r2s->data[2 * speedgoat_index + 1].value = out32_high;
-        }
-
         static void RTTask(Converter& converter)
         {
-            // back to TEST1: read data and send it back
-            // for (uint32_t i = 0; i < (converter.m_s2r->num_data - 1); i += 2)
-            // {
-            //     double output = readDouble(converter.m_s2r, i);
-            //     output        *= 2.0;
-            //     writeDouble(output, converter.m_r2s, i);
-            // }
+            // TEST 5: PLL
+            constexpr uint32_t                num_data      = 40;
+            constexpr uint32_t                num_data_half = 20;
+            std::array<double, num_data_half> data_in;
 
-            // TEST 4: Control simple system using PID with double-precision variables
-            const auto reference = readDouble(converter.m_s2r, 0);
-            const auto measurement = readDouble(converter.m_s2r, 1);
-
-            // use the numbers
-            const auto actuation = converter.pid.control(measurement, reference);
-
-            // write them to stream
-            writeDouble(actuation, converter.m_r2s, 0);
-
-            // write everything else
-            for (uint32_t i = 2; i < converter.m_s2r->num_data; i++)
+            for (std::size_t i = 0; i < num_data_half; ++i)
             {
-                converter.m_r2s->data[i].value = converter.m_s2r->data[i].value;
+                data_in[i] = cast<uint64_t, double>(converter.m_s2r->data[i].value);
+            }
+
+            const double a = data_in[0];   // a
+            const double b = data_in[1];   // b
+            const double c = data_in[2];   // c
+
+            data_in[3] = converter.pll.balance(a, b, c);
+
+            for (uint32_t index = 0; index < num_data_half; index++)
+            {
+                converter.m_r2s->data[index].value = cast<double, uint64_t>(data_in[index]);
             }
 
             // send it away
 
             // kria transfer rate: 100us
-            converter.m_r2s->num_data = converter.m_s2r->num_data;
-            converter.m_r2s->tkeep    = converter.m_s2r->keep[converter.m_s2r->num_data - 1].value;
+            converter.m_r2s->num_data = num_data;
+            converter.m_r2s->tkeep    = 0x0000FFFF;
 
             // trigger connection
-            converter.m_r2s->ctrl |= REG_TO_STREAM_CTRL_START;
-            converter.m_recently_used = true;
+            converter.m_r2s->ctrl = REG_TO_STREAM_CTRL_START;
+            // converter.m_recently_used = true;
+            converter.counter++;
         }
 
-        bool m_recently_used{false};
+        // bool m_recently_used{false};
 
       private:
         int m_interrupt_id;
