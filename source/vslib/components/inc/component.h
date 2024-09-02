@@ -64,7 +64,7 @@ namespace vslib
             StaticJson          serialized_parameters = nlohmann::json::array();
             for (const auto& parameter : m_parameters)
             {
-                serialized_parameters.emplace_back(serializer.serialize(std::get<1>(parameter).get()));
+                serialized_parameters.emplace_back(serializer.serialize(parameter.second.get()));
             }
 
             serialized_component
