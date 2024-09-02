@@ -23,6 +23,9 @@
 #include "pid.h"
 #include "rst.h"
 
+//! Current balancing
+#include "pll.h"
+
 //! Filters
 #include "boxFilter.h"
 #include "firFilter.h"
