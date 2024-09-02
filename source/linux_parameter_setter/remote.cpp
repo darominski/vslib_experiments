@@ -67,23 +67,25 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     std::vector<Json>           commands;
     std::array<int, 2>          version{0, 1};
     std::map<std::string, Json> values_to_set;
-    values_to_set["kp"]                      = 10.0;
-    values_to_set["ki"]                      = 5.0;
-    values_to_set["kd"]                      = 2.0;
-    values_to_set["kff"]                     = 0.0;
-    values_to_set["proportional_scaling"]    = 1.0;
-    values_to_set["derivative_scaling"]      = 1.0;
-    values_to_set["derivative_filter_order"] = 0.25;
-    values_to_set["control_period"]          = 1e-4;
-    values_to_set["pre_warping_frequency"]   = 1e-9;
-    values_to_set["lower_threshold"]         = -10.0;
-    values_to_set["upper_threshold"]         = 10.0;
-    values_to_set["dead_zone"]               = std::array<double, 2>{0, 0};
-
+    values_to_set["pi.kp"]                      = 50.0;
+    values_to_set["pi.ki"]                      = 200.0;
+    values_to_set["pi.kd"]                      = 0.0;
+    values_to_set["pi.kff"]                     = 0.0;
+    values_to_set["pi.proportional_scaling"]    = 1.0;
+    values_to_set["pi.derivative_scaling"]      = 1.0;
+    values_to_set["pi.derivative_filter_order"] = 1.0;
+    values_to_set["pi.control_period"]          = 1e-4;
+    values_to_set["pi.pre_warping_frequency"]   = 1e-9;
+    values_to_set["actuation_limits.lower_threshold"] = -1e9;
+    values_to_set["actuation_limits.upper_threshold"] = 1e9;
+    values_to_set["actuation_limits.dead_zone"]       = std::array<double, 2>{0, 0};
     for (const auto& [name, _] : parameters)
     {
-        std::string param_name = name.substr(name.find_last_of(".") + 1, name.size());
-        Json        command    = {{"name", name}, {"version", version}, {"value", values_to_set[param_name]}};
+        const std::string param_name = name.substr(name.find_last_of(".") + 1, name.size());
+        std::string       comp_name  = (name.substr(0, name.find_last_of(".")));
+        comp_name                    = comp_name.substr(comp_name.find_last_of(".") + 1, comp_name.size());
+
+        Json command = {{"name", name}, {"version", version}, {"value", values_to_set[comp_name + "." + param_name]}};
         commands.emplace_back(command);
     }
     return commands;
@@ -164,7 +166,7 @@ int main(int argc, char* argv[])
             {
                 std::cout << "No status\n";
             }
-            if (commands_set < commands.size())
+            if (commands_sent < commands.size())
             {
                 std::cout << "Command sent: " << commands[commands_sent].dump() << std::endl;
                 vslib::utils::writeJsonToMessageQueue(commands[commands_sent], write_commands_queue);
@@ -172,7 +174,7 @@ int main(int argc, char* argv[])
             }
         }
 
-        if (commands_sent > commands.size())
+        if (commands_sent >= commands.size())
         {
             break;
         }
