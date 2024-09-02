@@ -85,9 +85,9 @@ namespace vslib
                 return fgc4::utils::Warning("Upper edge of the dead_zone is below the lower edge.\n");
             }
 
-            if (min.toValidate() >= max.toValidate())
+            if (min.toValidate() > max.toValidate())
             {
-                return fgc4::utils::Warning("Attempted to set the lower limit below the upper limit.\n");
+                return fgc4::utils::Warning("Attempted to set the lower limit above the upper limit.\n");
             }
 
             return {};

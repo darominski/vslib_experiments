@@ -98,9 +98,9 @@ namespace vslib
             }
         }
 
-        //! Returns the value of the flag informing whether the parameters of this component have been recently modified
+        //! Returns the value of the flag informing whether the parameters of this component have been initialized
         //!
-        //! @return True if any parameter of this component has been recently modified, false otherwise
+        //! @return True if all Parameters of this Component have been initialized, false otherwise
         [[nodiscard]] bool parametersInitialized() const noexcept
         {
             return std::all_of(

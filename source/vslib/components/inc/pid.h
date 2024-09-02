@@ -25,7 +25,7 @@ namespace vslib
         //! given parent Component, and specify an anti-windup function, which by default does not do anything.
         //!
         //! @param name Name identification of the PID controller
-        //! @param parent Optional parent of this controller
+        //! @param parent Parent of this controller
         PID(std::string_view name, IComponent& parent)
             : Component("PID", name, parent),
               kp(*this, "kp"),                            // default limits
