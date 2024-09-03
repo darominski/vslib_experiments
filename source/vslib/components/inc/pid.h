@@ -56,11 +56,6 @@ namespace vslib
         //! @return Result of this iteration
         [[nodiscard]] double control(const double measurement, const double reference) noexcept
         {
-            if (!rst.isReady())
-            {
-                updateInputHistories(measurement, reference);
-                return 0.0;
-            }
             const double actuation         = rst.control(measurement, reference);
             const double clipped_actuation = actuation_limits.limit(actuation);
             if (clipped_actuation != actuation)
@@ -147,16 +142,15 @@ namespace vslib
         {
             // recalculation of PID interface into internal RST parameters, then: stability test
 
-            const double k_p   = kp.toValidate();
-            const double k_i   = ki.toValidate();
-            const double k_d   = kd.toValidate();
-            const double k_ff  = kff.toValidate();
-            const double b_    = b.toValidate();
-            const double c_    = c.toValidate();
-            const double N_    = N.toValidate();
-            const double T_    = T.toValidate();
-            const double f_0   = f0.toValidate();
-            const double kikpN = k_i * k_p * N_;
+            const double k_p  = kp.toValidate();
+            const double k_i  = ki.toValidate();
+            const double k_d  = kd.toValidate();
+            const double k_ff = kff.toValidate();
+            const double b_   = b.toValidate();
+            const double c_   = c.toValidate();
+            const double N_   = N.toValidate();
+            const double T_   = T.toValidate();
+            const double f_0  = f0.toValidate();
 
             const double a  = 2.0 * std::numbers::pi_v<double> * f_0 / tan(std::numbers::pi_v<double> * f_0 * T_);
             const double a2 = pow(a, 2);   // helper a^2, which occurs often in the calculations below
@@ -203,6 +197,8 @@ namespace vslib
             }
             else if (k_p != 0.0)
             {
+                const double kikpN = k_i * k_p * N_;
+
                 m_r[0] = (kikpN + k_d * k_i * a + k_d * k_p * a2 + pow(k_p, 2) * N_ * a + k_d * k_p * N_ * a2) / a2;
                 m_r[1] = 2.0 * (kikpN - k_d * k_p * a2 - k_d * k_p * N_ * a2) / a2;
                 m_r[2] = (kikpN - k_d * k_i * a + k_d * k_p * a2 - pow(k_p, 2) * N_ * a + k_d * k_p * N_ * a2) / a2;
