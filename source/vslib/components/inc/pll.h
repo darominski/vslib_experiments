@@ -26,8 +26,8 @@ namespace vslib
         PLL(std::string_view name, IComponent& parent)
             : Component("PLL", name, parent),
               abc_2_dq0("abc_2_dq0", *this),
-              pi("pi", *this),  
-              i("i", *this)              
+              pi("pi", *this),
+              integrator("i", *this)
         {
         }
 
@@ -42,9 +42,10 @@ namespace vslib
             const auto [d, q, zero] = abc_2_dq0.transform(a, b, c, m_wt);
 
             // reference of the PI controller is always zero
-            m_wt = i.control((pi.control(q, 0.0) + m_f_rated), 0.0);
-            
-            return  m_wt + m_angle_offset;
+            const double pi_out = pi.control(-q, 0.0);
+            m_wt = integrator.control(0.0, pi_out + m_f_rated);
+
+            return (m_wt + m_angle_offset);
         }
 
         //! Resets the controller to the initial state by zeroing the history.
@@ -63,7 +64,7 @@ namespace vslib
 
         AbcToDq0Transform abc_2_dq0; //!< abc to dq0 transform part of the PLL
         PID pi;                      //!< PI controller part of the PLL
-        PID i;                      //!< PI controller part of the PLL
+        PID integrator;              //!< I controller part of the PLL, accumulates wt with 2pi*f
 
         // ************************************************************
 

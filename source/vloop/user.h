@@ -132,7 +132,6 @@ namespace user
             const double a = data_in[0];   // a
             const double b = data_in[1];   // b
             const double c = data_in[2];   // c
-
             data_in[3] = converter.pll.balance(a, b, c);
 
             for (uint32_t index = 0; index < num_data_half; index++)
