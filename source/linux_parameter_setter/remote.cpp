@@ -81,15 +81,18 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["actuation_limits.upper_threshold"] = 1e9;
     values_to_set["actuation_limits.dead_zone"]       = std::array<double, 2>{0, 0};
 
-    values_to_set["i.kp"]                       = 0.0;
-    values_to_set["i.ki"]                       = 1.0;
-    values_to_set["i.kd"]                       = 0.0;
-    values_to_set["i.kff"]                      = 0.0;
-    values_to_set["i.proportional_scaling"]     = 1.0;
-    values_to_set["i.derivative_scaling"]       = 1.0;
-    values_to_set["i.derivative_filter_order"]  = 1.0;
-    values_to_set["i.control_period"]           = 1e-4;
-    values_to_set["i.pre_warping_frequency"]    = 1e-9;
+    values_to_set["i.kp"]                      = 0.0;
+    values_to_set["i.ki"]                      = 1.0;
+    values_to_set["i.kd"]                      = 0.0;
+    values_to_set["i.kff"]                     = 0.0;
+    values_to_set["i.proportional_scaling"]    = 1.0;
+    values_to_set["i.derivative_scaling"]      = 1.0;
+    values_to_set["i.derivative_filter_order"] = 1.0;
+    values_to_set["i.control_period"]          = 1e-4;
+    values_to_set["i.pre_warping_frequency"]   = 1e-9;
+
+    values_to_set["pll.f_rated"]      = 50.0;
+    values_to_set["pll.angle_offset"] = 0.0;
 
     for (const auto& [name, _] : parameters)
     {

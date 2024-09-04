@@ -1,16 +1,15 @@
 //! @file
-//! @brief Class definiting the Component interface of Phase-locked loop.
+//! @brief Class definiting the Component interface of Phase-locked loop (PLL).
 //! @author Dominik Arominski
 
 #pragma once
 
 #include <string>
 
+#include "abcToDq0Transform.h"
 #include "component.h"
 #include "parameter.h"
 #include "pid.h"
-#include "pid.h"
-#include "abcToDq0Transform.h"
 
 namespace vslib
 {
@@ -25,6 +24,8 @@ namespace vslib
         //! @param parent Parent of this controller
         PLL(std::string_view name, IComponent& parent)
             : Component("PLL", name, parent),
+              f_rated(*this, "f_rated", 0.0),
+              angle_offset(*this, "angle_offset"),
               abc_2_dq0("abc_2_dq0", *this),
               pi("pi", *this),
               integrator("i", *this)
@@ -43,7 +44,7 @@ namespace vslib
 
             // reference of the PI controller is always zero
             const double pi_out = pi.control(-q, 0.0);
-            m_wt = integrator.control(0.0, pi_out + m_f_rated);
+            m_wt                = integrator.control(0.0, pi_out + m_f_rated);
 
             return (m_wt + m_angle_offset);
         }
@@ -54,17 +55,19 @@ namespace vslib
             m_wt = 0;
             pi.reset();
         }
-       
+
         // ************************************************************
         // Settable Parameters of the Component
 
+        Parameter<double> f_rated;        //!< Frequency of the voltage source
+        Parameter<double> angle_offset;   //!< Angle offset to be added to calculated wt
 
         // ************************************************************
         // Components owned by this Component
 
-        AbcToDq0Transform abc_2_dq0; //!< abc to dq0 transform part of the PLL
-        PID pi;                      //!< PI controller part of the PLL
-        PID integrator;              //!< I controller part of the PLL, accumulates wt with 2pi*f
+        AbcToDq0Transform abc_2_dq0;    //!< abc to dq0 transform part of the PLL
+        PID               pi;           //!< PI controller part of the PLL
+        PID               integrator;   //!< I controller part of the PLL, accumulates wt with 2pi*f
 
         // ************************************************************
 
@@ -74,14 +77,14 @@ namespace vslib
         //! otherwise
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
+            m_f_rated      = {2.0 * std::numbers::pi * f_rated.toValidate()};
+            m_angle_offset = angle_offset.toValidate();
             return {};
         }
 
-        private:
-            double                  m_wt{0.0};
-            const double            m_angle_offset{0}; // Fixed for the moment
-            static constexpr double f{50};  // 50 Hz, fixed for the moment
-            static constexpr double m_f_rated{2.0*std::numbers::pi*f}; // 2 pi 50 Hz, fixed for the moment
-
+      private:
+        double m_wt{0.0};             // Returned wt value of the PLL
+        double m_angle_offset{0.0};   // Fixed for the moment
+        double m_f_rated{0.0};        // 2 pi 50 Hz, fixed for the moment
     };
 }   // namespace vslib
