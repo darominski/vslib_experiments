@@ -56,7 +56,7 @@ class MockComponent : public Component
 };
 
 //! Checks that a ParameterSetting object can be constructed
-TEST_F(ParameterSettingTest, ParameterSettingDefaultConstruction)
+TEST_F(ParameterSettingTest, DefaultConstruction)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 100;   // 100 bytes
@@ -67,7 +67,7 @@ TEST_F(ParameterSettingTest, ParameterSettingDefaultConstruction)
 }
 
 //! Checks that a ParameterSetting correct commadn is properly validated
-TEST_F(ParameterSettingTest, ParameterSettingValidateCorrectCommand)
+TEST_F(ParameterSettingTest, ValidateCorrectCommand)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 100;   // 100 bytes
@@ -81,7 +81,7 @@ TEST_F(ParameterSettingTest, ParameterSettingValidateCorrectCommand)
 }
 
 //! Checks that a ParameterSetting command validation finds out that the command is missing fields
-TEST_F(ParameterSettingTest, ParameterSettingValidateIncorrectCommand)
+TEST_F(ParameterSettingTest, ValidateIncorrectCommand)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 1024;   // 1024 bytes
@@ -146,7 +146,7 @@ TEST_F(ParameterSettingTest, ParameterSettingValidateIncorrectCommand)
 }
 
 //! Checks that a ParameterSetting can process a single int16 command
-TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIntCommand)
+TEST_F(ParameterSettingTest, ProcessSingleIntCommand)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
@@ -168,7 +168,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIntCommand)
 }
 
 //! Checks that a ParameterSetting can process a single uint32 command
-TEST_F(ParameterSettingTest, ParameterSettingProcessSingleUintCommand)
+TEST_F(ParameterSettingTest, ProcessSingleUintCommand)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
@@ -191,7 +191,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleUintCommand)
 }
 
 //! Checks that a ParameterSetting can process a single command
-TEST_F(ParameterSettingTest, ParameterSettingProcessSingleDoubleCommand)
+TEST_F(ParameterSettingTest, ProcessSingleDoubleCommand)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
@@ -215,7 +215,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleDoubleCommand)
 }
 
 //! Checks that a ParameterSetting finds that the type of the provided command value does not match uint32
-TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectUintCommand)
+TEST_F(ParameterSettingTest, ProcessSingleIncorrectUintCommand)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
@@ -247,12 +247,12 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectUintCommand)
         "The provided command value: -5 is not an unsigned integer, while Parameter type is an unsigned integer.\n"
     );
 
-    // test.flipBufferState();
+    test.flipBufferState();
     EXPECT_NE(test.parameter, (uint32_t)single_command["value"]);
 }
 
 //! Checks that a ParameterSetting finds that the type of the provided command value does not match int64
-TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectIntCommand)
+TEST_F(ParameterSettingTest, ProcessSingleIncorrectIntCommand)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
@@ -287,7 +287,7 @@ TEST_F(ParameterSettingTest, ParameterSettingProcessSingleIncorrectIntCommand)
 }
 
 //! Checks that a ParameterSetting sets correctly a number of commands, with the last one being used in this case
-TEST_F(ParameterSettingTest, ParameterMapProcessArrayCommand)
+TEST_F(ParameterSettingTest, ProcessArrayCommand)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
@@ -314,7 +314,7 @@ TEST_F(ParameterSettingTest, ParameterMapProcessArrayCommand)
 }
 
 //! Checks that a ParameterSetting sets correctly a number of commands, with the last one being used in this case
-TEST_F(ParameterSettingTest, ParameterMapProcessArrayInvalidCommand)
+TEST_F(ParameterSettingTest, ProcessArrayInvalidCommand)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
@@ -345,7 +345,7 @@ TEST_F(ParameterSettingTest, ParameterMapProcessArrayInvalidCommand)
 }
 
 //! Checks that a ParameterSetting executes a json command correctly
-TEST_F(ParameterSettingTest, ParameterMapExecuteCorrectCommand)
+TEST_F(ParameterSettingTest, ExecuteCorrectCommand)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 100;   // 100 bytes
@@ -382,7 +382,7 @@ TEST_F(ParameterSettingTest, ParameterMapExecuteCorrectCommand)
 }
 
 //! Checks that a ParameterSetting catches an invalid json command correctly
-TEST_F(ParameterSettingTest, ParameterMapExecuteIncorrectCommand)
+TEST_F(ParameterSettingTest, ExecuteIncorrectCommand)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 100;   // 100 bytes
@@ -419,7 +419,7 @@ TEST_F(ParameterSettingTest, ParameterMapExecuteIncorrectCommand)
 }
 
 //! Checks that a ParameterSetting validates modified components correctly
-TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedComponents)
+TEST_F(ParameterSettingTest, ValidateCorrectlyModifiedComponents)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 100;   // 100 bytes
@@ -452,11 +452,12 @@ TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedComponents)
     EXPECT_EQ(component_1.parameter, value);
     EXPECT_NE(component_2.parameter, value);
     EXPECT_TRUE(component_1.parametersInitialized());
+    EXPECT_TRUE(component_1.parameter.isValidated());
     EXPECT_FALSE(component_2.parametersInitialized());
 }
 
 //! Checks that a ParameterSetting validates modified hierarchical components correctly
-TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedHierarchicalComponents)
+TEST_F(ParameterSettingTest, ValidateCorrectModifiedHierarchicalComponents)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 100;   // 100 bytes
@@ -493,10 +494,12 @@ TEST_F(ParameterSettingTest, ParameterMapValidateCorrectModifiedHierarchicalComp
     // flags should not be changed by running the validation of components
     EXPECT_FALSE(component_1.parametersInitialized());
     EXPECT_TRUE(component_2.parametersInitialized());
+    EXPECT_TRUE(component_2.parameter.isValidated());
 }
 
-//! Checks that a ParameterSetting validates modified components correctly
-TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedComponents)
+//! Checks that a ParameterSetting validates modified components correctly, and unsets the initialized flag
+//! if the Parameter has not been previously validated.
+TEST_F(ParameterSettingTest, ValidateIncorrectModifiedComponents)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 100;   // 100 bytes
@@ -521,14 +524,16 @@ TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedComponents)
     nlohmann::json single_command = value;
     component_1.parameter.setJsonValue(single_command);
 
-    EXPECT_TRUE(component_1.parametersInitialized());
+    EXPECT_TRUE(component_1.parametersInitialized());    // value correctly set, before Component-level validation
     EXPECT_FALSE(component_2.parametersInitialized());   // unrelated component should not be flagged as modified
+    EXPECT_FALSE(component_1.parameter.isValidated());   // the Parameter not validated yet
 
     parameter_setting.validateComponents();
+    EXPECT_FALSE(component_1.parameter.isValidated());   // the Parameter failed validation
 
     EXPECT_NE(component_1.parameter, value);
     EXPECT_NE(component_2.parameter, value);
-    EXPECT_TRUE(component_1.parametersInitialized());
+    EXPECT_FALSE(component_1.parametersInitialized());
     EXPECT_FALSE(component_2.parametersInitialized());
 
     // ensures that despite incorrect input, the value has not been modified after flipping the buffer:
@@ -536,8 +541,65 @@ TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedComponents)
     EXPECT_NE(component_1.parameter, value);
 }
 
+//! Checks that a ParameterSetting validates modified components correctly
+TEST_F(ParameterSettingTest, CheckRevokeValidation)
+{
+    RootComponent                   root;
+    constexpr size_t                queue_size = 100;   // 100 bytes
+    std::array<uint8_t, queue_size> read_buffer{};
+    std::array<uint8_t, queue_size> write_buffer{};
+    Component                       root_component("root", "root", root);
+
+    ParameterSetting parameter_setting(read_buffer.data(), write_buffer.data(), root);
+
+    const std::string      type  = "type";
+    const std::string      name1 = "name1";
+    const std::string      name2 = "name2";
+    MockComponent<int32_t> component_1(type, name1, root_component);
+    MockComponent<int32_t> component_2(type, name2, root_component);
+    const int32_t          first_value = 2;   // even number will pass validation
+
+    std::array<uint8_t, queue_size> read_message_buffer;
+    auto                            read_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<void>>(
+        (uint8_t*)write_buffer.data(), queue_size
+    );
+
+    nlohmann::json single_command = first_value;
+    component_1.parameter.setJsonValue(single_command);
+
+    EXPECT_TRUE(component_1.parametersInitialized());    // value correctly set, before Component-level validation
+    EXPECT_FALSE(component_2.parametersInitialized());   // unrelated component should not be flagged as modified
+
+    parameter_setting.validateComponents();
+
+    EXPECT_TRUE(component_1.parametersInitialized());
+    EXPECT_FALSE(component_2.parametersInitialized());
+
+    // ensures that despite incorrect input, the value has not been modified after flipping the buffer:
+    component_1.flipBufferState();
+    EXPECT_EQ(component_1.parameter, first_value);
+    EXPECT_TRUE(component_1.parameter.isValidated());
+
+    const int32_t second_value = 3;   // odd number will fail validation
+    single_command             = second_value;
+    component_1.parameter.setJsonValue(single_command);
+    EXPECT_TRUE(component_1.parametersInitialized());   // value correctly set, before Component-level validation
+    EXPECT_TRUE(component_1.parameter.isValidated());   // the Parameter should still be validated
+
+    parameter_setting.validateComponents();
+    EXPECT_FALSE(component_1.parameter.isValidated());   // the Parameter should not be invalidated
+
+    // Parameter has been previously validated: the initialized flag is not revoked
+    EXPECT_TRUE(component_1.parametersInitialized());
+
+    component_1.flipBufferState();
+
+    EXPECT_NE(component_1.parameter, second_value);
+    EXPECT_EQ(component_1.parameter, first_value);
+}
+
 //! Checks that a ParameterSetting validates modified hierarchical components correctly
-TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedHierarchicalComponents)
+TEST_F(ParameterSettingTest, ValidateIncorrectSettingHierarchicalComponent)
 {
     RootComponent                   root;
     constexpr size_t                queue_size = 100;   // 100 bytes
@@ -568,7 +630,7 @@ TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedHierarchicalCo
     parameter_setting.validateComponents();
 
     EXPECT_FALSE(component_1.parametersInitialized());
-    EXPECT_TRUE(component_2.parametersInitialized());
+    EXPECT_FALSE(component_2.parametersInitialized());
 
     EXPECT_NE(component_1.parameter, value);
     EXPECT_NE(component_2.parameter, value);
@@ -576,5 +638,7 @@ TEST_F(ParameterSettingTest, ParameterMapValidateIncorrectModifiedHierarchicalCo
     // ensures that despite incorrect input, the value has not been modified after flipping the buffer:
     component_1.flipBufferState();
     EXPECT_NE(component_1.parameter, value);
+    EXPECT_EQ(component_1.parameter, int32_t());
+
     EXPECT_NE(component_2.parameter, value);
 }

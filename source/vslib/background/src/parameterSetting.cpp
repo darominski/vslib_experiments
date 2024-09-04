@@ -138,8 +138,8 @@ namespace vslib
                 const auto& warning = component.verifyParameters();
                 if (!warning.has_value())
                 {
-                    component.flipBufferState();
                     component.setParametersValidated();
+                    component.flipBufferState();
                 }
                 else
                 {

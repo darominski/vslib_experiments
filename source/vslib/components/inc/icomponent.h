@@ -124,7 +124,7 @@ namespace vslib
             );
         }
 
-        //! Sets either the validation or the initialization flag of owned Parameters to false 
+        //! Sets either the validation or the initialization flag of owned Parameters to false
         //! when the validation on the Component level has failed. If they were previously not
         //! successfully validated, the initialization flag is set to false. This is especially
         //! relevant during startup.
@@ -138,7 +138,7 @@ namespace vslib
                     {
                         // if Parameter has not been previously validated, the currently set Parameters
                         // are not correct and the entire initialization process needs revoking
-                        parameter.second.get().setInitialized(false);                        
+                        parameter.second.get().setInitialized(false);
                     }
                     else
                     {

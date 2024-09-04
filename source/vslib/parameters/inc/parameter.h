@@ -289,7 +289,6 @@ namespace vslib
             {
                 // set the initialized flag, uncheck the validation which is done by Component
                 m_initialized = true;
-                m_validated   = false;
             }
             return maybe_warning;
         }
