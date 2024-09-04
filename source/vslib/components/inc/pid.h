@@ -82,14 +82,6 @@ namespace vslib
         // ************************************************************
         // Getters
 
-        //! Returns flag whether the reference and measurement histories are filled and RST is ready to regulate.
-        //!
-        //! @return True if reference and measurement histories are filled, false otherwise
-        [[nodiscard]] bool isReady() const noexcept
-        {
-            return rst.isReady();
-        }
-
         //! Returns the r polynomial coefficients.
         //!
         //! @return r polynomial coefficients
@@ -140,6 +132,7 @@ namespace vslib
         //! otherwise
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
+            m_1dof = false;   // reset the flag for 1 and 2 DOF choice
             // recalculation of PID interface into internal RST parameters, then: stability test
 
             const double k_p  = kp.toValidate();
@@ -167,6 +160,7 @@ namespace vslib
                 // there is no derivative element, N is assumed to be 1.0
                 if (k_p != 0 && k_ff == 0.0 && b_ == 1)
                 {
+                    std::cout << "1DOF PI\n";
                     // 1DOF PI
                     m_r[0] = (k_p * k_i * (1 + k_p * a / k_i)) / a2;
                     m_r[1] = (k_p * k_i * (1 - k_p * a / k_i)) / a2;
@@ -176,9 +170,11 @@ namespace vslib
 
                     m_t[0] = m_r[0];
                     m_t[1] = m_r[1];
+                    m_1dof = true;
                 }
                 else if (k_p == 0.0)
                 {
+                    std::cout << "Integrator\n";
                     // 1DOF I: simple integrator
                     m_r[0] = k_i / a;
                     m_r[1] = k_i / a;
@@ -188,14 +184,18 @@ namespace vslib
 
                     m_t[0] = k_i / a + k_ff;
                     m_t[1] = k_i / a - k_ff;
+                    m_1dof = true;
                 }
 
-                // for all 1st order controllers, the last elements are 0.0
-                m_r[2] = 0;
-                m_s[2] = 0;
-                m_t[2] = 0;
+                if (m_1dof)
+                {
+                    // for all 1st order controllers, the last elements are 0.0
+                    m_r[2] = 0;
+                    m_s[2] = 0;
+                    m_t[2] = 0;
+                }
             }
-            else if (k_p != 0.0)
+            if (!m_1dof && (k_p != 0.0 || k_d != 0))
             {
                 const double kikpN = k_i * k_p * N_;
 
@@ -214,12 +214,6 @@ namespace vslib
                 m_t[2] = (kikpN - k_d * k_i * a + k_d * k_ff * a2 + k_d * k_p * a2 * b_ - pow(k_p, 2) * N_ * a * b_
                           - k_ff * k_p * N_ * a + k_d * k_p * N_ * a2 * c_)
                          / a2;
-            }
-            else
-            {
-                return fgc4::utils::Warning(
-                    fmt::format("Unsupported input case: kp: {}, ki: {}, kd: {}, kff: {}.", k_p, k_i, k_d, k_ff)
-                );
             }
 
             // Jury's stability test, based on logic implemented in CCLIBS regRst.c
@@ -264,5 +258,7 @@ namespace vslib
         std::array<double, buffer_length> m_t{0};   //!< Array holding a local copy of T coefficients
 
         RSTController<buffer_length> rst;   //!< RST controller responsible for the control logic
+
+        bool m_1dof{false};   //!< Flag to define whether the controller has 1 (true) or 2 degrees of freedom
     };
 }   // namespace vslib

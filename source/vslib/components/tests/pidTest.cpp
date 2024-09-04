@@ -149,7 +149,7 @@ TEST_F(PIDTest, PIDCoefficientsDefault)
     }
 }
 
-//! Checks that the RST coefficients were correctly calculated when kp=0 and kd!=0
+//! Checks that the RST coefficients were correctly calculated when kp=0 and kd != 0
 TEST_F(PIDTest, PIDCoefficientsKpZero)
 {
     RootComponent root;
@@ -162,8 +162,8 @@ TEST_F(PIDTest, PIDCoefficientsKpZero)
     const double  b  = 1.0;
     const double  c  = 1.0;
     const double  N  = 1.0;
-    const double  T  = 3.0;
-    const double  f0 = 2.263752e-6;
+    const double  T  = 1e-4;
+    const double  f0 = 1e-6;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0);
 
     const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * T);
@@ -201,15 +201,15 @@ TEST_F(PIDTest, PIDCoefficientsKdZero)
     RootComponent root;
     std::string   name = "pid_4";
     PID           pid(name, root);
-    const double  p  = 2.0;
+    const double  p  = 3.0;
     const double  i  = 1.0;
     const double  d  = 0.0;
     const double  ff = 0.2;
     const double  b  = 1.0;
     const double  c  = 1.0;
     const double  N  = 1.0;
-    const double  T  = 3.0;
-    const double  f0 = 2.263752e-6;
+    const double  T  = 1e-4;
+    const double  f0 = 1e-9;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0);
 
     const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * T);
@@ -241,11 +241,54 @@ TEST_F(PIDTest, PIDCoefficientsKdZero)
     }
 }
 
+//! Checks that the RST coefficients were correctly calculated when kd=kff=0, and b=c=1 (1DOF PI)
+TEST_F(PIDTest, PIDCoefficientsKdKffZeros)
+{
+    RootComponent root;
+    std::string   name = "pid_5";
+    PID           pid(name, root);
+    const double  p  = 2.0;
+    const double  i  = 1.0;
+    const double  d  = 0.0;
+    const double  ff = 0.0;
+    const double  b  = 1.0;
+    const double  c  = 1.0;
+    const double  N  = 1.0;
+    const double  T  = 1e-4;
+    const double  f0 = 1e-9;
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0);
+
+    const double a  = 2.0 * std::numbers::pi_v<double> * f0 / tan(std::numbers::pi_v<double> * f0 * T);
+    const double a2 = a * a;
+
+    std::array<double, 3> expected_r, expected_s, expected_t;
+
+    // simplified equations:
+    expected_r[0] = (i * p * N + p * p * a) / a2;
+    expected_r[1] = ((i - p * a) / (i + p * a)) * (i * p + p * p * a) / a2;
+    expected_r[2] = 0.0;
+
+    expected_s[0] = p / a;
+    expected_s[1] = -p / a;
+    expected_s[2] = 0.0;
+
+    expected_t[0] = expected_r[0];
+    expected_t[1] = expected_r[1];
+    expected_t[2] = 0.0;
+
+    for (int index = 0; index < 3; index++)
+    {
+        EXPECT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
+        EXPECT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
+        EXPECT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
+    }
+}
+
 //! Checks that the RST coefficients were correctly calculated when kp=0 and kd=0
 TEST_F(PIDTest, PIDCoefficientsIntegrator)
 {
     RootComponent root;
-    std::string   name = "pid_5";
+    std::string   name = "pid_6";
     PID           pid(name, root);
     const double  p  = 0.0;
     const double  i  = 1.0;
@@ -295,7 +338,7 @@ TEST_F(PIDTest, PIDSimulinkSimpleConsistency)
     // t has 10000 points, uniformly spaced from 0 to 9999 * T, t cutoff is max of the time
     // yk and rk inputs are randomly generated: rk = randn(10000, 1);
 
-    std::string  name = "pid";
+    std::string  name = "pid_7";
     PID          pid(name, root);
     const double p             = 1.0;
     const double i             = 1.0;
@@ -308,12 +351,6 @@ TEST_F(PIDTest, PIDSimulinkSimpleConsistency)
     const double f0            = 1e-15;
     const double actuation_min = -50;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0, actuation_min);
-
-    // fill the histories to enable the controller:
-    EXPECT_EQ(pid.control(0, 0), 0);
-    EXPECT_EQ(pid.control(0, 0), 0);
-    EXPECT_TRUE(pid.isReady());
-    // now, the controller is enabled and actuations can be calculated
 
     // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
@@ -361,7 +398,7 @@ TEST_F(PIDTest, PIDSimulinkConsistency)
     // t has 10000 points, uniformly spaced from 0 to 9999 * T, t cutoff is max of the time
     // yk and rk inputs are randomly generated: rk = randn(10000, 1);
 
-    std::string  name = "pid";
+    std::string  name = "pid_8";
     PID          pid(name, root);
     const double p             = 52.79;
     const double i             = 0.0472;
@@ -374,12 +411,6 @@ TEST_F(PIDTest, PIDSimulinkConsistency)
     const double f0            = 1e-15;
     const double actuation_min = -1e13;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0, actuation_min);
-
-    // fill the histories to enable the controller:
-    EXPECT_EQ(pid.control(0, 0), 0);
-    EXPECT_EQ(pid.control(0, 0), 0);
-    EXPECT_TRUE(pid.isReady());
-    // now, the controller is enabled and actuations can be calculated
 
     // the input files are randomly generated numbers
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
@@ -428,7 +459,7 @@ TEST_F(PIDTest, PIDSimulinkIntegratorConsistency)
     // t has 10000 points, uniformly spaced from 0 to 9999 * T, t cutoff is max of the time
     // yk and rk inputs are randomly generated: rk = randn(10000, 1);
 
-    std::string  name = "pid";
+    std::string  name = "pid_9";
     PID          pid(name, root);
     const double p             = 0;
     const double i             = 0.0472;
