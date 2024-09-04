@@ -160,7 +160,6 @@ namespace vslib
                 // there is no derivative element, N is assumed to be 1.0
                 if (k_p != 0 && k_ff == 0.0 && b_ == 1)
                 {
-                    std::cout << "1DOF PI\n";
                     // 1DOF PI
                     m_r[0] = (k_p * k_i * (1 + k_p * a / k_i)) / a2;
                     m_r[1] = (k_p * k_i * (1 - k_p * a / k_i)) / a2;
@@ -174,7 +173,6 @@ namespace vslib
                 }
                 else if (k_p == 0.0)
                 {
-                    std::cout << "Integrator\n";
                     // 1DOF I: simple integrator
                     m_r[0] = k_i / a;
                     m_r[1] = k_i / a;
