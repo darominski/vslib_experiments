@@ -37,16 +37,15 @@ namespace vslib
         //! @param a A-phase component of the three-phase system
         //! @param b B-phase component of the three-phase system
         //! @param c C-phase component of the three-phase system
-        //! @return Balanced angle (omega t)
+        //! @return Balanced angle (omega t), made to fit in 0 to 2pi values
         [[nodiscard]] double balance(const double a, const double b, const double c) noexcept
         {
             const auto [d, q, zero] = abc_2_dq0.transform(a, b, c, m_wt);
 
             // reference of the PI controller is always zero
-            const double pi_out = pi.control(-q, 0.0);
-            m_wt                = integrator.control(0.0, pi_out + m_f_rated);
+            m_wt = integrator.control(0.0, pi.control(-q, 0.0) + m_f_rated);
 
-            return (m_wt + m_angle_offset);
+            return fmod(m_wt + m_angle_offset, 2.0 * std::numbers::pi);
         }
 
         //! Resets the controller to the initial state by zeroing the history.
