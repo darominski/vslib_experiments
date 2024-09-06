@@ -97,25 +97,25 @@ namespace vslib
         void updateReferenceOpenLoop(const double updated_actuation)
         {
             // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c for open loop calculation
-            size_t prev_index = m_head - 1;
+            size_t prev_head = m_head - 1;
             if (m_head == 0)
             {
-                prev_index = ControllerLength - 1;
+                prev_head = ControllerLength - 1;
             }
-            m_actuations[prev_index] = updated_actuation;
+            m_actuations[prev_head] = updated_actuation;
 
-            double reference = m_s[0] * updated_actuation + m_r[0] * m_measurements[prev_index];
+            double reference = m_s[0] * updated_actuation + m_r[0] * m_measurements[prev_head];
             for (int64_t index = 1; index < ControllerLength; index++)
             {
-                int64_t buffer_index = (m_head - 1 - index);
+                int64_t buffer_index = (prev_head - index);
                 if (buffer_index < 0)
                 {
                     buffer_index += ControllerLength;
                 }
-                reference += m_s[index] * m_actuations[buffer_index] - m_r[index] * m_measurements[buffer_index]
+                reference += m_s[index] * m_actuations[buffer_index] + m_r[index] * m_measurements[buffer_index]
                              - m_t[index] * m_references[buffer_index];
             }
-            m_references[m_head - 1] = reference / m_t[0];
+            m_references[prev_head] = reference / m_t[0];
         }
 
         //! Resets the controller to the initial state by zeroing the history.
