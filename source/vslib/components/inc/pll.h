@@ -27,8 +27,7 @@ namespace vslib
               f_rated(*this, "f_rated", 0.0),
               angle_offset(*this, "angle_offset"),
               abc_2_dq0("abc_2_dq0", *this),
-              pi("pi", *this),
-              integrator("i", *this)
+              pi("pi", *this)
         {
         }
 
@@ -37,15 +36,20 @@ namespace vslib
         //! @param a A-phase component of the three-phase system
         //! @param b B-phase component of the three-phase system
         //! @param c C-phase component of the three-phase system
-        //! @return Balanced angle (omega t), made to fit in 0 to 2pi values
+        //! @return Balanced angle (omega t), always fits in 0 to 2pi values
         [[nodiscard]] double balance(const double a, const double b, const double c) noexcept
         {
             const auto [d, q, zero] = abc_2_dq0.transform(a, b, c, m_wt);
 
+            // for consistency with Matlab, forward-Euler method is used instead of trapezoid
+            // integration
+            const auto wt = m_wt;
             // reference of the PI controller is always zero
-            m_wt = integrator.control(0.0, pi.control(-q, 0.0) + m_f_rated);
+            m_wt          += pi.control(-q, 0.0) * pi.T + m_f_rated_2pi;
+            // to avoid precision loss, the wt is limited to 0-2pi range
+            m_wt          = fmod(m_wt, std::numbers::pi_v<double> * 2.0);
 
-            return fmod(m_wt + m_angle_offset, 2.0 * std::numbers::pi);
+            return wt + m_angle_offset;
         }
 
         //! Resets the controller to the initial state by zeroing the history.
@@ -64,9 +68,8 @@ namespace vslib
         // ************************************************************
         // Components owned by this Component
 
-        AbcToDq0Transform abc_2_dq0;    //!< abc to dq0 transform part of the PLL
-        PID               pi;           //!< PI controller part of the PLL
-        PID               integrator;   //!< I controller part of the PLL, accumulates wt with 2pi*f
+        AbcToDq0Transform abc_2_dq0;   //!< abc to dq0 transform part of the PLL
+        PID               pi;          //!< PI controller part of the PLL
 
         // ************************************************************
 
@@ -76,14 +79,14 @@ namespace vslib
         //! otherwise
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
-            m_f_rated      = {2.0 * std::numbers::pi * f_rated.toValidate()};
+            m_f_rated_2pi  = {2.0 * std::numbers::pi * f_rated.toValidate() * pi.T};
             m_angle_offset = angle_offset.toValidate();
             return {};
         }
 
       private:
         double m_wt{0.0};             // Returned wt value of the PLL
-        double m_angle_offset{0.0};   // Fixed for the moment
-        double m_f_rated{0.0};        // 2 pi 50 Hz, fixed for the moment
+        double m_angle_offset{0.0};   // Angular offset of the PLL output
+        double m_f_rated_2pi{0.0};    // 2 pi * f_rated * (Euler step size)
     };
 }   // namespace vslib
