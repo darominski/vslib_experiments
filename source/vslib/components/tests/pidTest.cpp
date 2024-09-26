@@ -511,3 +511,59 @@ TEST_F(PIDTest, PIDSimulinkIntegratorConsistency)
     rk_file.close();
     uk_file.close();
 }
+
+//! Checks the consistency of PI controller behaviour vs a PI model written in Simulink,
+//! as part of a Phase-Locked Loop.
+TEST_F(PIDTest, PIDSimulinkPIinPLL)
+{
+    RootComponent root;
+
+    std::string  name = "pi_10";
+    PID          pid(name, root);
+    const double p             = 50;
+    const double i             = 200;
+    const double d             = 0;
+    const double ff            = 0;
+    const double b             = 1.0;
+    const double c             = 1.0;
+    const double N             = 1.0;
+    const double T             = 1.0e-4;
+    const double f0            = 1e-15;
+    const double actuation_min = -1e9;
+    const double actuation_max = 1e9;
+    set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0, actuation_min, actuation_max);
+
+
+    // the input files are randomly generated numbers
+    std::filesystem::path pid_meas_path      = "components/inputs/pll_pi_meas.csv";
+    std::filesystem::path pid_actuation_path = "components/inputs/pll_act_pi_kp=50_ki=200.csv";
+
+    std::ifstream pid_meas_file(pid_meas_path);
+    std::ifstream pid_act_file(pid_actuation_path);
+
+    ASSERT_TRUE(pid_meas_file.is_open());
+    ASSERT_TRUE(pid_act_file.is_open());
+
+    std::string pid_meas_str;
+    std::string pid_act_str;
+
+    while (getline(pid_meas_file, pid_meas_str) && getline(pid_act_file, pid_act_str))
+    {
+        auto const meas_value           = std::stod(pid_meas_str.substr(pid_meas_str.find(",") + 1));
+        auto const pid_act_matlab_value = std::stod(pid_act_str.substr(pid_act_str.find(",") + 1));
+
+        auto const actuation = pid.control(-meas_value, 0.0);
+        double     relative;
+        if (pid_act_matlab_value != 0)
+        {
+            relative = (pid_act_matlab_value - actuation) / pid_act_matlab_value;
+        }
+        else
+        {
+            relative = (pid_act_matlab_value - actuation);
+        }
+        ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
+    }
+    pid_meas_file.close();
+    pid_act_file.close();
+}
