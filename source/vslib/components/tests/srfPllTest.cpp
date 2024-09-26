@@ -1,18 +1,18 @@
 //! @file
-//! @brief File with unit tests of PLL component.
+//! @brief File with unit tests of SRF PLL component.
 //! @author Dominik Arominski
 
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
 
-#include "pll.h"
 #include "rootComponent.h"
+#include "srfPll.h"
 #include "staticJson.h"
 
 using namespace vslib;
 
-class PLLTest : public ::testing::Test
+class SRFPLLTest : public ::testing::Test
 {
   protected:
     void SetUp() override
@@ -26,12 +26,12 @@ class PLLTest : public ::testing::Test
     }
 
     void set_parameters(
-        PLL& pll, const double p, const double i, const double d, const double ff, const double b, const double c,
+        SRFPLL& pll, const double p, const double i, const double d, const double ff, const double b, const double c,
         const double N = 1, const double T = 1, const double f0 = 1, const double act_min = -1e9,
         const double act_max = 1e9, const double f_rated = 50, const double angle_offset = 0.0
     )
     {
-        // set the PLL's pi Parameters:
+        // set the SRFPLL's pi Parameters:
         StaticJson p_value = p;
         pll.pi.kp.setJsonValue(p_value);
 
@@ -86,17 +86,17 @@ class PLLTest : public ::testing::Test
 };
 
 
-//! Checks that a PLL object can be constructed and is correctly added to the registry
-TEST_F(PLLTest, PLLDefaultConstruction)
+//! Checks that a SRFPLL object can be constructed and is correctly added to the registry
+TEST_F(SRFPLLTest, SRFPLLDefaultConstruction)
 {
     RootComponent root;
     std::string   name = "pll_1";
-    PLL           pll(name, root);
+    SRFPLL        pll(name, root);
     EXPECT_EQ(pll.getName(), name);
 
     auto serialized = pll.serialize();
     EXPECT_EQ(serialized["name"], name);
-    EXPECT_EQ(serialized["type"], "PLL");
+    EXPECT_EQ(serialized["type"], "SRFPLL");
 
     EXPECT_EQ(serialized["parameters"].size(), 2);
     EXPECT_EQ(serialized["parameters"][0]["name"], "f_rated");
@@ -109,23 +109,23 @@ TEST_F(PLLTest, PLLDefaultConstruction)
     EXPECT_EQ(serialized["components"][1]["name"], "pi");
 }
 
-//! Checks that a PLL object can calculate a single iteration of balancing
-TEST_F(PLLTest, PLLOneIteration)
+//! Checks that a SRFPLL object can calculate a single iteration of balancing
+TEST_F(SRFPLLTest, SRFPLLOneIteration)
 {
     RootComponent root;
     std::string   name = "pll_2";
-    PLL           pll(name, root);
+    SRFPLL        pll(name, root);
     // no need to set parameters, as the first step is always zero due to using
     // forward Euler method
     ASSERT_EQ(pll.balance(1.0, 1.0, 1.0), 0.0);
 }
 
-//! Checks that a PLL object can calculate a couple of iterations of balancing
-TEST_F(PLLTest, PLLCoupleIterations)
+//! Checks that a SRFPLL object can calculate a couple of iterations of balancing
+TEST_F(SRFPLLTest, SRFPLLCoupleIterations)
 {
     RootComponent root;
     std::string   name = "pll_3";
-    PLL           pll(name, root);
+    SRFPLL        pll(name, root);
 
     const double p            = 2.0;
     const double i            = 15.0;
@@ -150,12 +150,12 @@ TEST_F(PLLTest, PLLCoupleIterations)
     ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), 2.0 * T * f_rated_2pi, 1e-6);
 }
 
-//! Checks that a PLL object can calculate a couple of iterations of balancing
-TEST_F(PLLTest, PLLCoupleIterationsNonZeroOffset)
+//! Checks that a SRFPLL object can calculate a couple of iterations of balancing
+TEST_F(SRFPLLTest, SRFPLLCoupleIterationsNonZeroOffset)
 {
     RootComponent root;
     std::string   name = "pll_3";
-    PLL           pll(name, root);
+    SRFPLL        pll(name, root);
 
     const double p            = 2.0;
     const double i            = 15.0;
@@ -182,13 +182,13 @@ TEST_F(PLLTest, PLLCoupleIterationsNonZeroOffset)
     ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), 2.0 * T * f_rated_2pi + angle_offset, 1e-6);
 }
 
-//! Checks that the response of the PLL agrees with a Simulink model over a long simulation,
+//! Checks that the response of the SRFPLL agrees with a Simulink model over a long simulation,
 //! which includes introduced glitches
-TEST_F(PLLTest, PLLSimulinkSimpleConsistency)
+TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistency)
 {
     RootComponent root;
     std::string   name = "pll_4";
-    PLL           pll(name, root);
+    SRFPLL        pll(name, root);
 
     const double p  = 50.0;
     const double i  = 200.0;

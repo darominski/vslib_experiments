@@ -1,5 +1,5 @@
 //! @file
-//! @brief Class definiting the Component interface of Phase-locked loop (PLL).
+//! @brief Class definiting the Component interface of Synchronous Reference Frame phase-locked loop (SRF PLL).
 //! @author Dominik Arominski
 
 #pragma once
@@ -13,17 +13,18 @@
 
 namespace vslib
 {
-    class PLL : public Component
+    class SRFPLL : public Component
     {
 
       public:
-        //! PLL constructor. Allows to set the name of the Component, set this controller as a child of a
-        //! given parent Component, and specify an anti-windup function, which by default does not do anything.
+        //! Synchronous Reference Frame PLL constructor. Allows to set the name of the Component, set this controller as
+        //! a child of a given parent Component, and specify an anti-windup function, which by default does not do
+        //! anything.
         //!
         //! @param name Name identification of the PLL controller
         //! @param parent Parent of this controller
-        PLL(std::string_view name, IComponent& parent)
-            : Component("PLL", name, parent),
+        SRFPLL(std::string_view name, IComponent& parent)
+            : Component("SRFPLL", name, parent),
               f_rated(*this, "f_rated", 0.0),
               angle_offset(*this, "angle_offset"),
               abc_2_dq0("abc_2_dq0", *this, 50'000),   // 50'000 points needed to ensure 1e-6 relative precision of PLL
@@ -68,8 +69,8 @@ namespace vslib
         // ************************************************************
         // Components owned by this Component
 
-        AbcToDq0Transform abc_2_dq0;   //!< abc to dq0 transform part of the PLL
-        PID               pi;          //!< PI controller part of the PLL
+        AbcToDq0Transform abc_2_dq0;   //!< abc to dq0 transform part of the SRF PLL
+        PID               pi;          //!< PI controller part of the SRF PLL
 
         // ************************************************************
 
