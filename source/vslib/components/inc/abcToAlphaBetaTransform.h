@@ -8,8 +8,6 @@
 #include <string>
 
 #include "component.h"
-#include "cosLookupTable.h"
-#include "sinLookupTable.h"
 
 namespace vslib
 {

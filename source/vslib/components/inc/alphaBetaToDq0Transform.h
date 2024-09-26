@@ -20,8 +20,12 @@ namespace vslib
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        AlphaBetaToDq0Transform(std::string_view name, IComponent& parent)
-            : Component("AlphaBetaToDq0Transform", name, parent)
+        //! @param number_points Number of points for the sine and cosine lookup tables
+        AlphaBetaToDq0Transform(std::string_view name, IComponent& parent, const uint64_t number_points = 1000)
+            : Component("AlphaBetaToDq0Transform", name, parent),
+              m_sin("sin", *this, number_points),
+              m_cos("cos", *this, number_points)
+
         {
         }
 
@@ -36,6 +40,10 @@ namespace vslib
         //! @return Tuple of d, q, 0 values
         [[nodiscard]] std::tuple<double, double, double> transform(
             const double f_alpha, const double f_beta, const double f_0, const double wt, const bool a_alignment = true
-        ) const noexcept;
+        ) noexcept;
+
+      private:
+        SinLookupTable m_sin;   //!< Lookup table holding sine function
+        CosLookupTable m_cos;   //!< Lookup table holding cosine function
     };
 }   // namespace vslib

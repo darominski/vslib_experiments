@@ -14,11 +14,11 @@ namespace vslib
 
     [[nodiscard]] std::tuple<double, double, double> AlphaBetaToDq0Transform::transform(
         const double f_alpha, const double f_beta, const double f_0, const double wt, const bool a_alignment
-    ) const noexcept
+    ) noexcept
     {
 
-        const double sin_theta = sin(wt);
-        const double cos_theta = cos(wt);
+        const double sin_theta = m_sin(wt);
+        const double cos_theta = m_cos(wt);
 
         const double d
             = a_alignment ? f_alpha * cos_theta + f_beta * sin_theta : f_alpha * sin_theta - f_beta * cos_theta;

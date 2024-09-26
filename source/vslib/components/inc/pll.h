@@ -26,7 +26,7 @@ namespace vslib
             : Component("PLL", name, parent),
               f_rated(*this, "f_rated", 0.0),
               angle_offset(*this, "angle_offset"),
-              abc_2_dq0("abc_2_dq0", *this),
+              abc_2_dq0("abc_2_dq0", *this, 50'000),   // 50'000 points needed to ensure 1e-6 relative precision of PLL
               pi("pi", *this)
         {
         }

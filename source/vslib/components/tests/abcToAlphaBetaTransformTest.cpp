@@ -142,9 +142,23 @@ TEST_F(AbcToAlphaBetaTransformTest, SimulinkConsistency)
 
         // validation
         const auto [alpha, beta, zero] = clarke.transform(a, b, c);
+        if (abs(matlab_alpha) > 1e-12)
+        {
+            ASSERT_NEAR((matlab_alpha - alpha) / matlab_alpha, 0.0, 1e-6);   // at least 1e-6 relative precision
+        }
+        else
+        {
+            ASSERT_NEAR(alpha, matlab_alpha, 1e-6);   // at least 1e-6 precision
+        }
 
-        EXPECT_NEAR(alpha, matlab_alpha, 1e-6);   // at least 1e-6 relative precision
-        EXPECT_NEAR(beta, matlab_beta, 1e-6);     // at least 1e-6 relative precision
+        if (abs(matlab_beta) > 1e-12)
+        {
+            ASSERT_NEAR((matlab_beta - beta) / matlab_beta, 0.0, 1e-6);   // at least 1e-6 relative precision
+        }
+        else
+        {
+            ASSERT_NEAR(beta, matlab_beta, 1e-6);   // at least 1e-6 precision
+        }
     }
     abc_file.close();
     clarke_file.close();

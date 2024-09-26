@@ -7,6 +7,8 @@
 #include <string>
 
 #include "component.h"
+#include "cosLookupTable.h"
+#include "sinLookupTable.h"
 
 namespace vslib
 {
@@ -17,8 +19,10 @@ namespace vslib
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        Dq0ToAlphaBetaTransform(std::string_view name, IComponent& parent)
-            : Component("Dq0ToAlphaBetaTransform", name, parent)
+        Dq0ToAlphaBetaTransform(std::string_view name, IComponent& parent, const uint64_t number_points = 1000)
+            : Component("Dq0ToAlphaBetaTransform", name, parent),
+              m_sin("sin", *this, number_points),
+              m_cos("cos", *this, number_points)
         {
         }
 
@@ -35,6 +39,10 @@ namespace vslib
         //! @return Tuple of alpha, beta, zero values
         [[nodiscard]] std::tuple<double, double, double> transform(
             const double d, const double q, const double zero, const double theta, const bool a_alignment = true
-        ) const noexcept;
+        ) noexcept;
+
+      private:
+        SinLookupTable m_sin;   //!< Lookup table holding sine function
+        CosLookupTable m_cos;   //!< Lookup table holding cosine function
     };
 }   // namespace vslib

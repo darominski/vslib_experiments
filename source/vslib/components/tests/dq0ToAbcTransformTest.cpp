@@ -35,7 +35,14 @@ TEST_F(Dq0ToAbcTransformTest, Construction)
     auto serialized = dq0_to_abc.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "Dq0ToAbcTransform");
-    EXPECT_EQ(serialized["components"].size(), 0);
+    EXPECT_EQ(serialized["components"].size(), 2);
+    EXPECT_EQ(
+        serialized["components"].dump(),
+        "[{\"name\":\"sin\",\"type\":\"SinLookupTable\",\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":"
+        "\"LookupTable\",\"parameters\":[],\"components\":[]}]},{\"name\":\"cos\",\"type\":\"CosLookupTable\","
+        "\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":\"LookupTable\",\"parameters\":[],"
+        "\"components\":[]}]}]"
+    );
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
@@ -44,7 +51,7 @@ TEST_F(Dq0ToAbcTransformTest, BasicTest)
 {
     RootComponent     root;
     std::string_view  name = "dq0_to_abc_2";
-    Dq0ToAbcTransform dq0_to_abc(name, root);
+    Dq0ToAbcTransform dq0_to_abc(name, root, 10'000);   // 10k points needed for 1e-6 precision
 
     double d       = 1.0;
     double q       = -0.5;
@@ -75,7 +82,7 @@ TEST_F(Dq0ToAbcTransformTest, ZeroAngleTest)
 {
     RootComponent     root;
     std::string_view  name = "dq0_to_abc_3";
-    Dq0ToAbcTransform dq0_to_abc(name, root);
+    Dq0ToAbcTransform dq0_to_abc(name, root, 10'000);   // 10k points needed for 1e-6 precision
 
     double d       = 1.0;
     double q       = -0.5;
@@ -106,7 +113,7 @@ TEST_F(Dq0ToAbcTransformTest, ZeroAngle90degreesOffsetTest)
 {
     RootComponent     root;
     std::string_view  name = "dq0_to_abc_4";
-    Dq0ToAbcTransform dq0_to_abc(name, root);
+    Dq0ToAbcTransform dq0_to_abc(name, root, 10'000);
 
     double       d      = 1.0;
     double       q      = -0.5;
@@ -138,7 +145,7 @@ TEST_F(Dq0ToAbcTransformTest, NinetyDegreesTest)
 {
     RootComponent     root;
     std::string_view  name = "dq0_to_abc_5";
-    Dq0ToAbcTransform dq0_to_abc(name, root);
+    Dq0ToAbcTransform dq0_to_abc(name, root, 10'000);
 
     double d       = 1.0;
     double q       = -0.5;
@@ -169,7 +176,7 @@ TEST_F(Dq0ToAbcTransformTest, BasicSimulinkConsistency)
 {
     RootComponent     root;
     std::string_view  name = "dq0_to_abc_6";
-    Dq0ToAbcTransform dq0_to_abc(name, root);
+    Dq0ToAbcTransform dq0_to_abc(name, root, 10'000);
 
     // the input files are randomly generated numbers
     std::filesystem::path dq0_path   = "components/inputs/park_dq0_sin_120degrees_theta_0_20.csv";
@@ -233,9 +240,9 @@ TEST_F(Dq0ToAbcTransformTest, BasicSimulinkConsistency)
         const auto relative_b = (matlab_b - b);
         const auto relative_c = (matlab_c - c);
 
-        EXPECT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
-        EXPECT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
-        EXPECT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
     }
     abc_file.close();
     theta_file.close();
@@ -312,9 +319,9 @@ TEST_F(Dq0ToAbcTransformTest, SVCTransform)
         const auto relative_b = (matlab_b - b);
         const auto relative_c = (matlab_c - c);
 
-        EXPECT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
-        EXPECT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
-        EXPECT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
     }
     abc_file.close();
     theta_file.close();

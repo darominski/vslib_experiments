@@ -145,9 +145,9 @@ TEST_F(PLLTest, PLLCoupleIterations)
     const double f_rated_2pi = f_rated * std::numbers::pi * 2.0;
 
     // the first step is always angle_offset due to using forward Euler method
-    ASSERT_EQ(pll.balance(1.0, 1.0, 1.0), 0.0);
-    ASSERT_EQ(pll.balance(1.0, 1.0, 1.0), T * f_rated_2pi);   // the current is balanced, so q = 0
-    ASSERT_EQ(pll.balance(1.0, 1.0, 1.0), 2.0 * T * f_rated_2pi);
+    ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), 0.0, 1e-6);
+    ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), T * f_rated_2pi, 1e-6);   // the current is balanced, so q = 0
+    ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), 2.0 * T * f_rated_2pi, 1e-6);
 }
 
 //! Checks that a PLL object can calculate a couple of iterations of balancing
@@ -175,9 +175,11 @@ TEST_F(PLLTest, PLLCoupleIterationsNonZeroOffset)
     const double f_rated_2pi = f_rated * std::numbers::pi * 2.0;
 
     // the first step is always angle_offset due to using forward Euler method
-    ASSERT_EQ(pll.balance(1.0, 1.0, 1.0), angle_offset);
-    ASSERT_EQ(pll.balance(1.0, 1.0, 1.0), T * f_rated_2pi + angle_offset);   // the current is balanced, so q = 0
-    ASSERT_EQ(pll.balance(1.0, 1.0, 1.0), 2.0 * T * f_rated_2pi + angle_offset);
+    ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), angle_offset, 1e-6);
+    ASSERT_NEAR(
+        pll.balance(1.0, 1.0, 1.0), T * f_rated_2pi + angle_offset, 1e-6
+    );   // the current is balanced, so q = 0
+    ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), 2.0 * T * f_rated_2pi + angle_offset, 1e-6);
 }
 
 //! Checks that the response of the PLL agrees with a Simulink model over a long simulation,

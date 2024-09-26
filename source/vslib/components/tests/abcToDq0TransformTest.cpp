@@ -35,8 +35,14 @@ TEST_F(AbcToDq0TransformTest, Construction)
     auto serialized = park.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "AbcToDq0Transform");
-    EXPECT_EQ(serialized["components"].size(), 0);
-    EXPECT_EQ(serialized["components"].dump(), "[]");
+    EXPECT_EQ(serialized["components"].size(), 2);
+    EXPECT_EQ(
+        serialized["components"].dump(),
+        "[{\"name\":\"sin\",\"type\":\"SinLookupTable\",\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":"
+        "\"LookupTable\",\"parameters\":[],\"components\":[]}]},{\"name\":\"cos\",\"type\":\"CosLookupTable\","
+        "\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":\"LookupTable\",\"parameters\":[],"
+        "\"components\":[]}]}]"
+    );
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
@@ -104,7 +110,7 @@ TEST_F(AbcToDq0TransformTest, ZeroAngle90degreesOffsetTest)
 {
     RootComponent     root;
     std::string_view  name = "park3";
-    AbcToDq0Transform park(name, root);
+    AbcToDq0Transform park(name, root, 10'000);
 
     const double i_a    = 1.0;
     const double i_b    = -0.5;
@@ -126,9 +132,9 @@ TEST_F(AbcToDq0TransformTest, ZeroAngle90degreesOffsetTest)
     double expected_q    = (2.0 / 3.0) * (-i_a * sin_theta - i_b * sin_theta_m_two_thirds - i_c * sin_theta_two_thirds);
     double expected_zero = (1.0 / 3.0) * (i_a + i_b + i_c);
 
-    EXPECT_NEAR(d, expected_d, 1e-5);
-    EXPECT_NEAR(q, expected_q, 1e-5);
-    EXPECT_NEAR(zero, expected_zero, 1e-5);
+    EXPECT_NEAR(d, expected_d, 1e-6);
+    EXPECT_NEAR(q, expected_q, 1e-6);
+    EXPECT_NEAR(zero, expected_zero, 1e-6);
 }
 
 TEST_F(AbcToDq0TransformTest, NinetyDegreesTest)
@@ -166,7 +172,7 @@ TEST_F(AbcToDq0TransformTest, BasicSimulinkConsistency)
 {
     RootComponent     root;
     std::string_view  name = "park5";
-    AbcToDq0Transform park(name, root);
+    AbcToDq0Transform park(name, root, 10'000);
 
     // the input files are randomly generated numbers
     std::filesystem::path abc_path   = "components/inputs/park_abc_sin_120degrees.csv";
@@ -226,8 +232,8 @@ TEST_F(AbcToDq0TransformTest, BasicSimulinkConsistency)
         const auto relative_d   = (matlab_d - d);
         const auto relative_q   = (matlab_q - q);
 
-        EXPECT_NEAR(relative_d, 0.0, 1e-6);   // at least 1e-6 relative precision
-        EXPECT_NEAR(relative_q, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_d, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_q, 0.0, 1e-6);   // at least 1e-6 relative precision
     }
     abc_file.close();
     theta_file.close();
@@ -300,8 +306,8 @@ TEST_F(AbcToDq0TransformTest, SVCTransform)
         const auto relative_d   = (matlab_d - d) / matlab_d;
         const auto relative_q   = (matlab_q - q) / matlab_q;
 
-        EXPECT_NEAR(relative_d, 0.0, 1e-6);   // at least 1e-6 relative precision
-        EXPECT_NEAR(relative_q, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_d, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_q, 0.0, 1e-6);   // at least 1e-6 relative precision
     }
     abc_file.close();
     theta_file.close();

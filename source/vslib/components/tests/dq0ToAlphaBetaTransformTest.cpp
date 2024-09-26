@@ -35,7 +35,14 @@ TEST_F(Dq0ToAlphaBetaTransformTest, Construction)
     auto serialized = transform.serialize();
     EXPECT_EQ(serialized["name"], name);
     EXPECT_EQ(serialized["type"], "Dq0ToAlphaBetaTransform");
-    EXPECT_EQ(serialized["components"].size(), 0);
+    EXPECT_EQ(serialized["components"].size(), 2);
+    EXPECT_EQ(
+        serialized["components"].dump(),
+        "[{\"name\":\"sin\",\"type\":\"SinLookupTable\",\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":"
+        "\"LookupTable\",\"parameters\":[],\"components\":[]}]},{\"name\":\"cos\",\"type\":\"CosLookupTable\","
+        "\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":\"LookupTable\",\"parameters\":[],"
+        "\"components\":[]}]}]"
+    );
     EXPECT_EQ(serialized["parameters"].size(), 0);
 }
 
@@ -43,7 +50,7 @@ TEST_F(Dq0ToAlphaBetaTransformTest, BasicTest)
 {
     RootComponent           root;
     std::string_view        name = "dq0_to_alphaBeta_2";
-    Dq0ToAlphaBetaTransform transform(name, root);
+    Dq0ToAlphaBetaTransform transform(name, root, 10'000);
 
     const double d           = 1.0;
     const double q           = -0.5;
