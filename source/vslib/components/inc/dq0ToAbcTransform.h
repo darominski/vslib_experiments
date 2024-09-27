@@ -6,9 +6,9 @@
 
 #include <string>
 
+#include "alphaBetaToAbcTransform.h"
 #include "component.h"
-#include "cosLookupTable.h"
-#include "sinLookupTable.h"
+#include "dq0ToAlphaBetaTransform.h"
 
 namespace vslib
 {
@@ -19,10 +19,10 @@ namespace vslib
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        Dq0ToAbcTransform(std::string_view name, IComponent& parent, const uint64_t number_points = 1000)
+        Dq0ToAbcTransform(std::string_view name, IComponent& parent, const uint64_t number_points = 10'000)
             : Component("Dq0ToAbcTransform", name, parent),
-              m_sin("sin", *this, number_points),
-              m_cos("cos", *this, number_points)
+              dq0_2_alphabeta("dq0_2_alphabeta", *this, number_points),
+              alphabeta_2_abc("alphabeta_2_abc", *this)
         {
         }
 
@@ -40,7 +40,7 @@ namespace vslib
         transform(const double d, const double q, const double zero, const double wt, const double offset = 0) noexcept;
 
       private:
-        SinLookupTable m_sin;   //!< Lookup table holding sine function
-        CosLookupTable m_cos;   //!< Lookup table holding cosine function
+        Dq0ToAlphaBetaTransform dq0_2_alphabeta;
+        AlphaBetaToAbcTransform alphabeta_2_abc;
     };
 }   // namespace vslib
