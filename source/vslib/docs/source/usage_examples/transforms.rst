@@ -26,13 +26,19 @@ and nomeclature of the `Park transformation matlab implementation <https://ch.ma
 The :code:`transform` method takes four obligatory and one optional :code:`double`-type arguments, one for each phase,
 the :math:`theta` (:math:`=\omega t`) angle in radians between the `q` and `a` axes, and an optional offset (:math:`\phi`) in radians.
 The offset can be used to change the default alignment from `q` and `a` axis alignment to `d` and `a` by setting the offset
-to be equal to :math:`\frac{\pi}{2}`. The method returns a tuple of d, q, zero values. The calculation is as follows:
+to be equal to :math:`\frac{\pi}{2}`. The method returns a tuple of d, q, zero values. The transformation algorithm is as follows:
 
 .. math::
 
     d &= \frac{2}{3} \left( a \cdot sin(\theta + \phi) + b \cdot sin \left( \theta + \phi - \frac{2}{3} \pi \right) + c \cdot sin \left(\theta + \phi + \frac{2}{3} \pi \right) \right) \\
     q &= \frac{2}{3} \left(a \cdot cos(\theta + \phi) + b \cdot cos \left(\theta + \phi - \frac{2}{3} \pi \right) + c \cdot cos \left(\theta + \phi + \frac{2}{3} \pi \right) \right) \\
     zero &= \frac{1}{3} \left( a + b + c \right) \\
+
+However, during benchmarking it was found that due to the overhead of the look-ups of the sine and cosine functions, it is preferable
+to perform the `abc` to `dq0` transformation in two steps:
+
+1. Transform `abc` to :math:`\alpha \beta 0` frame, and then
+2. Transform :math:`\alpha\beta 0` to `dq0`.
 
 For more details regarding the API, see the :ref:`API documentation for AbcToDq0Transform <abcToDq0Transform_api>`.
 
@@ -80,13 +86,19 @@ and nomeclature of the `Inverse Park transformation Matlab implementation <https
 The :code:`transform` method takes four obligatory and one optional :code:`double`-type arguments, one for each `dq0` component,
 the :math:`theta` (:math:`=\omega t`) angle in radians between the `q` and `a` axes, and an optional offset in radians.
 The offset can be used to change the default alignment from `q` and `a` axis alignment to `d` and `a` by setting the offset
-to be equal to :math:`\frac{\pi}{2}`. The method returns a tuple of a, b, and c values. The calculation is as follows:
+to be equal to :math:`\frac{\pi}{2}`. The method returns a tuple of a, b, and c values. The transformation algorithm is as follows:
 
 .. math::
 
     a &= d \cdot sin(\theta + \phi) + q \cdot cos(theta + \phi) + zero \\
     b &= d \cdot sin(\theta + \phi - \frac{2}{3} \pi) + q \cdot cos(\theta + \phi - \frac{2}{3} \pi) + zero; \\
     c &= d \cdot sin(\theta + \phi + \frac{2}{3} \pi) + q \cdot cos(\theta + \phi + \frac{2}{3} \pi) + zero; \\
+
+However, during benchmarking it was found that due to the overhead of the look-ups of the sine and cosine functions, it is preferable
+to perform the `dq0` to `abc` transformation in two steps:
+
+1. Transform `dq0` to :math:`\alpha\beta 0` frame, and then
+2. Transform :math:`\alpha\beta 0` to `abc`.
 
 For more details regarding the API, see the :ref:`API documentation for Dq0ToAbcTransform <dq0ToAbcTransform_api>`.
 
@@ -348,16 +360,12 @@ The table below gives an overlook of the execution time that can be expected for
     * - AbcToAlphaBetaTransform
       - 33
     * - AbcToDq0Transform
-      - 797
+      - 263
     * - AlphaBetaToDq0Transform
-      - 272
+      - 197
     * - AlphaBetaToAbcTransform
       - 27
     * - Dq0ToAbcTransform
-      - 788
+      - 270
     * - Dq0ToAlphaBetaTransform
-      - 272
-
-The implementation of all algorithms followed equations available in Matlab documentation. However, it can be clearly seen
-that a boost in execution time can be achieved if :code:`AbcToDq0Transform` was implemented as a composite of :code:`AbcToAlphaBetaTransform`,
-followed up by :code:`AlphaBetaToDq0Transform`. This is due to 6 calculations of trigonometric functions inside the :code:`AbcToDq0Transform`.
+      - 230
