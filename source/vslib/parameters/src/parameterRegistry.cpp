@@ -31,20 +31,19 @@ namespace vslib
             std::cbegin(m_parameters), std::cend(m_parameters),
             [](const auto& parameter)
             {
-                // std::cout << parameter.first << " " <<  parameter.second.get().isValidated() << std::endl;
                 return parameter.second.get().isValidated();
             }
         );
     }
 
-    void ParameterRegistry::checkNameFormatting(const std::string& parameter_name)
+    void ParameterRegistry::checkNameFormatting(std::string_view parameter_name)
     {
         // Regex to match the expected full name formatting of Components
         // "root" is always expected to be the first element, as all Components should derive
         // from VSlib-controlled RootComponent, followed by arbitrarily long sequence of snake_case
         // words separated by dots.
         const std::regex re("^(root)(\\.([a-z0-9]+(_[a-z0-9]+)*))*$");
-        const auto       match = std::regex_match(parameter_name, re);
+        const auto       match = std::regex_match(std::string(parameter_name), re);
 
         if (!match)
         {
@@ -71,7 +70,7 @@ namespace vslib
             );
             throw std::runtime_error("Parameter name already exists!");
         }
-        checkNameFormatting(std::string(parameter_name));
+        checkNameFormatting(parameter_name);
         m_parameters.emplace(parameter_name, parameter_reference);
     }
 }   // namespace vslib
