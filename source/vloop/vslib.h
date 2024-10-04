@@ -24,7 +24,7 @@
 #include "rst.h"
 
 //! Current balancing
-#include "pll.h"
+#include "srfPll.h"
 
 //! Filters
 #include "boxFilter.h"
