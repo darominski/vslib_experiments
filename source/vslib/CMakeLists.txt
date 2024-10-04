@@ -53,17 +53,11 @@ if (NOT BUILD_TESTS)
 
   # Collect source files for the vslib code
   set(${LIB}_SOURCES
-      components/src/abcToAlphaBetaTransform.cpp
-      components/src/abcToDq0Transform.cpp
-      components/src/alphaBetaToDq0Transform.cpp
-      components/src/alphaBetaToAbcTransform.cpp
-      components/src/dq0ToAbcTransform.cpp
-      components/src/dq0ToAlphaBetaTransform.cpp
-      parameters/src/parameterRegistry.cpp
-      background/src/parameterSetting.cpp
-      background/src/parameterMap.cpp
-      utils/src/vslibMessageQueue.cpp
-      ../utils/messageQueue.cpp
+      components/src/*.cpp
+      parameters/src/*.cpp
+      background/src/*.cpp
+      utils/src/*.cpp
+      ../utils/*.cpp
   )
 
   # Create a library from the vslib sources
