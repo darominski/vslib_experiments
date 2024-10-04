@@ -18,9 +18,11 @@
 
 namespace vslib
 {
+    using ComponentRef = std::reference_wrapper<IComponent>;
+    using ChildrenList = std::vector<ComponentRef>;
+
     class RootComponent : public IComponent
     {
-
       public:
         //! Creates the RootComponent with type, name as the base of the hierarchy for Components.
         RootComponent() noexcept

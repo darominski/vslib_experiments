@@ -18,13 +18,12 @@ namespace vslib
 {
     class IComponent : public NonCopyableNonMovable
     {
-
       public:
-        using ParameterReference = std::reference_wrapper<IParameter>;
-        using ParameterList      = std::vector<std::pair<std::string, ParameterReference>>;
-        using ComponentReference = std::reference_wrapper<IComponent>;
-        using ChildrenList       = std::vector<ComponentReference>;
-        using StaticJson         = fgc4::utils::StaticJson;
+        using ComponentRef  = std::reference_wrapper<IComponent>;
+        using ChildrenList  = std::vector<ComponentRef>;
+        using ParameterRef  = std::reference_wrapper<IParameter>;
+        using ParameterList = std::vector<std::pair<std::string, ParameterRef>>;
+        using StaticJson    = fgc4::utils::StaticJson;
 
         IComponent(std::string_view type, std::string_view name)
             : m_component_type(type),
