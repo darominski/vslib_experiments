@@ -22,11 +22,11 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/periodicLookupTableTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidClassicTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/srfPllTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rootComponentTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstControllerTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/sinLookupTableTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/srfPllTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/abcToAlphaBetaTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/abcToDq0Transform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/alphaBetaToDq0Transform.cpp
