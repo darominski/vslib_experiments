@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fmt/format.h>
+#include <string>
 #include <unistd.h>
 
 #include "peripherals/reg_to_stream.h"
@@ -40,6 +42,10 @@ namespace user
            "REF.NINTH_PLATEAU.TIME",
            "REF.NINTH_PLATEAU.DURATION"};
 
+    std::array<std::string, 9> ordinal_numerals
+        = {"FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHT", "NINTH"};
+
+
     class Converter : public vslib::IConverter
     {
       public:
@@ -55,13 +61,14 @@ namespace user
               //   limit("limit", *this),
               //   abc_2_dq0("abc_2_dq0", *this),
               //   dq0_2_abc("dq0_2_abc", *this),
+              control_period(*this, "control_period", 0.0),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
         {
             // initialize all your objects that need initializing
             for (int index = 0; index < 30; index++)
             {
-                command_map[index] = std::make_pair(signal_name[index], -1.0);
+                cyclic_data_map[signal_name[index]] = -1.0;
             }
         }
 
@@ -72,7 +79,7 @@ namespace user
         // end of your Components
 
         // Define your Parameters here
-
+        vslib::Parameter<double> control_period;
         // end of your Parameters
 
         void init() override
@@ -151,16 +158,40 @@ namespace user
             return *reinterpret_cast<TargetType*>(&input);
         }
 
-        unsigned int                                          c_tim{0};
-        std::map<unsigned int, std::pair<std::string, float>> command_map;
+        unsigned int                 c_tim{0};
+        std::map<std::string, float> cyclic_data_map;
 
-        void print_command_map()
+        void print_cyclic_data_map()
         {
             std::cout << "Values received: " << std::endl;
-            for (int index = 0; index < command_map.size(); index++)
+            for (int index = 0; index < cyclic_data_map.size(); index++)
             {
-                std::cout << command_map[index].first << " " << command_map[index].second << std::endl;
+                std::cout << signal_name[index] << ": " << cyclic_data_map[signal_name[index]] << std::endl;
             }
+        }
+
+        double get_ref(double current_time)
+        {
+            bool current_regulation = (cyclic_data_map["REF.START.VREF"] == 0.0);   // field regulation if false
+
+            double reference = 0.0;
+            if (current_time < cyclic_data_map["REF.FIRST_PLATEAU.TIME"])   // and FIRST_PLATEAU is not -1
+            {
+                reference = cyclic_data_map["REF.START.VREF"];
+            }
+
+            for (int index = 1; index <= 9; index++)
+            {
+                if (current_time >= cyclic_data_map[fmt::format("REF.{}_PLATEAU.TIME", ordinal_numerals[index])]
+                    && current_time
+                           < (cyclic_data_map[fmt::format("REF.{}_PLATEAU.TIME", ordinal_numerals[index])]
+                              + cyclic_data_map[fmt::format("REF.{}_PLATEAU.DURATION", ordinal_numerals[index])]))
+                {
+                    reference = cyclic_data_map[fmt::format("REF.{}_PLATEAU.REF", ordinal_numerals[index])];
+                }
+            }
+
+            return reference;
         }
 
         static void RTTask(Converter& converter)
@@ -182,11 +213,20 @@ namespace user
             {
                 // new cycle start
                 converter.c_tim = 0;
-                converter.print_command_map();
             }
 
-            converter.command_map[converter.c_tim].second = cyclic_data_input;
-
+            if (converter.c_tim < 30)
+            {
+                converter.cyclic_data_map[signal_name[converter.c_tim]] = cyclic_data_input;
+            }
+            else if (converter.c_tim == 30)
+            {
+                converter.print_cyclic_data_map();
+            }
+            else   // c_tim > 30, full message received
+            {
+                data_in[2] = converter.get_ref(converter.c_tim * converter.control_period);
+            }
             // message received, update c_tim
             converter.c_tim++;
 
@@ -203,11 +243,8 @@ namespace user
 
             // trigger connection
             converter.m_r2s->ctrl = REG_TO_STREAM_CTRL_START;
-            // converter.m_recently_used = true;
             converter.counter++;
         }
-
-        // bool m_recently_used{false};
 
       private:
         int m_interrupt_id;

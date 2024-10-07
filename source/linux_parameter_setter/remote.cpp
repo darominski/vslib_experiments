@@ -70,6 +70,8 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
 
     const double control_period = 50e-6;
 
+    values_to_set["converter.control_period"] = 1e-4;
+
     // PLL
     values_to_set["pll.f_rated"]      = 50.0;
     values_to_set["pll.angle_offset"] = 0.0;
