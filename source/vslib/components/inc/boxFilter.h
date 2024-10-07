@@ -71,7 +71,6 @@ namespace vslib
         FixedPoint<fractional_bits>                            m_cumulative{0};   //!< Cumulative of the inputs
     };
 
-
     // ************************************************************
     // Partial template specialization for low-order filters
     //
