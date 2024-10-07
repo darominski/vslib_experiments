@@ -19,7 +19,7 @@ namespace vslib
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        Dq0ToAbcTransform(std::string_view name, IComponent& parent, const uint64_t number_points = 10'000)
+        Dq0ToAbcTransform(std::string_view name, Component& parent, const uint64_t number_points = 10'000)
             : Component("Dq0ToAbcTransform", name, parent),
               dq0_2_alphabeta("dq0_2_alphabeta", *this, number_points),
               alphabeta_2_abc("alphabeta_2_abc", *this)

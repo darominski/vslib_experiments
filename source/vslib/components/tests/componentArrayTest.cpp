@@ -26,7 +26,7 @@ class ComponentArrayTest : public ::testing::Test
 class Derived : public Component
 {
   public:
-    Derived(std::string_view name, IComponent& parent)
+    Derived(std::string_view name, Component& parent)
         : Component("Derived", name, parent)
     {
     }

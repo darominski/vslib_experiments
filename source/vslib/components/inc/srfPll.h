@@ -23,7 +23,7 @@ namespace vslib
         //!
         //! @param name Name identification of the PLL controller
         //! @param parent Parent of this controller
-        SRFPLL(std::string_view name, IComponent& parent)
+        SRFPLL(std::string_view name, Component& parent)
             : Component("SRFPLL", name, parent),
               f_rated(*this, "f_rated", 0.0),
               angle_offset(*this, "angle_offset"),

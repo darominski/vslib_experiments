@@ -23,7 +23,7 @@ namespace vslib
         //!
         //! @param name Name of this Filter Component
         //! @param parent Parent of this Filter Component
-        IIRFilter(std::string_view name, IComponent& parent)
+        IIRFilter(std::string_view name, Component& parent)
             : Filter("IIRFilter", name, parent),
               numerator(*this, "numerator_coefficients"),
               denominator(*this, "denominator_coefficients")

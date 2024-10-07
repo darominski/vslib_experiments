@@ -26,7 +26,7 @@ namespace vslib
         //!
         //! @param name Name identification of the PID controller
         //! @param parent Parent of this controller
-        PID(std::string_view name, IComponent& parent)
+        PID(std::string_view name, Component& parent)
             : Component("PID", name, parent),
               kp(*this, "kp"),                            // default limits
               ki(*this, "ki"),                            // default limits

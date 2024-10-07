@@ -23,7 +23,7 @@ namespace vslib
         //! @param name Name of this Component
         //! @param parent Parent of this Component
         //! @param number_points Length of the lookup table vector
-        CosLookupTable(std::string_view name, IComponent& parent, const size_t number_points)
+        CosLookupTable(std::string_view name, Component& parent, const size_t number_points)
             : Component("CosLookupTable", name, parent),
               m_function(
                   "data", *this,

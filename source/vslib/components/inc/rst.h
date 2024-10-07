@@ -23,7 +23,7 @@ namespace vslib
         //!
         //! @param name Name of this Controller Component
         //! @param parent Parent of this Controller Component
-        RST(std::string_view name, IComponent& parent)
+        RST(std::string_view name, Component& parent)
             : Component("RST", name, parent),
               r(*this, "r"),
               s(*this, "s"),

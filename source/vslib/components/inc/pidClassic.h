@@ -22,7 +22,7 @@ namespace vslib
         //! @param anti_windup_protection Optional anti-windup protection method. It needs to take double (integral
         //! value) and return a double (corrected integral value)
         PIDClassic(
-            std::string_view name, IComponent& parent,
+            std::string_view name, Component& parent,
             std::function<double(double)> anti_windup_protection =
                 [](double input)
             {

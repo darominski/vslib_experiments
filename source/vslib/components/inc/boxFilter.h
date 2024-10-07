@@ -26,7 +26,7 @@ namespace vslib
         //!
         //! @param name Name of this Component
         //! @param parent Pointer to the parent of this Component
-        BoxFilter(std::string_view name, IComponent& parent)
+        BoxFilter(std::string_view name, Component& parent)
             : Filter("BoxFilter", name, parent)
         {
             static_assert(FilterOrder >= 1, "Filter order needs to be a positive number larger than zero.");
@@ -83,7 +83,7 @@ namespace vslib
 
       public:
         //! Constructor of the box filter component
-        BoxFilter(std::string_view name, IComponent& parent)
+        BoxFilter(std::string_view name, Component& parent)
             : Filter("BoxFilter", name, parent)
         {
         }
@@ -120,7 +120,7 @@ namespace vslib
 
       public:
         //! Constructor of the box filter component
-        BoxFilter(std::string_view name, IComponent& parent)
+        BoxFilter(std::string_view name, Component& parent)
             : Filter("BoxFilter", name, parent)
         {
         }
