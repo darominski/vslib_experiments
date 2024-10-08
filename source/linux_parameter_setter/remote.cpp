@@ -68,9 +68,9 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     std::array<int, 2>          version{0, 1};
     std::map<std::string, Json> values_to_set;
 
-    const double control_period = 50e-6;
+    const double control_period = 1e-3;
 
-    values_to_set["converter.control_period"] = 1e-4;
+    values_to_set["example.control_period"] = control_period;
 
     // PLL
     values_to_set["pll.f_rated"]      = 50.0;

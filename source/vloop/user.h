@@ -10,7 +10,7 @@
 
 namespace user
 {
-    std::array<std::string, 30> signal_name
+    static std::array<std::string, 30> signal_name
         = {"REF_USER",
            "REF_USER",
            "REF.START.VREF",
@@ -42,9 +42,8 @@ namespace user
            "REF.NINTH_PLATEAU.TIME",
            "REF.NINTH_PLATEAU.DURATION"};
 
-    std::array<std::string, 9> ordinal_numerals
+    static std::array<std::string, 9> ordinal_numerals
         = {"FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHT", "NINTH"};
-
 
     class Converter : public vslib::IConverter
     {
@@ -68,7 +67,7 @@ namespace user
             // initialize all your objects that need initializing
             for (int index = 0; index < 30; index++)
             {
-                cyclic_data_map[signal_name[index]] = -1.0;
+                cyclic_data[signal_name[index]] = -1.0;
             }
         }
 
@@ -159,40 +158,100 @@ namespace user
         }
 
         unsigned int                 c_tim{0};
-        std::map<std::string, float> cyclic_data_map;
+        std::map<std::string, float> cyclic_data;
 
-        void print_cyclic_data_map()
+        void print_cyclic_data()
         {
             std::cout << "Values received: " << std::endl;
-            for (int index = 0; index < cyclic_data_map.size(); index++)
+            for (int index = 0; index < 30; index++)
             {
-                std::cout << signal_name[index] << ": " << cyclic_data_map[signal_name[index]] << std::endl;
+                std::cout << signal_name[index] << ": " << cyclic_data[signal_name[index]] << std::endl;
             }
+        }
+
+        double find_cycle_duration()
+        {
+            for (int index = 8; index > 0; index--)
+            {
+                const auto&  numeral     = ordinal_numerals[index];
+                const double min_plateau = cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
+                const double max_plateau = min_plateau + cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
+                if (min_plateau > 0 && max_plateau > 0)
+                {
+                    return (max_plateau > 2.3) ? 3.6 : 2.4;
+                }
+            }
+        }
+
+        std::vector<std::pair<double, double>> plot_ref()
+        {
+            const double min = 0;
+            const double max = find_cycle_duration();
+            std::cout << "Cycle duration: " << max << std::endl;
+            const int n_points = static_cast<int>((max - min) / control_period) + 1;
+
+            const double                           step_size = (max - min) / n_points;
+            std::vector<std::pair<double, double>> reference_function(n_points);
+
+            for (int index = 0; index < n_points; index++)
+            {
+                double x = min + index * step_size;
+                double y = 0.0;
+                // 9 possible plateaux, find the right plateau:
+                for (int plateau_index = 0; plateau_index < 9; plateau_index++)
+                {
+                    const auto&  numeral     = ordinal_numerals[plateau_index];
+                    const double min_plateau = cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
+                    const double max_plateau
+                        = min_plateau + cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
+                    if (x >= min_plateau && x < max_plateau)
+                    {
+                        if (plateau_index == 0)
+                        {
+                            y = cyclic_data[fmt::format("REF.{}_PLATEAU.REF", numeral)];
+                        }
+                        else
+                        {
+                            y = cyclic_data[fmt::format("PPPL.REF4_{}", plateau_index - 1)];
+                        }
+                        // std::cout << numeral << " " << y << std::endl;
+                        break;
+                    }
+                }
+                reference_function.emplace_back(std::make_pair(x, y));
+            }
+            return reference_function;
         }
 
         double get_ref(double current_time)
         {
-            bool current_regulation = (cyclic_data_map["REF.START.VREF"] == 0.0);   // field regulation if false
-
             double reference = 0.0;
-            if (current_time < cyclic_data_map["REF.FIRST_PLATEAU.TIME"])   // and FIRST_PLATEAU is not -1
-            {
-                reference = cyclic_data_map["REF.START.VREF"];
-            }
 
-            for (int index = 1; index <= 9; index++)
+            for (int index = 0; index < 9; index++)
             {
-                if (current_time >= cyclic_data_map[fmt::format("REF.{}_PLATEAU.TIME", ordinal_numerals[index])]
-                    && current_time
-                           < (cyclic_data_map[fmt::format("REF.{}_PLATEAU.TIME", ordinal_numerals[index])]
-                              + cyclic_data_map[fmt::format("REF.{}_PLATEAU.DURATION", ordinal_numerals[index])]))
+                const auto&  numeral     = ordinal_numerals[index];
+                const double min_plateau = cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
+                const double max_plateau = min_plateau + cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
+                if (current_time >= min_plateau && current_time < max_plateau)
                 {
-                    reference = cyclic_data_map[fmt::format("REF.{}_PLATEAU.REF", ordinal_numerals[index])];
+                    if (index == 0)
+                    {
+                        reference = cyclic_data[fmt::format("REF.{}_PLATEAU.REF", numeral)];
+                    }
+                    else
+                    {
+                        reference = cyclic_data[fmt::format("PPPL.REF4_{}", index - 1)];
+                    }
+
+                    // std::cout << current_time << " " << numeral<< " " << min_plateau << " " << max_plateau << " " <<
+                    // reference << std::endl;
+                    break;
                 }
             }
-
             return reference;
         }
+
+        unsigned long interrupt_counter{0};
 
         static void RTTask(Converter& converter)
         {
@@ -206,29 +265,48 @@ namespace user
                 data_in[i] = cast<uint64_t, double>(converter.m_s2r->data[i].value);
             }
 
-            volatile const float c0                = data_in[0];
-            volatile const float cyclic_data_input = data_in[1];
+            const float cyclic_data_input = data_in[0];
+            const float c0                = data_in[1];
+            const float vdc1              = data_in[2];
+            const float vdc2              = data_in[3];
+            const float vdc3              = data_in[4];
+            const float vdc4              = data_in[5];
+            const float vdc5              = data_in[6];
+            const float vdc6              = data_in[7];
 
-            if (c0 == 1 && (converter.c_tim != 0 && converter.c_tim != 1))
+            // std::cout << "input: " <<  cyclic_data_input << ", c0: " << c0  << " " << vdc1 << std::endl;
+
+            // detect new cycle: c0=1, c_tim arbitrary
+            if (c0 > 0.5 && (converter.c_tim != 0 && converter.c_tim != 1))
             {
                 // new cycle start
+                // std::cout << "resetting " << c0 << " " << converter.c_tim << std::endl;
                 converter.c_tim = 0;
             }
 
             if (converter.c_tim < 30)
             {
-                converter.cyclic_data_map[signal_name[converter.c_tim]] = cyclic_data_input;
+                // std::cout << "setting " << cyclic_data_input <<
+                converter.cyclic_data[signal_name[converter.c_tim]] = cyclic_data_input;
             }
             else if (converter.c_tim == 30)
             {
-                converter.print_cyclic_data_map();
+                converter.print_cyclic_data();
+                // converter.plot_ref();
+                // if(!converter.first)
+                // {
+                //     exit(0);
+                // }
+                // converter.first = false;
             }
             else   // c_tim > 30, full message received
             {
                 data_in[2] = converter.get_ref(converter.c_tim * converter.control_period);
             }
+
             // message received, update c_tim
             converter.c_tim++;
+            converter.interrupt_counter++;
 
             // write to output registers
             for (uint32_t index = 0; index < num_data_half; index++)
