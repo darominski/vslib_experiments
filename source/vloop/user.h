@@ -185,10 +185,9 @@ namespace user
 
         std::vector<std::pair<double, double>> plot_ref()
         {
-            const double min = 0;
-            const double max = find_cycle_duration();
-            std::cout << "Cycle duration: " << max << std::endl;
-            const int n_points = static_cast<int>((max - min) / control_period) + 1;
+            const double min      = 0;
+            const double max      = find_cycle_duration();
+            const int    n_points = static_cast<int>((max - min) / control_period) + 1;
 
             const double                           step_size = (max - min) / n_points;
             std::vector<std::pair<double, double>> reference_function(n_points);
@@ -212,9 +211,8 @@ namespace user
                         }
                         else
                         {
-                            y = cyclic_data[fmt::format("PPPL.REF4_{}", plateau_index - 1)];
+                            y = cyclic_data[fmt::format("REF.PPPL.REF4_{}", plateau_index - 1)];
                         }
-                        // std::cout << numeral << " " << y << std::endl;
                         break;
                     }
                 }
@@ -223,35 +221,53 @@ namespace user
             return reference_function;
         }
 
-        double get_ref(double current_time)
+        double get_plateau(const int plateau_index)
         {
-            double reference = 0.0;
+            const auto& numeral = ordinal_numerals[plateau_index];
+            return (plateau_index == 0) ? cyclic_data[fmt::format("REF.{}_PLATEAU.REF", numeral)]
+                                        : cyclic_data[fmt::format("REF.PPPL.REF4_{}", plateau_index - 1)];
+        }
+
+        double interpolate_to_next(const double x, const double x1, const double y1, const double x2, const double y2)
+        {
+            return y1 + (x - x1) * (y2 - y1) / (x2 - x1);
+        }
+
+        double get_ref(const double current_time)
+        {
+            double reference         = 0.0;
+            double previous_ref      = 0.0;
+            double previous_max_time = 0.0;
 
             for (int index = 0; index < 9; index++)
             {
-                const auto&  numeral     = ordinal_numerals[index];
-                const double min_plateau = cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
-                const double max_plateau = min_plateau + cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
-                if (current_time >= min_plateau && current_time < max_plateau)
+                const auto&  numeral       = ordinal_numerals[index];
+                const double next_min_time = cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
+                const double next_max_time
+                    = next_min_time + cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
+                const auto next_ref = get_plateau(index);
+                // first, if we fall between plateaux: interpolate the reference
+                if (current_time < next_min_time)
                 {
-                    if (index == 0)
-                    {
-                        reference = cyclic_data[fmt::format("REF.{}_PLATEAU.REF", numeral)];
-                    }
-                    else
-                    {
-                        reference = cyclic_data[fmt::format("PPPL.REF4_{}", index - 1)];
-                    }
-
-                    // std::cout << current_time << " " << numeral<< " " << min_plateau << " " << max_plateau << " " <<
-                    // reference << std::endl;
+                    reference
+                        = interpolate_to_next(current_time, previous_max_time, previous_ref, next_min_time, next_ref);
                     break;
                 }
+                // if we are in a plateau: reference is the given reference
+                else if (current_time >= next_min_time && current_time < next_max_time)
+                {
+                    reference = next_ref;
+                    break;
+                }
+                // else: reference is 0
+                previous_ref      = next_ref;
+                previous_max_time = next_max_time;
             }
             return reference;
         }
 
         unsigned long interrupt_counter{0};
+        double        previous_cyclic_data{-1};
 
         static void RTTask(Converter& converter)
         {
@@ -265,19 +281,22 @@ namespace user
                 data_in[i] = cast<uint64_t, double>(converter.m_s2r->data[i].value);
             }
 
-            const float cyclic_data_input = data_in[0];
-            const float c0                = data_in[1];
-            const float vdc1              = data_in[2];
-            const float vdc2              = data_in[3];
-            const float vdc3              = data_in[4];
-            const float vdc4              = data_in[5];
-            const float vdc5              = data_in[6];
-            const float vdc6              = data_in[7];
+            const double cyclic_data_input = data_in[0];
+            const double c0                = data_in[1];
+            const double vdc1              = data_in[2];
+            const double vdc2              = data_in[3];
+            const double vdc3              = data_in[4];
+            const double vdc4              = data_in[5];
+            const double vdc5              = data_in[6];
+            const double vdc6              = data_in[7];
+
+            data_in[2] = 0.0;   // otherwise, spikes appear as I am reusing this channel for output
 
             // std::cout << "input: " <<  cyclic_data_input << ", c0: " << c0  << " " << vdc1 << std::endl;
 
             // detect new cycle: c0=1, c_tim arbitrary
-            if (c0 > 0.5 && (converter.c_tim != 0 && converter.c_tim != 1))
+            // if (c0 > 0.5 && (converter.c_tim != 0 && converter.c_tim != 1))
+            if (cyclic_data_input > -1 && converter.previous_cyclic_data < 0)
             {
                 // new cycle start
                 // std::cout << "resetting " << c0 << " " << converter.c_tim << std::endl;
@@ -286,20 +305,11 @@ namespace user
 
             if (converter.c_tim < 30)
             {
-                // std::cout << "setting " << cyclic_data_input <<
+                // std::cout << "setting " << cyclic_data_input << ", to " << signal_name[converter.c_tim] << std::endl;
                 converter.cyclic_data[signal_name[converter.c_tim]] = cyclic_data_input;
             }
-            else if (converter.c_tim == 30)
-            {
-                converter.print_cyclic_data();
-                // converter.plot_ref();
-                // if(!converter.first)
-                // {
-                //     exit(0);
-                // }
-                // converter.first = false;
-            }
-            else   // c_tim > 30, full message received
+
+            if (converter.c_tim > 4)   // c_tim > 4, we can start outputting reference
             {
                 data_in[2] = converter.get_ref(converter.c_tim * converter.control_period);
             }
@@ -307,6 +317,7 @@ namespace user
             // message received, update c_tim
             converter.c_tim++;
             converter.interrupt_counter++;
+            converter.previous_cyclic_data = cyclic_data_input;
 
             // write to output registers
             for (uint32_t index = 0; index < num_data_half; index++)
