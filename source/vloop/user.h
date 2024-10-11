@@ -67,7 +67,7 @@ namespace user
             // initialize all your objects that need initializing
             for (int index = 0; index < 30; index++)
             {
-                cyclic_data[signal_name[index]] = -1.0;
+                m_cyclic_data[signal_name[index]] = -1.0;
             }
         }
 
@@ -83,37 +83,38 @@ namespace user
 
         void init() override
         {
-            if (m_s2r->ctrl & STREAM_TO_REG_CTRL_PMA_INIT)
-            {
-                m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_PMA_INIT;
-            }
-            sleep(2);
-            if (m_s2r->ctrl & STREAM_TO_REG_CTRL_RESET_PB)
-            {
-                m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_RESET_PB;
-            }
-            sleep(1);
+            // if (m_s2r->ctrl & STREAM_TO_REG_CTRL_PMA_INIT)
+            // {
+            //     m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_PMA_INIT;
+            // }
+            // sleep(2);
+            // if (m_s2r->ctrl & STREAM_TO_REG_CTRL_RESET_PB)
+            // {
+            //     m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_RESET_PB;
+            // }
+            // sleep(1);
 
-            m_s2r->ctrl |= STREAM_TO_REG_CTRL_SEL_OUTPUT;
+            // m_s2r->ctrl |= STREAM_TO_REG_CTRL_SEL_OUTPUT;
 
-            if (!(m_s2r->status
-                  & (STREAM_TO_REG_STATUS_CHANNEL_UP | STREAM_TO_REG_STATUS_GT_PLL_LOCK | STREAM_TO_REG_STATUS_LANE_UP
-                     | STREAM_TO_REG_STATUS_PLL_LOCKED | STREAM_TO_REG_STATUS_GT_POWERGOOD)))
-            {
-                printf("Unexpected status: 0x%#08x\n", m_s2r->ctrl);
-            }
+            // if (!(m_s2r->status
+            //       & (STREAM_TO_REG_STATUS_CHANNEL_UP | STREAM_TO_REG_STATUS_GT_PLL_LOCK |
+            //       STREAM_TO_REG_STATUS_LANE_UP
+            //          | STREAM_TO_REG_STATUS_PLL_LOCKED | STREAM_TO_REG_STATUS_GT_POWERGOOD)))
+            // {
+            //     printf("Unexpected status: 0x%#08x\n", m_s2r->ctrl);
+            // }
 
-            if (m_s2r->status & (STREAM_TO_REG_STATUS_LINK_RESET | STREAM_TO_REG_STATUS_SYS_RESET))
-            {
-                printf("Link is in reset\n");
-            }
+            // if (m_s2r->status & (STREAM_TO_REG_STATUS_LINK_RESET | STREAM_TO_REG_STATUS_SYS_RESET))
+            // {
+            //     printf("Link is in reset\n");
+            // }
 
-            if (m_s2r->status & (STREAM_TO_REG_STATUS_SOFT_ERR | STREAM_TO_REG_STATUS_HARD_ERR))
-            {
-                printf("Got an error\n");
-            }
+            // if (m_s2r->status & (STREAM_TO_REG_STATUS_SOFT_ERR | STREAM_TO_REG_STATUS_HARD_ERR))
+            // {
+            //     printf("Got an error\n");
+            // }
 
-            printf("Link up and good. Ready to receive data.\n");
+            // printf("Link up and good. Ready to receive data.\n");
             interrupt_1.start();
         }
 
@@ -157,15 +158,11 @@ namespace user
             return *reinterpret_cast<TargetType*>(&input);
         }
 
-        unsigned int                 c_tim{0};
-        std::map<std::string, float> cyclic_data;
-
         void print_cyclic_data()
         {
-            std::cout << "Values received: " << std::endl;
             for (int index = 0; index < 30; index++)
             {
-                std::cout << signal_name[index] << ": " << cyclic_data[signal_name[index]] << std::endl;
+                std::cout << signal_name[index] << ": " << m_cyclic_data[signal_name[index]] << std::endl;
             }
         }
 
@@ -174,8 +171,8 @@ namespace user
             for (int index = 8; index > 0; index--)
             {
                 const auto&  numeral     = ordinal_numerals[index];
-                const double min_plateau = cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
-                const double max_plateau = min_plateau + cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
+                const double min_plateau = m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
+                const double max_plateau = min_plateau + m_cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
                 if (min_plateau > 0 && max_plateau > 0)
                 {
                     return (max_plateau > 2.3) ? 3.6 : 2.4;
@@ -183,49 +180,98 @@ namespace user
             }
         }
 
-        std::vector<std::pair<double, double>> plot_ref()
-        {
-            const double min      = 0;
-            const double max      = find_cycle_duration();
-            const int    n_points = static_cast<int>((max - min) / control_period) + 1;
+        // std::vector<std::pair<double, double>> plot_ref()
+        // {
+        //     const double min      = 0;
+        //     const double max      = find_cycle_duration();
+        //     const int    n_points = static_cast<int>((max - min) / control_period) + 1;
 
-            const double                           step_size = (max - min) / n_points;
-            std::vector<std::pair<double, double>> reference_function(n_points);
+        //     const double                           step_size = (max - min) / n_points;
+        //     std::vector<std::pair<double, double>> reference_function(n_points);
 
-            for (int index = 0; index < n_points; index++)
-            {
-                double x = min + index * step_size;
-                double y = 0.0;
-                // 9 possible plateaux, find the right plateau:
-                for (int plateau_index = 0; plateau_index < 9; plateau_index++)
-                {
-                    const auto&  numeral     = ordinal_numerals[plateau_index];
-                    const double min_plateau = cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
-                    const double max_plateau
-                        = min_plateau + cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
-                    if (x >= min_plateau && x < max_plateau)
-                    {
-                        if (plateau_index == 0)
-                        {
-                            y = cyclic_data[fmt::format("REF.{}_PLATEAU.REF", numeral)];
-                        }
-                        else
-                        {
-                            y = cyclic_data[fmt::format("REF.PPPL.REF4_{}", plateau_index - 1)];
-                        }
-                        break;
-                    }
-                }
-                reference_function.emplace_back(std::make_pair(x, y));
-            }
-            return reference_function;
-        }
+        //     for (int index = 0; index < n_points; index++)
+        //     {
+        //         double x = min + index * step_size;
+        //         double y = 0.0;
+        //         // 9 possible plateaux, find the right plateau:
+        //         for (int plateau_index = 0; plateau_index < 9; plateau_index++)
+        //         {
+        //             const auto&  numeral     = ordinal_numerals[plateau_index];
+        //             const double min_plateau = m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
+        //             const double max_plateau
+        //                 = min_plateau + m_cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
+        //             if (x >= min_plateau && x < max_plateau)
+        //             {
+        //                 if (plateau_index == 0)
+        //                 {
+        //                     y = m_cyclic_data[fmt::format("REF.{}_PLATEAU.REF", numeral)];
+        //                 }
+        //                 else
+        //                 {
+        //                     y = m_cyclic_data[fmt::format("REF.PPPL.REF4_{}", plateau_index - 1)];
+        //                 }
+        //                 break;
+        //             }
+        //         }
+        //         reference_function.emplace_back(std::make_pair(x, y));
+        //     }
+        //     return reference_function;
+        // }
 
         double get_plateau(const int plateau_index)
         {
             const auto& numeral = ordinal_numerals[plateau_index];
-            return (plateau_index == 0) ? cyclic_data[fmt::format("REF.{}_PLATEAU.REF", numeral)]
-                                        : cyclic_data[fmt::format("REF.PPPL.REF4_{}", plateau_index - 1)];
+            return (plateau_index == 0) ? m_cyclic_data[fmt::format("REF.{}_PLATEAU.REF", numeral)]
+                                        : m_cyclic_data[fmt::format("REF.PPPL.REF4_{}", plateau_index - 1)];
+        }
+
+        int get_plateau_id(const double current_time)
+        {
+            int id = 0;
+            for (int index = 0; index < 9; index++)
+            {
+                double ref = 0;
+                if (index == 0)
+                {
+                    ref = m_cyclic_data[fmt::format("REF.FIRST_PLATEAU.REF")];
+                }
+                else
+                {
+                    ref = m_cyclic_data[fmt::format("REF.PPPL.REF4_{}", index - 1)];
+                }
+                if (ref < 0)
+                {
+                    id = index - 1;
+                    break;
+                }
+            }
+            return id;
+        }
+
+        double end_time_of_last_plateau()
+        {
+            int index = 0;
+            // find first non-set plateau: last plateau is the previous one
+            while (index < 9)
+            {
+                double plateau = 0;
+                if (index == 0)
+                {
+                    plateau = m_cyclic_data[fmt::format("REF.FIRST_PLATEAU.REF")];
+                }
+                else
+                {
+                    plateau = m_cyclic_data[fmt::format("REF.PPPL.REF4_{}", index - 1)];
+                }
+                if (plateau < 0)
+                {
+                    break;
+                }
+                index++;
+            }
+            const int last_plateau_id = index - 1;
+            return m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", ordinal_numerals[last_plateau_id])]
+                   + m_cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", ordinal_numerals[last_plateau_id])];
         }
 
         double interpolate_to_next(const double x, const double x1, const double y1, const double x2, const double y2)
@@ -242,9 +288,9 @@ namespace user
             for (int index = 0; index < 9; index++)
             {
                 const auto&  numeral       = ordinal_numerals[index];
-                const double next_min_time = cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
+                const double next_min_time = m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
                 const double next_max_time
-                    = next_min_time + cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
+                    = next_min_time + m_cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
                 const auto next_ref = get_plateau(index);
                 // first, if we fall between plateaux: interpolate the reference
                 if (current_time < next_min_time)
@@ -266,12 +312,116 @@ namespace user
             return reference;
         }
 
+        //! Returns the number of active number of DCDC converters.
+        //!
+        //! @param current_time Time in the cycle at which to provide the number of active DCDCs
+        //! @return Number of active DCDC converters, 1, 2, or 6.
+        int get_n_dcdc(const double current_time)
+        {
+            int n_dcdc           = 0;
+            // open-loop:
+            const int plateau_id = get_plateau_id(current_time);
+            if (plateau_id == 0)
+            {
+                n_dcdc = (m_cyclic_data["REF.START.VREF"] > 4900.0) ? 2 : 1;   // from Matlab's implementation
+            }
+            else
+            {
+                const double v_estimated = get_plateau(plateau_id) * m_r_mag;
+                if (v_estimated <= m_level_1)
+                {
+                    n_dcdc = 1;
+                }
+                else if (v_estimated > m_level_1 && v_estimated <= m_level_2)
+                {
+                    n_dcdc = 2;
+                }
+                else
+                {
+                    n_dcdc = 6;
+                }
+            }
+            return n_dcdc;
+        }
+
+        void pops_dispatcher(
+            const double current_time, const double v_ref, const double i_mag_meas, std::array<double, 8>& idx
+        )
+        {
+            // initialize the indices and kc, kf to zero:
+            double v_ref_1 = 0;
+            double v_ref_2 = 0;
+            double v_ref_3 = 0;
+            double v_ref_4 = 0;
+            double v_ref_5 = 0;
+            double v_ref_6 = 0;
+            double kc      = 0;
+            double kf      = 0;
+
+
+            const int n_dcdc = get_n_dcdc(current_time);
+
+            const double v_r = m_r_mag * i_mag_meas;
+            const double v_l = v_ref - v_r;
+
+            if (n_dcdc == 1)
+            {
+                v_ref_1 = v_ref;
+                // the rest remains unchanged
+            }
+            else if (n_dcdc == 2)
+            {
+                v_ref_1 = 0.5 * v_ref;
+                v_ref_2 = v_ref_1;
+                // the rest remain unchanged
+            }
+            else   // n_dcdc == 6
+            {
+                // assuming original calculation:
+
+                // energy needed to bring floaters to nominal voltage:
+                const double Ef
+                    = m_n_floaters * m_k * (std::pow(m_Udc_max_chargers, 2) - std::pow(m_Udc_min_chargers, 2));
+                // energy needed to bring chargers to nominal voltage:
+                const double Ech
+                    = m_n_chargers * m_k * (std::pow(m_Udc_max_floaters, 2) - std::pow(m_Udc_min_floaters, 2));
+
+                const double E = Ef + Ech;
+                kf             = Ef / E;
+                kc             = Ech / E;
+
+                v_ref_1 = v_ref * (1 - kf) / m_n_chargers;
+                v_ref_2 = v_ref_1;
+                v_ref_3 = v_ref * kf / m_n_floaters;
+                v_ref_4 = v_ref_3;
+                v_ref_5 = v_ref_3;
+                v_ref_6 = v_ref_3;
+            }
+
+            // set the outputs:
+            idx[0] = v_ref_1 / m_v_dc_meas[0];
+            idx[1] = v_ref_2 / m_v_dc_meas[1];
+            ;
+            idx[2] = v_ref_3 / m_v_dc_meas[2];
+            ;
+            idx[3] = v_ref_4 / m_v_dc_meas[3];
+            ;
+            idx[4] = v_ref_5 / m_v_dc_meas[4];
+            ;
+            idx[5] = v_ref_6 / m_v_dc_meas[5];
+            ;
+            idx[6] = kc;   // only calculated and relevant when n_dcdc is 6
+            idx[7] = kf;   // only calculated and relevant when n_dcdc is 6
+
+            // recharge time is the time of the end of the last plateau + 1 ms:
+            m_t_recharge = end_time_of_last_plateau() + 1e-3;
+        }
+
         unsigned long interrupt_counter{0};
         double        previous_cyclic_data{-1};
 
         static void RTTask(Converter& converter)
         {
-            // TEST 6: Active Front-End
             constexpr uint32_t                num_data      = 40;
             constexpr uint32_t                num_data_half = 20;
             std::array<double, num_data_half> data_in;
@@ -283,16 +433,12 @@ namespace user
 
             const double cyclic_data_input = data_in[0];
             const double c0                = data_in[1];
-            const double vdc1              = data_in[2];
-            const double vdc2              = data_in[3];
-            const double vdc3              = data_in[4];
-            const double vdc4              = data_in[5];
-            const double vdc5              = data_in[6];
-            const double vdc6              = data_in[7];
+            for (int index = 0; index < converter.m_v_dc_meas.size(); index++)
+            {
+                converter.m_v_dc_meas[index] = data_in[2 + index];
+            }
 
             data_in[2] = 0.0;   // otherwise, spikes appear as I am reusing this channel for output
-
-            // std::cout << "input: " <<  cyclic_data_input << ", c0: " << c0  << " " << vdc1 << std::endl;
 
             // detect new cycle: c0=1, c_tim arbitrary
             // if (c0 > 0.5 && (converter.c_tim != 0 && converter.c_tim != 1))
@@ -306,7 +452,7 @@ namespace user
             if (converter.c_tim < 30)
             {
                 // std::cout << "setting " << cyclic_data_input << ", to " << signal_name[converter.c_tim] << std::endl;
-                converter.cyclic_data[signal_name[converter.c_tim]] = cyclic_data_input;
+                converter.m_cyclic_data[signal_name[converter.c_tim]] = cyclic_data_input;
             }
 
             if (converter.c_tim > 4)   // c_tim > 4, we can start outputting reference
@@ -340,6 +486,27 @@ namespace user
 
         volatile stream_to_reg* m_s2r;
         volatile reg_to_stream* m_r2s;
+
+        unsigned int                 c_tim{0};
+        std::map<std::string, float> m_cyclic_data;
+        double                       m_t_recharge{0.0};
+        std::array<double, 6>        m_v_dc_meas{0.0};
+
+        //! Parameters of the converter, will be fixed or provided by Configurator? Or VSlib GUI Parameter?
+        const double m_r_mag{0.32};            //!< Magnets' resistance, in Ohm
+        const double m_l_mag{0.97};            //!< Magnets' inductance, in H
+        const double m_v_min{35};              //!< Minimum voltage that IGBT can deliver, in V
+        const double m_level_1{4 * m_v_min};   //!< Threshold to start using 2 DCDC, below: 1 DCDC
+        const double m_level_2{8 * m_v_min};   //!< Threshold to start using 6 DCDC, below: 2 DCDC
+        const int    m_n_floaters = 4;         // number of floaters
+        const int    m_n_chargers = 2;         // number of chargers
+
+        // factors in dispatcher:
+        const double m_k{0.5 * 0.247};   // ???
+        const double m_Udc_min_floaters{2400.0};
+        const double m_Udc_max_floaters{5000.0};
+        const double m_Udc_min_chargers{3100.0};
+        const double m_Udc_max_chargers{5000.0};
     };
 
 }   // namespace user
