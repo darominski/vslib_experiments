@@ -83,38 +83,37 @@ namespace user
 
         void init() override
         {
-            // if (m_s2r->ctrl & STREAM_TO_REG_CTRL_PMA_INIT)
-            // {
-            //     m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_PMA_INIT;
-            // }
-            // sleep(2);
-            // if (m_s2r->ctrl & STREAM_TO_REG_CTRL_RESET_PB)
-            // {
-            //     m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_RESET_PB;
-            // }
-            // sleep(1);
+            if (m_s2r->ctrl & STREAM_TO_REG_CTRL_PMA_INIT)
+            {
+                m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_PMA_INIT;
+            }
+            sleep(2);
+            if (m_s2r->ctrl & STREAM_TO_REG_CTRL_RESET_PB)
+            {
+                m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_RESET_PB;
+            }
+            sleep(1);
 
-            // m_s2r->ctrl |= STREAM_TO_REG_CTRL_SEL_OUTPUT;
+            m_s2r->ctrl |= STREAM_TO_REG_CTRL_SEL_OUTPUT;
 
-            // if (!(m_s2r->status
-            //       & (STREAM_TO_REG_STATUS_CHANNEL_UP | STREAM_TO_REG_STATUS_GT_PLL_LOCK |
-            //       STREAM_TO_REG_STATUS_LANE_UP
-            //          | STREAM_TO_REG_STATUS_PLL_LOCKED | STREAM_TO_REG_STATUS_GT_POWERGOOD)))
-            // {
-            //     printf("Unexpected status: 0x%#08x\n", m_s2r->ctrl);
-            // }
+            if (!(m_s2r->status
+                  & (STREAM_TO_REG_STATUS_CHANNEL_UP | STREAM_TO_REG_STATUS_GT_PLL_LOCK | STREAM_TO_REG_STATUS_LANE_UP
+                     | STREAM_TO_REG_STATUS_PLL_LOCKED | STREAM_TO_REG_STATUS_GT_POWERGOOD)))
+            {
+                printf("Unexpected status: 0x%#08x\n", m_s2r->ctrl);
+            }
 
-            // if (m_s2r->status & (STREAM_TO_REG_STATUS_LINK_RESET | STREAM_TO_REG_STATUS_SYS_RESET))
-            // {
-            //     printf("Link is in reset\n");
-            // }
+            if (m_s2r->status & (STREAM_TO_REG_STATUS_LINK_RESET | STREAM_TO_REG_STATUS_SYS_RESET))
+            {
+                printf("Link is in reset\n");
+            }
 
-            // if (m_s2r->status & (STREAM_TO_REG_STATUS_SOFT_ERR | STREAM_TO_REG_STATUS_HARD_ERR))
-            // {
-            //     printf("Got an error\n");
-            // }
+            if (m_s2r->status & (STREAM_TO_REG_STATUS_SOFT_ERR | STREAM_TO_REG_STATUS_HARD_ERR))
+            {
+                printf("Got an error\n");
+            }
 
-            // printf("Link up and good. Ready to receive data.\n");
+            printf("Link up and good. Ready to receive data.\n");
             interrupt_1.start();
         }
 
@@ -180,48 +179,9 @@ namespace user
             }
         }
 
-        // std::vector<std::pair<double, double>> plot_ref()
-        // {
-        //     const double min      = 0;
-        //     const double max      = find_cycle_duration();
-        //     const int    n_points = static_cast<int>((max - min) / control_period) + 1;
-
-        //     const double                           step_size = (max - min) / n_points;
-        //     std::vector<std::pair<double, double>> reference_function(n_points);
-
-        //     for (int index = 0; index < n_points; index++)
-        //     {
-        //         double x = min + index * step_size;
-        //         double y = 0.0;
-        //         // 9 possible plateaux, find the right plateau:
-        //         for (int plateau_index = 0; plateau_index < 9; plateau_index++)
-        //         {
-        //             const auto&  numeral     = ordinal_numerals[plateau_index];
-        //             const double min_plateau = m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
-        //             const double max_plateau
-        //                 = min_plateau + m_cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
-        //             if (x >= min_plateau && x < max_plateau)
-        //             {
-        //                 if (plateau_index == 0)
-        //                 {
-        //                     y = m_cyclic_data[fmt::format("REF.{}_PLATEAU.REF", numeral)];
-        //                 }
-        //                 else
-        //                 {
-        //                     y = m_cyclic_data[fmt::format("REF.PPPL.REF4_{}", plateau_index - 1)];
-        //                 }
-        //                 break;
-        //             }
-        //         }
-        //         reference_function.emplace_back(std::make_pair(x, y));
-        //     }
-        //     return reference_function;
-        // }
-
         double get_plateau(const int plateau_index)
         {
-            const auto& numeral = ordinal_numerals[plateau_index];
-            return (plateau_index == 0) ? m_cyclic_data[fmt::format("REF.{}_PLATEAU.REF", numeral)]
+            return (plateau_index == 0) ? m_cyclic_data[fmt::format("REF.FIRST_PLATEAU.REF")]
                                         : m_cyclic_data[fmt::format("REF.PPPL.REF4_{}", plateau_index - 1)];
         }
 
@@ -230,18 +190,20 @@ namespace user
             int id = 0;
             for (int index = 0; index < 9; index++)
             {
-                double ref = 0;
-                if (index == 0)
+                const auto&  numeral    = ordinal_numerals[index];
+                const double start_time = m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
+                const double duration   = m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
+                const double end_time   = start_time + duration;
+
+                // TODO: these decisions need to be written better
+                if (current_time < start_time)
                 {
-                    ref = m_cyclic_data[fmt::format("REF.FIRST_PLATEAU.REF")];
+                    id = index;
+                    break;
                 }
-                else
+                else if (current_time > start_time && current_time < end_time)
                 {
-                    ref = m_cyclic_data[fmt::format("REF.PPPL.REF4_{}", index - 1)];
-                }
-                if (ref < 0)
-                {
-                    id = index - 1;
+                    id = index;
                     break;
                 }
             }
@@ -263,7 +225,7 @@ namespace user
                 {
                     plateau = m_cyclic_data[fmt::format("REF.PPPL.REF4_{}", index - 1)];
                 }
-                if (plateau < 0)
+                if (plateau <= 1e-6)
                 {
                     break;
                 }
@@ -318,16 +280,18 @@ namespace user
         //! @return Number of active DCDC converters, 1, 2, or 6.
         int get_n_dcdc(const double current_time)
         {
-            int n_dcdc           = 0;
-            // open-loop:
+            int       n_dcdc     = 0;
             const int plateau_id = get_plateau_id(current_time);
-            if (plateau_id == 0)
+            if (plateau_id == -1)
             {
-                n_dcdc = (m_cyclic_data["REF.START.VREF"] > 4900.0) ? 2 : 1;   // from Matlab's implementation
+                // open-loop case, either 1 or 2 DC-DCs are active
+                n_dcdc = (m_cyclic_data["REF.START.VREF"] > 4900.0) ? 2 : 1;
             }
             else
             {
-                const double v_estimated = get_plateau(plateau_id) * m_r_mag;
+                const double v_estimated = get_plateau(plateau_id) * m_r_mag;   // + dI_dt;
+                std::cout << current_time << " " << plateau_id << " " << get_plateau(plateau_id) << std::endl;
+                std::cout << v_estimated << std::endl;
                 if (v_estimated <= m_level_1)
                 {
                     n_dcdc = 1;
@@ -348,6 +312,8 @@ namespace user
             const double current_time, const double v_ref, const double i_mag_meas, std::array<double, 8>& idx
         )
         {
+            const bool original_calculation = false;
+
             // initialize the indices and kc, kf to zero:
             double v_ref_1 = 0;
             double v_ref_2 = 0;
@@ -358,63 +324,146 @@ namespace user
             double kc      = 0;
             double kf      = 0;
 
-
             const int n_dcdc = get_n_dcdc(current_time);
-
+            std::cout << current_time << " " << n_dcdc << std::endl;
             const double v_r = m_r_mag * i_mag_meas;
             const double v_l = v_ref - v_r;
 
-            if (n_dcdc == 1)
+            // recharge time is the time of the end of the last plateau + 1 ms:
+            m_t_recharge = end_time_of_last_plateau() + 1e-3;
+
+            if (current_time < m_t_recharge)
             {
-                v_ref_1 = v_ref;
-                // the rest remains unchanged
+                if (n_dcdc == 1)
+                {
+                    v_ref_1 = v_ref;
+                    // the rest remains unchanged
+                }
+                else if (n_dcdc == 2)
+                {
+                    v_ref_1 = 0.5 * v_ref;
+                    v_ref_2 = 0.5 * v_ref;
+                    // the rest remain unchanged
+                }
+                else   // n_dcdc == 6
+                {
+                    if (original_calculation)
+                    {
+                        // assuming original calculation:
+                        // energy needed to bring floaters to nominal voltage:
+                        const double Ef
+                            = m_n_floaters * m_k * (std::pow(m_Udc_max_chargers, 2) - std::pow(m_Udc_min_chargers, 2));
+                        // energy needed to bring chargers to nominal voltage:
+                        const double Ech
+                            = m_n_chargers * m_k * (std::pow(m_Udc_max_floaters, 2) - std::pow(m_Udc_min_floaters, 2));
+
+                        const double E = Ef + Ech;
+                        kf             = Ef / E;
+                        kc             = Ech / E;
+
+                        v_ref_1 = v_ref * (1 - kf) / m_n_chargers;
+                        v_ref_2 = v_ref_1;
+                        v_ref_3 = v_ref * kf / m_n_floaters;
+                        v_ref_4 = v_ref_3;
+                        v_ref_5 = v_ref_3;
+                        v_ref_6 = v_ref_3;
+                    }
+                    else
+                    {
+                        // fixed-factors approach
+                        v_ref_1 = 0.5 * v_r + 0.1 * v_l;
+                        v_ref_2 = 0.5 * v_r + 0.1 * v_l;
+                        v_ref_3 = 0.2 * v_l;
+                        v_ref_4 = 0.2 * v_l;
+                        v_ref_5 = 0.2 * v_l;
+                        v_ref_6 = 0.2 * v_l;
+                        if (v_l < m_v_min)
+                        {
+                            v_ref_1 *= 0.3;
+                            v_ref_2 *= 0.3;
+                            v_ref_3 *= 0.1;
+                            v_ref_4 *= 0.1;
+                            v_ref_5 *= 0.1;
+                            v_ref_6 *= 0.1;
+                        }
+                    }
+                }
             }
-            else if (n_dcdc == 2)
+            else   // recharge is active
             {
-                v_ref_1 = 0.5 * v_ref;
-                v_ref_2 = v_ref_1;
-                // the rest remain unchanged
-            }
-            else   // n_dcdc == 6
-            {
-                // assuming original calculation:
+                const double          nominal_v2 = std::pow(5000.0, 2);
+                std::array<double, 6> dEc{0};
+                for (int index = 0; index < dEc.size(); index++)
+                {
+                    const double energy = 0.5 * 0.247 * (nominal_v2 - std::pow(m_v_dc_meas[index], 2));
+                    dEc[index]          = (energy > 0) ? energy : 0.0;
+                }
+                // total energy required to charge chargers to nominal voltage:
+                double Ec = (dEc[0] + dEc[1]);
+                if (Ec < 0)   // could be negative if AFE is too fast
+                {
+                    std::cout << "negative\n";
+                    Ec = 0;
+                }
+                // total energy required to charge floaters to nominal voltage:
+                const double Ef = dEc[2] + dEc[3] + dEc[4] + dEc[5];
 
-                // energy needed to bring floaters to nominal voltage:
-                const double Ef
-                    = m_n_floaters * m_k * (std::pow(m_Udc_max_chargers, 2) - std::pow(m_Udc_min_chargers, 2));
-                // energy needed to bring chargers to nominal voltage:
-                const double Ech
-                    = m_n_chargers * m_k * (std::pow(m_Udc_max_floaters, 2) - std::pow(m_Udc_min_floaters, 2));
+                if (Ef > 0 && i_mag_meas > 0)   // floaters not completely charged
+                {
+                    kf = 2.0 * Ef / (m_l_mag * std::pow(i_mag_meas, 2));
+                    if (kf > 1.0)
+                    {
+                        kf = 1.0;
+                    }
+                    kc = 1.0 - kf;
+                }
+                else
+                {
+                    kf = 0;
+                    kc = 1;
+                }
 
-                const double E = Ef + Ech;
-                kf             = Ef / E;
-                kc             = Ech / E;
-
-                v_ref_1 = v_ref * (1 - kf) / m_n_chargers;
-                v_ref_2 = v_ref_1;
-                v_ref_3 = v_ref * kf / m_n_floaters;
-                v_ref_4 = v_ref_3;
-                v_ref_5 = v_ref_3;
-                v_ref_6 = v_ref_3;
+                if (kf > 0)
+                {
+                    // chargers:
+                    if (Ec > 0)
+                    {
+                        v_ref_1 = 0.5 * v_r + kc * v_l * (dEc[0] / Ec);
+                        v_ref_2 = 0.5 * v_r + kc * v_l * (dEc[1] / Ec);
+                    }
+                    else
+                    {
+                        v_ref_1 = 0.5 * (v_r + v_l * kc);
+                        v_ref_2 = 0.5 * (v_r + v_l * kc);
+                    }
+                    // floaters:
+                    v_ref_3 = v_l * kf * (dEc[2] / Ef);
+                    v_ref_4 = v_l * kf * (dEc[3] / Ef);
+                    v_ref_5 = v_l * kf * (dEc[4] / Ef);
+                    v_ref_6 = v_l * kf * (dEc[5] / Ef);
+                }
+                else
+                {
+                    // chargers:
+                    v_ref_1 = 0.5 * v_ref;
+                    v_ref_2 = 0.5 * v_ref;
+                    // floaters:
+                    v_ref_3 = 0.0;
+                    v_ref_4 = 0.0;
+                    v_ref_5 = 0.0;
+                    v_ref_6 = 0.0;
+                }
             }
 
             // set the outputs:
             idx[0] = v_ref_1 / m_v_dc_meas[0];
             idx[1] = v_ref_2 / m_v_dc_meas[1];
-            ;
             idx[2] = v_ref_3 / m_v_dc_meas[2];
-            ;
             idx[3] = v_ref_4 / m_v_dc_meas[3];
-            ;
             idx[4] = v_ref_5 / m_v_dc_meas[4];
-            ;
             idx[5] = v_ref_6 / m_v_dc_meas[5];
-            ;
             idx[6] = kc;   // only calculated and relevant when n_dcdc is 6
             idx[7] = kf;   // only calculated and relevant when n_dcdc is 6
-
-            // recharge time is the time of the end of the last plateau + 1 ms:
-            m_t_recharge = end_time_of_last_plateau() + 1e-3;
         }
 
         unsigned long interrupt_counter{0};
@@ -432,33 +481,59 @@ namespace user
             }
 
             const double cyclic_data_input = data_in[0];
-            const double c0                = data_in[1];
             for (int index = 0; index < converter.m_v_dc_meas.size(); index++)
             {
                 converter.m_v_dc_meas[index] = data_in[2 + index];
             }
 
-            data_in[2] = 0.0;   // otherwise, spikes appear as I am reusing this channel for output
+            const double v_ref = data_in[8];
+
+            // calculate and set new values
+
+            for (int index = 0; index < num_data_half; index++)
+            {
+                data_in[index] = 0.0;   // zeroing as this channel is reused for output
+            }
+            data_in[0] = cyclic_data_input;
+            data_in[1] = converter.m_v_dc_meas[0];
 
             // detect new cycle: c0=1, c_tim arbitrary
-            // if (c0 > 0.5 && (converter.c_tim != 0 && converter.c_tim != 1))
             if (cyclic_data_input > -1 && converter.previous_cyclic_data < 0)
             {
-                // new cycle start
-                // std::cout << "resetting " << c0 << " " << converter.c_tim << std::endl;
-                converter.c_tim = 0;
+                converter.c_tim = 0;   // time = 0, new cycle begins
             }
 
             if (converter.c_tim < 30)
             {
-                // std::cout << "setting " << cyclic_data_input << ", to " << signal_name[converter.c_tim] << std::endl;
                 converter.m_cyclic_data[signal_name[converter.c_tim]] = cyclic_data_input;
             }
 
+            const double current_time     = converter.c_tim * converter.control_period;   // inside a cycle
+            double       i_meas_estimated = 0.0;
             if (converter.c_tim > 4)   // c_tim > 4, we can start outputting reference
             {
-                data_in[2] = converter.get_ref(converter.c_tim * converter.control_period);
+                i_meas_estimated = converter.get_ref(current_time);
             }
+            data_in[2] = i_meas_estimated;
+
+            // if (converter.c_tim == 30)
+            // {
+            //     converter.print_cyclic_data();
+            // }
+
+            if (converter.c_tim >= 30)
+            {
+                std::array<double, 8> dispatcher_data{0.0};
+                converter.pops_dispatcher(current_time, v_ref, i_meas_estimated, dispatcher_data);
+                for (int index = 0; index < 8; index++)
+                {
+                    data_in[index + 3] = dispatcher_data[index];
+                }
+            }
+
+            data_in[11] = converter.m_v_dc_meas[0];
+            data_in[12] = converter.m_v_dc_meas[1];
+            data_in[13] = converter.m_v_dc_meas[2];
 
             // message received, update c_tim
             converter.c_tim++;
