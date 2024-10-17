@@ -52,14 +52,6 @@ namespace user
             : vslib::IConverter("example", root),
               m_interrupt_id{121 + 0},   // Jonas's definition
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              //   pll("pll", *this),
-              //   pi_id_ref("pi_id_ref", *this),
-              //   pi_iq_ref("pi_iq_ref", *this),
-              //   pi_vd_ref("pi_vd_ref", *this),
-              //   pi_vq_ref("pi_vq_ref", *this),
-              //   limit("limit", *this),
-              //   abc_2_dq0("abc_2_dq0", *this),
-              //   dq0_2_abc("dq0_2_abc", *this),
               control_period(*this, "control_period", 0.0),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
@@ -179,38 +171,53 @@ namespace user
             }
         }
 
-        double get_plateau(const int plateau_index)
+        //! Returns the plateau reference value when provided with the index of that reference plateau value.
+        //!
+        //! @param
+        double get_plateau_by_index(const int plateau_index)
         {
             return (plateau_index == 0) ? m_cyclic_data[fmt::format("REF.FIRST_PLATEAU.REF")]
                                         : m_cyclic_data[fmt::format("REF.PPPL.REF4_{}", plateau_index - 1)];
         }
 
-        int get_plateau_id(const double current_time)
+        void get_plateau_id(const double current_time)
         {
-            int id = 0;
-            for (int index = 0; index < 9; index++)
+            int id = m_current_plateau_id;
+            for (int index = m_current_plateau_id; index < 9; index++)
             {
-                const auto&  numeral    = ordinal_numerals[index];
-                const double start_time = m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
-                const double duration   = m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
-                const double end_time   = start_time + duration;
-
-                // TODO: these decisions need to be written better
-                if (current_time < start_time)
+                if (current_time < m_cyclic_data["REF.FIRST_PLATEAU.TIME"]
+                    || (m_cyclic_data["REF.FIRST_PLATEAU.TIME"] == -1 || m_cyclic_data["REF.FIRST_PLATEAU.TIME"] == 0))
                 {
-                    id = index;
+                    id = -1;
                     break;
                 }
-                else if (current_time > start_time && current_time < end_time)
+                else if (index < 0)
                 {
+                    continue;
+                }
+                const auto&  numeral    = ordinal_numerals[index];
+                const double start_time = m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
+                const double duration   = m_cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
+                const double end_time   = start_time + duration;
+
+                if (current_time < start_time)
+                {
+                    // ramp-down or ramp-up to the next plateau
+                    id = index - 1;
+                    break;
+                }
+                else if (current_time >= start_time && current_time < end_time)
+                {
+                    // plateau region
                     id = index;
                     break;
                 }
             }
-            return id;
+            m_current_plateau_id = id;
         }
 
-        double end_time_of_last_plateau()
+        //! Finds and sets the time of the last plateau, when the recharge starts.
+        void end_time_of_last_plateau()
         {
             int index = 0;
             // find first non-set plateau: last plateau is the previous one
@@ -225,23 +232,26 @@ namespace user
                 {
                     plateau = m_cyclic_data[fmt::format("REF.PPPL.REF4_{}", index - 1)];
                 }
-                if (plateau <= 1e-6)
+
+                if (plateau <= 1e-3)
                 {
                     break;
                 }
                 index++;
             }
             const int last_plateau_id = index - 1;
-            return m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", ordinal_numerals[last_plateau_id])]
-                   + m_cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", ordinal_numerals[last_plateau_id])];
+            m_recharge_time
+                = 1e-3 + m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", ordinal_numerals[last_plateau_id])]
+                  + m_cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", ordinal_numerals[last_plateau_id])];
         }
 
+        //! Linearly interpolates the y value based on the provided x value and two nearest points
         double interpolate_to_next(const double x, const double x1, const double y1, const double x2, const double y2)
         {
             return y1 + (x - x1) * (y2 - y1) / (x2 - x1);
         }
 
-        double get_ref(const double current_time)
+        double get_reference(const double current_time)
         {
             double reference         = 0.0;
             double previous_ref      = 0.0;
@@ -253,7 +263,7 @@ namespace user
                 const double next_min_time = m_cyclic_data[fmt::format("REF.{}_PLATEAU.TIME", numeral)];
                 const double next_max_time
                     = next_min_time + m_cyclic_data[fmt::format("REF.{}_PLATEAU.DURATION", numeral)];
-                const auto next_ref = get_plateau(index);
+                const auto next_ref = get_plateau_by_index(index);
                 // first, if we fall between plateaux: interpolate the reference
                 if (current_time < next_min_time)
                 {
@@ -280,18 +290,22 @@ namespace user
         //! @return Number of active DCDC converters, 1, 2, or 6.
         int get_n_dcdc(const double current_time)
         {
-            int       n_dcdc     = 0;
-            const int plateau_id = get_plateau_id(current_time);
-            if (plateau_id == -1)
+            int n_dcdc = 0;
+            if (current_time >= m_recharge_time)
+            {
+                n_dcdc = 6;
+                return n_dcdc;
+            }
+
+            get_plateau_id(current_time);
+            if (m_current_plateau_id == -1)
             {
                 // open-loop case, either 1 or 2 DC-DCs are active
                 n_dcdc = (m_cyclic_data["REF.START.VREF"] > 4900.0) ? 2 : 1;
             }
             else
             {
-                const double v_estimated = get_plateau(plateau_id) * m_r_mag;   // + dI_dt;
-                std::cout << current_time << " " << plateau_id << " " << get_plateau(plateau_id) << std::endl;
-                std::cout << v_estimated << std::endl;
+                const double v_estimated = get_reference(current_time) * m_r_mag;
                 if (v_estimated <= m_level_1)
                 {
                     n_dcdc = 1;
@@ -324,15 +338,11 @@ namespace user
             double kc      = 0;
             double kf      = 0;
 
-            const int n_dcdc = get_n_dcdc(current_time);
-            std::cout << current_time << " " << n_dcdc << std::endl;
-            const double v_r = m_r_mag * i_mag_meas;
-            const double v_l = v_ref - v_r;
+            const int    n_dcdc = get_n_dcdc(current_time);
+            const double v_r    = m_r_mag * i_mag_meas;
+            const double v_l    = v_ref - v_r;
 
-            // recharge time is the time of the end of the last plateau + 1 ms:
-            m_t_recharge = end_time_of_last_plateau() + 1e-3;
-
-            if (current_time < m_t_recharge)
+            if (current_time < m_recharge_time)
             {
                 if (n_dcdc == 1)
                 {
@@ -371,20 +381,23 @@ namespace user
                     else
                     {
                         // fixed-factors approach
-                        v_ref_1 = 0.5 * v_r + 0.1 * v_l;
-                        v_ref_2 = 0.5 * v_r + 0.1 * v_l;
-                        v_ref_3 = 0.2 * v_l;
-                        v_ref_4 = 0.2 * v_l;
-                        v_ref_5 = 0.2 * v_l;
-                        v_ref_6 = 0.2 * v_l;
-                        if (v_l < m_v_min)
+                        if (abs(v_l) < m_v_min)
                         {
-                            v_ref_1 *= 0.3;
-                            v_ref_2 *= 0.3;
-                            v_ref_3 *= 0.1;
-                            v_ref_4 *= 0.1;
-                            v_ref_5 *= 0.1;
-                            v_ref_6 *= 0.1;
+                            v_ref_1 = v_ref * 0.3;
+                            v_ref_2 = v_ref * 0.3;
+                            v_ref_3 = v_ref * 0.1;
+                            v_ref_4 = v_ref * 0.1;
+                            v_ref_5 = v_ref * 0.1;
+                            v_ref_6 = v_ref * 0.1;
+                        }
+                        else
+                        {
+                            v_ref_1 = 0.5 * v_r + 0.1 * v_l;
+                            v_ref_2 = 0.5 * v_r + 0.1 * v_l;
+                            v_ref_3 = 0.2 * v_l;
+                            v_ref_4 = 0.2 * v_l;
+                            v_ref_5 = 0.2 * v_l;
+                            v_ref_6 = 0.2 * v_l;
                         }
                     }
                 }
@@ -402,7 +415,6 @@ namespace user
                 double Ec = (dEc[0] + dEc[1]);
                 if (Ec < 0)   // could be negative if AFE is too fast
                 {
-                    std::cout << "negative\n";
                     Ec = 0;
                 }
                 // total energy required to charge floaters to nominal voltage:
@@ -462,8 +474,10 @@ namespace user
             idx[3] = v_ref_4 / m_v_dc_meas[3];
             idx[4] = v_ref_5 / m_v_dc_meas[4];
             idx[5] = v_ref_6 / m_v_dc_meas[5];
-            idx[6] = kc;   // only calculated and relevant when n_dcdc is 6
-            idx[7] = kf;   // only calculated and relevant when n_dcdc is 6
+            idx[6]
+                = kc;   // only calculated and relevant when rechargind or n_dcdc is 6 and original calculation is used
+            idx[7]
+                = kf;   // only calculated and relevant when rechargind or n_dcdc is 6 and original calculation is used
         }
 
         unsigned long interrupt_counter{0};
@@ -486,7 +500,9 @@ namespace user
                 converter.m_v_dc_meas[index] = data_in[2 + index];
             }
 
-            const double v_ref = data_in[8];
+            const double v_ref  = data_in[8];
+            const int    n_dcdc = data_in[9];
+            const double i_meas = data_in[10];
 
             // calculate and set new values
 
@@ -495,7 +511,6 @@ namespace user
                 data_in[index] = 0.0;   // zeroing as this channel is reused for output
             }
             data_in[0] = cyclic_data_input;
-            data_in[1] = converter.m_v_dc_meas[0];
 
             // detect new cycle: c0=1, c_tim arbitrary
             if (cyclic_data_input > -1 && converter.previous_cyclic_data < 0)
@@ -512,14 +527,15 @@ namespace user
             double       i_meas_estimated = 0.0;
             if (converter.c_tim > 4)   // c_tim > 4, we can start outputting reference
             {
-                i_meas_estimated = converter.get_ref(current_time);
+                i_meas_estimated = converter.get_reference(current_time);
             }
             data_in[2] = i_meas_estimated;
 
-            // if (converter.c_tim == 30)
-            // {
-            //     converter.print_cyclic_data();
-            // }
+            if (converter.c_tim == 30)
+            {
+                // converter.print_cyclic_data();
+                converter.end_time_of_last_plateau();
+            }
 
             if (converter.c_tim >= 30)
             {
@@ -531,9 +547,7 @@ namespace user
                 }
             }
 
-            data_in[11] = converter.m_v_dc_meas[0];
-            data_in[12] = converter.m_v_dc_meas[1];
-            data_in[13] = converter.m_v_dc_meas[2];
+            data_in[11] = converter.get_n_dcdc(current_time);
 
             // message received, update c_tim
             converter.c_tim++;
@@ -564,7 +578,6 @@ namespace user
 
         unsigned int                 c_tim{0};
         std::map<std::string, float> m_cyclic_data;
-        double                       m_t_recharge{0.0};
         std::array<double, 6>        m_v_dc_meas{0.0};
 
         //! Parameters of the converter, will be fixed or provided by Configurator? Or VSlib GUI Parameter?
@@ -582,6 +595,9 @@ namespace user
         const double m_Udc_max_floaters{5000.0};
         const double m_Udc_min_chargers{3100.0};
         const double m_Udc_max_chargers{5000.0};
+
+        int    m_current_plateau_id{0};
+        double m_recharge_time{0.0};
     };
 
 }   // namespace user
