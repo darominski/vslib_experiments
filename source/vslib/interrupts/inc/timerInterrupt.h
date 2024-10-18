@@ -17,6 +17,7 @@ namespace vslib
         //! Constructor for TimerInterrupt.
         //!
         //! @param handler_function Function to be called when an interrupt triggers
+        //! @param delay Delay between interrupts in integer increments of a microsecond
         TimerInterrupt(
             std::string_view name, Converter& converter, int64_t delay,
             std::function<void(Converter&)> handler_function =
