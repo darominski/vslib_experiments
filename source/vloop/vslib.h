@@ -18,6 +18,7 @@
 #include "alphaBetaToDq0Transform.h"
 #include "dq0ToAbcTransform.h"
 #include "dq0ToAlphaBetaTransform.h"
+#include "instantaneousPowerThreePhase.h"
 
 //! Controllers
 #include "pid.h"
