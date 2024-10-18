@@ -19,7 +19,7 @@ namespace vslib
         //! @param handler_function Function to be called when an interrupt triggers
         //! @param delay Delay between interrupts in integer increments of a microsecond
         TimerInterrupt(
-            std::string_view name, Converter& converter, int64_t delay,
+            std::string_view name, Converter& converter, std::chrono::microseconds delay,
             std::function<void(Converter&)> handler_function =
                 [](Converter&)
             {
@@ -27,7 +27,7 @@ namespace vslib
             }
         )
             : Interrupt<Converter>(name, converter, handler_function),
-              m_delay(std::chrono::microseconds(delay))
+              m_delay(delay)
         {
             static_assert(
                 std::derived_from<Converter, IConverter>,
@@ -51,9 +51,9 @@ namespace vslib
         //! Sets the delay of the timer interrupt.
         //!
         //! @param delay Interrupt delay in microseconds
-        void setDelay(int64_t delay) noexcept
+        void setDelay(std::chrono::microseconds delay) noexcept
         {
-            m_delay = std::chrono::microseconds(delay);
+            m_delay = delay;
             bmboot::setupPeriodicInterrupt(m_delay, this->m_interrupt_handler);
         }
 
