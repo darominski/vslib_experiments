@@ -21,8 +21,8 @@ namespace vslib
         //! @param parent Parent of this Component
         Dq0ToAbcTransform(std::string_view name, Component& parent, const uint64_t number_points = 10'000)
             : Component("Dq0ToAbcTransform", name, parent),
-              dq0_2_alphabeta("dq0_2_alphabeta", *this, number_points),
-              alphabeta_2_abc("alphabeta_2_abc", *this)
+              dq0_to_alphabeta("dq0_to_alphabeta", *this, number_points),
+              alphabeta_to_abc("alphabeta_to_abc", *this)
         {
         }
 
@@ -40,7 +40,7 @@ namespace vslib
         transform(const double d, const double q, const double zero, const double wt, const double offset = 0) noexcept;
 
       private:
-        Dq0ToAlphaBetaTransform dq0_2_alphabeta;   //!< First stage of transformation
-        AlphaBetaToAbcTransform alphabeta_2_abc;   //!< Second stage of transformation
+        Dq0ToAlphaBetaTransform dq0_to_alphabeta;
+        AlphaBetaToAbcTransform alphabeta_to_abc;
     };
 }   // namespace vslib

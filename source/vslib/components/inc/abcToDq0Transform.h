@@ -22,8 +22,8 @@ namespace vslib
         //! @param number_points Number of points for the sine and cosine lookup tables
         AbcToDq0Transform(std::string_view name, Component& parent, const uint64_t number_points = 10'000)
             : Component("AbcToDq0Transform", name, parent),
-              abc_2_alphabeta("abc_2_alphabeta", *this),
-              alphabeta_2_dq0("alphabeta_2_dq0", *this, number_points)
+              abc_to_alphabeta("abc_to_alphabeta", *this),
+              alphabeta_to_dq0("alphabeta_to_dq0", *this, number_points)
         {
         }
 
@@ -41,7 +41,7 @@ namespace vslib
         transform(const double a, const double b, const double c, const double wt, const double offset = 0) noexcept;
 
       private:
-        AbcToAlphaBetaTransform abc_2_alphabeta;   //!< First stage of transformation
-        AlphaBetaToDq0Transform alphabeta_2_dq0;   //!< Second stage of transformation
+        AbcToAlphaBetaTransform abc_to_alphabeta;
+        AlphaBetaToDq0Transform alphabeta_to_dq0;
     };
 }   // namespace vslib

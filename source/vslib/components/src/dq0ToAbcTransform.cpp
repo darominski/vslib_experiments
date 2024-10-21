@@ -11,8 +11,10 @@ namespace vslib
     {
         const double theta = wt + offset;
 
-        const auto [alpha, beta, zero_out] = dq0_2_alphabeta.transform(d, q, zero, theta, false);
-        const auto [a, b, c]               = alphabeta_2_abc.transform(alpha, beta, zero_out);
+        constexpr bool a_axis_alignment
+            = false;   //! alignment between A-axis and d-axis, false: A axis is 90 degrees behind
+        const auto [alpha, beta, zero_out] = dq0_to_alphabeta.transform(d, q, zero, theta, a_axis_alignment);
+        const auto [a, b, c]               = alphabeta_to_abc.transform(alpha, beta, zero_out);
 
         return {a, b, c};
     }
