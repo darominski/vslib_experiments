@@ -40,7 +40,7 @@ namespace vslib
         transform(const double d, const double q, const double zero, const double wt, const double offset = 0) noexcept;
 
       private:
-        Dq0ToAlphaBetaTransform dq0_to_alphabeta;
-        AlphaBetaToAbcTransform alphabeta_to_abc;
+        Dq0ToAlphaBetaTransform dq0_to_alphabeta;   //!< First stage of transformation
+        AlphaBetaToAbcTransform alphabeta_to_abc;   //!< Second stage of transformation
     };
 }   // namespace vslib

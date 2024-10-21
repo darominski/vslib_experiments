@@ -25,7 +25,6 @@ namespace vslib
             : Component("AlphaBetaToDq0Transform", name, parent),
               m_sin("sin", *this, number_points),
               m_cos("cos", *this, number_points)
-
         {
         }
 
