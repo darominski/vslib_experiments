@@ -381,23 +381,23 @@ namespace user
                     else
                     {
                         // fixed-factors approach
-                        if (abs(v_l) < m_v_min)
+                        if (fabs(v_l) < m_v_min)
                         {
                             v_ref_1 = v_ref * 0.3;
-                            v_ref_2 = v_ref * 0.3;
+                            v_ref_2 = v_ref_1;
                             v_ref_3 = v_ref * 0.1;
-                            v_ref_4 = v_ref * 0.1;
-                            v_ref_5 = v_ref * 0.1;
-                            v_ref_6 = v_ref * 0.1;
+                            v_ref_4 = v_ref_3;
+                            v_ref_5 = v_ref_3;
+                            v_ref_6 = v_ref_3;
                         }
                         else
                         {
                             v_ref_1 = 0.5 * v_r + 0.1 * v_l;
-                            v_ref_2 = 0.5 * v_r + 0.1 * v_l;
+                            v_ref_2 = v_ref_1;
                             v_ref_3 = 0.2 * v_l;
-                            v_ref_4 = 0.2 * v_l;
-                            v_ref_5 = 0.2 * v_l;
-                            v_ref_6 = 0.2 * v_l;
+                            v_ref_4 = v_ref_3;
+                            v_ref_5 = v_ref_3;
+                            v_ref_6 = v_ref_3;
                         }
                     }
                 }
@@ -405,7 +405,7 @@ namespace user
             else   // recharge is active
             {
                 const double          nominal_v2 = std::pow(5000.0, 2);
-                std::array<double, 6> dEc{0};
+                std::array<double, 6> dEc{0};   // n dc dc is const
                 for (int index = 0; index < dEc.size(); index++)
                 {
                     const double energy = 0.5 * 0.247 * (nominal_v2 - std::pow(m_v_dc_meas[index], 2));
