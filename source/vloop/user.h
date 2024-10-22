@@ -540,7 +540,7 @@ namespace user
             if (converter.c_tim >= 30)
             {
                 std::array<double, 8> dispatcher_data{0.0};
-                converter.pops_dispatcher(current_time, v_ref, i_meas_estimated, dispatcher_data);
+                converter.pops_dispatcher(current_time, v_ref, i_meas, dispatcher_data);
                 for (int index = 0; index < 8; index++)
                 {
                     data_in[index + 3] = dispatcher_data[index];
