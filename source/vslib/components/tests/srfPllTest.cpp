@@ -6,6 +6,7 @@
 #include <fstream>
 #include <gtest/gtest.h>
 
+#include "readCsv.h"
 #include "rootComponent.h"
 #include "srfPll.h"
 #include "staticJson.h"
@@ -204,47 +205,29 @@ TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistency)
     std::filesystem::path abc_path       = "components/inputs/abc_pll.csv";
     std::filesystem::path matlab_wt_path = "components/inputs/wt_pll_kp=50_ki=200.csv";
 
-    std::ifstream abc_file(abc_path);
-    std::ifstream matlab_wt_file(matlab_wt_path);
+    fgc4::utils::test::ReadCSV<3> abc_file(abc_path);
+    fgc4::utils::test::ReadCSV<1> matlab_wt_file(matlab_wt_path);
 
-    ASSERT_TRUE(abc_file.is_open());
-    ASSERT_TRUE(matlab_wt_file.is_open());
-
-    std::string abc_str;
-    std::string matlab_wt_str;
-
-    // getline(output_file, output_str);
-    int counter = 0;
-    while (getline(abc_file, abc_str) && getline(matlab_wt_file, matlab_wt_str))
+    while (!abc_file.eof() && !matlab_wt_file.eof())
     {
-        std::stringstream ss(abc_str);
-        std::string       a_str, b_str, c_str;
-
-        // Get the a value
-        std::getline(ss, a_str, ',');
-        const auto a = std::stod(a_str);
-
-        // Get the b value
-        std::getline(ss, b_str, ',');
-        const auto b = std::stod(b_str);
-
-        // Get the c value
-        std::getline(ss, c_str, ',');
-        const auto c = std::stod(c_str);
-
-        auto const matlab_wt = std::stod(matlab_wt_str);   // Matlab output
-        auto const wt        = pll.balance(a, b, c);
-        double     relative;
-        if (matlab_wt != 0)
+        const auto matlab_wt_line = matlab_wt_file.readLine();
+        const auto abc_line       = abc_file.readLine();
+        if (abc_line && matlab_wt_line)
         {
-            relative = (matlab_wt - wt) / matlab_wt;
+            auto const [a, b, c]   = abc_line.value();
+            auto const [matlab_wt] = matlab_wt_line.value();
+
+            auto const wt = pll.balance(a, b, c);
+            double     relative;
+            if (matlab_wt != 0)
+            {
+                relative = (matlab_wt - wt) / matlab_wt;
+            }
+            else
+            {
+                relative = (matlab_wt - wt);
+            }
+            ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
         }
-        else
-        {
-            relative = (matlab_wt - wt);
-        }
-        ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
     }
-    abc_file.close();
-    matlab_wt_file.close();
 }
