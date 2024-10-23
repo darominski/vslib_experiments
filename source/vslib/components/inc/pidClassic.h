@@ -43,10 +43,10 @@ namespace vslib
 
         //! Computes one actuation calculation iteration of the controller.
         //!
-        //! @param measurement Value of the controlled process
         //! @param reference Value of the set-point reference
+        //! @param measurement Value of the controlled process
         //! @return Actuation value of this iteration
-        [[nodiscard]] double control(const double measurement, const double reference)
+        [[nodiscard]] double control(const double reference, const double measurement)
         {
             m_error    = reference - measurement;
             m_integral += m_error;

@@ -34,26 +34,26 @@ namespace vslib
 
         //! Updates histories of measurements and references and moves the head of the history buffer.
         //!
-        //! @param measurement Current value of the process value (measurement)
         //! @param reference Current value of the set-point reference
-        void updateInputHistories(const double measurement, const double reference) noexcept
+        //! @param measurement Current value of the process value (measurement)
+        void updateInputHistories(const double reference, const double measurement) noexcept
         {
-            rst.updateInputHistories(measurement, reference);
+            rst.updateInputHistories(reference, measurement);
         }
 
         //! Calculates one iteration of the controller algorithm.
         //!
-        //! @param measurement Current process value (measurement)
         //! @param reference Reference value for the controller
+        //! @param measurement Current process value (measurement)
         //! @return Controller output of the iteration
-        [[nodiscard]] double control(const double measurement, const double reference) noexcept
+        [[nodiscard]] double control(const double reference, const double measurement) noexcept
         {
             if (!isReady())
             {
-                updateInputHistories(measurement, reference);
+                updateInputHistories(reference, measurement);
                 return 0;
             }
-            const double actuation         = rst.control(measurement, reference);
+            const double actuation         = rst.control(reference, measurement);
             const double clipped_actuation = actuation_limits.limit(actuation);
             if (clipped_actuation != actuation)
             {

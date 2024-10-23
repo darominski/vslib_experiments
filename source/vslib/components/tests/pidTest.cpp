@@ -375,7 +375,7 @@ TEST_F(PIDTest, PIDSimulinkSimpleConsistency)
         auto const rk_value            = std::stod(rk_str.substr(rk_str.find(",") + 1));
         auto const matlab_output_value = std::stod(uk_str);   // Matlab output
 
-        auto const actuation = pid.control(yk_value, rk_value);
+        auto const actuation = pid.control(rk_value, yk_value);
         auto const relative  = (matlab_output_value - actuation) / matlab_output_value;
 
         EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
@@ -436,7 +436,7 @@ TEST_F(PIDTest, PIDSimulinkConsistency)
         auto const rk_value            = std::stod(rk_str.substr(rk_str.find(",") + 1));
         auto const matlab_output_value = std::stod(uk_str);   // Matlab output
 
-        auto const actuation = pid.control(yk_value, rk_value);
+        auto const actuation = pid.control(rk_value, yk_value);
         auto const relative  = (matlab_output_value - actuation) / matlab_output_value;
 
         EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
@@ -502,7 +502,7 @@ TEST_F(PIDTest, PIDSimulinkIntegratorConsistency)
         auto const rk_value            = std::stod(rk_str.substr(rk_str.find(",") + 1));
         auto const matlab_output_value = std::stod(uk_str);   // Matlab output
 
-        auto const actuation = pid.control(yk_value, rk_value);
+        auto const actuation = pid.control(rk_value, yk_value);
         auto const relative  = (matlab_output_value - actuation) / matlab_output_value;
 
         EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
@@ -552,7 +552,7 @@ TEST_F(PIDTest, PIDSimulinkPIinPLL)
         auto const meas_value           = std::stod(pid_meas_str.substr(pid_meas_str.find(",") + 1));
         auto const pid_act_matlab_value = std::stod(pid_act_str.substr(pid_act_str.find(",") + 1));
 
-        auto const actuation = pid.control(-meas_value, 0.0);
+        auto const actuation = pid.control(0.0, -meas_value);
         double     relative;
         if (pid_act_matlab_value != 0)
         {

@@ -145,7 +145,7 @@ TEST_F(PIDClassicTest, PIDClassicSingleIteration)
 
     const double error          = target_value - starting_value;
     const double expected_value = (target_value * b - starting_value) * p + error * i + d * error + target_value * ff;
-    EXPECT_NEAR(pid.control(starting_value, target_value), expected_value, 1e-6);
+    EXPECT_NEAR(pid.control(target_value, starting_value), expected_value, 1e-6);
 }
 
 //! Checks that a couple of iterations of control method correctly calculates gains
@@ -171,7 +171,7 @@ TEST_F(PIDClassicTest, PIDClassicControlIteration)
     double       derivative    = -0.2 * 0.0 + d * (current_error + 0.8 * 0);
     const double first_actuation
         = (target_value * b - starting_value) * p + current_error * i + derivative + target_value * ff;
-    EXPECT_NEAR(pid.control(starting_value, target_value), first_actuation, 1e-6);
+    EXPECT_NEAR(pid.control(target_value, starting_value), first_actuation, 1e-6);
 
     double previous_error = current_error;
     current_error         = target_value - first_actuation;
@@ -181,7 +181,7 @@ TEST_F(PIDClassicTest, PIDClassicControlIteration)
                                     + derivative + target_value * ff;
 
 
-    EXPECT_NEAR(pid.control(first_actuation, target_value), second_actuation, 1e-6);
+    EXPECT_NEAR(pid.control(target_value, first_actuation), second_actuation, 1e-6);
 
     previous_error = current_error;
     current_error  = target_value - second_actuation;
@@ -190,5 +190,5 @@ TEST_F(PIDClassicTest, PIDClassicControlIteration)
     const double third_actuation = (target_value * b - second_actuation) * p
                                    + (3 * target_value - first_actuation - second_actuation) * i + derivative
                                    + target_value * ff;
-    EXPECT_NEAR(pid.control(second_actuation, target_value), third_actuation, 1e-6);
+    EXPECT_NEAR(pid.control(target_value, second_actuation), third_actuation, 1e-6);
 }

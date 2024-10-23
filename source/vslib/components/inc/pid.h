@@ -45,18 +45,19 @@ namespace vslib
         //!
         //! @param measurement Current value of the process value
         //! @param reference Current value of the set-point reference
-        void updateInputHistories(const double measurement, const double reference) noexcept
+        void updateInputHistories(const double reference, const double measurement) noexcept
         {
-            rst.updateInputHistories(measurement, reference);
+            rst.updateInputHistories(reference, measurement);
         }
 
         //! Computes one iteration of the controller.
         //!
+        //! @param reference Reference value for the controller
         //! @param measurement Value of the controlled process
         //! @return Result of this iteration
-        [[nodiscard]] double control(const double measurement, const double reference) noexcept
+        [[nodiscard]] double control(const double reference, const double measurement) noexcept
         {
-            const double actuation         = rst.control(measurement, reference);
+            const double actuation         = rst.control(reference, measurement);
             const double clipped_actuation = actuation_limits.limit(actuation);
             if (clipped_actuation != actuation)
             {

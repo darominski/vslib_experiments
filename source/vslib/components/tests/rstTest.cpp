@@ -101,7 +101,7 @@ TEST_F(RSTTest, RSTUpdateInputHistories)
     for (size_t index = 0; index < order; index++)
     {
         EXPECT_EQ(rst.isReady(), false);
-        rst.updateInputHistories(index, index + 1);
+        rst.updateInputHistories(index + 1, index);
     }
     // when the history buffers are filled: the RST should be ready
     EXPECT_EQ(rst.isReady(), true);
@@ -120,7 +120,7 @@ TEST_F(RSTTest, RSTReset)
     for (size_t index = 0; index < order; index++)
     {
         EXPECT_EQ(rst.isReady(), false);
-        rst.updateInputHistories(index, index + 1);
+        rst.updateInputHistories(index + 1, index);
     }
     // when the history buffers are filled: the RST should be ready
     EXPECT_EQ(rst.isReady(), true);
@@ -275,7 +275,7 @@ TEST_F(RSTTest, RSTCalculateActuation)
     double const measurement_value = 1.111;
 
     const double expected_actuation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
-    EXPECT_EQ(rst.control(measurement_value, set_point_value), expected_actuation);
+    EXPECT_EQ(rst.control(set_point_value, measurement_value), expected_actuation);
 
     std::array<double, order + 1> expected_measurement_history = {measurement_value, 0, 0};
     EXPECT_EQ(rst.getMeasurements(), expected_measurement_history);
@@ -317,7 +317,7 @@ TEST_F(RSTTest, RSTCalculateActuationOrder3)
     double const measurement_value = 1.111;
 
     const double expected_actuation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
-    const double actuation          = rst.control(measurement_value, set_point_value);
+    const double actuation          = rst.control(set_point_value, measurement_value);
     EXPECT_EQ(actuation, expected_actuation);
 
     std::array<double, order + 1> expected_measurement_history = {measurement_value, 0, 0};
@@ -359,21 +359,21 @@ TEST_F(RSTTest, RSTCalculateMultipleActuations)
     double const measurement_value = 1.111;
 
     const double first_actuation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
-    EXPECT_NEAR(rst.control(measurement_value, set_point_value), first_actuation, 1e-6);
+    EXPECT_NEAR(rst.control(set_point_value, measurement_value), first_actuation, 1e-6);
 
     // here, the system transfer function is assumed to be unity so next measurement is the previous actuation
     const double second_actuation
         = ((t_value[0] + t_value[1]) * set_point_value - (r_value[0] * first_actuation + r_value[1] * measurement_value)
            - (s_value[1] * first_actuation))
           / s_value[0];
-    EXPECT_NEAR(rst.control(first_actuation, set_point_value), second_actuation, 1e-6);
+    EXPECT_NEAR(rst.control(set_point_value, first_actuation), second_actuation, 1e-6);
 
     const double third_actuation
         = ((t_value[0] + t_value[1] + t_value[2]) * set_point_value
            - (r_value[0] * second_actuation + r_value[1] * first_actuation + r_value[2] * measurement_value)
            - (s_value[1] * second_actuation + s_value[2] * first_actuation))
           / s_value[0];
-    EXPECT_NEAR(rst.control(second_actuation, set_point_value), third_actuation, 1e-6);
+    EXPECT_NEAR(rst.control(set_point_value, second_actuation), third_actuation, 1e-6);
 
     // history wraps around here
     const double fourth_actuation
@@ -382,7 +382,7 @@ TEST_F(RSTTest, RSTCalculateMultipleActuations)
            - (s_value[1] * third_actuation + s_value[2] * second_actuation))
           / s_value[0];
 
-    EXPECT_NEAR(rst.control(third_actuation, set_point_value), fourth_actuation, 1e-6);
+    EXPECT_NEAR(rst.control(set_point_value, third_actuation), fourth_actuation, 1e-6);
 }
 
 //! Checks that the calculated actuation of RST is as expected
@@ -406,7 +406,7 @@ TEST_F(RSTTest, RSTReCalculateReference)
     double const set_point_value   = 3.14159;
     double const measurement_value = 1.111;
 
-    const double actuation         = rst.control(measurement_value, set_point_value);
+    const double actuation         = rst.control(set_point_value, measurement_value);
     double const limited_actuation = actuation - 2.0;   // simulates clamping of possible actuations
     rst.updateReference(limited_actuation);
 
@@ -455,7 +455,7 @@ TEST_F(RSTTest, RSTLimitedActuation)
     const double measurement_value = 0.5;
 
     double unlimited_calculation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
-    double calculated_actuation  = rst.control(measurement_value, set_point_value);
+    double calculated_actuation  = rst.control(set_point_value, measurement_value);
     EXPECT_NE(calculated_actuation, unlimited_calculation);
     EXPECT_NEAR(calculated_actuation, max_actuation, 1e-6);
 
@@ -470,7 +470,7 @@ TEST_F(RSTTest, RSTLimitedActuation)
            - r_value[1] * measurement_value - calculated_actuation * s_value[1])
           / s_value[0];
 
-    const double second_calculated_actuation = rst.control(measurement_value, set_point_value);
+    const double second_calculated_actuation = rst.control(set_point_value, measurement_value);
     EXPECT_NE(second_calculated_actuation, second_unlimited_calculation);
     EXPECT_NEAR(second_calculated_actuation, max_actuation, 1e-6);
 
@@ -488,7 +488,7 @@ TEST_F(RSTTest, RSTLimitedActuation)
            - (r_value[0] + r_value[1] + r_value[2]) * measurement_value
            - (s_value[1] * second_calculated_actuation + s_value[2] * calculated_actuation))
           / s_value[0];
-    const double third_calculated_actuation = rst.control(measurement_value, set_point_value);
+    const double third_calculated_actuation = rst.control(set_point_value, measurement_value);
     EXPECT_NEAR(third_calculated_actuation, max_actuation, 1e-6);
 
     const double third_corrected_reference
@@ -505,7 +505,7 @@ TEST_F(RSTTest, RSTLimitedActuation)
            + t_value[2] * second_corrected_reference - (r_value[0] + r_value[1] + r_value[2]) * measurement_value
            - (s_value[1] * third_calculated_actuation + s_value[2] * second_calculated_actuation))
           / s_value[0];
-    const double fourth_calculated_actuation = rst.control(measurement_value, set_point_value);
+    const double fourth_calculated_actuation = rst.control(set_point_value, measurement_value);
     EXPECT_NEAR(fourth_calculated_actuation, max_actuation, 1e-6);
 
     const double fourth_corrected_reference
@@ -549,7 +549,7 @@ TEST_F(RSTTest, RSTLimitedActuationOrder3)
     const double measurement_value = 0.5;
 
     double unlimited_calculation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
-    double calculated_actuation  = rst.control(measurement_value, set_point_value);
+    double calculated_actuation  = rst.control(set_point_value, measurement_value);
     EXPECT_NE(calculated_actuation, unlimited_calculation);
     EXPECT_NEAR(calculated_actuation, max_actuation, 1e-6);
 
@@ -564,7 +564,7 @@ TEST_F(RSTTest, RSTLimitedActuationOrder3)
            - r_value[1] * measurement_value - calculated_actuation * s_value[1])
           / s_value[0];
 
-    const double second_calculated_actuation = rst.control(measurement_value, set_point_value);
+    const double second_calculated_actuation = rst.control(set_point_value, measurement_value);
     EXPECT_NE(second_calculated_actuation, second_unlimited_calculation);
     EXPECT_NEAR(second_calculated_actuation, max_actuation, 1e-6);
 
@@ -580,7 +580,7 @@ TEST_F(RSTTest, RSTLimitedActuationOrder3)
            - (r_value[0] + r_value[1] + r_value[2]) * measurement_value
            - (s_value[1] * second_calculated_actuation + s_value[2] * calculated_actuation))
           / s_value[0];
-    const double third_calculated_actuation = rst.control(measurement_value, set_point_value);
+    const double third_calculated_actuation = rst.control(set_point_value, measurement_value);
     EXPECT_NEAR(third_calculated_actuation, max_actuation, 1e-6);
 
     const double third_corrected_reference
@@ -599,7 +599,7 @@ TEST_F(RSTTest, RSTLimitedActuationOrder3)
            - (s_value[1] * third_calculated_actuation + s_value[2] * second_calculated_actuation
               + s_value[3] * calculated_actuation))
           / s_value[0];
-    const double fourth_calculated_actuation = rst.control(measurement_value, set_point_value);
+    const double fourth_calculated_actuation = rst.control(set_point_value, measurement_value);
     EXPECT_NEAR(fourth_calculated_actuation, max_actuation, 1e-6);
 
     const double fourth_corrected_reference

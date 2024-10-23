@@ -46,7 +46,7 @@ namespace vslib
             // integration
             const auto wt = m_wt;
             // reference of the PI controller is always zero
-            m_wt          += pi.control(-q, 0.0) * pi.T + m_f_rated_2pi;
+            m_wt          += pi.control(0.0, -q) * pi.T + m_f_rated_2pi;
             // to avoid precision loss, the wt is limited to 0-2pi range
             m_wt          = fmod(m_wt, std::numbers::pi_v<double> * 2.0);
 
