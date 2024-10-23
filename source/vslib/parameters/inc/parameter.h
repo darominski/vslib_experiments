@@ -287,7 +287,7 @@ namespace vslib
             auto const& maybe_warning = setJsonValueImpl(json_value);
             if (!maybe_warning.has_value())
             {
-                // set the initialized flag, uncheck the validation which is done by Component
+                // set the initialized flag
                 m_initialized = true;
             }
             return maybe_warning;
