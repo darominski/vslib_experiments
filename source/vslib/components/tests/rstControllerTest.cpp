@@ -50,7 +50,7 @@ TEST_F(RSTControllerTest, RSTControllerUpdateInputHistories)
     for (size_t index = 0; index < controller_length - 1; index++)
     {
         EXPECT_EQ(rst.isReady(), false);
-        rst.updateInputHistories(index, index + 1);
+        rst.updateInputHistories(index + 1, index);
     }
     // when the history buffers are filled: the RST should be ready
     EXPECT_EQ(rst.isReady(), true);
@@ -67,7 +67,7 @@ TEST_F(RSTControllerTest, RSTControllerReset)
     for (size_t index = 0; index < controller_length - 1; index++)
     {
         EXPECT_EQ(rst.isReady(), false);
-        rst.updateInputHistories(index, index + 1);
+        rst.updateInputHistories(index + 1, index);
     }
     // when the history buffers are filled: the RST should be ready
     EXPECT_EQ(rst.isReady(), true);
@@ -152,7 +152,7 @@ TEST_F(RSTControllerTest, RSTControllerCalculateActuation)
     double const measurement_value = 1.111;
 
     const double expected_actuation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
-    EXPECT_EQ(rst.control(measurement_value, set_point_value), expected_actuation);
+    EXPECT_EQ(rst.control(set_point_value, measurement_value), expected_actuation);
 
     std::array<double, controller_length> expected_measurement_history = {measurement_value, 0, 0};
     EXPECT_EQ(rst.getMeasurements(), expected_measurement_history);
@@ -184,21 +184,21 @@ TEST_F(RSTControllerTest, RSTControllerCalculateMultipleActuations)
     double const measurement_value = 1.111;
 
     const double first_actuation = (t_value[0] * set_point_value - r_value[0] * measurement_value) / s_value[0];
-    EXPECT_NEAR(rst.control(measurement_value, set_point_value), first_actuation, 1e-6);
+    EXPECT_NEAR(rst.control(set_point_value, measurement_value), first_actuation, 1e-6);
 
     // here, the system transfer function is assumed to be unity so next measurement is the previous actuation
     const double second_actuation
         = ((t_value[0] + t_value[1]) * set_point_value - (r_value[0] * first_actuation + r_value[1] * measurement_value)
            - (s_value[1] * first_actuation))
           / s_value[0];
-    EXPECT_NEAR(rst.control(first_actuation, set_point_value), second_actuation, 1e-6);
+    EXPECT_NEAR(rst.control(set_point_value, first_actuation), second_actuation, 1e-6);
 
     const double third_actuation
         = ((t_value[0] + t_value[1] + t_value[2]) * set_point_value
            - (r_value[0] * second_actuation + r_value[1] * first_actuation + r_value[2] * measurement_value)
            - (s_value[1] * second_actuation + s_value[2] * first_actuation))
           / s_value[0];
-    EXPECT_NEAR(rst.control(second_actuation, set_point_value), third_actuation, 1e-6);
+    EXPECT_NEAR(rst.control(set_point_value, second_actuation), third_actuation, 1e-6);
 
     // history wraps around here
     const double fourth_actuation
@@ -207,7 +207,7 @@ TEST_F(RSTControllerTest, RSTControllerCalculateMultipleActuations)
            - (s_value[1] * third_actuation + s_value[2] * second_actuation))
           / s_value[0];
 
-    EXPECT_NEAR(rst.control(third_actuation, set_point_value), fourth_actuation, 1e-6);
+    EXPECT_NEAR(rst.control(set_point_value, third_actuation), fourth_actuation, 1e-6);
 }
 
 //! Checks that the calculated actuation of RST is as expected
@@ -229,7 +229,7 @@ TEST_F(RSTControllerTest, RSTControllerReCalculateReference)
     double const set_point_value   = 3.14159;
     double const measurement_value = 1.111;
 
-    const double actuation         = rst.control(measurement_value, set_point_value);
+    const double actuation         = rst.control(set_point_value, measurement_value);
     double const limited_actuation = actuation - 2.0;   // simulates clamping of possible actuations
     rst.updateReference(limited_actuation);
 
@@ -301,7 +301,7 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkSimpleConsistency)
         auto const rk_value            = std::stod(rk_str.substr(rk_str.find(",") + 1));
         auto const matlab_output_value = std::stod(uk_str);   // Matlab output
 
-        auto const actuation = rst.control(yk_value, rk_value);
+        auto const actuation = rst.control(rk_value, yk_value);
         auto const relative  = (matlab_output_value - actuation) / matlab_output_value;
         EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
     }
@@ -366,7 +366,7 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkConsistency)
         auto const rk_value            = std::stod(rk_str.substr(rk_str.find(",") + 1));
         auto const matlab_output_value = std::stod(uk_str);   // Matlab output
 
-        auto const actuation = rst.control(yk_value, rk_value);
+        auto const actuation = rst.control(rk_value, yk_value);
         auto const relative  = (matlab_output_value - actuation) / matlab_output_value;
         EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
     }

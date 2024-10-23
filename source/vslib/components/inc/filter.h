@@ -18,7 +18,7 @@ namespace vslib
         //! @param type Type of this Filter Component
         //! @param name Name of this Filter Component
         //! @param parent Parent of this Filter Component
-        Filter(std::string_view type, std::string_view name, IComponent& parent)
+        Filter(std::string_view type, std::string_view name, Component& parent)
             : Component(type, name, parent)
         {
         }

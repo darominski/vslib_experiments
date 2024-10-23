@@ -20,7 +20,7 @@ namespace vslib
         //! @param name Name of this Limit Component
         //! @param parent Parent of this Limit Component
         //! @param iteration_period Iteration period at which this Limit Component is called
-        LimitRms(std::string_view name, IComponent& parent, const double iteration_period = 5e-6)
+        LimitRms(std::string_view name, Component& parent, const double iteration_period = 5e-6)
             : Component("LimitRms", name, parent),
               rms_limit(*this, "rms_limit"),
               rms_time_constant(*this, "rms_time_constant", 1e-12),   // 1 ps limit

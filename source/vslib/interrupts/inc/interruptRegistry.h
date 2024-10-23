@@ -26,7 +26,7 @@ namespace vslib
         //! @param interrupt_id Interrupt id to be given
         //! @param priority The physical priority line of the interrupt
         void registerInterrupt(
-            std::string_view interrupt_name, std::function<void(void)> handler_function, int interrupt_id,
+            std::string_view interrupt_name, std::function<void(Converter&)> handler_function, const int interrupt_id,
             InterruptPriority priority
         )
         {

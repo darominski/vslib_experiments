@@ -20,7 +20,7 @@ namespace vslib
         //!
         //! @param name Name of this Limit Component
         //! @param parent Parent of this Limit Component
-        LimitIntegral(std::string_view name, IComponent& parent)
+        LimitIntegral(std::string_view name, Component& parent)
             : Component("LimitIntegral", name, parent),
               integral_limit(*this, "integral_limit"),
               integral_limit_window_length(*this, "integral_limit_time_window", 0, TimeWindowLength)

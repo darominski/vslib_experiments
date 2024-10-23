@@ -19,10 +19,10 @@ namespace vslib
         //! Constructor for the ComponentArray component.
         //!
         //! @param name Name of the object
-        //! @param parent Pointer to the parent of this Component
+        //! @param parent Reference to the parent of this Component
         //! @param settings All settings that are forwarded to construct Components held in the array
         template<typename... ComponentSettings>
-        ComponentArray(const std::string& name, IComponent& parent, ComponentSettings... settings)
+        ComponentArray(const std::string& name, Component& parent, ComponentSettings... settings)
             : Component("ComponentArray", name, parent)
         {
             static_assert(std::derived_from<ComponentType, Component>, "ComponentType must be derived from Component");
@@ -55,7 +55,7 @@ namespace vslib
         std::array<std::unique_ptr<ComponentType>, N> m_components;   //!< Array of owned Components
 
         template<typename... CurrentSettings>
-        void createComponents(const std::string& name_base, size_t index, CurrentSettings... settings)
+        void createComponents(const std::string& name_base, const size_t index, CurrentSettings... settings)
         {
             // Create and initialize the current component
             m_components[index]

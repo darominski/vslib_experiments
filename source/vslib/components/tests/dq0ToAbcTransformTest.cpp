@@ -38,11 +38,11 @@ TEST_F(Dq0ToAbcTransformTest, Construction)
     EXPECT_EQ(serialized["components"].size(), 2);
     EXPECT_EQ(
         serialized["components"].dump(),
-        "[{\"name\":\"dq0_2_alphabeta\",\"type\":\"Dq0ToAlphaBetaTransform\",\"parameters\":[],\"components\":[{"
+        "[{\"name\":\"dq0_to_alphabeta\",\"type\":\"Dq0ToAlphaBetaTransform\",\"parameters\":[],\"components\":[{"
         "\"name\":\"sin\",\"type\":\"SinLookupTable\",\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":"
         "\"LookupTable\",\"parameters\":[],\"components\":[]}]},{\"name\":\"cos\",\"type\":\"CosLookupTable\","
         "\"parameters\":[],\"components\":[{\"name\":\"data\",\"type\":\"LookupTable\",\"parameters\":[],"
-        "\"components\":[]}]}]},{\"name\":\"alphabeta_2_abc\",\"type\":\"AlphaBetaToAbcTransform\",\"parameters\":[],"
+        "\"components\":[]}]}]},{\"name\":\"alphabeta_to_abc\",\"type\":\"AlphaBetaToAbcTransform\",\"parameters\":[],"
         "\"components\":[]}]"
     );
     EXPECT_EQ(serialized["parameters"].size(), 0);
