@@ -55,7 +55,7 @@ namespace vslib
         std::array<std::unique_ptr<ComponentType>, N> m_components;   //!< Array of owned Components
 
         template<typename... CurrentSettings>
-        void createComponents(const std::string& name_base, size_t index, CurrentSettings... settings)
+        void createComponents(const std::string& name_base, const size_t index, CurrentSettings... settings)
         {
             // Create and initialize the current component
             m_components[index]
