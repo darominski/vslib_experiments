@@ -11,8 +11,7 @@ namespace vslib
     }
 
     [[nodiscard]] std::tuple<double, double> InstantaneousPowerThreePhase::transform(
-        const double v_a, const double v_b, const double v_c, const double i_a, const double i_b, const double i_c,
-        const double p_gain, const double q_gain
+        const double v_a, const double v_b, const double v_c, const double i_a, const double i_b, const double i_c
     ) const noexcept
     {
         const double p_meas = (v_a * i_a + v_b * i_b + v_c * i_c);

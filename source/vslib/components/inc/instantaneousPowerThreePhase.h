@@ -7,6 +7,7 @@
 #include <string>
 
 #include "component.h"
+#include "parameter.h"
 
 namespace vslib
 {
@@ -18,7 +19,9 @@ namespace vslib
         //! @param name Name of the Component
         //! @param parent Parent of this Component
         InstantaneousPowerThreePhase(std::string_view name, Component& parent)
-            : Component("InstantaneousPowerThreePhase", name, parent)
+            : Component("InstantaneousPowerThreePhase", name, parent),
+              p_gain(*this, "p_gain"),
+              q_gain(*this, "q_gain")
         {
         }
 
@@ -34,8 +37,10 @@ namespace vslib
         //! @param q_gain Optional gain to be applied to reactive power Q (default = 1)
         //! @return Tuple of P, and Q: active and reactive power
         [[nodiscard]] std::tuple<double, double> transform(
-            const double v_a, const double v_b, const double v_c, const double i_a, const double i_b, const double i_c,
-            const double p_gain = 1.0, const double q_gain = 1.0
+            const double v_a, const double v_b, const double v_c, const double i_a, const double i_b, const double i_c
         ) const noexcept;
+
+        Parameter<double> p_gain;   //!< Gain of the active power component
+        Parameter<double> q_gain;   //!< Gain of the reactive power component
     };
 }   // namespace vslib
