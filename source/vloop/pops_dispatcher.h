@@ -244,6 +244,8 @@ namespace user
         double m_recharge_time{0.0};
 
         bool m_original_calculation{false};   //! Whether to use the 'original' calculation or not
+        bool m_normal_mode{true};
+        bool m_degraded_mode_1{false};
 
         //! Returns cycle duration, depending on the time of the last plateau.
         //!
@@ -337,13 +339,25 @@ namespace user
                 m_dEc[index]        = (energy > 0) ? energy : 0.0;
             }
             // total energy required to charge chargers to nominal voltage:
-            double Ec = (m_dEc[0] + m_dEc[1]);
-            if (Ec < 0)   // could be negative if AFE is too fast
+            double Ec;
+            if (m_normal_mode)
             {
-                Ec = 0;
+                Ec = m_dEc[0] + m_dEc[1];
+            }
+            else if (m_degraded_mode_1)
+            {
+                Ec = m_dEc[0];
             }
             // total energy required to charge floaters to nominal voltage:
-            const double Ef = m_dEc[2] + m_dEc[3] + m_dEc[4] + m_dEc[5];
+            double Ef;
+            if (m_normal_mode)
+            {
+                Ef = m_dEc[2] + m_dEc[3] + m_dEc[4] + m_dEc[5];
+            }
+            else if (m_degraded_mode_1)
+            {
+                Ef = m_dEc[1] + m_dEc[2] + m_dEc[3] + m_dEc[4] + m_dEc[5];
+            }
 
             if (Ef > 0 && i_mag_meas > 0)   // floaters not completely charged
             {
@@ -362,28 +376,52 @@ namespace user
 
             if (kf > 0)
             {
-                // chargers:
-                if (Ec > 0)
+                int n_chargers = m_n_chargers;
+                if (m_normal_mode)
                 {
-                    m_v_ref_dispatch[0] = 0.5 * v_r + kc * v_l * (m_dEc[0] / Ec);
-                    m_v_ref_dispatch[1] = 0.5 * v_r + kc * v_l * (m_dEc[1] / Ec);
+                    // chargers:
+                    if (Ec > 0)
+                    {
+                        m_v_ref_dispatch[0] = 0.5 * v_r + kc * v_l * (m_dEc[0] / Ec);
+                        m_v_ref_dispatch[1] = 0.5 * v_r + kc * v_l * (m_dEc[1] / Ec);
+                    }
+                    else
+                    {
+                        m_v_ref_dispatch[0] = 0.5 * (v_r + v_l * kc);
+                        m_v_ref_dispatch[1] = 0.5 * (v_r + v_l * kc);
+                    }
                 }
-                else
+                else if (m_degraded_mode_1)
                 {
-                    m_v_ref_dispatch[0] = 0.5 * (v_r + v_l * kc);
-                    m_v_ref_dispatch[1] = 0.5 * (v_r + v_l * kc);
+                    n_chargers = 1;
+                    // chargers:
+                    if (Ec > 0)
+                    {
+                        m_v_ref_dispatch[0] = 0.5 * v_r + kc * v_l * (m_dEc[0] / Ec);
+                    }
+                    else
+                    {
+                        m_v_ref_dispatch[0] = 0.5 * (v_r + v_l * kc);
+                    }
                 }
                 // floaters:
-                m_v_ref_dispatch[2] = v_l * kf * (m_dEc[2] / Ef);
-                m_v_ref_dispatch[3] = v_l * kf * (m_dEc[3] / Ef);
-                m_v_ref_dispatch[4] = v_l * kf * (m_dEc[4] / Ef);
-                m_v_ref_dispatch[5] = v_l * kf * (m_dEc[5] / Ef);
+                for (int index = n_chargers; index < m_dEc.size(); index++)
+                {
+                    m_v_ref_dispatch[index] = v_l * kf * (m_dEc[index] / Ef);
+                }
             }
             else
             {
                 // chargers:
                 m_v_ref_dispatch[0] = 0.5 * v_ref;
-                m_v_ref_dispatch[1] = 0.5 * v_ref;
+                if (m_normal_mode)
+                {
+                    m_v_ref_dispatch[1] = 0.5 * v_ref;
+                }
+                else if (m_degraded_mode_1)
+                {
+                    m_v_ref_dispatch[1] = 0.0;
+                }
                 // floaters:
                 m_v_ref_dispatch[2] = 0.0;
                 m_v_ref_dispatch[3] = 0.0;
@@ -401,52 +439,66 @@ namespace user
             if (n_dcdc == 1)
             {
                 m_v_ref_dispatch[0] = v_ref;
-                // the rest remains unchanged
             }
             else if (n_dcdc == 2)
             {
-                m_v_ref_dispatch[0] = 0.5 * v_ref;
-                m_v_ref_dispatch[1] = 0.5 * v_ref;
-                // the rest remains unchanged
+                if (m_normal_mode)
+                {
+                    m_v_ref_dispatch[0] = 0.5 * v_ref;
+                    m_v_ref_dispatch[1] = 0.5 * v_ref;
+                }
+                else if (m_degraded_mode_1)
+                {
+                    m_v_ref_dispatch[0] = v_ref;
+                }
             }
             else   // n_dcdc == 6
             {
-                if (m_original_calculation)
+                if (m_normal_mode)
                 {
-                    // assuming original calculation:
-                    // energy needed to bring floaters to nominal voltage:
-                    const double Ef
-                        = m_n_floaters * m_k * (std::pow(m_Udc_max_chargers, 2) - std::pow(m_Udc_min_chargers, 2));
-                    // energy needed to bring chargers to nominal voltage:
-                    const double Ech
-                        = m_n_chargers * m_k * (std::pow(m_Udc_max_floaters, 2) - std::pow(m_Udc_min_floaters, 2));
-
-                    const double E = Ef + Ech;
-                    kf             = Ef / E;
-                    kc             = Ech / E;
-
-                    m_v_ref_dispatch[0] = v_ref * (1 - kf) / m_n_chargers;
-                    m_v_ref_dispatch[1] = m_v_ref_dispatch[0];
-                    m_v_ref_dispatch[5] = m_v_ref_dispatch[4] = m_v_ref_dispatch[3] = m_v_ref_dispatch[2]
-                        = v_ref * kf / m_n_floaters;
-                }
-                else
-                {
-                    // fixed-factors approach
-                    if (fabs(v_l) < m_v_min)
+                    if (m_original_calculation)
                     {
-                        m_v_ref_dispatch[0] = v_ref * 0.3;
+                        // assuming original calculation:
+                        // energy needed to bring floaters to nominal voltage:
+                        const double Ef
+                            = m_n_floaters * m_k * (std::pow(m_Udc_max_chargers, 2) - std::pow(m_Udc_min_chargers, 2));
+                        // energy needed to bring chargers to nominal voltage:
+                        const double Ech
+                            = m_n_chargers * m_k * (std::pow(m_Udc_max_floaters, 2) - std::pow(m_Udc_min_floaters, 2));
+
+                        const double E = Ef + Ech;
+                        kf             = Ef / E;
+                        kc             = Ech / E;
+
+                        m_v_ref_dispatch[0] = v_ref * (1 - kf) / m_n_chargers;
                         m_v_ref_dispatch[1] = m_v_ref_dispatch[0];
                         m_v_ref_dispatch[5] = m_v_ref_dispatch[4] = m_v_ref_dispatch[3] = m_v_ref_dispatch[2]
-                            = v_ref * 0.1;
+                            = v_ref * kf / m_n_floaters;
                     }
                     else
                     {
-                        m_v_ref_dispatch[0] = 0.5 * v_r + 0.1 * v_l;
-                        m_v_ref_dispatch[1] = m_v_ref_dispatch[0];
-                        m_v_ref_dispatch[5] = m_v_ref_dispatch[4] = m_v_ref_dispatch[3] = m_v_ref_dispatch[2]
-                            = 0.2 * v_l;
+                        // fixed-factors approach
+                        if (fabs(v_l) < m_v_min)
+                        {
+                            m_v_ref_dispatch[0] = v_ref * 0.3;
+                            m_v_ref_dispatch[1] = m_v_ref_dispatch[0];
+                            m_v_ref_dispatch[5] = m_v_ref_dispatch[4] = m_v_ref_dispatch[3] = m_v_ref_dispatch[2]
+                                = v_ref * 0.1;
+                        }
+                        else
+                        {
+                            m_v_ref_dispatch[0] = 0.5 * v_r + 0.1 * v_l;
+                            m_v_ref_dispatch[1] = m_v_ref_dispatch[0];
+                            m_v_ref_dispatch[5] = m_v_ref_dispatch[4] = m_v_ref_dispatch[3] = m_v_ref_dispatch[2]
+                                = 0.2 * v_l;
+                        }
                     }
+                }
+                else if (m_degraded_mode_1)
+                {
+                    m_v_ref_dispatch[0] = 0.7 * v_r + v_l / 6.0;
+                    m_v_ref_dispatch[5] = m_v_ref_dispatch[4] = m_v_ref_dispatch[3] = m_v_ref_dispatch[2]
+                        = m_v_ref_dispatch[1]                                       = 0.06 * v_r + v_l / 6.0;
                 }
             }
         }
