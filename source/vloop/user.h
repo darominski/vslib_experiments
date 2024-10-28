@@ -134,7 +134,6 @@ namespace user
             {
                 converter.dispatcher.setVdcMeas(index, data_in[2 + index]);
             }
-
             const double v_ref  = data_in[8];
             const int    n_dcdc = data_in[9];
             const double i_meas = data_in[10];
@@ -150,34 +149,35 @@ namespace user
             // detect new cycle: c0=1, c_tim arbitrary
             if (cyclic_data_input > -1 && converter.previous_cyclic_data < 0)
             {
-                converter.c_tim = 0;   // time = 0, new cycle begins
+                converter.m_cycle_started = true;
+                converter.c_tim           = 0;   // time = 0, new cycle begins
             }
 
-            if (converter.c_tim < 30)
+            if (converter.m_cycle_started && converter.c_tim < 30)
             {
-                converter.dispatcher.setCyclicData(converter.c_tim, cyclic_data_input);
+                converter.dispatcher.parser.setCyclicData(converter.c_tim, cyclic_data_input);
             }
 
             const double current_time     = converter.c_tim * converter.control_period;   // inside a cycle
             double       i_meas_estimated = 0.0;
             if (converter.c_tim > 4)   // c_tim > 4, we can start outputting reference
             {
-                i_meas_estimated = converter.dispatcher.getReference(current_time);
+                i_meas_estimated = converter.dispatcher.parser.getReference(current_time);
             }
             data_in[2] = i_meas_estimated;
 
             if (converter.c_tim == 30)
             {
-                converter.dispatcher.printCyclicData();
-                converter.dispatcher.endTimeLastPlateau();
+                // converter.dispatcher.printCyclicData();
+                converter.dispatcher.init();
             }
 
             if (converter.c_tim >= 30)
             {
-                converter.dispatcher.dispatchVoltage(current_time, v_ref, i_meas_estimated);
+                converter.dispatcher.dispatchVoltage(current_time, v_ref, i_meas);
                 for (int index = 0; index < converter.dispatcher.getModulationId().size(); index++)
                 {
-                    std::cout << converter.dispatcher.getModulationId()[index] << std::endl;
+                    // std::cout << converter.dispatcher.getModulationId()[index] << std::endl;
                     data_in[index + 3] = converter.dispatcher.getModulationId()[index];
                 }
             }
@@ -185,7 +185,10 @@ namespace user
             data_in[11] = converter.dispatcher.getNdcdc(current_time);
 
             // message received, update c_tim
-            converter.c_tim++;
+            if (converter.m_cycle_started)
+            {
+                converter.c_tim++;
+            }
             converter.interrupt_counter++;
             converter.previous_cyclic_data = cyclic_data_input;
 
@@ -212,6 +215,7 @@ namespace user
         volatile reg_to_stream* m_r2s;
 
         unsigned int c_tim{0};
+        bool         m_cycle_started{false};
     };
 
 }   // namespace user
