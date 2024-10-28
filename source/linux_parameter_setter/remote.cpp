@@ -72,87 +72,81 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
 
     values_to_set["example.control_period"] = control_period;
 
-    // PLL
-    values_to_set["pll.f_rated"]      = 50.0;
-    values_to_set["pll.angle_offset"] = 0.0;
+    // POPS dispatcher
+    values_to_set["dispatcher.magnets_r"] = 0.32;
+    values_to_set["dispatcher.magnets_l"] = 0.97;
 
-    values_to_set["pi.kp"]                      = 400.0;
-    values_to_set["pi.ki"]                      = 35000.0;
-    values_to_set["pi.kd"]                      = 0.0;
-    values_to_set["pi.kff"]                     = 0.0;
-    values_to_set["pi.proportional_scaling"]    = 1.0;
-    values_to_set["pi.derivative_scaling"]      = 1.0;
-    values_to_set["pi.derivative_filter_order"] = 1.0;
-    values_to_set["pi.control_period"]          = control_period;
-    values_to_set["pi.pre_warping_frequency"]   = 1e-9;
+    // // PLL
+    // values_to_set["pll.f_rated"]      = 50.0;
+    // values_to_set["pll.angle_offset"] = 0.0;
 
-    values_to_set["actuation_limits.lower_threshold"] = -1e9;
-    values_to_set["actuation_limits.upper_threshold"] = 1e9;
-    values_to_set["actuation_limits.dead_zone"]       = std::array<double, 2>{0, 0};
+    // values_to_set["pi.kp"]                      = 400.0;
+    // values_to_set["pi.ki"]                      = 35000.0;
+    // values_to_set["pi.kd"]                      = 0.0;
+    // values_to_set["pi.kff"]                     = 0.0;
+    // values_to_set["pi.proportional_scaling"]    = 1.0;
+    // values_to_set["pi.derivative_scaling"]      = 1.0;
+    // values_to_set["pi.derivative_filter_order"] = 1.0;
+    // values_to_set["pi.control_period"]          = control_period;
+    // values_to_set["pi.pre_warping_frequency"]   = 1e-9;
 
-    // values_to_set["i.kp"]                      = 0.0;
-    // values_to_set["i.ki"]                      = 1.0;
-    // values_to_set["i.kd"]                      = 0.0;
-    // values_to_set["i.kff"]                     = 0.0;
-    // values_to_set["i.proportional_scaling"]    = 1.0;
-    // values_to_set["i.derivative_scaling"]      = 1.0;
-    // values_to_set["i.derivative_filter_order"] = 1.0;
-    // values_to_set["i.control_period"]          = control_period;
-    // values_to_set["i.pre_warping_frequency"]   = 1e-9;
+    // values_to_set["actuation_limits.lower_threshold"] = -1e9;
+    // values_to_set["actuation_limits.upper_threshold"] = 1e9;
+    // values_to_set["actuation_limits.dead_zone"]       = std::array<double, 2>{0, 0};
 
-    // outer loops
-    const double kp_outer = 1.0;
-    const double ki_outer = 7.5;
+    // // outer loops
+    // const double kp_outer = 1.0;
+    // const double ki_outer = 7.5;
 
-    values_to_set["pi_id_ref.kp"]                      = kp_outer;
-    values_to_set["pi_id_ref.ki"]                      = ki_outer;
-    values_to_set["pi_id_ref.kd"]                      = 0.0;
-    values_to_set["pi_id_ref.kff"]                     = 0.0;
-    values_to_set["pi_id_ref.proportional_scaling"]    = 1.0;
-    values_to_set["pi_id_ref.derivative_scaling"]      = 1.0;
-    values_to_set["pi_id_ref.derivative_filter_order"] = 1.0;
-    values_to_set["pi_id_ref.control_period"]          = control_period;
-    values_to_set["pi_id_ref.pre_warping_frequency"]   = 1e-9;
+    // values_to_set["pi_id_ref.kp"]                      = kp_outer;
+    // values_to_set["pi_id_ref.ki"]                      = ki_outer;
+    // values_to_set["pi_id_ref.kd"]                      = 0.0;
+    // values_to_set["pi_id_ref.kff"]                     = 0.0;
+    // values_to_set["pi_id_ref.proportional_scaling"]    = 1.0;
+    // values_to_set["pi_id_ref.derivative_scaling"]      = 1.0;
+    // values_to_set["pi_id_ref.derivative_filter_order"] = 1.0;
+    // values_to_set["pi_id_ref.control_period"]          = control_period;
+    // values_to_set["pi_id_ref.pre_warping_frequency"]   = 1e-9;
 
-    values_to_set["pi_iq_ref.kp"]                      = kp_outer;
-    values_to_set["pi_iq_ref.ki"]                      = ki_outer;
-    values_to_set["pi_iq_ref.kd"]                      = 0.0;
-    values_to_set["pi_iq_ref.kff"]                     = 0.0;
-    values_to_set["pi_iq_ref.proportional_scaling"]    = 1.0;
-    values_to_set["pi_iq_ref.derivative_scaling"]      = 1.0;
-    values_to_set["pi_iq_ref.derivative_filter_order"] = 1.0;
-    values_to_set["pi_iq_ref.control_period"]          = control_period;
-    values_to_set["pi_iq_ref.pre_warping_frequency"]   = 1e-9;
+    // values_to_set["pi_iq_ref.kp"]                      = kp_outer;
+    // values_to_set["pi_iq_ref.ki"]                      = ki_outer;
+    // values_to_set["pi_iq_ref.kd"]                      = 0.0;
+    // values_to_set["pi_iq_ref.kff"]                     = 0.0;
+    // values_to_set["pi_iq_ref.proportional_scaling"]    = 1.0;
+    // values_to_set["pi_iq_ref.derivative_scaling"]      = 1.0;
+    // values_to_set["pi_iq_ref.derivative_filter_order"] = 1.0;
+    // values_to_set["pi_iq_ref.control_period"]          = control_period;
+    // values_to_set["pi_iq_ref.pre_warping_frequency"]   = 1e-9;
 
-    // inner loops
-    const double Zb       = 1950 / (3300 / sqrt(2.0));
-    const double kp_inner = (0.7e-3 / Zb) / 2.0 / control_period;
-    const double ki_inner = (1e-5 / Zb) / 2.0 / control_period;
+    // // inner loops
+    // const double Zb       = 1950 / (3300 / sqrt(2.0));
+    // const double kp_inner = (0.7e-3 / Zb) / 2.0 / control_period;
+    // const double ki_inner = (1e-5 / Zb) / 2.0 / control_period;
 
-    values_to_set["pi_vd_ref.kp"]                      = kp_inner;
-    values_to_set["pi_vd_ref.ki"]                      = ki_inner;
-    values_to_set["pi_vd_ref.kd"]                      = 0.0;
-    values_to_set["pi_vd_ref.kff"]                     = 0.0;
-    values_to_set["pi_vd_ref.proportional_scaling"]    = 1.0;
-    values_to_set["pi_vd_ref.derivative_scaling"]      = 1.0;
-    values_to_set["pi_vd_ref.derivative_filter_order"] = 1.0;
-    values_to_set["pi_vd_ref.control_period"]          = control_period;
-    values_to_set["pi_vd_ref.pre_warping_frequency"]   = 1e-9;
+    // values_to_set["pi_vd_ref.kp"]                      = kp_inner;
+    // values_to_set["pi_vd_ref.ki"]                      = ki_inner;
+    // values_to_set["pi_vd_ref.kd"]                      = 0.0;
+    // values_to_set["pi_vd_ref.kff"]                     = 0.0;
+    // values_to_set["pi_vd_ref.proportional_scaling"]    = 1.0;
+    // values_to_set["pi_vd_ref.derivative_scaling"]      = 1.0;
+    // values_to_set["pi_vd_ref.derivative_filter_order"] = 1.0;
+    // values_to_set["pi_vd_ref.control_period"]          = control_period;
+    // values_to_set["pi_vd_ref.pre_warping_frequency"]   = 1e-9;
 
-    values_to_set["pi_vq_ref.kp"]                      = kp_inner;
-    values_to_set["pi_vq_ref.ki"]                      = ki_inner;
-    values_to_set["pi_vq_ref.kd"]                      = 0.0;
-    values_to_set["pi_vq_ref.kff"]                     = 0.0;
-    values_to_set["pi_vq_ref.proportional_scaling"]    = 1.0;
-    values_to_set["pi_vq_ref.derivative_scaling"]      = 1.0;
-    values_to_set["pi_vq_ref.derivative_filter_order"] = 1.0;
-    values_to_set["pi_vq_ref.control_period"]          = control_period;
-    values_to_set["pi_vq_ref.pre_warping_frequency"]   = 1e-9;
+    // values_to_set["pi_vq_ref.kp"]                      = kp_inner;
+    // values_to_set["pi_vq_ref.ki"]                      = ki_inner;
+    // values_to_set["pi_vq_ref.kd"]                      = 0.0;
+    // values_to_set["pi_vq_ref.kff"]                     = 0.0;
+    // values_to_set["pi_vq_ref.proportional_scaling"]    = 1.0;
+    // values_to_set["pi_vq_ref.derivative_scaling"]      = 1.0;
+    // values_to_set["pi_vq_ref.derivative_filter_order"] = 1.0;
+    // values_to_set["pi_vq_ref.control_period"]          = control_period;
+    // values_to_set["pi_vq_ref.pre_warping_frequency"]   = 1e-9;
 
-    // final saturation
-    values_to_set["limit.lower_threshold"] = -1.1;
-    values_to_set["limit.upper_threshold"] = 1.1;
-    values_to_set["limit.dead_zone"]       = std::array<double, 2>{0, 0};
+    // // final saturation
+    // values_to_set["limit.lower_threshold"] = -1.1;
+    // values_to_set["limit.upper_threshold"] = 1.1;
+    // values_to_set["limit.dead_zone"]       = std::array<double, 2>{0, 0};
 
     for (const auto& [name, _] : parameters)
     {

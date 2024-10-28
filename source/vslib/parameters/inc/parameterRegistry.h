@@ -69,6 +69,6 @@ namespace vslib
         //! is not-conforming.
         //!
         //! @param parameter_name Full name of the Parameter, including hierarchy, to be checked
-        void checkNameFormatting(const std::string& parameter_name);
+        void checkNameFormatting(std::string_view parameter_name);
     };
 }   // namespace vslib

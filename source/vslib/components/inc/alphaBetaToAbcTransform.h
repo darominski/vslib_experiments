@@ -18,7 +18,7 @@ namespace vslib
         //!
         //! @param name Name of the Component
         //! @param parent Parent of this Component
-        AlphaBetaToAbcTransform(std::string_view name, IComponent& parent)
+        AlphaBetaToAbcTransform(std::string_view name, Component& parent)
             : Component("AlphaBetaToAbcTransform", name, parent)
         {
         }

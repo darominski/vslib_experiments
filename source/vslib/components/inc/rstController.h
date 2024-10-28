@@ -23,12 +23,12 @@ namespace vslib
 
         //! Updates histories of measurements and references and moves the head of the history buffer.
         //!
-        //! @param measurement Current value of the process value
         //! @param reference Current value of the set-point reference
-        void updateInputHistories(const double measurement, const double reference) noexcept
+        //! @param measurement Current value of the process value
+        void updateInputHistories(const double reference, const double measurement) noexcept
         {
-            m_measurements[m_head] = measurement;
             m_references[m_head]   = reference;
+            m_measurements[m_head] = measurement;
 
             m_head++;
             if (m_head == (ControllerLength - 1))
@@ -40,14 +40,14 @@ namespace vslib
 
         //! Calculates one iteration of the controller algorithm.
         //!
-        //! @param measurement Current process value (measurement)
         //! @param reference Reference value for the controller
+        //! @param measurement Current process value (measurement)
         //! @return Controller output of the iteration
-        [[nodiscard]] double control(const double measurement, const double reference) noexcept
+        [[nodiscard]] double control(const double reference, const double measurement) noexcept
         {
             // based on logic in regRstCalcActRT from CCLIBS libreg regRst.c
-            m_measurements[m_head] = measurement;
             m_references[m_head]   = reference;
+            m_measurements[m_head] = measurement;
 
             double actuation = m_t[0] * m_references[m_head] - m_r[0] * m_measurements[m_head];
             for (int64_t index = 1; index < ControllerLength; index++)
@@ -305,16 +305,16 @@ namespace vslib
     //! @param reference Current reference value
     //! @return Next actuation value
     template<>
-    [[nodiscard]] inline double RSTController<3>::control(const double measurement, const double reference) noexcept
+    [[nodiscard]] inline double RSTController<3>::control(const double reference, const double measurement) noexcept
     {
         // This specialization allows to speed-up the calculation of the RST actuation by about 15%
-        m_measurements[2] = m_measurements[1];
-        m_measurements[1] = m_measurements[0];
-        m_measurements[0] = measurement;
-
         m_references[2] = m_references[1];
         m_references[1] = m_references[0];
         m_references[0] = reference;
+
+        m_measurements[2] = m_measurements[1];
+        m_measurements[1] = m_measurements[0];
+        m_measurements[0] = measurement;
 
         m_actuations[2] = m_actuations[1];
         m_actuations[1] = m_actuations[0];

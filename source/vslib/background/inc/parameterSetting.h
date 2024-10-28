@@ -18,9 +18,6 @@ namespace vslib
 {
     class ParameterSetting
     {
-        using ComponentReference = std::reference_wrapper<IComponent>;
-        using ChildrenList       = std::vector<ComponentReference>;
-
       public:
         //! Creates the ParameterSetting background task object and initializes the JSON schema validator as well as
         //! read and write JSON queues

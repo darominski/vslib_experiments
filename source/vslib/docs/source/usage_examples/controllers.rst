@@ -20,10 +20,9 @@ engine, that of an :code:`RST` controller. Both components include a :ref:`Limit
 to provide saturation protection and ensure that the actuation provided by the controller falls within the expected range.
 
 Both components have a single access method to return the next :code:`double`-type actuation value called :code:`control`,
-that takes two arguments of type :code:`double`: current measurement (process value) and current reference (set-point) values.
-The :code:`control` method will return :code:`0.0` until the buffers with input histories for measurement and references are filled,
-which is equal to the order of the controller, e.g. 2 iterations for a :code:`PID` controller. The algorithm to calculate the next
-actuation is the following:
+that takes two arguments of type :code:`double`: current reference (set-point) and current measurement (process value) values.
+In case of and :code:`RST`, the :code:`control` method will return :code:`0.0` until the buffers with input histories for measurement
+and references are filled, which is equal to the order of the controller. The algorithm to calculate the next actuation is the following:
 
 .. math::
 
@@ -32,7 +31,7 @@ actuation is the following:
 where: `u` are actuations, `r` are references, and `y` are measurements.
 
 The input history buffers can also be filled manually by calling :code:`updateInputHistories` method, taking two :code:`double`-type
-arguments with measurement and reference values respectively.
+arguments with reference and measurement values respectively.
 
 The anti-windup is triggered automatically when the resulting actuation value is outside the limits specified by the internal
 :code:`LimitRange` component. It can be also triggered manually, by calling :code:`updateReference` method. The method takes one argument
@@ -101,11 +100,11 @@ Usage example
 
         const double expected_actuation = ((t[0] + t[1] + t[2]) * set_point_value - (r[0] + r[1] + r[2]) * measurement_value) / s[0];
 
-        auto actuation = rst.control(measurement_value, set_point_value); // 0.0
+        auto actuation = rst.control(set_point_value, measurement_value); // 0.0
         auto ready = rst.isReady();                                       // false
-        actuation = rst.control(measurement_value, set_point_value);      // 0.0
+        actuation = rst.control(set_point_value, measurement_value);      // 0.0
         ready = rst.isReady();                                            // false
-        actuation = rst.control(measurement_value, set_point_value);      // expected_actuation's value
+        actuation = rst.control(set_point_value, measurement_value);      // expected_actuation's value
         ready = rst.isReady();                                            // true
 
         // reset between not-connected uses to clear cached data
@@ -113,9 +112,9 @@ Usage example
 
         // update histories manually:
         ready = rst.isReady(); // false
-        rst.updateInputHistories(measurement_value, set_point_value);
+        rst.updateInputHistories(set_point_value, measurement_value);
         ready = rst.isReady(); // false
-        rst.updateInputHistories(measurement_value, set_point_value);
+        rst.updateInputHistories(set_point_value, measurement_value);
         ready = rst.isReady(); // true
 
         // trigger anti-windup calculation:
@@ -220,11 +219,11 @@ Usage example
         const double set_point_value   = 3.14159;
         const double measurement_value = 1.111;
 
-        auto actuation = pid.control(measurement_value, set_point_value); // 0.0
+        auto actuation = pid.control(set_point_value, measurement_value); // 0.0
         auto ready = pid.isReady();                                       // false
-        actuation = pid.control(measurement_value, set_point_value);      // 0.0
+        actuation = pid.control(set_point_value, measurement_value);      // 0.0
         ready = pid.isReady();                                            // false
-        actuation = pid.control(measurement_value, set_point_value);
+        actuation = pid.control(set_point_value, measurement_value);
         ready = pid.isReady();                                            // true
 
         // reset between not-connected uses to clear cached data
@@ -232,9 +231,9 @@ Usage example
 
         // update histories manually:
         ready = pid.isReady(); // false
-        pid.updateInputHistories(measurement_value, set_point_value);
+        pid.updateInputHistories(set_point_value, measurement_value);
         ready = pid.isReady(); // false
-        pid.updateInputHistories(measurement_value, set_point_value);
+        pid.updateInputHistories(set_point_value, measurement_value);
         ready = pid.isReady(); // true
 
         // trigger anti-windup calculation:

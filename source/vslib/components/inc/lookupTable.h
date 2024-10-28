@@ -25,7 +25,7 @@ namespace vslib
         //! @param values Vector with lookup table index-value pairs
         //! @param equal_binning Flag signalling whether the lookup table indexing has equal spaced binning
         LookupTable(
-            std::string_view name, IComponent& parent, std::vector<std::pair<IndexType, StoredType>>&& values,
+            std::string_view name, Component& parent, std::vector<std::pair<IndexType, StoredType>>&& values,
             const bool equal_binning = false
         ) noexcept
             : Component("LookupTable", name, parent),
