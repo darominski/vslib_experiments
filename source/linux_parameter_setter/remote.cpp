@@ -75,7 +75,7 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     // POPS dispatcher
     values_to_set["dispatcher.magnets_r"]      = 0.32;
     values_to_set["dispatcher.magnets_l"]      = 0.97;
-    values_to_set["dispatcher.operating_mode"] = "degraded_1";
+    values_to_set["dispatcher.operating_mode"] = "degraded_2";
 
     // // PLL
     // values_to_set["pll.f_rated"]      = 50.0;
