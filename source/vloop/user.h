@@ -32,7 +32,7 @@ namespace user
 
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
-        vslib::PLL                            pll;
+        vslib::SRFPLL                         pll;
         vslib::PID                            pi_id_ref;
         vslib::PID                            pi_iq_ref;
         vslib::PID                            pi_vd_ref;
@@ -205,8 +205,8 @@ namespace user
             //
             // Outer loops
             //
-            const auto id_ref = converter.pi_id_ref.control(start * p_meas, start * p_ref);
-            const auto iq_ref = -converter.pi_iq_ref.control(start * q_meas, start * q_ref);
+            const auto id_ref = converter.pi_id_ref.control(start * p_ref, start * p_meas);
+            const auto iq_ref = -converter.pi_iq_ref.control(start * q_ref, start * q_meas);
 
             data_in[7] = id_ref;
             data_in[8] = iq_ref;
@@ -215,9 +215,9 @@ namespace user
             // Inner loops
             //
             // PI + 2 * ff for each loop
-            const auto vd_ref = converter.pi_vd_ref.control(start * id_meas, start * id_ref) + vd_meas
+            const auto vd_ref = converter.pi_vd_ref.control(start * id_ref, start * id_meas) + vd_meas
                                 - i_base * wL * si_2_pu * iq_meas;
-            const auto vq_ref = converter.pi_vq_ref.control(start * iq_meas, start * iq_ref) + vq_meas
+            const auto vq_ref = converter.pi_vq_ref.control(start * iq_ref, start * iq_meas) + vq_meas
                                 + i_base * wL * si_2_pu * id_meas;
             data_in[9]  = vd_ref;
             data_in[10] = vq_ref;
