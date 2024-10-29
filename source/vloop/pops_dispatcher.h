@@ -41,7 +41,7 @@ namespace user
             = {"FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHT", "NINTH"};
 
       public:
-        //! Creates P80 cyclic data-specific parser object.
+        //! Constructs a P80 cyclic data-specific parser object.
         P80CyclicDataParser()
         {
             for (int index = 0; index < signal_name.size(); index++)
@@ -51,11 +51,12 @@ namespace user
         }
 
         //! Sets a value to the P80 cyclic data array.
-        void setCyclicData(size_t index, double value)
+        //!
+        //! @param index Index of the value to be set to.
+        //! @param value Value to be set at the given index.
+        void setCyclicData(const size_t index, const double value)
         {
-            // std::cout << signal_name[index] << " " << value << " ";
             m_cyclic_data[signal_name[index]] = value;
-            // std::cout << m_cyclic_data[signal_name[index]] << std::endl;
         }
 
 
@@ -83,7 +84,7 @@ namespace user
 
         //! Returns the plateau reference value when provided with the index of that reference plateau value.
         //!
-        //! @param plateau_index Index of the plateau to get the reference of
+        //! @param plateau_index Index of the plateau to get the reference of.
         //! @return Reference value at the requested index
         double getPlateaubyId(const int plateau_index) noexcept
         {
@@ -93,7 +94,8 @@ namespace user
 
         //! Sets the plateau id at the current time, or a previous one if the provided time falls between plateaux.
         //!
-        //! @param current_time The current value of time within the cycle being played
+        //! @param current_time The current value of time within the cycle being played.
+        //! @return Current plateau's ID
         int getPlateauId(const double current_time) noexcept
         {
             int id = m_current_plateau_id;
@@ -130,6 +132,10 @@ namespace user
             return id;
         }
 
+        //! Returns the reference at the provided time, either the value at the plateau or an interpolated value between
+        //! neighbouring plateaux.
+        //!
+        //! @param current_time The current value of time within the cycle being played.
         double getReference(const double current_time)
         {
             double reference         = 0.0;
@@ -164,6 +170,8 @@ namespace user
         }
 
         //! Finds and sets the time of the last plateau, when the recharge starts.
+        //!
+        //! @return End time of the last non-zero plateau.
         double endTimeLastPlateau()
         {
             int index = 0;
@@ -232,6 +240,9 @@ namespace user
       public:
         static constexpr size_t TotalNumberDCDC = 6;
 
+        //! Constructs a POPSDispatcher Component.
+        //!
+        //! @param parent Converter owning this object
         POPSDispatcher(vslib::IConverter& parent)
             : vslib::Component("POPSDispatcher", "dispatcher", parent),
               magnets_r(*this, "magnets_r"),
@@ -256,6 +267,7 @@ namespace user
         // ************************************************************
         // Initialization and verification of Parameters
 
+        //! Initialization method.
         void init()
         {
             m_recharge_time = parser.endTimeLastPlateau();
@@ -315,7 +327,11 @@ namespace user
             return n_dcdc;
         }
 
+        //! Sets (dispatches) the modulation indices for all DCDCs based on current time and the operation mode used.
         //!
+        //! @param current_time Time inside the cycle [s]
+        //! @param v_ref Voltage reference [V]
+        //! @param i_mag_meas Measured current in magnets [A]
         void dispatchVoltage(const double current_time, const double v_ref, const double i_mag_meas) noexcept
         {
             std::fill(m_v_ref_dispatch.begin(), m_v_ref_dispatch.end(), 0.0);
@@ -366,6 +382,12 @@ namespace user
 
         bool m_original_calculation{false};   //! Whether to use the 'original' calculation or not
 
+        //! Sets the modulation indices for all DCDC when the DCDCs are recharging at the end of the cycle.
+        //!
+        //! @param v_ref Voltage reference [V]
+        //! @param i_mag_meas Measured magnet current [A]
+        //! @param v_r Resistive voltage component [V]
+        //! @param v_l Inductive voltage component [V]
         void dispatchRecharging(const double v_ref, const double i_mag_meas, const double v_r, const double v_l)
         {
             double kc = 0;
@@ -466,6 +488,12 @@ namespace user
             }
         }
 
+        //! Sets the modulation indices for all DCDC during the cycle, before recharging.
+        //!
+        //! @param v_ref Voltage reference [V]
+        //! @param v_r Resistive voltage component [V]
+        //! @param v_l Inductive voltage component [V]
+        //! @param n_dcdc Number of DCDC that are active
         void dispatchCycle(const double v_ref, const double v_r, const double v_l, const int n_dcdc)
         {
             double kf = 0;
