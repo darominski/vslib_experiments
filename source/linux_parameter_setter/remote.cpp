@@ -68,10 +68,11 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     std::array<int, 2>          version{0, 1};
     std::map<std::string, Json> values_to_set;
 
-    const double control_period = 50e-6;
+    const double control_period    = 50e-6;
+    const double current_frequency = 50.0;
 
     // PLL
-    values_to_set["pll.f_rated"]      = 50.0;
+    values_to_set["pll.f_rated"]      = current_frequency;
     values_to_set["pll.angle_offset"] = 0.0;
 
     values_to_set["pi.kp"]                      = 400.0;
@@ -151,6 +152,18 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["limit.lower_threshold"] = -1.1;
     values_to_set["limit.upper_threshold"] = 1.1;
     values_to_set["limit.dead_zone"]       = std::array<double, 2>{0, 0};
+
+    // AFE parameters
+    static constexpr double V_base = 1950.0;
+    static constexpr double i_base = 3300.0;
+
+    values_to_set["afe.inductance"] = 0.7e-3;
+    values_to_set["afe.frequency"]  = current_frequency;
+    values_to_set["afe.v_base"]     = V_base;
+    values_to_set["afe.i_base"]     = i_base;
+
+    values_to_set["power_3ph_instant.p_gain"] = sqrt(2) / (sqrt(3) * V_base * i_base);
+    values_to_set["power_3ph_instant.q_gain"] = sqrt(2) / (sqrt(3) * V_base * i_base);
 
     for (const auto& [name, _] : parameters)
     {
