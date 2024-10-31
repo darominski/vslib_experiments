@@ -68,14 +68,17 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     std::array<int, 2>          version{0, 1};
     std::map<std::string, Json> values_to_set;
 
-    const double control_period = 1e-3;
+    const double control_period      = 1e-3;
+    const double switching_frequency = 333.33;
 
-    values_to_set["example.control_period"] = control_period;
+    values_to_set["example.control_period"]      = control_period;
+    values_to_set["example.switching_frequency"] = switching_frequency;
+    values_to_set["example.i_base"]              = 3300.0;
 
-    // POPS dispatcher
-    values_to_set["dispatcher.magnets_r"]      = 0.32;
-    values_to_set["dispatcher.magnets_l"]      = 0.97;
-    values_to_set["dispatcher.operating_mode"] = "degraded_2";
+    // // POPS dispatcher
+    // values_to_set["dispatcher.magnets_r"]      = 0.32;
+    // values_to_set["dispatcher.magnets_l"]      = 0.97;
+    // values_to_set["dispatcher.operating_mode"] = "degraded_2";
 
     // // PLL
     // values_to_set["pll.f_rated"]      = 50.0;
@@ -148,6 +151,15 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     // values_to_set["limit.lower_threshold"] = -1.1;
     // values_to_set["limit.upper_threshold"] = 1.1;
     // values_to_set["limit.dead_zone"]       = std::array<double, 2>{0, 0};
+
+    // current balancing
+    values_to_set["avoid_zero_division.lower_threshold"] = 1e-10;
+    values_to_set["avoid_zero_division.upper_threshold"] = 1e3;
+    values_to_set["avoid_zero_division.dead_zone"]       = std::array<double, 2>{0, 0};
+
+    values_to_set["saturation_protection.lower_threshold"] = -0.03;
+    values_to_set["saturation_protection.upper_threshold"] = 0.03;
+    values_to_set["saturation_protection.dead_zone"]       = std::array<double, 2>{0, 0};
 
     for (const auto& [name, _] : parameters)
     {
