@@ -6,6 +6,7 @@
 
 #include "peripherals/reg_to_stream.h"
 #include "peripherals/stream_to_reg.h"
+#include "pops_current_balancing.h"
 #include "pops_dispatcher.h"
 #include "vslib.h"
 
@@ -19,17 +20,8 @@ namespace user
             : vslib::IConverter("example", root),
               m_interrupt_id{121 + 0},   // Jonas's definition
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              maverage_pos_a("maverage_pos_a", *this),
-              maverage_pos_b("maverage_pos_b", *this),
-              maverage_pos_c("maverage_pos_c", *this),
-              maverage_neg_a("maverage_neg_a", *this),
-              maverage_neg_b("maverage_neg_b", *this),
-              maverage_neg_c("maverage_neg_c", *this),
-              saturation("saturation_protection", *this),
-              avoid_zero_division("avoid_zero_division", *this),
-              switching_frequency(*this, "switching_frequency"),
-              i_base(*this, "i_base"),
-              //   control_period(*this, "control_period", 0.0),
+              current_balancing_pos("current_balancing_pos", *this),
+              current_balancing_neg("current_balancing_neg", *this),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
         {
@@ -38,21 +30,13 @@ namespace user
 
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
-        vslib::BoxFilter<5>                   maverage_pos_a;   // moving average filters
-        vslib::BoxFilter<5>                   maverage_pos_b;
-        vslib::BoxFilter<5>                   maverage_pos_c;
-        vslib::BoxFilter<5>                   maverage_neg_a;
-        vslib::BoxFilter<5>                   maverage_neg_b;
-        vslib::BoxFilter<5>                   maverage_neg_c;
-        vslib::LimitRange<double>             saturation;
-        vslib::LimitRange<double>             avoid_zero_division;
+        CurrentBalancing                      current_balancing_pos;
+        CurrentBalancing                      current_balancing_neg;
         // ...
         // end of your Components
 
         // Define your Parameters here
-        // vslib::Parameter<double> control_period;
-        vslib::Parameter<double> switching_frequency;
-        vslib::Parameter<double> i_base;
+
         // end of your Parameters
 
         void init() override
@@ -91,7 +75,6 @@ namespace user
             interrupt_1.start();
         }
 
-        int                  counter        = 0;
         int                  expected_delay = 210;
         int                  time_range_min = expected_delay - 20;   // in clock ticks
         int                  time_range_max = expected_delay + 20;   // in clock ticks
@@ -131,106 +114,106 @@ namespace user
             return *reinterpret_cast<TargetType*>(&input);
         }
 
+        // //! Calculates current balancing modulation indices: old calculation.
+        // //!
+        // //! @param i_a a-component of the current
+        // //! @param i_b b-component of the current
+        // //! @param i_c c-component of the current
+        // //! @param ron_vdc ???
+        // //! @param modulation External modulation index
+        // //! @param positive Whether this is a positive or negative current and index
+        // //! @return Tuple of a, b, and c modulation indices
+        // std::tuple<double, double, double, double, double, double> balance_current_old(
+        //     const double i_a, const double i_b, const double i_c, const double vdc, const double modulation,
+        //     const bool positive
+        // )
+        // {
+        // const double ron_vdc = converter.ron / converter.avoid_zero_division.limit(vdc_norm);
+        //
+        //     // first, calculate moving average for all input currents
+        //     const double i_a_av = positive ? maverage_pos_a.filter(i_a) : maverage_neg_a.filter(i_a);
+        //     const double i_b_av = positive ? maverage_pos_b.filter(i_b) : maverage_neg_a.filter(i_a);
+        //     const double i_c_av = positive ? maverage_pos_c.filter(i_c) : maverage_neg_a.filter(i_a);
 
-        unsigned long interrupt_counter{0};
-        double        previous_cyclic_data{-1};
+        //     // calculate average of all currents:
+        //     const double i_abc_av = (i_a_av + i_b_av + i_c_av) / 3.0;
 
-        //! Calculates current balancing modulation indices: old calculation.
-        //!
-        //! @param i_a a-component of the current
-        //! @param i_b b-component of the current
-        //! @param i_c c-component of the current
-        //! @param ron_vdc ???
-        //! @param modulation External modulation index
-        //! @param positive Whether this is a positive or negative current and index
-        //! @return Tuple of a, b, and c modulation indices
-        std::tuple<double, double, double> balance_current_old(
-            const double i_a, const double i_b, const double i_c, const double ron_vdc, const double modulation,
-            const bool positive
-        )
-        {
-            // first, calculate moving average for all input currents
-            const double i_a_av = positive ? maverage_pos_a.filter(i_a) : maverage_neg_a.filter(i_a);
-            const double i_b_av = positive ? maverage_pos_b.filter(i_b) : maverage_neg_a.filter(i_a);
-            const double i_c_av = positive ? maverage_pos_c.filter(i_c) : maverage_neg_a.filter(i_a);
+        //     // subtract the current value of each component from the average and set it to it
+        //     const double i_a_balanced = i_abc_av - i_a_av;
+        //     const double i_b_balanced = i_abc_av - i_b_av;
+        //     const double i_c_balanced = i_abc_av - i_c_av;
 
-            // calculate average of all currents:
-            const double i_abc_av = (i_a_av + i_b_av + i_c_av) / 3.0;
+        //     // multiply them by ron_vdc to calculate apparent voltage of each component
+        //     const double v_a = i_a_balanced * ron_vdc;
+        //     const double v_b = i_b_balanced * ron_vdc;
+        //     const double v_c = i_c_balanced * ron_vdc;
 
-            // subtract the current value of each component from the average and set it to it
-            const double i_a_balanced = i_abc_av - i_a_av;
-            const double i_b_balanced = i_abc_av - i_b_av;
-            const double i_c_balanced = i_abc_av - i_c_av;
+        //     // calculate saturation-protected values, subtract them from the original value to calculate a mean
+        //     voltage
+        //     // of all components and add the mean voltage to each component
+        //     const double v_a_limited = saturation.limit(v_a);
+        //     const double v_b_limited = saturation.limit(v_b);
+        //     const double v_c_limited = saturation.limit(v_c);
 
-            // multiply them by ron_vdc to calculate apparent power of each component
-            const double p_a = i_a_balanced * ron_vdc;
-            const double p_b = i_a_balanced * ron_vdc;
-            const double p_c = i_a_balanced * ron_vdc;
+        //     // calculate common mean voltage:
+        //     const double v_mean = ((v_a - v_a_limited) + (v_b - v_b_limited) + (v_c - v_c_limited)) / 3.0;
 
-            // calculate saturation-protected values, subtract them from the original value to calculate a mean power of
-            // all components and add the mean power to each component
-            const double p_a_limited = saturation.limit(p_a);
-            const double p_b_limited = saturation.limit(p_b);
-            const double p_c_limited = saturation.limit(p_c);
+        //     // sum limited voltages with the mean voltage
+        //     const double v_a_out = v_a_limited + v_mean;
+        //     const double v_b_out = v_b_limited + v_mean;
+        //     const double v_c_out = v_c_limited + v_mean;
 
-            // calculate average power
-            const double p_mean = ((p_a - p_a_limited) + (p_b - p_b_limited) + (p_c - p_c_limited)) / 3.0;
+        //     // finally, calculate indices
+        //     const double m_a = v_a_out + modulation;
+        //     const double m_b = v_b_out + modulation;
+        //     const double m_c = v_c_out + modulation;
 
-            // sum limited power with the mean power
-            const double p_a_out = p_a_limited + p_mean;
-            const double p_b_out = p_b_limited + p_mean;
-            const double p_c_out = p_c_limited + p_mean;
+        //     return std::make_tuple(m_a, m_b, m_c, i_a_av, i_b_av, i_c_av);
+        // }
 
-            // finally, calculate modulation indices
-            const double m_a = p_a_out + modulation;
-            const double m_b = p_b_out + modulation;
-            const double m_c = p_c_out + modulation;
+        // std::tuple<double, double, double, double, double, double> balance_current(
+        //     const double i_a, const double i_b, const double i_c, const double vdc, const double modulation,
+        //     const bool positive
+        // )
+        // {
+        //     // first, calculate moving average for all input currents
 
-            return std::make_tuple(m_a, m_b, m_c);
-        }
+        //     const double i_a_mav = positive ? maverage_pos_a_3.filter(i_a) : maverage_neg_a_3.filter(i_a);
+        //     const double i_b_mav = positive ? maverage_pos_b_3.filter(i_b) : maverage_neg_b_3.filter(i_b);
+        //     const double i_c_mav = positive ? maverage_pos_c_3.filter(i_c) : maverage_neg_c_3.filter(i_c);
 
-        std::tuple<double, double, double> balance_current(
-            const double i_a, const double i_b, const double i_c, const double vdc, const double modulation,
-            const bool positive
-        )
-        {
-            // first, calculate moving average for all input currents
+        //     // calculate average of all currents:
+        //     const double i_abc_av = (i_a_mav + i_b_mav + i_c_mav) / 3.0;
 
-            const double i_a_av = positive ? maverage_pos_a.filter(i_a) : maverage_neg_a.filter(i_a);
-            const double i_b_av = positive ? maverage_pos_b.filter(i_b) : maverage_neg_a.filter(i_a);
-            const double i_c_av = positive ? maverage_pos_c.filter(i_c) : maverage_neg_a.filter(i_a);
+        //     // subtract the current value of each component from the average and set it to it
+        //     const double i_a_balanced = i_a_mav - i_abc_av;
+        //     const double i_b_balanced = i_b_mav - i_abc_av;
+        //     const double i_c_balanced = i_c_mav - i_abc_av;
 
-            // calculate average of all currents:
-            const double i_abc_av = (i_a_av + i_b_av + i_c_av) / 3.0;
+        //     // multiply mean-subtracted currents by I_base to calculate scaled current of each component
+        //     const double i_a_scaled
+        //         = i_base * maverage_notch_frequency
+        //           * (factors_a[0] * i_a_balanced + factors_a[1] * i_b_balanced + factors_a[2] * i_c_balanced);
+        //     const double i_b_scaled
+        //         = i_base * maverage_notch_frequency
+        //           * (factors_b[0] * i_a_balanced + factors_b[1] * i_b_balanced + factors_b[2] * i_c_balanced);
+        //     const double i_c_scaled
+        //         = i_base * maverage_notch_frequency
+        //           * (factors_c[0] * i_a_balanced + factors_c[1] * i_b_balanced + factors_c[2] * i_c_balanced);
 
-            // subtract the current value of each component from the average and set it to it
-            const double i_a_balanced = i_abc_av - i_a_av;
-            const double i_b_balanced = i_abc_av - i_b_av;
-            const double i_c_balanced = i_abc_av - i_c_av;
+        //     // divide volate components by vdc_meas scaled to voltage units
+        //     const double vdc_scaled     = avoid_zero_division.limit(vdc) * m_max_voltage;   // max_voltage = V_2_pu
+        //     const double inv_r_a_scaled = i_a_scaled / vdc_scaled;
+        //     const double inv_r_b_scaled = i_b_scaled / vdc_scaled;
+        //     const double inv_r_c_scaled = i_c_scaled / vdc_scaled;
 
-            // multiply mean-subtracted currents by I_base to calculate scaled current of each component
-            const double i_a_scaled
-                = i_base * switching_frequency
-                  * (factors_a[0] * i_a_balanced + factors_a[1] * i_b_balanced + factors_a[2] * i_c_balanced);
-            const double i_b_scaled
-                = i_a_balanced * i_base * switching_frequency
-                  * (factors_b[0] * i_a_balanced + factors_b[1] * i_b_balanced + factors_b[2] * i_c_balanced);
-            const double i_c_scaled
-                = i_a_balanced * i_base * switching_frequency
-                  * (factors_c[0] * i_a_balanced + factors_c[1] * i_b_balanced + factors_c[2] * i_c_balanced);
+        //     // finally, calculate modulation indices
+        //     const double m_a = inv_r_a_scaled + modulation;
+        //     const double m_b = inv_r_b_scaled + modulation;
+        //     const double m_c = inv_r_c_scaled + modulation;
 
-            // divide power components by vdc_meas scaled to power units
-            const double vdc_scaled     = avoid_zero_division.limit(vdc) * m_max_voltage;   // max_voltage = V_2_pu
-            const double inv_r_a_scaled = i_a_scaled / vdc_scaled;
-            const double inv_r_b_scaled = i_b_scaled / vdc_scaled;
-            const double inv_r_c_scaled = i_c_scaled / vdc_scaled;
-
-            // finally, calculate modulation indices
-            const double m_a = modulation;
-            const double m_b = modulation;
-            const double m_c = modulation;
-            return std::make_tuple(m_a, m_b, m_c);
-        }
+        //     return std::make_tuple(m_a, m_b, m_c);
+        // }
 
         const double          ron{-0.4};
         std::array<double, 3> factors_a{5.4e-3, -1.2e-3, -1.2e-3};
@@ -259,20 +242,17 @@ namespace user
             const double in_c      = data_in[7];
             const double vdc       = data_in[8];
 
-            // derived values
-            const double vdc_meas = vdc * 2.0 / converter.m_max_voltage;
-            const double ron_vdc  = converter.ron / converter.avoid_zero_division.limit(vdc_meas);
-
             // zero outputs to avoid confusion
             for (int index = 0; index < num_data_half; index++)
             {
                 data_in[index] = 0.0;   // zeroing as this channel is reused for output
             }
 
+            // balance currents
             const auto [m_a_pos, m_b_pos, m_c_pos]
-                = converter.balance_current_old(ip_a, ip_b, ip_c, ron_vdc, m_idx_pos, true);
+                = converter.current_balancing_pos.balance(ip_a, ip_b, ip_c, vdc, m_idx_pos);
             const auto [m_a_neg, m_b_neg, m_c_neg]
-                = converter.balance_current_old(in_a, in_b, in_c, ron_vdc, m_idx_neg, false);
+                = converter.current_balancing_neg.balance(in_a, in_b, in_c, vdc, m_idx_neg);
 
             // set outputs:
             data_in[0] = m_a_pos;
@@ -295,7 +275,6 @@ namespace user
 
             // trigger connection
             converter.m_r2s->ctrl = REG_TO_STREAM_CTRL_START;
-            converter.counter++;
         }
 
       private:
