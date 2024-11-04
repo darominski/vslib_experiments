@@ -14,7 +14,7 @@ The `PLL` Component is a composite Component, owning a :ref:`AbcToDq0Transform <
 and a :ref:`PID <pid_component>`. Therefore, all Parameters of these children Components must be set before
 the `PLL` is ready to be used.
 
-The `PLL` Component implements a single interaction method, called `balance`. It takes three
+The `PLL` Component implements a single interaction method, called `synchronise`. It takes three
 double-precision arguments: `a`, `b`, and `c` for each component of the three-phase current or voltage.
 The output is a single value: :math:`\omega t`, being the output of the single iteration of locking
 the phase. The output is guaranteed to fit in :math:`[0, 2\pi]` range, if the angle offset is set to 0.
@@ -58,7 +58,7 @@ Usage example
         const double v_b    = -0.5;
         const double v_c    = -0.5;
 
-        const double wt_pll = converter.pll.balance(v_a, v_b, v_c);
+        const double wt_pll = converter.pll.synchronise(v_a, v_b, v_c);
 
         return 0;
     }

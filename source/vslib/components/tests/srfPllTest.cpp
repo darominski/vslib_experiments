@@ -118,7 +118,7 @@ TEST_F(SRFPLLTest, SRFPLLOneIteration)
     SRFPLL        pll(name, root);
     // no need to set parameters, as the first step is always zero due to using
     // forward Euler method
-    ASSERT_EQ(pll.balance(1.0, 1.0, 1.0), 0.0);
+    ASSERT_EQ(pll.synchronise(1.0, 1.0, 1.0), 0.0);
 }
 
 //! Checks that a SRFPLL object can calculate a couple of iterations of balancing
@@ -146,9 +146,9 @@ TEST_F(SRFPLLTest, SRFPLLCoupleIterations)
     const double f_rated_2pi = f_rated * std::numbers::pi * 2.0;
 
     // the first step is always angle_offset due to using forward Euler method
-    ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), 0.0, 1e-6);
-    ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), T * f_rated_2pi, 1e-6);   // the current is balanced, so q = 0
-    ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), 2.0 * T * f_rated_2pi, 1e-6);
+    ASSERT_NEAR(pll.synchronise(1.0, 1.0, 1.0), 0.0, 1e-6);
+    ASSERT_NEAR(pll.synchronise(1.0, 1.0, 1.0), T * f_rated_2pi, 1e-6);   // the current is balanced, so q = 0
+    ASSERT_NEAR(pll.synchronise(1.0, 1.0, 1.0), 2.0 * T * f_rated_2pi, 1e-6);
 }
 
 //! Checks that a SRFPLL object can calculate a couple of iterations of balancing
@@ -176,11 +176,11 @@ TEST_F(SRFPLLTest, SRFPLLCoupleIterationsNonZeroOffset)
     const double f_rated_2pi = f_rated * std::numbers::pi * 2.0;
 
     // the first step is always angle_offset due to using forward Euler method
-    ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), angle_offset, 1e-6);
+    ASSERT_NEAR(pll.synchronise(1.0, 1.0, 1.0), angle_offset, 1e-6);
     ASSERT_NEAR(
-        pll.balance(1.0, 1.0, 1.0), T * f_rated_2pi + angle_offset, 1e-6
+        pll.synchronise(1.0, 1.0, 1.0), T * f_rated_2pi + angle_offset, 1e-6
     );   // the current is balanced, so q = 0
-    ASSERT_NEAR(pll.balance(1.0, 1.0, 1.0), 2.0 * T * f_rated_2pi + angle_offset, 1e-6);
+    ASSERT_NEAR(pll.synchronise(1.0, 1.0, 1.0), 2.0 * T * f_rated_2pi + angle_offset, 1e-6);
 }
 
 //! Checks that the response of the SRFPLL agrees with a Simulink model over a long simulation,
@@ -217,7 +217,7 @@ TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistency)
             auto const [a, b, c]   = abc_line.value();
             auto const [matlab_wt] = matlab_wt_line.value();
 
-            auto const wt = pll.balance(a, b, c);
+            auto const wt = pll.synchronise(a, b, c);
             double     relative;
             if (matlab_wt != 0)
             {

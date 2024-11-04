@@ -32,13 +32,13 @@ namespace vslib
         {
         }
 
-        //! Computes one iteration of the balancing of the PLL.
+        //! Computes one iteration of the the PLL synchronisation.
         //!
         //! @param a A-phase component of the three-phase system
         //! @param b B-phase component of the three-phase system
         //! @param c C-phase component of the three-phase system
         //! @return Balanced angle (omega t), always fits in 0 to 2pi values
-        [[nodiscard]] double balance(const double a, const double b, const double c) noexcept
+        [[nodiscard]] double synchronise(const double a, const double b, const double c) noexcept
         {
             const auto [d, q, zero] = abc_2_dq0.transform(a, b, c, m_wt);
 
