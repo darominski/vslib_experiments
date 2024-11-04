@@ -177,6 +177,18 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     // values_to_set["limit.upper_threshold"] = 1.1;
     // values_to_set["limit.dead_zone"]       = std::array<double, 2>{0, 0};
 
+    // AFE parameters
+    static constexpr double V_base = 1950.0;
+    static constexpr double i_base = 3300.0;
+
+    values_to_set["afe.inductance"] = 0.7e-3;
+    values_to_set["afe.frequency"]  = current_frequency;
+    values_to_set["afe.v_base"]     = V_base;
+    values_to_set["afe.i_base"]     = i_base;
+
+    values_to_set["power_3ph_instant.p_gain"] = sqrt(2) / (sqrt(3) * V_base * i_base);
+    values_to_set["power_3ph_instant.q_gain"] = sqrt(2) / (sqrt(3) * V_base * i_base);
+
     for (const auto& [name, _] : parameters)
     {
         const std::string param_name = name.substr(name.find_last_of(".") + 1, name.size());

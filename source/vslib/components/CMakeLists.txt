@@ -15,6 +15,7 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/firFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/lookupTableTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/iirFilterTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/instantaneousPowerThreePhaseTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitIntegralTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRangeTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitRateTest.cpp
@@ -33,6 +34,7 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/alphaBetaToAbcTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dq0ToAbcTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dq0ToAlphaBetaTransform.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/instantaneousPowerThreePhase.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
 )
 

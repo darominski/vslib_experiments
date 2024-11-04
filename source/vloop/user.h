@@ -4,6 +4,7 @@
 #include <string>
 #include <unistd.h>
 
+#include "afe.h"
 #include "peripherals/reg_to_stream.h"
 #include "peripherals/stream_to_reg.h"
 #include "pops_current_balancing.h"
