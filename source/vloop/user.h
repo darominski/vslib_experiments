@@ -7,6 +7,7 @@
 #include "peripherals/reg_to_stream.h"
 #include "peripherals/stream_to_reg.h"
 #include "pops_current_balancing.h"
+#include "pops_current_balancing_old.h"
 #include "pops_dispatcher.h"
 #include "vslib.h"
 
