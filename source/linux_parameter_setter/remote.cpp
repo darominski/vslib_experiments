@@ -68,12 +68,37 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     std::array<int, 2>          version{0, 1};
     std::map<std::string, Json> values_to_set;
 
-    const double control_period      = 1e-3;
-    const double switching_frequency = 333.33;
+    const double control_period           = 1e-3;
+    const double maverage_notch_frequency = 333.33;
+    const double i_base                   = 3300.0;
+    const double v_max                    = 5000.0;
 
-    values_to_set["example.control_period"]      = control_period;
-    values_to_set["example.switching_frequency"] = switching_frequency;
-    values_to_set["example.i_base"]              = 3300.0;
+    values_to_set["example.control_period"] = control_period;
+
+    values_to_set["current_balancing_pos.i_base"]                   = i_base;
+    values_to_set["current_balancing_pos.v_max"]                    = v_max;
+    values_to_set["current_balancing_pos.maverage_notch_frequency"] = maverage_notch_frequency;
+    values_to_set["current_balancing_pos.a_factors"]                = std::array<double, 3>{5.4e-3, -1.2e-3, -1.2e-3};
+    values_to_set["current_balancing_pos.b_factors"]                = std::array<double, 3>{-1.2e-3, 5.4e-3, -1.2e-3};
+    values_to_set["current_balancing_pos.c_factors"]                = std::array<double, 3>{-1.2e-3, -1.2e-3, 5.4e-3};
+    values_to_set["current_balancing_pos.fifth_filter_order"]       = false;
+
+    values_to_set["current_balancing_neg.i_base"]                   = i_base;
+    values_to_set["current_balancing_neg.v_max"]                    = v_max;
+    values_to_set["current_balancing_neg.maverage_notch_frequency"] = maverage_notch_frequency;
+    values_to_set["current_balancing_neg.a_factors"]                = std::array<double, 3>{5.4e-3, -1.2e-3, -1.2e-3};
+    values_to_set["current_balancing_neg.b_factors"]                = std::array<double, 3>{-1.2e-3, 5.4e-3, -1.2e-3};
+    values_to_set["current_balancing_neg.c_factors"]                = std::array<double, 3>{-1.2e-3, -1.2e-3, 5.4e-3};
+    values_to_set["current_balancing_neg.fifth_filter_order"]       = false;
+
+    // zero_division and saturation
+    values_to_set["avoid_zero_division.lower_threshold"] = 1e-10;
+    values_to_set["avoid_zero_division.upper_threshold"] = 1e3;
+    values_to_set["avoid_zero_division.dead_zone"]       = std::array<double, 2>{0, 0};
+
+    values_to_set["saturation_protection.lower_threshold"] = -0.03;
+    values_to_set["saturation_protection.upper_threshold"] = 0.03;
+    values_to_set["saturation_protection.dead_zone"]       = std::array<double, 2>{0, 0};
 
     // // POPS dispatcher
     // values_to_set["dispatcher.magnets_r"]      = 0.32;
@@ -151,15 +176,6 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     // values_to_set["limit.lower_threshold"] = -1.1;
     // values_to_set["limit.upper_threshold"] = 1.1;
     // values_to_set["limit.dead_zone"]       = std::array<double, 2>{0, 0};
-
-    // current balancing
-    values_to_set["avoid_zero_division.lower_threshold"] = 1e-10;
-    values_to_set["avoid_zero_division.upper_threshold"] = 1e3;
-    values_to_set["avoid_zero_division.dead_zone"]       = std::array<double, 2>{0, 0};
-
-    values_to_set["saturation_protection.lower_threshold"] = -0.03;
-    values_to_set["saturation_protection.upper_threshold"] = 0.03;
-    values_to_set["saturation_protection.dead_zone"]       = std::array<double, 2>{0, 0};
 
     for (const auto& [name, _] : parameters)
     {
