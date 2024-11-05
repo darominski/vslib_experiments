@@ -52,9 +52,9 @@ namespace user
             //
             // Measurement and reference frame
             //
-            const double wt_pll = pll.balance(v_a * m_si_to_pu, v_b * m_si_to_pu, v_c * m_si_to_pu);
+            const double wt_pll = pll.synchronise(v_a * m_v_to_pu, v_b * m_v_to_pu, v_c * m_v_to_pu);
             const auto [vd_meas, vq_meas, zero_v]
-                = abc_2_dq0.transform(v_a * m_si_to_pu, v_b * m_si_to_pu, v_c * m_si_to_pu, wt_pll);
+                = abc_2_dq0.transform(v_a * m_v_to_pu, v_b * m_v_to_pu, v_c * m_v_to_pu, wt_pll);
             const auto [id_meas, iq_meas, zero_i]
                 = abc_2_dq0.transform(i_a * m_i_to_pu, i_b * m_i_to_pu, i_c * m_i_to_pu, wt_pll);
             const auto [p_meas, q_meas] = power_3ph_instant.transform(v_a, v_b, v_c, i_a, i_b, i_c);
@@ -102,9 +102,9 @@ namespace user
 
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
-            m_wl = 2.0 * std::numbers::pi * frequency.toValidate() * inductance.toValidate();
-
+            m_wl       = 2.0 * std::numbers::pi * frequency.toValidate() * inductance.toValidate();
             // conversion constants, based on base voltage and base current:
+            m_v_to_pu  = 1.0 / v_base.toValidate();
             m_si_to_pu = sqrt(3.0 / 2.0) / v_base.toValidate();
             m_pu_to_si = 1.0 / m_si_to_pu;
             m_i_to_pu  = 1.0 / i_base.toValidate();
@@ -114,8 +114,9 @@ namespace user
 
       private:
         double m_wl{0.0};
-        double m_si_to_pu{0.0};
+        double m_v_to_pu{0.0};    //!< voltage to per unit
+        double m_si_to_pu{0.0};   //!<
         double m_pu_to_si{0.0};
-        double m_i_to_pu{0.0};
+        double m_i_to_pu{0.0};   //!< current to per unit
     };
 }   // namespace user

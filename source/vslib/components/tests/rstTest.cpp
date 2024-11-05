@@ -185,21 +185,21 @@ TEST_F(RSTTest, RSTVerifyParameters)
     set_rst_parameters<order>(rst, r_value, s_value, t_value);
     auto const r_does_not_pass = rst.verifyParameters();
     ASSERT_EQ(r_does_not_pass.has_value(), true);
-    EXPECT_EQ(r_does_not_pass.value().warning_str, "First element of r coefficients is zero.\n");
+    EXPECT_EQ(r_does_not_pass.value().warning_str, "rst_5: first element of r coefficients is zero.\n");
 
     // checks that s[0]=0 is found out by the verification
     r_value = {0.1, 0.2, 0.3, 0.4};
     set_rst_parameters<order>(rst, r_value, s_value, t_value);
     auto const s_does_not_pass = rst.verifyParameters();
     ASSERT_EQ(s_does_not_pass.has_value(), true);
-    EXPECT_EQ(s_does_not_pass.value().warning_str, "First element of s coefficients is zero.\n");
+    EXPECT_EQ(s_does_not_pass.value().warning_str, "rst_5: first element of s coefficients is zero.\n");
 
     // checks that t[0]=0 is found out by the verification
     s_value = {0.5, 0.6, 0.7, 0.8};
     set_rst_parameters<order>(rst, r_value, s_value, t_value);
     auto const t_does_not_pass = rst.verifyParameters();
     ASSERT_EQ(t_does_not_pass.has_value(), true);
-    EXPECT_EQ(t_does_not_pass.value().warning_str, "First element of t coefficients is zero.\n");
+    EXPECT_EQ(t_does_not_pass.value().warning_str, "rst_5: first element of t coefficients is zero.\n");
 
 
     // checks that s(odd) < s(even) is found out by the verification
@@ -210,7 +210,7 @@ TEST_F(RSTTest, RSTVerifyParameters)
     ASSERT_EQ(unstable_s_even_less_than_odd.has_value(), true);
     EXPECT_EQ(
         unstable_s_even_less_than_odd.value().warning_str,
-        "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"
+        "rst_5: unstable, sum of even coefficients less or equal than of odd coefficients.\n"
     );
 
     // checks that t(odd) < t(even) is found out by the verification
@@ -221,7 +221,7 @@ TEST_F(RSTTest, RSTVerifyParameters)
     ASSERT_EQ(unstable_t_even_less_than_odd.has_value(), true);
     EXPECT_EQ(
         unstable_t_even_less_than_odd.value().warning_str,
-        "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"
+        "rst_5: unstable, sum of even coefficients less or equal than of odd coefficients.\n"
     );
 
     // checks that sum of coefficients below 0 is found out by the verification
@@ -232,7 +232,7 @@ TEST_F(RSTTest, RSTVerifyParameters)
     ASSERT_EQ(unstable_coeffs_sum_negative.has_value(), true);
     EXPECT_EQ(
         unstable_coeffs_sum_negative.value().warning_str,
-        "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"
+        "rst_5: unstable, sum of even coefficients less or equal than of odd coefficients.\n"
     );
 
     // checks that roots of coefficients is not above 0 is found out by the verification
@@ -243,7 +243,7 @@ TEST_F(RSTTest, RSTVerifyParameters)
     ASSERT_EQ(unstable_coeffs_roots_negative.has_value(), true);
     EXPECT_EQ(
         unstable_coeffs_roots_negative.value().warning_str,
-        "RST unstable: the first element of Jury's array is not above zero.\n"
+        "rst_5: unstable, the first element of Jury's array is not above zero.\n"
     );
 }
 

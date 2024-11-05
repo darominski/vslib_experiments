@@ -17,7 +17,8 @@ namespace vslib
     {
       public:
         //! Default constructor for RSTController class.
-        RSTController()
+        RSTController(std::string_view name)
+            : m_name(name)
         {
         }
 
@@ -50,6 +51,7 @@ namespace vslib
             m_measurements[m_head] = measurement;
 
             double actuation = m_t[0] * m_references[m_head] - m_r[0] * m_measurements[m_head];
+            // std::cout << m_head << " " << actuation << std::endl;
             for (int64_t index = 1; index < ControllerLength; index++)
             {
                 int64_t buffer_index = (m_head - index);
@@ -57,9 +59,12 @@ namespace vslib
                 {
                     buffer_index += ControllerLength;
                 }
-
                 actuation += m_t[index] * m_references[buffer_index] - m_r[index] * m_measurements[buffer_index]
                              - m_s[index] * m_actuations[buffer_index];
+
+                // std::cout << index << " " << buffer_index <<  " " << actuation << " " << m_t[index] << " " <<
+                // m_references[buffer_index] << " " << m_r[index]  << " "  << m_measurements[buffer_index] << " " <<
+                // m_s[index] << " " << m_actuations[buffer_index] << std::endl;
             }
             actuation /= m_s[0];
 
@@ -131,9 +136,11 @@ namespace vslib
         //! Performs the Jury's stability test on the provided array of coefficients.
         //!
         //! @param coefficients Coefficients to be tested
+        //! @param name Name of the controller this test is run on
         //! @return Optionally returns a Warning with relevant information if test failed, nothing otherwise
         std::optional<fgc4::utils::Warning> jurysStabilityTest(const std::array<double, ControllerLength>& coefficients)
         {
+            // Test re-implemented from CCLIBS libreg's regRst.c
             int64_t coefficient_length = 1;
             while (coefficient_length < ControllerLength && coefficients[coefficient_length] != 0.0F)
             {
@@ -164,16 +171,16 @@ namespace vslib
             // Stability check 1 : Sum(even coefficients) >= Sum(odd coefficients)
             if (sum_odd > sum_even)
             {
-                return fgc4::utils::Warning(
-                    "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"
-                );
+                return fgc4::utils::Warning(fmt::format(
+                    "{}: unstable, sum of even coefficients less or equal than of odd coefficients.\n", m_name
+                ));
             }
 
             // Stability check 2 : Sum(coefficients) > 0 - allow for floating point rounding errors
             if (((sum_even + sum_odd) / sum_abs) < -fgc4::utils::constants::floating_point_min_threshold)
             {
                 return fgc4::utils::Warning(
-                    "RST unstable: sum of coefficients below minimal floating-point threshold.\n"
+                    fmt::format("{}: unstable, sum of coefficients below minimal floating-point threshold.\n", m_name)
                 );
             }
 
@@ -185,7 +192,9 @@ namespace vslib
                 // First element of every row of Jury's array > 0 for stability
                 if ((m_b[0] - d * m_b[coefficient_length]) <= 0.0F)
                 {
-                    return fgc4::utils::Warning("RST unstable: the first element of Jury's array is not above zero.\n");
+                    return fgc4::utils::Warning(
+                        fmt::format("{}: unstable, the first element of Jury's array is not above zero.\n", m_name)
+                    );
                 }
 
                 coefficient_length--;
@@ -282,7 +291,8 @@ namespace vslib
         }
 
       private:
-        int64_t m_head{0};   //!< Index to oldest entry in the history
+        int64_t     m_head{0};   //!< Index to oldest entry in the history
+        std::string m_name;      //!< Name of this controller
 
         std::array<double, ControllerLength> m_r{0};   //!< R-polynomial coefficients
         std::array<double, ControllerLength> m_s{0};   //!< S-polynomial coefficients
@@ -290,7 +300,7 @@ namespace vslib
 
         std::array<double, ControllerLength> m_measurements{0};   //!< RST measurement history
         std::array<double, ControllerLength> m_references{0};     //!< RST reference history
-        std::array<double, ControllerLength> m_actuations{0};     //!< RST actuation history.
+        std::array<double, ControllerLength> m_actuations{0};     //!< RST actuation history
 
         bool m_history_ready{false};   //!< flag to mark RST ref and meas histories are filled
 
@@ -298,6 +308,69 @@ namespace vslib
         std::array<double, ControllerLength> m_b{0};   // variable used in Jury's test, declaring them here avoids
                                                        // allocation whenever jurysStabilityTest is called
     };
+
+    // //! Control method returning the next actuation.
+    // //!
+    // //! @param measurement Current measurement value
+    // //! @param reference Current reference value
+    // //! @return Next actuation value
+    // template<>
+    // [[nodiscard]] inline double RSTController<2>::control(const double reference, const double measurement) noexcept
+    // {
+    //     // This specialization allows to speed-up the calculation of the RST actuation by about 15%
+    //     m_references[1] = m_references[0];
+    //     m_references[0] = reference;
+
+    //     m_measurements[1] = m_measurements[0];
+    //     m_measurements[0] = measurement;
+
+    //     m_actuations[1] = m_actuations[0];
+    //     m_actuations[0] = (m_t[0] * reference - m_r[0] * measurement + m_t[1] * m_references[1]
+    //                        - m_r[1] * m_measurements[1] - (m_s[1] * m_actuations[1]))
+    //                       / m_s[0];
+
+    //     return m_actuations[0];
+    // }
+
+
+    // //! Updates the most recent reference in the history, used in cases actuation goes over the limit.
+    // //!
+    // //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
+    // template<>
+    // inline void RSTController<2>::updateReferenceOpenLoop(const double updated_actuation)
+    // {
+    //     // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
+    //     m_actuations[0] = updated_actuation;
+    //     m_references[0] = (m_s[0] * updated_actuation + m_r[0] * m_measurements[0] + m_s[1] * m_actuations[1]
+    //                        + m_r[1] * m_measurements[1] - m_t[1] * m_references[1])
+    //                       / m_t[0];
+    // }
+
+
+    // //! Updates the most recent reference in the history, used in cases actuation goes over the limit.
+    // //!
+    // //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
+    // template<>
+    // inline void RSTController<2>::updateReference(const double updated_actuation)
+    // {
+    //     // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
+    //     const double delta_actuation = updated_actuation - m_actuations[0];
+    //     m_actuations[0]              = updated_actuation;
+    //     m_references[0]              += delta_actuation * m_s[0] / m_t[0];
+    // }
+
+
+    // template<>
+    // inline void RSTController<2>::updateInputHistories(const double reference, const double measurement) noexcept
+    // {
+    //     m_references[1] = m_references[0];
+    //     m_references[0]   = reference;
+
+    //     m_measurements[1] = m_measurements[0];
+    //     m_measurements[0] = measurement;
+
+    //     m_history_ready = true;
+    // }
 
     //! Control method returning the next actuation.
     //!
@@ -351,6 +424,25 @@ namespace vslib
         const double delta_actuation = updated_actuation - m_actuations[0];
         m_actuations[0]              = updated_actuation;
         m_references[0]              += delta_actuation * m_s[0] / m_t[0];
+    }
+
+    template<>
+    inline void RSTController<3>::updateInputHistories(const double reference, const double measurement) noexcept
+    {
+        m_references[2] = m_references[1];
+        m_references[1] = m_references[0];
+        m_references[0] = reference;
+
+        m_measurements[2] = m_measurements[1];
+        m_measurements[1] = m_measurements[0];
+        m_measurements[0] = measurement;
+
+        m_head++;
+        if (m_head == 2)
+        {
+            m_history_ready = true;
+            m_head          = 0;
+        }
     }
 
 }   // namespace vslib

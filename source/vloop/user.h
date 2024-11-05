@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "afe.h"
+#include "afe_rst.h"
 #include "peripherals/reg_to_stream.h"
 #include "peripherals/stream_to_reg.h"
 #include "pops_current_balancing.h"
@@ -22,8 +23,7 @@ namespace user
             : vslib::IConverter("example", root),
               m_interrupt_id{121 + 0},   // Jonas's definition
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              current_balancing_pos("current_balancing_pos", *this),
-              current_balancing_neg("current_balancing_neg", *this),
+              afe("afe_rst", *this),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
         {
@@ -32,8 +32,7 @@ namespace user
 
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
-        CurrentBalancing                      current_balancing_pos;
-        CurrentBalancing                      current_balancing_neg;
+        ActiveFrontEndRST                     afe;
         // ...
         // end of your Components
 
@@ -116,10 +115,12 @@ namespace user
             return *reinterpret_cast<TargetType*>(&input);
         }
 
+        int counter = 0;
+
         static void RTTask(Converter& converter)
         {
-            constexpr uint32_t                num_data      = 40;
-            constexpr uint32_t                num_data_half = 20;
+            constexpr static uint32_t         num_data      = 40;
+            constexpr static uint32_t         num_data_half = 20;
             std::array<double, num_data_half> data_in;
 
             // collect inputs
@@ -128,15 +129,16 @@ namespace user
                 data_in[i] = cast<uint64_t, double>(converter.m_s2r->data[i].value);
             }
 
-            const double m_idx_pos = data_in[0];   // positive modulation index
-            const double m_idx_neg = data_in[1];   // negative modulation index
-            const double ip_a      = data_in[2];   // positive current components
-            const double ip_b      = data_in[3];
-            const double ip_c      = data_in[4];
-            const double in_a      = data_in[5];   // negative current components
-            const double in_b      = data_in[6];
-            const double in_c      = data_in[7];
-            const double vdc       = data_in[8];
+            const double regulation_on = data_in[0];
+            const double v_dc_ref      = data_in[1];
+            const double v_dc_meas     = data_in[2];
+            const double q_ref         = data_in[3];
+            const double v_a           = data_in[4];
+            const double v_b           = data_in[5];
+            const double v_c           = data_in[6];
+            const double i_a           = data_in[7];
+            const double i_b           = data_in[8];
+            const double i_c           = data_in[9];
 
             // zero outputs to avoid confusion
             for (int index = 0; index < num_data_half; index++)
@@ -144,19 +146,19 @@ namespace user
                 data_in[index] = 0.0;   // zeroing as this channel is reused for output
             }
 
-            // balance currents
-            const auto [m_a_pos, m_b_pos, m_c_pos]
-                = converter.current_balancing_pos.balance(ip_a, ip_b, ip_c, vdc, m_idx_pos);
-            const auto [m_a_neg, m_b_neg, m_c_neg]
-                = converter.current_balancing_neg.balance(in_a, in_b, in_c, vdc, m_idx_neg);
+            // perform active front-end control
+            const auto [v_a_ref, v_b_ref, v_c_ref, a]
+                = converter.afe.vdc_control(v_a, v_b, v_c, i_a, i_b, i_c, v_dc_ref, v_dc_meas, q_ref, regulation_on);
 
             // set outputs:
-            data_in[0] = m_a_pos;
-            data_in[1] = m_b_pos;
-            data_in[2] = m_c_pos;
-            data_in[3] = m_a_neg;
-            data_in[4] = m_b_neg;
-            data_in[5] = m_c_neg;
+            data_in[0] = v_a_ref;
+            data_in[1] = v_b_ref;
+            data_in[2] = v_c_ref;
+
+            // data_in[4] = v_dc_ref;
+            // data_in[5] = v_dc_meas;
+            // data_in[6] = b;
+            // data_in[7] = c;
 
             // write to output registers
             for (uint32_t index = 0; index < num_data_half; index++)
@@ -171,6 +173,11 @@ namespace user
 
             // trigger connection
             converter.m_r2s->ctrl = REG_TO_STREAM_CTRL_START;
+
+            // if(regulation_on>0 && converter.counter++ > 100)
+            // {
+            //     converter.interrupt_1.stop();
+            // }
         }
 
       private:

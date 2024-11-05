@@ -28,7 +28,8 @@ namespace vslib
               r(*this, "r"),
               s(*this, "s"),
               t(*this, "t"),
-              actuation_limits("actuation_limits", *this)
+              actuation_limits("actuation_limits", *this),
+              rst(name)
         {
         }
 
@@ -50,8 +51,8 @@ namespace vslib
         {
             if (!isReady())
             {
-                updateInputHistories(reference, measurement);
-                return 0;
+                rst.updateInputHistories(reference, measurement);
+                return 0.0;
             }
             const double actuation         = rst.control(reference, measurement);
             const double clipped_actuation = actuation_limits.limit(actuation);
@@ -130,17 +131,17 @@ namespace vslib
             // Jury's stability test, based on logic implemented in CCLIBS regRst.c
             if (r.toValidate()[0] == 0)
             {
-                return fgc4::utils::Warning("First element of r coefficients is zero.\n");
+                return fgc4::utils::Warning(fmt::format("{}: first element of r coefficients is zero.\n", m_name));
             }
 
             if (s.toValidate()[0] == 0)
             {
-                return fgc4::utils::Warning("First element of s coefficients is zero.\n");
+                return fgc4::utils::Warning(fmt::format("{}: first element of s coefficients is zero.\n", m_name));
             }
 
             if (t.toValidate()[0] == 0)
             {
-                return fgc4::utils::Warning("First element of t coefficients is zero.\n");
+                return fgc4::utils::Warning(fmt::format("{}: first element of t coefficients is zero.\n", m_name));
             }
 
             const auto& maybe_warning_s = rst.jurysStabilityTest(s.toValidate());
