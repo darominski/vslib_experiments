@@ -37,7 +37,8 @@ namespace vslib
               N(*this, "derivative_filter_order", 0.0),   // min limit: 0
               T(*this, "control_period", 0.0),            // min limit: 0.0
               f0(*this, "pre_warping_frequency", 0.0),    // min limit: 0.0
-              actuation_limits("actuation_limits", *this)
+              actuation_limits("actuation_limits", *this),
+              rst(name)
         {
         }
 

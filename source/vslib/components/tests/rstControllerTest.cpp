@@ -28,7 +28,7 @@ TEST_F(RSTControllerTest, RSTControllerDefaultConstruction)
 {
     constexpr size_t controller_length = 3;
 
-    RSTController<controller_length> rst;
+    RSTController<controller_length> rst("rst");
 
     EXPECT_FALSE(rst.isReady());
 
@@ -45,7 +45,7 @@ TEST_F(RSTControllerTest, RSTControllerUpdateInputHistories)
 {
     constexpr size_t controller_length = 5;
 
-    RSTController<controller_length> rst;
+    RSTController<controller_length> rst("rst");
 
     for (size_t index = 0; index < controller_length - 1; index++)
     {
@@ -61,7 +61,7 @@ TEST_F(RSTControllerTest, RSTControllerReset)
 {
     constexpr size_t controller_length = 7;
 
-    RSTController<controller_length> rst;
+    RSTController<controller_length> rst("rst");
     EXPECT_EQ(rst.isReady(), false);
 
     for (size_t index = 0; index < controller_length - 1; index++)
@@ -82,7 +82,7 @@ TEST_F(RSTControllerTest, RSTControllerVerifyParameters)
 {
     constexpr size_t controller_length = 4;
 
-    RSTController<controller_length> rst;
+    RSTController<controller_length> rst("rst");
 
     // set parameters
     std::array<double, controller_length> s_value;
@@ -94,7 +94,7 @@ TEST_F(RSTControllerTest, RSTControllerVerifyParameters)
     ASSERT_EQ(unstable_s_even_less_than_odd.has_value(), true);
     EXPECT_EQ(
         unstable_s_even_less_than_odd.value().warning_str,
-        "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"
+        "rst: unstable, sum of even coefficients less or equal than of odd coefficients.\n"
     );
 
     // checks that t(odd) < t(even) is found out by the verification
@@ -103,7 +103,7 @@ TEST_F(RSTControllerTest, RSTControllerVerifyParameters)
     ASSERT_EQ(unstable_t_even_less_than_odd.has_value(), true);
     EXPECT_EQ(
         unstable_t_even_less_than_odd.value().warning_str,
-        "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"
+        "rst: unstable, sum of even coefficients less or equal than of odd coefficients.\n"
     );
 
     // checks that sum of coefficients below 0 is found out by the verification
@@ -112,7 +112,7 @@ TEST_F(RSTControllerTest, RSTControllerVerifyParameters)
     ASSERT_EQ(unstable_coeffs_sum_negative.has_value(), true);
     EXPECT_EQ(
         unstable_coeffs_sum_negative.value().warning_str,
-        "RST unstable: sum of even coefficients less or equal than of odd coefficients.\n"
+        "rst: unstable, sum of even coefficients less or equal than of odd coefficients.\n"
     );
 
     // checks that roots of coefficients is not above 0 is found out by the verification
@@ -121,7 +121,7 @@ TEST_F(RSTControllerTest, RSTControllerVerifyParameters)
     ASSERT_EQ(unstable_coeffs_roots_negative.has_value(), true);
     EXPECT_EQ(
         unstable_coeffs_roots_negative.value().warning_str,
-        "RST unstable: the first element of Jury's array is not above zero.\n"
+        "rst: unstable, the first element of Jury's array is not above zero.\n"
     );
 }
 
@@ -130,7 +130,7 @@ TEST_F(RSTControllerTest, RSTControllerCalculateActuation)
 {
     constexpr size_t controller_length = 3;
 
-    RSTController<controller_length> rst;
+    RSTController<controller_length> rst("rst");
 
     // set parameters
     std::array<double, controller_length> r_value = {0.1, 0.2, 0.3};
@@ -169,7 +169,7 @@ TEST_F(RSTControllerTest, RSTControllerCalculateMultipleActuations)
 {
     constexpr size_t controller_length = 3;
 
-    RSTController<controller_length> rst;
+    RSTController<controller_length> rst("rst");
 
     // set parameters
     std::array<double, controller_length> r_value = {0.1, 0.2, 0.3};
@@ -215,7 +215,7 @@ TEST_F(RSTControllerTest, RSTControllerReCalculateReference)
 {
     constexpr size_t controller_length = 3;
 
-    RSTController<controller_length> rst;
+    RSTController<controller_length> rst("rst");
 
     // set parameters
     std::array<double, controller_length> r_value = {0.1, 0.2, 0.3};
@@ -260,7 +260,7 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkSimpleConsistency)
     // yk and rk inputs are randomly generated: rk = randn(10000, 1);
 
     constexpr size_t                 controller_length = 3;
-    RSTController<controller_length> rst;
+    RSTController<controller_length> rst("rst");
 
     // parameters calculated in Matlab
     std::array<double, controller_length> r_value = {3.0015005, -5.999999, 2.9985005};
@@ -324,7 +324,7 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkConsistency)
     // yk and rk inputs are randomly generated: rk = randn(10000, 1);
 
     constexpr size_t                 controller_length = 3;
-    RSTController<controller_length> rst;
+    RSTController<controller_length> rst("rst");
 
     // parameters calculated in Matlab
     std::array<double, controller_length> r_value = {68.4926325370984, -87.4083295284352, 18.9157413184664};
