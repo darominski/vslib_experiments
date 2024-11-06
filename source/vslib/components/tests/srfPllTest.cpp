@@ -3,7 +3,6 @@
 //! @author Dominik Arominski
 
 #include <filesystem>
-#include <fstream>
 #include <gtest/gtest.h>
 
 #include "readCsv.h"

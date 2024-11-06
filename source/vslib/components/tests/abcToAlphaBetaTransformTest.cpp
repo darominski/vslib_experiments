@@ -4,10 +4,10 @@
 
 #include <array>
 #include <filesystem>
-#include <fstream>
 #include <gtest/gtest.h>
 
 #include "abcToAlphaBetaTransform.h"
+#include "readCsv.h"
 #include "rootComponent.h"
 
 using namespace vslib;
@@ -98,68 +98,41 @@ TEST_F(AbcToAlphaBetaTransformTest, SimulinkConsistency)
     AbcToAlphaBetaTransform clarke(name, root);
 
     // the input files are randomly generated numbers
-    std::filesystem::path abc_path    = "components/inputs/park_abc_sin_120degrees.csv";
-    std::filesystem::path clarke_path = "components/inputs/clarke_alpha-beta_sin_120degrees.csv";
+    std::filesystem::path abc_path = "components/inputs/park_abc_sin_120degrees.csv";
+    std::filesystem::path abz_path = "components/inputs/clarke_alpha-beta_sin_120degrees.csv";
 
-    std::ifstream abc_file(abc_path);
-    std::ifstream clarke_file(clarke_path);
+    fgc4::utils::test::ReadCSV<3> abz_file(abz_path);
+    fgc4::utils::test::ReadCSV<4> abc_file(abc_path);
 
-    ASSERT_TRUE(abc_file.is_open());
-    ASSERT_TRUE(clarke_file.is_open());
-
-    std::string abc_line;
-    std::string clarke_line;
-
-    while (getline(abc_file, abc_line) && getline(clarke_file, clarke_line))
+    while (!abc_file.eof() && !abz_file.eof())
     {
-        // matlab inputs:
-        std::stringstream ss(abc_line);
-        std::string       timestamp, a_str, b_str, c_str;
+        const auto abz_line = abz_file.readLine();
+        const auto abc_line = abc_file.readLine();
 
-        // Get the timestamp (we don't need it)
-        std::getline(ss, timestamp, ',');
-
-        // Get the a value
-        std::getline(ss, a_str, ',');
-        const auto a = std::stod(a_str);
-
-        // Get the b value
-        std::getline(ss, b_str, ',');
-        const auto b = std::stod(b_str);
-
-        // Get the c value
-        std::getline(ss, c_str, ',');
-        const auto c = std::stod(c_str);
-
-        // matlab outputs
-        std::string       alpha_str, beta_str;
-        std::stringstream ss_clarke(clarke_line);
-        std::getline(ss_clarke, alpha_str, ',');
-        const auto matlab_alpha = std::stod(alpha_str);
-
-        std::getline(ss_clarke, beta_str, ',');
-        const auto matlab_beta = std::stod(beta_str);
-
-        // validation
-        const auto [alpha, beta, zero] = clarke.transform(a, b, c);
-        if (abs(matlab_alpha) > 1e-12)
+        if (abc_line && abz_line)
         {
-            ASSERT_NEAR((matlab_alpha - alpha) / matlab_alpha, 0.0, 1e-6);   // at least 1e-6 relative precision
-        }
-        else
-        {
-            ASSERT_NEAR(alpha, matlab_alpha, 1e-6);   // at least 1e-6 precision
-        }
+            const auto [matlab_alpha, matlab_beta, matlab_zero] = abz_line.value();
+            const auto [time1, a, b, c]                         = abc_line.value();
 
-        if (abs(matlab_beta) > 1e-12)
-        {
-            ASSERT_NEAR((matlab_beta - beta) / matlab_beta, 0.0, 1e-6);   // at least 1e-6 relative precision
-        }
-        else
-        {
-            ASSERT_NEAR(beta, matlab_beta, 1e-6);   // at least 1e-6 precision
+            // validation
+            const auto [alpha, beta, zero] = clarke.transform(a, b, c);
+            if (abs(matlab_alpha) > 1e-12)
+            {
+                ASSERT_NEAR((matlab_alpha - alpha) / matlab_alpha, 0.0, 1e-6);   // at least 1e-6 relative precision
+            }
+            else
+            {
+                ASSERT_NEAR(alpha, matlab_alpha, 1e-6);   // at least 1e-6 precision
+            }
+
+            if (abs(matlab_beta) > 1e-12)
+            {
+                ASSERT_NEAR((matlab_beta - beta) / matlab_beta, 0.0, 1e-6);   // at least 1e-6 relative precision
+            }
+            else
+            {
+                ASSERT_NEAR(beta, matlab_beta, 1e-6);   // at least 1e-6 precision
+            }
         }
     }
-    abc_file.close();
-    clarke_file.close();
 }

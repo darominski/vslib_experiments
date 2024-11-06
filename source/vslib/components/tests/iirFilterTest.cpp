@@ -3,10 +3,10 @@
 //! @author Dominik Arominski
 
 #include <filesystem>
-#include <fstream>
 #include <gtest/gtest.h>
 
 #include "iirFilter.h"
+#include "readCsv.h"
 #include "rootComponent.h"
 #include "staticJson.h"
 
@@ -258,26 +258,24 @@ TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPOPB.245.BR23.RMPS_B_MEAS_2023-11-17_09-32_iir_butter_2.csv";
 
-    std::ifstream inputs_file(inputs_path);
-    std::ifstream outputs_file(outputs_path);
-    ASSERT_TRUE(inputs_file.is_open());
-    ASSERT_TRUE(outputs_file.is_open());
+    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
+    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
 
-    std::string input_str;
-    std::string output_str;
-
-    while (getline(inputs_file, input_str) && getline(outputs_file, output_str))
+    while (!inputs_file.eof() && !outputs_file.eof())
     {
-        auto const input_value         = std::stod(input_str);
-        auto const matlab_output_value = std::stod(output_str);
+        const auto inputs_line  = inputs_file.readLine();
+        const auto outputs_line = outputs_file.readLine();
 
-        double const filtered_value = filter.filter(input_value);
+        if (inputs_line && outputs_line)
+        {
+            auto const [input_value]         = inputs_line.value();
+            auto const [matlab_output_value] = outputs_line.value();
 
-        double const relative = (matlab_output_value - filtered_value) / matlab_output_value;
-        ASSERT_NEAR(relative, 0.0, 2e-4);   // at least 0.02% relative precision
+            const double filtered_value = filter.filter(input_value);
+            const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
+            ASSERT_NEAR(relative, 0.0, 2e-4);   // at least 0.02% relative precision
+        }
     }
-    inputs_file.close();
-    outputs_file.close();
 }
 
 //! Checks the behaviour of a tenth-order Chebyshev Type II IIR filter on a real data coming from
@@ -306,24 +304,22 @@ TEST_F(IIRFilterTest, ChebyIIRFilterBMeasTenthOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPOPB.245.BR23.RMPS_B_MEAS_2023-11-17_09-32_iir_butter_10.csv";
 
-    std::ifstream inputs_file(inputs_path);
-    std::ifstream outputs_file(outputs_path);
-    ASSERT_TRUE(inputs_file.is_open());
-    ASSERT_TRUE(outputs_file.is_open());
+    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
+    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
 
-    std::string input_str;
-    std::string output_str;
-
-    while (getline(inputs_file, input_str) && getline(outputs_file, output_str))
+    while (!inputs_file.eof() && !outputs_file.eof())
     {
-        auto const input_value         = std::stod(input_str);
-        auto const matlab_output_value = std::stod(output_str);
+        const auto inputs_line  = inputs_file.readLine();
+        const auto outputs_line = outputs_file.readLine();
 
-        double const filtered_value = filter.filter(input_value);
+        if (inputs_line && outputs_line)
+        {
+            auto const [input_value]         = inputs_line.value();
+            auto const [matlab_output_value] = outputs_line.value();
 
-        double const relative = (matlab_output_value - filtered_value) / matlab_output_value;
-        ASSERT_NEAR(relative, 0.0, 5e-4);   // at least 0.05% relative precision
+            const double filtered_value = filter.filter(input_value);
+            const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
+            ASSERT_NEAR(relative, 0.0, 5e-4);   // at least 5e-4 relative precision
+        }
     }
-    inputs_file.close();
-    outputs_file.close();
 }

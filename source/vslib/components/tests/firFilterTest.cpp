@@ -3,10 +3,10 @@
 //! @author Dominik Arominski
 
 #include <filesystem>
-#include <fstream>
 #include <gtest/gtest.h>
 
 #include "firFilter.h"
+#include "readCsv.h"
 #include "rootComponent.h"
 #include "staticJson.h"
 
@@ -198,25 +198,24 @@ TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_3_0_5.csv";
 
-    std::ifstream inputs_file(inputs_path);
-    std::ifstream outputs_file(outputs_path);
-    ASSERT_TRUE(inputs_file.is_open());
-    ASSERT_TRUE(outputs_file.is_open());
+    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
+    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
 
-    std::string input_str;
-    std::string output_str;
-
-    while (getline(inputs_file, input_str) && getline(outputs_file, output_str))
+    while (!inputs_file.eof() && !outputs_file.eof())
     {
-        auto const input_value         = std::stod(input_str);
-        auto const matlab_output_value = std::stod(output_str);
+        const auto inputs_line  = inputs_file.readLine();
+        const auto outputs_line = outputs_file.readLine();
 
-        double const filtered_value = filter.filter(input_value);
-        auto const   relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 3e-4);   // at least 3e-4 relative precision
+        if (inputs_line && outputs_line)
+        {
+            auto const [input_value]         = inputs_line.value();
+            auto const [matlab_output_value] = outputs_line.value();
+
+            const double filtered_value = filter.filter(input_value);
+            const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
+            ASSERT_NEAR(relative, 0.0, 3e-4);   // at least 3e-4 relative precision
+        }
     }
-    inputs_file.close();
-    outputs_file.close();
 }
 
 //! Checks the behaviour of fifth-order FIR filter on a real data coming from
@@ -238,25 +237,24 @@ TEST_F(FIRFilterTest, FilterBMeasDataSeventhOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_5_0_5.csv";
 
-    std::ifstream inputs_file(inputs_path);
-    std::ifstream outputs_file(outputs_path);
-    ASSERT_TRUE(inputs_file.is_open());
-    ASSERT_TRUE(outputs_file.is_open());
+    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
+    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
 
-    std::string input_str;
-    std::string output_str;
-
-    while (getline(inputs_file, input_str) && getline(outputs_file, output_str))
+    while (!inputs_file.eof() && !outputs_file.eof())
     {
-        auto const input_value         = std::stod(input_str);
-        auto const matlab_output_value = std::stod(output_str);
+        const auto inputs_line  = inputs_file.readLine();
+        const auto outputs_line = outputs_file.readLine();
 
-        double const filtered_value = filter.filter(input_value);
-        auto const   relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
+        if (inputs_line && outputs_line)
+        {
+            auto const [input_value]         = inputs_line.value();
+            auto const [matlab_output_value] = outputs_line.value();
+
+            const double filtered_value = filter.filter(input_value);
+            const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
+            ASSERT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
+        }
     }
-    inputs_file.close();
-    outputs_file.close();
 }
 
 //! Checks the behaviour of tenth-order FIR filter on a real data coming from
@@ -278,25 +276,32 @@ TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_10_0_5.csv";
 
-    std::ifstream inputs_file(inputs_path);
-    std::ifstream outputs_file(outputs_path);
-    ASSERT_TRUE(inputs_file.is_open());
-    ASSERT_TRUE(outputs_file.is_open());
+    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
+    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
 
-    std::string input_str;
-    std::string output_str;
-
-    while (getline(inputs_file, input_str) && getline(outputs_file, output_str))
+    while (!inputs_file.eof() && !outputs_file.eof())
     {
-        auto const input_value         = std::stod(input_str);
-        auto const matlab_output_value = std::stod(output_str);
+        const auto inputs_line  = inputs_file.readLine();
+        const auto outputs_line = outputs_file.readLine();
 
-        double const filtered_value = filter.filter(input_value);
-        auto const   relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
+        if (inputs_line && outputs_line)
+        {
+            auto const [input_value]         = inputs_line.value();
+            auto const [matlab_output_value] = outputs_line.value();
+
+            const double filtered_value = filter.filter(input_value);
+            double       relative;
+            if (matlab_output_value != 0)
+            {
+                relative = (matlab_output_value - filtered_value) / matlab_output_value;
+            }
+            else
+            {
+                relative = (matlab_output_value - filtered_value);
+            }
+            ASSERT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
+        }
     }
-    inputs_file.close();
-    outputs_file.close();
 }
 
 //! Checks the behaviour of fourth-order low-pass FIR filter on a real data coming from
@@ -321,33 +326,32 @@ TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_low-pass_fir_4_0_5.csv";
 
-    std::ifstream inputs_file(inputs_path);
-    std::ifstream outputs_file(outputs_path);
-    ASSERT_TRUE(inputs_file.is_open());
-    ASSERT_TRUE(outputs_file.is_open());
+    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
+    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
 
-    std::string input_str;
-    std::string output_str;
-
-    while (getline(inputs_file, input_str) && getline(outputs_file, output_str))
+    while (!inputs_file.eof() && !outputs_file.eof())
     {
-        auto const input_value         = std::stod(input_str);
-        auto const matlab_output_value = std::stod(output_str);
+        const auto inputs_line  = inputs_file.readLine();
+        const auto outputs_line = outputs_file.readLine();
 
-        double const filtered_value = filter.filter(input_value);
-        double       relative;
-        if (matlab_output_value == 0)
+        if (inputs_line && outputs_line)
         {
-            relative = (matlab_output_value - filtered_value);
+            auto const [input_value]         = inputs_line.value();
+            auto const [matlab_output_value] = outputs_line.value();
+
+            const double filtered_value = filter.filter(input_value);
+            double       relative;
+            if (matlab_output_value != 0)
+            {
+                relative = (matlab_output_value - filtered_value) / matlab_output_value;
+            }
+            else
+            {
+                relative = (matlab_output_value - filtered_value);
+            }
+            ASSERT_NEAR(relative, 0.0, 5e-5);   // at least 1e-6 relative precision
         }
-        else
-        {
-            relative = (matlab_output_value - filtered_value) / matlab_output_value;
-        }
-        EXPECT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
     }
-    inputs_file.close();
-    outputs_file.close();
 }
 
 //! Checks the behaviour of an 81st-order FIR filter on a real data coming from
@@ -388,23 +392,30 @@ TEST_F(FIRFilterTest, FilterBMeasData81stOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_80_0_5.csv";
 
-    std::ifstream inputs_file(inputs_path);
-    std::ifstream outputs_file(outputs_path);
-    ASSERT_TRUE(inputs_file.is_open());
-    ASSERT_TRUE(outputs_file.is_open());
+    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
+    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
 
-    std::string input_str;
-    std::string output_str;
-
-    while (getline(inputs_file, input_str) && getline(outputs_file, output_str))
+    while (!inputs_file.eof() && !outputs_file.eof())
     {
-        auto const input_value         = std::stod(input_str);
-        auto const matlab_output_value = std::stod(output_str);
+        const auto inputs_line  = inputs_file.readLine();
+        const auto outputs_line = outputs_file.readLine();
 
-        double const filtered_value = filter.filter(input_value);
-        auto const   relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
+        if (inputs_line && outputs_line)
+        {
+            auto const [input_value]         = inputs_line.value();
+            auto const [matlab_output_value] = outputs_line.value();
+
+            const double filtered_value = filter.filter(input_value);
+            double       relative;
+            if (matlab_output_value != 0)
+            {
+                relative = (matlab_output_value - filtered_value) / matlab_output_value;
+            }
+            else
+            {
+                relative = (matlab_output_value - filtered_value);
+            }
+            ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
+        }
     }
-    inputs_file.close();
-    outputs_file.close();
 }

@@ -3,9 +3,9 @@
 //! @author Dominik Arominski
 
 #include <filesystem>
-#include <fstream>
 #include <gtest/gtest.h>
 
+#include "readCsv.h"
 #include "rstController.h"
 
 using namespace vslib;
@@ -283,31 +283,27 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkSimpleConsistency)
     std::filesystem::path rk_path = "components/inputs/rst_rk_random.csv";
     std::filesystem::path uk_path = "components/inputs/rst_uk_kp=ki=kd=kff=1_N=2_T=1e-3.csv";
 
-    std::ifstream yk_file(yk_path);
-    std::ifstream rk_file(rk_path);
-    std::ifstream uk_file(uk_path);
+    fgc4::utils::test::ReadCSV<2> yk_file(yk_path);
+    fgc4::utils::test::ReadCSV<2> rk_file(rk_path);
+    fgc4::utils::test::ReadCSV<1> uk_file(uk_path);
 
-    ASSERT_TRUE(yk_file.is_open());
-    ASSERT_TRUE(rk_file.is_open());
-    ASSERT_TRUE(uk_file.is_open());
-
-    std::string yk_str;
-    std::string rk_str;
-    std::string uk_str;
-
-    while (getline(yk_file, yk_str) && getline(rk_file, rk_str) && getline(uk_file, uk_str))
+    while (!yk_file.eof() && !rk_file.eof() && !uk_file.eof())
     {
-        auto const yk_value            = std::stod(yk_str.substr(yk_str.find(",") + 1));
-        auto const rk_value            = std::stod(rk_str.substr(rk_str.find(",") + 1));
-        auto const matlab_output_value = std::stod(uk_str);   // Matlab output
+        const auto yk_line = yk_file.readLine();
+        const auto rk_line = rk_file.readLine();
+        const auto uk_line = uk_file.readLine();
 
-        auto const actuation = rst.control(rk_value, yk_value);
-        auto const relative  = (matlab_output_value - actuation) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
+        if (yk_line && rk_line && uk_line)
+        {
+            auto const [time_stamp_1, yk_value] = yk_line.value();
+            auto const [time_stamp_2, rk_value] = rk_line.value();
+            auto const [matlab_output]          = uk_line.value();
+
+            auto const actuation = rst.control(rk_value, yk_value);
+            auto const relative  = (matlab_output - actuation) / matlab_output;
+            EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
+        }
     }
-    yk_file.close();
-    rk_file.close();
-    uk_file.close();
 }
 
 //! Checks that the calculated actuation of RST is as expected against Simulink model
@@ -348,29 +344,25 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkConsistency)
     std::filesystem::path uk_path
         = "components/inputs/rst_uk_kp=52p79_ki=0p0472_kd=0p0441_kff=6p1190_N=17p79_T=1e-3.csv";
 
-    std::ifstream yk_file(yk_path);
-    std::ifstream rk_file(rk_path);
-    std::ifstream uk_file(uk_path);
+    fgc4::utils::test::ReadCSV<2> yk_file(yk_path);
+    fgc4::utils::test::ReadCSV<2> rk_file(rk_path);
+    fgc4::utils::test::ReadCSV<1> uk_file(uk_path);
 
-    ASSERT_TRUE(yk_file.is_open());
-    ASSERT_TRUE(rk_file.is_open());
-    ASSERT_TRUE(uk_file.is_open());
-
-    std::string yk_str;
-    std::string rk_str;
-    std::string uk_str;
-
-    while (getline(yk_file, yk_str) && getline(rk_file, rk_str) && getline(uk_file, uk_str))
+    while (!yk_file.eof() && !rk_file.eof() && !uk_file.eof())
     {
-        auto const yk_value            = std::stod(yk_str.substr(yk_str.find(",") + 1));
-        auto const rk_value            = std::stod(rk_str.substr(rk_str.find(",") + 1));
-        auto const matlab_output_value = std::stod(uk_str);   // Matlab output
+        const auto yk_line = yk_file.readLine();
+        const auto rk_line = rk_file.readLine();
+        const auto uk_line = uk_file.readLine();
 
-        auto const actuation = rst.control(rk_value, yk_value);
-        auto const relative  = (matlab_output_value - actuation) / matlab_output_value;
-        EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
+        if (yk_line && rk_line && uk_line)
+        {
+            auto const [time_stamp_1, yk_value] = yk_line.value();
+            auto const [time_stamp_2, rk_value] = rk_line.value();
+            auto const [matlab_output]          = uk_line.value();
+
+            auto const actuation = rst.control(rk_value, yk_value);
+            auto const relative  = (matlab_output - actuation) / matlab_output;
+            EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
+        }
     }
-    yk_file.close();
-    rk_file.close();
-    uk_file.close();
 }

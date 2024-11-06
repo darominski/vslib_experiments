@@ -4,10 +4,10 @@
 
 #include <array>
 #include <filesystem>
-#include <fstream>
 #include <gtest/gtest.h>
 
 #include "alphaBetaToAbcTransform.h"
+#include "readCsv.h"
 #include "rootComponent.h"
 
 using namespace vslib;
@@ -98,59 +98,28 @@ TEST_F(AlphaBetaToAbcTransformTest, SimulinkConsistency)
     AlphaBetaToAbcTransform inv_clarke(name, root);
 
     // the input files are randomly generated numbers
-    std::filesystem::path alphaBetaZero_path = "components/inputs/clarke_alpha-beta_sin_120degrees.csv";
-    std::filesystem::path inv_clarke_path    = "components/inputs/park_abc_sin_120degrees.csv";
+    std::filesystem::path abz_path = "components/inputs/clarke_alpha-beta_sin_120degrees.csv";
+    std::filesystem::path abc_path = "components/inputs/park_abc_sin_120degrees.csv";
 
-    std::ifstream alphaBetaZero_file(alphaBetaZero_path);
-    std::ifstream inv_clarke_file(inv_clarke_path);
+    fgc4::utils::test::ReadCSV<4> abc_file(abc_path);
+    fgc4::utils::test::ReadCSV<3> abz_file(abz_path);
 
-    ASSERT_TRUE(alphaBetaZero_file.is_open());
-    ASSERT_TRUE(inv_clarke_file.is_open());
-
-    std::string alphaBetaZero_line;
-    std::string inv_clarke_line;
-
-    while (getline(alphaBetaZero_file, alphaBetaZero_line) && getline(inv_clarke_file, inv_clarke_line))
+    while (!abz_file.eof() && !abc_file.eof())
     {
-        // matlab inputs:
-        std::stringstream ss(alphaBetaZero_line);
-        std::string       alpha_str, beta_str, zero_str;
+        const auto abc_line = abc_file.readLine();
+        const auto abz_line = abz_file.readLine();
 
-        // Get the a value
-        std::getline(ss, alpha_str, ',');
-        const auto alpha = std::stod(alpha_str);
+        if (abz_line && abc_line)
+        {
+            const auto [time1, matlab_a, matlab_b, matlab_c] = abc_line.value();
+            const auto [alpha, beta, zero]                   = abz_line.value();
 
-        // Get the b value
-        std::getline(ss, beta_str, ',');
-        const auto beta = std::stod(beta_str);
+            // validation
+            const auto [a, b, c] = inv_clarke.transform(alpha, beta, zero);
 
-        // Get the c value
-        std::getline(ss, zero_str, ',');
-        const auto zero = std::stod(zero_str);
-
-        // matlab outputs
-        std::string       timestamp, a_str, b_str, c_str;
-        std::stringstream ss_clarke(inv_clarke_line);
-
-        // Get the timestamp (we don't need it)
-        std::getline(ss_clarke, timestamp, ',');
-
-        std::getline(ss_clarke, a_str, ',');
-        const auto matlab_a = std::stod(a_str);
-
-        std::getline(ss_clarke, b_str, ',');
-        const auto matlab_b = std::stod(b_str);
-
-        std::getline(ss_clarke, c_str, ',');
-        const auto matlab_c = std::stod(c_str);
-
-        // validation
-        const auto [a, b, c] = inv_clarke.transform(alpha, beta, zero);
-
-        EXPECT_NEAR(a, matlab_a, 1e-6);   // at least 1e-6 relative precision
-        EXPECT_NEAR(b, matlab_b, 1e-6);   // at least 1e-6 relative precision
-        EXPECT_NEAR(c, matlab_c, 1e-6);   // at least 1e-6 relative precision
+            ASSERT_NEAR(a, matlab_a, 1e-6);   // at least 1e-6 relative precision
+            ASSERT_NEAR(b, matlab_b, 1e-6);   // at least 1e-6 relative precision
+            ASSERT_NEAR(c, matlab_c, 1e-6);   // at least 1e-6 relative precision
+        }
     }
-    alphaBetaZero_file.close();
-    inv_clarke_file.close();
 }

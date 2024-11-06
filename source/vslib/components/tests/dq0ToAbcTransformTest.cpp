@@ -4,10 +4,10 @@
 
 #include <array>
 #include <filesystem>
-#include <fstream>
 #include <gtest/gtest.h>
 
 #include "dq0ToAbcTransform.h"
+#include "readCsv.h"
 #include "rootComponent.h"
 
 using namespace vslib;
@@ -185,70 +185,32 @@ TEST_F(Dq0ToAbcTransformTest, BasicSimulinkConsistency)
     std::filesystem::path abc_path   = "components/inputs/park_abc_sin_120degrees.csv";
     std::filesystem::path theta_path = "components/inputs/park_theta_0_20.csv";
 
-    std::ifstream abc_file(abc_path);
-    std::ifstream theta_file(theta_path);
-    std::ifstream dq0_file(dq0_path);
+    fgc4::utils::test::ReadCSV<3> dq0_file(dq0_path);
+    fgc4::utils::test::ReadCSV<2> theta_file(theta_path);
+    fgc4::utils::test::ReadCSV<4> abc_file(abc_path);
 
-    ASSERT_TRUE(abc_file.is_open());
-    ASSERT_TRUE(theta_file.is_open());
-    ASSERT_TRUE(dq0_file.is_open());
-
-    std::string abc_line;
-    std::string theta_line;
-    std::string dq0_line;
-
-    while (getline(abc_file, abc_line) && getline(theta_file, theta_line) && getline(dq0_file, dq0_line))
+    while (!abc_file.eof() && !theta_file.eof() && !dq0_file.eof())
     {
-        // matlab inputs:
-        std::stringstream ss(abc_line);
-        std::string       timestamp, a_str, b_str, c_str;
+        const auto dq0_line   = dq0_file.readLine();
+        const auto theta_line = theta_file.readLine();
+        const auto abc_line   = abc_file.readLine();
 
-        // Get the timestamp (we don't need it)
-        std::getline(ss, timestamp, ',');
+        if (abc_line && theta_line && dq0_line)
+        {
+            const auto [d, q, z]                              = dq0_line.value();
+            const auto [time_1, theta]                        = theta_line.value();
+            const auto [time_2, matlab_a, matlab_b, matlab_c] = abc_line.value();
 
-        // Get the a value
-        std::getline(ss, a_str, ',');
-        const auto matlab_a = std::stod(a_str);
+            const auto [a, b, c]  = dq0_to_abc.transform(d, q, z, theta);
+            const auto relative_a = (matlab_a - a);
+            const auto relative_b = (matlab_b - b);
+            const auto relative_c = (matlab_c - c);
 
-        // Get the b value
-        std::getline(ss, b_str, ',');
-        const auto matlab_b = std::stod(b_str);
-
-        // Get the c value
-        std::getline(ss, c_str, ',');
-        const auto matlab_c = std::stod(c_str);
-
-        std::string       theta_str;
-        std::stringstream ss_theta(theta_line);
-        std::getline(ss_theta, timestamp, ',');
-        std::getline(ss_theta, theta_str, ',');
-        const auto theta = std::stod(theta_str);
-
-        // matlab outputs
-        std::string       d_str, q_str, zero_str;
-        std::stringstream ss_park(dq0_line);
-        std::getline(ss_park, d_str, ',');
-        const auto d = std::stod(d_str);
-
-        std::getline(ss_park, q_str, ',');
-        const auto q = std::stod(q_str);
-
-        std::getline(ss_park, zero_str, ',');
-        const auto zero = std::stod(zero_str);
-
-        // validation
-        const auto [a, b, c]  = dq0_to_abc.transform(d, q, zero, theta);
-        const auto relative_a = (matlab_a - a);
-        const auto relative_b = (matlab_b - b);
-        const auto relative_c = (matlab_c - c);
-
-        ASSERT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
-        ASSERT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
-        ASSERT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
+            ASSERT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
+            ASSERT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
+            ASSERT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
+        }
     }
-    abc_file.close();
-    theta_file.close();
-    dq0_file.close();
 }
 
 //! Tests interacting with transform method of Dq0ToAbcTransform component, validation against simulink and SVC measured
@@ -264,68 +226,30 @@ TEST_F(Dq0ToAbcTransformTest, SVCTransform)
     std::filesystem::path theta_path = "components/inputs/theta_svc_18kV_pll.csv";
     std::filesystem::path dq0_path   = "components/inputs/park_dq0_svc_18kV_pll.csv";
 
-    std::ifstream abc_file(abc_path);
-    std::ifstream theta_file(theta_path);
-    std::ifstream dq0_file(dq0_path);
+    fgc4::utils::test::ReadCSV<3> dq0_file(dq0_path);
+    fgc4::utils::test::ReadCSV<2> theta_file(theta_path);
+    fgc4::utils::test::ReadCSV<4> abc_file(abc_path);
 
-    ASSERT_TRUE(abc_file.is_open());
-    ASSERT_TRUE(theta_file.is_open());
-    ASSERT_TRUE(dq0_file.is_open());
-
-    std::string abc_line;
-    std::string theta_line;
-    std::string dq0_line;
-
-    while (getline(abc_file, abc_line) && getline(theta_file, theta_line) && getline(dq0_file, dq0_line))
+    while (!abc_file.eof() && !theta_file.eof() && !dq0_file.eof())
     {
-        // matlab inputs:
-        std::stringstream ss(abc_line);
-        std::string       timestamp, a_str, b_str, c_str;
+        const auto dq0_line   = dq0_file.readLine();
+        const auto theta_line = theta_file.readLine();
+        const auto abc_line   = abc_file.readLine();
 
-        // Get the timestamp (we don't need it)
-        std::getline(ss, timestamp, ',');
+        if (abc_line && theta_line && dq0_line)
+        {
+            const auto [d, q, z]                              = dq0_line.value();
+            const auto [time_1, theta]                        = theta_line.value();
+            const auto [time_2, matlab_a, matlab_b, matlab_c] = abc_line.value();
 
-        // Get the a value
-        std::getline(ss, a_str, ',');
-        const auto matlab_a = std::stod(a_str);
+            const auto [a, b, c]  = dq0_to_abc.transform(d, q, z, theta);
+            const auto relative_a = (matlab_a - a);
+            const auto relative_b = (matlab_b - b);
+            const auto relative_c = (matlab_c - c);
 
-        // Get the b value
-        std::getline(ss, b_str, ',');
-        const auto matlab_b = std::stod(b_str);
-
-        // Get the c value
-        std::getline(ss, c_str, ',');
-        const auto matlab_c = std::stod(c_str);
-
-        std::string       theta_str;
-        std::stringstream ss_theta(theta_line);
-        std::getline(ss_theta, timestamp, ',');
-        std::getline(ss_theta, theta_str, ',');
-        const auto theta = std::stod(theta_str);
-
-        // matlab outputs
-        std::string       d_str, q_str, zero_str;
-        std::stringstream ss_park(dq0_line);
-        std::getline(ss_park, d_str, ',');
-        const auto d = std::stod(d_str);
-
-        std::getline(ss_park, q_str, ',');
-        const auto q = std::stod(q_str);
-
-        std::getline(ss_park, zero_str, ',');
-        const auto zero = std::stod(zero_str);
-
-        // validation
-        const auto [a, b, c]  = dq0_to_abc.transform(d, q, zero, theta);
-        const auto relative_a = (matlab_a - a);
-        const auto relative_b = (matlab_b - b);
-        const auto relative_c = (matlab_c - c);
-
-        ASSERT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
-        ASSERT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
-        ASSERT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
+            ASSERT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
+            ASSERT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
+            ASSERT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
+        }
     }
-    abc_file.close();
-    theta_file.close();
-    dq0_file.close();
 }
