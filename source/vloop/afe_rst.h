@@ -2,6 +2,7 @@
 //! @brief Defines the Active Front-End Component including active control.
 //! @author Dominik Arominski
 
+#include "rstDelayed.h"
 #include "vslib.h"
 
 #pragma once
@@ -20,7 +21,7 @@ namespace user
               abc_to_dq0_i("abc_to_dq0_current", *this),
               dq0_to_abc("dq0_to_abc", *this),
               power_3ph_instant("power_3ph_instant", *this),
-              rst_outer_vdc("rst_outer_vdc", *this),
+              rst_outer_vdc("rst_outer_vdc", *this, 1),
               rst_outer_id("rst_outer_id", *this),
               rst_outer_iq("rst_outer_iq", *this),
               rst_inner_vd("rst_inner_vd", *this),
@@ -102,7 +103,7 @@ namespace user
         vslib::AbcToDq0Transform            abc_to_dq0_i;
         vslib::Dq0ToAbcTransform            dq0_to_abc;
         vslib::InstantaneousPowerThreePhase power_3ph_instant;
-        vslib::RST<1>                       rst_outer_vdc;
+        vslib::RSTDelayed<1>                rst_outer_vdc;
         vslib::RST<2>                       rst_outer_id;
         vslib::RST<2>                       rst_outer_iq;
         vslib::RST<1>                       rst_inner_vd;
