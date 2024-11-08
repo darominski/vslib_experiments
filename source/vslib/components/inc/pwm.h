@@ -70,11 +70,11 @@ namespace vslib
             }
             else if (period.toValidate() == 0.0)
             {
-                m_pwm->frequency = (1.0 / period.toValidate());
+                setFrequency(1.0 / period.toValidate());
             }
             else if (frequency.toValidate() == 0.0)
             {
-                m_pwm->frequency = frequency.toValidate();
+                setFrequency(frequency.toValidate());
             }
             else
             {
@@ -82,7 +82,26 @@ namespace vslib
                                             "distinguish which should be the source of PWM frequency." m_name);
             }
 
-            m_pwm->frequency = duty_cycle.toValidate();
+            setDutyCycle(duty_cycle.toValidate());
+
+            if (rise_time.toValidate() > fall_time.toValidate())
+            {
+                return fgc4::utils::Warning(
+                    "{}: the rise time {} is later than fall time {}." m_name, rise_time.toValidate(),
+                    fall_time.toValidate()
+                );
+            }
+
+            if ((fall_time.toValidate() - rise_time.toValidate()) < minimum_on_time.toValidate())
+            {
+                return fgc4::utils::Warning(
+                    "{}: the minimum on time of {} is not respected with rise time of {} and fall time of." m_name,
+                    minimum_on_time.toValidate(), rise_time.toValidate(), fall_time.toValidate()
+                );
+            }
+
+            m_pwm->CC0 = rise_time.toValidate();
+            m_pwm->CC1 = fall_time.toValidate();
             // etc.
 
             return {};
@@ -90,6 +109,16 @@ namespace vslib
 
       private:
         double m_frequency{0.0};   //!< PWM frequency
+
+        void setFrequency(const double frequency)
+        {
+            // logic to set registers to the correct values
+        }
+
+        void setDutyCycle(const double duty_cycle)
+        {
+            // sets duty cycle
+        }
 
         volatile PwmIp* m_pwm;
     };
