@@ -207,11 +207,11 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
 
     values_to_set["rst_inner_vd.r"] = std::array<double, 2>{-3.416063337264311, 3.111243602756688};
     values_to_set["rst_inner_vd.s"] = std::array<double, 2>{1.0, -1.0};
-    values_to_set["rst_inner_vd.t"] = std::array<double, 2>{1.0, 0.0};
+    values_to_set["rst_inner_vd.t"] = std::array<double, 2>{0.304819734507623, 0.0};
 
     values_to_set["rst_inner_vq.r"] = std::array<double, 2>{-3.416063337264311, 3.111243602756688};
     values_to_set["rst_inner_vq.s"] = std::array<double, 2>{1.0, -1.0};
-    values_to_set["rst_inner_vq.t"] = std::array<double, 2>{1.0, 0.0};
+    values_to_set["rst_inner_vq.t"] = std::array<double, 2>{0.304819734507623, 0.0};
 
     for (const auto& [name, _] : parameters)
     {

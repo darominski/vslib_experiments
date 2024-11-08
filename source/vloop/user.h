@@ -147,7 +147,7 @@ namespace user
             }
 
             // perform active front-end control
-            const auto [v_a_ref, v_b_ref, v_c_ref, a]
+            const auto [v_a_ref, v_b_ref, v_c_ref]
                 = converter.afe.vdc_control(v_a, v_b, v_c, i_a, i_b, i_c, v_dc_ref, v_dc_meas, q_ref, regulation_on);
 
             // set outputs:
@@ -155,9 +155,8 @@ namespace user
             data_in[1] = v_b_ref;
             data_in[2] = v_c_ref;
 
-            // data_in[4] = v_dc_ref;
-            // data_in[5] = v_dc_meas;
-            // data_in[6] = b;
+            // data_in[3] = a;
+            // data_in[4] = b;
             // data_in[7] = c;
 
             // write to output registers

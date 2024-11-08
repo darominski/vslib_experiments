@@ -32,7 +32,7 @@ namespace vslib
             m_measurements[m_head] = measurement;
 
             m_head++;
-            if (m_head == (ControllerLength - 1))
+            if (m_head == ControllerLength)
             {
                 m_history_ready = true;
                 m_head          = 0;

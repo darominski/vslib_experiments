@@ -46,7 +46,7 @@ namespace user
         //! @param q_ref Reference reactive power
         //! @param regulation_on 1 or 0, depending whether the regulation is to be used or not
         //! @return a, b, and c components of the voltage reference
-        std::tuple<double, double, double, double> vdc_control(
+        std::tuple<double, double, double> vdc_control(
             const double v_a, const double v_b, const double v_c, const double i_a, const double i_b, const double i_c,
             const double v_dc_ref, const double v_dc_meas, const double q_ref, const double regulation_on = 1.0
         )
@@ -61,30 +61,31 @@ namespace user
                 = abc_to_dq0_i.transform(i_a * m_i_to_pu, i_b * m_i_to_pu, i_c * m_i_to_pu, wt_pll);
             const auto [p_meas, q_meas] = power_3ph_instant.transform(v_a, v_b, v_c, i_a, i_b, i_c);
 
-            auto vd_ref = vd_meas + iq_meas * i_base * m_wl * m_si_to_pu;
-            auto vq_ref = vq_meas - id_meas * i_base * m_wl * m_si_to_pu;
-            auto p_ref  = 0;
+            auto p_ref = 0;
             if (regulation_on > 0)
             {
+                // needs to not run until regulation is set to ON
                 //
                 // Outer loop: Vdc control
                 //
                 p_ref = rst_outer_vdc.control(pow(v_dc_ref, 2), pow(v_dc_meas, 2));
-
-                //
-                // Outer loop: power regulation
-                // 2 RSTs
-                const auto id_ref = rst_outer_id.control(p_ref * m_va_to_pu, p_meas);
-                const auto iq_ref = -rst_outer_iq.control(q_ref, q_meas);
-
-                //
-                // Inner loop: dq-vector current control
-                //
-                // RST + 2 * ff for each loop
-                static constexpr double T0 = -0.304819734507623;
-                vd_ref                     += rst_inner_vd.control(id_ref * T0, id_meas);
-                vq_ref                     += rst_inner_vq.control(iq_ref * T0, iq_meas);
             }
+
+            //
+            // Outer loop: power regulation
+            // 2 RSTs
+            const auto id_ref = rst_outer_id.control(regulation_on * p_ref * m_va_to_pu, regulation_on * p_meas);
+            const auto iq_ref = -rst_outer_iq.control(regulation_on * q_ref, regulation_on * q_meas);
+
+            //
+            // Inner loop: dq-vector current control
+            //
+            // RST + 2 * ff for each loop
+            const auto vd_ref = rst_inner_vd.control(-regulation_on * id_ref, regulation_on * id_meas) + vd_meas
+                                + iq_meas * i_base * m_wl * m_si_to_pu;
+            const auto vq_ref = rst_inner_vq.control(-regulation_on * iq_ref, regulation_on * iq_meas) + vq_meas
+                                - id_meas * i_base * m_wl * m_si_to_pu;
+
             //
             // Frame conversion
             //
@@ -92,7 +93,7 @@ namespace user
             const auto vq_ref_lim = limit.limit(vq_ref);
 
             const auto [v_a_ref, v_b_ref, v_c_ref] = dq0_to_abc.transform(vd_ref_lim, vq_ref_lim, 0.0, wt_pll);
-            return std::make_tuple(v_a_ref * m_pu_to_v, v_b_ref * m_pu_to_v, v_c_ref * m_pu_to_v, p_ref * m_va_to_pu);
+            return std::make_tuple(v_a_ref * m_pu_to_v, v_b_ref * m_pu_to_v, v_c_ref * m_pu_to_v);
         }
 
         // Owned Components
@@ -124,8 +125,7 @@ namespace user
             m_i_to_pu  = 1.0 / i_base.toValidate();
             m_va_to_pu = sqrt(2.0 / 3.0) * m_i_to_pu * m_v_to_pu;
 
-            m_pu_to_si = 1.0 / m_si_to_pu;
-            m_pu_to_v  = m_pu_to_si;
+            m_pu_to_v = 1.0 / m_si_to_pu;
 
             return {};
         }
@@ -135,7 +135,6 @@ namespace user
         double m_si_to_pu{0.0};
         double m_v_to_pu{0.0};
         double m_pu_to_v{0.0};
-        double m_pu_to_si{0.0};
         double m_i_to_pu{0.0};
         double m_va_to_pu{0.0};
 
