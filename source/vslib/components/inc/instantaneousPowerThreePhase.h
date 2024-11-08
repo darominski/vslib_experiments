@@ -33,8 +33,6 @@ namespace vslib
         //! @param i_a a-phase current value
         //! @param i_b b-phase current value
         //! @param i_c c-phase current value
-        //! @param p_gain Optional gain to be applied to active power P (default = 1)
-        //! @param q_gain Optional gain to be applied to reactive power Q (default = 1)
         //! @return Tuple of P, and Q: active and reactive power
         [[nodiscard]] std::tuple<double, double> transform(
             const double v_a, const double v_b, const double v_c, const double i_a, const double i_b, const double i_c
