@@ -155,3 +155,30 @@ TEST(ReadCSVTest, ReadNonNumericData)
     ASSERT_FALSE(reader.eof());
     ASSERT_THROW(reader.readLine(), std::runtime_error);
 }
+
+//! Checks the reading of all values from the entire file in a loop of the existing file with a non-default separator
+//! (space) and a multi-line header
+TEST(ReadCSVTest, ReadOneLineWithHeader)
+{
+    ReadCSV<3> reader("./inputs/input5.csv", ' ');
+    while (!reader.eof())
+    {
+        const auto output = reader.readLine();
+        if (output)
+        {
+            const auto [val1, val2, val3] = output.value();
+            ASSERT_EQ(val1, 0.5);
+            ASSERT_EQ(val2, 1.0);
+            ASSERT_EQ(val3, 0.75);
+        }
+    }
+    ASSERT_TRUE(reader.eof());
+}
+
+//! Checks that an attempt to read values from a file that contains only a header
+TEST(ReadCSVTest, ReadFileHeaderOnly)
+{
+    ReadCSV<3> reader("./inputs/input6.csv");
+    const auto output1 = reader.readLine();
+    ASSERT_FALSE(output1.has_value());
+}
