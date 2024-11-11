@@ -48,6 +48,20 @@ TEST(ReadCSVTest, ReadOneLine)
     ASSERT_TRUE(reader.eof());
 }
 
+//! Checks the reading of all values from the first line of the existing file with a non-default separator
+TEST(ReadCSVTest, ReadOneLineSemicololns)
+{
+    ReadCSV<3> reader("./inputs/input1_semicolons.csv", ';');
+    ASSERT_FALSE(reader.eof());
+    const auto output = reader.readLine();
+    ASSERT_TRUE(output.has_value());
+    const auto [val1, val2, val3] = output.value();
+    ASSERT_EQ(val1, 0.5);
+    ASSERT_EQ(val2, 0.6);
+    ASSERT_EQ(val3, 0.7);
+    ASSERT_TRUE(reader.eof());
+}
+
 //! Checks that an attempt to read more than the number of lines of the file fails gracefully
 TEST(ReadCSVTest, AttemptReadTooManyLines)
 {
@@ -64,6 +78,26 @@ TEST(ReadCSVTest, AttemptReadTooManyLines)
 TEST(ReadCSVTest, ReadAllLines)
 {
     ReadCSV<3> reader("./inputs/input2.csv");
+    int        counter = 0;
+    while (!reader.eof())
+    {
+        const auto output = reader.readLine();
+        if (output)
+        {
+            const auto [val1, val2, val3] = output.value();
+            ASSERT_EQ(val1, counter + 0.5);
+            ASSERT_EQ(val2, counter + 0.6);
+            ASSERT_EQ(val3, counter + 0.7);
+            counter++;
+        }
+    }
+    ASSERT_TRUE(reader.eof());
+}
+
+//! Checks the reading of all values from the entire file in a loop of the existing file with a non-default separator
+TEST(ReadCSVTest, ReadAllLinesSemicolons)
+{
+    ReadCSV<3> reader("./inputs/input2_semicolons.csv", ';');
     int        counter = 0;
     while (!reader.eof())
     {
