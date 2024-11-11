@@ -25,9 +25,15 @@ namespace fgc4::utils::test
         //! @throws std::runtime_error if the file cannot be opened for any reason
         ReadCSV(std::filesystem::path path, const char& separator = ',')
             : m_in_file(path),
-              m_separator{separator},
-              m_regex_expr{std::string("(\\+|-)?[0-9]*(\\.?([0-9]*))") + "\\" + separator + '?'}
+              path(path),
+              m_separator{separator}
         {
+            // regex expression matching arbitrary collection of numbers starting with a '+' or '-' sign, followed up by
+            // a digit, with an optional decimal point ('.'), and optional exponent (e) separated with user-defined
+            // separators
+            m_regex_expr = std::string("((\\+|-)?[0-9]*\\.?[0-9]+(e(\\+|-)?[0-9]+)?)") + "(?:" + "\\" + separator
+                           + std::string("(\\+|-)?[0-9]*\\.?[0-9]+(e(\\+|-)?[0-9]+)?)*");
+
             if (!m_in_file.is_open())
             {
                 throw std::runtime_error(fmt::format("Failed to open file: {}.", std::string(path)));
@@ -121,7 +127,7 @@ namespace fgc4::utils::test
         bool possibleHeader(const std::string& line) const
         {
             // it is assumed to be a header if the first couple of characters are not a number
-            return !std::regex_match(line.substr(0, 2), m_regex_expr);
+            return !std::regex_match(line, m_regex_expr);
         }
     };
 }   // namespace fgc4::utils::test
