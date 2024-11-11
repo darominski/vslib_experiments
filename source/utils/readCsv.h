@@ -7,6 +7,7 @@
 #include <array>
 #include <filesystem>
 #include <fstream>
+#include <regex>
 #include <string>
 
 #include "fmt/format.h"
@@ -17,14 +18,15 @@ namespace fgc4::utils::test
     class ReadCSV
     {
       public:
-        //! ReadCSV constructor
+        //! Constructs a ReadCSV object.
         //!
         //! @param path Path to the file to be read.
         //! @param separator Character that is expected to separate columns
         //! @throws std::runtime_error if the file cannot be opened for any reason
         ReadCSV(std::filesystem::path path, const char& separator = ',')
             : m_in_file(path),
-              m_separator{separator}
+              m_separator{separator},
+              m_regex_expr{std::string("(\\+|-)?[0-9]*(\\.?([0-9]*))") + "\\" + separator + '?'}
         {
             if (!m_in_file.is_open())
             {
@@ -32,7 +34,7 @@ namespace fgc4::utils::test
             }
         }
 
-        //! ReadCSV destructor.
+        //! Destructs a ReadCSV object, closes the open file.
         ~ReadCSV()
         {
             if (m_in_file.is_open())
@@ -59,15 +61,30 @@ namespace fgc4::utils::test
             {
                 return std::nullopt;
             }
+            // check if the line is a (possible) header
+            if (m_first && possibleHeader(line_str))
+            {
+                // recursively ignore possible headers
+                return readLine();
+            }
+            else
+            {
+                m_first = false;
+            }
             processLine(line_str);
             return m_read_values;
         }
 
 
       private:
-        std::ifstream                    m_in_file;
-        const char                       m_separator{','};
-        std::array<double, NumberValues> m_read_values{0.0};
+        std::ifstream m_in_file;          //!< File to be read
+        const char    m_separator{','};   //!< Expected data separator
+        //! Flag to signal start of reading the file, used for ignoring file header
+        bool m_first{true};
+        //! Regex expression to find numbers in the first couple characters of a line
+        std::regex                       m_regex_expr;
+        std::array<double, NumberValues> m_read_values{0.0};   //!< Values read from the file's most recent line
+
 
         //! Processes one provided line and fills the internal array.
         //!
@@ -85,7 +102,6 @@ namespace fgc4::utils::test
                         fmt::format("Insufficient number of values in the line. Expected {} values.", NumberValues)
                     );
                 }
-
                 try
                 {
                     m_read_values[index] = stod(tmp_str);
@@ -95,6 +111,17 @@ namespace fgc4::utils::test
                     throw std::runtime_error("Invalid number format in CSV.");
                 }
             }
+        }
+
+        //! Checks if the first two characters contain a number and whether the entire line contains the expected
+        //! separator, as a rudimentary check whether the line might be a comment.
+        //!
+        //! @param line Line to be checked
+        //! @return True if the line is a possible header, false otherwise
+        bool possibleHeader(const std::string& line) const
+        {
+            // it is assumed to be a header if the first couple of characters are not a number
+            return !std::regex_match(line.substr(0, 2), m_regex_expr);
         }
     };
 }   // namespace fgc4::utils::test
