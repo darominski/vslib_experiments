@@ -20,6 +20,7 @@ namespace fgc4::utils::test
         //! ReadCSV constructor
         //!
         //! @param path Path to the file to be read.
+        //! @param separator Character that is expected to separate columns
         //! @throws std::runtime_error if the file cannot be opened for any reason
         ReadCSV(std::filesystem::path path, const char& separator = ',')
             : m_in_file(path),
