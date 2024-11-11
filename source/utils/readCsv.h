@@ -21,8 +21,9 @@ namespace fgc4::utils::test
         //!
         //! @param path Path to the file to be read.
         //! @throws std::runtime_error if the file cannot be opened for any reason
-        ReadCSV(std::filesystem::path path)
-            : m_in_file(path)
+        ReadCSV(std::filesystem::path path, const char& separator = ',')
+            : m_in_file(path),
+              m_separator{separator}
         {
             if (!m_in_file.is_open())
             {
@@ -64,6 +65,7 @@ namespace fgc4::utils::test
 
       private:
         std::ifstream                    m_in_file;
+        const char                       m_separator{','};
         std::array<double, NumberValues> m_read_values{0.0};
 
         //! Processes one provided line and fills the internal array.
@@ -76,7 +78,7 @@ namespace fgc4::utils::test
             std::stringstream ss(line_str);
             for (size_t index = 0; index < NumberValues; index++)
             {
-                if (!std::getline(ss, tmp_str, ','))
+                if (!std::getline(ss, tmp_str, m_separator))
                 {
                     throw std::runtime_error(
                         fmt::format("Insufficient number of values in the line. Expected {} values.", NumberValues)
