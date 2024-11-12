@@ -148,11 +148,12 @@ TEST(ReadCSVTest, ReadEmptyFile)
     ASSERT_FALSE(output1.has_value());
 }
 
-//! Checks that an attempt to read values with non-double values raises a std::runtime_error
+//! Checks that an attempt to read values with non-numerical values raises a std::runtime_error
 TEST(ReadCSVTest, ReadNonNumericData)
 {
     ReadCSV<3> reader("./inputs/input4.csv");
     ASSERT_FALSE(reader.eof());
+    ASSERT_NO_THROW(reader.readLine());   // the first line is correct
     ASSERT_THROW(reader.readLine(), std::runtime_error);
 }
 

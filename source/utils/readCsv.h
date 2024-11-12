@@ -25,7 +25,6 @@ namespace fgc4::utils::test
         //! @throws std::runtime_error if the file cannot be opened for any reason
         ReadCSV(std::filesystem::path path, const char& separator = ',')
             : m_in_file(path),
-              path(path),
               m_separator{separator}
         {
             // regex expression matching arbitrary collection of numbers starting with a '+' or '-' sign, followed up by
