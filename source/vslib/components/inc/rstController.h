@@ -51,7 +51,6 @@ namespace vslib
             m_measurements[m_head] = measurement;
 
             double actuation = m_t[0] * m_references[m_head] - m_r[0] * m_measurements[m_head];
-            // std::cout << m_head << " " << actuation << std::endl;
             for (int64_t index = 1; index < ControllerLength; index++)
             {
                 int64_t buffer_index = (m_head - index);
@@ -61,10 +60,6 @@ namespace vslib
                 }
                 actuation += m_t[index] * m_references[buffer_index] - m_r[index] * m_measurements[buffer_index]
                              - m_s[index] * m_actuations[buffer_index];
-
-                // std::cout << index << " " << buffer_index <<  " " << actuation << " " << m_t[index] << " " <<
-                // m_references[buffer_index] << " " << m_r[index]  << " "  << m_measurements[buffer_index] << " " <<
-                // m_s[index] << " " << m_actuations[buffer_index] << std::endl;
             }
             actuation /= m_s[0];
 
@@ -308,69 +303,6 @@ namespace vslib
         std::array<double, ControllerLength> m_b{0};   // variable used in Jury's test, declaring them here avoids
                                                        // allocation whenever jurysStabilityTest is called
     };
-
-    // //! Control method returning the next actuation.
-    // //!
-    // //! @param measurement Current measurement value
-    // //! @param reference Current reference value
-    // //! @return Next actuation value
-    // template<>
-    // [[nodiscard]] inline double RSTController<2>::control(const double reference, const double measurement) noexcept
-    // {
-    //     // This specialization allows to speed-up the calculation of the RST actuation by about 15%
-    //     m_references[1] = m_references[0];
-    //     m_references[0] = reference;
-
-    //     m_measurements[1] = m_measurements[0];
-    //     m_measurements[0] = measurement;
-
-    //     m_actuations[1] = m_actuations[0];
-    //     m_actuations[0] = (m_t[0] * reference - m_r[0] * measurement + m_t[1] * m_references[1]
-    //                        - m_r[1] * m_measurements[1] - (m_s[1] * m_actuations[1]))
-    //                       / m_s[0];
-
-    //     return m_actuations[0];
-    // }
-
-
-    // //! Updates the most recent reference in the history, used in cases actuation goes over the limit.
-    // //!
-    // //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
-    // template<>
-    // inline void RSTController<2>::updateReferenceOpenLoop(const double updated_actuation)
-    // {
-    //     // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
-    //     m_actuations[0] = updated_actuation;
-    //     m_references[0] = (m_s[0] * updated_actuation + m_r[0] * m_measurements[0] + m_s[1] * m_actuations[1]
-    //                        + m_r[1] * m_measurements[1] - m_t[1] * m_references[1])
-    //                       / m_t[0];
-    // }
-
-
-    // //! Updates the most recent reference in the history, used in cases actuation goes over the limit.
-    // //!
-    // //! @param updated_actuation Actuation that actually took place after clipping of the calculated actuation
-    // template<>
-    // inline void RSTController<2>::updateReference(const double updated_actuation)
-    // {
-    //     // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c
-    //     const double delta_actuation = updated_actuation - m_actuations[0];
-    //     m_actuations[0]              = updated_actuation;
-    //     m_references[0]              += delta_actuation * m_s[0] / m_t[0];
-    // }
-
-
-    // template<>
-    // inline void RSTController<2>::updateInputHistories(const double reference, const double measurement) noexcept
-    // {
-    //     m_references[1] = m_references[0];
-    //     m_references[0]   = reference;
-
-    //     m_measurements[1] = m_measurements[0];
-    //     m_measurements[0] = measurement;
-
-    //     m_history_ready = true;
-    // }
 
     //! Control method returning the next actuation.
     //!

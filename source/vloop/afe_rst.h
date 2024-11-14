@@ -14,6 +14,10 @@ namespace user
     {
 
       public:
+        //! Constructs ActiveFrontEnd with RST active control object.
+        //!
+        //! @param name Name of this Component
+        //! @param parent Parent of this Component
         ActiveFrontEndRST(std::string_view name, vslib::Component& parent)
             : vslib::Component("ActiveFrontEndRST", name, parent),
               pll("pll", *this),
@@ -55,9 +59,9 @@ namespace user
             //
             // Synchronisation, measurement, and change of reference frame
             //
-            const auto wt_pll = pll.synchronise(v_a * m_v_to_pu, v_b * m_v_to_pu, v_c * m_v_to_pu);
+            const auto wt_pll = pll.synchronise(v_a * m_si_to_pu, v_b * m_si_to_pu, v_c * m_si_to_pu);
             const auto [vd_meas, vq_meas, zero_v]
-                = abc_to_dq0_v.transform(v_a * m_v_to_pu, v_b * m_v_to_pu, v_c * m_v_to_pu, wt_pll);
+                = abc_to_dq0_v.transform(v_a * m_si_to_pu, v_b * m_si_to_pu, v_c * m_si_to_pu, wt_pll);
             const auto [id_meas, iq_meas, zero_i]
                 = abc_to_dq0_i.transform(i_a * m_i_to_pu, i_b * m_i_to_pu, i_c * m_i_to_pu, wt_pll);
             const auto [p_meas, q_meas] = power_3ph_instant.transform(v_a, v_b, v_c, i_a, i_b, i_c);
@@ -122,9 +126,8 @@ namespace user
 
             // conversion constants, based on base voltage and base current:
             m_si_to_pu = sqrt(3.0 / 2.0) / v_base.toValidate();
-            m_v_to_pu  = 1.0 / v_base.toValidate();
             m_i_to_pu  = 1.0 / i_base.toValidate();
-            m_va_to_pu = sqrt(2.0 / 3.0) * m_i_to_pu * m_v_to_pu;
+            m_va_to_pu = sqrt(2.0 / 3.0) * m_i_to_pu / v_base.toValidate();
 
             m_pu_to_v = 1.0 / m_si_to_pu;
 
@@ -134,7 +137,6 @@ namespace user
       private:
         double m_wl{0.0};
         double m_si_to_pu{0.0};
-        double m_v_to_pu{0.0};
         double m_pu_to_v{0.0};
         double m_i_to_pu{0.0};
         double m_va_to_pu{0.0};
