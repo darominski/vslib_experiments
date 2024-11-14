@@ -28,11 +28,10 @@ namespace vslib
         //! @param measurement Current value of the process value
         void updateInputHistories(const double reference, const double measurement) noexcept
         {
-            m_references[m_head % ControllerLength]   = reference;
-            m_measurements[m_head % ControllerLength] = measurement;
-
+            m_references[m_head]   = reference;
+            m_measurements[m_head] = measurement;
             m_head++;
-            if (m_head == ControllerLength)
+            if (m_head == (ControllerLength))
             {
                 m_history_ready = true;
                 m_head          = 0;
@@ -370,7 +369,7 @@ namespace vslib
         m_measurements[0] = measurement;
 
         m_head++;
-        if (m_head == 2)
+        if (m_head == 3)
         {
             m_history_ready = true;
             m_head          = 0;
