@@ -31,10 +31,9 @@ namespace vslib
             m_references[m_head]   = reference;
             m_measurements[m_head] = measurement;
             m_head++;
-            if (m_head == (ControllerLength))
+            if (m_head == (ControllerLength - 1))
             {
                 m_history_ready = true;
-                m_head          = 0;
             }
         }
 
@@ -369,10 +368,9 @@ namespace vslib
         m_measurements[0] = measurement;
 
         m_head++;
-        if (m_head == 3)
+        if (m_head == 2)
         {
             m_history_ready = true;
-            m_head          = 0;
         }
     }
 

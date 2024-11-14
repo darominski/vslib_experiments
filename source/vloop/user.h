@@ -155,10 +155,6 @@ namespace user
             data_in[1] = v_b_ref;
             data_in[2] = v_c_ref;
 
-            // data_in[3] = a;
-            // data_in[4] = b;
-            // data_in[7] = c;
-
             // write to output registers
             for (uint32_t index = 0; index < num_data_half; index++)
             {
