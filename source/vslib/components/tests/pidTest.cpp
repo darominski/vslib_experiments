@@ -5,12 +5,13 @@
 #include <filesystem>
 #include <gtest/gtest.h>
 
+#include "csv.hpp"
 #include "pid.h"
-#include "readCsv.h"
 #include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
+using namespace csv;
 
 class PIDTest : public ::testing::Test
 {
@@ -143,9 +144,9 @@ TEST_F(PIDTest, PIDCoefficientsDefault)
 
     for (int index = 0; index < 3; index++)
     {
-        EXPECT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
-        EXPECT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
-        EXPECT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
+        ASSERT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
+        ASSERT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
+        ASSERT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
     }
 }
 
@@ -189,9 +190,9 @@ TEST_F(PIDTest, PIDCoefficientsKpZero)
 
     for (int index = 0; index < 3; index++)
     {
-        EXPECT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
-        EXPECT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
-        EXPECT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
+        ASSERT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
+        ASSERT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
+        ASSERT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
     }
 }
 
@@ -235,9 +236,9 @@ TEST_F(PIDTest, PIDCoefficientsKdZero)
 
     for (int index = 0; index < 3; index++)
     {
-        EXPECT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
-        EXPECT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
-        EXPECT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
+        ASSERT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
+        ASSERT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
+        ASSERT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
     }
 }
 
@@ -278,9 +279,9 @@ TEST_F(PIDTest, PIDCoefficientsKdKffZeros)
 
     for (int index = 0; index < 3; index++)
     {
-        EXPECT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
-        EXPECT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
-        EXPECT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
+        ASSERT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
+        ASSERT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
+        ASSERT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
     }
 }
 
@@ -319,9 +320,9 @@ TEST_F(PIDTest, PIDCoefficientsIntegrator)
 
     for (int index = 0; index < 3; index++)
     {
-        EXPECT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
-        EXPECT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
-        EXPECT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
+        ASSERT_NEAR(pid.getR()[index], expected_r[index], 1e-12);
+        ASSERT_NEAR(pid.getS()[index], expected_s[index], 1e-12);
+        ASSERT_NEAR(pid.getT()[index], expected_t[index], 1e-12);
     }
 }
 
@@ -357,26 +358,30 @@ TEST_F(PIDTest, PIDSimulinkSimpleConsistency)
     std::filesystem::path rk_path = "components/inputs/rst_rk_random.csv";
     std::filesystem::path uk_path = "components/inputs/rst_uk_kp=ki=kd=kff=1_N=2_T=1e-3.csv";
 
-    fgc4::utils::test::ReadCSV<2> yk_file(yk_path);
-    fgc4::utils::test::ReadCSV<2> rk_file(rk_path);
-    fgc4::utils::test::ReadCSV<1> uk_file(uk_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!yk_file.eof() && !rk_file.eof() && !uk_file.eof())
+    CSVReader yk_file(yk_path.c_str(), format);
+    CSVReader rk_file(rk_path.c_str(), format);
+    CSVReader uk_file(uk_path.c_str(), format);
+
+    auto yk_line = yk_file.begin();
+    auto rk_line = rk_file.begin();
+    auto uk_line = uk_file.begin();
+
+    while (yk_line != yk_file.end() && rk_line != rk_file.end() && uk_line != uk_file.end())
     {
-        const auto yk_line = yk_file.readLine();
-        const auto rk_line = rk_file.readLine();
-        const auto uk_line = uk_file.readLine();
+        const auto yk_value      = (*yk_line)[1].get<double>();
+        const auto rk_value      = (*rk_line)[1].get<double>();
+        const auto matlab_output = (*uk_line)[0].get<double>();
 
-        if (yk_line && rk_line && uk_line)
-        {
-            auto const [time_stamp_1, yk_value] = yk_line.value();
-            auto const [time_stamp_2, rk_value] = rk_line.value();
-            auto const [matlab_output]          = uk_line.value();
+        auto const actuation = pid.control(rk_value, yk_value);
+        auto const relative  = (matlab_output - actuation) / matlab_output;
+        ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
 
-            auto const actuation = pid.control(rk_value, yk_value);
-            auto const relative  = (matlab_output - actuation) / matlab_output;
-            EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
-        }
+        ++yk_line;
+        ++rk_line;
+        ++uk_line;
     }
 }
 
@@ -413,26 +418,30 @@ TEST_F(PIDTest, PIDSimulinkConsistency)
     std::filesystem::path uk_path
         = "components/inputs/rst_uk_kp=52p79_ki=0p0472_kd=0p0441_kff=6p1190_N=17p79_T=1e-3.csv";
 
-    fgc4::utils::test::ReadCSV<2> yk_file(yk_path);
-    fgc4::utils::test::ReadCSV<2> rk_file(rk_path);
-    fgc4::utils::test::ReadCSV<1> uk_file(uk_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!yk_file.eof() && !rk_file.eof() && !uk_file.eof())
+    CSVReader yk_file(yk_path.c_str(), format);
+    CSVReader rk_file(rk_path.c_str(), format);
+    CSVReader uk_file(uk_path.c_str(), format);
+
+    auto yk_line = yk_file.begin();
+    auto rk_line = rk_file.begin();
+    auto uk_line = uk_file.begin();
+
+    while (yk_line != yk_file.end() && rk_line != rk_file.end() && uk_line != uk_file.end())
     {
-        const auto yk_line = yk_file.readLine();
-        const auto rk_line = rk_file.readLine();
-        const auto uk_line = uk_file.readLine();
+        const auto yk_value      = (*yk_line)[1].get<double>();
+        const auto rk_value      = (*rk_line)[1].get<double>();
+        const auto matlab_output = (*uk_line)[0].get<double>();
 
-        if (yk_line && rk_line && uk_line)
-        {
-            auto const [time_stamp_1, yk_value] = yk_line.value();
-            auto const [time_stamp_2, rk_value] = rk_line.value();
-            auto const [matlab_output]          = uk_line.value();
+        auto const actuation = pid.control(rk_value, yk_value);
+        auto const relative  = (matlab_output - actuation) / matlab_output;
+        ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
 
-            auto const actuation = pid.control(rk_value, yk_value);
-            auto const relative  = (matlab_output - actuation) / matlab_output;
-            EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
-        }
+        ++yk_line;
+        ++rk_line;
+        ++uk_line;
     }
 }
 
@@ -474,26 +483,30 @@ TEST_F(PIDTest, PIDSimulinkIntegratorConsistency)
     std::filesystem::path rk_path = "components/inputs/rst_rk_random.csv";
     std::filesystem::path uk_path = "components/inputs/rst_uk_kp=kd=0_ki=0p0472_kff=6p1190_N=17p79_T=1e-3.csv";
 
-    fgc4::utils::test::ReadCSV<2> yk_file(yk_path);
-    fgc4::utils::test::ReadCSV<2> rk_file(rk_path);
-    fgc4::utils::test::ReadCSV<1> uk_file(uk_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!yk_file.eof() && !rk_file.eof() && !uk_file.eof())
+    CSVReader yk_file(yk_path.c_str(), format);
+    CSVReader rk_file(rk_path.c_str(), format);
+    CSVReader uk_file(uk_path.c_str(), format);
+
+    auto yk_line = yk_file.begin();
+    auto rk_line = rk_file.begin();
+    auto uk_line = uk_file.begin();
+
+    while (yk_line != yk_file.end() && rk_line != rk_file.end() && uk_line != uk_file.end())
     {
-        const auto yk_line = yk_file.readLine();
-        const auto rk_line = rk_file.readLine();
-        const auto uk_line = uk_file.readLine();
+        const auto yk_value      = (*yk_line)[1].get<double>();
+        const auto rk_value      = (*rk_line)[1].get<double>();
+        const auto matlab_output = (*uk_line)[0].get<double>();
 
-        if (yk_line && rk_line && uk_line)
-        {
-            auto const [time_stamp_1, yk_value] = yk_line.value();
-            auto const [time_stamp_2, rk_value] = rk_line.value();
-            auto const [matlab_output]          = uk_line.value();
+        auto const actuation = pid.control(rk_value, yk_value);
+        auto const relative  = (matlab_output - actuation) / matlab_output;
+        ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
 
-            auto const actuation = pid.control(rk_value, yk_value);
-            auto const relative  = (matlab_output - actuation) / matlab_output;
-            EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
-        }
+        ++yk_line;
+        ++rk_line;
+        ++uk_line;
     }
 }
 
@@ -518,35 +531,37 @@ TEST_F(PIDTest, PIDSimulinkPIinPLL)
     const double actuation_max = 1e9;
     set_pid_parameters(pid, p, i, d, ff, b, c, N, T, f0, actuation_min, actuation_max);
 
-
     // the input files are randomly generated numbers
     std::filesystem::path pid_meas_path      = "components/inputs/pll_pi_meas.csv";
     std::filesystem::path pid_actuation_path = "components/inputs/pll_act_pi_kp=50_ki=200.csv";
 
-    fgc4::utils::test::ReadCSV<1> pid_meas_file(pid_meas_path);
-    fgc4::utils::test::ReadCSV<1> pid_act_file(pid_actuation_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!pid_meas_file.eof() && !pid_act_file.eof())
+    CSVReader pid_meas_file(pid_meas_path.c_str(), format);
+    CSVReader pid_act_file(pid_actuation_path.c_str(), format);
+
+    auto meas_line = pid_meas_file.begin();
+    auto act_line  = pid_act_file.begin();
+
+    while (meas_line != pid_meas_file.end() && act_line != pid_act_file.end())
     {
-        const auto meas_line = pid_meas_file.readLine();
-        const auto act_line  = pid_act_file.readLine();
+        const auto meas_value     = (*meas_line)[0].get<double>();
+        const auto pid_act_matlab = (*act_line)[0].get<double>();
 
-        if (meas_line && act_line)
+        auto const actuation = pid.control(0.0, -meas_value);
+        double     relative;
+        if (pid_act_matlab != 0)
         {
-            auto const [meas_value]     = meas_line.value();
-            auto const [pid_act_matlab] = act_line.value();
-
-            auto const actuation = pid.control(0.0, -meas_value);
-            double     relative;
-            if (pid_act_matlab != 0)
-            {
-                relative = (pid_act_matlab - actuation) / pid_act_matlab;
-            }
-            else
-            {
-                relative = (pid_act_matlab - actuation);
-            }
-            ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
+            relative = (pid_act_matlab - actuation) / pid_act_matlab;
         }
+        else
+        {
+            relative = (pid_act_matlab - actuation);
+        }
+        ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
+
+        ++meas_line;
+        ++act_line;
     }
 }

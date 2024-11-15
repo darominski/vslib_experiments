@@ -5,12 +5,13 @@
 #include <filesystem>
 #include <gtest/gtest.h>
 
+#include "csv.hpp"
 #include "firFilter.h"
-#include "readCsv.h"
 #include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
+using namespace csv;
 
 class FIRFilterTest : public ::testing::Test
 {
@@ -198,23 +199,26 @@ TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_3_0_5.csv";
 
-    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
-    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!inputs_file.eof() && !outputs_file.eof())
+    CSVReader inputs_file(inputs_path.c_str(), format);
+    CSVReader outputs_file(outputs_path.c_str(), format);
+
+    auto inputs_line  = inputs_file.begin();
+    auto outputs_line = outputs_file.begin();
+
+    while (inputs_line != inputs_file.end() && outputs_line != outputs_file.end())
     {
-        const auto inputs_line  = inputs_file.readLine();
-        const auto outputs_line = outputs_file.readLine();
+        const auto input_value         = (*inputs_line)[0].get<double>();
+        const auto matlab_output_value = (*outputs_line)[0].get<double>();
 
-        if (inputs_line && outputs_line)
-        {
-            auto const [input_value]         = inputs_line.value();
-            auto const [matlab_output_value] = outputs_line.value();
+        const double filtered_value = filter.filter(input_value);
+        const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
+        ASSERT_NEAR(relative, 0.0, 3e-4);   // at least 3e-4 relative precision
 
-            const double filtered_value = filter.filter(input_value);
-            const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-            ASSERT_NEAR(relative, 0.0, 3e-4);   // at least 3e-4 relative precision
-        }
+        ++inputs_line;
+        ++outputs_line;
     }
 }
 
@@ -237,23 +241,26 @@ TEST_F(FIRFilterTest, FilterBMeasDataSeventhOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_5_0_5.csv";
 
-    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
-    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!inputs_file.eof() && !outputs_file.eof())
+    CSVReader inputs_file(inputs_path.c_str(), format);
+    CSVReader outputs_file(outputs_path.c_str(), format);
+
+    auto inputs_line  = inputs_file.begin();
+    auto outputs_line = outputs_file.begin();
+
+    while (inputs_line != inputs_file.end() && outputs_line != outputs_file.end())
     {
-        const auto inputs_line  = inputs_file.readLine();
-        const auto outputs_line = outputs_file.readLine();
+        const auto input_value         = (*inputs_line)[0].get<double>();
+        const auto matlab_output_value = (*outputs_line)[0].get<double>();
 
-        if (inputs_line && outputs_line)
-        {
-            auto const [input_value]         = inputs_line.value();
-            auto const [matlab_output_value] = outputs_line.value();
+        const double filtered_value = filter.filter(input_value);
+        const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
+        ASSERT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
 
-            const double filtered_value = filter.filter(input_value);
-            const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-            ASSERT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
-        }
+        ++inputs_line;
+        ++outputs_line;
     }
 }
 
@@ -276,31 +283,34 @@ TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_10_0_5.csv";
 
-    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
-    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!inputs_file.eof() && !outputs_file.eof())
+    CSVReader inputs_file(inputs_path.c_str(), format);
+    CSVReader outputs_file(outputs_path.c_str(), format);
+
+    auto inputs_line  = inputs_file.begin();
+    auto outputs_line = outputs_file.begin();
+
+    while (inputs_line != inputs_file.end() && outputs_line != outputs_file.end())
     {
-        const auto inputs_line  = inputs_file.readLine();
-        const auto outputs_line = outputs_file.readLine();
+        const auto input_value         = (*inputs_line)[0].get<double>();
+        const auto matlab_output_value = (*outputs_line)[0].get<double>();
 
-        if (inputs_line && outputs_line)
+        const double filtered_value = filter.filter(input_value);
+        double       relative;
+        if (matlab_output_value != 0)
         {
-            auto const [input_value]         = inputs_line.value();
-            auto const [matlab_output_value] = outputs_line.value();
-
-            const double filtered_value = filter.filter(input_value);
-            double       relative;
-            if (matlab_output_value != 0)
-            {
-                relative = (matlab_output_value - filtered_value) / matlab_output_value;
-            }
-            else
-            {
-                relative = (matlab_output_value - filtered_value);
-            }
-            ASSERT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
+            relative = (matlab_output_value - filtered_value) / matlab_output_value;
         }
+        else
+        {
+            relative = (matlab_output_value - filtered_value);
+        }
+        ASSERT_NEAR(relative, 0.0, 1e-4);   // at least 1e-4 relative precision
+
+        ++inputs_line;
+        ++outputs_line;
     }
 }
 
@@ -326,31 +336,34 @@ TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_low-pass_fir_4_0_5.csv";
 
-    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
-    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!inputs_file.eof() && !outputs_file.eof())
+    CSVReader inputs_file(inputs_path.c_str(), format);
+    CSVReader outputs_file(outputs_path.c_str(), format);
+
+    auto inputs_line  = inputs_file.begin();
+    auto outputs_line = outputs_file.begin();
+
+    while (inputs_line != inputs_file.end() && outputs_line != outputs_file.end())
     {
-        const auto inputs_line  = inputs_file.readLine();
-        const auto outputs_line = outputs_file.readLine();
+        const auto input_value         = (*inputs_line)[0].get<double>();
+        const auto matlab_output_value = (*outputs_line)[0].get<double>();
 
-        if (inputs_line && outputs_line)
+        const double filtered_value = filter.filter(input_value);
+        double       relative;
+        if (matlab_output_value != 0)
         {
-            auto const [input_value]         = inputs_line.value();
-            auto const [matlab_output_value] = outputs_line.value();
-
-            const double filtered_value = filter.filter(input_value);
-            double       relative;
-            if (matlab_output_value != 0)
-            {
-                relative = (matlab_output_value - filtered_value) / matlab_output_value;
-            }
-            else
-            {
-                relative = (matlab_output_value - filtered_value);
-            }
-            ASSERT_NEAR(relative, 0.0, 5e-5);   // at least 1e-6 relative precision
+            relative = (matlab_output_value - filtered_value) / matlab_output_value;
         }
+        else
+        {
+            relative = (matlab_output_value - filtered_value);
+        }
+        ASSERT_NEAR(relative, 0.0, 5e-5);   // at least 1e-6 relative precision
+
+        ++inputs_line;
+        ++outputs_line;
     }
 }
 
@@ -392,30 +405,33 @@ TEST_F(FIRFilterTest, FilterBMeasData81stOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_80_0_5.csv";
 
-    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
-    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!inputs_file.eof() && !outputs_file.eof())
+    CSVReader inputs_file(inputs_path.c_str(), format);
+    CSVReader outputs_file(outputs_path.c_str(), format);
+
+    auto inputs_line  = inputs_file.begin();
+    auto outputs_line = outputs_file.begin();
+
+    while (inputs_line != inputs_file.end() && outputs_line != outputs_file.end())
     {
-        const auto inputs_line  = inputs_file.readLine();
-        const auto outputs_line = outputs_file.readLine();
+        const auto input_value         = (*inputs_line)[0].get<double>();
+        const auto matlab_output_value = (*outputs_line)[0].get<double>();
 
-        if (inputs_line && outputs_line)
+        const double filtered_value = filter.filter(input_value);
+        double       relative;
+        if (matlab_output_value != 0)
         {
-            auto const [input_value]         = inputs_line.value();
-            auto const [matlab_output_value] = outputs_line.value();
-
-            const double filtered_value = filter.filter(input_value);
-            double       relative;
-            if (matlab_output_value != 0)
-            {
-                relative = (matlab_output_value - filtered_value) / matlab_output_value;
-            }
-            else
-            {
-                relative = (matlab_output_value - filtered_value);
-            }
-            ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
+            relative = (matlab_output_value - filtered_value) / matlab_output_value;
         }
+        else
+        {
+            relative = (matlab_output_value - filtered_value);
+        }
+        ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
+
+        ++inputs_line;
+        ++outputs_line;
     }
 }

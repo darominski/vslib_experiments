@@ -6,11 +6,12 @@
 #include <filesystem>
 #include <gtest/gtest.h>
 
+#include "csv.hpp"
 #include "dq0ToAbcTransform.h"
-#include "readCsv.h"
 #include "rootComponent.h"
 
 using namespace vslib;
+using namespace csv;
 
 class Dq0ToAbcTransformTest : public ::testing::Test
 {
@@ -185,31 +186,38 @@ TEST_F(Dq0ToAbcTransformTest, BasicSimulinkConsistency)
     std::filesystem::path abc_path   = "components/inputs/park_abc_sin_120degrees.csv";
     std::filesystem::path theta_path = "components/inputs/park_theta_0_20.csv";
 
-    fgc4::utils::test::ReadCSV<3> dq0_file(dq0_path);
-    fgc4::utils::test::ReadCSV<2> theta_file(theta_path);
-    fgc4::utils::test::ReadCSV<4> abc_file(abc_path);
+    CSVReader abc_file(abc_path.c_str());
+    CSVReader dq0_file(dq0_path.c_str());
+    CSVReader theta_file(theta_path.c_str());
 
-    while (!abc_file.eof() && !theta_file.eof() && !dq0_file.eof())
+    auto abc_line   = abc_file.begin();
+    auto dq0_line   = dq0_file.begin();
+    auto theta_line = theta_file.begin();
+
+    while (abc_line != abc_file.end() && dq0_line != dq0_file.end() && theta_line != theta_file.end())
     {
-        const auto dq0_line   = dq0_file.readLine();
-        const auto theta_line = theta_file.readLine();
-        const auto abc_line   = abc_file.readLine();
+        const auto matlab_a = (*abc_line)[1].get<double>();
+        const auto matlab_b = (*abc_line)[2].get<double>();
+        const auto matlab_c = (*abc_line)[3].get<double>();
 
-        if (abc_line && theta_line && dq0_line)
-        {
-            const auto [d, q, z]                              = dq0_line.value();
-            const auto [time_1, theta]                        = theta_line.value();
-            const auto [time_2, matlab_a, matlab_b, matlab_c] = abc_line.value();
+        const auto theta = (*theta_line)[1].get<double>();
 
-            const auto [a, b, c]  = dq0_to_abc.transform(d, q, z, theta);
-            const auto relative_a = (matlab_a - a);
-            const auto relative_b = (matlab_b - b);
-            const auto relative_c = (matlab_c - c);
+        const auto d = (*dq0_line)[0].get<double>();
+        const auto q = (*dq0_line)[1].get<double>();
+        const auto z = (*dq0_line)[2].get<double>();
 
-            ASSERT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
-            ASSERT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
-            ASSERT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
-        }
+        const auto [a, b, c]  = dq0_to_abc.transform(d, q, z, theta);
+        const auto relative_a = (matlab_a - a);
+        const auto relative_b = (matlab_b - b);
+        const auto relative_c = (matlab_c - c);
+
+        ASSERT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
+
+        ++abc_line;
+        ++dq0_line;
+        ++theta_line;
     }
 }
 
@@ -226,30 +234,37 @@ TEST_F(Dq0ToAbcTransformTest, SVCTransform)
     std::filesystem::path theta_path = "components/inputs/theta_svc_18kV_pll.csv";
     std::filesystem::path dq0_path   = "components/inputs/park_dq0_svc_18kV_pll.csv";
 
-    fgc4::utils::test::ReadCSV<3> dq0_file(dq0_path);
-    fgc4::utils::test::ReadCSV<2> theta_file(theta_path);
-    fgc4::utils::test::ReadCSV<4> abc_file(abc_path);
+    CSVReader abc_file(abc_path.c_str());
+    CSVReader dq0_file(dq0_path.c_str());
+    CSVReader theta_file(theta_path.c_str());
 
-    while (!abc_file.eof() && !theta_file.eof() && !dq0_file.eof())
+    auto abc_line   = abc_file.begin();
+    auto dq0_line   = dq0_file.begin();
+    auto theta_line = theta_file.begin();
+
+    while (abc_line != abc_file.end() && dq0_line != dq0_file.end() && theta_line != theta_file.end())
     {
-        const auto dq0_line   = dq0_file.readLine();
-        const auto theta_line = theta_file.readLine();
-        const auto abc_line   = abc_file.readLine();
+        const auto matlab_a = (*abc_line)[1].get<double>();
+        const auto matlab_b = (*abc_line)[2].get<double>();
+        const auto matlab_c = (*abc_line)[3].get<double>();
 
-        if (abc_line && theta_line && dq0_line)
-        {
-            const auto [d, q, z]                              = dq0_line.value();
-            const auto [time_1, theta]                        = theta_line.value();
-            const auto [time_2, matlab_a, matlab_b, matlab_c] = abc_line.value();
+        const auto theta = (*theta_line)[1].get<double>();
 
-            const auto [a, b, c]  = dq0_to_abc.transform(d, q, z, theta);
-            const auto relative_a = (matlab_a - a);
-            const auto relative_b = (matlab_b - b);
-            const auto relative_c = (matlab_c - c);
+        const auto d = (*dq0_line)[0].get<double>();
+        const auto q = (*dq0_line)[1].get<double>();
+        const auto z = (*dq0_line)[2].get<double>();
 
-            ASSERT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
-            ASSERT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
-            ASSERT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
-        }
+        const auto [a, b, c]  = dq0_to_abc.transform(d, q, z, theta);
+        const auto relative_a = (matlab_a - a);
+        const auto relative_b = (matlab_b - b);
+        const auto relative_c = (matlab_c - c);
+
+        ASSERT_NEAR(relative_a, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_b, 0.0, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_c, 0.0, 1e-6);   // at least 1e-6 relative precision
+
+        ++abc_line;
+        ++dq0_line;
+        ++theta_line;
     }
 }

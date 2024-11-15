@@ -5,10 +5,11 @@
 #include <filesystem>
 #include <gtest/gtest.h>
 
-#include "readCsv.h"
+#include "csv.hpp"
 #include "rstController.h"
 
 using namespace vslib;
+using namespace csv;
 
 class RSTControllerTest : public ::testing::Test
 {
@@ -278,31 +279,34 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkSimpleConsistency)
     maybe_warning = rst.jurysStabilityTest(t_value);
     ASSERT_FALSE(maybe_warning.has_value());
 
-    // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
     std::filesystem::path rk_path = "components/inputs/rst_rk_random.csv";
     std::filesystem::path uk_path = "components/inputs/rst_uk_kp=ki=kd=kff=1_N=2_T=1e-3.csv";
 
-    fgc4::utils::test::ReadCSV<2> yk_file(yk_path);
-    fgc4::utils::test::ReadCSV<2> rk_file(rk_path);
-    fgc4::utils::test::ReadCSV<1> uk_file(uk_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!yk_file.eof() && !rk_file.eof() && !uk_file.eof())
+    CSVReader yk_file(yk_path.c_str(), format);
+    CSVReader rk_file(rk_path.c_str(), format);
+    CSVReader uk_file(uk_path.c_str(), format);
+
+    auto yk_line = yk_file.begin();
+    auto rk_line = rk_file.begin();
+    auto uk_line = uk_file.begin();
+
+    while (yk_line != yk_file.end() && rk_line != rk_file.end() && uk_line != uk_file.end())
     {
-        const auto yk_line = yk_file.readLine();
-        const auto rk_line = rk_file.readLine();
-        const auto uk_line = uk_file.readLine();
+        const auto yk_value      = (*yk_line)[1].get<double>();
+        const auto rk_value      = (*rk_line)[1].get<double>();
+        const auto matlab_output = (*uk_line)[0].get<double>();
 
-        if (yk_line && rk_line && uk_line)
-        {
-            auto const [time_stamp_1, yk_value] = yk_line.value();
-            auto const [time_stamp_2, rk_value] = rk_line.value();
-            auto const [matlab_output]          = uk_line.value();
+        auto const actuation = rst.control(rk_value, yk_value);
+        auto const relative  = (matlab_output - actuation) / matlab_output;
+        ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
 
-            auto const actuation = rst.control(rk_value, yk_value);
-            auto const relative  = (matlab_output - actuation) / matlab_output;
-            EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
-        }
+        yk_line++;
+        rk_line++;
+        uk_line++;
     }
 }
 
@@ -338,31 +342,34 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkConsistency)
     maybe_warning = rst.jurysStabilityTest(t_value);
     ASSERT_FALSE(maybe_warning.has_value());
 
-    // the input file is a measurement of B performed on 08/10/2020, shortened to the first 5000 points
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
     std::filesystem::path rk_path = "components/inputs/rst_rk_random.csv";
     std::filesystem::path uk_path
         = "components/inputs/rst_uk_kp=52p79_ki=0p0472_kd=0p0441_kff=6p1190_N=17p79_T=1e-3.csv";
 
-    fgc4::utils::test::ReadCSV<2> yk_file(yk_path);
-    fgc4::utils::test::ReadCSV<2> rk_file(rk_path);
-    fgc4::utils::test::ReadCSV<1> uk_file(uk_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!yk_file.eof() && !rk_file.eof() && !uk_file.eof())
+    CSVReader yk_file(yk_path.c_str(), format);
+    CSVReader rk_file(rk_path.c_str(), format);
+    CSVReader uk_file(uk_path.c_str(), format);
+
+    auto yk_line = yk_file.begin();
+    auto rk_line = rk_file.begin();
+    auto uk_line = uk_file.begin();
+
+    while (yk_line != yk_file.end() && rk_line != rk_file.end() && uk_line != uk_file.end())
     {
-        const auto yk_line = yk_file.readLine();
-        const auto rk_line = rk_file.readLine();
-        const auto uk_line = uk_file.readLine();
+        const auto yk_value      = (*yk_line)[1].get<double>();
+        const auto rk_value      = (*rk_line)[1].get<double>();
+        const auto matlab_output = (*uk_line)[0].get<double>();
 
-        if (yk_line && rk_line && uk_line)
-        {
-            auto const [time_stamp_1, yk_value] = yk_line.value();
-            auto const [time_stamp_2, rk_value] = rk_line.value();
-            auto const [matlab_output]          = uk_line.value();
+        auto const actuation = rst.control(rk_value, yk_value);
+        auto const relative  = (matlab_output - actuation) / matlab_output;
+        ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
 
-            auto const actuation = rst.control(rk_value, yk_value);
-            auto const relative  = (matlab_output - actuation) / matlab_output;
-            EXPECT_NEAR(relative, 0.0, 1e-6);   // at least 1e-4 relative precision
-        }
+        yk_line++;
+        rk_line++;
+        uk_line++;
     }
 }

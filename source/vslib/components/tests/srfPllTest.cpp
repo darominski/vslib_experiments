@@ -5,12 +5,13 @@
 #include <filesystem>
 #include <gtest/gtest.h>
 
-#include "readCsv.h"
+#include "csv.hpp"
 #include "rootComponent.h"
 #include "srfPll.h"
 #include "staticJson.h"
 
 using namespace vslib;
+using namespace csv;
 
 class SRFPLLTest : public ::testing::Test
 {
@@ -204,29 +205,36 @@ TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistency)
     std::filesystem::path abc_path       = "components/inputs/abc_pll.csv";
     std::filesystem::path matlab_wt_path = "components/inputs/wt_pll_kp=50_ki=200.csv";
 
-    fgc4::utils::test::ReadCSV<3> abc_file(abc_path);
-    fgc4::utils::test::ReadCSV<1> matlab_wt_file(matlab_wt_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!abc_file.eof() && !matlab_wt_file.eof())
+    CSVReader abc_file(abc_path.c_str(), format);
+    CSVReader matlab_wt_file(matlab_wt_path.c_str(), format);
+
+    auto abc_line       = abc_file.begin();
+    auto matlab_wt_line = matlab_wt_file.begin();
+
+    while (abc_line != abc_file.end() && matlab_wt_line != matlab_wt_file.end())
     {
-        const auto matlab_wt_line = matlab_wt_file.readLine();
-        const auto abc_line       = abc_file.readLine();
-        if (abc_line && matlab_wt_line)
-        {
-            auto const [a, b, c]   = abc_line.value();
-            auto const [matlab_wt] = matlab_wt_line.value();
+        const auto a = (*abc_line)[0].get<double>();
+        const auto b = (*abc_line)[1].get<double>();
+        const auto c = (*abc_line)[2].get<double>();
 
-            auto const wt = pll.synchronise(a, b, c);
-            double     relative;
-            if (matlab_wt != 0)
-            {
-                relative = (matlab_wt - wt) / matlab_wt;
-            }
-            else
-            {
-                relative = (matlab_wt - wt);
-            }
-            ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
+        const auto matlab_wt = (*matlab_wt_line)[0].get<double>();
+
+        auto const wt = pll.synchronise(a, b, c);
+        double     relative;
+        if (matlab_wt != 0)
+        {
+            relative = (matlab_wt - wt) / matlab_wt;
         }
+        else
+        {
+            relative = (matlab_wt - wt);
+        }
+        ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
+
+        ++abc_line;
+        ++matlab_wt_line;
     }
 }

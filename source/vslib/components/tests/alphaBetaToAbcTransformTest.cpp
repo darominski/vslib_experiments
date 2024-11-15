@@ -7,10 +7,11 @@
 #include <gtest/gtest.h>
 
 #include "alphaBetaToAbcTransform.h"
-#include "readCsv.h"
+#include "csv.hpp"
 #include "rootComponent.h"
 
 using namespace vslib;
+using namespace csv;
 
 class AlphaBetaToAbcTransformTest : public ::testing::Test
 {
@@ -101,25 +102,30 @@ TEST_F(AlphaBetaToAbcTransformTest, SimulinkConsistency)
     std::filesystem::path abz_path = "components/inputs/clarke_alpha-beta_sin_120degrees.csv";
     std::filesystem::path abc_path = "components/inputs/park_abc_sin_120degrees.csv";
 
-    fgc4::utils::test::ReadCSV<4> abc_file(abc_path);
-    fgc4::utils::test::ReadCSV<3> abz_file(abz_path);
+    CSVReader abz_file(abz_path.c_str());
+    CSVReader abc_file(abc_path.c_str());
 
-    while (!abz_file.eof() && !abc_file.eof())
+    auto abz_line = abz_file.begin();
+    auto abc_line = abc_file.begin();
+
+    while (abz_line != abz_file.end() && abc_line != abc_file.end())
     {
-        const auto abc_line = abc_file.readLine();
-        const auto abz_line = abz_file.readLine();
+        const auto matlab_a = (*abc_line)[1].get<double>();
+        const auto matlab_b = (*abc_line)[2].get<double>();
+        const auto matlab_c = (*abc_line)[3].get<double>();
 
-        if (abz_line && abc_line)
-        {
-            const auto [time1, matlab_a, matlab_b, matlab_c] = abc_line.value();
-            const auto [alpha, beta, zero]                   = abz_line.value();
+        const auto alpha = (*abz_line)[0].get<double>();
+        const auto beta  = (*abz_line)[1].get<double>();
+        const auto zero  = (*abz_line)[2].get<double>();
 
-            // validation
-            const auto [a, b, c] = inv_clarke.transform(alpha, beta, zero);
+        // validation
+        const auto [a, b, c] = inv_clarke.transform(alpha, beta, zero);
 
-            ASSERT_NEAR(a, matlab_a, 1e-6);   // at least 1e-6 relative precision
-            ASSERT_NEAR(b, matlab_b, 1e-6);   // at least 1e-6 relative precision
-            ASSERT_NEAR(c, matlab_c, 1e-6);   // at least 1e-6 relative precision
-        }
+        ASSERT_NEAR(a, matlab_a, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(b, matlab_b, 1e-6);   // at least 1e-6 relative precision
+        ASSERT_NEAR(c, matlab_c, 1e-6);   // at least 1e-6 relative precision
+
+        ++abz_line;
+        ++abc_line;
     }
 }

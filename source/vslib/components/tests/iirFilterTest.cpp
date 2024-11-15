@@ -5,12 +5,13 @@
 #include <filesystem>
 #include <gtest/gtest.h>
 
+#include "csv.hpp"
 #include "iirFilter.h"
-#include "readCsv.h"
 #include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
+using namespace csv;
 
 class IIRFilterTest : public ::testing::Test
 {
@@ -258,23 +259,26 @@ TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPOPB.245.BR23.RMPS_B_MEAS_2023-11-17_09-32_iir_butter_2.csv";
 
-    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
-    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!inputs_file.eof() && !outputs_file.eof())
+    CSVReader inputs_file(inputs_path.c_str(), format);
+    CSVReader outputs_file(outputs_path.c_str(), format);
+
+    auto inputs_line  = inputs_file.begin();
+    auto outputs_line = outputs_file.begin();
+
+    while (inputs_line != inputs_file.end() && outputs_line != outputs_file.end())
     {
-        const auto inputs_line  = inputs_file.readLine();
-        const auto outputs_line = outputs_file.readLine();
+        const auto input_value         = (*inputs_line)[0].get<double>();
+        const auto matlab_output_value = (*outputs_line)[0].get<double>();
 
-        if (inputs_line && outputs_line)
-        {
-            auto const [input_value]         = inputs_line.value();
-            auto const [matlab_output_value] = outputs_line.value();
+        const double filtered_value = filter.filter(input_value);
+        const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
+        ASSERT_NEAR(relative, 0.0, 2e-4);   // at least 0.02% relative precision
 
-            const double filtered_value = filter.filter(input_value);
-            const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-            ASSERT_NEAR(relative, 0.0, 2e-4);   // at least 0.02% relative precision
-        }
+        ++inputs_line;
+        ++outputs_line;
     }
 }
 
@@ -304,22 +308,25 @@ TEST_F(IIRFilterTest, ChebyIIRFilterBMeasTenthOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPOPB.245.BR23.RMPS_B_MEAS_2023-11-17_09-32_iir_butter_10.csv";
 
-    fgc4::utils::test::ReadCSV<1> inputs_file(inputs_path);
-    fgc4::utils::test::ReadCSV<1> outputs_file(outputs_path);
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
 
-    while (!inputs_file.eof() && !outputs_file.eof())
+    CSVReader inputs_file(inputs_path.c_str(), format);
+    CSVReader outputs_file(outputs_path.c_str(), format);
+
+    auto inputs_line  = inputs_file.begin();
+    auto outputs_line = outputs_file.begin();
+
+    while (inputs_line != inputs_file.end() && outputs_line != outputs_file.end())
     {
-        const auto inputs_line  = inputs_file.readLine();
-        const auto outputs_line = outputs_file.readLine();
+        const auto input_value         = (*inputs_line)[0].get<double>();
+        const auto matlab_output_value = (*outputs_line)[0].get<double>();
 
-        if (inputs_line && outputs_line)
-        {
-            auto const [input_value]         = inputs_line.value();
-            auto const [matlab_output_value] = outputs_line.value();
+        const double filtered_value = filter.filter(input_value);
+        const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
+        ASSERT_NEAR(relative, 0.0, 5e-4);   // at least 5e-4 relative precision
 
-            const double filtered_value = filter.filter(input_value);
-            const double relative       = (matlab_output_value - filtered_value) / matlab_output_value;
-            ASSERT_NEAR(relative, 0.0, 5e-4);   // at least 5e-4 relative precision
-        }
+        ++inputs_line;
+        ++outputs_line;
     }
 }

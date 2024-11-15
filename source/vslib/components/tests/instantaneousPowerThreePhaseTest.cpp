@@ -4,12 +4,13 @@
 
 #include <gtest/gtest.h>
 
+#include "csv.hpp"
 #include "instantaneousPowerThreePhase.h"
-#include "readCsv.h"
 #include "rootComponent.h"
 #include "staticJson.h"
 
 using namespace vslib;
+using namespace csv;
 
 class InstantaneousPowerThreePhaseTest : public ::testing::Test
 {
@@ -102,40 +103,44 @@ TEST_F(InstantaneousPowerThreePhaseTest, SimulinkConsistency)
     std::filesystem::path v_abc_path      = "components/inputs/park_abc_sin_120degrees.csv";
     std::filesystem::path matlab_power3ph = "components/inputs/instantaneous_power_3phase.csv";
 
-    fgc4::utils::test::ReadCSV<4> v_abc_file(v_abc_path);
-    fgc4::utils::test::ReadCSV<2> matlab_power3ph_file(matlab_power3ph);
+    CSVReader v_abc_file(v_abc_path.c_str());
+    CSVReader matlab_power3ph_file(matlab_power3ph.c_str());
 
-    while (!v_abc_file.eof() && !matlab_power3ph_file.eof())
+    auto v_abc_line           = v_abc_file.begin();
+    auto matlab_power3ph_line = matlab_power3ph_file.begin();
+
+    while (v_abc_line != v_abc_file.end() || matlab_power3ph_line != matlab_power3ph_file.end())
     {
-        const auto matlab_power3ph_line = matlab_power3ph_file.readLine();
-        const auto v_abc_line           = v_abc_file.readLine();
-        if (v_abc_line && matlab_power3ph_line)
+        const auto v_a = (*v_abc_line)[1].get<double>();
+        const auto v_b = (*v_abc_line)[2].get<double>();
+        const auto v_c = (*v_abc_line)[3].get<double>();
+
+        const auto matlab_p = (*matlab_power3ph_line)[0].get<double>();
+        const auto matlab_q = (*matlab_power3ph_line)[1].get<double>();
+
+        const auto [p, q] = power.calculate(v_a, v_b, v_c, i_abc[0], i_abc[1], i_abc[2]);
+        double relative_p;
+        if (matlab_p != 0)
         {
-            auto const [time, v_a, v_b, v_c] = v_abc_line.value();
-            auto const [matlab_p, matlab_q]  = matlab_power3ph_line.value();
-
-
-            const auto [p, q] = power.calculate(v_a, v_b, v_c, i_abc[0], i_abc[1], i_abc[2]);
-            double relative_p;
-            if (matlab_p != 0)
-            {
-                relative_p = (matlab_p - p) / matlab_p;
-            }
-            else
-            {
-                relative_p = (matlab_p - p);
-            }
-            ASSERT_NEAR(relative_p, 0.0, 1e-6);   // at least 1e-6 relative precision
-            double relative_q;
-            if (matlab_q != 0)
-            {
-                relative_q = (matlab_q - q) / matlab_q;
-            }
-            else
-            {
-                relative_q = (matlab_q - q);
-            }
-            ASSERT_NEAR(relative_q, 0.0, 1e-6);   // at least 1e-6 relative precision
+            relative_p = (matlab_p - p) / matlab_p;
         }
+        else
+        {
+            relative_p = (matlab_p - p);
+        }
+        ASSERT_NEAR(relative_p, 0.0, 1e-6);   // at least 1e-6 relative precision
+        double relative_q;
+        if (matlab_q != 0)
+        {
+            relative_q = (matlab_q - q) / matlab_q;
+        }
+        else
+        {
+            relative_q = (matlab_q - q);
+        }
+        ASSERT_NEAR(relative_q, 0.0, 1e-6);   // at least 1e-6 relative precision
+
+        ++v_abc_line;
+        ++matlab_power3ph_line;
     }
 }

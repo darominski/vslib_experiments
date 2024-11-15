@@ -7,10 +7,11 @@
 #include <gtest/gtest.h>
 
 #include "alphaBetaToDq0Transform.h"
-#include "readCsv.h"
+#include "csv.hpp"
 #include "rootComponent.h"
 
 using namespace vslib;
+using namespace csv;
 
 class AlphaBetaToDq0TransformTest : public ::testing::Test
 {
@@ -146,32 +147,39 @@ TEST_F(AlphaBetaToDq0TransformTest, SimulinkConsistencyAaxisAlignment)
     std::filesystem::path theta_path = "components/inputs/park_theta_0_20.csv";
     std::filesystem::path dq0_path   = "components/inputs/alpha-beta-zero_to_dq0_sin_120degrees_theta_0_20.csv";
 
-    fgc4::utils::test::ReadCSV<3> dq0_file(dq0_path);
-    fgc4::utils::test::ReadCSV<2> theta_file(theta_path);
-    fgc4::utils::test::ReadCSV<3> abz_file(abz_path);
+    CSVReader dq0_file(dq0_path.c_str());
+    CSVReader theta_file(theta_path.c_str());
+    CSVReader abz_file(abz_path.c_str());
 
-    while (!abz_file.eof() && !theta_file.eof() && !dq0_file.eof())
+    auto dq0_line   = dq0_file.begin();
+    auto theta_line = theta_file.begin();
+    auto abz_line   = abz_file.begin();
+
+    while (dq0_line != dq0_file.end() && theta_line != theta_file.end() && abz_line != abz_file.end())
     {
-        const auto dq0_line   = dq0_file.readLine();
-        const auto theta_line = theta_file.readLine();
-        const auto abz_line   = abz_file.readLine();
+        const auto matlab_d    = (*dq0_line)[0].get<double>();
+        const auto matlab_q    = (*dq0_line)[1].get<double>();
+        const auto matlab_zero = (*dq0_line)[2].get<double>();
 
-        if (abz_line && theta_line && dq0_line)
-        {
-            const auto [matlab_d, matlab_q, matlab_zero] = dq0_line.value();
-            const auto [_, theta]                        = theta_line.value();
-            const auto [f_alpha, f_beta, f_zero]         = abz_line.value();
+        const auto theta = (*theta_line)[1].get<double>();
 
-            // validation
-            const auto [d, q, zero]  = transform.transform(f_alpha, f_beta, f_zero, theta);
-            const auto relative_d    = (matlab_d - d);
-            const auto relative_q    = (matlab_q - q);
-            const auto relative_zero = (matlab_zero - zero);
+        const auto f_alpha = (*abz_line)[0].get<double>();
+        const auto f_beta  = (*abz_line)[1].get<double>();
+        const auto f_zero  = (*abz_line)[2].get<double>();
 
-            ASSERT_NEAR(relative_d, 0.0, 1e-6);      // at least 1e-6 relative precision
-            ASSERT_NEAR(relative_q, 0.0, 1e-6);      // at least 1e-6 relative precision
-            ASSERT_NEAR(relative_zero, 0.0, 1e-6);   // at least 1e-6 relative precision
-        }
+        // validation
+        const auto [d, q, zero]  = transform.transform(f_alpha, f_beta, f_zero, theta);
+        const auto relative_d    = (matlab_d - d);
+        const auto relative_q    = (matlab_q - q);
+        const auto relative_zero = (matlab_zero - zero);
+
+        ASSERT_NEAR(relative_d, 0.0, 1e-6);      // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_q, 0.0, 1e-6);      // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_zero, 0.0, 1e-6);   // at least 1e-6 relative precision
+
+        ++dq0_line;
+        ++theta_line;
+        ++abz_line;
     }
 }
 
@@ -188,31 +196,38 @@ TEST_F(AlphaBetaToDq0TransformTest, SimulinkConsistencyAaxisNotAligned)
     std::filesystem::path dq0_path
         = "components/inputs/alpha-beta-zero_to_dq0_sin_120degrees_theta_0_20_a_notaligned.csv";
 
-    fgc4::utils::test::ReadCSV<3> dq0_file(dq0_path);
-    fgc4::utils::test::ReadCSV<2> theta_file(theta_path);
-    fgc4::utils::test::ReadCSV<3> abz_file(abz_path);
+    CSVReader dq0_file(dq0_path.c_str());
+    CSVReader theta_file(theta_path.c_str());
+    CSVReader abz_file(abz_path.c_str());
 
-    while (!abz_file.eof() && !theta_file.eof() && !dq0_file.eof())
+    auto dq0_line   = dq0_file.begin();
+    auto theta_line = theta_file.begin();
+    auto abz_line   = abz_file.begin();
+
+    while (dq0_line != dq0_file.end() && theta_line != theta_file.end() && abz_line != abz_file.end())
     {
-        const auto dq0_line   = dq0_file.readLine();
-        const auto theta_line = theta_file.readLine();
-        const auto abz_line   = abz_file.readLine();
+        const auto matlab_d    = (*dq0_line)[0].get<double>();
+        const auto matlab_q    = (*dq0_line)[1].get<double>();
+        const auto matlab_zero = (*dq0_line)[2].get<double>();
 
-        if (abz_line && theta_line && dq0_line)
-        {
-            const auto [matlab_d, matlab_q, matlab_zero] = dq0_line.value();
-            const auto [_, theta]                        = theta_line.value();
-            const auto [f_alpha, f_beta, f_zero]         = abz_line.value();
+        const auto theta = (*theta_line)[1].get<double>();
 
-            // validation
-            const auto [d, q, zero]  = transform.transform(f_alpha, f_beta, f_zero, theta, false);
-            const auto relative_d    = (matlab_d - d);
-            const auto relative_q    = (matlab_q - q);
-            const auto relative_zero = (matlab_zero - zero);
+        const auto f_alpha = (*abz_line)[0].get<double>();
+        const auto f_beta  = (*abz_line)[1].get<double>();
+        const auto f_zero  = (*abz_line)[2].get<double>();
 
-            ASSERT_NEAR(relative_d, 0.0, 1e-6);      // at least 1e-6 relative precision
-            ASSERT_NEAR(relative_q, 0.0, 1e-6);      // at least 1e-6 relative precision
-            ASSERT_NEAR(relative_zero, 0.0, 1e-6);   // at least 1e-6 relative precision
-        }
+        // validation
+        const auto [d, q, zero]  = transform.transform(f_alpha, f_beta, f_zero, theta, false);
+        const auto relative_d    = (matlab_d - d);
+        const auto relative_q    = (matlab_q - q);
+        const auto relative_zero = (matlab_zero - zero);
+
+        ASSERT_NEAR(relative_d, 0.0, 1e-6);      // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_q, 0.0, 1e-6);      // at least 1e-6 relative precision
+        ASSERT_NEAR(relative_zero, 0.0, 1e-6);   // at least 1e-6 relative precision
+
+        ++dq0_line;
+        ++theta_line;
+        ++abz_line;
     }
 }
