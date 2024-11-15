@@ -32,7 +32,7 @@ namespace user
 
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
-        vslib::PLL                            pll;
+        vslib::SRFPLL                         pll;
         vslib::PID                            pi_id_ref;
         vslib::PID                            pi_iq_ref;
         vslib::PID                            pi_vd_ref;
@@ -186,7 +186,7 @@ namespace user
             //
             // Measurement and reference frame
             //
-            const double wt_pll = converter.pll.balance(v_a * si_2_pu, v_b * si_2_pu, v_c * si_2_pu);
+            const double wt_pll = converter.pll.synchronise(v_a * si_2_pu, v_b * si_2_pu, v_c * si_2_pu);
             const auto [vd_meas, vq_meas, zero_v]
                 = converter.abc_2_dq0.transform(v_a * v_2_pu, v_b * v_2_pu, v_c * v_2_pu, wt_pll);
             const auto [id_meas, iq_meas, zero_i]
