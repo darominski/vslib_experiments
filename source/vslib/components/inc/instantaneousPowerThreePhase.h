@@ -34,7 +34,7 @@ namespace vslib
         //! @param i_b b-phase current value
         //! @param i_c c-phase current value
         //! @return Tuple of P, and Q: active and reactive power
-        [[nodiscard]] std::tuple<double, double> transform(
+        [[nodiscard]] std::tuple<double, double> calculate(
             const double v_a, const double v_b, const double v_c, const double i_a, const double i_b, const double i_c
         ) const noexcept;
 

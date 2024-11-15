@@ -72,7 +72,7 @@ TEST_F(InstantaneousPowerThreePhaseTest, SingleValue)
     std::array<double, 3> v_abc{230.0, -115.0, 115.0};
     std::array<double, 3> i_abc{10.0, -5.0, -5.0};
 
-    const auto [p, q] = power.transform(v_abc[0], v_abc[1], v_abc[2], i_abc[0], i_abc[1], i_abc[2]);
+    const auto [p, q] = power.calculate(v_abc[0], v_abc[1], v_abc[2], i_abc[0], i_abc[1], i_abc[2]);
 
     const auto expected_p = (v_abc[0] * i_abc[0] + v_abc[1] * i_abc[1] + v_abc[2] * i_abc[2]) * p_gain;
     const auto expected_q
@@ -115,7 +115,7 @@ TEST_F(InstantaneousPowerThreePhaseTest, SimulinkConsistency)
             auto const [matlab_p, matlab_q]  = matlab_power3ph_line.value();
 
 
-            const auto [p, q] = power.transform(v_a, v_b, v_c, i_abc[0], i_abc[1], i_abc[2]);
+            const auto [p, q] = power.calculate(v_a, v_b, v_c, i_abc[0], i_abc[1], i_abc[2]);
             double relative_p;
             if (matlab_p != 0)
             {

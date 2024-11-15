@@ -10,7 +10,7 @@ namespace vslib
         constexpr double inv_sqrt_3 = 1.0 / std::numbers::sqrt3;
     }
 
-    [[nodiscard]] std::tuple<double, double> InstantaneousPowerThreePhase::transform(
+    [[nodiscard]] std::tuple<double, double> InstantaneousPowerThreePhase::calculate(
         const double v_a, const double v_b, const double v_c, const double i_a, const double i_b, const double i_c
     ) const noexcept
     {
