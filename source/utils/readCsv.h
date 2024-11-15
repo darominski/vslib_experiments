@@ -30,8 +30,8 @@ namespace fgc4::utils::test
             // regex expression matching arbitrary collection of numbers starting with a '+' or '-' sign, followed up by
             // a digit, with an optional decimal point ('.'), and optional exponent (e) separated with user-defined
             // separators
-            m_regex_expr = std::string("((\\+|-)?[0-9]*\\.?[0-9]+(e(\\+|-)?[0-9]+)?)") + "(?:" + "\\" + separator
-                           + std::string("(\\+|-)?[0-9]*\\.?[0-9]+(e(\\+|-)?[0-9]+)?)*");
+            m_csv_pattern = std::string("((\\+|-)?[0-9]*\\.?[0-9]+(e(\\+|-)?[0-9]+)?)") + "(?:" + "\\" + separator
+                            + std::string("(\\+|-)?[0-9]*\\.?[0-9]+(e(\\+|-)?[0-9]+)?)*");
 
             if (!m_in_file.is_open())
             {
@@ -87,7 +87,7 @@ namespace fgc4::utils::test
         //! Flag to signal start of reading the file, used for ignoring file header
         bool m_first{true};
         //! Regex expression to find numbers in the first couple characters of a line
-        std::regex                       m_regex_expr;
+        std::regex                       m_csv_pattern;
         std::array<double, NumberValues> m_read_values{0.0};   //!< Values read from the file's most recent line
 
 
@@ -126,7 +126,7 @@ namespace fgc4::utils::test
         bool possibleHeader(const std::string& line) const
         {
             // it is assumed to be a header if the first couple of characters are not a number
-            return !std::regex_match(line, m_regex_expr);
+            return !std::regex_match(line, m_csv_pattern);
         }
     };
 }   // namespace fgc4::utils::test
