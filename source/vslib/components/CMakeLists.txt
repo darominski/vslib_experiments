@@ -42,6 +42,8 @@ add_executable(${APP}
 # with the same compiler compatible with the gtest, e.g. aarch64-none-linux-gnu-g++,
 # and then linked as library for testing purposes
 
+add_subdirectory(${LIBRARIES_HOME}/csv-parser ${CMAKE_CURRENT_BINARY_DIR}/csv-parser)
+
 target_include_directories(${APP} PUBLIC
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
@@ -52,7 +54,7 @@ target_include_directories(${APP} PUBLIC
     ${LIBRARIES_HOME}/magic_enum-0.9.3
 )
 
-target_link_libraries(${APP} PUBLIC ${GTEST_LIBRARIES} GTest::gtest pthread dl fmt::fmt)
+target_link_libraries(${APP} PUBLIC ${GTEST_LIBRARIES} GTest::gtest pthread dl fmt::fmt csv)
 target_link_options(${APP} PUBLIC  -Wl,-dynamic-linker,/my-lib/ld-2.33.so -Wl,-rpath,/my-lib)
 target_link_options(${APP} PRIVATE -static -static-libgcc -static-libstdc++)
 
