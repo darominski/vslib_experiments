@@ -8,7 +8,7 @@
 //! Generic Component
 #include "component.h"
 #include "componentArray.h"
-#include "converter.h"
+#include "iconverter.h"
 #include "rootComponent.h"
 
 //! Transforms
