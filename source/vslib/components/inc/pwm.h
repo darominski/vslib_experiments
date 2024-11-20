@@ -8,118 +8,73 @@
 
 #include "component.h"
 #include "parameter.h"
+#include "peripheralInterrupt.h"
 
 namespace vslib
 {
-    enum class CarrierType
-    {
-        sawtooth,
-        triangular
-    }
-
     class PulseWidthModulator : public Component
     {
       public:
-        PulseWidthModulator(std::string_view name, Component& parent, int physical_id)
+        PulseWidthModulator(
+            std::string_view name, Component& parent, int physical_id,
+            std::function<void(PulseWidthModulator&)> callback
+        ) noexcept
             : Component("PWM", name, parent),
-              active_edge_limits(*this, "active_edge_limits") duty_cycle("duty_cycle", *this, 0, 100),
-              period("period", *this, 0.0),
-              frequency("frequency", *this, 0.0),
-              resolution("resolution", *this),
-              rise_time("rise_time", *this, 0.0),
-              fall_time("fall_time", *this, 0.0),
-              modulation_index("modulation_index", *this),
-              phase_offset("phase_offset", *this),
-              minimum_off_time("minimum_off_time", *this, 0.0),
-              minimum_on_time("minimum_on_time", *this, 0.0),
-              dead_time("dead_time", *this, 0.0),
-              carrier_type("carrier_type", *this)
+              modulation_limits(*this, "modulation_limits") phase_offset("phase_offset", *this),
+              additional_dead_time("additional_dead_time", *this, 0.0),
         {
             // initialize the right PWM IP out of the list of 12:
             m_pwm = utils::assign_ip_object("PwmIp", physical_id);
         }
 
-        // ************************************************************
-        // Settable Parameters
-        Parameter<double>      duty_cycle;
-        Parameter<double>      period;
-        Parameter<double>      frequency;
-        Parameter<double>      resolution;
-        Parameter<double>      rise_time;
-        Parameter<double>      fall_time;
-        Parameter<double>      modulation_index;
-        Parameter<double>      phase_offset;
-        Parameter<double>      minimum_off_time;
-        Parameter<double>      minimum_on_time;
-        Parameter<double>      dead_time;
-        Parameter<CarrierType> carrier_type;
-
-        // ************************************************************
-        // Owned Components
-
-        LimitRange<double> active_edge_limits;   //!< Range limiting of the possible values for CC0 and CC1
-
-        std::optional<fgc4::utils::Warning> verifyParameters() override
-        {
-            // issue: frequency and period set the same variable, but we want to offer them as a convenience to users,
-            // so they need to set only one. Since all Parameters need to be properly initialized, how to approach this?
-            // ugly fix: use 0.0 in one of them as a signal of not being used
-            if (period.toValidate() == 0.0 && frequency.toValidate() == 0.0)
-            {
-                return fgc4::utils::Warning("{}: both period and frequency set to zero.", m_name);
-            }
-            else if (period.toValidate() == 0.0)
-            {
-                setFrequency(1.0 / period.toValidate());
-            }
-            else if (frequency.toValidate() == 0.0)
-            {
-                setFrequency(frequency.toValidate());
-            }
-            else
-            {
-                return fgc4::utils::Warning("{}: both period and frequency set to a plausible values, not possible to "
-                                            "distinguish which should be the source of PWM frequency." m_name);
-            }
-
-            setDutyCycle(duty_cycle.toValidate());
-
-            if (rise_time.toValidate() > fall_time.toValidate())
-            {
-                return fgc4::utils::Warning(
-                    "{}: the rise time {} is later than fall time {}." m_name, rise_time.toValidate(),
-                    fall_time.toValidate()
-                );
-            }
-
-            if ((fall_time.toValidate() - rise_time.toValidate()) < minimum_on_time.toValidate())
-            {
-                return fgc4::utils::Warning(
-                    "{}: the minimum on time of {} is not respected with rise time of {} and fall time of." m_name,
-                    minimum_on_time.toValidate(), rise_time.toValidate(), fall_time.toValidate()
-                );
-            }
-
-            m_pwm->CC0 = rise_time.toValidate();
-            m_pwm->CC1 = fall_time.toValidate();
-            // etc.
-
-            return {};
-        }
-
-      private:
-        double m_frequency{0.0};   //!< PWM frequency
-
-        void setFrequency(const double frequency)
-        {
-            // logic to set registers to the correct values
-        }
-
-        void setDutyCycle(const double duty_cycle)
+        //! Sets the duty cycle of the PWM. When set to 0.0 (%), the PWM is held low, when set to 100 (%), the PWM is
+        //! held high.
+        //!
+        //! @param duty_cycle Value between 0 and 100 for the duty cycle of the PWM
+        void setDutyCycle(const double duty_cycle) noexcept
         {
             // sets duty cycle
         }
 
-        volatile PwmIp* m_pwm;
+        //! Allows to set the phase offset in lieu of shifting the PWM carrier.
+        //!
+        //! @param offset Offset to be set
+        void setPhaseOffset(const double offset) noexcept
+        {
+            m_phase_offset = offset;
+        }
+
+        void start() noexcept
+        {
+            m_pwm.stg.start();
+        }
+
+        void stop() noexcept
+        {
+            m_pwm.stg.stop();
+        }
+
+        // ************************************************************
+        // Settable Parameters
+
+        Parameter<double> additional_dead_time;
+
+        // ************************************************************
+        // Owned Components
+
+        LimitRange<double> modulation_limits;   //!< Range limiting of the possible values for the modulation index
+
+        std::optional<fgc4::utils::Warning> verifyParameters() override
+        {
+            return {};
+        }
+
+      private:
+        volatile PwmIp* m_pwm;   //!< PWM IP core export
+
+        PeripheralInterrupt interrupt;   //!< Interrupt interface for the STG interrupt attached to the PWM
+
+        double m_phase_offset{
+            0.0};   //!< Phase offset, handles the offsetting the CC0, CC1 instead of shifting the carrier
     };
 }
