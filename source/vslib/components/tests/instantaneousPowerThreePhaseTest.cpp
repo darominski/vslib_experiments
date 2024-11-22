@@ -100,23 +100,23 @@ TEST_F(InstantaneousPowerThreePhaseTest, SimulinkConsistency)
 
     std::array<double, 3> i_abc{0.75, 1.5, 3.5};
 
-    std::filesystem::path v_abc_path      = "components/inputs/park_abc_sin_120degrees.csv";
+    std::filesystem::path abc_path        = "components/inputs/park_abc_sin_120degrees.csv";
     std::filesystem::path matlab_power3ph = "components/inputs/instantaneous_power_3phase.csv";
 
-    CSVReader v_abc_file(v_abc_path.c_str());
-    CSVReader matlab_power3ph_file(matlab_power3ph.c_str());
+    CSVReader abc_file(abc_path.c_str());
+    CSVReader matlab_file(matlab_power3ph.c_str());
 
-    auto v_abc_line           = v_abc_file.begin();
-    auto matlab_power3ph_line = matlab_power3ph_file.begin();
+    auto abc_line    = abc_file.begin();
+    auto matlab_line = matlab_file.begin();
 
-    while (v_abc_line != v_abc_file.end() || matlab_power3ph_line != matlab_power3ph_file.end())
+    while (abc_line != abc_file.end() && matlab_line != matlab_file.end())
     {
-        const auto v_a = (*v_abc_line)[1].get<double>();
-        const auto v_b = (*v_abc_line)[2].get<double>();
-        const auto v_c = (*v_abc_line)[3].get<double>();
+        const auto v_a = (*abc_line)[1].get<double>();
+        const auto v_b = (*abc_line)[2].get<double>();
+        const auto v_c = (*abc_line)[3].get<double>();
 
-        const auto matlab_p = (*matlab_power3ph_line)[0].get<double>();
-        const auto matlab_q = (*matlab_power3ph_line)[1].get<double>();
+        const auto matlab_p = (*matlab_line)[0].get<double>();
+        const auto matlab_q = (*matlab_line)[1].get<double>();
 
         const auto [p, q] = power.calculate(v_a, v_b, v_c, i_abc[0], i_abc[1], i_abc[2]);
         double relative_p;
@@ -140,7 +140,7 @@ TEST_F(InstantaneousPowerThreePhaseTest, SimulinkConsistency)
         }
         ASSERT_NEAR(relative_q, 0.0, 1e-6);   // at least 1e-6 relative precision
 
-        ++v_abc_line;
-        ++matlab_power3ph_line;
+        ++abc_line;
+        ++matlab_line;
     }
 }
