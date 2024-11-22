@@ -78,8 +78,8 @@ struct stream_to_reg
     struct keep
     {
         /* [0x0]: REG (ro) (no description) */
-        uint32_t value;
-    } keep[200];
+        uint64_t value;
+    } keep[100];
 
     /* padding to: 2048 Bytes */
     uint32_t __padding_2[56];
