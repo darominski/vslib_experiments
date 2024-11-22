@@ -5,8 +5,8 @@
 #pragma once
 
 #include "constants.h"
-#include "converter.h"
 #include "fsm.h"
+#include "iconverter.h"
 #include "parameterMap.h"
 #include "parameterRegistry.h"
 #include "parameterSetting.h"
