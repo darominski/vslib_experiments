@@ -1,9 +1,16 @@
 #pragma once
 
+#include <fmt/format.h>
+#include <string>
 #include <unistd.h>
 
+#include "afe.h"
+#include "afe_rst.h"
 #include "peripherals/reg_to_stream.h"
 #include "peripherals/stream_to_reg.h"
+#include "pops_current_balancing.h"
+#include "pops_current_balancing_old.h"
+#include "pops_dispatcher.h"
 #include "vslib.h"
 
 namespace user
@@ -16,14 +23,7 @@ namespace user
             : vslib::IConverter("example", root),
               m_interrupt_id{121 + 0},   // Jonas's definition
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              pll("pll", *this),
-              pi_id_ref("pi_id_ref", *this),
-              pi_iq_ref("pi_iq_ref", *this),
-              pi_vd_ref("pi_vd_ref", *this),
-              pi_vq_ref("pi_vq_ref", *this),
-              limit("limit", *this),
-              abc_2_dq0("abc_2_dq0", *this),
-              dq0_2_abc("dq0_2_abc", *this),
+              afe("afe_rst", *this),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
         {
@@ -83,7 +83,6 @@ namespace user
             interrupt_1.start();
         }
 
-        int                  counter        = 0;
         int                  expected_delay = 210;
         int                  time_range_min = expected_delay - 20;   // in clock ticks
         int                  time_range_max = expected_delay + 20;   // in clock ticks
@@ -91,14 +90,6 @@ namespace user
 
         void backgroundTask() override
         {
-            // reset the PID every 2 minutes
-            // if(!m_recently_used)
-            // {
-            //     sleep(120);
-            //     std::cout << "resetting pid\n";
-            //     pid.reset();
-            // }
-            // m_recently_used = false;
 #ifdef PERFORMANCE_TESTS
             if (counter > n_elements)
             {
@@ -131,57 +122,30 @@ namespace user
             return std::bit_cast<TargetType>(input);
         }
 
-        static constexpr double inv_sqrt_3 = 1.0 / sqrt(3);
-
-        static constexpr double V_base = 1950.0;
-        static constexpr double i_base = 3300.0;
-
-        static constexpr double si_2_pu = sqrt(3.0 / 2.0) / V_base;
-        static constexpr double pu_2_si = 1.0 / si_2_pu;
-        static constexpr double v_2_pu  = si_2_pu;
-        static constexpr double i_2_pu  = 1.0 / i_base;
-
-        static constexpr double inductance = 0.7e-3;
-        static constexpr double wL         = 2 * std::numbers::pi * 50.0 * inductance;
-
-        static constexpr double p_gain = sqrt(2.0 / 3.0) / (V_base * i_base);
-        static constexpr double q_gain = sqrt(2.0 / 3.0) / (V_base * i_base);
-
-        std::tuple<double, double> power_3ph_instantaneous(
-            const double v_a, const double v_b, const double v_c, const double i_a, const double i_b, const double i_c,
-            const double p_gain, const double q_gain
-        )
-        {
-            const double p_meas = (v_a * i_a + v_b * i_b + v_c * i_c);
-            const double v_ab   = v_a - v_b;
-            const double v_bc   = v_b - v_c;
-            const double v_ca   = v_c - v_a;
-
-            const double q_meas = (i_a * v_bc + i_b * v_ca + i_c * v_ab) * inv_sqrt_3;
-            return {p_meas * p_gain, q_meas * q_gain};
-        }
+        int counter = 0;
 
         static void RTTask(Converter& converter)
         {
-            // TEST 6: Active Front-End
-            constexpr uint32_t                num_data      = 40;
-            constexpr uint32_t                num_data_half = 20;
+            constexpr static uint32_t         num_data      = 40;
+            constexpr static uint32_t         num_data_half = 20;
             std::array<double, num_data_half> data_in;
 
+            // collect inputs
             for (std::size_t i = 0; i < num_data_half; ++i)
             {
                 data_in[i] = cast<uint64_t, double>(converter.m_s2r->data[i].value);
             }
 
-            const double start = data_in[0];
-            const double p_ref = data_in[1];
-            const double q_ref = data_in[2];
-            const double v_a   = data_in[3];
-            const double v_b   = data_in[4];
-            const double v_c   = data_in[5];
-            const double i_a   = data_in[6];
-            const double i_b   = data_in[7];
-            const double i_c   = data_in[8];
+            const double regulation_on = data_in[0];
+            const double v_dc_ref      = data_in[1];
+            const double v_dc_meas     = data_in[2];
+            const double q_ref         = data_in[3];
+            const double v_a           = data_in[4];
+            const double v_b           = data_in[5];
+            const double v_c           = data_in[6];
+            const double i_a           = data_in[7];
+            const double i_b           = data_in[8];
+            const double i_c           = data_in[9];
 
             //
             // Measurement and reference frame
@@ -194,44 +158,14 @@ namespace user
             const auto [p_meas, q_meas]
                 = converter.power_3ph_instantaneous(v_a, v_b, v_c, i_a, i_b, i_c, p_gain, q_gain);
 
-            data_in[0] = wt_pll;
-            data_in[1] = vd_meas;
-            data_in[2] = vq_meas;
-            data_in[3] = id_meas;
-            data_in[4] = iq_meas;
-            data_in[5] = p_meas;
-            data_in[6] = q_meas;
+            // perform active front-end control
+            const auto [v_a_ref, v_b_ref, v_c_ref]
+                = converter.afe.vdc_control(v_a, v_b, v_c, i_a, i_b, i_c, v_dc_ref, v_dc_meas, q_ref, regulation_on);
 
-            //
-            // Outer loops
-            //
-            const auto id_ref = converter.pi_id_ref.control(start * p_meas, start * p_ref);
-            const auto iq_ref = -converter.pi_iq_ref.control(start * q_meas, start * q_ref);
-
-            data_in[7] = id_ref;
-            data_in[8] = iq_ref;
-
-            //
-            // Inner loops
-            //
-            // PI + 2 * ff for each loop
-            const auto vd_ref = converter.pi_vd_ref.control(start * id_meas, start * id_ref) + vd_meas
-                                - i_base * wL * si_2_pu * iq_meas;
-            const auto vq_ref = converter.pi_vq_ref.control(start * iq_meas, start * iq_ref) + vq_meas
-                                + i_base * wL * si_2_pu * id_meas;
-            data_in[9]  = vd_ref;
-            data_in[10] = vq_ref;
-
-            //
-            // Frame convertion
-            //
-            const auto vd_ref_lim               = converter.limit.limit(-vd_ref);
-            const auto vq_ref_lim               = converter.limit.limit(-vq_ref);
-            const auto [vref_a, vref_b, vref_c] = converter.dq0_2_abc.transform(vd_ref_lim, vq_ref_lim, 0.0, wt_pll);
-
-            data_in[11] = vref_a;
-            data_in[12] = vref_b;
-            data_in[13] = vref_c;
+            // set outputs:
+            data_in[0] = v_a_ref;
+            data_in[1] = v_b_ref;
+            data_in[2] = v_c_ref;
 
             // write to output registers
             for (uint32_t index = 0; index < num_data_half; index++)
@@ -246,11 +180,12 @@ namespace user
 
             // trigger connection
             converter.m_r2s->ctrl = REG_TO_STREAM_CTRL_START;
-            // converter.m_recently_used = true;
-            converter.counter++;
-        }
 
-        // bool m_recently_used{false};
+            // if(regulation_on>0 && converter.counter++ > 100)
+            // {
+            //     converter.interrupt_1.stop();
+            // }
+        }
 
       private:
         int m_interrupt_id;
