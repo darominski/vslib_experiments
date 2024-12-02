@@ -128,7 +128,7 @@ namespace user
         template<typename SourceType, typename TargetType>
         static TargetType cast(SourceType input)
         {
-            return *reinterpret_cast<TargetType*>(&input);
+            return std::bit_cast<TargetType>(input);
         }
 
         static constexpr double inv_sqrt_3 = 1.0 / sqrt(3);
