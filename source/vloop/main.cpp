@@ -16,6 +16,7 @@ int main()
 {
     RootComponent   root;
     user::Converter converter = user::Converter(root);
+    bmboot::startCycleCounter();
 
     // VSlib-side initialization:
     vslib::utils::VSMachine vs_state(root, converter);   // initial state: initalization

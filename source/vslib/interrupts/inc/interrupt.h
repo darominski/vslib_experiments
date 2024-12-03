@@ -7,12 +7,13 @@
 #include <functional>
 
 #include "histogram.h"
+#include "iconverter.h"
 #include "pollCpuClock.h"
 
 namespace vslib
 {
 #ifdef PERFORMANCE_TESTS
-    static constexpr int number_measurements = 1'000;
+    static constexpr int number_measurements = 10'000;
 #endif
 
     template<class Converter>
@@ -35,12 +36,9 @@ namespace vslib
             {
                 const auto start_time = preConditions();
                 handler_function(converter);
-                const auto total_time = postConditions(start_time);
-                if (m_measurement_counter < number_measurements)
-                {
-                    m_measurements[m_measurement_counter % number_measurements] = total_time;
-                    m_measurement_counter++;
-                }
+                const auto total_time                                       = postConditions(start_time);
+                m_measurements[m_measurement_counter % number_measurements] = total_time;
+                m_measurement_counter++;
             };
             m_measurements = {0};   // sets all elements to 0
 #else
@@ -114,7 +112,7 @@ namespace vslib
         //! @return Clock value at the time of the call
         uint64_t preConditions()
         {
-            return fgc4::utils::read_CNTPCT();
+            return bmboot::getCycleCounterValue();
         }
 
         //! Defines the postconditions necessary to estimate the execution time of the interrupt handler.
@@ -124,7 +122,7 @@ namespace vslib
         uint64_t postConditions(uint64_t starting_point)
         {
             // implementation of polling the CPU clock is required
-            return fgc4::utils::read_CNTPCT() - starting_point;
+            return bmboot::getCycleCounterValue() - starting_point;
         }
 #endif
     };

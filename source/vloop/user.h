@@ -22,7 +22,8 @@ namespace user
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
               m_interrupt_id{121 + 0},   // Jonas's definition
-              interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
+              interrupt_2("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
+              interrupt_1("timer", *this, std::chrono::microseconds(100), RTTask),
               afe("afe_rst", *this),
               m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
               m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
@@ -31,15 +32,9 @@ namespace user
         }
 
         // Define your public Components here
-        vslib::PeripheralInterrupt<Converter> interrupt_1;
-        vslib::SRFPLL                         pll;
-        vslib::PID                            pi_id_ref;
-        vslib::PID                            pi_iq_ref;
-        vslib::PID                            pi_vd_ref;
-        vslib::PID                            pi_vq_ref;
-        vslib::LimitRange<double>             limit;
-        vslib::AbcToDq0Transform              abc_2_dq0;
-        vslib::Dq0ToAbcTransform              dq0_2_abc;
+        vslib::PeripheralInterrupt<Converter> interrupt_2;
+        vslib::TimerInterrupt<Converter>      interrupt_1;
+        ActiveFrontEndRST                     afe;
         // ...
         // end of your Components
 
@@ -81,36 +76,34 @@ namespace user
 
             printf("Link up and good. Ready to receive data.\n");
             interrupt_1.start();
+            interrupt_2.stop();
         }
 
-        int                  expected_delay = 210;
-        int                  time_range_min = expected_delay - 20;   // in clock ticks
-        int                  time_range_max = expected_delay + 20;   // in clock ticks
-        constexpr static int n_elements     = 10'000;
+        constexpr static int n_elements = 10'003;
 
         void backgroundTask() override
         {
 #ifdef PERFORMANCE_TESTS
             if (counter > n_elements)
             {
-                std::cout << "counter: " << counter << " " << n_elements << " " << (counter > n_elements) << std::endl;
                 interrupt_1.stop();
-                double const mean = interrupt_1.average();
-                std::cout << "Average time per interrupt: " << mean << " +- " << interrupt_1.standardDeviation(mean)
-                          << std::endl;
-                // auto const histogram = interrupt_1.histogramMeasurements<100>(time_range_min,
-                // time_range_max); for (auto const& value : histogram.getData())
-                //             {
-                //                 std::cout << value << " ";
-                //             }
-                //             std::cout << std::endl;
-                //             auto const bin_with_max = histogram.getBinWithMax();
-                //             auto const edges        = histogram.getBinEdges(bin_with_max);
-                //             std::cout << "bin with max: " << bin_with_max
-                //                       << ", centered at: " << 0.5 * (edges.first + edges.second) << std::endl;
-                const auto min = interrupt_1.min();
-                const auto max = interrupt_1.max();
-                std::cout << "min: " << min << ", max: " << max << std::endl;
+                interrupt_2.stop();
+                double const mean = interrupt_1.average() / 1.2;
+                std::cout << "Average time per interrupt: (" << mean << " +- "
+                          << interrupt_1.standardDeviation(mean) / 1.2 << ") ns" << std::endl;
+                auto const histogram = interrupt_1.histogramMeasurements<100>(interrupt_1.min(), interrupt_1.max());
+                for (auto const& value : histogram.getData())
+                {
+                    std::cout << value << " ";
+                }
+                std::cout << std::endl;
+                auto const bin_with_max = histogram.getBinWithMax();
+                auto const edges        = histogram.getBinEdges(bin_with_max);
+                std::cout << "bin with max: " << bin_with_max
+                          << ", centered at: " << 0.5 * (edges.first / 1.2 + edges.second / 1.2) << std::endl;
+                const auto min = interrupt_1.min() / 1.2;
+                const auto max = interrupt_1.max() / 1.2;
+                std::cout << "min: " << min << " ns, max: " << max << " ns" << std::endl;
                 exit(0);
             }
 #endif
@@ -122,55 +115,37 @@ namespace user
             return std::bit_cast<TargetType>(input);
         }
 
-        int counter = 0;
-
         static void RTTask(Converter& converter)
         {
-            constexpr static uint32_t         num_data      = 40;
-            constexpr static uint32_t         num_data_half = 20;
-            std::array<double, num_data_half> data_in;
-
             // collect inputs
-            for (std::size_t i = 0; i < num_data_half; ++i)
+            for (std::size_t i = 0; i < num_data; ++i)
             {
-                data_in[i] = cast<uint64_t, double>(converter.m_s2r->data[i].value);
+                converter.m_data_1[i] = cast<uint64_t, double>(converter.m_s2r->data[i].value);
+                converter.m_data[i]   = (std::rand() - 1.0) * 100.0 / RAND_MAX;
             }
 
-            const double regulation_on = data_in[0];
-            const double v_dc_ref      = data_in[1];
-            const double v_dc_meas     = data_in[2];
-            const double q_ref         = data_in[3];
-            const double v_a           = data_in[4];
-            const double v_b           = data_in[5];
-            const double v_c           = data_in[6];
-            const double i_a           = data_in[7];
-            const double i_b           = data_in[8];
-            const double i_c           = data_in[9];
+            const double regulation_on = converter.m_data[0];
+            const double v_dc_ref      = converter.m_data[1];
+            const double v_dc_meas     = converter.m_data[2];
+            const double q_ref         = converter.m_data[3];
+            const double v_a           = converter.m_data[4];
+            const double v_b           = converter.m_data[5];
+            const double v_c           = converter.m_data[6];
+            const double i_a           = converter.m_data[7];
+            const double i_b           = converter.m_data[8];
+            const double i_c           = converter.m_data[9];
 
-            //
-            // Measurement and reference frame
-            //
-            const double wt_pll = converter.pll.synchronise(v_a * si_2_pu, v_b * si_2_pu, v_c * si_2_pu);
-            const auto [vd_meas, vq_meas, zero_v]
-                = converter.abc_2_dq0.transform(v_a * v_2_pu, v_b * v_2_pu, v_c * v_2_pu, wt_pll);
-            const auto [id_meas, iq_meas, zero_i]
-                = converter.abc_2_dq0.transform(i_a * i_2_pu, i_b * i_2_pu, i_c * i_2_pu, wt_pll);
-            const auto [p_meas, q_meas]
-                = converter.power_3ph_instantaneous(v_a, v_b, v_c, i_a, i_b, i_c, p_gain, q_gain);
-
-            // perform active front-end control
             const auto [v_a_ref, v_b_ref, v_c_ref]
                 = converter.afe.vdc_control(v_a, v_b, v_c, i_a, i_b, i_c, v_dc_ref, v_dc_meas, q_ref, regulation_on);
 
-            // set outputs:
-            data_in[0] = v_a_ref;
-            data_in[1] = v_b_ref;
-            data_in[2] = v_c_ref;
+            converter.m_data[0] = v_a_ref;
+            converter.m_data[1] = v_b_ref;
+            converter.m_data[2] = v_c_ref;
 
             // write to output registers
-            for (uint32_t index = 0; index < num_data_half; index++)
+            for (uint32_t index = 0; index < num_data; index++)
             {
-                converter.m_r2s->data[index].value = cast<double, uint64_t>(data_in[index]);
+                converter.m_r2s->data[index].value = cast<double, uint64_t>(converter.m_data_1[index]);
             }
 
             // send it away
@@ -181,14 +156,17 @@ namespace user
             // trigger connection
             converter.m_r2s->ctrl = REG_TO_STREAM_CTRL_START;
 
-            // if(regulation_on>0 && converter.counter++ > 100)
-            // {
-            //     converter.interrupt_1.stop();
-            // }
+            converter.counter++;
         }
 
       private:
         int m_interrupt_id;
+
+        int counter{0};
+
+        constexpr static uint32_t    num_data{20};
+        std::array<double, num_data> m_data;
+        std::array<double, num_data> m_data_1;
 
         volatile stream_to_reg* m_s2r;
         volatile reg_to_stream* m_r2s;

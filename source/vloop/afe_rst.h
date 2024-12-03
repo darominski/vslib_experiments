@@ -64,7 +64,7 @@ namespace user
                 = abc_to_dq0_v.transform(v_a * m_si_to_pu, v_b * m_si_to_pu, v_c * m_si_to_pu, wt_pll);
             const auto [id_meas, iq_meas, zero_i]
                 = abc_to_dq0_i.transform(i_a * m_i_to_pu, i_b * m_i_to_pu, i_c * m_i_to_pu, wt_pll);
-            const auto [p_meas, q_meas] = power_3ph_instant.transform(v_a, v_b, v_c, i_a, i_b, i_c);
+            const auto [p_meas, q_meas] = power_3ph_instant.calculate(v_a, v_b, v_c, i_a, i_b, i_c);
 
             auto p_ref = 0;
             if (regulation_on > 0)
@@ -97,7 +97,10 @@ namespace user
             const auto vd_ref_lim = limit.limit(vd_ref);
             const auto vq_ref_lim = limit.limit(vq_ref);
 
-            const auto [v_a_ref, v_b_ref, v_c_ref] = dq0_to_abc.transform(vd_ref_lim, vq_ref_lim, 0.0, wt_pll);
+            // const auto [v_a_ref, v_b_ref, v_c_ref] = dq0_to_abc.transform(vd_ref_lim, vq_ref_lim, 0.0, wt_pll);
+            const double v_a_ref = 0.0;
+            const double v_b_ref = 0.0;
+            const double v_c_ref = 0.0;
             return std::make_tuple(v_a_ref * m_pu_to_v, v_b_ref * m_pu_to_v, v_c_ref * m_pu_to_v);
         }
 
