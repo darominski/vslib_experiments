@@ -333,5 +333,5 @@ presented in the table below and also as a figure.
 
 
 .. image:: ../figures/controllers_performance.png
- :scale: 50 %
+ :scale: 15 %
  :alt: Controllers performance depending on the order
