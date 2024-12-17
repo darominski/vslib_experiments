@@ -44,7 +44,7 @@ namespace user
         //! @param p_ref Reference active power
         //! @param q_ref Reference reactive power
         //! @return a, b, and c components of the voltage reference
-        std::tuple<double, double, double> transform(
+        std::tuple<double, double, double> control(
             const double v_a, const double v_b, const double v_c, const double i_a, const double i_b, const double i_c,
             const double p_ref, const double q_ref, const double start
         )
