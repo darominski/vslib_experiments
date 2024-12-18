@@ -577,7 +577,6 @@ namespace user
                         }
                         else
                         {
-
                             m_v_ref_dispatch[0] = 0.5 * v_r + v_l * v_l_factor_chargers;
                             m_v_ref_dispatch[1] = m_v_ref_dispatch[0];
                             m_v_ref_dispatch[5] = m_v_ref_dispatch[4] = m_v_ref_dispatch[3] = m_v_ref_dispatch[2]
