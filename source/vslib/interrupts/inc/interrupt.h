@@ -13,7 +13,7 @@
 namespace vslib
 {
 #ifdef PERFORMANCE_TESTS
-    static constexpr int number_measurements = 10'000;
+    static constexpr int number_measurements = 100'000;
 #endif
 
     template<class Converter>

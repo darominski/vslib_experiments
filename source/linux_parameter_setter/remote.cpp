@@ -68,46 +68,44 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     std::array<int, 2>          version{0, 1};
     std::map<std::string, Json> values_to_set;
 
-    static constexpr double control_period    = 50e-6;
-    // const double maverage_notch_frequency = 333.33;
-    static constexpr double v_base            = 1950.0;
-    static constexpr double i_base            = 3300.0;
-    static constexpr double v_max             = 5000.0;
-    static constexpr double current_frequency = 50;   // Hz
+    static constexpr double control_period           = 50e-6;
+    const double            maverage_notch_frequency = 333.33;
+    static constexpr double v_base                   = 1950.0;
+    static constexpr double i_base                   = 3300.0;
+    static constexpr double v_max                    = 5000.0;
+    static constexpr double current_frequency        = 50;   // Hz
 
     values_to_set["example.control_period"] = control_period;
 
-    // values_to_set["current_balancing_pos.i_base"]                   = i_base;
-    // values_to_set["current_balancing_pos.v_max"]                    = v_max;
-    // values_to_set["current_balancing_pos.maverage_notch_frequency"] = maverage_notch_frequency;
-    // values_to_set["current_balancing_pos.a_factors"]                = std::array<double, 3>{5.4e-3, -1.2e-3,
-    // -1.2e-3}; values_to_set["current_balancing_pos.b_factors"]                = std::array<double,
-    // 3>{-1.2e-3, 5.4e-3, -1.2e-3}; values_to_set["current_balancing_pos.c_factors"]                =
-    // std::array<double, 3>{-1.2e-3, -1.2e-3, 5.4e-3}; values_to_set["current_balancing_pos.fifth_filter_order"] =
-    // false;
+    values_to_set["current_balancing_pos.i_base"]                   = i_base;
+    values_to_set["current_balancing_pos.v_max"]                    = v_max;
+    values_to_set["current_balancing_pos.maverage_notch_frequency"] = maverage_notch_frequency;
+    values_to_set["current_balancing_pos.a_factors"]                = std::array<double, 3>{5.4e-3, -1.2e-3, -1.2e-3};
+    values_to_set["current_balancing_pos.b_factors"]                = std::array<double, 3>{-1.2e-3, 5.4e-3, -1.2e-3};
+    values_to_set["current_balancing_pos.c_factors"]                = std::array<double, 3>{-1.2e-3, -1.2e-3, 5.4e-3};
+    values_to_set["current_balancing_pos.fifth_filter_order"]       = false;
 
-    // values_to_set["current_balancing_neg.i_base"]                   = i_base;
-    // values_to_set["current_balancing_neg.v_max"]                    = v_max;
-    // values_to_set["current_balancing_neg.maverage_notch_frequency"] = maverage_notch_frequency;
-    // values_to_set["current_balancing_neg.a_factors"]                = std::array<double, 3>{5.4e-3, -1.2e-3,
-    // -1.2e-3}; values_to_set["current_balancing_neg.b_factors"]                = std::array<double,
-    // 3>{-1.2e-3, 5.4e-3, -1.2e-3}; values_to_set["current_balancing_neg.c_factors"]                =
-    // std::array<double, 3>{-1.2e-3, -1.2e-3, 5.4e-3}; values_to_set["current_balancing_neg.fifth_filter_order"] =
-    // false;
+    values_to_set["current_balancing_neg.i_base"]                   = i_base;
+    values_to_set["current_balancing_neg.v_max"]                    = v_max;
+    values_to_set["current_balancing_neg.maverage_notch_frequency"] = maverage_notch_frequency;
+    values_to_set["current_balancing_neg.a_factors"]                = std::array<double, 3>{5.4e-3, -1.2e-3, -1.2e-3};
+    values_to_set["current_balancing_neg.b_factors"]                = std::array<double, 3>{-1.2e-3, 5.4e-3, -1.2e-3};
+    values_to_set["current_balancing_neg.c_factors"]                = std::array<double, 3>{-1.2e-3, -1.2e-3, 5.4e-3};
+    values_to_set["current_balancing_neg.fifth_filter_order"]       = false;
 
-    // // zero_division and saturation
-    // values_to_set["avoid_zero_division.lower_threshold"] = 1e-10;
-    // values_to_set["avoid_zero_division.upper_threshold"] = 1e3;
-    // values_to_set["avoid_zero_division.dead_zone"]       = std::array<double, 2>{0, 0};
+    // zero_division and saturation
+    values_to_set["avoid_zero_division.lower_threshold"] = 1e-10;
+    values_to_set["avoid_zero_division.upper_threshold"] = 1e3;
+    values_to_set["avoid_zero_division.dead_zone"]       = std::array<double, 2>{0, 0};
 
-    // values_to_set["saturation_protection.lower_threshold"] = -0.03;
-    // values_to_set["saturation_protection.upper_threshold"] = 0.03;
-    // values_to_set["saturation_protection.dead_zone"]       = std::array<double, 2>{0, 0};
+    values_to_set["saturation_protection.lower_threshold"] = -0.03;
+    values_to_set["saturation_protection.upper_threshold"] = 0.03;
+    values_to_set["saturation_protection.dead_zone"]       = std::array<double, 2>{0, 0};
 
-    // // POPS dispatcher
-    // values_to_set["dispatcher.magnets_r"]      = 0.32;
-    // values_to_set["dispatcher.magnets_l"]      = 0.97;
-    // values_to_set["dispatcher.operating_mode"] = "degraded_2";
+    // POPS dispatcher
+    values_to_set["dispatcher.magnets_r"]      = 0.32;
+    values_to_set["dispatcher.magnets_l"]      = 0.97;
+    values_to_set["dispatcher.operating_mode"] = "degraded_2";
 
     // PLL
     values_to_set["pll.f_rated"]      = current_frequency;
@@ -127,54 +125,54 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["actuation_limits.upper_threshold"] = 1e12;
     values_to_set["actuation_limits.dead_zone"]       = std::array<double, 2>{0, 0};
 
-    // // outer loops
-    // const double kp_outer = 1.0;
-    // const double ki_outer = 7.5;
+    // outer loops
+    const double kp_outer = 1.0;
+    const double ki_outer = 7.5;
 
-    // values_to_set["pi_id_ref.kp"]                      = kp_outer;
-    // values_to_set["pi_id_ref.ki"]                      = ki_outer;
-    // values_to_set["pi_id_ref.kd"]                      = 0.0;
-    // values_to_set["pi_id_ref.kff"]                     = 0.0;
-    // values_to_set["pi_id_ref.proportional_scaling"]    = 1.0;
-    // values_to_set["pi_id_ref.derivative_scaling"]      = 1.0;
-    // values_to_set["pi_id_ref.derivative_filter_order"] = 1.0;
-    // values_to_set["pi_id_ref.control_period"]          = control_period;
-    // values_to_set["pi_id_ref.pre_warping_frequency"]   = 1e-9;
+    values_to_set["pi_id_ref.kp"]                      = kp_outer;
+    values_to_set["pi_id_ref.ki"]                      = ki_outer;
+    values_to_set["pi_id_ref.kd"]                      = 0.0;
+    values_to_set["pi_id_ref.kff"]                     = 0.0;
+    values_to_set["pi_id_ref.proportional_scaling"]    = 1.0;
+    values_to_set["pi_id_ref.derivative_scaling"]      = 1.0;
+    values_to_set["pi_id_ref.derivative_filter_order"] = 1.0;
+    values_to_set["pi_id_ref.control_period"]          = control_period;
+    values_to_set["pi_id_ref.pre_warping_frequency"]   = 1e-9;
 
-    // values_to_set["pi_iq_ref.kp"]                      = kp_outer;
-    // values_to_set["pi_iq_ref.ki"]                      = ki_outer;
-    // values_to_set["pi_iq_ref.kd"]                      = 0.0;
-    // values_to_set["pi_iq_ref.kff"]                     = 0.0;
-    // values_to_set["pi_iq_ref.proportional_scaling"]    = 1.0;
-    // values_to_set["pi_iq_ref.derivative_scaling"]      = 1.0;
-    // values_to_set["pi_iq_ref.derivative_filter_order"] = 1.0;
-    // values_to_set["pi_iq_ref.control_period"]          = control_period;
-    // values_to_set["pi_iq_ref.pre_warping_frequency"]   = 1e-9;
+    values_to_set["pi_iq_ref.kp"]                      = kp_outer;
+    values_to_set["pi_iq_ref.ki"]                      = ki_outer;
+    values_to_set["pi_iq_ref.kd"]                      = 0.0;
+    values_to_set["pi_iq_ref.kff"]                     = 0.0;
+    values_to_set["pi_iq_ref.proportional_scaling"]    = 1.0;
+    values_to_set["pi_iq_ref.derivative_scaling"]      = 1.0;
+    values_to_set["pi_iq_ref.derivative_filter_order"] = 1.0;
+    values_to_set["pi_iq_ref.control_period"]          = control_period;
+    values_to_set["pi_iq_ref.pre_warping_frequency"]   = 1e-9;
 
-    // // inner loops
-    // const double Zb       = 1950 / (3300 / sqrt(2.0));
-    // const double kp_inner = (0.7e-3 / Zb) / 2.0 / control_period;
-    // const double ki_inner = (1e-5 / Zb) / 2.0 / control_period;
+    // inner loops
+    const double Zb       = 1950 / (3300 / sqrt(2.0));
+    const double kp_inner = (0.7e-3 / Zb) / 2.0 / control_period;
+    const double ki_inner = (1e-5 / Zb) / 2.0 / control_period;
 
-    // values_to_set["pi_vd_ref.kp"]                      = kp_inner;
-    // values_to_set["pi_vd_ref.ki"]                      = ki_inner;
-    // values_to_set["pi_vd_ref.kd"]                      = 0.0;
-    // values_to_set["pi_vd_ref.kff"]                     = 0.0;
-    // values_to_set["pi_vd_ref.proportional_scaling"]    = 1.0;
-    // values_to_set["pi_vd_ref.derivative_scaling"]      = 1.0;
-    // values_to_set["pi_vd_ref.derivative_filter_order"] = 1.0;
-    // values_to_set["pi_vd_ref.control_period"]          = control_period;
-    // values_to_set["pi_vd_ref.pre_warping_frequency"]   = 1e-9;
+    values_to_set["pi_vd_ref.kp"]                      = kp_inner;
+    values_to_set["pi_vd_ref.ki"]                      = ki_inner;
+    values_to_set["pi_vd_ref.kd"]                      = 0.0;
+    values_to_set["pi_vd_ref.kff"]                     = 0.0;
+    values_to_set["pi_vd_ref.proportional_scaling"]    = 1.0;
+    values_to_set["pi_vd_ref.derivative_scaling"]      = 1.0;
+    values_to_set["pi_vd_ref.derivative_filter_order"] = 1.0;
+    values_to_set["pi_vd_ref.control_period"]          = control_period;
+    values_to_set["pi_vd_ref.pre_warping_frequency"]   = 1e-9;
 
-    // values_to_set["pi_vq_ref.kp"]                      = kp_inner;
-    // values_to_set["pi_vq_ref.ki"]                      = ki_inner;
-    // values_to_set["pi_vq_ref.kd"]                      = 0.0;
-    // values_to_set["pi_vq_ref.kff"]                     = 0.0;
-    // values_to_set["pi_vq_ref.proportional_scaling"]    = 1.0;
-    // values_to_set["pi_vq_ref.derivative_scaling"]      = 1.0;
-    // values_to_set["pi_vq_ref.derivative_filter_order"] = 1.0;
-    // values_to_set["pi_vq_ref.control_period"]          = control_period;
-    // values_to_set["pi_vq_ref.pre_warping_frequency"]   = 1e-9;
+    values_to_set["pi_vq_ref.kp"]                      = kp_inner;
+    values_to_set["pi_vq_ref.ki"]                      = ki_inner;
+    values_to_set["pi_vq_ref.kd"]                      = 0.0;
+    values_to_set["pi_vq_ref.kff"]                     = 0.0;
+    values_to_set["pi_vq_ref.proportional_scaling"]    = 1.0;
+    values_to_set["pi_vq_ref.derivative_scaling"]      = 1.0;
+    values_to_set["pi_vq_ref.derivative_filter_order"] = 1.0;
+    values_to_set["pi_vq_ref.control_period"]          = control_period;
+    values_to_set["pi_vq_ref.pre_warping_frequency"]   = 1e-9;
 
     // AFE parameters
     values_to_set["afe_rst.inductance"] = 0.7e-3;
@@ -212,6 +210,28 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["rst_inner_vq.r"] = std::array<double, 2>{-3.416063337264311, 3.111243602756688};
     values_to_set["rst_inner_vq.s"] = std::array<double, 2>{1.0, -1.0};
     values_to_set["rst_inner_vq.t"] = std::array<double, 2>{0.304819734507623, 0.0};
+
+    // RST for Vdc balancing:
+    values_to_set["rst_vdc.r"] = std::array<double, 2>{1.000125e-10, -9.99875e-11};
+    values_to_set["rst_vdc.s"] = std::array<double, 2>{5e-8, -5e-8};
+    values_to_set["rst_vdc.t"] = std::array<double, 2>{1.000125e-10, -9.99875e-11};
+
+    // 2nd order IIR for Vdc-diff
+    const double w0  = 2 * std::numbers::pi * 15;
+    const double ksi = 0.85;
+
+    const double w     = w0 * sqrt(1 - ksi * ksi);
+    const double alfa  = exp(-ksi * w0 * control_period);
+    const double beta  = cos(w * control_period);
+    const double delta = sin(w * control_period);
+
+    const double p_b1 = 1 - alfa * (beta + (ksi * w0 / w) * delta);
+    const double p_b2 = alfa * alfa + alfa * (ksi * w0 * delta / w - beta);
+    const double p_a1 = -2 * alfa * beta;
+    const double p_a2 = alfa * alfa;
+
+    values_to_set["iir_vdc.numerator_coefficients"]   = std::array<double, 3>{0.0, p_b1, p_b2};
+    values_to_set["iir_vdc.denominator_coefficients"] = std::array<double, 3>{1.0, p_a1, p_a2};
 
     for (const auto& [name, _] : parameters)
     {

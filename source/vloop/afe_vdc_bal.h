@@ -1,8 +1,7 @@
 //! @file
-//! @brief Defines the Active Front-End Component including active control in form of RST.
+//! @brief Defines the Active Front-End Component with active control in form of RST and voltage balancing.
 //! @author Dominik Arominski
 
-#include "rstDelayed.h"
 #include "vslib.h"
 
 #pragma once
@@ -10,16 +9,16 @@
 namespace user
 {
 
-    class ActiveFrontEndRST : vslib::Component
+    class ActiveFrontEndVdcBalance : vslib::Component
     {
 
       public:
-        //! Constructs ActiveFrontEnd with RST active control object.
+        //! Constructs ActiveFrontEnd with RST active control object and Vdc balancing.
         //!
         //! @param name Name of this Component
         //! @param parent Parent of this Component
-        ActiveFrontEndRST(std::string_view name, vslib::Component& parent)
-            : vslib::Component("ActiveFrontEndRST", name, parent),
+        ActiveFrontEndVdcBalance(std::string_view name, vslib::Component& parent)
+            : vslib::Component("ActiveFrontEndVdcBalance", name, parent),
               pll("pll", *this),
               abc_to_dq0_v("abc_to_dq0_voltage", *this),
               abc_to_dq0_i("abc_to_dq0_current", *this),
@@ -59,7 +58,9 @@ namespace user
             //
             // Synchronisation, measurement, and change of reference frame
             //
-            const auto wt_pll = pll.synchronise(v_a * m_si_to_pu, v_b * m_si_to_pu, v_c * m_si_to_pu);
+            const auto wt_pll = pll.synchronise(
+                v_a * m_si_to_pu * regulation_on, v_b * m_si_to_pu * regulation_on, v_c * m_si_to_pu * regulation_on
+            );
             const auto [vd_meas, vq_meas, zero_v]
                 = abc_to_dq0_v.transform(v_a * m_si_to_pu, v_b * m_si_to_pu, v_c * m_si_to_pu, wt_pll);
             const auto [id_meas, iq_meas, zero_i]
@@ -97,11 +98,8 @@ namespace user
             const auto vd_ref_lim = limit.limit(vd_ref);
             const auto vq_ref_lim = limit.limit(vq_ref);
 
-            // const auto [v_a_ref, v_b_ref, v_c_ref] = dq0_to_abc.transform(vd_ref_lim, vq_ref_lim, 0.0, wt_pll);
-            const double v_a_ref = 0.0;
-            const double v_b_ref = 0.0;
-            const double v_c_ref = 0.0;
-            return std::make_tuple(v_a_ref * m_pu_to_v, v_b_ref * m_pu_to_v, v_c_ref * m_pu_to_v);
+            const auto [v_a_ref, v_b_ref, v_c_ref] = dq0_to_abc.transform(vd_ref_lim, vq_ref_lim, 0.0, wt_pll);
+            return std::make_tuple(v_a_ref, v_b_ref, v_c_ref);
         }
 
         // Owned Components
