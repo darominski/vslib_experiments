@@ -587,7 +587,8 @@ TEST_F(ParameterSettingTest, CheckRevokeValidation)
     EXPECT_TRUE(component_1.parameter.isValidated());   // the Parameter should still be validated
 
     parameter_setting.validateComponents();
-    EXPECT_FALSE(component_1.parameter.isValidated());   // the Parameter should not be invalidated
+    EXPECT_FALSE(component_1.parameter.isValidated());    // the Parameter should be invalidated
+    EXPECT_TRUE(component_1.parameter.isInitialized());   // but not un-initialized
 
     // Parameter has been previously validated: the initialized flag is not revoked
     EXPECT_TRUE(component_1.parametersInitialized());

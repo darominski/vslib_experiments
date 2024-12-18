@@ -165,13 +165,10 @@ namespace vslib
         //! Sets the validation flag of owned Parameters to true when the validation has been successfully.
         void setParametersValidated() noexcept
         {
-            std::for_each(
-                getParameters().begin(), getParameters().end(),
-                [](auto parameter)
-                {
-                    parameter.second.get().setValidated(true);
-                }
-            );
+            for (auto& parameter : m_parameters)
+            {
+                parameter.second.get().setValidated(true);
+            }
         }
 
         //! Sets either the validation or the initialization flag of owned Parameters to false
@@ -180,22 +177,19 @@ namespace vslib
         //! relevant during startup.
         void revokeValidation() noexcept
         {
-            std::for_each(
-                getParameters().begin(), getParameters().end(),
-                [](auto parameter)
+            for (auto& parameter : m_parameters)
+            {
+                if (!parameter.second.get().isValidated())
                 {
-                    if (!parameter.second.get().isValidated())
-                    {
-                        // if Parameter has not been previously validated, the currently set Parameters
-                        // are not correct and the entire initialization process needs revoking
-                        parameter.second.get().setInitialized(false);
-                    }
-                    else
-                    {
-                        parameter.second.get().setValidated(false);
-                    }
+                    // if Parameter has not been previously validated, the currently set Parameters
+                    // are not correct and the entire initialization process needs revoking
+                    parameter.second.get().setInitialized(false);
                 }
-            );
+                else
+                {
+                    parameter.second.get().setValidated(false);
+                }
+            }
         }
 
         //! Verifies parameters after they are set, to be called after parameters of this component are modified.
