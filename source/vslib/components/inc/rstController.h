@@ -129,7 +129,6 @@ namespace vslib
         //! Performs the Jury's stability test on the provided array of coefficients.
         //!
         //! @param coefficients Coefficients to be tested
-        //! @param name Name of the controller this test is run on
         //! @return Optionally returns a Warning with relevant information if test failed, nothing otherwise
         std::optional<fgc4::utils::Warning> jurysStabilityTest(const std::array<double, ControllerLength>& coefficients)
         {
