@@ -122,6 +122,14 @@ endif()
 
 if(BUILD_TESTS)
 
+  option(COVERAGE "Enable coverage reporting" OFF)
+
+  if(COVERAGE)
+    # Add compile and link options for coverage
+    add_compile_options(--coverage -g -O0)
+    add_link_options(--coverage)
+  endif()
+
   add_subdirectory("${LIBRARIES_HOME}/googletest-1.11.0" "${CMAKE_CURRENT_BINARY_DIR}/googletest")
 
   add_subdirectory("${LIBRARIES_HOME}/json-schema-validator-2.2.0" ${CMAKE_CURRENT_BINARY_DIR}/json-schema-validator)
