@@ -172,7 +172,7 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["pi_vq_ref.derivative_scaling"]      = 1.0;
     values_to_set["pi_vq_ref.derivative_filter_order"] = 1.0;
     values_to_set["pi_vq_ref.control_period"]          = control_period;
-    values_to_set["pi_vq_ref.pre_warping_frequency"]   = 1e-9;
+    values_to_set["pi_vq_ref.pre_warping_frequency"]   = 1e-12;
 
     // AFE parameters
     values_to_set["afe_rst.inductance"] = 0.7e-3;

@@ -97,10 +97,7 @@ namespace user
             const auto vd_ref_lim = limit.limit(vd_ref);
             const auto vq_ref_lim = limit.limit(vq_ref);
 
-            // const auto [v_a_ref, v_b_ref, v_c_ref] = dq0_to_abc.transform(vd_ref_lim, vq_ref_lim, 0.0, wt_pll);
-            const double v_a_ref = 0.0;
-            const double v_b_ref = 0.0;
-            const double v_c_ref = 0.0;
+            const auto [v_a_ref, v_b_ref, v_c_ref] = dq0_to_abc.transform(vd_ref_lim, vq_ref_lim, 0.0, wt_pll);
             return std::make_tuple(v_a_ref * m_pu_to_v, v_b_ref * m_pu_to_v, v_c_ref * m_pu_to_v);
         }
 

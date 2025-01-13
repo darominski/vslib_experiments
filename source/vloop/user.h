@@ -141,7 +141,7 @@ namespace user
                 v_a, v_b, v_c, i_a, i_b, i_c, v_dc_ref, v_dc_meas, q_ref, regulation_on
             );
 
-            const auto v_dc_diff_filtered = converter.iir_vdc.filter(v_dc_diff * regulation_on);
+            const auto v_dc_diff_filtered = converter.iir_vdc.filter(regulation_on * v_dc_diff);
             const auto m0                 = converter.rst_vdc.control(0.0, regulation_on * v_dc_diff_filtered);
 
             converter.m_data[0] = v_a_ref;

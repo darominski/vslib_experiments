@@ -20,9 +20,9 @@ namespace user
         ActiveFrontEndVdcBalance(std::string_view name, vslib::Component& parent)
             : vslib::Component("ActiveFrontEndVdcBalance", name, parent),
               pll("pll", *this),
-              abc_to_dq0_v("abc_to_dq0_voltage", *this),
-              abc_to_dq0_i("abc_to_dq0_current", *this),
-              dq0_to_abc("dq0_to_abc", *this),
+              abc_to_dq0_v("abc_to_dq0_voltage", *this, 100'000),
+              abc_to_dq0_i("abc_to_dq0_current", *this, 100'000),
+              dq0_to_abc("dq0_to_abc", *this, 100'000),
               power_3ph_instant("power_3ph_instant", *this),
               rst_outer_vdc("rst_outer_vdc", *this),
               rst_outer_id("rst_outer_id", *this),
@@ -59,22 +59,29 @@ namespace user
             // Synchronisation, measurement, and change of reference frame
             //
             const auto wt_pll = pll.synchronise(
-                v_a * m_si_to_pu * regulation_on, v_b * m_si_to_pu * regulation_on, v_c * m_si_to_pu * regulation_on
+                regulation_on * v_a * m_si_to_pu, regulation_on * v_b * m_si_to_pu, regulation_on * v_c * m_si_to_pu
             );
-            const auto [vd_meas, vq_meas, zero_v]
-                = abc_to_dq0_v.transform(v_a * m_si_to_pu, v_b * m_si_to_pu, v_c * m_si_to_pu, wt_pll);
-            const auto [id_meas, iq_meas, zero_i]
-                = abc_to_dq0_i.transform(i_a * m_i_to_pu, i_b * m_i_to_pu, i_c * m_i_to_pu, wt_pll);
-            const auto [p_meas, q_meas] = power_3ph_instant.calculate(v_a, v_b, v_c, i_a, i_b, i_c);
+            const auto [vd_meas, vq_meas, zero_v] = abc_to_dq0_v.transform(
+                regulation_on * v_a * m_si_to_pu, regulation_on * v_b * m_si_to_pu, regulation_on * v_c * m_si_to_pu,
+                wt_pll
+            );
+            const auto [id_meas, iq_meas, zero_i] = abc_to_dq0_i.transform(
+                regulation_on * i_a * m_i_to_pu, regulation_on * i_b * m_i_to_pu, regulation_on * i_c * m_i_to_pu,
+                wt_pll
+            );
+            const auto [p_meas, q_meas] = power_3ph_instant.calculate(
+                regulation_on * v_a, regulation_on * v_b, regulation_on * v_c, regulation_on * i_a, regulation_on * i_b,
+                regulation_on * i_c
+            );
 
-            auto p_ref = 0;
+            double p_ref = 0;
             if (regulation_on > 0)
             {
                 // needs to not run until regulation is set to ON
                 //
                 // Outer loop: Vdc control
                 //
-                p_ref = rst_outer_vdc.control(pow(v_dc_ref, 2), pow(v_dc_meas, 2));
+                p_ref = rst_outer_vdc.control(regulation_on * pow(v_dc_ref, 2), regulation_on * pow(v_dc_meas, 2));
             }
 
             //
@@ -88,9 +95,9 @@ namespace user
             //
             // RST + 2 * ff for each loop
             const auto vd_ref = rst_inner_vd.control(-regulation_on * id_ref, regulation_on * id_meas) + vd_meas
-                                + iq_meas * i_base * m_wl * m_si_to_pu;
+                                + regulation_on * iq_meas * i_base * m_wl * m_si_to_pu;
             const auto vq_ref = rst_inner_vq.control(-regulation_on * iq_ref, regulation_on * iq_meas) + vq_meas
-                                - id_meas * i_base * m_wl * m_si_to_pu;
+                                - regulation_on * id_meas * i_base * m_wl * m_si_to_pu;
 
             //
             // Frame conversion
