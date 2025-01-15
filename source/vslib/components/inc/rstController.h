@@ -49,7 +49,7 @@ namespace vslib
             m_measurements[m_head] = measurement;
 
             double actuation = m_t[0] * m_references[m_head] - m_r[0] * m_measurements[m_head];
-            for (int64_t index = 1; index < ControllerLength; index++)
+            for (size_t index = 1; index < ControllerLength; index++)
             {
                 int64_t buffer_index = (m_head - index);
                 if (buffer_index < 0)
@@ -133,7 +133,7 @@ namespace vslib
         std::optional<fgc4::utils::Warning> jurysStabilityTest(const std::array<double, ControllerLength>& coefficients)
         {
             // Test re-implemented from CCLIBS libreg's regRst.c
-            int64_t coefficient_length = 1;
+            size_t coefficient_length = 1;
             while (coefficient_length < ControllerLength && coefficients[coefficient_length] != 0.0F)
             {
                 coefficient_length++;

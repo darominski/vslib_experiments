@@ -33,7 +33,7 @@ TEST_F(RSTControllerTest, RSTControllerDefaultConstruction)
 
     EXPECT_FALSE(rst.isReady());
 
-    for (int64_t index = 0; index < controller_length; index++)
+    for (size_t index = 0; index < controller_length; index++)
     {
         EXPECT_EQ(rst.getR()[index], 0.0);
         EXPECT_EQ(rst.getS()[index], 0.0);

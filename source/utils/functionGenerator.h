@@ -25,7 +25,7 @@ namespace fgc4::utils
     {
         assert(max > min);
         std::vector<std::pair<IndexType, StoredType>> data(number_points + 1);
-        const auto                                    bin_size = (max - min) / number_points;
+        const auto                                    bin_size = (max - min) / static_cast<IndexType>(number_points);
 
         std::generate(
             data.begin(), data.end(),

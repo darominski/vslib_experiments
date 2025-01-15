@@ -152,7 +152,7 @@ TEST_F(BoxFilterTest, FilterValuesBufferWrapAround)
     double accumulator = 0;
     int    counter     = 0;
 
-    for (int index = 0; index < values.size(); index++)
+    for (size_t index = 0; index < values.size(); index++)
     {
         double oldest_value = 0;
         if (index > filter_order)

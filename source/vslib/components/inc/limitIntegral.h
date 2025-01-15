@@ -70,7 +70,7 @@ namespace vslib
         Parameter<size_t> integral_limit_window_length;   //!< Length of the time window for the cumulative calculation
 
       private:
-        int64_t m_head{0};   //!< Points to where the oldest input is
+        size_t m_head{0};   //!< Points to where the oldest input is
 
         T m_cumulative{T{}};   //!< Holds cumulative value over the time window
 
