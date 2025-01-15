@@ -88,6 +88,7 @@ if (NOT BUILD_TESTS)
       interrupts/inc
       utils/inc # vslib-specific utilities
       ../utils  # bare-metal shared utilities
+      ../hal/inc
       ${LIBRARIES_HOME}/json-3.11.2
       ${LIBRARIES_HOME}/magic_enum-0.9.3
       # Other vslib include directories go here
