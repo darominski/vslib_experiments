@@ -9,20 +9,21 @@
 #include "component.h"
 #include "parameter.h"
 #include "peripheralInterrupt.h"
+#include "peripherals/pwm_hal.h"
 
 namespace vslib
 {
-    class PWM : public Component
+    class HalfBridge : public Component
     {
       public:
-        PWM(std::string_view name, Component& parent, int physical_id, )
-        noexcept
-            : Component("PWM", name, parent),
+        HalfBridge(std::string_view name, Component& parent, uint8_t* base_address) noexcept
+            : Component("HalfBridge", name, parent),
               modulation_limits(*this, "modulation_limits"),
               additional_dead_time("additional_dead_time", *this, 0.0),
+              m_pwm(base_address)
         {
-            // initialize the right PWM IP out of the list of 12:
-            m_pwm = utils::assign_ip_object("PwmIp", physical_id);
+            // initialize the right PWM IP out of the list of 12, TODO
+            // right now, base_address is needed
         }
 
         //! Sets the duty cycle of the PWM. When set to 0.0 (%), the PWM is held low, when set to 100 (%), the PWM is
@@ -107,7 +108,7 @@ namespace vslib
         }
 
       private:
-        volatile PwmIp* m_pwm;   //!< PWM IP core export
+        hal::PWM volatile& m_pwm;   //!< PWM IP core HAL
 
         //! Phase offset, handles the offsetting the CC0, CC1 instead of shifting the carrier
         double m_phase_offset{0.0};
