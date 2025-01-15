@@ -90,8 +90,6 @@ TEST_F(LimitRmsTest, LimitRmsLongerRunning)
 
     set_limit_parameters(limit, rms_limit, rms_time_constant);
 
-    const double filter_factor = iteration_period / (rms_time_constant + 0.5 * iteration_period);
-
     const double first_input = rms_limit - 1;
     ASSERT_TRUE(limit.limit(first_input));
     ASSERT_TRUE(limit.limit(first_input));
@@ -113,7 +111,6 @@ TEST_F(LimitRmsTest, LimitRmsInfInput)
 
     const double rms_limit         = 5;
     const double rms_time_constant = 5e-5;
-    const double filter_factor     = iteration_period / (rms_time_constant + 0.5 * iteration_period);
 
     set_limit_parameters(limit, rms_limit, rms_time_constant);
 
@@ -129,9 +126,8 @@ TEST_F(LimitRmsTest, LimitRmsMinusInfInput)
     const double  iteration_period = 1.0;
     LimitRms      limit(name, root, iteration_period);
 
-    double       rms_limit         = 5;
-    double       rms_time_constant = 5e-5;
-    const double filter_factor     = iteration_period / (rms_time_constant + 0.5 * iteration_period);
+    double rms_limit         = 5;
+    double rms_time_constant = 5e-5;
 
     set_limit_parameters(limit, rms_limit, rms_time_constant);
 

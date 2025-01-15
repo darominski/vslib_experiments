@@ -519,7 +519,6 @@ namespace user
         void dispatchCycle(const double v_ref, const double v_r, const double v_l, const int n_dcdc)
         {
             double kf = 0;
-            double kc = 0;
             if (n_dcdc == 1)
             {
                 m_v_ref_dispatch[0] = v_ref;
@@ -552,7 +551,6 @@ namespace user
 
                         const double E = Ef + Ech;
                         kf             = Ef / E;
-                        kc             = Ech / E;
 
                         m_v_ref_dispatch[0] = v_ref * (1 - kf) / m_n_chargers;
                         m_v_ref_dispatch[1] = m_v_ref_dispatch[0];

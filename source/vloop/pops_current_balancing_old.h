@@ -36,11 +36,10 @@ namespace user
         balance(const double i_a, const double i_b, const double i_c, const double v_dc, const double common_modulation)
         {
             // first, normalize inputs
-            const double i_a_norm   = i_a / i_base;
-            const double i_b_norm   = i_b / i_base;
-            const double i_c_norm   = i_c / i_base;
-            const double vdc_scaled = avoid_zero_division.limit(v_dc) * v_max;
-            const double ron_vdc    = m_r_on / avoid_zero_division.limit(2.0 * v_dc / v_max);
+            const double i_a_norm = i_a / i_base;
+            const double i_b_norm = i_b / i_base;
+            const double i_c_norm = i_c / i_base;
+            const double ron_vdc  = m_r_on / avoid_zero_division.limit(2.0 * v_dc / v_max);
 
             // calculate moving averages for all input currents
             const double i_a_mav = maverage_a.filter(i_a_norm);

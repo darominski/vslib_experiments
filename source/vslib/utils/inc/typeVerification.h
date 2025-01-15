@@ -50,7 +50,6 @@ namespace vslib::utils
     {
         // C++ standard does not differentiate between integral and boolean type in std::is_integral and
         // std::is_unsigned. Therefore, boolean has to be explicitely removed from comparison below.
-        bool passed = true;
         if constexpr (std::is_unsigned<typename ParameterType::value_type>::value && !std::is_same_v<typename ParameterType::value_type, bool>)
         {   // checks internal type, e.g. stored in an array.
             if (value.is_array())

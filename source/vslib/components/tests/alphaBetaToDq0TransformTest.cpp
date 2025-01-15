@@ -79,12 +79,11 @@ TEST_F(AlphaBetaToDq0TransformTest, ZeroAngleTest)
     std::string_view        name = "AlphaBetaToDq0Transform4";
     AlphaBetaToDq0Transform transform(name, root);
 
-    double i_alpha     = 1.0;
-    double i_beta      = -0.5;
-    double i_zero      = -0.5;
-    double theta       = 0.0;
-    bool   a_alignment = true;
-    auto [d, q, zero]  = transform.transform(i_alpha, i_beta, i_zero, theta);
+    double i_alpha    = 1.0;
+    double i_beta     = -0.5;
+    double i_zero     = -0.5;
+    double theta      = 0.0;
+    auto [d, q, zero] = transform.transform(i_alpha, i_beta, i_zero, theta);
 
     // Expected values calculation
     const double cos_theta = std::cos(theta);

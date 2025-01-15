@@ -79,7 +79,6 @@ TEST_F(IIRFilterTest, FirstOrderFilterSingleValueSetDenominator)
     RootComponent                     root;
     constexpr int                     filter_order  = 1;
     constexpr int                     filter_length = filter_order + 1;
-    constexpr int                     inputs_length = 3;
     IIRFilter<filter_order>           filter("filter", root);
     std::array<double, filter_length> numerator_values{0.3, 0.7};
     setNumeratorValues<filter_order>(filter, numerator_values);
