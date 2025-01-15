@@ -50,9 +50,9 @@ namespace vslib
 
             m_integral_buffer[m_head] = input;
             m_head++;
-            if (m_head >= integral_limit_window_length)
+            if (m_head == integral_limit_window_length)
             {
-                m_head -= integral_limit_window_length;
+                m_head = 0;
             }
 
             return true;
