@@ -7,6 +7,8 @@
 #include "afe.h"
 #include "afe_rst.h"
 #include "afe_vdc_bal.h"
+#include "cheby_gen/reg_to_stream_cpp.h"
+#include "cheby_gen/stream_to_reg_cpp.h"
 #include "peripherals/reg_to_stream.h"
 #include "peripherals/stream_to_reg.h"
 #include "pops_current_balancing.h"
@@ -22,20 +24,14 @@ namespace user
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              afe_vdc_bal("afe_rst", *this),
-              rst_vdc("rst_vdc", *this),
-              iir_vdc("iir_vdc", *this),
-              m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
-              m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
+              m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
+              m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000))
         {
             // initialize all your objects that need initializing
         }
 
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
-        ActiveFrontEndVdcBalance              afe_vdc_bal;
-        vslib::RST<1>                         rst_vdc;
-        vslib::IIRFilter<2>                   iir_vdc;
         // ...
         // end of your Components
 
@@ -45,37 +41,36 @@ namespace user
 
         void init() override
         {
-            if (m_s2r->ctrl & STREAM_TO_REG_CTRL_PMA_INIT)
-            {
-                m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_PMA_INIT;
-            }
+            m_s2rcpp.ctrl.pmaInit.set(false);
             sleep(2);
-            if (m_s2r->ctrl & STREAM_TO_REG_CTRL_RESET_PB)
-            {
-                m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_RESET_PB;
-            }
+
+            m_s2rcpp.ctrl.resetPb.set(false);
             sleep(1);
 
-            m_s2r->ctrl |= STREAM_TO_REG_CTRL_SEL_OUTPUT;
+            m_s2rcpp.ctrl.selOutput.set(true);
 
-            if (!(m_s2r->status
-                  & (STREAM_TO_REG_STATUS_CHANNEL_UP | STREAM_TO_REG_STATUS_GT_PLL_LOCK | STREAM_TO_REG_STATUS_LANE_UP
-                     | STREAM_TO_REG_STATUS_PLL_LOCKED | STREAM_TO_REG_STATUS_GT_POWERGOOD)))
+            if (!(m_s2rcpp.status.channelUp.get() && m_s2rcpp.status.gtPllLock.get() && m_s2rcpp.status.laneUp.get()
+                  && m_s2rcpp.status.pllLocked.get() && m_s2rcpp.status.gtPowergood.get()))
             {
-                printf("Unexpected status: 0x%#08x\n", m_s2r->ctrl);
+                printf("Unexpected status: 0x%#08x\n", m_s2rcpp.ctrl.read());
             }
 
-            if (m_s2r->status & (STREAM_TO_REG_STATUS_LINK_RESET | STREAM_TO_REG_STATUS_SYS_RESET))
+            if (m_s2rcpp.status.linkReset.get() || m_s2rcpp.status.sysReset.get())
             {
                 printf("Link is in reset\n");
             }
 
-            if (m_s2r->status & (STREAM_TO_REG_STATUS_SOFT_ERR | STREAM_TO_REG_STATUS_HARD_ERR))
+            if (m_s2rcpp.status.softErr.get() || m_s2rcpp.status.hardErr.get())
             {
                 printf("Got an error\n");
             }
 
             printf("Link up and good. Ready to receive data.\n");
+
+            // kria transfer rate: 100us
+            m_r2scpp.numData.write(num_data * 2);
+            m_r2scpp.tkeep.write(0x0000FFFF);
+
             interrupt_1.start();
         }
 
@@ -119,51 +114,18 @@ namespace user
             // collect inputs
             for (uint32_t index = 0; index < num_data; index++)
             {
-                converter.m_data[index] = cast<uint64_t, double>(converter.m_s2r->data[index].value);
+                converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
             }
-
-            const double regulation_on = converter.m_data[0];
-            const double v_dc_ref      = converter.m_data[1];
-            const double v_dc_p        = converter.m_data[2];
-            const double v_dc_n        = converter.m_data[3];
-            const double q_ref         = converter.m_data[4];
-            const double v_a           = converter.m_data[5];
-            const double v_b           = converter.m_data[6];
-            const double v_c           = converter.m_data[7];
-            const double i_a           = converter.m_data[8];
-            const double i_b           = converter.m_data[9];
-            const double i_c           = converter.m_data[10];
-
-            const double v_dc_meas = v_dc_p + v_dc_n;
-            const double v_dc_diff = v_dc_p - v_dc_n;
-
-            const auto [v_a_ref, v_b_ref, v_c_ref] = converter.afe_vdc_bal.vdc_control(
-                v_a, v_b, v_c, i_a, i_b, i_c, v_dc_ref, v_dc_meas, q_ref, regulation_on
-            );
-
-            const auto v_dc_diff_filtered = converter.iir_vdc.filter(v_dc_diff * regulation_on);
-            const auto m0                 = converter.rst_vdc.control(0.0, regulation_on * v_dc_diff_filtered);
-
-            converter.m_data[0] = v_a_ref;
-            converter.m_data[1] = v_b_ref;
-            converter.m_data[2] = v_c_ref;
-            converter.m_data[3] = m0;
-            converter.m_data[4] = v_dc_diff;
-            converter.m_data[5] = v_dc_diff_filtered;
 
             // write to output registers
             for (uint32_t index = 0; index < num_data; index++)
             {
-                converter.m_r2s->data[index].value = cast<double, uint64_t>(converter.m_data[index]);
+                converter.m_r2scpp.data[index].write(cast<double, uint64_t>(converter.m_data[index]));
             }
 
             // send it away
-            // kria transfer rate: 100us
-            converter.m_r2s->num_data = num_data * 2;
-            converter.m_r2s->tkeep    = 0x0000FFFF;
-
             // trigger connection
-            converter.m_r2s->ctrl = REG_TO_STREAM_CTRL_START;
+            converter.m_r2scpp.ctrl.start.set(true);
         }
 
         // static void RTTaskPerf(Converter& converter)
@@ -192,8 +154,8 @@ namespace user
         constexpr static uint32_t    num_data{20};
         std::array<double, num_data> m_data;
 
-        volatile stream_to_reg* m_s2r;
-        volatile reg_to_stream* m_r2s;
+        myModule::StreamToReg m_s2rcpp;
+        myModule::RegToStream m_r2scpp;
     };
 
 }   // namespace user
