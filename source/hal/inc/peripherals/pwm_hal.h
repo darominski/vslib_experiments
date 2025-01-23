@@ -53,7 +53,7 @@ namespace hal
         void setDutyCycle(const float duty_cycle) noexcept
         {
             const float fraction  = forceLimit(duty_cycle, 0.0, m_max_duty_cycle);
-            const float threshold = getMaximumCounterValue() * (1.0 - fraction);
+            const float threshold = getMaximumCounterValue() * (m_max_modulation_index - fraction);
             writeTriggerValue(static_cast<uint32_t>(threshold));
         }
 
