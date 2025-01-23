@@ -18,102 +18,109 @@ namespace vslib
       public:
         HalfBridge(std::string_view name, Component& parent, uint8_t* base_address) noexcept
             : Component("HalfBridge", name, parent),
-              modulation_limits(*this, "modulation_limits"),
-              additional_dead_time("additional_dead_time", *this, 0.0),
               m_pwm(base_address)
         {
             // initialize the right PWM IP out of the list of 12, TODO
             // right now, base_address is needed
         }
 
+        //! Starts the PWM IP by enabling the PWMA and PWMB.
+        void start() noexcept
+        {
+            m_pwm.setDisableA(false);
+            m_pwm.setDisableB(false);
+            m_pwm.setEnable(true);
+        }
+
+        //! Stops the PWM IP by disabling the PWMA and PWMB.
+        void stop() noexcept
+        {
+            m_pwm.setDisableA(true);
+            m_pwm.setDisableA(true);
+            m_pwm.setEnable(false);
+            // or kill A/B ?
+        }
+
+        void reset() noexcept
+        {
+            m_pwm.reset();
+        }
+
         //! Sets the duty cycle of the PWM. When set to 0.0 (%), the PWM is held low, when set to 100 (%), the PWM is
         //! held high.
         //!
-        //! @param duty_cycle Value between 0.0 and 100.0 for the duty cycle of the PWM
-        void setDutyCycle(const double duty_cycle) noexcept
+        //! @param duty_cycle Value between 0.0 and 1.0 for the duty cycle of the PWM
+        void setDutyCycle(const float duty_cycle) noexcept
         {
-            // force 0 - 100%
-            // sets duty cycle, take into account the offset
+            m_pwm.setModulationIndex(duty_cycle);
         }
 
+        //! Sets the modulation index.
+        //!
         //! @param index Modulation index, -1 to 1
-        void setModulationIndex(const double index) noexcept
+        void setModulationIndex(const float index) noexcept
         {
-            // if index=0.5, duty cycle = 50%
-            // shift by offset m_phase_offset
-            const double modulation_limits_double.limit(index);
+            // force limit of -1.0, 1.0
+            m_pwm.setModulationIndex(index);
         }
 
-        //! @param counter Counter value, from 0 to CTRH
-        void setModulationIndex(const uint32_t counter) noexcept
-        {
-
-            // check against m_limit_min_uint, m_limit_max_uint
-        }
-
+        //! Sets the output to high.
         void setHigh() noexcept
         {
+            m_pwm.setHigh();
         }
 
+        //! Sets the output to low.
         void setLow() noexcept
         {
+            m_pwm.setLow();
         }
 
-        //! Allows to set the phase offset in lieu of shifting the PWM carrier.
+        //! Sets the additional dead time.
         //!
-        //! @param offset Offset to be set
-        void setPhaseOffset(const double offset) noexcept
+        //! @param dead_time Additional dead time in clock ticks
+        void setAdditionalDeadTime(const uint32_t dead_time) noexcept
         {
-            m_phase_offset = offset;
-            // and modify the modulation index, shift CC0 and CC1
+            m_pwm.setExtendedDeadTime(dead_time);
         }
 
-        void setAdditionalDeadTime(const double dead_time) noexcept
+        //! Sets the update type.
+        //!
+        //! @param update_type Update type to be set, one of zero, prd, zero_prd, and immediate
+        void setUpdateType(hal::PWM::UpdateType update_type) noexcept
         {
-            // adds this to PWM IP register
-            // m_pwm->extended_dead_time = dead_time;
+            m_pwm.setUpdateType(update_type);
         }
 
-        void setUpdateType()
+        //! Sets the inverted state of PWMA to a desired setting.
+        //!
+        //! @param setting New setting for inversion of PWMA: inverted if true, not-inverted otherwise
+        void invertA(const bool setting) noexcept
         {
-            // ???
+            m_pwm.setInvertA(setting);
         }
 
-        void invert(const bool inverter)
+        //! Sets the inverted state of PWMB to a desired setting.
+        //!
+        //! @param setting New setting for inversion of PWMB: inverted if true, not-inverted otherwise
+        void invertB(const bool setting) noexcept
         {
-            // at runtime? at configuration?
+            m_pwm.setInvertB(setting);
         }
 
-        void start() noexcept
-        {
-            m_pwm->enable = 0xFFFF;
-        }
+        // ************************************************************
+        // Owned Parameters
 
-        void stop() noexcept
-        {
-            m_pwm->enable = 0x0000;
-        }
 
         // ************************************************************
         // Owned Components
 
-        LimitRange<double> modulation_limits;   //!< Range limiting of the possible values for the modulation index
-
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
-            m_limit_min_uint = static_cast<uint32_t>(modulation_limits.min.toValidate() * (m_pwm->CTRH / 2.0));
-            m_limit_max_uint = static_cast<uint32_t>(modulation_limits.max.toValidate() * (m_pwm->CTRH / 2.0));
-
             return {};
         }
 
       private:
-        hal::PWM volatile& m_pwm;   //!< PWM IP core HAL
-
-        //! Phase offset, handles the offsetting the CC0, CC1 instead of shifting the carrier
-        double m_phase_offset{0.0};
-
-        uint32_t m_limit_min_uint;
-        uint32_t m_limit_max_uint;
+        hal::PWM m_pwm;   //!< PWM IP core HAL
     };
 }
