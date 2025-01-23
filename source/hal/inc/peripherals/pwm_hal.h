@@ -24,24 +24,35 @@ namespace hal
             // Assumption is made t hat the configuration does not change at runtime, so configuration can be
             // internalized in memory rather than always read from register
             m_max_counter_value = m_regs.ctrh.read();
+
+            const uint32_t dead_time = m_regs.deadtime.read();   // dead time, in clock cycles
+            const uint32_t min_switch_time
+                = m_regs.minSwitchTimeSc.read();   // minimum ON or OFF switch time, in clock cycles
+            // max counter value serves as period in clock cycles
+            m_max_modulation_index
+                = static_cast<float>(2 * (m_max_counter_value - min_switch_time + dead_time) / m_max_counter_value + 1);
+            m_min_modulation_index
+                = -(2.0 * static_cast<float>((m_max_counter_value - min_switch_time - dead_time) / m_max_counter_value)
+                    - 1.0);
+            m_max_duty_cycle = 0.5 * (m_max_modulation_index - m_min_modulation_index);
         }
 
         //! Sets the desired modulation index.
         //!
-        //! @param index Modulation index to be used, limited from -1 to 1
+        //! @param index Modulation index to be used, limited from -1 to 1 (at maximum)
         void setModulationIndex(const float modulation_index) noexcept
         {
-            const float index     = forceLimit(modulation_index, -1.0, 1.0);
+            const float index     = forceLimit(modulation_index, m_min_modulation_index, m_max_modulation_index);
             const float threshold = getMaximumCounterValue() * (0.5 * (index + 1));
             writeTriggerValue(static_cast<uint32_t>(threshold));
         }
 
         //! Configures the desired duty cycle for the PWM.
         //!
-        //! @param fraction Duty cycle fraction percentage, 0-1.
+        //! @param fraction Duty cycle fraction percentage, 0-1 (at maximum)
         void setDutyCycle(const float duty_cycle) noexcept
         {
-            const float fraction  = forceLimit(duty_cycle, 0.0, 1.0);
+            const float fraction  = forceLimit(duty_cycle, 0.0, m_max_duty_cycle);
             const float threshold = getMaximumCounterValue() * (1.0 - fraction);
             writeTriggerValue(static_cast<uint32_t>(threshold));
         }
@@ -49,13 +60,13 @@ namespace hal
         //! Configures the PWM to stay high.
         void setHigh() noexcept
         {
-            writeTriggerValue(0);
+            writeTriggerValue(0);   // or min_modulation_index?
         }
 
         //! Configures the PWM to stay low.
         void setLow() noexcept
         {
-            writeTriggerValue(getMaximumCounterValue());
+            writeTriggerValue(getMaximumCounterValue());   // or max_modulation_index?
         }
 
         //! Sets the update type.
@@ -106,14 +117,18 @@ namespace hal
             m_regs.dtctrl.invb.set(setting);
         }
 
+        //! Enables the PWM counters.
+        //!
+        //! @param setting Setting for the counters,
         void setEnable(const bool setting) noexcept
         {
             m_regs.ctrl.en.set(setting);
         }
 
-        void reset(const bool setting) noexcept
+        //! Resets the registers (which?) to a default state.
+        void reset() noexcept
         {
-            m_regs.ctrl.reset.set(setting);
+            m_regs.ctrl.reset.set(true);
         }
 
         //! Reads the maximum counter value.
@@ -127,8 +142,14 @@ namespace hal
       private:
         myModule::PwmRegs m_regs;
 
-        uint32_t m_max_counter_value{
-            0};   //!< Maximum counter value to which the PWM counter is counting to, a configuration parameter.
+        //! Maximum counter value to which the PWM counter is counting to, a configuration parameter.
+        uint32_t m_max_counter_value{0};
+        //! Minimum modulation index that can be set for this particular PWM.
+        float m_min_modulation_index{-1.0};
+        //! Maximum modulation index that can be set for this particular PWM.
+        float m_max_modulation_index{1.0};
+        //! Maximum duty cycle due to limits imposed on the modulation indices;
+        float m_max_duty_cycle{1.0};
 
         //! Writes to the PWM trigger register, allows to set the trigger for PWM to go high.
         //!
