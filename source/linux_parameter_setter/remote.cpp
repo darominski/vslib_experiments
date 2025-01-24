@@ -189,9 +189,10 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["limit.dead_zone"]       = std::array<double, 2>{0, 0};
 
     // RST outer vdc control
-    values_to_set["rst_outer_vdc.r"] = std::array<double, 2>{2.82728041215208e-8, -2.82703370692139e-8};
+    values_to_set["rst_outer_vdc.r"]
+        = std::array<double, 2>{2.827280412152077772454317e-8, -2.827033706921389033422873e-8};
     values_to_set["rst_outer_vdc.s"] = std::array<double, 2>{4e-8, -4e-8};
-    values_to_set["rst_outer_vdc.t"] = std::array<double, 2>{2.467052306887041e-12, 0.0};
+    values_to_set["rst_outer_vdc.t"] = std::array<double, 2>{2.467052306887040943725432e-12, 0.0};
 
     values_to_set["rst_outer_id.r"]
         = std::array<double, 3>{34.981377456380478, -70.702862583905244, 35.721937146991330};
