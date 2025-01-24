@@ -7,6 +7,9 @@
 #include "afe.h"
 #include "afe_rst.h"
 #include "afe_vdc_bal.h"
+#include "cheby_gen/reg_to_stream_cpp.h"
+#include "cheby_gen/stream_to_reg_cpp.h"
+#include "halfBridge.h"
 #include "peripherals/reg_to_stream.h"
 #include "peripherals/stream_to_reg.h"
 #include "pops_current_balancing.h"
@@ -79,7 +82,7 @@ namespace user
             interrupt_1.start();
         }
 
-        constexpr static int n_elements = 101'000;
+        constexpr static int n_elements = 100'000;
 
         void backgroundTask() override
         {
@@ -87,21 +90,22 @@ namespace user
             if (counter > n_elements)
             {
                 interrupt_1.stop();
-                double const mean = interrupt_1.average() / 1.2;
+                const double clk_freq = 1.33333;   // in ns
+                const double mean     = interrupt_1.average() / clk_freq;
                 std::cout << "Average time per interrupt: (" << mean << " +- "
-                          << interrupt_1.standardDeviation(mean) / 1.2 << ") ns" << std::endl;
-                auto const histogram = interrupt_1.histogramMeasurements<100>(interrupt_1.min(), interrupt_1.max());
+                          << interrupt_1.standardDeviation(interrupt_1.average()) / clk_freq << ") ns" << std::endl;
+                const auto histogram = interrupt_1.histogramMeasurements<100>(interrupt_1.min(), interrupt_1.max());
                 for (auto const& value : histogram.getData())
                 {
                     std::cout << value << " ";
                 }
                 std::cout << std::endl;
-                auto const bin_with_max = histogram.getBinWithMax();
-                auto const edges        = histogram.getBinEdges(bin_with_max);
+                const auto bin_with_max = histogram.getBinWithMax();
+                const auto edges        = histogram.getBinEdges(bin_with_max);
                 std::cout << "bin with max: " << bin_with_max
-                          << ", centered at: " << 0.5 * (edges.first / 1.2 + edges.second / 1.2) << std::endl;
-                const auto min = interrupt_1.min() / 1.2;
-                const auto max = interrupt_1.max() / 1.2;
+                          << ", centered at: " << 0.5 * (edges.first / clk_freq + edges.second / clk_freq) << std::endl;
+                const auto min = interrupt_1.min() / clk_freq;
+                const auto max = interrupt_1.max() / clk_freq;
                 std::cout << "min: " << min << " ns, max: " << max << " ns" << std::endl;
                 exit(0);
             }
@@ -119,7 +123,7 @@ namespace user
             // collect inputs
             for (uint32_t index = 0; index < num_data; index++)
             {
-                converter.m_data[index] = cast<uint64_t, double>(converter.m_s2r->data[index].value);
+                converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
             }
 
             const double regulation_on = converter.m_data[0];
@@ -154,7 +158,8 @@ namespace user
             // write to output registers
             for (uint32_t index = 0; index < num_data; index++)
             {
-                converter.m_r2s->data[index].value = cast<double, uint64_t>(converter.m_data[index]);
+                // converter.m_r2scpp.data[index].write(cast<double, uint64_t>(converter.m_data[index]));
+                converter.m_r2scpp.data[index].write((converter.m_data[index]));
             }
 
             // send it away
@@ -163,7 +168,9 @@ namespace user
             converter.m_r2s->tkeep    = 0x0000FFFF;
 
             // trigger connection
-            converter.m_r2s->ctrl = REG_TO_STREAM_CTRL_START;
+            converter.m_r2scpp.ctrl.start.set(true);
+
+            // converter.counter++;
         }
 
         // static void RTTaskPerf(Converter& converter)
