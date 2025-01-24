@@ -39,7 +39,6 @@ target_link_options(${APP} PRIVATE
 
 target_link_libraries(${APP} PRIVATE
     vslib
-    fmt::fmt
 )
 
 # Include directories for headers

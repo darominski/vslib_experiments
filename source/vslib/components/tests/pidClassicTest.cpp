@@ -154,12 +154,11 @@ TEST_F(PIDClassicTest, PIDClassicControlIteration)
     RootComponent root;
     std::string   name = "pid_6";
     PIDClassic    pid(name, root);
-    const double  p            = 0.6;
-    const double  i            = 0.3;
-    const double  d            = 0.06;
-    const double  ff           = 0.03;
-    const double  b            = 1.11;
-    const double  max_integral = 1000.0;
+    const double  p  = 0.6;
+    const double  i  = 0.3;
+    const double  d  = 0.06;
+    const double  ff = 0.03;
+    const double  b  = 1.11;
     set_pid_parameters(pid, p, i, d, ff, b);
 
     const double target_value = 3.14159;

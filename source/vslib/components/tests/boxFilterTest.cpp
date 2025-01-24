@@ -64,7 +64,6 @@ TEST_F(BoxFilterTest, FirstOrderFilterMultipleValues)
     std::vector<double> values(inputs_length);
     std::iota(values.begin(), values.end(), 0);
     double previous_value = 0;
-    int    counter        = 0;
 
     for (const auto& value : values)
     {
@@ -95,7 +94,6 @@ TEST_F(BoxFilterTest, SecondOrderFilterMultipleValues)
     std::iota(values.begin(), values.end(), 0);
     double earlier_value  = 0;
     double previous_value = 0;
-    int    counter        = 0;
 
     for (const auto& value : values)
     {
@@ -129,7 +127,6 @@ TEST_F(BoxFilterTest, FilterMultipleValues)
     std::vector<double> values(filter_order);
     std::iota(values.begin(), values.end(), 0);
     double accumulator = 0;
-    int    counter     = 0;
 
     for (const auto& value : values)
     {
@@ -150,9 +147,8 @@ TEST_F(BoxFilterTest, FilterValuesBufferWrapAround)
     std::vector<double> values(10);
     std::iota(values.begin(), values.end(), 0);
     double accumulator = 0;
-    int    counter     = 0;
 
-    for (int index = 0; index < values.size(); index++)
+    for (size_t index = 0; index < values.size(); index++)
     {
         double oldest_value = 0;
         if (index > filter_order)

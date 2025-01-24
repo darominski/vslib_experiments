@@ -25,20 +25,14 @@ namespace user
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              afe_vdc_bal("afe_rst", *this),
-              rst_vdc("rst_vdc", *this),
-              iir_vdc("iir_vdc", *this),
-              m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
-              m_r2s(reinterpret_cast<volatile reg_to_stream*>(0xA0100000))
+              m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
+              m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000))
         {
             // initialize all your objects that need initializing
         }
 
         // Define your public Components here
         vslib::PeripheralInterrupt<Converter> interrupt_1;
-        ActiveFrontEndVdcBalance              afe_vdc_bal;
-        vslib::RST<1>                         rst_vdc;
-        vslib::IIRFilter<2>                   iir_vdc;
         // ...
         // end of your Components
 
@@ -48,37 +42,36 @@ namespace user
 
         void init() override
         {
-            if (m_s2r->ctrl & STREAM_TO_REG_CTRL_PMA_INIT)
-            {
-                m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_PMA_INIT;
-            }
+            m_s2rcpp.ctrl.pmaInit.set(false);
             sleep(2);
-            if (m_s2r->ctrl & STREAM_TO_REG_CTRL_RESET_PB)
-            {
-                m_s2r->ctrl &= ~STREAM_TO_REG_CTRL_RESET_PB;
-            }
+
+            m_s2rcpp.ctrl.resetPb.set(false);
             sleep(1);
 
-            m_s2r->ctrl |= STREAM_TO_REG_CTRL_SEL_OUTPUT;
+            m_s2rcpp.ctrl.selOutput.set(true);
 
-            if (!(m_s2r->status
-                  & (STREAM_TO_REG_STATUS_CHANNEL_UP | STREAM_TO_REG_STATUS_GT_PLL_LOCK | STREAM_TO_REG_STATUS_LANE_UP
-                     | STREAM_TO_REG_STATUS_PLL_LOCKED | STREAM_TO_REG_STATUS_GT_POWERGOOD)))
+            if (!(m_s2rcpp.status.channelUp.get() && m_s2rcpp.status.gtPllLock.get() && m_s2rcpp.status.laneUp.get()
+                  && m_s2rcpp.status.pllLocked.get() && m_s2rcpp.status.gtPowergood.get()))
             {
-                printf("Unexpected status: 0x%#08x\n", m_s2r->ctrl);
+                printf("Unexpected status: 0x%#08x\n", m_s2rcpp.ctrl.read());
             }
 
-            if (m_s2r->status & (STREAM_TO_REG_STATUS_LINK_RESET | STREAM_TO_REG_STATUS_SYS_RESET))
+            if (m_s2rcpp.status.linkReset.get() || m_s2rcpp.status.sysReset.get())
             {
                 printf("Link is in reset\n");
             }
 
-            if (m_s2r->status & (STREAM_TO_REG_STATUS_SOFT_ERR | STREAM_TO_REG_STATUS_HARD_ERR))
+            if (m_s2rcpp.status.softErr.get() || m_s2rcpp.status.hardErr.get())
             {
                 printf("Got an error\n");
             }
 
             printf("Link up and good. Ready to receive data.\n");
+
+            // kria transfer rate: 100us
+            m_r2scpp.numData.write(num_data * 2);
+            m_r2scpp.tkeep.write(0x0000FFFF);
+
             interrupt_1.start();
         }
 
@@ -163,10 +156,6 @@ namespace user
             }
 
             // send it away
-            // kria transfer rate: 100us
-            converter.m_r2s->num_data = num_data * 2;
-            converter.m_r2s->tkeep    = 0x0000FFFF;
-
             // trigger connection
             converter.m_r2scpp.ctrl.start.set(true);
 
@@ -199,8 +188,8 @@ namespace user
         constexpr static uint32_t    num_data{20};
         std::array<double, num_data> m_data;
 
-        volatile stream_to_reg* m_s2r;
-        volatile reg_to_stream* m_r2s;
+        myModule::StreamToReg m_s2rcpp;
+        myModule::RegToStream m_r2scpp;
     };
 
 }   // namespace user

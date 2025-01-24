@@ -64,7 +64,6 @@ namespace vslib
             const double rate = abs(input - m_previous_value) / time_difference;
             if (rate > change_rate)
             {
-                T tmp = input;
                 // maximal input to not violate the rate of change
                 input = m_previous_value + change_rate * time_difference;
 

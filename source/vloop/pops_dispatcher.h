@@ -44,7 +44,7 @@ namespace user
         //! Constructs a P80 cyclic data-specific parser object.
         P80CyclicDataParser()
         {
-            for (int index = 0; index < signal_name.size(); index++)
+            for (size_t index = 0; index < signal_name.size(); index++)
             {
                 m_cyclic_data[signal_name[index]] = -1.0;
             }
@@ -142,7 +142,7 @@ namespace user
             double previous_ref      = 0.0;
             double previous_max_time = 0.0;
 
-            for (int index = 0; index < ordinal_numerals.size(); index++)
+            for (size_t index = 0; index < ordinal_numerals.size(); index++)
             {
                 const auto&  numeral       = ordinal_numerals[index];
                 const double next_min_time = m_cyclic_data.at(fmt::format("REF.{}_PLATEAU.TIME", numeral));
@@ -174,7 +174,7 @@ namespace user
         //! @return End time of the last non-zero plateau.
         double endTimeLastPlateau()
         {
-            int index = 0;
+            size_t index = 0;
             // find first non-set plateau: last plateau is the previous one
             while (index < ordinal_numerals.size())
             {
@@ -203,7 +203,7 @@ namespace user
         //! Prints stored cyclic data.
         void printCyclicData()
         {
-            for (int index = 0; index < m_cyclic_data.size(); index++)
+            for (size_t index = 0; index < m_cyclic_data.size(); index++)
             {
                 std::cout << signal_name[index] << ": " << m_cyclic_data[signal_name[index]] << std::endl;
             }
@@ -350,7 +350,7 @@ namespace user
             }
 
             // set the outputs:
-            for (int index = 0; index < TotalNumberDCDC; index++)
+            for (size_t index = 0; index < TotalNumberDCDC; index++)
             {
                 m_idx[index] = m_v_ref_dispatch[index] / m_v_dc_meas[index];
             }
@@ -414,7 +414,7 @@ namespace user
             double kf = 0;
 
             const double nominal_v2 = std::pow(5000.0, 2);
-            for (int index = 0; index < m_dEc.size(); index++)
+            for (size_t index = 0; index < m_dEc.size(); index++)
             {
                 const double energy = 0.5 * 0.247 * (nominal_v2 - std::pow(m_v_dc_meas[index], 2));
                 m_dEc[index]        = (energy > 0) ? energy : 0.0;
@@ -484,7 +484,7 @@ namespace user
                     }
                 }
                 // floaters:
-                for (int index = m_n_chargers; index < m_dEc.size(); index++)
+                for (size_t index = m_n_chargers; index < m_dEc.size(); index++)
                 {
                     m_v_ref_dispatch[index] = v_l * kf * (m_dEc[index] / Ef);
                 }
@@ -519,7 +519,6 @@ namespace user
         void dispatchCycle(const double v_ref, const double v_r, const double v_l, const int n_dcdc)
         {
             double kf = 0;
-            double kc = 0;
             if (n_dcdc == 1)
             {
                 m_v_ref_dispatch[0] = v_ref;
@@ -552,7 +551,6 @@ namespace user
 
                         const double E = Ef + Ech;
                         kf             = Ef / E;
-                        kc             = Ech / E;
 
                         m_v_ref_dispatch[0] = v_ref * (1 - kf) / m_n_chargers;
                         m_v_ref_dispatch[1] = m_v_ref_dispatch[0];

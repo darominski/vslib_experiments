@@ -112,7 +112,6 @@ TEST_F(AbcToAlphaBetaTransformTest, SimulinkConsistency)
     {
         const auto matlab_alpha = (*abz_line)[0].get<double>();
         const auto matlab_beta  = (*abz_line)[1].get<double>();
-        const auto matlab_zero  = (*abz_line)[2].get<double>();
 
         const auto a = (*abc_line)[1].get<double>();
         const auto b = (*abc_line)[2].get<double>();

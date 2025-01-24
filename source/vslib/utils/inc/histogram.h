@@ -13,7 +13,7 @@
 namespace vslib::utils
 {
 
-    template<size_t BinNumber>
+    template<int64_t BinNumber>
     class Histogram
     {
       public:
