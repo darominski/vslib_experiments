@@ -180,6 +180,11 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["afe_rst.v_base"]     = v_base;
     values_to_set["afe_rst.i_base"]     = i_base;
 
+    values_to_set["example.inductance"] = 0.7e-3;
+    values_to_set["example.frequency"]  = current_frequency;
+    values_to_set["example.v_base"]     = v_base;
+    values_to_set["example.i_base"]     = i_base;
+
     values_to_set["power_3ph_instant.p_gain"] = sqrt(2) / (sqrt(3) * v_base * i_base);
     values_to_set["power_3ph_instant.q_gain"] = sqrt(2) / (sqrt(3) * v_base * i_base);
 
@@ -194,23 +199,31 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["rst_outer_vdc.s"] = std::array<double, 2>{4e-8, -4e-8};
     values_to_set["rst_outer_vdc.t"] = std::array<double, 2>{2.46705230688704093725432e-12, 0.0};
 
-    values_to_set["rst_outer_id.r"]
-        = std::array<double, 3>{34.981377456380478, -70.702862583905244, 35.721937146991330};
-    values_to_set["rst_outer_id.s"] = std::array<double, 3>{1.0, -1.0, 0.0};
-    values_to_set["rst_outer_id.t"] = std::array<double, 3>{4.520194665644794e-4, 0.0, 0.0};
+    // RST outer loop control
+    std::array<double, 3> r_outer{34.98137745638047846341578, -70.70286258390524380956776, 35.72193714699132982559604};
+    std::array<double, 3> s_outer{1.0, -1.0, 0.0};
+    std::array<double, 3> t_outer{4.5201946656448e-4, 0.0, 0.0};
 
-    values_to_set["rst_outer_iq.r"]
-        = std::array<double, 3>{34.981377456380478, -70.702862583905244, 35.721937146991330};
-    values_to_set["rst_outer_iq.s"] = std::array<double, 3>{1.0, -1.0, 0.0};
-    values_to_set["rst_outer_iq.t"] = std::array<double, 3>{4.520194665644794e-4, 0.0, 0.0};
+    values_to_set["rst_outer_id.r"] = r_outer;
+    values_to_set["rst_outer_id.s"] = s_outer;
+    values_to_set["rst_outer_id.t"] = t_outer;
 
-    values_to_set["rst_inner_vd.r"] = std::array<double, 2>{-3.416063337264311, 3.111243602756688};
-    values_to_set["rst_inner_vd.s"] = std::array<double, 2>{1.0, -1.0};
-    values_to_set["rst_inner_vd.t"] = std::array<double, 2>{0.304819734507623, 0.0};
+    values_to_set["rst_outer_iq.r"] = r_outer;
+    values_to_set["rst_outer_iq.s"] = s_outer;
+    values_to_set["rst_outer_iq.t"] = t_outer;
 
-    values_to_set["rst_inner_vq.r"] = std::array<double, 2>{-3.416063337264311, 3.111243602756688};
-    values_to_set["rst_inner_vq.s"] = std::array<double, 2>{1.0, -1.0};
-    values_to_set["rst_inner_vq.t"] = std::array<double, 2>{0.304819734507623, 0.0};
+    // RST inner loop control
+    std::array<double, 2> r_inner{-3.416063337264310995067262, 3.111243602756687653965173};
+    std::array<double, 2> s_inner{1.0, -1.0};
+    std::array<double, 2> t_inner{0.3048197345076233411020894, 0.0};
+
+    values_to_set["rst_inner_vd.r"] = r_inner;
+    values_to_set["rst_inner_vd.s"] = s_inner;
+    values_to_set["rst_inner_vd.t"] = t_inner;
+
+    values_to_set["rst_inner_vq.r"] = r_inner;
+    values_to_set["rst_inner_vq.s"] = s_inner;
+    values_to_set["rst_inner_vq.t"] = t_inner;
 
     // RST for Vdc balancing:
     values_to_set["rst_vdc.r"] = std::array<double, 2>{1.000125e-10, -9.99875e-11};
