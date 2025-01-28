@@ -99,11 +99,11 @@ namespace user
             if (counter > n_elements)
             {
                 interrupt_1.stop();
-                const double clk_freq = 1.33333;   // in ns
-                const double mean     = interrupt_1.average() / clk_freq;
+                const double scaling = 1.0 / 1.3333;   // 1 / 1.3333 GHz
+                double const mean    = interrupt_1.average() * scaling;
                 std::cout << "Average time per interrupt: (" << mean << " +- "
-                          << interrupt_1.standardDeviation(interrupt_1.average()) / clk_freq << ") ns" << std::endl;
-                const auto histogram = interrupt_1.histogramMeasurements<100>(interrupt_1.min(), interrupt_1.max());
+                          << interrupt_1.standardDeviation(interrupt_1.average()) * scaling << ") ns" << std::endl;
+                auto const histogram = interrupt_1.histogramMeasurements<100>(interrupt_1.min(), interrupt_1.max());
                 for (auto const& value : histogram.getData())
                 {
                     std::cout << value << " ";
@@ -112,9 +112,9 @@ namespace user
                 const auto bin_with_max = histogram.getBinWithMax();
                 const auto edges        = histogram.getBinEdges(bin_with_max);
                 std::cout << "bin with max: " << bin_with_max
-                          << ", centered at: " << 0.5 * (edges.first / clk_freq + edges.second / clk_freq) << std::endl;
-                const auto min = interrupt_1.min() / clk_freq;
-                const auto max = interrupt_1.max() / clk_freq;
+                          << ", centered at: " << 0.5 * (edges.first * scaling + edges.second * scaling) << std::endl;
+                const auto min = interrupt_1.min() * scaling;
+                const auto max = interrupt_1.max() * scaling;
                 std::cout << "min: " << min << " ns, max: " << max << " ns" << std::endl;
                 exit(0);
             }
@@ -248,6 +248,7 @@ namespace user
             // send it away
             // trigger connection
             converter.m_r2scpp.ctrl.start.set(true);
+            converter.counter++;
         }
 
         // static void RTTaskPerf(Converter& converter)
