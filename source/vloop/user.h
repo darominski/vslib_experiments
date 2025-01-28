@@ -82,9 +82,10 @@ namespace user
             if (counter > n_elements)
             {
                 interrupt_1.stop();
-                double const mean = interrupt_1.average() / 1.2;
+                const double scaling = 1.0 / 1.3333;   // 1 / 1.3333 GHz
+                double const mean    = interrupt_1.average() * scaling;
                 std::cout << "Average time per interrupt: (" << mean << " +- "
-                          << interrupt_1.standardDeviation(mean) / 1.2 << ") ns" << std::endl;
+                          << interrupt_1.standardDeviation(interrupt_1.average()) * scaling << ") ns" << std::endl;
                 auto const histogram = interrupt_1.histogramMeasurements<100>(interrupt_1.min(), interrupt_1.max());
                 for (auto const& value : histogram.getData())
                 {
@@ -94,9 +95,9 @@ namespace user
                 auto const bin_with_max = histogram.getBinWithMax();
                 auto const edges        = histogram.getBinEdges(bin_with_max);
                 std::cout << "bin with max: " << bin_with_max
-                          << ", centered at: " << 0.5 * (edges.first / 1.2 + edges.second / 1.2) << std::endl;
-                const auto min = interrupt_1.min() / 1.2;
-                const auto max = interrupt_1.max() / 1.2;
+                          << ", centered at: " << 0.5 * (edges.first * scaling + edges.second * scaling) << std::endl;
+                const auto min = interrupt_1.min() * scaling;
+                const auto max = interrupt_1.max() * scaling;
                 std::cout << "min: " << min << " ns, max: " << max << " ns" << std::endl;
                 exit(0);
             }
@@ -126,6 +127,7 @@ namespace user
             // send it away
             // trigger connection
             converter.m_r2scpp.ctrl.start.set(true);
+            converter.counter++;
         }
 
         // static void RTTaskPerf(Converter& converter)
