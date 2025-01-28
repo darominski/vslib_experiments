@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <mem_primitives.h>
+#include <mmpp.h>
 
 namespace myModule
 {
@@ -73,7 +73,7 @@ namespace myModule
             using MemReg::MemReg;
         };
 
-        struct DataArrayItem : MemReg<StreamToReg, AccessMode::RO, uint64_t>
+        struct DataArrayItem : MemReg<StreamToReg, AccessMode::RO, double>
         {
             using MemReg::MemReg;
         };
