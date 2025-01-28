@@ -52,7 +52,14 @@ namespace vslib
                 }
                 else
                 {
-                    return (abs(dead_zone[0] - input) > abs(dead_zone[1] - input)) ? dead_zone[1] : dead_zone[0];
+                    if constexpr (fgc4::utils::Integral<T>)
+                    {
+                        return (abs(dead_zone[0] - input) > abs(dead_zone[1] - input)) ? dead_zone[1] : dead_zone[0];
+                    }
+                    else
+                    {
+                        return (fabs(dead_zone[0] - input) > fabs(dead_zone[1] - input)) ? dead_zone[1] : dead_zone[0];
+                    }
                 }
             }
 
