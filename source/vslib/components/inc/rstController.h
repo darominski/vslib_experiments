@@ -148,7 +148,7 @@ namespace vslib
             {
                 const double coefficient = coefficients[index];
 
-                sum_abs += abs(coefficient);
+                sum_abs += fabs(coefficient);
 
                 if ((index & 1) == 0)
                 {
