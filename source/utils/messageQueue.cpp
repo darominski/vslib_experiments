@@ -3,9 +3,9 @@
 //! @author Martin Cejp
 
 #include <algorithm>
-#include <string.h>
+#include <string>
 
-#include "messageQueue.h"
+#include "messageQueue.hpp"
 
 using std::nullopt;
 

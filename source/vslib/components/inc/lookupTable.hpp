@@ -1,0 +1,159 @@
+//! @file
+//! @brief Defines the Component class for look-up table.
+//! @author Dominik Arominski
+
+#pragma once
+
+#include <cmath>
+#include <string>
+
+#include "component.hpp"
+#include "containerSearch.hpp"
+#include "parameter.hpp"
+#include "typeTraits.hpp"
+
+namespace vslib
+{
+    template<fgc4::utils::NumericScalar IndexType, fgc4::utils::NumericScalar StoredType = IndexType>
+    class LookupTable : public Component
+    {
+      public:
+        //! Defines constructor for LookupTable Component.
+        //!
+        //! @param name Name of this Component
+        //! @param parent Parent of this Component
+        //! @param values Vector with lookup table index-value pairs
+        //! @param equal_binning Flag signalling whether the lookup table indexing has equal spaced binning
+        LookupTable(
+            std::string_view name, Component& parent, std::vector<std::pair<IndexType, StoredType>>&& values,
+            const bool equal_binning = false
+        ) noexcept
+            : Component("LookupTable", name, parent),
+              m_values{std::move(values)}
+        {
+            m_lower_edge_x          = m_values[0].first;
+            m_upper_edge_x          = m_values[m_values.size() - 1].first;
+            m_previous_section_x[0] = m_lower_edge_x;
+            m_previous_section_x[1] = m_lower_edge_x;
+
+            m_bin_size = m_values[1].first - m_values[0].first;
+
+            m_equal_binning = equal_binning;
+        }
+
+        //! Provides an interpolated y-axis value from the stored values closest to the provided x-axis input.
+        //!
+        //! @param input_x X-axis input value
+        //! @param random_access Switch informing if the input_x is coming linearly or randomly, allows for binary
+        //! search optimisation in the latter case
+        //! @return Y-axis value result of the interpolation
+        [[nodiscard]] StoredType interpolate(const IndexType input_x, const bool random_access = false) noexcept
+        {
+            // handle interpolation saturation cases: return the function value at the edge in case of under or overflow
+            if (input_x <= m_lower_edge_x)
+            {
+                return m_values[0].second;
+            }
+
+            if (input_x >= m_upper_edge_x)
+            {
+                return m_values[m_values.size() - 1].second;
+            }
+
+            return interpolate_data(input_x, random_access);
+        }
+
+        //! Provides random-access operator overload to the index-th element of the stored lookup table's y-axis value.
+        //!
+        //! @param index Index of the element to be returned
+        //! @return Y-axis value of the function at the index
+        [[nodiscard]] const StoredType& operator[](const size_t index) const
+        {
+            return m_values[index].second;
+        }
+
+        //! Provides a const reference to the data table.
+        //!
+        //! @return Data table of index-value pairs
+        [[nodiscard]] const auto& getData() const
+        {
+            return m_values;
+        }
+
+        //! Resets the Component to its initial state.
+        void reset() noexcept
+        {
+            m_previous_section_x[0]  = m_lower_edge_x;
+            m_previous_section_x[1]  = m_lower_edge_x;
+            m_previous_section_y     = m_values[0].second;
+            m_previous_section_index = 0;
+        }
+
+      protected:
+        std::array<IndexType, 2> m_previous_section_x;   //!< Edges of the previous section
+        StoredType               m_previous_section_y;   //!< Function's value at the upper edge of the previous section
+
+        size_t m_previous_section_index{0};   //!< Index of the last found section
+        //!< Interpolation helper factor to avoid re-calculation if the same sector is hit
+        StoredType m_interpolation_factor;
+
+        IndexType m_lower_edge_x;   //!< Minimum x-axis value of the stored table
+        IndexType m_upper_edge_x;   //!< Maximum x-axis value of the stored table
+
+        IndexType m_bin_size{0};   //!< Bin size in equal-binning case
+
+        std::vector<std::pair<IndexType, StoredType>> m_values;   //!< Stored table of x-y value pairs
+
+        bool m_equal_binning{false};   //!< Flag informing whether the stored table has equally-binned x-axis
+
+        //! Helper method performing the interpolation.
+        //!
+        //! @param input_x X-axis input value
+        //! @param random_access Flag to inform whether the lookup table is accessed in random order
+        //! @return Y-value corresponding to lookup table close to the provided input_x
+        [[nodiscard]] StoredType interpolate_data(const IndexType input_x, const bool random_access)
+        {
+            size_t start_loop_index = 0;
+            if (input_x >= m_previous_section_x[0])
+            {
+                if (input_x < m_previous_section_x[1])   // same section
+                {
+                    return m_previous_section_y + (input_x - m_previous_section_x[1]) * m_interpolation_factor;
+                }   // else: new section and we need to find new edges
+                start_loop_index = m_previous_section_index;
+            }
+
+            IndexType  x1, x2;
+            StoredType y1, y2;
+            if (m_equal_binning)
+            {
+                // Going branchless with constexpr if and placing m_equal_binning in the template does not provide any
+                // benefit in this case
+
+                // This case provides a 15% speedup for a 100-element lookup table when compared with linear
+                // time monotonic access from the 'else' case.
+
+                utils::index_search(m_values, input_x, m_lower_edge_x, m_bin_size, x1, y1, x2, y2);
+            }
+            else
+            {
+                // Existence of this branch leads to a loss of 1% performance.
+
+                // binary_search performs a binary search, more efficient with random access, while
+                // for monotonic access the linear linear_search should be more efficient assuming that the next
+                // point is relatively close to the previously interpolated one.
+                m_previous_section_index
+                    = random_access ? utils::binary_search(m_values, input_x, start_loop_index, x1, y1, x2, y2)
+                                    : utils::linear_search(m_values, input_x, start_loop_index, x1, y1, x2, y2);
+            }
+
+            m_previous_section_y    = y1;
+            m_previous_section_x[1] = x1;
+            m_previous_section_x[0] = x2;
+            m_interpolation_factor  = (y2 - y1) / (x2 - x1);
+
+            return y1 + (input_x - x1) * m_interpolation_factor;
+        }
+    };
+
+}   // namespace vslib

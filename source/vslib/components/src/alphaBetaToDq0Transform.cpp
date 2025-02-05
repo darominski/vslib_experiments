@@ -1,7 +1,7 @@
 #include <cmath>
 #include <numbers>
 
-#include "alphaBetaToDq0Transform.h"
+#include "alphaBetaToDq0Transform.hpp"
 
 namespace vslib
 {
