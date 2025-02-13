@@ -13,7 +13,8 @@
 #include "peripherals/stream_to_reg.h"
 #include "pops_current_balancing.h"
 #include "pops_current_balancing_old.h"
-#include "pops_dispatcher.h"
+// #include "pops_dispatcher.h"
+#include "halfBridge.h"
 #include "vslib.h"
 
 namespace user
@@ -25,7 +26,9 @@ namespace user
             : vslib::IConverter("example", root),
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
               m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
-              m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000))
+              m_s2r(reinterpret_cast<volatile stream_to_reg*>(0xA0200000)),
+              m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000)),
+              pwm("pwm_1", *this, m_buffer)
         {
             // initialize all your objects that need initializing
         }
@@ -150,6 +153,8 @@ namespace user
         //     converter.counter++;
         // }
 
+        vslib::HalfBridge pwm;
+
       private:
         int counter{0};
 
@@ -158,6 +163,8 @@ namespace user
 
         myModule::StreamToReg m_s2rcpp;
         myModule::RegToStream m_r2scpp;
+
+        uint8_t m_buffer[myModule::StreamToReg::csize()];
     };
 
 }   // namespace user
