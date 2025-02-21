@@ -1,0 +1,32 @@
+//! @file
+//! @brief File containing abstract interface for Parameter.
+//! @author Dominik Arominski
+
+#pragma once
+
+#include <optional>
+
+#include "nonCopyableNonMovable.hpp"
+#include "staticJson.hpp"
+#include "warningMessage.hpp"
+
+namespace vslib
+{
+    class ParameterSerializer;   // forward declaration of serialization visitor
+
+    class IParameter : public NonCopyableNonMovable
+    {
+      public:
+        virtual ~IParameter() = default;
+
+        virtual std::string_view                    getName() const noexcept                             = 0;
+        virtual bool                                isInitialized() const noexcept                       = 0;
+        virtual bool                                isValidated() const noexcept                         = 0;
+        virtual void                                setValidated(const bool) noexcept                    = 0;
+        virtual void                                setInitialized(const bool) noexcept                  = 0;
+        virtual std::optional<fgc4::utils::Warning> setJsonValue(const fgc4::utils::StaticJson&)         = 0;
+        virtual fgc4::utils::StaticJson             serialize(const ParameterSerializer&) const noexcept = 0;
+        virtual void                                syncWriteBuffer()                                    = 0;
+        virtual void                                swapBuffers()                                        = 0;
+    };
+}   // namespace vslib

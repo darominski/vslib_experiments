@@ -1,7 +1,7 @@
 #include <cmath>
 #include <numbers>
 
-#include "instantaneousPowerThreePhase.h"
+#include "instantaneousPowerThreePhase.hpp"
 
 namespace vslib
 {

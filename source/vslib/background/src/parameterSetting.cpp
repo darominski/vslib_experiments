@@ -3,14 +3,14 @@
 //! validation of incoming commands, their execution, and triggering synchronisation of buffers.
 //! @author Dominik Arominski
 
-#include "constants.h"
-#include "errorCodes.h"
+#include "constants.hpp"
+#include "errorCodes.hpp"
 #include "fmt/format.h"
-#include "parameter.h"
-#include "parameterRegistry.h"
-#include "parameterSetting.h"
-#include "versions.h"
-#include "warningMessage.h"
+#include "parameter.hpp"
+#include "parameterRegistry.hpp"
+#include "parameterSetting.hpp"
+#include "versions.hpp"
+#include "warningMessage.hpp"
 
 using namespace fgc4::utils;
 

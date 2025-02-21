@@ -1,6 +1,6 @@
 #include <cmath>
 
-#include "dq0ToAlphaBetaTransform.h"
+#include "dq0ToAlphaBetaTransform.hpp"
 
 namespace vslib
 {
