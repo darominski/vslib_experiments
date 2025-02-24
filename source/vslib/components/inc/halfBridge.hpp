@@ -8,7 +8,6 @@
 
 #include "component.hpp"
 #include "parameter.hpp"
-#include "peripheralInterrupt.hpp"
 #include "peripherals/pwm_hal.hpp"
 
 namespace vslib
@@ -27,18 +26,17 @@ namespace vslib
         //! Starts the PWM IP by enabling the PWMA and PWMB.
         void start() noexcept
         {
-            m_pwm.setDisableA(false);
-            m_pwm.setDisableB(false);
+            m_pwm.setEnableA(true);
+            m_pwm.setEnableB(true);
             m_pwm.setEnable(true);
         }
 
         //! Stops the PWM IP by disabling the PWMA and PWMB.
         void stop() noexcept
         {
-            m_pwm.setDisableA(true);
-            m_pwm.setDisableA(true);
+            m_pwm.setEnableA(false);
+            m_pwm.setEnableB(false);
             m_pwm.setEnable(false);
-            // or kill A/B ?
         }
 
         void reset() noexcept
