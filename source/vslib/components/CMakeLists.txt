@@ -13,6 +13,7 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/dq0ToAbcTransformTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/dq0ToAlphaBetaTransformTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/firFilterTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/halfBridgeTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/iirFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/instantaneousPowerThreePhaseTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitIntegralTest.cpp
@@ -44,17 +45,21 @@ add_executable(${APP}
 
 add_subdirectory(${LIBRARIES_HOME}/csv-parser ${CMAKE_CURRENT_BINARY_DIR}/csv-parser)
 
+set(mmpp_DIR ${LIBRARIES_HOME}/mmpp/build/cmake/mmpp) # if needed
+find_package(mmpp CONFIG REQUIRED)
+
 target_include_directories(${APP} PUBLIC
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../../utils        # FGC4-general utilities
     ${CMAKE_CURRENT_SOURCE_DIR}/../utils/inc       # VSlib-only utilities
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../hal/inc      # Hardware Abstraction Layer
     ${LIBRARIES_HOME}/json-3.11.2
     ${LIBRARIES_HOME}/magic_enum-0.9.3
 )
 
-target_link_libraries(${APP} PUBLIC ${GTEST_LIBRARIES} GTest::gtest pthread dl fmt::fmt csv)
+target_link_libraries(${APP} PUBLIC ${GTEST_LIBRARIES} GTest::gtest pthread dl fmt::fmt csv mmpp::mmpp)
 target_link_options(${APP} PUBLIC  -Wl,-dynamic-linker,/my-lib/ld-2.33.so -Wl,-rpath,/my-lib)
 target_link_options(${APP} PRIVATE -static -static-libgcc -static-libstdc++)
 
