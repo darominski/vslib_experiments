@@ -39,19 +39,8 @@ namespace vslib
             m_pwm.setEnabled(false);
         }
 
-        void reset() noexcept
-        {
-            m_pwm.reset();
-        }
-
-        //! Sets the duty cycle of the PWM. When set to 0.0 (%), the PWM is held low, when set to 100 (%), the PWM is
-        //! held high.
-        //!
-        //! @param duty_cycle Value between 0.0 and 1.0 for the duty cycle of the PWM
-        void setDutyCycle(const float duty_cycle) noexcept
-        {
-            m_pwm.setModulationIndex(duty_cycle);
-        }
+        // ************************************************************
+        // Setters
 
         //! Sets the modulation index.
         //!
