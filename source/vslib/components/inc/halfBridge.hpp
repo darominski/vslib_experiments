@@ -110,6 +110,11 @@ namespace vslib
             return {};
         }
 
+        static auto constexpr size() noexcept
+        {
+            return hal::PWM::size();
+        }
+
       private:
         hal::PWM m_pwm;   //!< PWM IP core HAL
     };
