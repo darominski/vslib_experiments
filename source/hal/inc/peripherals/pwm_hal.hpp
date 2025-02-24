@@ -88,7 +88,7 @@ namespace hal
         //! Sets the enabled status for PWMA.
         //!
         //! @param setting Flag for setting the PWMA enabled status: enabled if true, disabled otherwise
-        void setEnableA(const bool setting) noexcept
+        void setEnabledA(const bool setting) noexcept
         {
             m_regs.dtctrl.disableA.set(!setting);
         }
@@ -96,9 +96,17 @@ namespace hal
         //! Sets the enabled status for PWMB.
         //!
         //! @param setting Flag for setting the PWMB enabled status: enabled if true, disabled otherwise
-        void setEnableB(const bool setting) noexcept
+        void setEnabledB(const bool setting) noexcept
         {
             m_regs.dtctrl.disableB.set(!setting);
+        }
+
+        //! Enables the PWM counters.
+        //!
+        //! @param setting Setting for the counters,
+        void setEnabled(const bool setting) noexcept
+        {
+            m_regs.ctrl.en.set(setting);
         }
 
         //! Sets the inverted status of PWMA.
@@ -108,14 +116,6 @@ namespace hal
         {
             m_regs.dtctrl.inva.set(setting);
             m_regs.dtctrl.invb.set(setting);
-        }
-
-        //! Enables the PWM counters.
-        //!
-        //! @param setting Setting for the counters,
-        void setEnable(const bool setting) noexcept
-        {
-            m_regs.ctrl.en.set(setting);
         }
 
         //! Reads the maximum counter value.

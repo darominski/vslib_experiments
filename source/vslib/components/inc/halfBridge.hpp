@@ -26,17 +26,17 @@ namespace vslib
         //! Starts the PWM IP by enabling the PWMA and PWMB.
         void start() noexcept
         {
-            m_pwm.setEnableA(true);
-            m_pwm.setEnableB(true);
-            m_pwm.setEnable(true);
+            m_pwm.setEnabledA(true);
+            m_pwm.setEnabledB(true);
+            m_pwm.setEnabled(true);
         }
 
         //! Stops the PWM IP by disabling the PWMA and PWMB.
         void stop() noexcept
         {
-            m_pwm.setEnableA(false);
-            m_pwm.setEnableB(false);
-            m_pwm.setEnable(false);
+            m_pwm.setEnabledA(false);
+            m_pwm.setEnabledB(false);
+            m_pwm.setEnabled(false);
         }
 
         void reset() noexcept
