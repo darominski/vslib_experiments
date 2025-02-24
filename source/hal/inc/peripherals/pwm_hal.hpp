@@ -85,20 +85,20 @@ namespace hal
             m_regs.extDeadtime.write(additional_dead_time);
         }
 
-        //! Sets the disabled status for PWMA.
+        //! Sets the enabled status for PWMA.
         //!
-        //! @param setting Flag for setting the PWMA enabled status: disabled if true, enabled otherwise
-        void setDisableA(const bool setting) noexcept
+        //! @param setting Flag for setting the PWMA enabled status: enabled if true, disabled otherwise
+        void setEnableA(const bool setting) noexcept
         {
-            m_regs.dtctrl.disableA.set(setting);
+            m_regs.dtctrl.disableA.set(!setting);
         }
 
-        //! Sets the disabled status for PWMB.
+        //! Sets the enabled status for PWMB.
         //!
-        //! @param setting Flag for setting the PWMB enabled status: disabled if true, enabled otherwise
-        void setDisableB(const bool setting) noexcept
+        //! @param setting Flag for setting the PWMB enabled status: enabled if true, disabled otherwise
+        void setEnableB(const bool setting) noexcept
         {
-            m_regs.dtctrl.disableB.set(setting);
+            m_regs.dtctrl.disableB.set(!setting);
         }
 
         //! Sets the inverted status of PWMA.
