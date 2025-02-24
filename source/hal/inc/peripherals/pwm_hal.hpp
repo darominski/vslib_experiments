@@ -118,12 +118,6 @@ namespace hal
             m_regs.ctrl.en.set(setting);
         }
 
-        //! Resets the registers (which?) to a default state.
-        void reset() noexcept
-        {
-            m_regs.ctrl.reset.set(true);
-        }
-
         //! Reads the maximum counter value.
         //!
         //! @return Maximum counter value in clock ticks
