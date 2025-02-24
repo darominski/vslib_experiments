@@ -18,8 +18,8 @@ namespace vslib
       public:
         FullBridge(std::string_view name, Component& parent, uint8_t* base_address)
             : Component("FullBridge", name, parent),
-              leg_1("leg_1", *this),
-              leg_2("leg_2", *this)
+              leg_1("leg_1", *this, base_address),
+              leg_2("leg_2", *this, base_address + leg_1.size())
         {
         }
 
