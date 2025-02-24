@@ -90,20 +90,12 @@ namespace vslib
             m_pwm.setUpdateType(update_type);
         }
 
-        //! Sets the inverted state of PWMA to a desired setting.
+        //! Sets the inverted state of PWMA and PWMB to a desired setting.
         //!
         //! @param setting New setting for inversion of PWMA: inverted if true, not-inverted otherwise
-        void invertA(const bool setting) noexcept
+        void setInvert(const bool setting) noexcept
         {
-            m_pwm.setInvertA(setting);
-        }
-
-        //! Sets the inverted state of PWMB to a desired setting.
-        //!
-        //! @param setting New setting for inversion of PWMB: inverted if true, not-inverted otherwise
-        void invertB(const bool setting) noexcept
-        {
-            m_pwm.setInvertB(setting);
+            m_pwm.setInvert(setting);
         }
 
         // ************************************************************
