@@ -51,3 +51,7 @@
 
 //! Utils
 #include "fixedPointType.hpp"
+
+//! Pulse Width Modulation
+#include "fullBridge.hpp"
+#include "twoLevelAFE.hpp"
