@@ -4,9 +4,9 @@
 
 #include <gtest/gtest.h>
 
-#include "rootComponent.h"
-#include "rst.h"
-#include "staticJson.h"
+#include "rootComponent.hpp"
+#include "rst.hpp"
+#include "staticJson.hpp"
 
 using namespace vslib;
 

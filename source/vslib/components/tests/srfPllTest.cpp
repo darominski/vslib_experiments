@@ -6,9 +6,9 @@
 #include <gtest/gtest.h>
 
 #include "csv.hpp"
-#include "rootComponent.h"
-#include "srfPll.h"
-#include "staticJson.h"
+#include "rootComponent.hpp"
+#include "srfPll.hpp"
+#include "staticJson.hpp"
 
 using namespace vslib;
 using namespace csv;

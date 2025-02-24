@@ -6,8 +6,8 @@
 #include <cmath>
 #include <gtest/gtest.h>
 
-#include "staticJson.h"
-#include "typeVerification.h"
+#include "staticJson.hpp"
+#include "typeVerification.hpp"
 
 using namespace vslib::utils;
 using namespace fgc4::utils;

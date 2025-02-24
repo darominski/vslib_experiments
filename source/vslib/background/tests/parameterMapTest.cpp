@@ -4,11 +4,11 @@
 
 #include <gtest/gtest.h>
 
-#include "component.h"
+#include "component.hpp"
 #include "json/json.hpp"
-#include "messageQueue.h"
-#include "parameterMap.h"
-#include "rootComponent.h"
+#include "messageQueue.hpp"
+#include "parameterMap.hpp"
+#include "rootComponent.hpp"
 
 using namespace vslib;
 

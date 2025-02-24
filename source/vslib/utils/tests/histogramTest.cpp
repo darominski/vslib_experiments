@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "histogram.h"
+#include "histogram.hpp"
 
 using namespace vslib::utils;
 

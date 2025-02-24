@@ -6,9 +6,9 @@
 #include <gtest/gtest.h>
 
 #include "csv.hpp"
-#include "iirFilter.h"
-#include "rootComponent.h"
-#include "staticJson.h"
+#include "iirFilter.hpp"
+#include "rootComponent.hpp"
+#include "staticJson.hpp"
 
 using namespace vslib;
 using namespace csv;

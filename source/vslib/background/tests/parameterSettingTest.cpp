@@ -5,13 +5,13 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "component.h"
+#include "component.hpp"
 #include "json/json.hpp"
-#include "messageQueue.h"
-#include "parameter.h"
-#include "parameterSetting.h"
-#include "staticJson.h"
-#include "typeTraits.h"
+#include "messageQueue.hpp"
+#include "parameter.hpp"
+#include "parameterSetting.hpp"
+#include "staticJson.hpp"
+#include "typeTraits.hpp"
 
 using namespace vslib;
 

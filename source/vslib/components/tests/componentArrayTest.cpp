@@ -4,10 +4,10 @@
 
 #include <gtest/gtest.h>
 
-#include "component.h"
-#include "componentArray.h"
+#include "component.hpp"
+#include "componentArray.hpp"
 #include "json/json.hpp"
-#include "rootComponent.h"
+#include "rootComponent.hpp"
 
 using namespace vslib;
 

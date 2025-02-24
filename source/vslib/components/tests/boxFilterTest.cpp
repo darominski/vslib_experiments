@@ -5,8 +5,8 @@
 #include <cmath>
 #include <gtest/gtest.h>
 
-#include "boxFilter.h"
-#include "rootComponent.h"
+#include "boxFilter.hpp"
+#include "rootComponent.hpp"
 
 using namespace vslib;
 

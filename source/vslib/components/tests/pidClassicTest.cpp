@@ -4,9 +4,9 @@
 
 #include <gtest/gtest.h>
 
-#include "pidClassic.h"
-#include "rootComponent.h"
-#include "staticJson.h"
+#include "pidClassic.hpp"
+#include "rootComponent.hpp"
+#include "staticJson.hpp"
 
 using namespace vslib;
 

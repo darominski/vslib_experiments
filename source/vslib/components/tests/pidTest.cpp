@@ -6,9 +6,9 @@
 #include <gtest/gtest.h>
 
 #include "csv.hpp"
-#include "pid.h"
-#include "rootComponent.h"
-#include "staticJson.h"
+#include "pid.hpp"
+#include "rootComponent.hpp"
+#include "staticJson.hpp"
 
 using namespace vslib;
 using namespace csv;

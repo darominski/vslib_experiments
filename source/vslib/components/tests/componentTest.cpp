@@ -4,11 +4,11 @@
 
 #include <gtest/gtest.h>
 
-#include "component.h"
+#include "component.hpp"
 #include "json/json.hpp"
-#include "parameter.h"
-#include "parameterRegistry.h"
-#include "rootComponent.h"
+#include "parameter.hpp"
+#include "parameterRegistry.hpp"
+#include "rootComponent.hpp"
 
 using namespace vslib;
 
