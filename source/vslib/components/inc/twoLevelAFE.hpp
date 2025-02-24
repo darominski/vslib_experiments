@@ -18,9 +18,9 @@ namespace vslib
       public:
         TwoLevelAFE(std::string_view name, Component& parent, uint8_t* base_address)
             : Component("TwoLevelActiveFrontEnd", name, parent),
-              leg_1("leg_1", *this),
-              leg_2("leg_2", *this),
-              leg_3("leg_3", *this)
+              leg_1("leg_1", *this, base_address),
+              leg_2("leg_2", *this, base_address + leg_1.size()),
+              leg_3("leg_3", *this, base_address + 2 * leg_1.size())
         {
         }
 
@@ -92,6 +92,6 @@ namespace vslib
       private:
         HalfBridge leg_1;   //!< Leg 1 of the Ftwo-level AFE
         HalfBridge leg_2;   //!< Leg 2 of the two-level AFE
-        HalfBridge leg_2;   //!< Leg 3 of the FUll Bridge
+        HalfBridge leg_3;   //!< Leg 3 of the FUll Bridge
     };
 }
