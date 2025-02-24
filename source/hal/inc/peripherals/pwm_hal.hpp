@@ -126,6 +126,11 @@ namespace hal
             return m_max_counter_value;
         }
 
+        static auto constexpr size() noexcept
+        {
+            return myModule::PwmRegs::csize();
+        }
+
       private:
         myModule::PwmRegs m_regs;
 
