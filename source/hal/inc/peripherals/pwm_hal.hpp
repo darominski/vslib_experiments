@@ -104,16 +104,9 @@ namespace hal
         //! Sets the inverted status of PWMA.
         //!
         //! @param setting Flag for setting the PWMA inverted status: inverted if true, not inverted otherwise
-        void setInvertA(bool setting) noexcept
+        void setInvert(bool setting) noexcept
         {
             m_regs.dtctrl.inva.set(setting);
-        }
-
-        //! Sets the inverted status of PWMB.
-        //!
-        //! @param setting Flag for setting the PWMB inverted status: inverted if true, not inverted otherwise
-        void setInvertB(bool setting) noexcept
-        {
             m_regs.dtctrl.invb.set(setting);
         }
 
