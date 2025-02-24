@@ -23,6 +23,9 @@ namespace vslib
             // right now, base_address is needed
         }
 
+        // ************************************************************
+        // General start/stop methods
+
         //! Starts the PWM IP by enabling the PWMA and PWMB.
         void start() noexcept
         {
@@ -41,6 +44,22 @@ namespace vslib
 
         // ************************************************************
         // Setters
+
+        //! Sets the enabled status for PWMA.
+        //!
+        //! @param setting Flag for setting the PWMA enabled status: enabled if true, disabled otherwise
+        void setEnabledA(const bool setting) noexcept
+        {
+            m_pwm.setEnabledA(setting);
+        }
+
+        //! Sets the enabled status for PWMB.
+        //!
+        //! @param setting Flag for setting the PWMA enabled status: enabled if true, disabled otherwise
+        void setEnabledB(const bool setting) noexcept
+        {
+            m_pwm.setEnabledA(setting);
+        }
 
         //! Sets the modulation index.
         //!
@@ -84,8 +103,12 @@ namespace vslib
         //! @param setting New setting for inversion of PWMA: inverted if true, not-inverted otherwise
         void setInverted(const bool setting) noexcept
         {
-            m_pwm.setInvert(setting);
+            m_pwm.setInverted(setting);
         }
+
+        // ************************************************************
+        // Getters
+
 
         // ************************************************************
         // Owned Parameters
