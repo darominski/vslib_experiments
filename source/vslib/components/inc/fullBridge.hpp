@@ -105,25 +105,6 @@ namespace vslib
             leg_2.setModulationIndex(-modulation_index);
         }
 
-        //! Sets the duty cycle of positive unipolar two-level full bridge.
-        //!
-        //! @param duty_cycle Duty cycle of the full bridge, will be set to leg 2
-        void setDutyCyclePositive(const float duty_cycle) noexcept
-        {
-            leg_1.setDutyCycle(1.0);
-            leg_2.setDutyCycle(duty_cycle);
-        }
-
-
-        //! Sets the duty cycle of negative unipolar two-level full bridge.
-        //!
-        //! @param duty_cycle Duty cycle of the full bridge, will be set to leg 1
-        void setDutyCycleNegative(const float duty_cycle) noexcept
-        {
-            leg_1.setDutyCycle(duty_cycle);
-            leg_2.setDutyCycle(1.0);
-        }
-
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
             return {};
