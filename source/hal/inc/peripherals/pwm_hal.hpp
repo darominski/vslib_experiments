@@ -60,13 +60,13 @@ namespace hal
         //! Configures the PWM to stay high.
         void setHigh() noexcept
         {
-            writeTriggerValue(0);   // or min_modulation_index?
+            writeTriggerValue(0);
         }
 
         //! Configures the PWM to stay low.
         void setLow() noexcept
         {
-            writeTriggerValue(getMaximumCounterValue());   // or max_modulation_index?
+            writeTriggerValue(getMaximumCounterValue());
         }
 
         //! Sets the update type.
