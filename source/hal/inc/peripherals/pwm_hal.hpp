@@ -140,8 +140,6 @@ namespace hal
         float m_min_modulation_index{-1.0};
         //! Maximum modulation index that can be set for this particular PWM.
         float m_max_modulation_index{1.0};
-        //! Maximum duty cycle due to limits imposed on the modulation indices;
-        float m_max_duty_cycle{1.0};
 
         //! Writes to the PWM trigger register, allows to set the trigger for PWM to go high.
         //!
