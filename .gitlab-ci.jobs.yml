@@ -1,7 +1,10 @@
+stages:          # List of stages for jobs, and their order of execution
+  - build
+  - test
+
 # Build VSlib on change of relevant files
 fgc4_vslib_build:
   stage: build
-  needs: []
   timeout: 30 minutes
 
   image: registry.cern.ch/doaromin_test/fgc4-ci:latest
@@ -22,17 +25,11 @@ fgc4_vslib_build:
     paths:
       - $CI_PROJECT_DIR/source/vslib/build-vslib
     when: always
-    expire_in: 6 months
+    expire_in: 1 months
 
   rules:
-    # Do not run this job in scheduled pipelines
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_COMMIT_TAG =~ /^[a-zA-Z_]+-v\d+.*$/'
-      when: never
-
     - changes:
-      - source/*
+      - source
 
 fgc4_vslib_docs:
   stage: build
@@ -56,22 +53,16 @@ fgc4_vslib_docs:
       - $CI_PROJECT_DIR/source/vslib/docs/doxygen
       - $CI_PROJECT_DIR/source/vslib/docs/build
     when: always
-    expire_in: 6 months
+    expire_in: 1 month
 
   rules:
-    # Do not run this job in scheduled pipelines
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_COMMIT_TAG =~ /^[a-zA-Z_]+-v\d+.*$/'
-      when: never
-
     - changes:
-      - source/*
+      - source
 
 # Build and run FGC4 tests on change of files
 fgc4_tests:
   stage: test
-  needs: []
+  needs: [fgc4_vslib_build]
   timeout: 30 minutes
 
   image: registry.cern.ch/doaromin_test/fgc4-ci:latest
@@ -125,8 +116,8 @@ fgc4_tests:
       - $CI_PROJECT_DIR/source/utils/build-utils
       - $CI_PROJECT_DIR/source/vslib/build-vslib-tests
     when: always
-    expire_in: 6 months
+    expire_in: 1 month
 
   rules:
     - changes:
-      - source/*
+      - source
