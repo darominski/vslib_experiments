@@ -182,12 +182,8 @@ namespace vslib
                 if (!parameter.second.get().isValidated())
                 {
                     // if Parameter has not been previously validated, the currently set Parameters
-                    // are not correct and the entire initialization process needs revoking
+                    // are not correct and the entire initialization process needs to be rolled back
                     parameter.second.get().setInitialized(false);
-                }
-                else
-                {
-                    parameter.second.get().setValidated(false);
                 }
             }
         }

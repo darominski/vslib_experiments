@@ -574,6 +574,8 @@ TEST_F(ParameterSettingTest, CheckRevokeValidation)
 
     EXPECT_TRUE(component_1.parametersInitialized());
     EXPECT_FALSE(component_2.parametersInitialized());
+    EXPECT_TRUE(component_1.parameter.isValidated());
+    EXPECT_FALSE(component_2.parameter.isValidated());
 
     // ensures that despite incorrect input, the value has not been modified after flipping the buffer:
     component_1.flipBufferState();
@@ -587,8 +589,8 @@ TEST_F(ParameterSettingTest, CheckRevokeValidation)
     EXPECT_TRUE(component_1.parameter.isValidated());   // the Parameter should still be validated
 
     parameter_setting.validateComponents();
-    EXPECT_FALSE(component_1.parameter.isValidated());    // the Parameter should be invalidated
-    EXPECT_TRUE(component_1.parameter.isInitialized());   // but not un-initialized
+    EXPECT_TRUE(component_1.parameter.isValidated());     // the Parameter should still be valid
+    EXPECT_TRUE(component_1.parameter.isInitialized());   // and still initialized
 
     // Parameter has been previously validated: the initialized flag is not revoked
     EXPECT_TRUE(component_1.parametersInitialized());
