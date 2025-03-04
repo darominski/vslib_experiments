@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <string>
+#include <tuple>
 
 #include "component.hpp"
 #include "cosLookupTable.hpp"

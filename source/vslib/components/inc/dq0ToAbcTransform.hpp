@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <tuple>
 
 #include "alphaBetaToAbcTransform.hpp"
 #include "component.hpp"
