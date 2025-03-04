@@ -29,32 +29,28 @@ namespace hal
             const uint32_t min_switch_time
                 = m_regs.minSwitchTimeSc.read();   // minimum ON or OFF switch time, in clock cycles
             // max counter value serves as period in clock cycles
-            m_max_modulation_index
-                = static_cast<float>(2 * (m_max_counter_value - min_switch_time + dead_time) / m_max_counter_value + 1);
+
             m_min_modulation_index
-                = -(2.0 * static_cast<float>((m_max_counter_value - min_switch_time - dead_time) / m_max_counter_value)
-                    - 1.0);
-            m_max_duty_cycle = 0.5 * (m_max_modulation_index - m_min_modulation_index);
+                = 1.0 - static_cast<float>((m_max_counter_value - min_switch_time - dead_time) / m_max_counter_value);
+            m_max_modulation_index
+                = static_cast<float>(m_max_counter_value - min_switch_time - dead_time) / (m_max_counter_value);
         }
 
         //! Sets the desired modulation index.
         //!
-        //! @param index Modulation index to be used, limited from -1 to 1 (at maximum)
-        void setModulationIndex(const float modulation_index) noexcept
+        //! @param index Modulation index to be used, limited from 0 to 1 (at maximum)
+        //! @return
+        bool setModulationIndex(const float modulation_index) noexcept
         {
             const float index     = forceLimit(modulation_index, m_min_modulation_index, m_max_modulation_index);
-            const float threshold = getMaximumCounterValue() * (0.5 * (index + 1));
+            const float threshold = getMaximumCounterValue() * index;
+            if (isnanf(threshold))
+            {
+                // avoid setting NaN to register, return early
+                return false;
+            }
             writeTriggerValue(static_cast<uint32_t>(threshold));
-        }
-
-        //! Configures the desired duty cycle for the PWM.
-        //!
-        //! @param fraction Duty cycle fraction percentage, 0-1 (at maximum)
-        void setDutyCycle(const float duty_cycle) noexcept
-        {
-            const float fraction  = forceLimit(duty_cycle, 0.0, m_max_duty_cycle);
-            const float threshold = getMaximumCounterValue() * (m_max_modulation_index - fraction);
-            writeTriggerValue(static_cast<uint32_t>(threshold));
+            return (index == modulation_index);
         }
 
         //! Configures the PWM to stay high.
