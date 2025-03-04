@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "component.hpp"
@@ -12,7 +13,7 @@
 
 namespace vslib
 {
-    template<typename ComponentType, size_t N>
+    template<typename ComponentType, size_t array_length>
     class ComponentArray : public Component
     {
       public:
@@ -52,7 +53,7 @@ namespace vslib
         }
 
       private:
-        std::array<std::unique_ptr<ComponentType>, N> m_components;   //!< Array of owned Components
+        std::array<std::unique_ptr<ComponentType>, array_length> m_components;   //!< Array of owned Components
 
         template<typename... CurrentSettings>
         void createComponents(const std::string& name_base, const size_t index, CurrentSettings... settings)
@@ -61,7 +62,7 @@ namespace vslib
             m_components[index]
                 = std::make_unique<ComponentType>(name_base + "[" + std::to_string(index) + "]", *this, settings...);
             // Recursively create the rest of the components
-            if (N > (index + 1))
+            if (array_length > (index + 1))
             {
                 createComponents<CurrentSettings...>(name_base, index + 1, settings...);
             }
@@ -73,7 +74,7 @@ namespace vslib
         class IteratorWrapper
         {
           public:
-            IteratorWrapper(typename std::array<std::unique_ptr<ComponentType>, N>::iterator iter)
+            explicit IteratorWrapper(typename std::array<std::unique_ptr<ComponentType>, array_length>::iterator iter)
                 : m_iter(iter)
             {
             }
@@ -97,7 +98,7 @@ namespace vslib
             }
 
           private:
-            typename std::array<std::unique_ptr<ComponentType>, N>::iterator m_iter;
+            typename std::array<std::unique_ptr<ComponentType>, array_length>::iterator m_iter;
         };
     };
 
