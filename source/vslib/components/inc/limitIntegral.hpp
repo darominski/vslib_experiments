@@ -12,7 +12,7 @@
 
 namespace vslib
 {
-    template<fgc4::utils::NumericScalar T, size_t TimeWindowLength = 16>
+    template<fgc4::utils::NumericScalar T, size_t time_window_length = 16>
     class LimitIntegral : public Component
     {
       public:
@@ -23,7 +23,7 @@ namespace vslib
         LimitIntegral(std::string_view name, Component& parent)
             : Component("LimitIntegral", name, parent),
               integral_limit(*this, "integral_limit"),
-              integral_limit_window_length(*this, "integral_limit_time_window", 0, TimeWindowLength)
+              integral_limit_window_length(*this, "integral_limit_time_window", 0, time_window_length)
         {
         }
 
@@ -74,6 +74,6 @@ namespace vslib
 
         T m_cumulative{T{}};   //!< Holds cumulative value over the time window
 
-        std::array<T, TimeWindowLength> m_integral_buffer{0};   //!< Container with provided inputs
+        std::array<T, time_window_length> m_integral_buffer{0};   //!< Container with provided inputs
     };
 }   // namespace vslib

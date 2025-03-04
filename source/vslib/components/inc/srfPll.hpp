@@ -15,7 +15,6 @@ namespace vslib
 {
     class SRFPLL : public Component
     {
-
       public:
         //! Synchronous Reference Frame PLL constructor. Allows to set the name of the Component, set this controller as
         //! a child of a given parent Component, and specify an anti-windup function, which by default does not do
@@ -38,9 +37,9 @@ namespace vslib
         //! @param b B-phase component of the three-phase system
         //! @param c C-phase component of the three-phase system
         //! @return Balanced angle (omega t), always fits in 0 to 2pi values
-        [[nodiscard]] double synchronise(const double a, const double b, const double c) noexcept
+        [[nodiscard]] double synchronise(const double f_a, const double f_b, const double f_c) noexcept
         {
-            const auto [d, q, zero] = abc_2_dq0.transform(a, b, c, m_wt);
+            const auto [d, q, zero] = abc_2_dq0.transform(f_a, f_b, f_c, m_wt);
 
             // for consistency with Matlab, forward-Euler method is used instead of trapezoid
             // integration

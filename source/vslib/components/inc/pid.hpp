@@ -44,8 +44,8 @@ namespace vslib
 
         //! Updates histories of measurements and references and moves the head of the history buffer.
         //!
-        //! @param measurement Current value of the process value
         //! @param reference Current value of the set-point reference
+        //! @param measurement Current value of the process value
         void updateInputHistories(const double reference, const double measurement) noexcept
         {
             rst.updateInputHistories(reference, measurement);
@@ -197,21 +197,21 @@ namespace vslib
             }
             if (!m_1dof && (k_p != 0.0 || k_d != 0))
             {
-                const double kikpN = k_i * k_p * N_;
+                const double ki_kp_N = k_i * k_p * N_;
 
-                m_r[0] = (kikpN + k_d * k_i * a + k_d * k_p * a2 + pow(k_p, 2) * N_ * a + k_d * k_p * N_ * a2) / a2;
-                m_r[1] = 2.0 * (kikpN - k_d * k_p * a2 - k_d * k_p * N_ * a2) / a2;
-                m_r[2] = (kikpN - k_d * k_i * a + k_d * k_p * a2 - pow(k_p, 2) * N_ * a + k_d * k_p * N_ * a2) / a2;
+                m_r[0] = (ki_kp_N + k_d * k_i * a + k_d * k_p * a2 + pow(k_p, 2) * N_ * a + k_d * k_p * N_ * a2) / a2;
+                m_r[1] = 2.0 * (ki_kp_N - k_d * k_p * a2 - k_d * k_p * N_ * a2) / a2;
+                m_r[2] = (ki_kp_N - k_d * k_i * a + k_d * k_p * a2 - pow(k_p, 2) * N_ * a + k_d * k_p * N_ * a2) / a2;
 
                 m_s[0] = (k_d * a2 + k_p * N_ * a) / a2;
                 m_s[1] = -2.0 * k_d;
                 m_s[2] = (k_d * a2 - k_p * N_ * a) / a2;
 
-                m_t[0] = (kikpN + k_d * k_i * a + k_d * k_ff * a2 + k_d * k_p * a2 * b_ + pow(k_p, 2) * N_ * a * b_
+                m_t[0] = (ki_kp_N + k_d * k_i * a + k_d * k_ff * a2 + k_d * k_p * a2 * b_ + pow(k_p, 2) * N_ * a * b_
                           + k_ff * k_p * N_ * a + k_d * k_p * N_ * a2 * c_)
                          / a2;
-                m_t[1] = 2 * (kikpN - k_d * k_ff * a2 - k_d * k_p * a2 * b_ - k_d * k_p * N_ * a2 * c_) / a2;
-                m_t[2] = (kikpN - k_d * k_i * a + k_d * k_ff * a2 + k_d * k_p * a2 * b_ - pow(k_p, 2) * N_ * a * b_
+                m_t[1] = 2 * (ki_kp_N - k_d * k_ff * a2 - k_d * k_p * a2 * b_ - k_d * k_p * N_ * a2 * c_) / a2;
+                m_t[2] = (ki_kp_N - k_d * k_i * a + k_d * k_ff * a2 + k_d * k_p * a2 * b_ - pow(k_p, 2) * N_ * a * b_
                           - k_ff * k_p * N_ * a + k_d * k_p * N_ * a2 * c_)
                          / a2;
             }

@@ -25,9 +25,11 @@ namespace vslib
       public:
         //! Constructor for PeripheralInterrupt.
         //!
-        //! @param handler_function Function to be called when the interrupt triggers
+        //! @param name Name identifier for this interrupt
+        //! @param converter Reference to the parent converter object
         //! @param interrupt_id Platform-dependent interrupt ID
         //! @param priority Priority level of the interrupt
+        //! @param handler_function Function to be called when the interrupt triggers
         PeripheralInterrupt(
             std::string_view name, Converter& converter, const int interrupt_id, const InterruptPriority priority,
             std::function<void(Converter&)> handler_function

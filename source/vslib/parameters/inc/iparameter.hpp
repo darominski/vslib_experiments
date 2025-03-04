@@ -19,14 +19,14 @@ namespace vslib
       public:
         virtual ~IParameter() = default;
 
-        virtual std::string_view                    getName() const noexcept                             = 0;
-        virtual bool                                isInitialized() const noexcept                       = 0;
-        virtual bool                                isValidated() const noexcept                         = 0;
-        virtual void                                setValidated(const bool) noexcept                    = 0;
-        virtual void                                setInitialized(const bool) noexcept                  = 0;
-        virtual std::optional<fgc4::utils::Warning> setJsonValue(const fgc4::utils::StaticJson&)         = 0;
-        virtual fgc4::utils::StaticJson             serialize(const ParameterSerializer&) const noexcept = 0;
-        virtual void                                syncWriteBuffer()                                    = 0;
-        virtual void                                swapBuffers()                                        = 0;
+        [[nodiscard]] virtual std::string_view        getName() const noexcept                             = 0;
+        [[nodiscard]] virtual bool                    isInitialized() const noexcept                       = 0;
+        [[nodiscard]] virtual bool                    isValidated() const noexcept                         = 0;
+        virtual void                                  setValidated(const bool) noexcept                    = 0;
+        virtual void                                  setInitialized(const bool) noexcept                  = 0;
+        virtual std::optional<fgc4::utils::Warning>   setJsonValue(const fgc4::utils::StaticJson&)         = 0;
+        [[nodiscard]] virtual fgc4::utils::StaticJson serialize(const ParameterSerializer&) const noexcept = 0;
+        virtual void                                  syncWriteBuffer()                                    = 0;
+        virtual void                                  swapBuffers()                                        = 0;
     };
 }   // namespace vslib

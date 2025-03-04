@@ -10,7 +10,7 @@ namespace vslib::utils
 {
 
     // The schema is defined based upon a string literal
-    static nlohmann::json json_command_schema = R"(
+    static const nlohmann::json json_command_schema = R"(
     {
     "title": "Command",
     "description": "Command with a new value to be set",

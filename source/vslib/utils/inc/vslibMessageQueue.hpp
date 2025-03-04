@@ -22,12 +22,11 @@ namespace vslib::utils
     //!
     //! @param message Reference to the shared memory object
     //! @return Static JSON object parsed from shared memory
-    fgc4::utils::StaticJson readJsonFromMessageQueue(std::span<uint8_t>& message);
+    const fgc4::utils::StaticJson readJsonFromMessageQueue(std::span<uint8_t>& message);
 
     //! Helper function to write string object from the message and deserialize it.
     //!
     //! @param message Reference to the string to be written to the queue
     //! @param message_queue Reference to the shared memory object
-    //! @return Static JSON object parsed from shared memory
     void writeStringToMessageQueue(const std::string& message, fgc4::utils::MessageQueueWriter<void>& message_queue);
 }   // namespace vslib::utils

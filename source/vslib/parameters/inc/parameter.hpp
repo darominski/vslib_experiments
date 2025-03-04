@@ -34,7 +34,7 @@ namespace vslib
     // ************************************************************
     // Helper definitions to define the type for min/max limits for parameters
 
-    template<typename T, bool IsArray>
+    template<typename T, bool is_array>
     struct LimitTypeHelper
     {
         using type = T;
@@ -329,8 +329,8 @@ namespace vslib
         // ************************************************************
 
       private:
-        const std::string m_name;     //!< Name of this Parameter
-        Component&        m_parent;   //!< Component owning this Parameter
+        std::string m_name;     //!< Name of this Parameter
+        Component&  m_parent;   //!< Component owning this Parameter
 
         std::array<T, number_buffers> m_value{T{}, T{}};   //!< Double-buffered value stored by this Parameter
 

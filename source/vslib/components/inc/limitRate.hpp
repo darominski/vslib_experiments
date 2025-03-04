@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cmath>
+#include <limits>
 #include <string>
 
 #include "component.hpp"
@@ -61,7 +62,7 @@ namespace vslib
                 m_previous_value_set = true;
                 return input;
             }
-            const double rate = abs(input - m_previous_value) / time_difference;
+            const double rate = fabs(input - m_previous_value) / time_difference;
             if (rate > change_rate)
             {
                 // maximal input to not violate the rate of change

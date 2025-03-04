@@ -42,12 +42,7 @@ namespace vslib
             // calculation re-implemented from regLimRmsRT
             m_cumulative += (pow(input, 2) - m_cumulative) * m_filter_factor;
 
-            if (m_cumulative > m_rms_limit2)
-            {
-                return false;
-            }
-
-            return true;
+            return (m_cumulative < m_rms_limit2);
         }
 
         //! Resets this Limit Component to the initial state of buffers and buffer pointers.
@@ -67,9 +62,9 @@ namespace vslib
         }
 
       private:
-        double m_iteration_period;   //!< Iteration period for this Limit
-        double m_cumulative{0};      //!< Cumulative of the squared inputs
-        double m_filter_factor;      //!< Convenience factor to avoid re-calculation each call to limit
-        double m_rms_limit2;         //!< optimisation method to not recalculate limit to the power of 2
+        double m_iteration_period{0.0};   //!< Iteration period for this Limit
+        double m_cumulative{0.0};         //!< Cumulative of the squared inputs
+        double m_filter_factor{0.0};      //!< Convenience factor to avoid re-calculation each call to limit
+        double m_rms_limit2{0.0};         //!< optimisation method to not recalculate limit to the power of 2
     };
 }   // namespace vslib

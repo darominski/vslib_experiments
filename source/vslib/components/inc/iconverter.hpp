@@ -18,10 +18,12 @@ namespace vslib
         {
         }
 
+        virtual ~IConverter() = default;
+
         //! Method to be filled with initialization logic when the binary is fully configured.
         void virtual init() = 0;
 
         //! Background task to be executed at each iteration in the spare time, non real-time.
         void virtual backgroundTask() = 0;
     };
-}
+}   // namespace vslib

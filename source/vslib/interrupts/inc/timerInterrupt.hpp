@@ -16,6 +16,8 @@ namespace vslib
       public:
         //! Constructor for TimerInterrupt.
         //!
+        //! @param name Name identifier for this interrupt
+        //! @param converter Reference to the parent converter object
         //! @param handler_function Function to be called when an interrupt triggers
         //! @param delay Delay between interrupts in integer increments of a microsecond
         TimerInterrupt(
@@ -58,7 +60,7 @@ namespace vslib
         }
 
         //! Returns the delay in microseconds.
-        int64_t getDelay() const
+        [[nodiscard]] int64_t getDelay() const
         {
             return m_delay.count();
         }

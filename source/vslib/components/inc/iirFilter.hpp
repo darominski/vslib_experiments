@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <string>
 
@@ -61,7 +62,7 @@ namespace vslib
 
         //! Filters the provided input array by filtering each element of the input.
         //!
-        //! @param input Array with input values to be filtered
+        //! @param inputs Array with input values to be filtered
         //! @return Array with the filtered values
         template<size_t N>
         [[nodiscard]] std::array<double, N> filter(const std::array<double, N>& inputs)

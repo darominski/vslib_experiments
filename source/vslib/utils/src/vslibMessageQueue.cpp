@@ -29,7 +29,7 @@ namespace vslib::utils
         }
     }
 
-    fgc4::utils::StaticJson readJsonFromMessageQueue(std::span<uint8_t>& message)
+    const fgc4::utils::StaticJson readJsonFromMessageQueue(std::span<uint8_t>& message)
     {
         auto json_object = fgc4::utils::StaticJsonFactory::getJsonObject();
         try

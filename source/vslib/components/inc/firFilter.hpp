@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <string>
 
@@ -56,7 +57,7 @@ namespace vslib
 
         //! Filters the provided input array by convolving coefficients and the input.
         //!
-        //! @param input Input values to be filtered
+        //! @param inputs Input values to be filtered
         //! @return Filtered values
         template<size_t N>
         [[nodiscard]] std::array<double, N> filter(const std::array<double, N>& inputs)

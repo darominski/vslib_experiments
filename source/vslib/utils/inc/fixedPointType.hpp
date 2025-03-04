@@ -18,10 +18,9 @@ namespace vslib
     //! Please note that no overflow nor underflow check is ever performed, just like with the standard C++ plain-old
     //! data types. The maximal value that can be stored without internal overflow is defined by the number of bits left
     //! for the exponent part and is accessible via maximumValue() public method.
-    template<unsigned short FractionalBits, fgc4::utils::Integral T = int64_t>
+    template<int16_t fractional_bits, fgc4::utils::Integral T = int64_t>
     class FixedPoint
     {
-
       public:
         //! Default constructor, stored value initialized to zero.
         FixedPoint()
@@ -86,7 +85,7 @@ namespace vslib
         //! @param other Fixed-point value to be the multiplicand
         void operator*=(const FixedPoint& other)
         {
-            m_value = (this->m_value * other.m_value + m_fractional_rounding) >> FractionalBits;
+            m_value = (this->m_value * other.m_value + m_fractional_rounding) >> fractional_bits;
         }
 
         //! Overload to handle dividing the already-existing object's value by a FixedPoint object's value
@@ -94,7 +93,7 @@ namespace vslib
         //! @param Fixed-point value to be the divisor
         void operator/=(const FixedPoint& other)
         {
-            m_value = (m_value << FractionalBits) / other.m_value;
+            m_value = (m_value << fractional_bits) / other.m_value;
         }
 
         //! Operator overload providing all 5 relationship checks, will only work where the number of fractional bits
@@ -127,7 +126,7 @@ namespace vslib
         FixedPoint operator*(const FixedPoint& other) const
         {
             FixedPoint result;
-            result.m_value = (this->m_value * other.m_value + m_fractional_rounding) >> FractionalBits;
+            result.m_value = (this->m_value * other.m_value + m_fractional_rounding) >> fractional_bits;
             return result;
         }
 
@@ -137,7 +136,7 @@ namespace vslib
         FixedPoint operator/(const FixedPoint& other) const
         {
             FixedPoint result;
-            result.m_value = (this->m_value << FractionalBits) / other.m_value;
+            result.m_value = (this->m_value << fractional_bits) / other.m_value;
             return result;
         }
 
@@ -151,18 +150,18 @@ namespace vslib
 
         //!< Maximum value that can be stored by the fixed-point object
         inline static constexpr double maximum_value{
-            pow(2, sizeof(T) * 8 - FractionalBits - 1)};   // 8 bits per byte, -1 for sign
+            pow(2, sizeof(T) * 8 - fractional_bits - 1)};   // 8 bits per byte, -1 for sign
 
         //!< Representation precision of the fixed-point object
-        inline static constexpr double representation_precision{pow(2, -FractionalBits)};
+        inline static constexpr double representation_precision{pow(2, -fractional_bits)};
 
       private:
         T m_value;   //!< value stored by the FixedPoint type
         //!< Helper method holding the fractional bit shift
-        inline static constexpr double m_fractional_shift{static_cast<double>(T(1) << FractionalBits)};
-        inline static constexpr float  m_float_fractional_shift{static_cast<float>(T(1) << FractionalBits)};
+        inline static constexpr double m_fractional_shift{static_cast<double>(T(1) << fractional_bits)};
+        inline static constexpr float  m_float_fractional_shift{static_cast<float>(T(1) << fractional_bits)};
         //!< Helper method holding the fractional rounding
-        inline static constexpr T m_fractional_rounding{T(1) << (FractionalBits - 1)};
+        inline static constexpr T m_fractional_rounding{T(1) << (fractional_bits - 1)};
     };
 
 }   // namespace vslib

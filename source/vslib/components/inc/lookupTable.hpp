@@ -6,6 +6,8 @@
 
 #include <cmath>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "component.hpp"
 #include "containerSearch.hpp"
@@ -60,7 +62,7 @@ namespace vslib
                 return m_values[m_values.size() - 1].second;
             }
 
-            return interpolate_data(input_x, random_access);
+            return interpolateData(input_x, random_access);
         }
 
         //! Provides random-access operator overload to the index-th element of the stored lookup table's y-axis value.
@@ -111,7 +113,7 @@ namespace vslib
         //! @param input_x X-axis input value
         //! @param random_access Flag to inform whether the lookup table is accessed in random order
         //! @return Y-value corresponding to lookup table close to the provided input_x
-        [[nodiscard]] StoredType interpolate_data(const IndexType input_x, const bool random_access)
+        [[nodiscard]] StoredType interpolateData(const IndexType input_x, const bool random_access)
         {
             size_t start_loop_index = 0;
             if (input_x >= m_previous_section_x[0])
@@ -133,7 +135,7 @@ namespace vslib
                 // This case provides a 15% speedup for a 100-element lookup table when compared with linear
                 // time monotonic access from the 'else' case.
 
-                utils::index_search(m_values, input_x, m_lower_edge_x, m_bin_size, x1, y1, x2, y2);
+                utils::indexSearch(m_values, input_x, m_lower_edge_x, m_bin_size, x1, y1, x2, y2);
             }
             else
             {
@@ -143,8 +145,8 @@ namespace vslib
                 // for monotonic access the linear linear_search should be more efficient assuming that the next
                 // point is relatively close to the previously interpolated one.
                 m_previous_section_index
-                    = random_access ? utils::binary_search(m_values, input_x, start_loop_index, x1, y1, x2, y2)
-                                    : utils::linear_search(m_values, input_x, start_loop_index, x1, y1, x2, y2);
+                    = random_access ? utils::binarySearch(m_values, input_x, start_loop_index, x1, y1, x2, y2)
+                                    : utils::linearSearch(m_values, input_x, start_loop_index, x1, y1, x2, y2);
             }
 
             m_previous_section_y    = y1;

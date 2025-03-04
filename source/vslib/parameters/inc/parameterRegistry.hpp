@@ -53,17 +53,16 @@ namespace vslib
         //! Checks if all parameters in the registry have been initialized.
         //!
         //! @return True if all parameters in the registry have been initialized, false otherwise.
-        bool parametersInitialized() const noexcept;
-
+        [[nodiscard]] bool parametersInitialized() const noexcept;
 
         //! Checks if all parameters in the registry have been validated.
         //!
         //! @return True if all parameters in the registry have been validated, false otherwise.
-        bool parametersValidated() const noexcept;
+        [[nodiscard]] bool parametersValidated() const noexcept;
 
       private:
-        ParameterRegistry() = default;                            //!< Default constructor
-        std::map<std::string, ParameterReference> m_parameters;   //!< Map holding references to all Parameters
+        ParameterRegistry() = default;                              //!< Default constructor
+        std::map<std::string, ParameterReference> m_parameters{};   //!< Map holding references to all Parameters
 
         //! Checks the name formatting of the provided full parameter name and throws an exception if the name
         //! is not-conforming.

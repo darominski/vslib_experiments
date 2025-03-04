@@ -5,6 +5,7 @@
 #pragma once
 
 #include <functional>
+#include <string>
 
 #include "histogram.hpp"
 #include "iconverter.hpp"
@@ -22,6 +23,8 @@ namespace vslib
       public:
         //! Constructor for the Interrupt class.
         //!
+        //! @param name Name identifier for this interrupt
+        //! @param converter Reference to the parent converter object
         //! @param handler_function Function to be executed when an interrupt is triggered
         Interrupt(std::string_view name, Converter& converter, std::function<void(Converter&)> handler_function)
             : m_name(name)
@@ -46,9 +49,7 @@ namespace vslib
 #endif
         }
 
-        virtual ~Interrupt()   = default;
-        Interrupt(Interrupt&)  = delete;
-        Interrupt(Interrupt&&) = delete;
+        virtual ~Interrupt() = default;
 
         //! Starts the interrupt
         virtual void start() = 0;
@@ -100,7 +101,7 @@ namespace vslib
 
 #endif
       protected:
-        std::string const         m_name;                //!< Interrupt name
+        std::string               m_name;                //!< Interrupt name
         std::function<void(void)> m_interrupt_handler;   //!< Function to be called during the interrupt
 
 #ifdef PERFORMANCE_TESTS

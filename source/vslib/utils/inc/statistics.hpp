@@ -40,4 +40,4 @@ namespace vslib::utils
         return sqrt(square_sum / (static_cast<double>(data.size()) - 1));
     }
 
-}   // namespace vslib
+}   // namespace vslib::utils

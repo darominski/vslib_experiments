@@ -7,6 +7,7 @@
 #include <array>
 #include <cstdint>
 #include <optional>
+#include <string>
 
 #include "warningMessage.hpp"
 
@@ -17,7 +18,7 @@ namespace vslib
     {
       public:
         //! Default constructor for RSTController class.
-        RSTController(std::string_view name)
+        explicit RSTController(std::string_view name)
             : m_name(name)
         {
         }
@@ -95,7 +96,7 @@ namespace vslib
         void updateReferenceOpenLoop(const double updated_actuation)
         {
             // based on logic of regRstCalcRefRT from CCLIBS libreg's regRst.c for open loop calculation
-            size_t prev_head = m_head - 1;
+            const int64_t prev_head = m_head - 1;
             if (m_head == 0)
             {
                 prev_head = buffer_length - 1;

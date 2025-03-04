@@ -62,11 +62,11 @@ namespace vslib
                 input_x += this->m_lower_edge_x;
             }
 
-            return this->interpolate_data(input_x, random_access);
+            return this->interpolateData(input_x, random_access);
         }
 
       private:
-        IndexType m_span_x;   //!< Range of x values covered by the held data table
+        IndexType m_span_x{IndexType{}};   //!< Range of x values covered by the held data table
     };
 
 }   // namespace vslib
