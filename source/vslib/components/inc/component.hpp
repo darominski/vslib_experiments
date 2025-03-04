@@ -6,6 +6,8 @@
 
 #include <array>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "iparameter.hpp"
 #include "nonCopyableNonMovable.hpp"
@@ -200,8 +202,8 @@ namespace vslib
         std::string m_name;             //!< Name of this Component
         std::string m_full_name;        //!< Full name of this component, including hierarchy
 
-        ChildrenList  m_children;     //!< Container with all children component registered to this component
-        ParameterList m_parameters;   //!< Container with all Parameters registered to this component
+        ChildrenList  m_children{};     //!< Container with all children component registered to this component
+        ParameterList m_parameters{};   //!< Container with all Parameters registered to this component
 
       private:
         //! Creates the Component object with the provided type, name. Intended for creating the root Component.
