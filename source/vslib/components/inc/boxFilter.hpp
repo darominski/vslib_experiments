@@ -14,14 +14,14 @@
 
 namespace vslib
 {
-    template<int64_t FilterOrder, double maximalFilteredValue = 1e5>
+    template<int64_t filter_order, double maximal_filtered_value = 1e5>
     class BoxFilter : public Filter
     {
-        constexpr static int64_t buffer_length = FilterOrder + 1;
+        constexpr static int64_t buffer_length = filter_order + 1;
 
       public:
         //!< 8 is the number of bits per byte, -1 is for the sign
-        constexpr uint64_t static fractional_bits = sizeof(int64_t) * 8 - 1 - std::ceil(log2(maximalFilteredValue));
+        constexpr int64_t static fractional_bits = sizeof(int64_t) * 8 - 1 - std::ceil(log2(maximal_filtered_value));
 
         //! Constructor of the Box filter Component.
         //!
@@ -30,7 +30,7 @@ namespace vslib
         BoxFilter(std::string_view name, Component& parent)
             : Filter("BoxFilter", name, parent)
         {
-            static_assert(FilterOrder >= 1, "Filter order needs to be a positive number larger than zero.");
+            static_assert(filter_order >= 1, "Filter order needs to be a positive number larger than zero.");
         }
 
         //! Filters the provided input by calculating the moving average of the buffer of previously
@@ -80,7 +80,6 @@ namespace vslib
     template<>
     class BoxFilter<1> : public Filter
     {
-
       public:
         //! Constructor of the box filter component
         BoxFilter(std::string_view name, Component& parent)
@@ -117,7 +116,6 @@ namespace vslib
     template<>
     class BoxFilter<2> : public Filter
     {
-
       public:
         //! Constructor of the box filter component
         BoxFilter(std::string_view name, Component& parent)

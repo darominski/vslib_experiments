@@ -14,7 +14,7 @@
 
 namespace vslib
 {
-    template<size_t Order>
+    template<int64_t order>
     class RST : public Component
     {
       public:
@@ -115,9 +115,9 @@ namespace vslib
         // ************************************************************
         // Settable Parameters
 
-        Parameter<std::array<double, Order + 1>> r;   //!< reference coefficients
-        Parameter<std::array<double, Order + 1>> s;   //!< disturbance coefficients
-        Parameter<std::array<double, Order + 1>> t;   //!< control coefficients
+        Parameter<std::array<double, order + 1>> r;   //!< reference coefficients
+        Parameter<std::array<double, order + 1>> s;   //!< disturbance coefficients
+        Parameter<std::array<double, order + 1>> t;   //!< control coefficients
 
         // ************************************************************
         // Limits of the controller's actuation
@@ -169,6 +169,6 @@ namespace vslib
         }
 
       private:
-        RSTController<Order + 1> rst;   //!< RST controller responsible for the control logic
+        RSTController<order + 1> rst;   //!< RST controller responsible for the control logic
     };
 }   // namespace vslib

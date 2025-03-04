@@ -12,10 +12,10 @@
 
 namespace vslib
 {
-    template<int64_t FilterOrder>
+    template<int64_t filter_order>
     class IIRFilter : public Filter
     {
-        constexpr static int64_t buffer_length = FilterOrder + 1;
+        constexpr static int64_t buffer_length = filter_order + 1;
 
       public:
         //! Constructor of the IIR filter Component, initializing two Parameters: numerator and denominator coefficient
@@ -28,7 +28,7 @@ namespace vslib
               numerator(*this, "numerator_coefficients"),
               denominator(*this, "denominator_coefficients")
         {
-            static_assert(FilterOrder >= 1, "Filter order needs to be a positive number larger than zero.");
+            static_assert(filter_order >= 1, "Filter order needs to be a positive number larger than zero.");
         }
 
         //! Filters the provided input by convolving coefficients and the input, including previous inputs

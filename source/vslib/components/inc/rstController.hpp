@@ -12,7 +12,7 @@
 
 namespace vslib
 {
-    template<size_t ControllerLength>
+    template<int64_t buffer_length>
     class RSTController
     {
       public:
@@ -31,7 +31,7 @@ namespace vslib
             m_references[m_head]   = reference;
             m_measurements[m_head] = measurement;
             m_head++;
-            if (m_head == (ControllerLength - 1))
+            if (m_head == (buffer_length - 1))
             {
                 m_history_ready = true;
             }
@@ -49,12 +49,12 @@ namespace vslib
             m_measurements[m_head] = measurement;
 
             double actuation = m_t[0] * m_references[m_head] - m_r[0] * m_measurements[m_head];
-            for (size_t index = 1; index < ControllerLength; index++)
+            for (int64_t index = 1; index < buffer_length; index++)
             {
                 int64_t buffer_index = (m_head - index);
                 if (buffer_index < 0)
                 {
-                    buffer_index += ControllerLength;
+                    buffer_index += buffer_length;
                 }
                 actuation += m_t[index] * m_references[buffer_index] - m_r[index] * m_measurements[buffer_index]
                              - m_s[index] * m_actuations[buffer_index];
@@ -64,7 +64,7 @@ namespace vslib
             m_actuations[m_head] = actuation;   // update actuations
 
             m_head++;
-            if (m_head == ControllerLength)
+            if (m_head == buffer_length)
             {
                 m_head = 0;
             }
@@ -81,7 +81,7 @@ namespace vslib
             size_t index = m_head - 1;
             if (m_head == 0)
             {
-                index = ControllerLength - 1;
+                index = buffer_length - 1;
             }
             const double delta_actuation = updated_actuation - m_actuations[index];
             m_actuations[index]          = updated_actuation;
@@ -98,17 +98,17 @@ namespace vslib
             size_t prev_head = m_head - 1;
             if (m_head == 0)
             {
-                prev_head = ControllerLength - 1;
+                prev_head = buffer_length - 1;
             }
             m_actuations[prev_head] = updated_actuation;
 
             double reference = m_s[0] * updated_actuation + m_r[0] * m_measurements[prev_head];
-            for (int64_t index = 1; index < ControllerLength; index++)
+            for (int64_t index = 1; index < buffer_length; index++)
             {
                 int64_t buffer_index = (prev_head - index);
                 if (buffer_index < 0)
                 {
-                    buffer_index += ControllerLength;
+                    buffer_index += buffer_length;
                 }
                 reference += m_s[index] * m_actuations[buffer_index] + m_r[index] * m_measurements[buffer_index]
                              - m_t[index] * m_references[buffer_index];
@@ -130,11 +130,11 @@ namespace vslib
         //!
         //! @param coefficients Coefficients to be tested
         //! @return Optionally returns a Warning with relevant information if test failed, nothing otherwise
-        std::optional<fgc4::utils::Warning> jurysStabilityTest(const std::array<double, ControllerLength>& coefficients)
+        std::optional<fgc4::utils::Warning> jurysStabilityTest(const std::array<double, buffer_length>& coefficients)
         {
             // Test re-implemented from CCLIBS libreg's regRst.c
             size_t coefficient_length = 1;
-            while (coefficient_length < ControllerLength && coefficients[coefficient_length] != 0.0F)
+            while (coefficient_length < buffer_length && coefficients[coefficient_length] != 0.0F)
             {
                 coefficient_length++;
             }
@@ -261,7 +261,7 @@ namespace vslib
         //! Sets the R polynomial.
         //!
         //! @param r Array with R polynomial values to be set
-        void setR(const std::array<double, ControllerLength>& r)
+        void setR(const std::array<double, buffer_length>& r)
         {
             m_r = r;
         }
@@ -269,7 +269,7 @@ namespace vslib
         //! Sets the S polynomial.
         //!
         //! @param s Array with S polynomial values to be set
-        void setS(const std::array<double, ControllerLength>& s)
+        void setS(const std::array<double, buffer_length>& s)
         {
             m_s = s;
         }
@@ -277,7 +277,7 @@ namespace vslib
         //! Sets the T polynomial.
         //!
         //! @param t Array with T polynomial values to be set
-        void setT(const std::array<double, ControllerLength>& t)
+        void setT(const std::array<double, buffer_length>& t)
         {
             m_t = t;
         }
@@ -286,19 +286,19 @@ namespace vslib
         int64_t     m_head{0};   //!< Index to oldest entry in the history
         std::string m_name;      //!< Name of this controller
 
-        std::array<double, ControllerLength> m_r{0};   //!< R-polynomial coefficients
-        std::array<double, ControllerLength> m_s{0};   //!< S-polynomial coefficients
-        std::array<double, ControllerLength> m_t{0};   //!< T-polynomial coefficients
+        std::array<double, buffer_length> m_r{0};   //!< R-polynomial coefficients
+        std::array<double, buffer_length> m_s{0};   //!< S-polynomial coefficients
+        std::array<double, buffer_length> m_t{0};   //!< T-polynomial coefficients
 
-        std::array<double, ControllerLength> m_measurements{0};   //!< RST measurement history
-        std::array<double, ControllerLength> m_references{0};     //!< RST reference history
-        std::array<double, ControllerLength> m_actuations{0};     //!< RST actuation history
+        std::array<double, buffer_length> m_measurements{0};   //!< RST measurement history
+        std::array<double, buffer_length> m_references{0};     //!< RST reference history
+        std::array<double, buffer_length> m_actuations{0};     //!< RST actuation history
 
         bool m_history_ready{false};   //!< flag to mark RST ref and meas histories are filled
 
         // helper variables used in Jury's test
-        std::array<double, ControllerLength> m_b{0};   // variable used in Jury's test, declaring them here avoids
-                                                       // allocation whenever jurysStabilityTest is called
+        std::array<double, buffer_length> m_b{0};   // variable used in Jury's test, declaring them here avoids
+                                                    // allocation whenever jurysStabilityTest is called
     };
 
     //! Control method returning the next actuation.
