@@ -23,6 +23,8 @@ namespace vslib
         {
         }
 
+        virtual ~Filter() = default;
+
         //! Method to implement filtering of the provided input.
         //!
         //! @param input Value to be filtered
