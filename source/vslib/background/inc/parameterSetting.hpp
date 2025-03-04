@@ -67,12 +67,12 @@ namespace vslib
         bool checkNewSettingsAvailable();
 
       private:
-        nlohmann::json_schema::json_validator m_validator;              //!< JSON schema for incoming commands
+        nlohmann::json_schema::json_validator m_validator{};            //!< JSON schema for incoming commands
         fgc4::utils::MessageQueueReader<void> m_read_commands_queue;    //!< Incoming commands queue
         fgc4::utils::MessageQueueWriter<void> m_write_command_status;   //!< Command execution status queue
 
         //!< Buffer for the incoming commands
-        std::array<uint8_t, fgc4::utils::constants::json_memory_pool_size> m_read_commands_buffer;
+        std::array<uint8_t, fgc4::utils::constants::json_memory_pool_size> m_read_commands_buffer{0};
 
         RootComponent& m_root_component;   //!< Root Component
 

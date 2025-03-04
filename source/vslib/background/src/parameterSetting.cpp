@@ -12,8 +12,6 @@
 #include "versions.hpp"
 #include "warningMessage.hpp"
 
-using namespace fgc4::utils;
-
 namespace vslib
 {
 
