@@ -97,11 +97,26 @@ namespace fgc4::utils
 
     void MessageQueueBase::writeRaw(void const* data, size_t length)
     {
+        if (length == 0)
+        {
+            // If length is zero, there's nothing to write, so return early
+            return;
+        }
+
+        if (data == nullptr && length > 0)
+        {
+            // fgc4::utils::Error();
+            // throw std::invalid_argument("data pointer cannot be nullptr when length is greater than zero");
+        }
+
         auto run = std::min(length, m_buffer_size - maskIndex(m_control_block.wrpos));
         auto rem = length - run;
 
         memcpy(m_buffer + maskIndex(m_control_block.wrpos), data, run);
-        memcpy(m_buffer, (uint8_t const*)data + run, rem);
+        if (rem > 0)
+        {
+            memcpy(m_buffer, reinterpret_cast<uint8_t const*>(data) + run, rem);
+        }
         m_control_block.wrpos = wrapIndex(m_control_block.wrpos + length);
     }
 
