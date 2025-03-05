@@ -41,4 +41,4 @@ namespace fgc4::utils
 
         return data;
     }
-}   // namepace fgc4::utils
+}   // namespace fgc4::utils

@@ -41,7 +41,7 @@ namespace fgc4::utils
         auto rem = length - run;
 
         memcpy(data_out, m_buffer + rd_offset, run);
-        memcpy((uint8_t*)data_out + run, m_buffer, rem);
+        memcpy(reinterpret_cast<uint8_t*>(data_out) + run, m_buffer, rem);
     }
 
     // ************************************************************
