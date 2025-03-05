@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "constants.hpp"
 #include "json/json.hpp"
 #include "ringBufferAllocator.hpp"

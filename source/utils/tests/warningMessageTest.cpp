@@ -5,9 +5,9 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "constants.h"
-#include "logString.h"
-#include "warningMessage.h"
+#include "constants.hpp"
+#include "logString.hpp"
+#include "warningMessage.hpp"
 
 using namespace fgc4::utils;
 

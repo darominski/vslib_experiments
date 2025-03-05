@@ -5,8 +5,8 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "constants.h"
-#include "typeLabel.h"
+#include "constants.hpp"
+#include "typeLabel.hpp"
 
 using namespace fgc4::utils;
 

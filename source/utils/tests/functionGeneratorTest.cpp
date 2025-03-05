@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "functionGenerator.h"
+#include "functionGenerator.hpp"
 
 using namespace fgc4::utils;
 

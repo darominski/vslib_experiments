@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "readCsv.h"
+#include "readCsv.hpp"
 
 using namespace fgc4::utils::test;
 

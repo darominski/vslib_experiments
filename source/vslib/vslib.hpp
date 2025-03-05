@@ -46,6 +46,7 @@
 #include "sinLookupTable.hpp"
 
 //! Interrupts
+#include "interruptRegistry.hpp"
 #include "peripheralInterrupt.hpp"
 #include "timerInterrupt.hpp"
 

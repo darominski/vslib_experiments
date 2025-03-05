@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "errorMessage.h"
+#include "errorMessage.hpp"
 
 using namespace fgc4::utils;
 

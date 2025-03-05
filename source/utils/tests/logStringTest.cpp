@@ -5,8 +5,8 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "constants.h"
-#include "logString.h"
+#include "constants.hpp"
+#include "logString.hpp"
 
 using namespace fgc4::utils;
 
