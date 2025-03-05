@@ -65,7 +65,7 @@ namespace vslib
 
       private:
         //!< Container with all registered Peripheral interrupts
-        std::map<std::string_view, std::reference_wrapper<PeripheralInterrupt>> m_interrupts;
+        std::map<std::string_view, std::reference_wrapper<PeripheralInterrupt>> m_interrupts{};
 
         //! Returns a reference to the chosen interrupt.
         //!
@@ -75,7 +75,6 @@ namespace vslib
             auto iterator = m_interrupts.find(interrupt_name);
             if (iterator == m_interrupts.end())
             {
-
                 fgc4::utils::Error error_message(
                     fmt::format("Interrupt with name: {} has not been registered!", interrupt_name),
                     fgc4::utils::errorCodes::name_already_used
