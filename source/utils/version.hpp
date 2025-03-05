@@ -9,15 +9,15 @@ namespace fgc4::utils
     class Version
     {
       public:
-        constexpr Version(short _major, short _minor, short _revision)
+        constexpr Version(int32_t _major, int32_t _minor, int32_t _revision)
             : major(_major),
               minor(_minor),
               revision(_revision)
         {
         }
 
-        short major;
-        short minor;
-        short revision;
+        int32_t major;
+        int32_t minor;
+        int32_t revision;
     };
 }   // namespace fgc4::utils
