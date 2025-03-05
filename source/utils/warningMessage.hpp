@@ -15,6 +15,9 @@ namespace fgc4::utils
 {
     struct Warning
     {
+        //! Constructor for Warning message
+        //!
+        //! @param _warning_message Contents of the message.
         Warning(std::string_view _warning_message)
             : warning_str{_warning_message}
         {

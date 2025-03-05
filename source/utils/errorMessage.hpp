@@ -15,6 +15,10 @@ namespace fgc4::utils
 {
     struct Error
     {
+        //! Constructor for Error message
+        //!
+        //! @param _error_msg Content of the error message
+        //! @param _error_code Error code corresponding to this error message
         Error(std::string_view _error_msg, std::size_t _error_code)
             : error_str{_error_msg},
               error_code{_error_code}
@@ -22,6 +26,9 @@ namespace fgc4::utils
             std::cerr << fmt::format("Error [{}]: {}", error_code, error_str);
         }
 
+        //! Constructor for Error message
+        //!
+        //! @param _error_msg Content of the error message
         explicit Error(std::string_view error_msg)
             : Error{error_msg, 0U}
         {
