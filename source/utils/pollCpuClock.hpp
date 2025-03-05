@@ -10,9 +10,9 @@ namespace fgc4::utils
 {
     [[maybe_unused]] static uint64_t read_CNTPCT()
     {
-        uint64_t cntval;
+        uint64_t cntval = 0;
         // asm statement MUST be volatile, otherwise compiler will do weird, wrong things like coalescing the access
         asm volatile("mrs %0, CNTPCT_EL0" : "=r"(cntval));
         return cntval;
     }
-}
+}   // namespace fgc4::utils
