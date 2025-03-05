@@ -33,7 +33,7 @@ namespace fgc4::utils
     class MessageQueueBase
     {
       public:
-        MessageQueueBase(MessageQueueShmem volatile& control_block, uint8_t* buffer, size_t buffer_size)
+        MessageQueueBase(volatile MessageQueueShmem& control_block, uint8_t* buffer, size_t buffer_size)
             : m_control_block(control_block),
               m_buffer(buffer),
               m_buffer_size(buffer_size)
