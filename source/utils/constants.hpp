@@ -13,8 +13,8 @@ namespace fgc4::utils::constants
     // ************************************************************
     // Constants defined for static memory pools for supported use cases of the RingBuffer
 
-    constexpr uint64_t json_memory_pool_size   = 1024 * 1024;   // 1 MB
-    constexpr uint64_t string_memory_pool_size = 1024;          // 1024 objects of type std::string, approximately 32 kb
+    constexpr uint64_t json_memory_pool_size   = static_cast<uint64_t>(1024) * static_cast<uint64_t>(1024);   // 1 MB
+    constexpr uint64_t string_memory_pool_size = 1024;   // 1024 objects of type std::string, approximately 32 kb
 
     // ************************************************************
     // Names of supported types for use in FGC Configurator
