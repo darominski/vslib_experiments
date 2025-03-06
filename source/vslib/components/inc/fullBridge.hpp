@@ -38,12 +38,6 @@ namespace vslib
             leg_2.stop();
         }
 
-        void reset() noexcept
-        {
-            leg_1.reset();
-            leg_2.reset();
-        }
-
         // ************************************************************
         // Interaction methods with legs
 
@@ -125,8 +119,7 @@ namespace vslib
         void switchBipolar(const bool setting) noexcept
         {
             m_bipolar = setting;
-            leg_2.invertA(setting);
-            leg_2.invertB(!setting);
+            leg_2.setInverted(setting);
         }
     };
 }
