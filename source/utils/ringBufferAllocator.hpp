@@ -14,7 +14,7 @@
 
 namespace fgc4::utils
 {
-    template<typename BufferType, uint64_t BufferSize>
+    template<typename BufferType, uint64_t buffer_size>
     class RingBuffer
     {
       public:
@@ -33,9 +33,9 @@ namespace fgc4::utils
             m_current_position += adjustment;
 
             // Check if there is enough memory available
-            if (size + adjustment < BufferSize)   // too big memory chunk required
+            if (size + adjustment < buffer_size)   // too big memory chunk required
             {
-                if (m_current_position + size >= BufferSize)
+                if (m_current_position + size >= buffer_size)
                 {
                     m_current_position = 0;   // Overflow: wraps around to the beginning of the buffer
                     m_current_position += calculate_adjustment<T>();   // needs to recalculate adjustment
@@ -60,7 +60,7 @@ namespace fgc4::utils
         }
 
       private:
-        static std::byte       m_buffer[BufferSize];
+        static std::byte       m_buffer[buffer_size];
         inline static uint64_t m_current_position = 0;
 
         //! Calculates the adjustment needed to align the next memory allocation
@@ -78,7 +78,7 @@ namespace fgc4::utils
 
     // ************************************************************
 
-    template<typename T, typename BufferType, uint64_t BufferSize>
+    template<typename T, typename BufferType, uint64_t buffer_size>
     class StaticRingBufferAllocator
     {
       public:
@@ -86,20 +86,20 @@ namespace fgc4::utils
         StaticRingBufferAllocator() noexcept = default;
 
         template<typename U>
-        StaticRingBufferAllocator(const StaticRingBufferAllocator<U, BufferType, BufferSize>&) noexcept
+        StaticRingBufferAllocator(const StaticRingBufferAllocator<U, BufferType, buffer_size>&) noexcept
         {
         }
 
-        template<typename U, typename OtherBufferType, uint64_t OtherBufferSize>
-        bool operator==(const StaticRingBufferAllocator<U, OtherBufferType, OtherBufferSize>&) const noexcept
+        template<typename U, typename OtherBufferType, uint64_t other_buffer_size>
+        bool operator==(const StaticRingBufferAllocator<U, OtherBufferType, other_buffer_size>&) const noexcept
         {
             // The buffers are the same if the type and size agrees, regardless of the stored type
-            return (std::is_same_v<BufferType, OtherBufferType> && BufferSize == OtherBufferSize) ? true : false;
+            return (std::is_same_v<BufferType, OtherBufferType> && buffer_size == other_buffer_size) ? true : false;
         }
 
         // Comparison operator for inequality
-        template<typename U, typename OtherBufferType, uint64_t OtherBufferSize>
-        bool operator!=(const StaticRingBufferAllocator<U, OtherBufferType, OtherBufferSize>& other) const noexcept
+        template<typename U, typename OtherBufferType, uint64_t other_buffer_size>
+        bool operator!=(const StaticRingBufferAllocator<U, OtherBufferType, other_buffer_size>& other) const noexcept
         {
             // Implement the logic to check if allocators are not equal.
             return !(*this == other);
@@ -111,7 +111,7 @@ namespace fgc4::utils
         template<typename U>
         struct rebind
         {
-            using other = StaticRingBufferAllocator<U, BufferType, BufferSize>;
+            using other = StaticRingBufferAllocator<U, BufferType, buffer_size>;
         };
 
         //! Allocates memory in the RingBuffer for a provided numer of objects of the type T.
@@ -121,7 +121,7 @@ namespace fgc4::utils
         //! @return Pointer to the location of RingBuffer where objects can be allocated
         T* allocate(uint64_t count)
         {
-            return RingBuffer<BufferType, BufferSize>::template do_allocate<T>(count);
+            return RingBuffer<BufferType, buffer_size>::template do_allocate<T>(count);
         }
 
         //! Satisfies allocator_traits but memory deallocation is not foreseen while application runs
@@ -135,7 +135,7 @@ namespace fgc4::utils
         //! @return Number of objects that can be allocated in the buffer
         [[nodiscard]] uint64_t max_size() const noexcept
         {
-            return BufferSize / sizeof(T);
+            return buffer_size / sizeof(T);
         }
     };
 
@@ -143,7 +143,7 @@ namespace fgc4::utils
     // Initialization of static heaps for supported types
 
     // Let's align the buffers to the largest type we want to have in our JSON
-    template<typename BufferType, size_t BufferSize>
-    alignas(std::max_align_t) std::byte RingBuffer<BufferType, BufferSize>::m_buffer[];
+    template<typename BufferType, size_t buffer_size>
+    alignas(std::max_align_t) std::byte RingBuffer<BufferType, buffer_size>::m_buffer[];
 
 }   // namespace fgc4::utils
