@@ -39,7 +39,8 @@ namespace hal
         //! Sets the desired modulation index.
         //!
         //! @param index Modulation index to be used, limited from 0 to 1 (at maximum)
-        //! @return
+        //! @return Boolean value with information whether the modulation index value set is identical to the one
+        //! provided (true), false otherwise
         bool setModulationIndex(const float modulation_index) noexcept
         {
             const float index     = forceLimit(modulation_index, m_min_modulation_index, m_max_modulation_index);
@@ -122,6 +123,17 @@ namespace hal
             return m_max_counter_value;
         }
 
+        //! Reads the modulation index value.
+        //!
+        //! @return Modulation index set to CC
+        uint32_t getModulationIndex() const noexcept
+        {
+            return m_regs.cc.read();
+        }
+
+        //! Returns the constant size of PWM
+        //!
+        //! @return Maximum size of the PWM registers
         static auto constexpr size() noexcept
         {
             return myModule::PwmRegs::csize();
