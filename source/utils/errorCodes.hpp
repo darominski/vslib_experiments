@@ -15,4 +15,6 @@ namespace fgc4::utils::errorCodes
     constexpr uint32_t allocation_buffer_overflow = 2000;
 
     constexpr uint32_t out_of_bounds_access = 3000;
+
+    constexpr uint32_t message_body_empty = 4000;
 }   // namespace fgc4::utils::errorCodes

@@ -18,6 +18,8 @@
 #include <string.h>
 #include <utility>
 
+#include "errorMessage.hpp"
+
 namespace fgc4::utils
 {
 

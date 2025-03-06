@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <string>
 
+#include "errorCodes.hpp"
 #include "messageQueue.hpp"
 
 using std::nullopt;
@@ -105,8 +106,10 @@ namespace fgc4::utils
 
         if (data == nullptr && length > 0)
         {
-            // fgc4::utils::Error();
-            // throw std::invalid_argument("data pointer cannot be nullptr when length is greater than zero");
+            fgc4::utils::Error(
+                "Incorrect request: communicated message length > 0 but data is a nullptr",
+                fgc4::utils::errorCodes::message_body_empty
+            );
         }
 
         auto run = std::min(length, m_buffer_size - maskIndex(m_control_block.wrpos));
