@@ -41,13 +41,6 @@ namespace vslib
             leg_3.stop();
         }
 
-        void reset() noexcept
-        {
-            leg_1.reset();
-            leg_2.reset();
-            leg_3.reset();
-        }
-
         // ************************************************************
         // Interaction methods with legs
 
