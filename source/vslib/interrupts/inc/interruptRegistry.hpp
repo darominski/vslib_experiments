@@ -65,12 +65,12 @@ namespace vslib
 
       private:
         //!< Container with all registered Peripheral interrupts
-        std::map<std::string_view, std::reference_wrapper<PeripheralInterrupt>> m_interrupts{};
+        std::map<std::string_view, std::reference_wrapper<PeripheralInterrupt<Converter>>> m_interrupts;
 
         //! Returns a reference to the chosen interrupt.
         //!
         //! @param interrupt_name Name identifier for the peripheral interrupt
-        PeripheralInterrupt& getInterrupt(std::string_view interrupt_name)
+        PeripheralInterrupt<Converter>& getInterrupt(std::string_view interrupt_name)
         {
             auto iterator = m_interrupts.find(interrupt_name);
             if (iterator == m_interrupts.end())
