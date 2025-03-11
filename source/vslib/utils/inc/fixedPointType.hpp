@@ -122,7 +122,7 @@ namespace vslib
 
         //! Overload to handle summing two FixedPoint objects where a new object needs to be created.
         //!
-        //! @param other Fixed-point value to be the multiplicand
+        //! @param other Fixed-point value of the multiplicand
         FixedPoint operator*(const FixedPoint& other) const
         {
             FixedPoint result;
@@ -132,7 +132,7 @@ namespace vslib
 
         //! Overload to handle summing two FixedPoint objects where a new object needs to be created.
         //!
-        //! @param Fixed-point value to be the divisor
+        //! @param other Fixed-point value to be the divisor
         FixedPoint operator/(const FixedPoint& other) const
         {
             FixedPoint result;

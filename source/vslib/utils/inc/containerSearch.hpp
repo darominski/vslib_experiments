@@ -16,6 +16,8 @@ namespace vslib::utils
     //!
     //! @param values Vector of values to use for interpolation
     //! @param input_x Input x-axis value to be searched for
+    //! @param lower_edge_x Minimum value on the X-axis
+    //! @param bin_size Bin width (constant)
     //! @param x1 X-axis value of the lower section edge
     //! @param y1 Y-axis value of the lower section edge
     //! @param x2 X-axis value of the upper section edge

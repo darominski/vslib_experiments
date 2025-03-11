@@ -28,7 +28,7 @@ namespace fgc4::utils
 
         //! Constructor for Error message
         //!
-        //! @param _error_msg Content of the error message
+        //! @param error_msg Content of the error message
         explicit Error(std::string_view error_msg)
             : Error{error_msg, 0U}
         {

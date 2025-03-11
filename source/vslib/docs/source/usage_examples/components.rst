@@ -25,7 +25,7 @@ and passed to the user by reference.
 Using :code:`std::string` for types and names allows for semantic identification of :code:`Components` and their
 :code:`Parameters`, when the latter are registered in the :code:`ParameterRegistry`. The definition of a parent,
 allows for a construction of logical hierarchy between the :code:`Components` in your control workflow. Each :code:`Component`
-in your code will derive either from your-defined class, which in turn derives from a root :code:`Component`, or
+in your code will derive either from your-defined class, which in turn derives from a :code:`RootComponent`, or
 other :code:`Components` defined in your code. For example, in the case of :ref:`PID <pid_component>` controller, the :code:`PID`
 has a parent, while it itself is a parent to a :code:`LimitRange` :code:`Component`.
 
