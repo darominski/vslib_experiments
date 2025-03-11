@@ -37,27 +37,10 @@ namespace vslib
         //! @param b B-phase component of the three-phase system
         //! @param c C-phase component of the three-phase system
         //! @return Balanced angle (omega t), always fits in 0 to 2pi values
-        [[nodiscard]] double synchronise(const double f_a, const double f_b, const double f_c) noexcept
-        {
-            const auto [d, q, zero] = abc_2_dq0.transform(f_a, f_b, f_c, m_wt);
-
-            // for consistency with Matlab, forward-Euler method is used instead of trapezoid
-            // integration
-            const auto wt = m_wt;
-            // reference of the PI controller is always zero
-            m_wt          += pi.control(0.0, -q) * pi.T + m_f_rated_2pi;
-            // to avoid precision loss, the wt is limited to 0-2pi range
-            m_wt          = fmod(m_wt, std::numbers::pi_v<double> * 2.0);
-
-            return wt + m_angle_offset;
-        }
+        [[nodiscard]] double synchronise(const double f_a, const double f_b, const double f_c) noexcept;
 
         //! Resets the controller to the initial state by zeroing the history.
-        void reset() noexcept
-        {
-            m_wt = 0;
-            pi.reset();
-        }
+        void reset() noexcept;
 
         // ************************************************************
         // Settable Parameters of the Component
@@ -77,12 +60,7 @@ namespace vslib
         //!
         //! @return Optionally returns a Warning with pertinent information if verification was unsuccessful, nothing
         //! otherwise
-        std::optional<fgc4::utils::Warning> verifyParameters() override
-        {
-            m_f_rated_2pi  = {2.0 * std::numbers::pi * f_rated.toValidate() * pi.T};
-            m_angle_offset = angle_offset.toValidate();
-            return {};
-        }
+        std::optional<fgc4::utils::Warning> verifyParameters() override;
 
       private:
         double m_wt{0.0};             // Returned wt value of the PLL

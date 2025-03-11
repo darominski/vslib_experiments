@@ -36,6 +36,7 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dq0ToAbcTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dq0ToAlphaBetaTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/instantaneousPowerThreePhase.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/srfPll.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/../parameters/src/parameterRegistry.cpp
 )
 
