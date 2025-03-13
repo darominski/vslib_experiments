@@ -2,7 +2,6 @@
 //! @brief Defines the Active Front-End Component including active control in form of RST.
 //! @author Dominik Arominski
 
-#include "rstDelayed.hpp"
 #include "vslib.hpp"
 
 #pragma once
