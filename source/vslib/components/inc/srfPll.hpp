@@ -31,7 +31,16 @@ namespace vslib
         {
         }
 
-        //! Computes one iteration of the the PLL synchronisation.
+        //! Computes one iteration of the the PLL synchronisation and returns wt and q.
+        //!
+        //! @param a A-phase component of the three-phase system
+        //! @param b B-phase component of the three-phase system
+        //! @param c C-phase component of the three-phase system
+        //! @return Pair with balanced angle (omega t), that always fits in 0 to 2pi, and q
+        [[nodiscard]] std::pair<double, double>
+        synchroniseWithQ(const double f_a, const double f_b, const double f_c) noexcept;
+
+        //! Computes one iteration of the the PLL synchronisation and returns wt.
         //!
         //! @param a A-phase component of the three-phase system
         //! @param b B-phase component of the three-phase system

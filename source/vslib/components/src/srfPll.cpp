@@ -2,7 +2,8 @@
 
 namespace vslib
 {
-    [[nodiscard]] double SRFPLL::synchronise(const double f_a, const double f_b, const double f_c) noexcept
+    [[nodiscard]] std::pair<double, double>
+    SRFPLL::synchroniseWithQ(const double f_a, const double f_b, const double f_c) noexcept
     {
         const auto [d, q, zero] = abc_2_dq0.transform(f_a, f_b, f_c, m_wt);
 
@@ -14,7 +15,13 @@ namespace vslib
         // to avoid precision loss, the wt is limited to 0-2pi range
         m_wt          = fmod(m_wt, std::numbers::pi_v<double> * 2.0);
 
-        return wt + m_angle_offset;
+        return {wt + m_angle_offset, q};
+    }
+
+    [[nodiscard]] double SRFPLL::synchronise(const double f_a, const double f_b, const double f_c) noexcept
+    {
+        const auto [wt, _] = synchroniseWithQ(f_a, f_b, f_c);
+        return wt;
     }
 
     void SRFPLL::reset() noexcept
