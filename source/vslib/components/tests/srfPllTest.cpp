@@ -6,9 +6,9 @@
 #include <gtest/gtest.h>
 
 #include "csv.hpp"
-#include "rootComponent.h"
-#include "srfPll.h"
-#include "staticJson.h"
+#include "rootComponent.hpp"
+#include "srfPll.hpp"
+#include "staticJson.hpp"
 
 using namespace vslib;
 using namespace csv;
@@ -121,11 +121,24 @@ TEST_F(SRFPLLTest, SRFPLLOneIteration)
     ASSERT_EQ(pll.synchronise(1.0, 1.0, 1.0), 0.0);
 }
 
+//! Checks that a SRFPLL object can calculate a single iteration of balancing
+TEST_F(SRFPLLTest, SRFPLLOneIterationWithQ)
+{
+    RootComponent root;
+    std::string   name = "pll_3";
+    SRFPLL        pll(name, root);
+    // no need to set parameters, as the first step is always zero due to using
+    // forward Euler method
+    const auto [wt, q] = pll.synchroniseWithQ(1.0, 1.0, 1.0);
+    ASSERT_EQ(wt, 0.0);
+    ASSERT_EQ(q, 0.0);
+}
+
 //! Checks that a SRFPLL object can calculate a couple of iterations of balancing
 TEST_F(SRFPLLTest, SRFPLLCoupleIterations)
 {
     RootComponent root;
-    std::string   name = "pll_3";
+    std::string   name = "pll_4";
     SRFPLL        pll(name, root);
 
     const double p            = 2.0;
@@ -155,7 +168,7 @@ TEST_F(SRFPLLTest, SRFPLLCoupleIterations)
 TEST_F(SRFPLLTest, SRFPLLCoupleIterationsNonZeroOffset)
 {
     RootComponent root;
-    std::string   name = "pll_3";
+    std::string   name = "pll_5";
     SRFPLL        pll(name, root);
 
     const double p            = 2.0;
@@ -188,7 +201,7 @@ TEST_F(SRFPLLTest, SRFPLLCoupleIterationsNonZeroOffset)
 TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistency)
 {
     RootComponent root;
-    std::string   name = "pll_4";
+    std::string   name = "pll_6";
     SRFPLL        pll(name, root);
 
     const double p  = 50.0;
@@ -224,6 +237,62 @@ TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistency)
 
         auto const wt = pll.synchronise(a, b, c);
         double     relative;
+        if (matlab_wt != 0)
+        {
+            relative = (matlab_wt - wt) / matlab_wt;
+        }
+        else
+        {
+            relative = (matlab_wt - wt);
+        }
+        ASSERT_NEAR(relative, 0.0, 1e-6);   // at least 1e-6 relative precision
+
+        ++abc_line;
+        ++matlab_wt_line;
+    }
+}
+
+//! Checks that the response of the SRFPLL agrees with a Simulink model over a long simulation,
+//! which includes introduced glitches
+TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistencyWithQ)
+{
+    RootComponent root;
+    std::string   name = "pll_6";
+    SRFPLL        pll(name, root);
+
+    const double p  = 50.0;
+    const double i  = 200.0;
+    const double d  = 0.0;
+    const double ff = 0.0;
+    const double b  = 1.0;
+    const double c  = 1.0;
+    const double N  = 1.0;
+    const double T  = 1.0e-4;
+    const double f0 = 1e-9;
+    set_parameters(pll, p, i, d, ff, b, c, N, T, f0);
+
+    std::filesystem::path abc_path       = "components/inputs/abc_pll.csv";
+    std::filesystem::path matlab_wt_path = "components/inputs/wt_pll_kp=50_ki=200.csv";
+
+    csv::CSVFormat format;
+    format.header_row(-1);   // Disables header handling
+
+    CSVReader abc_file(abc_path.c_str(), format);
+    CSVReader matlab_wt_file(matlab_wt_path.c_str(), format);
+
+    auto abc_line       = abc_file.begin();
+    auto matlab_wt_line = matlab_wt_file.begin();
+
+    while (abc_line != abc_file.end() && matlab_wt_line != matlab_wt_file.end())
+    {
+        const auto a = (*abc_line)[0].get<double>();
+        const auto b = (*abc_line)[1].get<double>();
+        const auto c = (*abc_line)[2].get<double>();
+
+        const auto matlab_wt = (*matlab_wt_line)[0].get<double>();
+
+        auto const [wt, q] = pll.synchroniseWithQ(a, b, c);
+        double relative;
         if (matlab_wt != 0)
         {
             relative = (matlab_wt - wt) / matlab_wt;

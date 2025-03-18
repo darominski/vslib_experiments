@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "fixedPointType.h"
+#include "fixedPointType.hpp"
 
 using namespace vslib;
 

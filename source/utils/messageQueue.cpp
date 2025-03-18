@@ -3,9 +3,10 @@
 //! @author Martin Cejp
 
 #include <algorithm>
-#include <string.h>
+#include <string>
 
-#include "messageQueue.h"
+#include "errorCodes.hpp"
+#include "messageQueue.hpp"
 
 using std::nullopt;
 
@@ -41,7 +42,7 @@ namespace fgc4::utils
         auto rem = length - run;
 
         memcpy(data_out, m_buffer + rd_offset, run);
-        memcpy((uint8_t*)data_out + run, m_buffer, rem);
+        memcpy(reinterpret_cast<uint8_t*>(data_out) + run, m_buffer, rem);
     }
 
     // ************************************************************
@@ -97,11 +98,28 @@ namespace fgc4::utils
 
     void MessageQueueBase::writeRaw(void const* data, size_t length)
     {
+        if (length == 0)
+        {
+            // If length is zero, there's nothing to write, so return early
+            return;
+        }
+
+        if (data == nullptr && length > 0)
+        {
+            fgc4::utils::Error(
+                "Incorrect request: communicated message length > 0 but data is a nullptr",
+                fgc4::utils::errorCodes::message_body_empty
+            );
+        }
+
         auto run = std::min(length, m_buffer_size - maskIndex(m_control_block.wrpos));
         auto rem = length - run;
 
         memcpy(m_buffer + maskIndex(m_control_block.wrpos), data, run);
-        memcpy(m_buffer, (uint8_t const*)data + run, rem);
+        if (rem > 0)
+        {
+            memcpy(m_buffer, reinterpret_cast<uint8_t const*>(data) + run, rem);
+        }
         m_control_block.wrpos = wrapIndex(m_control_block.wrpos + length);
     }
 

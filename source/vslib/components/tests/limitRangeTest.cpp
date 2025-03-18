@@ -5,9 +5,9 @@
 #include <array>
 #include <gtest/gtest.h>
 
-#include "limitRange.h"
-#include "rootComponent.h"
-#include "staticJson.h"
+#include "limitRange.hpp"
+#include "rootComponent.hpp"
+#include "staticJson.hpp"
 
 using namespace vslib;
 

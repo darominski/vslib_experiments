@@ -6,9 +6,9 @@
 #include <filesystem>
 #include <gtest/gtest.h>
 
-#include "abcToAlphaBetaTransform.h"
+#include "abcToAlphaBetaTransform.hpp"
 #include "csv.hpp"
-#include "rootComponent.h"
+#include "rootComponent.hpp"
 
 using namespace vslib;
 using namespace csv;

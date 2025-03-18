@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "ringBufferAllocator.h"
+#include "ringBufferAllocator.hpp"
 
 using namespace fgc4::utils;
 

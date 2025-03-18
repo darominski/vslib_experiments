@@ -2,12 +2,12 @@
 //! @brief File containing implementation of methods used to manipulate communicate with the read/write message queues.
 //! @author Dominik Arominski
 
-#include "constants.h"
-#include "errorCodes.h"
-#include "errorMessage.h"
+#include "constants.hpp"
+#include "errorCodes.hpp"
+#include "errorMessage.hpp"
 #include "fmt/format.h"
-#include "vslibMessageQueue.h"
-#include "warningMessage.h"
+#include "vslibMessageQueue.hpp"
+#include "warningMessage.hpp"
 
 namespace vslib::utils
 {
@@ -29,7 +29,7 @@ namespace vslib::utils
         }
     }
 
-    fgc4::utils::StaticJson readJsonFromMessageQueue(std::span<uint8_t>& message)
+    const fgc4::utils::StaticJson readJsonFromMessageQueue(std::span<uint8_t>& message)
     {
         auto json_object = fgc4::utils::StaticJsonFactory::getJsonObject();
         try

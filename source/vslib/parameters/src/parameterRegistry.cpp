@@ -4,10 +4,10 @@
 
 #include <regex>
 
-#include "errorCodes.h"
-#include "errorMessage.h"
+#include "errorCodes.hpp"
+#include "errorMessage.hpp"
 #include "fmt/format.h"
-#include "parameterRegistry.h"
+#include "parameterRegistry.hpp"
 
 using namespace nlohmann;
 using namespace fgc4::utils;

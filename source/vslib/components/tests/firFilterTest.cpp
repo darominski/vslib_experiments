@@ -6,9 +6,9 @@
 #include <gtest/gtest.h>
 
 #include "csv.hpp"
-#include "firFilter.h"
-#include "rootComponent.h"
-#include "staticJson.h"
+#include "firFilter.hpp"
+#include "rootComponent.hpp"
+#include "staticJson.hpp"
 
 using namespace vslib;
 using namespace csv;

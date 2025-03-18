@@ -1,7 +1,7 @@
 #include <cmath>
 #include <numbers>
 
-#include "alphaBetaToDq0Transform.h"
+#include "alphaBetaToDq0Transform.hpp"
 
 namespace vslib
 {
@@ -16,7 +16,6 @@ namespace vslib
         const double f_alpha, const double f_beta, const double f_0, const double wt, const bool a_alignment
     ) noexcept
     {
-
         const double sin_theta = m_sin(wt);
         const double cos_theta = m_cos(wt);
 

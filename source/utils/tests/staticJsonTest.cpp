@@ -5,8 +5,8 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "constants.h"
-#include "staticJson.h"
+#include "constants.hpp"
+#include "staticJson.hpp"
 
 using namespace fgc4::utils;
 

@@ -3,9 +3,9 @@
 //! map.
 //! @author Dominik Arominski
 
-#include "parameterMap.h"
-#include "versions.h"
-#include "vslibMessageQueue.h"
+#include "parameterMap.hpp"
+#include "versions.hpp"
+#include "vslibMessageQueue.hpp"
 
 namespace vslib
 {

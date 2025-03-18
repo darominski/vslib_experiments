@@ -1,7 +1,7 @@
 #include <cmath>
 #include <numbers>
 
-#include "dq0ToAbcTransform.h"
+#include "dq0ToAbcTransform.hpp"
 
 namespace vslib
 {
@@ -13,8 +13,8 @@ namespace vslib
 
         constexpr bool a_axis_alignment
             = false;   //! alignment between A-axis and d-axis, false: A axis is 90 degrees behind
-        const auto [alpha, beta, zero_out] = dq0_to_alphabeta.transform(d, q, zero, theta, a_axis_alignment);
-        const auto [a, b, c]               = alphabeta_to_abc.transform(alpha, beta, zero_out);
+        const auto [alpha, beta, zero_out] = m_dq0_to_alphabeta.transform(d, q, zero, theta, a_axis_alignment);
+        const auto [a, b, c]               = m_alphabeta_to_abc.transform(alpha, beta, zero_out);
 
         return {a, b, c};
     }

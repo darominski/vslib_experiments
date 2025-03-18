@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <mem_primitives.h>
+#include <mmpp.h>
 
 namespace myModule
 {

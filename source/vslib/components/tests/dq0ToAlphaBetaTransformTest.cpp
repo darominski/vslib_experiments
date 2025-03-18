@@ -7,8 +7,8 @@
 #include <gtest/gtest.h>
 
 #include "csv.hpp"
-#include "dq0ToAlphaBetaTransform.h"
-#include "rootComponent.h"
+#include "dq0ToAlphaBetaTransform.hpp"
+#include "rootComponent.hpp"
 
 using namespace vslib;
 using namespace csv;

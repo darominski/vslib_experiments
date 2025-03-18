@@ -5,9 +5,9 @@
 #include <array>
 #include <gtest/gtest.h>
 
-#include "rootComponent.h"
-#include "sinLookupTable.h"
-#include "staticJson.h"
+#include "rootComponent.hpp"
+#include "sinLookupTable.hpp"
+#include "staticJson.hpp"
 
 using namespace vslib;
 

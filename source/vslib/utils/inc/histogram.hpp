@@ -1,0 +1,117 @@
+//! @file
+//! @brief File containing a simple histogram data structure
+//! @author Dominik Arominski
+
+#pragma once
+
+#include <array>
+#include <cmath>
+#include <utility>
+
+#include "statistics.hpp"
+
+namespace vslib::utils
+{
+
+    template<int64_t bin_number>
+    class Histogram
+    {
+      public:
+        Histogram() = delete;
+
+        //! Histogram constructor where the minimum and maximum value to be stored is provided.
+        //!
+        //! @param min Defines the first bin lower edge
+        //! @param max Defines the final bin upper edge
+        Histogram(const double min, const double max) noexcept
+            : m_min_value(min),
+              m_max_value(max)
+        {
+            prepareHistogram();
+        }
+
+        //! Adds the provided value to the histogram.
+        //!
+        //! @param value New value to be added to the histogram
+        void addValue(const double value) noexcept
+        {
+            const int64_t bin_index = std::floor((value - m_min_value) / m_bin_width);
+            if (bin_index < 0)   // underflow case
+            {
+                m_counts[0]++;
+            }
+            else if (bin_index >= bin_number)   // overflow case
+            {
+                m_counts[bin_number - 1]++;
+            }
+            else   // regular case
+            {
+                m_counts[bin_index]++;
+            }
+        }
+
+        //! Returns the bin value with the maximum value of counts.
+        //!
+        //! @return Bin number where the maximal number of counts is stored
+        [[nodiscard]] size_t getBinWithMax() const noexcept
+        {
+            return std::distance(m_counts.cbegin(), std::max_element(m_counts.cbegin(), m_counts.cend()));
+        }
+
+        //! Returns the bin edges values for the provided bin_number. If the bin number is above the number of bins, it
+        //! returns the last bin.
+        //!
+        //! @param bin Bin number of interest
+        [[nodiscard]] std::pair<double, double> getBinEdges(size_t bin) const noexcept
+        {
+            if (bin > bin_number)
+            {
+                bin = bin_number;
+            }
+            return std::make_pair(m_edges[bin], m_edges[bin + 1]);
+        }
+
+        //! Returns the data stored in the histogram.
+        //!
+        //! @return Stored data
+        [[nodiscard]] const auto& getData() const noexcept
+        {
+            return m_counts;
+        }
+
+        //! Returns the number of bins of the histogram.
+        //!
+        //! @return Number of bins
+        [[nodiscard]] const auto getBinNumber() const noexcept
+        {
+            return bin_number;
+        }
+
+        //! Returns the bin width of the histogram
+        //!
+        //! @return Bin width
+        [[nodiscard]] const auto& getBinWidth() const noexcept
+        {
+            return m_bin_width;
+        }
+
+      private:
+        std::array<double, bin_number + 1> m_edges{0};       //!< Array storing the histogram edges
+        std::array<int64_t, bin_number>    m_counts{0};      //!< Array storing the histogram values
+        double                             m_min_value;      //!< Minimum value to be stored (X-axis)
+        double                             m_max_value;      //!< Maximum value to be stored (X-axis)
+        double                             m_bin_width{0};   //!< Histogram bin width
+
+        //! Helper function handling calculation of the histogram edges.
+        void prepareHistogram()
+        {
+            m_bin_width = (m_max_value - m_min_value) / bin_number;
+            for (size_t index = 0; index < bin_number; index++)
+            {
+                m_edges[index] = m_min_value + static_cast<double>(index) * m_bin_width;
+            }
+            m_edges[bin_number] = m_max_value;
+        }
+    };
+
+}   // namespace vslib::utils

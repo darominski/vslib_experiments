@@ -63,6 +63,7 @@ if (NOT BUILD_TESTS)
       components/src/dq0ToAbcTransform.cpp
       components/src/dq0ToAlphaBetaTransform.cpp
       components/src/instantaneousPowerThreePhase.cpp
+      components/src/srfPll.cpp
       parameters/src/parameterRegistry.cpp
       background/src/parameterSetting.cpp
       background/src/parameterMap.cpp

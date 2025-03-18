@@ -1,7 +1,7 @@
 #include "bmboot/payload_runtime.hpp"
-#include "rootComponent.h"
-#include "state.h"
-#include "user.h"
+#include "rootComponent.hpp"
+#include "state.hpp"
+#include "user.hpp"
 
 // // This is one way to stop users from creating objects on the heap and explicit memory allocations
 // #ifdef __GNUC__

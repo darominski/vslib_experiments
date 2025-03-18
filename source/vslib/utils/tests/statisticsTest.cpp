@@ -7,7 +7,7 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "statistics.h"
+#include "statistics.hpp"
 
 using namespace vslib::utils;
 

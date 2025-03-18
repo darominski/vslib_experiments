@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "csv.hpp"
-#include "rstController.h"
+#include "rstController.hpp"
 
 using namespace vslib;
 using namespace csv;

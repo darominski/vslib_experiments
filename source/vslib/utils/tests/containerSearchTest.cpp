@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "containerSearch.h"
+#include "containerSearch.hpp"
 
 using namespace vslib::utils;
 
@@ -42,19 +42,19 @@ TEST_F(ContainerSearchTest, IndexSearchInt)
     auto         container     = createContainer<int, int>(number_points, min, max);
     int          x1, x2, y1, y2;
 
-    index_search<int, int>(container, min, min, bin_size, x1, y1, x2, y2);
+    indexSearch<int, int>(container, min, min, bin_size, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    index_search<int, int>(container, 0, min, bin_size, x1, y1, x2, y2);
+    indexSearch<int, int>(container, 0, min, bin_size, x1, y1, x2, y2);
     EXPECT_NEAR(x1, 0, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, 0, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y2, bin_size * 2, static_cast<double>(bin_size) / 2.0);
 
-    index_search<int, int>(container, max - bin_size, min, bin_size, x1, y1, x2, y2);
+    indexSearch<int, int>(container, max - bin_size, min, bin_size, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - 2 * bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - 2 * bin_size) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);
@@ -70,13 +70,13 @@ TEST_F(ContainerSearchTest, IndexSearchIntOutsideBounds)
     auto         container     = createContainer<int, int>(number_points, min, max);
     int          x1, x2, y1, y2;
 
-    index_search<int, int>(container, -50, min, bin_size, x1, y1, x2, y2);
+    indexSearch<int, int>(container, -50, min, bin_size, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    index_search<int, int>(container, max * 2, min, bin_size, x1, y1, x2, y2);
+    indexSearch<int, int>(container, max * 2, min, bin_size, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - 2 * bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - 2 * bin_size) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);
@@ -92,19 +92,19 @@ TEST_F(ContainerSearchTest, IndexSearchDouble)
     auto         container     = createContainer<double, double>(number_points, min, max);
     double       x1, x2, y1, y2;
 
-    index_search<double, double>(container, min, min, bin_size, x1, y1, x2, y2);
+    indexSearch<double, double>(container, min, min, bin_size, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    index_search<double, double>(container, 0, min, bin_size, x1, y1, x2, y2);
+    indexSearch<double, double>(container, 0, min, bin_size, x1, y1, x2, y2);
     EXPECT_NEAR(x1, -bin_size, bin_size / 2.0);
     EXPECT_NEAR(y1, -bin_size * 2, bin_size / 2.0);
     EXPECT_NEAR(x2, 0, bin_size / 2.0);
     EXPECT_NEAR(y2, 0, bin_size / 2.0);
 
-    index_search<double, double>(container, max - bin_size, min, bin_size, x1, y1, x2, y2);
+    indexSearch<double, double>(container, max - bin_size, min, bin_size, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - 2 * bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - 2 * bin_size) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);
@@ -120,13 +120,13 @@ TEST_F(ContainerSearchTest, IndexSearchDoubleOutsideBounds)
     auto         container     = createContainer<double, double>(number_points, min, max);
     double       x1, x2, y1, y2;
 
-    index_search<double, double>(container, -50, min, bin_size, x1, y1, x2, y2);
+    indexSearch<double, double>(container, -50, min, bin_size, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    index_search<double, double>(container, max * 2, min, bin_size, x1, y1, x2, y2);
+    indexSearch<double, double>(container, max * 2, min, bin_size, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - 2 * bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - 2 * bin_size) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);
@@ -146,19 +146,19 @@ TEST_F(ContainerSearchTest, LinearSearchInt)
     int          x1, x2, y1, y2;
     int          start_index = 0;
 
-    start_index = linear_search<int, int>(container, min, start_index, x1, y1, x2, y2);
+    start_index = linearSearch<int, int>(container, min, start_index, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    start_index = linear_search<int, int>(container, 0, start_index, x1, y1, x2, y2);
+    start_index = linearSearch<int, int>(container, 0, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, -bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, -bin_size * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, 0, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y2, 0, static_cast<double>(bin_size) / 2.0);
 
-    linear_search<int, int>(container, max - bin_size, start_index, x1, y1, x2, y2);
+    linearSearch<int, int>(container, max - bin_size, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - 2 * bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - 2 * bin_size) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);
@@ -175,13 +175,13 @@ TEST_F(ContainerSearchTest, LinearSearchIntOutsideBounds)
     int          x1, x2, y1, y2;
     int          start_index = 0;
 
-    linear_search<int, int>(container, -50, start_index, x1, y1, x2, y2);
+    linearSearch<int, int>(container, -50, start_index, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    linear_search<int, int>(container, max * 2, start_index, x1, y1, x2, y2);
+    linearSearch<int, int>(container, max * 2, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - bin_size * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - bin_size * 2) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);
@@ -198,19 +198,19 @@ TEST_F(ContainerSearchTest, LinearSearchDouble)
     double       x1, x2, y1, y2;
     int          start_index = 0;
 
-    start_index = linear_search<double, double>(container, min, start_index, x1, y1, x2, y2);
+    start_index = linearSearch<double, double>(container, min, start_index, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    start_index = linear_search<double, double>(container, 0, start_index, x1, y1, x2, y2);
+    start_index = linearSearch<double, double>(container, 0, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, -bin_size, bin_size / 2.0);
     EXPECT_NEAR(y1, -bin_size * 2, bin_size / 2.0);
     EXPECT_NEAR(x2, 0, bin_size / 2.0);
     EXPECT_NEAR(y2, 0, bin_size / 2.0);
 
-    linear_search<double, double>(container, max - bin_size, start_index, x1, y1, x2, y2);
+    linearSearch<double, double>(container, max - bin_size, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - 2 * bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - 2 * bin_size) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);
@@ -227,13 +227,13 @@ TEST_F(ContainerSearchTest, LinearSearchDoubleOutsideBounds)
     double       x1, x2, y1, y2;
     int          start_index = 0;
 
-    linear_search<double, double>(container, min * 2, start_index, x1, y1, x2, y2);
+    linearSearch<double, double>(container, min * 2, start_index, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    linear_search<double, double>(container, max * 2, start_index, x1, y1, x2, y2);
+    linearSearch<double, double>(container, max * 2, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - 2 * bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - 2 * bin_size) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);
@@ -253,19 +253,19 @@ TEST_F(ContainerSearchTest, BinarySearchInt)
     int          x1, x2, y1, y2;
     int          start_index = 0;
 
-    start_index = binary_search<int, int>(container, min, start_index, x1, y1, x2, y2);
+    start_index = binarySearch<int, int>(container, min, start_index, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    start_index = binary_search<int, int>(container, 0, start_index, x1, y1, x2, y2);
+    start_index = binarySearch<int, int>(container, 0, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, -bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, -bin_size * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, 0, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y2, 0, static_cast<double>(bin_size) / 2.0);
 
-    binary_search<int, int>(container, max - bin_size, start_index, x1, y1, x2, y2);
+    binarySearch<int, int>(container, max - bin_size, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - 2 * bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - 2 * bin_size) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);
@@ -282,13 +282,13 @@ TEST_F(ContainerSearchTest, BinarySearchIntOutsideBounds)
     int          x1, x2, y1, y2;
     int          start_index = 0;
 
-    binary_search<int, int>(container, -50, start_index, x1, y1, x2, y2);
+    binarySearch<int, int>(container, -50, start_index, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    binary_search<int, int>(container, max * 2, start_index, x1, y1, x2, y2);
+    binarySearch<int, int>(container, max * 2, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - bin_size * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - bin_size * 2) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);
@@ -305,19 +305,19 @@ TEST_F(ContainerSearchTest, BinarySearchDouble)
     double       x1, x2, y1, y2;
     int          start_index = 0;
 
-    start_index = binary_search<double, double>(container, min, start_index, x1, y1, x2, y2);
+    start_index = binarySearch<double, double>(container, min, start_index, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    start_index = binary_search<double, double>(container, 0, start_index, x1, y1, x2, y2);
+    start_index = binarySearch<double, double>(container, 0, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, -bin_size, bin_size / 2.0);
     EXPECT_NEAR(y1, -bin_size * 2, bin_size / 2.0);
     EXPECT_NEAR(x2, 0, bin_size / 2.0);
     EXPECT_NEAR(y2, 0, bin_size / 2.0);
 
-    binary_search<double, double>(container, max - bin_size, start_index, x1, y1, x2, y2);
+    binarySearch<double, double>(container, max - bin_size, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - 2 * bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - 2 * bin_size) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);
@@ -334,13 +334,13 @@ TEST_F(ContainerSearchTest, BinarySearchDoubleOutsideBounds)
     double       x1, x2, y1, y2;
     int          start_index = 0;
 
-    binary_search<double, double>(container, min * 2, start_index, x1, y1, x2, y2);
+    binarySearch<double, double>(container, min * 2, start_index, x1, y1, x2, y2);
     EXPECT_EQ(x1, min);
     EXPECT_EQ(y1, min * 2);
     EXPECT_EQ(x2, min + bin_size);
     EXPECT_EQ(y2, (min + bin_size) * 2);
 
-    binary_search<double, double>(container, max * 2, start_index, x1, y1, x2, y2);
+    binarySearch<double, double>(container, max * 2, start_index, x1, y1, x2, y2);
     EXPECT_NEAR(x1, max - 2 * bin_size, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(y1, (max - 2 * bin_size) * 2, static_cast<double>(bin_size) / 2.0);
     EXPECT_NEAR(x2, (max - bin_size), static_cast<double>(bin_size) / 2.0);

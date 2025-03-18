@@ -13,6 +13,7 @@ add_executable(${APP}
   tests/utilsTests.cpp
   tests/errorMessageTest.cpp
   tests/logStringTest.cpp
+  tests/messageQueueTest.cpp
   tests/readCsvTest.cpp
   tests/ringBufferTest.cpp
   tests/ringBufferAllocatorTest.cpp
@@ -20,6 +21,7 @@ add_executable(${APP}
   tests/typeLabelTest.cpp
   tests/warningMessageTest.cpp
   tests/functionGeneratorTest.cpp
+  messageQueue.cpp
 )
 
 target_include_directories(${APP} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${LIBRARIES_HOME}/json-3.11.2)
