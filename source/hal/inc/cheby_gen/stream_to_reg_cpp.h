@@ -73,7 +73,7 @@ namespace myModule
             using MemReg::MemReg;
         };
 
-        struct DataArrayItem : MemReg<StreamToReg, AccessMode::RO, double>
+        struct DataArrayItem : MemReg<StreamToReg, AccessMode::RO, uint64_t>
         {
             using MemReg::MemReg;
         };
