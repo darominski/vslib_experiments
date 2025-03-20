@@ -36,8 +36,8 @@ namespace user
               rst_inner_vd("rst_inner_vd", *this),
               rst_inner_vq("rst_inner_vq", *this),
               limit("limit", *this),
-              rst_vdc("rst_vdc", *this),
-              iir_vdc("iir_vdc", *this),
+              //   rst_vdc("rst_vdc", *this),
+              //   iir_vdc("iir_vdc", *this),
               inductance(*this, "inductance"),
               frequency(*this, "frequency"),
               v_base(*this, "v_base"),
@@ -215,15 +215,15 @@ namespace user
             // v_a, v_b, v_c, i_a, i_b, i_c, v_dc_ref, v_dc_meas, q_ref, regulation_on
             // );
 
-            const auto v_dc_diff_filtered = converter.iir_vdc.filter(regulation_on * v_dc_diff);
-            const auto m0                 = converter.rst_vdc.control(0.0, regulation_on * v_dc_diff_filtered);
+            // const auto v_dc_diff_filtered = converter.iir_vdc.filter(regulation_on * v_dc_diff);
+            // const auto m0                 = converter.rst_vdc.control(0.0, regulation_on * v_dc_diff_filtered);
 
             converter.m_data[0]  = v_a_ref;
             converter.m_data[1]  = v_b_ref;
             converter.m_data[2]  = v_c_ref;
-            converter.m_data[3]  = m0;
+            // converter.m_data[3]  = m0;
             converter.m_data[4]  = v_dc_diff;
-            converter.m_data[5]  = v_dc_diff_filtered;
+            // converter.m_data[5]  = v_dc_diff_filtered;
             converter.m_data[6]  = vd_ref;
             converter.m_data[7]  = vq_ref;
             converter.m_data[8]  = p_ref * converter.m_va_to_pu;
@@ -251,40 +251,20 @@ namespace user
             converter.counter++;
         }
 
-        // static void RTTaskPerf(Converter& converter)
-        // {
-        //     // for (int index=0; index<50; index++)
-        //     // {
-        //         asm volatile("isb; dsb sy");
-        //         const volatile double meas = 0.5;//static_cast<double>((std::rand() / RAND_MAX - 1) * 100.0);
-        //         const volatile double ref = 1.0;//static_cast<double>((std::rand() / RAND_MAX - 1) * 100.0);
-
-        //         converter.m_data[0] = meas;
-        //         converter.m_data[1] = ref;
-
-        //         const volatile double act = 0.0;
-        //     //     const volatile double act = converter.rst.control(ref, meas);
-
-        //         converter.m_data[2] = act;
-        //         asm volatile("isb; dsb sy");
-        //     // }
-        //     converter.counter++;
-        // }
-
         vslib::SRFPLL                       pll;
         vslib::AbcToDq0Transform            abc_to_dq0_v;
         vslib::AbcToDq0Transform            abc_to_dq0_i;
         vslib::Dq0ToAbcTransform            dq0_to_abc;
         vslib::InstantaneousPowerThreePhase power_3ph_instant;
-        vslib::RST<1>                       rst_outer_vdc;
+        vslib::RST<3>                       rst_outer_vdc;
         vslib::RST<2>                       rst_outer_id;
         vslib::RST<2>                       rst_outer_iq;
-        vslib::RST<1>                       rst_inner_vd;
-        vslib::RST<1>                       rst_inner_vq;
+        vslib::RST<2>                       rst_inner_vd;
+        vslib::RST<2>                       rst_inner_vq;
         vslib::LimitRange<double>           limit;
 
-        vslib::RST<1>       rst_vdc;
-        vslib::IIRFilter<2> iir_vdc;
+        // vslib::RST<1>       rst_vdc;
+        // vslib::IIRFilter<2> iir_vdc;
 
         // Owned Parameters
         vslib::Parameter<double> inductance;   //!< Inductance of the system [H]

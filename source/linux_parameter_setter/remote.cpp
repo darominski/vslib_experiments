@@ -194,15 +194,14 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["limit.dead_zone"]       = std::array<double, 2>{0, 0};
 
     // RST outer vdc control
-    values_to_set["rst_outer_vdc.r"]
-        = std::array<double, 2>{2.827280412152077772454317e-8, -2.827033706921389033422873e-8};
-    values_to_set["rst_outer_vdc.s"] = std::array<double, 2>{4e-8, -4e-8};
-    values_to_set["rst_outer_vdc.t"] = std::array<double, 2>{2.46705230688704093725432e-12, 0.0};
+    values_to_set["rst_outer_vdc.r"] = std::array<double, 4>{1.8361e-7, -1.7108e-7, -1.5545e-9, -6.3707e-12};
+    values_to_set["rst_outer_vdc.s"] = std::array<double, 4>{1.0, -0.95052, -0.049271, -0.00020886};
+    values_to_set["rst_outer_vdc.t"] = std::array<double, 4>{1.0968e-8, 0.0, 0.0, 0.0};
 
     // RST outer loop control
-    std::array<double, 3> r_outer{34.98137745638047846341578, -70.70286258390524380956776, 35.72193714699132982559604};
-    std::array<double, 3> s_outer{1.0, -1.0, 0.0};
-    std::array<double, 3> t_outer{4.5201946656448e-4, 0.0, 0.0};
+    std::array<double, 3> r_outer{2.4189, -5.44, 3.0294};
+    std::array<double, 3> s_outer{1.0, -0.42203, -0.57797};
+    std::array<double, 3> t_outer{0.0083397, 0.0, 0.0};
 
     values_to_set["rst_outer_id.r"] = r_outer;
     values_to_set["rst_outer_id.s"] = s_outer;
@@ -213,9 +212,9 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["rst_outer_iq.t"] = t_outer;
 
     // RST inner loop control
-    std::array<double, 2> r_inner{-3.416063337264310995067262, 3.111243602756687653965173};
-    std::array<double, 2> s_inner{1.0, -1.0};
-    std::array<double, 2> t_inner{0.3048197345076233411020894, 0.0};
+    std::array<double, 3> r_inner{-7.9398, 6.8227, 0.0};
+    std::array<double, 3> s_inner{1.0, -0.52941, -0.47059};
+    std::array<double, 3> t_inner{1.1171, 0.0, 0.0};
 
     values_to_set["rst_inner_vd.r"] = r_inner;
     values_to_set["rst_inner_vd.s"] = s_inner;
