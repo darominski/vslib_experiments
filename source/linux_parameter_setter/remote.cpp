@@ -8,9 +8,9 @@
 #include "bmboot/domain.hpp"
 #include "bmboot/domain_helpers.hpp"
 #include "json/json.hpp"
-#include "messageQueue.h"
+#include "messageQueue.hpp"
 #include "shared_memory.h"
-#include "vslibMessageQueue.h"
+#include "vslibMessageQueue.hpp"
 
 using Json = nlohmann::json;
 using namespace vslib;
