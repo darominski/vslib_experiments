@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <tuple>
 
 #include "abcToDq0Transform.hpp"
 #include "component.hpp"
@@ -36,9 +37,9 @@ namespace vslib
         //! @param a A-phase component of the three-phase system
         //! @param b B-phase component of the three-phase system
         //! @param c C-phase component of the three-phase system
-        //! @return Pair with balanced angle (omega t), that always fits in 0 to 2pi, and q
-        [[nodiscard]] std::pair<double, double>
-        synchroniseWithQ(const double f_a, const double f_b, const double f_c) noexcept;
+        //! @return Pair with balanced angle (omega t), that always fits in 0 to 2pi, d, and q
+        [[nodiscard]] std::tuple<double, double, double>
+        synchroniseWithDQ(const double f_a, const double f_b, const double f_c) noexcept;
 
         //! Computes one iteration of the the PLL synchronisation and returns wt.
         //!

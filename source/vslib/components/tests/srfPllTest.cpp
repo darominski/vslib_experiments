@@ -121,16 +121,17 @@ TEST_F(SRFPLLTest, SRFPLLOneIteration)
     ASSERT_EQ(pll.synchronise(1.0, 1.0, 1.0), 0.0);
 }
 
-//! Checks that a SRFPLL object can calculate a single iteration of balancing
-TEST_F(SRFPLLTest, SRFPLLOneIterationWithQ)
+//! Checks that a SRFPLL object can calculate a single iteration of balancing, d-q version
+TEST_F(SRFPLLTest, SRFPLLOneIterationWithDQ)
 {
     RootComponent root;
     std::string   name = "pll_3";
     SRFPLL        pll(name, root);
     // no need to set parameters, as the first step is always zero due to using
     // forward Euler method
-    const auto [wt, q] = pll.synchroniseWithQ(1.0, 1.0, 1.0);
+    const auto [wt, d, q] = pll.synchroniseWithDQ(1.0, 1.0, 1.0);
     ASSERT_EQ(wt, 0.0);
+    ASSERT_EQ(d, 0.0);
     ASSERT_EQ(q, 0.0);
 }
 
@@ -291,7 +292,7 @@ TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistencyWithQ)
 
         const auto matlab_wt = (*matlab_wt_line)[0].get<double>();
 
-        auto const [wt, q] = pll.synchroniseWithQ(a, b, c);
+        auto const [wt, d, q] = pll.synchroniseWithDQ(a, b, c);
         double relative;
         if (matlab_wt != 0)
         {
