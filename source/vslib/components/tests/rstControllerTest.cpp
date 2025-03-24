@@ -91,38 +91,38 @@ TEST_F(RSTControllerTest, RSTControllerVerifyParameters)
 
     // checks that s(odd) < s(even) is found out by the verification
     s_value                                  = {0.5, 0.6, 0.5, 0.5};
-    auto const unstable_s_even_less_than_odd = rst.jurysStabilityTest(s_value);
+    auto const unstable_s_even_less_than_odd = rst.jurysStabilityTest(s_value, 's');
     ASSERT_EQ(unstable_s_even_less_than_odd.has_value(), true);
     EXPECT_EQ(
         unstable_s_even_less_than_odd.value().warning_str,
-        "rst: unstable, sum of even coefficients less or equal than of odd coefficients.\n"
+        "rst: s unstable, sum of even coefficients less or equal than of odd coefficients.\n"
     );
 
     // checks that t(odd) < t(even) is found out by the verification
     t_value                                  = {0.1, 0.2, 0.0, 0.0};
-    auto const unstable_t_even_less_than_odd = rst.jurysStabilityTest(t_value);
+    auto const unstable_t_even_less_than_odd = rst.jurysStabilityTest(t_value, 't');
     ASSERT_EQ(unstable_t_even_less_than_odd.has_value(), true);
     EXPECT_EQ(
         unstable_t_even_less_than_odd.value().warning_str,
-        "rst: unstable, sum of even coefficients less or equal than of odd coefficients.\n"
+        "rst: t unstable, sum of even coefficients less or equal than of odd coefficients.\n"
     );
 
     // checks that sum of coefficients below 0 is found out by the verification
     t_value                                 = {0.1, 0.2, -1.0, 0.1};
-    auto const unstable_coeffs_sum_negative = rst.jurysStabilityTest(t_value);
+    auto const unstable_coeffs_sum_negative = rst.jurysStabilityTest(t_value, 't');
     ASSERT_EQ(unstable_coeffs_sum_negative.has_value(), true);
     EXPECT_EQ(
         unstable_coeffs_sum_negative.value().warning_str,
-        "rst: unstable, sum of even coefficients less or equal than of odd coefficients.\n"
+        "rst: t unstable, sum of even coefficients less or equal than of odd coefficients.\n"
     );
 
     // checks that roots of coefficients is not above 0 is found out by the verification
     t_value                                   = {0.5, 0.5, 0.5, 0.5};
-    auto const unstable_coeffs_roots_negative = rst.jurysStabilityTest(t_value);
+    auto const unstable_coeffs_roots_negative = rst.jurysStabilityTest(t_value, 't');
     ASSERT_EQ(unstable_coeffs_roots_negative.has_value(), true);
     EXPECT_EQ(
         unstable_coeffs_roots_negative.value().warning_str,
-        "rst: unstable, the first element of Jury's array is not above zero.\n"
+        "rst: t unstable, the first element of Jury's array is not above zero.\n"
     );
 }
 
@@ -142,11 +142,11 @@ TEST_F(RSTControllerTest, RSTControllerCalculateActuation)
     rst.setS(s_value);
     rst.setT(t_value);
 
-    auto maybe_warning = rst.jurysStabilityTest(r_value);
+    auto maybe_warning = rst.jurysStabilityTest(r_value, 'r');
     ASSERT_FALSE(maybe_warning.has_value());
-    maybe_warning = rst.jurysStabilityTest(s_value);
+    maybe_warning = rst.jurysStabilityTest(s_value, 's');
     ASSERT_FALSE(maybe_warning.has_value());
-    maybe_warning = rst.jurysStabilityTest(t_value);
+    maybe_warning = rst.jurysStabilityTest(t_value, 't');
     ASSERT_FALSE(maybe_warning.has_value());
 
     double const set_point_value   = 3.14159;
@@ -272,11 +272,11 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkSimpleConsistency)
     rst.setS(s_value);
     rst.setT(t_value);
 
-    auto maybe_warning = rst.jurysStabilityTest(r_value);
+    auto maybe_warning = rst.jurysStabilityTest(r_value, 'r');
     ASSERT_FALSE(maybe_warning.has_value());
-    maybe_warning = rst.jurysStabilityTest(s_value);
+    maybe_warning = rst.jurysStabilityTest(s_value, 's');
     ASSERT_FALSE(maybe_warning.has_value());
-    maybe_warning = rst.jurysStabilityTest(t_value);
+    maybe_warning = rst.jurysStabilityTest(t_value, 't');
     ASSERT_FALSE(maybe_warning.has_value());
 
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";
@@ -335,11 +335,11 @@ TEST_F(RSTControllerTest, RSTControllerSimulinkConsistency)
     rst.setS(s_value);
     rst.setT(t_value);
 
-    auto maybe_warning = rst.jurysStabilityTest(r_value);
+    auto maybe_warning = rst.jurysStabilityTest(r_value, 'r');
     ASSERT_FALSE(maybe_warning.has_value());
-    maybe_warning = rst.jurysStabilityTest(s_value);
+    maybe_warning = rst.jurysStabilityTest(s_value, 's');
     ASSERT_FALSE(maybe_warning.has_value());
-    maybe_warning = rst.jurysStabilityTest(t_value);
+    maybe_warning = rst.jurysStabilityTest(t_value, 't');
     ASSERT_FALSE(maybe_warning.has_value());
 
     std::filesystem::path yk_path = "components/inputs/rst_yk_random.csv";

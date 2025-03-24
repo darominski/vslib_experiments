@@ -232,13 +232,13 @@ namespace vslib
                 return fgc4::utils::Warning("First element of t coefficients is zero.");
             }
 
-            const auto& warning_s = rst.jurysStabilityTest(m_s);
+            const auto& warning_s = rst.jurysStabilityTest(m_s, 's');
             if (warning_s.has_value())
             {
                 return warning_s.value();
             }
 
-            const auto& warning_t = rst.jurysStabilityTest(m_t);
+            const auto& warning_t = rst.jurysStabilityTest(m_t, 't');
             if (warning_t.has_value())
             {
                 return warning_t.value();

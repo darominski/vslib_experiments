@@ -131,7 +131,8 @@ namespace vslib
         //!
         //! @param coefficients Coefficients to be tested
         //! @return Optionally returns a Warning with relevant information if test failed, nothing otherwise
-        std::optional<fgc4::utils::Warning> jurysStabilityTest(const std::array<double, buffer_length>& coefficients)
+        std::optional<fgc4::utils::Warning>
+        jurysStabilityTest(const std::array<double, buffer_length>& coefficients, const char group_symbol)
         {
             // Test re-implemented from CCLIBS libreg's regRst.c
             size_t coefficient_length = 1;
@@ -165,16 +166,18 @@ namespace vslib
             if (sum_odd > sum_even)
             {
                 return fgc4::utils::Warning(fmt::format(
-                    "{}: unstable, sum of even coefficients less or equal than of odd coefficients.\n", m_name
+                    "{}: {} unstable, sum of even coefficients less or equal than of odd coefficients.\n", m_name,
+                    group_symbol
                 ));
             }
 
             // Stability check 2 : Sum(coefficients) > 0 - allow for floating point rounding errors
             if (((sum_even + sum_odd) / sum_abs) < -fgc4::utils::constants::floating_point_min_threshold)
             {
-                return fgc4::utils::Warning(
-                    fmt::format("{}: unstable, sum of coefficients below minimal floating-point threshold.\n", m_name)
-                );
+                return fgc4::utils::Warning(fmt::format(
+                    "{}: {} unstable, sum of coefficients below minimal floating-point threshold.\n", m_name,
+                    group_symbol
+                ));
             }
 
             // Stability check 3 : Jury's Stability Test for unstable roots
@@ -185,9 +188,9 @@ namespace vslib
                 // First element of every row of Jury's array > 0 for stability
                 if ((m_b[0] - d * m_b[coefficient_length]) <= 0.0F)
                 {
-                    return fgc4::utils::Warning(
-                        fmt::format("{}: unstable, the first element of Jury's array is not above zero.\n", m_name)
-                    );
+                    return fgc4::utils::Warning(fmt::format(
+                        "{}: {} unstable, the first element of Jury's array is not above zero.\n", m_name, group_symbol
+                    ));
                 }
 
                 coefficient_length--;

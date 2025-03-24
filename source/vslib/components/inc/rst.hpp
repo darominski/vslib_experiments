@@ -144,13 +144,13 @@ namespace vslib
                 return fgc4::utils::Warning(fmt::format("{}: first element of t coefficients is zero.\n", m_name));
             }
 
-            const auto& maybe_warning_s = rst.jurysStabilityTest(s.toValidate());
+            const auto& maybe_warning_s = rst.jurysStabilityTest(s.toValidate(), 's');
             if (maybe_warning_s.has_value())
             {
                 return maybe_warning_s.value();
             }
 
-            const auto& maybe_warning_t = rst.jurysStabilityTest(t.toValidate());
+            const auto& maybe_warning_t = rst.jurysStabilityTest(t.toValidate(), 't');
             if (maybe_warning_t.has_value())
             {
                 return maybe_warning_t.value();
