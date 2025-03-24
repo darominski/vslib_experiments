@@ -130,6 +130,7 @@ namespace vslib
         //! Performs the Jury's stability test on the provided array of coefficients.
         //!
         //! @param coefficients Coefficients to be tested
+        //! @param group_symbol Character used to identify the coefficient array being tested, one of 'r', 's', or 't'
         //! @return Optionally returns a Warning with relevant information if test failed, nothing otherwise
         std::optional<fgc4::utils::Warning>
         jurysStabilityTest(const std::array<double, buffer_length>& coefficients, const char group_symbol)
