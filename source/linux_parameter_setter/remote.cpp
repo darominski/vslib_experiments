@@ -75,7 +75,8 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     static constexpr double v_max                    = 5000.0;
     static constexpr double current_frequency        = 50;   // Hz
 
-    values_to_set["example.control_period"] = control_period;
+    values_to_set["example.control_period"]   = control_period;
+    values_to_set["example.rst_outer_period"] = static_cast<int>(1.0 / 50.0);
 
     values_to_set["current_balancing_pos.i_base"]                   = i_base;
     values_to_set["current_balancing_pos.v_max"]                    = v_max;
