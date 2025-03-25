@@ -14,10 +14,11 @@ The `PLL` Component is a composite Component, owning a :ref:`AbcToDq0Transform <
 and a :ref:`PID <pid_component>`. Therefore, all Parameters of these children Components must be set before
 the `PLL` is ready to be used.
 
-The `PLL` Component implements a single interaction method, called `synchronise`. It takes three
-double-precision arguments: `a`, `b`, and `c` for each component of the three-phase current or voltage.
-The output is a single value: :math:`\omega t`, being the output of the single iteration of locking
-the phase. The output is guaranteed to fit in :math:`[0, 2\pi]` range, if the angle offset is set to 0.
+The `PLL` Component implements a two interaction methods, called `synchronise` and `synchroniseWithDQ`. Both take three
+double-precision floating-point arguments: `a`, `b`, and `c` for each component of the three-phase current or voltage.
+The output of `synchronise` is a single value: :math:`\omega t`, being the output of the single iteration of locking
+the phase. The output is guaranteed to fit in :math:`[0, 2\pi]` range, if the angle offset is set to 0. The output of
+`synchroniseWithDQ` returns a tuple with :math:`\omega t`, and in addition `d` and `q` components of the `DQ0` frame.
 
 The algorithm implemented in VSlib is equivalent to the following Simulink implementation:
 
@@ -59,6 +60,9 @@ Usage example
         const double v_c    = -0.5;
 
         const double wt_pll = converter.pll.synchronise(v_a, v_b, v_c);
+
+        // If observability of d an q components is required:
+        const auto [wt, d, q] = converter.pll.synchroniseWithDQ(v_a, v_b, v_c);
 
         return 0;
     }
