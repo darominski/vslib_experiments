@@ -22,7 +22,8 @@ namespace vslib
         //! @param iteration_period Iteration period at which this Limit Component is called
         LimitRms(std::string_view name, Component& parent, const double iteration_period = 5e-6)
             : Component("LimitRms", name, parent),
-              rms_limit(*this, "rms_limit"),
+              rms_limit_min(*this, "rms_limit_min"),
+              rms_limit_max(*this, "rms_limit_max"),
               rms_time_constant(*this, "rms_time_constant", 1e-12),   // 1 ps limit
               m_iteration_period(iteration_period)   // TODO: replace by iteration period information sharing solution
         {
@@ -42,7 +43,7 @@ namespace vslib
             // calculation re-implemented from regLimRmsRT
             m_cumulative += (pow(input, 2) - m_cumulative) * m_filter_factor;
 
-            return (m_cumulative < m_rms_limit2);
+            return (m_cumulative < m_rms_limit_max_squared && m_cumulative > m_rms_limit_min_squared);
         }
 
         //! Resets this Limit Component to the initial state of buffers and buffer pointers.
@@ -51,20 +52,23 @@ namespace vslib
             m_cumulative = 0.0;
         }
 
-        Parameter<double> rms_limit;           //!< Maximal value of root-mean square
+        Parameter<double> rms_limit_min;       //!< Minimal value of root-mean square
+        Parameter<double> rms_limit_max;       //!< Maximal value of root-mean square
         Parameter<double> rms_time_constant;   //!< Time constant to calculate filter factor
 
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
-            m_filter_factor = m_iteration_period / (rms_time_constant.toValidate() + 0.5 * m_iteration_period);
-            m_rms_limit2    = pow(rms_limit.toValidate(), 2);
+            m_filter_factor         = m_iteration_period / (rms_time_constant.toValidate() + 0.5 * m_iteration_period);
+            m_rms_limit_min_squared = pow(rms_limit_min.toValidate(), 2);
+            m_rms_limit_max_squared = pow(rms_limit_max.toValidate(), 2);
             return {};
         }
 
       private:
-        double m_iteration_period{0.0};   //!< Iteration period for this Limit
-        double m_cumulative{0.0};         //!< Cumulative of the squared inputs
-        double m_filter_factor{0.0};      //!< Convenience factor to avoid re-calculation each call to limit
-        double m_rms_limit2{0.0};         //!< optimisation method to not recalculate limit to the power of 2
+        double m_iteration_period{0.0};        //!< Iteration period for this Limit
+        double m_cumulative{0.0};              //!< Cumulative of the squared inputs
+        double m_filter_factor{0.0};           //!< Convenience factor to avoid re-calculation each call to limit
+        double m_rms_limit_min_squared{0.0};   //!< optimisation method to not recalculate limit to the power of 2
+        double m_rms_limit_max_squared{0.0};   //!< optimisation method to not recalculate limit to the power of 2
     };
 }   // namespace vslib
