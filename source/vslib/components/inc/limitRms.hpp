@@ -43,7 +43,7 @@ namespace vslib
             // calculation re-implemented from regLimRmsRT
             m_cumulative += (pow(input, 2) - m_cumulative) * m_filter_factor;
 
-            return (m_cumulative < m_rms_limit_max_squared && m_cumulative > m_rms_limit_min_squared);
+            return (m_cumulative >= m_rms_limit_min_squared && m_cumulative <= m_rms_limit_max_squared);
         }
 
         //! Resets this Limit Component to the initial state of buffers and buffer pointers.
