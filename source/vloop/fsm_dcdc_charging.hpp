@@ -1,15 +1,16 @@
 //! @file
-//! @brief Definition of finite state machine for floating DCDCs
+//! @brief Definition of finite state machine for charger DCDCs
 //! @author Dominik Arominski
 
 #pragma once
 
 #include "constants.hpp"
 #include "fsm.hpp"
+#include "pops_constants.h"
 
-namespace utils
+namespace user
 {
-    enum class DCDCChargingStates
+    enum class DCDCChargerStates
     {
         fault_off,
         fault_stopping,
@@ -17,38 +18,36 @@ namespace utils
         stopping,
         starting,
         blocking,
-        charging,
-        charged,
         direct
     };
 
-    class DCDChargingFSM
+    class DCDChargerFSM
     {
-        using StateMachine = ::utils::Fsm<DCDCChargingStates, DCDChargingFSM, false>;
+        using StateMachine = ::utils::Fsm<DCDCChargerStates, DCDChargerFSM, false>;
 
-        using TransRes = ::utils::FsmTransitionResult<DCDCChargingStates>;
+        using TransRes = ::utils::FsmTransitionResult<DCDCChargerStates>;
 
         using StateFunc = std::function<void(void)>;
 
         //! Convenience alias representing pointer to a member function of the Parent class, for a transition function.
-        using TransitionFunc = ::utils::FsmTransitionResult<DCDCChargingStates> (DCDChargingFSM::*)();
+        using TransitionFunc = ::utils::FsmTransitionResult<DCDCChargerStates> (DCDChargerFSM::*)();
 
       public:
-        DCDChargingFSM()
-            : m_fsm(*this, DCDCChargingStates::fault_off)
+        DCDChargerFSM()
+            : m_fsm(*this, DCDCChargerStates::fault_off)
         {
-            // CAUTION: The order of transition method matters
+            // Initialize handles for the I_loop state, vdc measurement, gateware status, interlock status, and the PFM
+            // status
 
+            // CAUTION: The order of transition method matters
             // clang-format off
-            m_fsm.addState(DCDCChargingStates::fault_off,      &DCDChargingFSM::onFaultOff,      {&DCDChargingFSM::toOff});
-            m_fsm.addState(DCDCChargingStates::fault_stopping, &DCDChargingFSM::onFaultStopping, {&DCDChargingFSM::toFaultOff});
-            m_fsm.addState(DCDCChargingStates::off,            &DCDChargingFSM::onOff,           {&DCDChargingFSM::toFaultStopping, &DCDChargingFSM::toStarting});
-            m_fsm.addState(DCDCChargingStates::stopping,       &DCDChargingFSM::onStopping,      {&DCDChargingFSM::toFaultStopping, &DCDChargingFSM::toOff});
-            m_fsm.addState(DCDCChargingStates::starting,       &DCDChargingFSM::onStarting,      {&DCDChargingFSM::toFaultStopping, &DCDChargingFSM::toStopping, &DCDChargingFSM::toBlocking});
-            m_fsm.addState(DCDCChargingStates::blocking,       &DCDChargingFSM::onBlocking,      {&DCDChargingFSM::toFaultStopping, &DCDChargingFSM::toStopping});
-            m_fsm.addState(DCDCChargingStates::charging,       &DCDChargingFSM::onCharging,      {&DCDChargingFSM::toFaultStopping, &DCDChargingFSM::toStopping, &DCDChargingFSM::toCharged});
-            m_fsm.addState(DCDCChargingStates::charged,        &DCDChargingFSM::onCharged,       {&DCDChargingFSM::toFaultStopping, &DCDChargingFSM::toStopping, &DCDChargingFSM::toDirect});
-            m_fsm.addState(DCDCChargingStates::direct,         &DCDChargingFSM::onDirect,        {&DCDChargingFSM::toFaultStopping, &DCDChargingFSM::toStopping, &DCDChargingFSM::toCharged});
+            m_fsm.addState(DCDCChargerStates::fault_off,      &DCDChargerFSM::onFaultOff,      {&DCDChargerFSM::toOff});
+            m_fsm.addState(DCDCChargerStates::fault_stopping, &DCDChargerFSM::onFaultStopping, {&DCDChargerFSM::toFaultOff});
+            m_fsm.addState(DCDCChargerStates::off,            &DCDChargerFSM::onOff,           {&DCDChargerFSM::toFaultStopping, &DCDChargerFSM::toStarting});
+            m_fsm.addState(DCDCChargerStates::stopping,       &DCDChargerFSM::onStopping,      {&DCDChargerFSM::toFaultStopping, &DCDChargerFSM::toOff});
+            m_fsm.addState(DCDCChargerStates::starting,       &DCDChargerFSM::onStarting,      {&DCDChargerFSM::toFaultStopping, &DCDChargerFSM::toStopping, &DCDChargerFSM::toBlocking});
+            m_fsm.addState(DCDCChargerStates::blocking,       &DCDChargerFSM::onBlocking,      {&DCDChargerFSM::toFaultStopping, &DCDChargerFSM::toStopping, &DCDChargerFSM::toDirect});
+            m_fsm.addState(DCDCChargerStates::direct,         &DCDChargerFSM::onDirect,        {&DCDChargerFSM::toFaultStopping, &DCDChargerFSM::toStopping, &DCDChargerFSM::toBlocking});
             // clang-format on
         }
 
@@ -96,9 +95,9 @@ namespace utils
 
         TransRes toFaultOff()
         {
-            if (Vdc < vdc_min)   // DC bus is discharged
+            if (getVdc() < constants::v_dc_min)   // DC bus is discharged
             {
-                return TransRes{DCDCChargingStates::fault_off};
+                return TransRes{DCDCChargerStates::fault_off};
             }
             return {};
         }
@@ -108,7 +107,7 @@ namespace utils
             if (force_stop || gatewareFault() || interlock || I_loop.getState() == RegLoopStates::FS
                 || pfm.getState() == PFMStates::FO)
             {
-                return TransRes{DCDCChargingStates::fault_stopping};
+                return TransRes{DCDCChargerStates::fault_stopping};
             }
             return {};
         }
@@ -117,40 +116,102 @@ namespace utils
         {
             if (I_loop.getState() == RegLoopStates::OF)
             {
-                return TransRes{DCDCChargingStates::off};
+                return TransRes{DCDCChargerStates::off};
             }
             return {};
         }
 
-        TransRes toStopping()
+        //! Transition to the stopping state.
+        //!
+        //! @param force_stop Force stopping of the DCDC, e.g. from a HMI request
+        TransRes toStopping(const bool force_stop = false)
         {
-            return TransRes{DCDCChargingStates::stopping};
+            if (I_loop.getState() == RegLoopStates::SP || force_stop)
+            {
+                return TransRes{DCDCChargerStates::stopping};
+            }
+            return {};
         }
 
         TransRes toStarting()
         {
-            return TransRes{DCDCChargingStates::starting};
+            if (checkVSRunReceived())
+            {
+                return TransRes{DCDCChargerStates::starting};
+            }
+            return {};
         }
 
         TransRes toBlocking()
         {
-            return TransRes{DCDCChargingStates::blocking};
-        }
-
-        TransRes toCharging()
-        {
-            return TransRes{DCDCChargingStates::charging};
-        }
-
-        TransRes toCharged()
-        {
-            return TransRes{DCDCChargingStates::charged};
+            if ((getState() == DCDCChargerStates::starting && checkOutputsReady()
+                 && getVout() <= constants::v_out_threshold)
+                || (getState() == DCDCChargerStates::direct && allFloatingsInBK()
+                    && getVdcFloatings() < constants::v_dc_floatings_threshold))
+            {
+                return TransRes{DCDCChargerStates::blocking};
+            }
+            return {};
         }
 
         TransRes toDirect()
         {
-            return TransRes{DCDCChargingStates::direct};
+            if (unblockReceived() && getVloopMask())
+            {
+                return TransRes{DCDCChargerStates::direct};
+            }
+            return {};
+        }
+
+      private:
+        bool allFloatingsInBK()
+        {
+            // TODO: loop over all Floating DCDC and check their state. If all are in BK, return true, false otherwise.
+            return false;
+        }
+
+        double getVdcFloatings()
+        {
+            // TODO: get Vdc value of Floating DCDC
+            return 0.0;
+        }
+
+        bool checkVSRunReceived()
+        {
+            // TODO: check if VS_RUN has been received from I_loop
+            return false;
+        }
+
+        bool unblockReceived()
+        {
+            // TODO: check if 'Unblock' has been received from I_loop
+            return false;
+        }
+
+        bool getVloopMask()
+        {
+            // TODO: get Vloop mask setting
+            return false;
+        }
+
+        bool checkOutputsReady()
+        {
+            // TODO: check if outputs == 0110
+            return false;
+        }
+
+        double getVout()
+        {
+            // TODO: get V out
+            return 0.0;
+        }
+
+        double getVdc()
+        {
+            // TODO: get V dc
+            return 0.0;
         }
     };
+
 
 }   // namespace user
