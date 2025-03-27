@@ -7,7 +7,7 @@
 #include "constants.hpp"
 #include "fsm.hpp"
 
-namespace utils
+namespace user
 {
     enum class DCDCFloatingStates
     {
@@ -37,8 +37,9 @@ namespace utils
         DCDCFloatingFSM()
             : m_fsm(*this, DCDCFloatingStates::fault_off)
         {
-            // CAUTION: The order of transition method matters
+            // Initialize handles for the I_loop state, gateware status, interlock status, and PFM state
 
+            // CAUTION: The order of transition method matters
             // clang-format off
             m_fsm.addState(DCDCFloatingStates::fault_off,      &DCDCFloatingFSM::onFaultOff,      {&DCDCFloatingFSM::toOff});
             m_fsm.addState(DCDCFloatingStates::fault_stopping, &DCDCFloatingFSM::onFaultStopping, {&DCDCFloatingFSM::toFaultOff});

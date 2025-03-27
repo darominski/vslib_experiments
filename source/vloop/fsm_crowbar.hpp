@@ -30,8 +30,9 @@ namespace user
         CrowbarFSM()
             : m_fsm(*this, CrowbarStates::fault_off)
         {
-            // CAUTION: The order of transition method matters
+            // obtain handles for the I_loop state and the intertrip light state
 
+            // CAUTION: The order of transition method matters
             // clang-format off
             m_fsm.addState(CrowbarStates::fault_off, &CrowbarFSM::onFaultOff, {&CrowbarFSM::toOn});
             m_fsm.addState(CrowbarStates::on,        &CrowbarFSM::onOn,       {&CrowbarFSM::toFaultOff});
@@ -62,7 +63,7 @@ namespace user
 
         TransRes toOn()
         {
-            if (I_loop.getState() == VS_RUN)
+            if (I_loop sent VS_RUN)
             {
                 return TransRes{CrowbarStates::on};
             }
@@ -73,7 +74,7 @@ namespace user
         {
             if (!intertrip_light || I_loop.getState() == FO)
             {
-                {CrowbarStates::fault_off};
+                return TransRes{CrowbarStates::fault_off};
             }
             return {};
         }
