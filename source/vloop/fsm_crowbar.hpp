@@ -63,7 +63,7 @@ namespace user
 
         TransRes toOn()
         {
-            if (I_loop sent VS_RUN)
+            if (checkVSRunReceived())
             {
                 return TransRes{CrowbarStates::on};
             }
@@ -72,11 +72,18 @@ namespace user
 
         TransRes toFaultOff()
         {
-            if (!intertrip_light || I_loop.getState() == FO)
+            if (!checkIntertripLight() || I_loop.getState() == FO)
             {
                 return TransRes{CrowbarStates::fault_off};
             }
             return {};
+        }
+
+      private:
+        bool checkVSRunReceived()
+        {
+            // TODO: check if VS_RUN has been received from I_loop
+            return false;
         }
     };
 

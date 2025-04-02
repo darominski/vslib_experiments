@@ -104,7 +104,7 @@ namespace user
 
         TransRes toFaultStopping(const bool force_stop = false)
         {
-            if (force_stop || gatewareFault() || interlock || I_loop.getState() == RegLoopStates::FS
+            if (force_stop || checkGatewareFault() || checkInterlock() || I_loop.getState() == RegLoopStates::FS
                 || pfm.getState() == PFMStates::FO)
             {
                 return TransRes{DCDCChargerStates::fault_stopping};
@@ -156,7 +156,7 @@ namespace user
 
         TransRes toDirect()
         {
-            if (unblockReceived() && getVloopMask())
+            if (checkUnblockReceived() && getVloopMask())
             {
                 return TransRes{DCDCChargerStates::direct};
             }
@@ -182,21 +182,21 @@ namespace user
             return false;
         }
 
-        bool unblockReceived()
+        bool checkUnblockReceived()
         {
             // TODO: check if 'Unblock' has been received from I_loop
-            return false;
-        }
-
-        bool getVloopMask()
-        {
-            // TODO: get Vloop mask setting
             return false;
         }
 
         bool checkOutputsReady()
         {
             // TODO: check if outputs == 0110
+            return false;
+        }
+
+        bool getVloopMask()
+        {
+            // TODO: get Vloop mask setting
             return false;
         }
 

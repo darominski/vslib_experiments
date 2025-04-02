@@ -6,6 +6,7 @@
 
 #include "constants.hpp"
 #include "fsm.hpp"
+#include "pops_constants.hpp"
 
 namespace user
 {
@@ -99,16 +100,16 @@ namespace user
 
         TransRes toFaultOff()
         {
-            if (Vdc < vdc_min)   // DC bus is discharged
+            if (getVdc() < constants::v_dc_min)   // DC bus is discharged
             {
                 return TransRes{DCDCFloatingStates::fault_off};
             }
             return {};
         }
 
-        TransRes toFaultStopping(const bool force_stop = false)
+        TransRes toFaultStopping()
         {
-            if (force_stop || gatewareFault() || interlock || I_loop.getState() == RegLoopStates::FS
+            if (checkHMIForceStop || checkGatewareFault() || checkInterlock() || I_loop.getState() == RegLoopStates::FS
                 || pfm.getState() == PFMStates::FO)
             {
                 return TransRes{DCDCFloatingStates::fault_stopping};
@@ -153,6 +154,13 @@ namespace user
         TransRes toDirect()
         {
             return TransRes{DCDCFloatingStates::direct};
+        }
+
+      private:
+        double getVdc()
+        {
+            // TODO: get V dc
+            return 0.0;
         }
     };
 
