@@ -65,7 +65,7 @@ Neither of the polynomial coefficient arrays' first element can be equal to 0.0.
 are verified for stability using Jury's stability test:
 
 1. Sum of odd-index coefficients must be larger than sum of even-index coefficients
-2. Sum of even and odd coefficients divided by the sum of absolute values of coeffcients must be less than a negative value for floating point precision (equal to `-1e-7`)
+2. Sum of even and odd coefficients divided by the sum of absolute values of coefficients must be less than a negative value for floating point precision (equal to `-1e-7`)
 3. Roots of the polynomial must lie within the unit circle.
 
 In case any issue is found during validation, the offending :code:`Parameter` will not be accepted and cannot be used by

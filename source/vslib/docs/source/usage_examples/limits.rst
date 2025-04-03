@@ -217,7 +217,7 @@ LimitRms
 and the input type has been fixed to :code:`double`, for type safety given the necessary calculations to be performed.
 
 The component has two settable Parameters: :code:`rms_limit` and :code:`rms_time_constant`, both of double type. In addition, the component has
-an optional constructor argument of type double: :code:`iteration_period`, which by default is set to :math:`5e-6`.
+an optional constructor argument of type double: :code:`iteration_period`, which by default is set to :math:`5\cdot 10^{-6}`.
 
 The :code:`limit` function takes one argument: the input value of type double and returns one value of boolean type.
 It returns true if the RMS of provided input is less or equal than the :code:`rms_limit`,
