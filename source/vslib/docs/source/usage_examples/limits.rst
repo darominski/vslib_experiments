@@ -213,14 +213,14 @@ Usage example
 LimitRms
 --------
 
-:code:`LimitRms` implements a second rate limit, using root-mean square calculation of the provided input. The component is not type dependent,
-and the input type has been fixed to :code:`double`, for type safety given the necessary calculations to be performed.
+:code:`LimitRms` implements a second rate limit, using root-mean square calculation of the provided input. The component is not type-dependent,
+and the input type is fixed to :code:`double`, for type safety given the necessary calculations to be performed.
 
-The component has two settable Parameters: :code:`rms_limit` and :code:`rms_time_constant`, both of double type. In addition, the component has
-an optional constructor argument of type double: :code:`iteration_period`, which by default is set to :math:`5\cdot 10^{-6}`.
+The component has three settable Parameters: :code:`rms_limit_min`, :code:`rms_limit_max`, and :code:`rms_time_constant`, all of double type.
+In addition, the component has an optional constructor argument of type double: :code:`iteration_period`, which by default is set to :math:`5\cdot 10^{-6}`.
 
 The :code:`limit` function takes one argument: the input value of type double and returns one value of boolean type.
-It returns true if the RMS of provided input is less or equal than the :code:`rms_limit`,
+It returns true if the RMS of provided input is larger or equal to :code:`rms_limit_min` and less or equal than the :code:`rms_limit_max`,
 otherwise it returns false. :code:`false` is also returned if the provided input is not a number.
 
 The formula used is the following:
@@ -228,7 +228,14 @@ The formula used is the following:
 .. math::
 
     cumulative_{i} = (input_{i}^{2} - cumulative_{i-1}) \cdot filter\_factor \\
-    cumulative_{i} <= rms\_limit^{2},
+
+
+check if:
+
+.. math::
+
+    cumulative_{i} >= rms\_limit\_min^{2} \\
+    cumulative_{i} <= rms\_limit\_max^{2}
 
 where :math:`filter\_factor = \frac{iteration\_period}{rms\_time\_constant + 0.5 \cdot iteration\_period}`.
 
@@ -251,7 +258,8 @@ Usage example
         LimitRms limit("limit", root);
 
         // set rms_limit and rms_time_constant Parameters
-        // example below assumes rms_limit = 10.0, rms_time_constant: 1e-6, iteration_period: 1e-5
+        // example below assumes rms_limit_min = 1.0, rms_limit_max = 10.0,
+        // rms_time_constant: 1e-6, iteration_period: 1e-5
 
         bool out_1 = limit.limit(1.0); // first input always passes, true
         bool out_2 = limit.limit(2.0); // true
@@ -259,6 +267,10 @@ Usage example
 
         out_1 = limit.limit(1.0);   // true
         out_2 = limit.limit(10.0);  // false, maximum is < 7.853
+        limit.reset();
+
+        out_1 = limit.limit(1.0); // true
+        out_2 = limit.limit(1.0); // false, minimum is > 1.0
         limit.reset();
 
         out_1 = limit.limit(1.0); // true
