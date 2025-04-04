@@ -13,8 +13,8 @@ namespace user
 {
     enum class CWBVloopStates
     {
-        FO,
-        ON
+        FO,   // fault off
+        ON    // on
     };
 
     class CWBStateMachine
