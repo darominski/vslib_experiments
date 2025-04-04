@@ -105,7 +105,7 @@ namespace user
 
         TransRes toFaultStopping()
         {
-            if (force_stop || checkGatewareFault() || checkInterlock() || i_loop.getState() == IloopStates::FS
+            if (checkGatewareFault() || checkInterlock() || i_loop.getState() == IloopStates::FS
                 || pfm.getState() == PFMStates::FO)
             {
                 return TransRes{DCDCChargerVloopStates::FS};
@@ -123,8 +123,6 @@ namespace user
         }
 
         //! Transition to the SP state.
-        //!
-        //! @param force_stop Force SP of the DCDC, e.g. from a HMI request
         TransRes toStopping()
         {
             if (i_loop.getState() == IloopStates::SP || checkHMIRequestStop())

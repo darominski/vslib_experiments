@@ -101,29 +101,37 @@ namespace user
 
         TransRes toFaultOff()
         {
-            if (getVdc() < constants::v_dc_min)   // DC bus is disCD
+            // from FS and DC bus is discharged
+            if (getVdc() < constants::v_dc_min)
             {
                 return TransRes{DCDCFloatingVloopStates::FO};
             }
+
+            // no transition
             return {};
         }
 
         TransRes toFaultStopping()
         {
-            if (checkHMIRequestStop() || checkGatewareFault() || checkInterlock()
-                || i_loop.getState() == IloopStates::FS || pfm.getState() == PFMStates::FO)
+            if (checkGatewareFault() || checkInterlock() || i_loop.getState() == IloopStates::FS
+                || pfm.getState() == PFMStates::FO)
             {
                 return TransRes{DCDCFloatingVloopStates::FS};
             }
+
+            // no transition
             return {};
         }
 
         TransRes toOff()
         {
+            // Iloop goes to off
             if (i_loop.getState() == IloopStates::OF)
             {
                 return TransRes{DCDCFloatingVloopStates::OF};
             }
+
+            // no transition
             return {};
         }
 
@@ -135,60 +143,88 @@ namespace user
                 return TransRes{DCDCFloatingVloopStates::SP};
             }
 
-            // HMI request to stop, valid for CH, CD, and DT
-            if (checkHMIRequestStop()
-                && (getState() == DCDCFloatingVloopStates::CH || getState() == DCDCFloatingVloopStates::CD
-                    || getState() == DCDCFloatingVloopStates::DT))
+            // HMI request to stop
+            if (checkHMIRequestStop())
             {
-                return TransRes{DCDCFloatingVloopStates::SP};
+                // transition to stopping if current state is CH, CD, and DT
+                if (getState() == DCDCFloatingVloopStates::CH || getState() == DCDCFloatingVloopStates::CD
+                    || getState() == DCDCFloatingVloopStates::DT)
+                {
+                    return TransRes{DCDCFloatingVloopStates::SP};
+                }
+                else   // FS otherwise
+                {
+                    return TransRes{DCDCFloatingVloopStates::FS};
+                }
             }
 
+            // no transition
             return {};
         }
 
         TransRes toStarting()
         {
+            // VS_RUN received from Iloop
             if (checkVSRunReceived())
             {
                 return TransRes{DCDCFloatingVloopStates::ST};
             }
+
+            // no transition
             return {};
         }
 
         TransRes toBlocking()
         {
+            // 0110 on inputs and V_out = 0 V
             if (checkOutputsReady() && getVout() < constants::v_out_threshold)
             {
                 return TransRes{DCDCFloatingVloopStates::BK};
             }
+
+            // no transition
             return {};
         }
 
         TransRes toCharging()
         {
+            // 'unblock' received from Iloop
             if (checkUnblockReceived())
             {
                 return TransRes{DCDCFloatingVloopStates::CH};
             }
+
+            // no transition
             return {};
         }
 
         TransRes toCharged()
         {
-            if ((getState() == DCDCFloatingVloopStates::CH && getVdc() >= constants::v_dc_floatings_charged_threshold)
-                || (getState() == DCDCFloatingVloopStates::DT && getVloopMask() == 0))
+            // from CH, Vdc > threshold
+            if (getState() == DCDCFloatingVloopStates::CH && getVdc() >= constants::v_dc_floatings_charged_threshold)
             {
                 return TransRes{DCDCFloatingVloopStates::CD};
             }
+
+            // from DT, Vloop MASK set to 0
+            if (getState() == DCDCFloatingVloopStates::DT && getVloopMask() == 0)
+            {
+                return TransRes{DCDCFloatingVloopStates::CD};
+            }
+
+            // no transition
             return {};
         }
 
         TransRes toDirect()
         {
+            // Vloop MASK set to 1
             if (getVloopMask() == 1)
             {
                 return TransRes{DCDCFloatingVloopStates::DT};
             }
+
+            // no transition
             return {};
         }
 
