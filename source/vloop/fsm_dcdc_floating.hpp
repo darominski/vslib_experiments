@@ -11,47 +11,47 @@
 
 namespace user
 {
-    enum class DCDCFloatingStates
+    enum class DCDCFloatingVloopStates
     {
-        fault_off,
-        fault_stopping,
-        off,
-        stopping,
-        starting,
-        blocking,
-        charging,
-        charged,
-        direct
+        FO,   // fault off
+        FS,   // fault stopping
+        OF,   // off
+        SP,   // stopping
+        ST,   // starting
+        BK,   // blocking
+        CH,   // charging
+        CD,   // charged
+        DT    // direct
     };
 
-    class DCDCFloatingFSM
+    class DCDCFloatingStateMachine
     {
-        using StateMachine = ::utils::Fsm<DCDCFloatingStates, DCDCFloatingFSM, false>;
+        using StateMachine = ::utils::Fsm<DCDCFloatingVloopStates, DCDCFloatingStateMachine, false>;
 
-        using TransRes = ::utils::FsmTransitionResult<DCDCFloatingStates>;
+        using TransRes = ::utils::FsmTransitionResult<DCDCFloatingVloopStates>;
 
         using StateFunc = std::function<void(void)>;
 
         //! Convenience alias representing pointer to a member function of the Parent class, for a transition function.
-        using TransitionFunc = ::utils::FsmTransitionResult<DCDCFloatingStates> (DCDCFloatingFSM::*)();
+        using TransitionFunc = ::utils::FsmTransitionResult<DCDCFloatingVloopStates> (DCDCFloatingStateMachine::*)();
 
       public:
-        DCDCFloatingFSM()
-            : m_fsm(*this, DCDCFloatingStates::fault_off)
+        DCDCFloatingStateMachine()
+            : m_fsm(*this, DCDCFloatingVloopStates::FO)
         {
-            // Initialize handles for the I_loop state, gateware status, interlock status, and PFM state
+            // Initialize handles for the i_loop state, gateware status, interlock status, and PFM state
 
             // CAUTION: The order of transition method matters
             // clang-format off
-            m_fsm.addState(DCDCFloatingStates::fault_off,      &DCDCFloatingFSM::onFaultOff,      {&DCDCFloatingFSM::toOff});
-            m_fsm.addState(DCDCFloatingStates::fault_stopping, &DCDCFloatingFSM::onFaultStopping, {&DCDCFloatingFSM::toFaultOff});
-            m_fsm.addState(DCDCFloatingStates::off,            &DCDCFloatingFSM::onOff,           {&DCDCFloatingFSM::toFaultStopping, &DCDCFloatingFSM::toStarting});
-            m_fsm.addState(DCDCFloatingStates::stopping,       &DCDCFloatingFSM::onStopping,      {&DCDCFloatingFSM::toFaultStopping, &DCDCFloatingFSM::toOff});
-            m_fsm.addState(DCDCFloatingStates::starting,       &DCDCFloatingFSM::onStarting,      {&DCDCFloatingFSM::toFaultStopping, &DCDCFloatingFSM::toStopping, &DCDCFloatingFSM::toBlocking});
-            m_fsm.addState(DCDCFloatingStates::blocking,       &DCDCFloatingFSM::onBlocking,      {&DCDCFloatingFSM::toFaultStopping, &DCDCFloatingFSM::toStopping, &DCDCFloatingFSM::toCharging});
-            m_fsm.addState(DCDCFloatingStates::charging,       &DCDCFloatingFSM::onCharging,      {&DCDCFloatingFSM::toFaultStopping, &DCDCFloatingFSM::toStopping, &DCDCFloatingFSM::toCharged});
-            m_fsm.addState(DCDCFloatingStates::charged,        &DCDCFloatingFSM::onCharged,       {&DCDCFloatingFSM::toFaultStopping, &DCDCFloatingFSM::toStopping, &DCDCFloatingFSM::toDirect});
-            m_fsm.addState(DCDCFloatingStates::direct,         &DCDCFloatingFSM::onDirect,        {&DCDCFloatingFSM::toFaultStopping, &DCDCFloatingFSM::toStopping, &DCDCFloatingFSM::toCharged});
+            m_fsm.addState(DCDCFloatingVloopStates::FO, &DCDCFloatingStateMachine::onFaultOff,      {&DCDCFloatingStateMachine::toOff});
+            m_fsm.addState(DCDCFloatingVloopStates::FS, &DCDCFloatingStateMachine::onFaultStopping, {&DCDCFloatingStateMachine::toFaultOff});
+            m_fsm.addState(DCDCFloatingVloopStates::OF, &DCDCFloatingStateMachine::onOff,           {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStarting});
+            m_fsm.addState(DCDCFloatingVloopStates::SP, &DCDCFloatingStateMachine::onStopping,      {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toOff});
+            m_fsm.addState(DCDCFloatingVloopStates::ST, &DCDCFloatingStateMachine::onStarting,      {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStopping, &DCDCFloatingStateMachine::toBlocking});
+            m_fsm.addState(DCDCFloatingVloopStates::BK, &DCDCFloatingStateMachine::onBlocking,      {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStopping, &DCDCFloatingStateMachine::toCharging});
+            m_fsm.addState(DCDCFloatingVloopStates::CH, &DCDCFloatingStateMachine::onCharging,      {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStopping, &DCDCFloatingStateMachine::toCharged});
+            m_fsm.addState(DCDCFloatingVloopStates::CD, &DCDCFloatingStateMachine::onCharged,       {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStopping, &DCDCFloatingStateMachine::toDirect});
+            m_fsm.addState(DCDCFloatingVloopStates::DT, &DCDCFloatingStateMachine::onDirect,        {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStopping, &DCDCFloatingStateMachine::toCharged});
             // clang-format on
         }
 
@@ -101,41 +101,48 @@ namespace user
 
         TransRes toFaultOff()
         {
-            if (getVdc() < constants::v_dc_min)   // DC bus is discharged
+            if (getVdc() < constants::v_dc_min)   // DC bus is disCD
             {
-                return TransRes{DCDCFloatingStates::fault_off};
+                return TransRes{DCDCFloatingVloopStates::FO};
             }
             return {};
         }
 
         TransRes toFaultStopping()
         {
-            if (checkHMIForceStop() || checkGatewareFault() || checkInterlock()
-                || I_loop.getState() == RegLoopStates::FS || pfm.getState() == PFMStates::FO)
+            if (checkHMIRequestStop() || checkGatewareFault() || checkInterlock()
+                || i_loop.getState() == IloopStates::FS || pfm.getState() == PFMStates::FO)
             {
-                return TransRes{DCDCFloatingStates::fault_stopping};
+                return TransRes{DCDCFloatingVloopStates::FS};
             }
             return {};
         }
 
         TransRes toOff()
         {
-            if (I_loop.getState() == RegLoopStates::OF)
+            if (i_loop.getState() == IloopStates::OF)
             {
-                return TransRes{DCDCFloatingStates::off};
+                return TransRes{DCDCFloatingVloopStates::OF};
             }
             return {};
         }
 
         TransRes toStopping()
         {
-            if (I_loop.getState() == RegLoopStates::SP
-                || (checkHMIForceStop()
-                    && (getState() == DCDCFloatingStates::charging || getState() == DCDCFloatingStates::charged
-                        || getState() == DCDCFloatingStates::direct)))
+            // from any state if Iloop is stopping
+            if (i_loop.getState() == IloopStates::SP)
             {
-                return TransRes{DCDCFloatingStates::stopping};
+                return TransRes{DCDCFloatingVloopStates::SP};
             }
+
+            // HMI request to stop, valid for CH, CD, and DT
+            if (checkHMIRequestStop()
+                && (getState() == DCDCFloatingVloopStates::CH || getState() == DCDCFloatingVloopStates::CD
+                    || getState() == DCDCFloatingVloopStates::DT))
+            {
+                return TransRes{DCDCFloatingVloopStates::SP};
+            }
+
             return {};
         }
 
@@ -143,7 +150,7 @@ namespace user
         {
             if (checkVSRunReceived())
             {
-                return TransRes{DCDCFloatingStates::starting};
+                return TransRes{DCDCFloatingVloopStates::ST};
             }
             return {};
         }
@@ -152,7 +159,7 @@ namespace user
         {
             if (checkOutputsReady() && getVout() < constants::v_out_threshold)
             {
-                return TransRes{DCDCFloatingStates::blocking};
+                return TransRes{DCDCFloatingVloopStates::BK};
             }
             return {};
         }
@@ -161,17 +168,17 @@ namespace user
         {
             if (checkUnblockReceived())
             {
-                return TransRes{DCDCFloatingStates::charging};
+                return TransRes{DCDCFloatingVloopStates::CH};
             }
             return {};
         }
 
         TransRes toCharged()
         {
-            if ((getState() == DCDCFloatingStates::charging && getVdc() >= constants::v_dc_floatings_charged_threshold)
-                || (getState() == DCDCFloatingStates::direct && getVloopMask() == 0))
+            if ((getState() == DCDCFloatingVloopStates::CH && getVdc() >= constants::v_dc_floatings_charged_threshold)
+                || (getState() == DCDCFloatingVloopStates::DT && getVloopMask() == 0))
             {
-                return TransRes{DCDCFloatingStates::charged};
+                return TransRes{DCDCFloatingVloopStates::CD};
             }
             return {};
         }
@@ -180,7 +187,7 @@ namespace user
         {
             if (getVloopMask() == 1)
             {
-                return TransRes{DCDCFloatingStates::direct};
+                return TransRes{DCDCFloatingVloopStates::DT};
             }
             return {};
         }

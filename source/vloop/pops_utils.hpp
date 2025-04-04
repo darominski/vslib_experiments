@@ -41,7 +41,7 @@ namespace user
         return false;
     }
 
-    bool checkHMIForceStop()
+    bool checkHMIRequestStop()
     {
         // TODO: check if the HMI force stop condition is fulfilled
         return false;
