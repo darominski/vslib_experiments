@@ -8,9 +8,9 @@
 #include "fsm.hpp"
 #include "fsm_afe.hpp"
 #include "fsm_crowbar.hpp"
-#include "fsm_dcdc_CH.hpp"
+#include "fsm_dcdc_charger.hpp"
 #include "fsm_dcdc_floating.hpp"
-#include "pops_constants.h"
+#include "pops_constants.hpp"
 
 namespace user
 {
