@@ -11,44 +11,44 @@
 
 namespace user
 {
-    enum class AFEStates
+    enum class AFEVloopStates
     {
-        fault_off,
-        fault_stopping,
-        off,
-        stopping,
-        precharging,
-        precharged,
-        on
+        FO,   // fault_off
+        FS,   // fault stopping
+        OF,   // off
+        SP,   // stopping
+        PH,   // precharging
+        PD,   // precharged
+        ON    // on
     };
 
-    class AFEFSM
+    class AFEStateMachine
     {
-        using StateMachine = ::utils::Fsm<AFEStates, AFEFSM, false>;
+        using StateMachine = ::utils::Fsm<AFEVloopStates, AFEStateMachine, false>;
 
-        using TransRes = ::utils::FsmTransitionResult<AFEStates>;
+        using TransRes = ::utils::FsmTransitionResult<AFEVloopStates>;
 
         using StateFunc = std::function<void(void)>;
 
         //! Convenience alias representing pointer to a member function of the Parent class, for a transition function.
-        using TransitionFunc = ::utils::FsmTransitionResult<AFEStates> (AFEFSM::*)();
+        using TransitionFunc = ::utils::FsmTransitionResult<AFEVloopStates> (AFEStateMachine::*)();
 
       public:
-        AFEFSM()
-            : m_fsm(*this, AFEStates::fault_off)
+        AFEStateMachine()
+            : m_fsm(*this, AFEVloopStates::FO)
         {
-            // Initialize handles for the I_loop state, vdc measurement, gateware status, interlock status, and the PFM
+            // Initialize handles for the i_loop state, vdc measurement, gateware status, interlock status, and the PFM
             // status
 
             // CAUTION: The order of transition method matters
             // clang-format off
-            m_fsm.addState(AFEStates::fault_off,      &AFEFSM::onFaultOff,      {&AFEFSM::toOff});
-            m_fsm.addState(AFEStates::fault_stopping, &AFEFSM::onFaultStopping, {&AFEFSM::toFaultOff});
-            m_fsm.addState(AFEStates::off,            &AFEFSM::onOff,           {&AFEFSM::toFaultStopping, &AFEFSM::toPrecharging});
-            m_fsm.addState(AFEStates::stopping,       &AFEFSM::onStopping,      {&AFEFSM::toFaultStopping, &AFEFSM::toOff});
-            m_fsm.addState(AFEStates::precharging,    &AFEFSM::onPrecharging,   {&AFEFSM::toFaultStopping, &AFEFSM::toPrecharged});
-            m_fsm.addState(AFEStates::precharged,     &AFEFSM::onPrecharged,    {&AFEFSM::toFaultStopping, &AFEFSM::toOn});
-            m_fsm.addState(AFEStates::on,             &AFEFSM::onOn,            {&AFEFSM::toFaultStopping, &AFEFSM::toStopping});
+            m_fsm.addState(AFEVloopStates::FO, &AFEStateMachine::onFaultOff,      {&AFEStateMachine::toOff});
+            m_fsm.addState(AFEVloopStates::FS, &AFEStateMachine::onFaultStopping, {&AFEStateMachine::toFaultOff});
+            m_fsm.addState(AFEVloopStates::OF, &AFEStateMachine::onOff,           {&AFEStateMachine::toFaultStopping, &AFEStateMachine::toPrecharging});
+            m_fsm.addState(AFEVloopStates::SP, &AFEStateMachine::onStopping,      {&AFEStateMachine::toFaultStopping, &AFEStateMachine::toOff});
+            m_fsm.addState(AFEVloopStates::PH, &AFEStateMachine::onPrecharging,   {&AFEStateMachine::toFaultStopping, &AFEStateMachine::toPrecharged});
+            m_fsm.addState(AFEVloopStates::PD, &AFEStateMachine::onPrecharged,    {&AFEStateMachine::toFaultStopping, &AFEStateMachine::toOn});
+            m_fsm.addState(AFEVloopStates::ON, &AFEStateMachine::onOn,            {&AFEStateMachine::toFaultStopping, &AFEStateMachine::toStopping});
             // clang-format on
         }
 
@@ -93,27 +93,27 @@ namespace user
             // DC bus is discharged, MCB should be open, and MV and LV breakers should be open
             if (getVdc() < constants::v_dc_min && checkMCBOpen() && checkMVOpen() && checkLVOpen())
             {
-                return TransRes{AFEStates::fault_off};
+                return TransRes{AFEVloopStates::FO};
             }
             return {};
         }
 
-        TransRes toFaultStopping(const bool force_stop = false)
+        TransRes toFaultStopping()
         {
-            if (force_stop || checkGatewareFault() || checkInterlock() || I_loop.getState() == RegLoopStates::FS
+            if (checkGatewareFault() || checkInterlock() || i_loop.getState() == IloopStates::FS
                 || pfm.getState() == PFMStates::FO
-                || (getState() == AFEStates::precharged && I_loop.getState() == RegLoopStates::SP))
+                || (getState() == AFEVloopStates::PD && i_loop.getState() == IloopStates::SP))
             {
-                return TransRes{AFEStates::fault_stopping};
+                return TransRes{AFEVloopStates::FS};
             }
             return {};
         }
 
         TransRes toOff()
         {
-            if (I_loop.getState() == RegLoopStates::OF)
+            if (i_loop.getState() == IloopStates::OF)
             {
-                return TransRes{AFEStates::off};
+                return TransRes{AFEVloopStates::OF};
             }
             return {};
         }
@@ -121,11 +121,11 @@ namespace user
         //! Transition to the stopping state.
         //!
         //! @param force_stop Force stopping of the DCDC, e.g. from a HMI request
-        TransRes toStopping(const bool force_stop = false)
+        TransRes toStopping()
         {
-            if (force_stop || I_loop.getState() == RegLoopStates::SP)
+            if (i_loop.getState() == IloopStates::SP)
             {
-                return TransRes{AFEStates::stopping};
+                return TransRes{AFEVloopStates::SP};
             }
             return {};
         }
@@ -134,7 +134,7 @@ namespace user
         {
             if (checkVSRunReceived())
             {
-                return TransRes{AFEStates::precharging};
+                return TransRes{AFEVloopStates::PH};
             }
             return {};
         }
@@ -143,7 +143,7 @@ namespace user
         {
             if (!checkMCBOpen() && check400VOpen() && getVdcCharger() > constants::v_dc_charger_min)
             {
-                return TransRes{AFEStates::precharged};
+                return TransRes{AFEVloopStates::PD};
             }
             return {};
         }
@@ -152,18 +152,24 @@ namespace user
         {
             if (checkUnblockReceived())
             {
-                return TransRes{AFEStates::on};
+                return TransRes{AFEVloopStates::ON};
             }
             return {};
         }
 
       private:
+        //! Returns the Vdc value of the DCDC Charger
+        //!
+        //! @return Vdc charger value in V
         double getVdcCharger()
         {
             // TODO: get Vdc value of Floating DCDC
             return 0.0;
         }
 
+        //! Returns the Vdc value
+        //!
+        //! Vdc value in V
         double getVdc()
         {
             // TODO: get V dc

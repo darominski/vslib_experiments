@@ -11,44 +11,44 @@
 
 namespace user
 {
-    enum class DCDCChargerStates
+    enum class DCDCChargerVloopStates
     {
-        fault_off,
-        fault_stopping,
-        off,
-        stopping,
-        starting,
-        blocking,
-        direct
+        FO,   // fault off
+        FS,   // fault stopping
+        OF,   // off
+        SP,   // stopping
+        ST,   // starting
+        BK,   // blocking
+        DT    // direct
     };
 
-    class DCDChargerFSM
+    class DCDCChargerStateMachine
     {
-        using StateMachine = ::utils::Fsm<DCDCChargerStates, DCDChargerFSM, false>;
+        using StateMachine = ::utils::Fsm<DCDCChargerVloopStates, DCDCChargerStateMachine, false>;
 
-        using TransRes = ::utils::FsmTransitionResult<DCDCChargerStates>;
+        using TransRes = ::utils::FsmTransitionResult<DCDCChargerVloopStates>;
 
         using StateFunc = std::function<void(void)>;
 
         //! Convenience alias representing pointer to a member function of the Parent class, for a transition function.
-        using TransitionFunc = ::utils::FsmTransitionResult<DCDCChargerStates> (DCDChargerFSM::*)();
+        using TransitionFunc = ::utils::FsmTransitionResult<DCDCChargerVloopStates> (DCDCChargerStateMachine::*)();
 
       public:
-        DCDChargerFSM()
-            : m_fsm(*this, DCDCChargerStates::fault_off)
+        DCDCChargerStateMachine()
+            : m_fsm(*this, DCDCChargerVloopStates::FO)
         {
-            // Initialize handles for the I_loop state, vdc measurement, gateware status, interlock status, and the PFM
+            // Initialize handles for the i_loop state, vdc measurement, gateware status, interlock status, and the PFM
             // status
 
             // CAUTION: The order of transition method matters
             // clang-format off
-            m_fsm.addState(DCDCChargerStates::fault_off,      &DCDChargerFSM::onFaultOff,      {&DCDChargerFSM::toOff});
-            m_fsm.addState(DCDCChargerStates::fault_stopping, &DCDChargerFSM::onFaultStopping, {&DCDChargerFSM::toFaultOff});
-            m_fsm.addState(DCDCChargerStates::off,            &DCDChargerFSM::onOff,           {&DCDChargerFSM::toFaultStopping, &DCDChargerFSM::toStarting});
-            m_fsm.addState(DCDCChargerStates::stopping,       &DCDChargerFSM::onStopping,      {&DCDChargerFSM::toFaultStopping, &DCDChargerFSM::toOff});
-            m_fsm.addState(DCDCChargerStates::starting,       &DCDChargerFSM::onStarting,      {&DCDChargerFSM::toFaultStopping, &DCDChargerFSM::toStopping, &DCDChargerFSM::toBlocking});
-            m_fsm.addState(DCDCChargerStates::blocking,       &DCDChargerFSM::onBlocking,      {&DCDChargerFSM::toFaultStopping, &DCDChargerFSM::toStopping, &DCDChargerFSM::toDirect});
-            m_fsm.addState(DCDCChargerStates::direct,         &DCDChargerFSM::onDirect,        {&DCDChargerFSM::toFaultStopping, &DCDChargerFSM::toStopping, &DCDChargerFSM::toBlocking});
+            m_fsm.addState(DCDCChargerVloopStates::FO, &DCDCChargerStateMachine::onFaultOff,      {&DCDCChargerStateMachine::toOff});
+            m_fsm.addState(DCDCChargerVloopStates::FS, &DCDCChargerStateMachine::onFaultStopping, {&DCDCChargerStateMachine::toFaultOff});
+            m_fsm.addState(DCDCChargerVloopStates::OF, &DCDCChargerStateMachine::onOff,           {&DCDCChargerStateMachine::toFaultStopping, &DCDCChargerStateMachine::toStarting});
+            m_fsm.addState(DCDCChargerVloopStates::SP, &DCDCChargerStateMachine::onStopping,      {&DCDCChargerStateMachine::toFaultStopping, &DCDCChargerStateMachine::toOff});
+            m_fsm.addState(DCDCChargerVloopStates::ST, &DCDCChargerStateMachine::onStarting,      {&DCDCChargerStateMachine::toFaultStopping, &DCDCChargerStateMachine::toStopping, &DCDCChargerStateMachine::toBlocking});
+            m_fsm.addState(DCDCChargerVloopStates::BK, &DCDCChargerStateMachine::onBlocking,      {&DCDCChargerStateMachine::toFaultStopping, &DCDCChargerStateMachine::toStopping, &DCDCChargerStateMachine::toDirect});
+            m_fsm.addState(DCDCChargerVloopStates::DT, &DCDCChargerStateMachine::onDirect,        {&DCDCChargerStateMachine::toFaultStopping, &DCDCChargerStateMachine::toStopping, &DCDCChargerStateMachine::toBlocking});
             // clang-format on
         }
 
@@ -98,38 +98,38 @@ namespace user
         {
             if (getVdc() < constants::v_dc_min)   // DC bus is discharged
             {
-                return TransRes{DCDCChargerStates::fault_off};
+                return TransRes{DCDCChargerVloopStates::FO};
             }
             return {};
         }
 
-        TransRes toFaultStopping(const bool force_stop = false)
+        TransRes toFaultStopping()
         {
-            if (force_stop || checkGatewareFault() || checkInterlock() || I_loop.getState() == RegLoopStates::FS
+            if (force_stop || checkGatewareFault() || checkInterlock() || i_loop.getState() == IloopStates::FS
                 || pfm.getState() == PFMStates::FO)
             {
-                return TransRes{DCDCChargerStates::fault_stopping};
+                return TransRes{DCDCChargerVloopStates::FS};
             }
             return {};
         }
 
         TransRes toOff()
         {
-            if (I_loop.getState() == RegLoopStates::OF)
+            if (i_loop.getState() == IloopStates::OF)
             {
-                return TransRes{DCDCChargerStates::off};
+                return TransRes{DCDCChargerVloopStates::OF};
             }
             return {};
         }
 
-        //! Transition to the stopping state.
+        //! Transition to the SP state.
         //!
-        //! @param force_stop Force stopping of the DCDC, e.g. from a HMI request
-        TransRes toStopping(const bool force_stop = false)
+        //! @param force_stop Force SP of the DCDC, e.g. from a HMI request
+        TransRes toStopping()
         {
-            if (I_loop.getState() == RegLoopStates::SP || force_stop)
+            if (i_loop.getState() == IloopStates::SP || checkHMIRequestStop())
             {
-                return TransRes{DCDCChargerStates::stopping};
+                return TransRes{DCDCChargerVloopStates::SP};
             }
             return {};
         }
@@ -138,19 +138,25 @@ namespace user
         {
             if (checkVSRunReceived())
             {
-                return TransRes{DCDCChargerStates::starting};
+                return TransRes{DCDCChargerVloopStates::ST};
             }
             return {};
         }
 
         TransRes toBlocking()
         {
-            if ((getState() == DCDCChargerStates::starting && checkOutputsReady()
-                 && getVout() <= constants::v_out_threshold)
-                || (getState() == DCDCChargerStates::direct && checkAllFloatingsInBK()
-                    && getVdcFloatings() < constants::v_dc_floatings_min_threshold))
+            // from ST
+            if (getState() == DCDCChargerVloopStates::ST && checkOutputsReady()
+                && getVout() <= constants::v_out_threshold)
             {
-                return TransRes{DCDCChargerStates::blocking};
+                return TransRes{DCDCChargerVloopStates::BK};
+            }
+
+            // from DT
+            if (getState() == DCDCChargerVloopStates::DT && checkAllFloatingVloopInBK()
+                && getVdcFloatings() < constants::v_dc_floatings_min_threshold)
+            {
+                return TransRes{DCDCChargerVloopStates::BK};
             }
             return {};
         }
@@ -159,15 +165,15 @@ namespace user
         {
             if (checkUnblockReceived() && getVloopMask())
             {
-                return TransRes{DCDCChargerStates::direct};
+                return TransRes{DCDCChargerVloopStates::DT};
             }
             return {};
         }
 
-        //! Checks if all Floating DCDC are in blocking (BK) state.
+        //! Checks if all Floating DCDC are in BK (BK) state.
         //!
         //! @return True if all Floating DCDCs are in BK, false otherwise
-        bool checkAllFloatingsInBK()
+        bool checkAllFloatingVloopInBK()
         {
             // TODO: loop over all Floating DCDC and check their state. If all are in BK, return true, false otherwise.
             return false;

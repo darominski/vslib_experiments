@@ -8,54 +8,54 @@
 #include "fsm.hpp"
 #include "fsm_afe.hpp"
 #include "fsm_crowbar.hpp"
-#include "fsm_dcdc_charging.hpp"
+#include "fsm_dcdc_CH.hpp"
 #include "fsm_dcdc_floating.hpp"
 #include "pops_constants.h"
 
 namespace user
 {
-    enum class MainStates
+    enum class MCVloopStates
     {
-        fault_off,
-        fault_stopping,
-        off,
-        stopping,
-        starting,
-        blocking,
-        charging,
-        standby,
-        cycling
+        FO,   // fault OF
+        FS,   // fault SP
+        OF,   // off
+        SP,   // stopping
+        ST,   // starting
+        BK,   // blocking
+        CH,   // charging
+        SB,   // standby
+        CY    // cycling
     };
 
-    class MainFSM
+    class MCStateMachine
     {
-        using StateMachine = ::utils::Fsm<MainStates, MainFSM, false>;
+        using StateMachine = ::utils::Fsm<MCVloopStates, MCStateMachine, false>;
 
-        using TransRes = ::utils::FsmTransitionResult<MainStates>;
+        using TransRes = ::utils::FsmTransitionResult<MCVloopStates>;
 
         using StateFunc = std::function<void(void)>;
 
         //! Convenience alias representing pointer to a member function of the Parent class, for a transition function.
-        using TransitionFunc = ::utils::FsmTransitionResult<MainStates> (MainFSM::*)();
+        using TransitionFunc = ::utils::FsmTransitionResult<MCVloopStates> (MCStateMachine::*)();
 
       public:
-        MainFSM()
-            : m_fsm(*this, MainStates::fault_off)
+        MCStateMachine()
+            : m_fsm(*this, MCVloopStates::FO)
         {
-            // Initialize handles for the I_loop state, vdc measurement, gateware status, interlock status, and the PFM
-            // status, and all I_loop and Vloops on executors
+            // Initialize handles for the i_loop state, vdc measurement, gateware status, interlock status, and the PFM
+            // status, and all i_loop and Vloops on executors
 
             // CAUTION: The order of transition method matters
             // clang-format off
-            m_fsm.addState(MainStates::fault_off,      &MainFSM::onFaultOff,      {&MainFSM::toOff});
-            m_fsm.addState(MainStates::fault_stopping, &MainFSM::onFaultStopping, {&MainFSM::toFaultOff});
-            m_fsm.addState(MainStates::off,            &MainFSM::onOff,           {&MainFSM::toFaultStopping, &MainFSM::toStarting});
-            m_fsm.addState(MainStates::stopping,       &MainFSM::onStopping,      {&MainFSM::toFaultStopping, &MainFSM::toOff});
-            m_fsm.addState(MainStates::starting,       &MainFSM::onStarting,      {&MainFSM::toFaultStopping, &MainFSM::toBlocking});
-            m_fsm.addState(MainStates::blocking,       &MainFSM::onBlocking,      {&MainFSM::toFaultStopping, &MainFSM::toStopping, &MainFSM::toCharging});
-            m_fsm.addState(MainStates::charging,       &MainFSM::onCharging,      {&MainFSM::toFaultStopping, &MainFSM::toStopping, &MainFSM::toStandby});
-            m_fsm.addState(MainStates::standby,        &MainFSM::onStandby,       {&MainFSM::toFaultStopping, &MainFSM::toStopping, &MainFSM::toBlocking, &MainFSM::toCycling});
-            m_fsm.addState(MainStates::cycling,        &MainFSM::onCycling,       {&MainFSM::toFaultStopping, &MainFSM::toStandby});
+            m_fsm.addState(MCVloopStates::FO, &MCStateMachine::onFaultOff,      {&MCStateMachine::toOff});
+            m_fsm.addState(MCVloopStates::FS, &MCStateMachine::onFaultStopping, {&MCStateMachine::toFaultOff});
+            m_fsm.addState(MCVloopStates::OF, &MCStateMachine::onOff,           {&MCStateMachine::toFaultStopping, &MCStateMachine::toStarting});
+            m_fsm.addState(MCVloopStates::SP, &MCStateMachine::onStopping,      {&MCStateMachine::toFaultStopping, &MCStateMachine::toOff});
+            m_fsm.addState(MCVloopStates::ST, &MCStateMachine::onStarting,      {&MCStateMachine::toFaultStopping, &MCStateMachine::toBlocking});
+            m_fsm.addState(MCVloopStates::BK, &MCStateMachine::onBlocking,      {&MCStateMachine::toFaultStopping, &MCStateMachine::toStopping, &MCStateMachine::toCharging});
+            m_fsm.addState(MCVloopStates::CH, &MCStateMachine::onCharging,      {&MCStateMachine::toFaultStopping, &MCStateMachine::toStopping, &MCStateMachine::toStandby});
+            m_fsm.addState(MCVloopStates::SB, &MCStateMachine::onStandby,       {&MCStateMachine::toFaultStopping, &MCStateMachine::toStopping, &MCStateMachine::toBlocking, &MCStateMachine::toCycling});
+            m_fsm.addState(MCVloopStates::CY, &MCStateMachine::onCycling,       {&MCStateMachine::toFaultStopping, &MCStateMachine::toStandby});
             // clang-format on
         }
 
@@ -103,50 +103,77 @@ namespace user
 
         TransRes toFaultOff()
         {
-            if (checkAllIloops(RegLoopState::FO))
+            if (checkAllIloops(IloopState::FO))
             {
-                return TransRes{MainStates::fault_off};
+                return TransRes{MCVloopStates::FO};
             }
+
+            // no transition
             return {};
         }
 
-        TransRes toFaultStopping(const bool force_stop = false)
+        TransRes toFaultStopping()
         {
-            if (force_stop || checkAllIloops(RegLoopState::FS) || checkGatewareFault() || checkInterlock()
-                || I_loop.getState() == RegLoopStates::FS || pfm.getState() == PFMStates::FO || checkFaultChainOpen()
-                || checkConsistentIloopVloops()
-                || (getState() == MainStates::blocking && I_loop.getState() == RegLoopStates::SP))
+            // from any state
+            if (checkAllIloops(IloopState::FS) || checkGatewareFault() || checkInterlock()
+                || i_loop.getState() == IloopStates::FS || pfm.getState() == PFMStates::FO || checkFaultChainOpen()
+                || checkConsistentIloopVloops())
             {
-                return TransRes{MainStates::fault_stopping};
+                return TransRes{MCVloopStates::FS};
             }
+
+            // from BK
+            if (getState() == MCVloopStates::BK && i_loop.getState() == IloopStates::SP)
+            {
+                return TransRes{MCVloopStates::FS};
+            }
+
+            // no transition
             return {};
         }
 
         TransRes toOff()
         {
-            if (I_loop.getState() == RegLoopStates::OF
-                && ((getState() == MainStates::SP && checkAllIloops(RegLoopState::OF))
-                    || (getState() == MainStates::FO && checkAllVloopsInOF() && checkCrowbarIloop(RegLoopStates::BK))))
+            if (i_loop.getState() == IloopStates::OF
+                && ((getState() == MCVloopStates::SP && checkAllIloops(IloopState::OF))
+                    || (getState() == MCVloopStates::FO && checkAllVloopsInOF() && checkCrowbarIloop(IloopStates::BK))))
             {
-                return TransRes{MainStates::off};
+                return TransRes{MCVloopStates::OF};
             }
+
+            // no transition
             return {};
         }
 
-        //! Transition to the stopping state.
+        //! Transition to the SP state.
         //!
-        //! @param force_stop Force stopping of the DCDC, e.g. from a HMI request
-        TransRes toStopping(const bool force_stop = false)
+        //! @param force_stop Force SP of the DCDC, e.g. from a HMI request
+        TransRes toStopping()
         {
-            if ((getState() == MainStates::blocking && checkAFEStates(AFEStates::stopping)
-                 && checkDCDCChargerStates(DCDCChargerStates::stopping))
-                || (getState() == MainStates::charging && force_stop
-                    && checkDCDCChargerStates(DCDCChargerStates::stopping) && checkAFEILoopStates(RegLoopStates::SP)
-                    && (checkDCDCFloatingIloopStates(RegLoopStates::SP)
-                        || checkDCDCFloatingIloopStates(RegLoopStates::BK))))
+            // from BK
+            if ((getState() == MCVloopStates::BK && checkAFEIloopStates(IloopStates::SP)
+                 && checkDCDCChargerVloopStates(DCDCChargerVloopStates::SP)))
             {
-                return TransRes{MainStates::stopping};
+                return TransRes{MCVloopStates::SP};
             }
+
+            // from CH
+            if (getState() == MCVloopStates::CH && checkDCDCChargerVloopStates(DCDCChargerVloopStates::SP)
+                && checkAFEILoopStates(IloopStates::SP)
+                && (checkDCDCFloatingIloopStates(IloopStates::SP) || checkDCDCFloatingIloopStates(IloopStates::BK)))
+            {
+                return TransRes{MCVloopStates::SP};
+            }
+
+            // from SB
+            if (getState() == MCVloopStates::SB && checkHMIRequestStop() && checkAFEIloopStates(IloopStates::SP)
+                && checkDCDCChargerVloopStates(DCDCChargerVloopStates::SP)
+                && (checkDCDCFloatingIloopStates(IloopStates::SP) || checkDCDCFloatingIloopStates(IloopStates::BK)))
+            {
+                return TransRes{MCVloopStates::SP};
+            }
+
+            // no transition
             return {};
         }
 
@@ -154,20 +181,30 @@ namespace user
         {
             if (checkVSRunReceived())
             {
-                return TransRes{MainStates::starting};
+                return TransRes{MCVloopStates::ST};
             }
+
+            // no transition
             return {};
         }
 
         TransRes toBlocking()
         {
-            if ((getState() == MainStates::starting && checkAFEIloopStates(RegLoopStates::DT)
-                 && checkDCDCChargerIloopStates(RegLoopStates::BK))
-                || (getState() == MainStates::standby && checkDCDCFloatingIloopStates(RegLoopStates::BK)
-                    && checkDCDCChargerIloopStates(RegLoopStates::BK)))
+            // from ST
+            if (getState() == MCVloopStates::ST && checkAFEIloopStates(IloopStates::DT)
+                && checkDCDCChargerIloopStates(IloopStates::BK))
             {
-                return TransRes{MainStates::blocking};
+                return TransRes{MCVloopStates::BK};
             }
+
+            // from  SB
+            if (getState() == MCVloopStates::SB && checkDCDCFloatingIloopStates(IloopStates::BK)
+                && checkDCDCChargerIloopStates(IloopStates::BK))
+            {
+                return TransRes{MCVloopStates::BK};
+            }
+
+            // no transition
             return {};
         }
 
@@ -175,32 +212,41 @@ namespace user
         {
             if (checkUnblockReceived())
             {
-                return TransRes(MainStates::charging);
+                return TransRes(MCVloopStates::CH);
             }
+
+            // no transition
             return {};
         }
 
-        //! Transition function to standby state.
-        //!
-        //! @param force_standby Forces transition to standby from cycling, e.g. by HMI request
         TransRes toStandby()
         {
-            if ((getState() == MainStates::charging && checkRegLoopState(RegLoopStates::SB)
-                 && checkAFEIloopStates(RegLoopStates::DT) && checkDCDCChargerStates(DCDCChargerStates::charging)
-                 && checkDCDCFloatingStates(DCDCFloatingStates::charged))
-                || (getState() == MainStates::cycling && checkHMIRequestSB()))
+            // from CH
+            if (getState() == MCVloopStates::CH && checkIloopState(IloopStates::SB)
+                && checkAFEIloopStates(IloopStates::DT) && checkDCDCChargerVloopStates(DCDCChargerVloopStates::CH)
+                && checkDCDCFloatingVloopStates(DCDCFloatingStates::CD))
             {
-                return TransRes{MainStates::standby};
+                return TransRes{MCVloopStates::SB};
             }
+
+            // from CY
+            if (getState() == MCVloopStates::CY && checkHMIRequestSB())
+            {
+                return TransRes{MCVloopStates::SB};
+            }
+
+            // no transition
             return {};
         }
 
         TransRes toCycling()
         {
-            if (checkRegLoopState(RegLoopStates::CY) || checkRegLoopState(RegLoopStates::TC))
+            if (checkIloopState(IloopStates::CY) || checkIloopState(IloopStates::TC))
             {
-                return TransRes{MainStates::cycling};
+                return TransRes{MCVloopStates::CY};
             }
+
+            // no transition
             return {};
         }
 
@@ -220,7 +266,7 @@ namespace user
         //!
         //! @param state Expected state
         //! @return True if Charger DCDCs are in the expected state, false otherwise
-        bool checkDCDCChargerStates(DCDCChargerStates state)
+        bool checkDCDCChargerVloopStates(DCDCChargerVloopStates state)
         {
             // TODO: loop over all connected Charger DCDCs and check their state. If all are in the 'state', return
             // true, false otherwise.
@@ -231,70 +277,60 @@ namespace user
         //!
         //! @param state Expected state
         //! @return True if Floating DCDCs are in the expected state, false otherwise
-        bool checkDCDCFloatingStates(DCDCFloatingStates state)
+        bool checkDCDCFloatingVloopStates(DCDCFloatingStates state)
         {
             // TODO: loop over all connected Floating DCDCs and check their state. If all are in the 'state', return
             // true, false otherwise.
             return false;
         }
 
-        //! Checks whether the Crowbar's Vloop is in the desired state.
+        //! Checks whether the Crowbar's i_loop is in the desired state.
         //!
         //! @param state Expected state
         //! @return True if Crowbar is in the expected state, false otherwise
-        bool checkCrowbarStates(CrowbarStates state)
+        bool checkCrowbarIloopState(IloopStates state)
         {
-            // TODO: check crowbar state. If it is in the 'state', return true, false otherwise.
+            // TODO: check if the Crowbar's i_loop state is the same as the desired state
             return false;
         }
 
-        //! Checks whether the Crowbar's I_loop is in the desired state.
-        //!
-        //! @param state Expected state
-        //! @return True if Crowbar is in the expected state, false otherwise
-        bool checkCrowbarIloopState(RegLoopStates state)
-        {
-            // TODO: check if the Crowbar's I_loop state is the same as the desired state
-            return false;
-        }
-
-        //! Checks whether the Charger DCDCs' I_loops are in the desired state.
+        //! Checks whether the Charger DCDCs' i_loops are in the desired state.
         //!
         //! @param state Expected state
         //! @return True if Charger DCDCs are in the expected state, false otherwise
-        bool checkDCDCChargerIloopStates(RegLoopStates state)
+        bool checkDCDCChargerIloopStates(IloopStates state)
         {
-            // TODO: check if all Charger DCDC I_loop states are equal to the desired state
+            // TODO: check if all Charger DCDC i_loop states are equal to the desired state
             return false;
         }
 
-        //! Checks whether the Floating DCDCs' I_loops are in the desired state.
+        //! Checks whether the Floating DCDCs' i_loops are in the desired state.
         //!
         //! @param state Expected state
         //! @return True if Floating DCDCs are in the expected state, false otherwise
-        bool checkDCDCFloatingIloopStates(RegLoopStates state)
+        bool checkDCDCFloatingIloopStates(IloopStates state)
         {
-            // TODO: check if all Floating DCDC I_loop states are equal to the desired state
+            // TODO: check if all Floating DCDC i_loop states are equal to the desired state
             return false;
         }
 
-        //! Checks whether the AFEs' I_loops are in the desired state.
+        //! Checks whether the AFEs' i_loops are in the desired state.
         //!
         //! @param state Expected state
         //! @return True if AFEs are in the expected state, false otherwise
-        bool checkAFEIloopStates(RegLoopStates state)
+        bool checkAFEIloopStates(IloopStates state)
         {
-            // TODO: check if all AFEs I_loop states are equal to the desired state
+            // TODO: check if all AFEs i_loop states are equal to the desired state
             return false;
         }
 
-        //! Checks whether all connected AFEs' and DCDCs' I_loops are in the desired state.
+        //! Checks whether all connected AFEs' and DCDCs' i_loops are in the desired state.
         //!
         //! @param state Expected state
         //! @return True if all connected AFEs and DCDCs are in the expected state, false otherwise
-        bool checkAllIloops(RegLoopState state)
+        bool checkAllIloops(IloopState state)
         {
-            // TODO: loop over all connected DCDCs, AFEs, and crowbar to check if their I_loop state is the same as the
+            // TODO: loop over all connected DCDCs, AFEs, and crowbar to check if their i_loop state is the same as the
             // desired one
             return (
                 checkCrowbarIloopState(state) && checkDCDCChargerIloopStates(state)
@@ -302,16 +338,16 @@ namespace user
             );
         }
 
-        bool checkRegLoopState(RegLoopState state)
+        bool checkIloopState(IloopState state)
         {
-            return (I_loop.getState() == state);
+            return (i_loop.getState() == state);
         }
 
         bool checkAllVloopsInOF()
         {
             return (
-                checkAFEStates(AFEStates::off) && checkDCDCChargerStates(DCDCChargerStates::off)
-                && checkDCDCFloatingStates(DCDCFloatingStates::off)
+                checkAFEVloopStates(AFEVloopStates::OF) && checkDCDCChargerVloopStates(DCDCChargerVloopStates::OF)
+                && checkDCDCFloatingVloopStates(DCDCFloatingVloopStates::OF)
             );
         }
 
@@ -323,13 +359,13 @@ namespace user
 
         bool checkVSRunReceived()
         {
-            // TODO: check if VS_RUN has been received from I_loop
+            // TODO: check if VS_RUN has been received from i_loop
             return false;
         }
 
         bool checkUnblockReceived()
         {
-            // TODO: check if 'Unblock' has been received from I_loop
+            // TODO: check if 'Unblock' has been received from i_loop
             return false;
         }
 
@@ -347,7 +383,7 @@ namespace user
 
         bool checkConsistentIloopVloop()
         {
-            // TODO: check consistency of the set of I_loops and Vloops with HMI, e.g. if AFEs and DCDCs in SP and no
+            // TODO: check consistency of the set of i_loops and Vloops with HMI, e.g. if AFEs and DCDCs in SP and no
             // HMI command to SP
             return false;
         }
