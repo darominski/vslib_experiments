@@ -6,6 +6,8 @@
 
 #include "constants.hpp"
 #include "fsm.hpp"
+#include "pops_constants.h"
+#include "pops_utils.hpp"
 
 namespace user
 {
@@ -72,18 +74,11 @@ namespace user
 
         TransRes toFaultOff()
         {
-            if (!checkIntertripLight() || I_loop.getState() == FO)
+            if (!checkIntertripLight() || I_loop.getState() == RegLoopStates::FO)
             {
                 return TransRes{CrowbarStates::fault_off};
             }
             return {};
-        }
-
-      private:
-        bool checkVSRunReceived()
-        {
-            // TODO: check if VS_RUN has been received from I_loop
-            return false;
         }
     };
 

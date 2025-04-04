@@ -6,7 +6,8 @@
 
 #include "constants.hpp"
 #include "fsm.hpp"
-#include "pops_constants.hpp"
+#include "pops_constants.h"
+#include "pops_utils.hpp"
 
 namespace user
 {
@@ -109,8 +110,8 @@ namespace user
 
         TransRes toFaultStopping()
         {
-            if (checkHMIForceStop || checkGatewareFault() || checkInterlock() || I_loop.getState() == RegLoopStates::FS
-                || pfm.getState() == PFMStates::FO)
+            if (checkHMIForceStop() || checkGatewareFault() || checkInterlock()
+                || I_loop.getState() == RegLoopStates::FS || pfm.getState() == PFMStates::FO)
             {
                 return TransRes{DCDCFloatingStates::fault_stopping};
             }
@@ -128,38 +129,71 @@ namespace user
 
         TransRes toStopping()
         {
-            return TransRes{DCDCFloatingStates::stopping};
+            if (I_loop.getState() == RegLoopStates::SP
+                || (checkHMIForceStop()
+                    && (getState() == DCDCFloatingStates::charging || getState() == DCDCFloatingStates::charged
+                        || getState() == DCDCFloatingStates::direct)))
+            {
+                return TransRes{DCDCFloatingStates::stopping};
+            }
+            return {};
         }
 
         TransRes toStarting()
         {
-            return TransRes{DCDCFloatingStates::starting};
+            if (checkVSRunReceived())
+            {
+                return TransRes{DCDCFloatingStates::starting};
+            }
+            return {};
         }
 
         TransRes toBlocking()
         {
-            return TransRes{DCDCFloatingStates::blocking};
+            if (checkOutputsReady() && getVout() < constants::v_out_threshold)
+            {
+                return TransRes{DCDCFloatingStates::blocking};
+            }
+            return {};
         }
 
         TransRes toCharging()
         {
-            return TransRes{DCDCFloatingStates::charging};
+            if (checkUnblockReceived())
+            {
+                return TransRes{DCDCFloatingStates::charging};
+            }
+            return {};
         }
 
         TransRes toCharged()
         {
-            return TransRes{DCDCFloatingStates::charged};
+            if ((getState() == DCDCFloatingStates::charging && getVdc() >= constants::v_dc_floatings_charged_threshold)
+                || (getState() == DCDCFloatingStates::direct && getVloopMask() == 0))
+            {
+                return TransRes{DCDCFloatingStates::charged};
+            }
+            return {};
         }
 
         TransRes toDirect()
         {
-            return TransRes{DCDCFloatingStates::direct};
+            if (getVloopMask() == 1)
+            {
+                return TransRes{DCDCFloatingStates::direct};
+            }
+            return {};
         }
 
-      private:
         double getVdc()
         {
             // TODO: get V dc
+            return 0.0;
+        }
+
+        double getVout()
+        {
+            // TODO: get V out
             return 0.0;
         }
     };
