@@ -205,9 +205,9 @@ namespace user
         }
 
       private:
-        //! Checks whether all connected AFEs are in the desired state.
+        //! Checks whether all connected AFEs' Vloops are in the desired state.
         //!
-        //! @param state Expected state of the connected AFEs
+        //! @param state Expected state
         //! @return True if AFEs are in the expected state, false otherwise
         bool checkAFEStates(AFEStates state)
         {
@@ -216,9 +216,9 @@ namespace user
             return false;
         }
 
-        //! Checks whether all connected Charger DCDCs are in the desired state.
+        //! Checks whether all connected Charger DCDCs' Vloop are in the desired state.
         //!
-        //! @param state Expected state of the connected Charger DCDCs
+        //! @param state Expected state
         //! @return True if Charger DCDCs are in the expected state, false otherwise
         bool checkDCDCChargerStates(DCDCChargerStates state)
         {
@@ -227,9 +227,9 @@ namespace user
             return false;
         }
 
-        //! Checks whether all connected Floating DCDCs are in the desired state.
+        //! Checks whether all connected Floating DCDCs' Vloops are in the desired state.
         //!
-        //! @param state Expected state of the connected Floating DCDCs
+        //! @param state Expected state
         //! @return True if Floating DCDCs are in the expected state, false otherwise
         bool checkDCDCFloatingStates(DCDCFloatingStates state)
         {
@@ -238,41 +238,60 @@ namespace user
             return false;
         }
 
-        //! Checks whether the Crowbar is in the desired state.
+        //! Checks whether the Crowbar's Vloop is in the desired state.
         //!
-        //! @param state Expected state of the Crowbar
-        //! @return True if Crowbar are in the expected state, false otherwise
+        //! @param state Expected state
+        //! @return True if Crowbar is in the expected state, false otherwise
         bool checkCrowbarStates(CrowbarStates state)
         {
             // TODO: check crowbar state. If it is in the 'state', return true, false otherwise.
             return false;
         }
 
+        //! Checks whether the Crowbar's I_loop is in the desired state.
         //!
+        //! @param state Expected state
+        //! @return True if Crowbar is in the expected state, false otherwise
         bool checkCrowbarIloopState(RegLoopStates state)
         {
             // TODO: check if the Crowbar's I_loop state is the same as the desired state
             return false;
         }
 
+        //! Checks whether the Charger DCDCs' I_loops are in the desired state.
+        //!
+        //! @param state Expected state
+        //! @return True if Charger DCDCs are in the expected state, false otherwise
         bool checkDCDCChargerIloopStates(RegLoopStates state)
         {
             // TODO: check if all Charger DCDC I_loop states are equal to the desired state
             return false;
         }
 
+        //! Checks whether the Floating DCDCs' I_loops are in the desired state.
+        //!
+        //! @param state Expected state
+        //! @return True if Floating DCDCs are in the expected state, false otherwise
         bool checkDCDCFloatingIloopStates(RegLoopStates state)
         {
             // TODO: check if all Floating DCDC I_loop states are equal to the desired state
             return false;
         }
 
+        //! Checks whether the AFEs' I_loops are in the desired state.
+        //!
+        //! @param state Expected state
+        //! @return True if AFEs are in the expected state, false otherwise
         bool checkAFEIloopStates(RegLoopStates state)
         {
             // TODO: check if all AFEs I_loop states are equal to the desired state
             return false;
         }
 
+        //! Checks whether all connected AFEs' and DCDCs' I_loops are in the desired state.
+        //!
+        //! @param state Expected state
+        //! @return True if all connected AFEs and DCDCs are in the expected state, false otherwise
         bool checkAllIloops(RegLoopState state)
         {
             // TODO: loop over all connected DCDCs, AFEs, and crowbar to check if their I_loop state is the same as the
@@ -292,7 +311,7 @@ namespace user
         {
             return (
                 checkAFEStates(AFEStates::off) && checkDCDCChargerStates(DCDCChargerStates::off)
-                && checkDCDCFloatingStates(DCDCFloatingStates::off) && checkCrowbarIloop(RegLoopStates::BK)
+                && checkDCDCFloatingStates(DCDCFloatingStates::off)
             );
         }
 

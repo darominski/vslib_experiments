@@ -7,6 +7,7 @@
 #include "constants.hpp"
 #include "fsm.hpp"
 #include "pops_constants.h"
+#include "pops_utils.hpp"
 
 namespace user
 {
@@ -146,8 +147,8 @@ namespace user
         {
             if ((getState() == DCDCChargerStates::starting && checkOutputsReady()
                  && getVout() <= constants::v_out_threshold)
-                || (getState() == DCDCChargerStates::direct && allFloatingsInBK()
-                    && getVdcFloatings() < constants::v_dc_floatings_threshold))
+                || (getState() == DCDCChargerStates::direct && checkAllFloatingsInBK()
+                    && getVdcFloatings() < constants::v_dc_floatings_min_threshold))
             {
                 return TransRes{DCDCChargerStates::blocking};
             }
@@ -163,55 +164,41 @@ namespace user
             return {};
         }
 
-      private:
-        bool allFloatingsInBK()
+        //! Checks if all Floating DCDC are in blocking (BK) state.
+        //!
+        //! @return True if all Floating DCDCs are in BK, false otherwise
+        bool checkAllFloatingsInBK()
         {
             // TODO: loop over all Floating DCDC and check their state. If all are in BK, return true, false otherwise.
             return false;
         }
 
+        //! Returns the Vdc value of the connected Floating DCDC.
+        //!
+        //! @return Vdc value of the connected Floating DCDC, in V.
         double getVdcFloatings()
         {
             // TODO: get Vdc value of Floating DCDC
             return 0.0;
         }
 
-        bool checkVSRunReceived()
-        {
-            // TODO: check if VS_RUN has been received from I_loop
-            return false;
-        }
-
-        bool checkUnblockReceived()
-        {
-            // TODO: check if 'Unblock' has been received from I_loop
-            return false;
-        }
-
-        bool checkOutputsReady()
-        {
-            // TODO: check if outputs == 0110
-            return false;
-        }
-
-        bool getVloopMask()
-        {
-            // TODO: get Vloop mask setting
-            return false;
-        }
-
+        //! Returns the Vout.
+        //!
+        //! @return Vout value, in V.
         double getVout()
         {
             // TODO: get V out
             return 0.0;
         }
 
+        //! Returns the Vdc.
+        //!
+        //! @return Vdc value, in V.
         double getVdc()
         {
             // TODO: get V dc
             return 0.0;
         }
     };
-
 
 }   // namespace user

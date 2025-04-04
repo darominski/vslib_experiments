@@ -7,6 +7,7 @@
 #include "constants.hpp"
 #include "fsm.hpp"
 #include "pops_constants.h"
+#include "pops_utils.hpp"
 
 namespace user
 {
@@ -157,52 +158,16 @@ namespace user
         }
 
       private:
-        bool check400VOpen()
-        {
-            // TODO: checks whether the 400 V is open
-            return false;
-        }
-
         double getVdcCharger()
         {
             // TODO: get Vdc value of Floating DCDC
             return 0.0;
         }
 
-        bool checkVSRunReceived()
-        {
-            // TODO: check if VS_RUN has been received from I_loop
-            return false;
-        }
-
-        bool checkUnblockReceived()
-        {
-            // TODO: check if 'Unblock' has been received from I_loop
-            return false;
-        }
-
         double getVdc()
         {
             // TODO: get V dc
             return 0.0;
-        }
-
-        bool checkMCBOpen()
-        {
-            // TODO: check if MCB is open
-            return false;
-        }
-
-        bool checkMVOpen()
-        {
-            // TODO: check if MV breaker is open
-            return false;
-        }
-
-        bool checkLVOpen()
-        {
-            // TODO: check if LV breaker is open
-            return false;
         }
     };
 }   // namespace user
