@@ -6,7 +6,7 @@
 
 #include "constants.hpp"
 #include "fsm.hpp"
-#include "pops_constants.h"
+#include "pops_constants.hpp"
 #include "pops_utils.hpp"
 
 namespace user
