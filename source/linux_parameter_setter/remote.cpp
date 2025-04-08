@@ -181,10 +181,11 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["afe_rst.v_base"]     = v_base;
     values_to_set["afe_rst.i_base"]     = i_base;
 
-    values_to_set["example.inductance"] = 0.7e-3;
-    values_to_set["example.frequency"]  = current_frequency;
-    values_to_set["example.v_base"]     = v_base;
-    values_to_set["example.i_base"]     = i_base;
+    values_to_set["example.inductance"]   = 0.7e-3;
+    values_to_set["example.frequency"]    = current_frequency;
+    values_to_set["example.v_base"]       = v_base;
+    values_to_set["example.i_base"]       = i_base;
+    values_to_set["example.theta_offset"] = 0.047124;
 
     values_to_set["power_3ph_instant.p_gain"] = sqrt(2) / (sqrt(3) * v_base * i_base);
     values_to_set["power_3ph_instant.q_gain"] = sqrt(2) / (sqrt(3) * v_base * i_base);

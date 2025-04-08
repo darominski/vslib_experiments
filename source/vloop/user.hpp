@@ -42,6 +42,7 @@ namespace user
               frequency(*this, "frequency"),
               v_base(*this, "v_base"),
               i_base(*this, "i_base"),
+              theta_offset(*this, "theta_offset"),
               control_period(*this, "control_period"),
               rst_outer_period(*this, "rst_outer_period"),
               m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
@@ -148,8 +149,8 @@ namespace user
             const double i_a           = converter.m_data[8];
             const double i_b           = converter.m_data[9];
             const double i_c           = converter.m_data[10];
-            const double iq_ref        = converter.m_data[11];
-            const double id_ref        = converter.m_data[12];
+            // const double iq_ref        = converter.m_data[11];
+            // const double id_ref        = converter.m_data[12];
             const double in19          = converter.m_data[19];
 
             const double v_dc_meas = v_dc_p + v_dc_n;
@@ -175,7 +176,7 @@ namespace user
                 regulation_on * i_c
             );
 
-            if (regulation_on > 0 && converter.rst_outer_ready())
+            if (regulation_on > 0)
             {
                 // needs to not run until regulation is set to ON
                 //
@@ -208,15 +209,15 @@ namespace user
             //
             // Frame conversion
             //
-            const auto vd_ref_lim = converter.limit.limit(vd_ref);
-            const auto vq_ref_lim = converter.limit.limit(vq_ref);
+            const auto vd_ref_lim = converter.limit.limit(vd_ref * converter.m_pu_to_v * 2.0 / v_dc_meas);
+            const auto vq_ref_lim = converter.limit.limit(vq_ref * converter.m_pu_to_v * 2.0 / v_dc_meas);
 
             const auto [v_a_ref, v_b_ref, v_c_ref]
-                = converter.dq0_to_abc.transform(vd_ref_lim, vq_ref_lim, 0.0, wt_pll);
+                = converter.dq0_to_abc.transform(vd_ref_lim, vq_ref_lim, 0.0, wt_pll + converter.m_theta_offset);
 
-            const auto [v_a_ref, v_b_ref, v_c_ref] = converter.afe_vdc_bal.vdc_control(
-                v_a, v_b, v_c, i_a, i_b, i_c, v_dc_ref, v_dc_meas, q_ref, regulation_on
-            );
+            // const auto [v_a_ref, v_b_ref, v_c_ref] = converter.afe_vdc_bal.vdc_control(
+            //     v_a, v_b, v_c, i_a, i_b, i_c, v_dc_ref, v_dc_meas, q_ref, regulation_on
+            // );
 
             const auto v_dc_diff_filtered = converter.iir_vdc.filter(regulation_on * v_dc_diff);
             const auto m0                 = converter.rst_vdc.control(0.0, regulation_on * v_dc_diff_filtered);
@@ -240,6 +241,7 @@ namespace user
             converter.m_data[16] = vq_meas;
             converter.m_data[17] = id_ref;
             converter.m_data[18] = q_meas;
+            converter.m_data[19] = in19;
 
             // write to output registers
             for (uint32_t index = 0; index < num_data; index++)
@@ -281,10 +283,11 @@ namespace user
         vslib::IIRFilter<2> iir_vdc;
 
         // Owned Parameters
-        vslib::Parameter<double> inductance;   //!< Inductance of the system [H]
-        vslib::Parameter<double> frequency;    //!< Current frequency [Hz]
-        vslib::Parameter<double> v_base;       //!< Base voltage [V]
-        vslib::Parameter<double> i_base;       //!< Base current [A]
+        vslib::Parameter<double> inductance;     //!< Inductance of the system [H]
+        vslib::Parameter<double> frequency;      //!< Current frequency [Hz]
+        vslib::Parameter<double> v_base;         //!< Base voltage [V]
+        vslib::Parameter<double> i_base;         //!< Base current [A]
+        vslib::Parameter<double> theta_offset;   //!< Theta offset [rad]
 
         vslib::Parameter<double> control_period;     //!< Iteration period of the main control loop
         vslib::Parameter<double> rst_outer_period;   //!< Iteration period of the RST outer controller
@@ -304,6 +307,8 @@ namespace user
 
             m_rst_outer_wait_n_iter = control_period.toValidate() / rst_outer_period.toValidate();
 
+            m_theta_offset = theta_offset.toValidate();
+
             return {};
         }
 
@@ -321,6 +326,7 @@ namespace user
         double m_pu_to_v{0.0};
         double m_i_to_pu{0.0};
         double m_va_to_pu{0.0};
+        double m_theta_offset{0.0};
 
         int m_rst_outer_wait_n_iter{0};
         int m_rst_outer_iteration{0};
