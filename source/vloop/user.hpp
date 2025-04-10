@@ -73,14 +73,33 @@ namespace user
             if (!(m_s2rcpp.status.channelUp.get() && m_s2rcpp.status.gtPllLock.get() && m_s2rcpp.status.laneUp.get()
                   && m_s2rcpp.status.pllLocked.get() && m_s2rcpp.status.gtPowergood.get()))
             {
-                printf("Unexpected status: 0x%#08x\n", m_s2rcpp.ctrl.read());
+                printf("Unexpected status: %#08x\n", m_s2rcpp.ctrl.read());
+            }
+            if (!m_s2rcpp.status.channelUp.get())
+            {
+                printf("Channel not up\n");
+            }
+            if (!m_s2rcpp.status.gtPllLock.get())
+            {
+                printf("gtPLL lock not locked\n");
+            }
+            if (!m_s2rcpp.status.laneUp.get())
+            {
+                printf("LaneUp not up\n");
+            }
+            if (!m_s2rcpp.status.pllLocked.get())
+            {
+                printf("pllLocked not locked\n");
+            }
+            if (!m_s2rcpp.status.gtPowergood.get())
+            {
+                printf("gtPowergood not good\n");
             }
 
             if (m_s2rcpp.status.linkReset.get() || m_s2rcpp.status.sysReset.get())
             {
                 printf("Link is in reset\n");
             }
-
             if (m_s2rcpp.status.softErr.get() || m_s2rcpp.status.hardErr.get())
             {
                 printf("Got an error\n");
@@ -191,8 +210,7 @@ namespace user
             //
             // Outer loop: power regulation
             // 2 RSTs
-            const auto id_ref
-                = converter.rst_outer_id.control(regulation_on * p_ref * converter.m_va_to_pu, regulation_on * p_meas);
+            const auto id_ref = converter.rst_outer_id.control(regulation_on * p_ref, regulation_on * p_meas);
             const auto iq_ref = -converter.rst_outer_iq.control(regulation_on * q_ref, regulation_on * q_meas);
 
             //
@@ -230,7 +248,7 @@ namespace user
             converter.m_data[5]  = v_dc_diff_filtered;
             converter.m_data[6]  = vd_ref;
             converter.m_data[7]  = vq_ref;
-            converter.m_data[8]  = p_ref * converter.m_va_to_pu;
+            converter.m_data[8]  = p_ref;
             converter.m_data[9]  = iq_meas;
             converter.m_data[10] = iq_ref;
             converter.m_data[11] = id_meas;
@@ -301,7 +319,6 @@ namespace user
             // conversion constants, based on base voltage and base current:
             m_si_to_pu = sqrt(3.0 / 2.0) / v_base.toValidate();
             m_i_to_pu  = 1.0 / i_base.toValidate();
-            m_va_to_pu = sqrt(2.0 / 3.0) * m_i_to_pu / v_base.toValidate();
 
             m_pu_to_v = 1.0 / m_si_to_pu;
 
@@ -325,7 +342,6 @@ namespace user
         double m_si_to_pu{0.0};
         double m_pu_to_v{0.0};
         double m_i_to_pu{0.0};
-        double m_va_to_pu{0.0};
         double m_theta_offset{0.0};
 
         int m_rst_outer_wait_n_iter{0};
