@@ -7,8 +7,8 @@
 #include "afe.hpp"
 #include "afe_rst.hpp"
 #include "afe_vdc_bal.hpp"
-#include "cheby_gen/reg_to_stream_cpp.h"
-#include "cheby_gen/stream_to_reg_cpp.h"
+#include "cheby_gen/reg_to_stream.hpp"
+#include "cheby_gen/stream_to_reg.hpp"
 #include "peripherals/reg_to_stream.h"
 #include "peripherals/stream_to_reg.h"
 // #include "pops_current_balancing.hpp"
@@ -318,8 +318,8 @@ namespace user
         constexpr static uint32_t    num_data{20};
         std::array<double, num_data> m_data;
 
-        myModule::StreamToReg m_s2rcpp;
-        myModule::RegToStream m_r2scpp;
+        ipCores::StreamToReg m_s2rcpp;
+        ipCores::RegToStream m_r2scpp;
 
         double m_wl{0.0};
         double m_si_to_pu{0.0};
