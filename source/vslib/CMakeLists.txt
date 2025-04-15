@@ -51,7 +51,7 @@ if (NOT BUILD_TESTS)
   add_subdirectory("${LIBRARIES_HOME}/fmt-8.0.1" ${CMAKE_CURRENT_BINARY_DIR}/fmt)
   add_subdirectory("${LIBRARIES_HOME}/json-schema-validator-2.2.0" ${CMAKE_CURRENT_BINARY_DIR}/json-schema-validator)
 
-  set(mmpp_DIR ${LIBRARIES_HOME}/mmpp/build/cmake/mmpp) # if needed
+  set(mmpp_DIR ${LIBRARIES_HOME}/mmpp-v0.2.4/lib/cmake/mmpp) # if needed
   find_package(mmpp CONFIG REQUIRED)
 
   # Collect source files for the vslib code

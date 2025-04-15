@@ -205,7 +205,7 @@ namespace fgc4::utils
          * Attempt to read a message from the queue
          * @param body_buffer Buffer to receive the message body. If the buffer is insufficient, the excess data is
          *        truncated. The appropriate size can be determined by calling getPendingMessageSize().
-         * @return The message, returned as a sub-span of @body_buffer.
+         * @return The message, returned as a sub-span of @param body_buffer.
          *         @b std::nullopt is returned if there is no message to read.
          */
         std::optional<std::span<uint8_t>> read(std::span<uint8_t> body_buffer)

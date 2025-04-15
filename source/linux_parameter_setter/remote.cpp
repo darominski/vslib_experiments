@@ -8,7 +8,7 @@
 #include "bmboot/domain.hpp"
 #include "bmboot/domain_helpers.hpp"
 #include "json/json.hpp"
-#include "messageQueue.h"
+#include "messageQueue.hpp"
 #include "shared_memory.h"
 #include "vslibMessageQueue.h"
 
@@ -68,7 +68,7 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     std::array<int, 2>          version{0, 1};
     std::map<std::string, Json> values_to_set;
 
-    static constexpr double control_period           = 50e-6;
+    static constexpr double control_period           = 100e-6;
     const double            maverage_notch_frequency = 333.33;
     static constexpr double v_base                   = 1950.0;
     static constexpr double i_base                   = 3300.0;

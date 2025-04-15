@@ -13,9 +13,6 @@ using namespace vslib;
 
 class HalfBridgeTest : public ::testing::Test
 {
-  public:
-    uint8_t m_buffer[vslib::HalfBridge::size() * 2];
-
   protected:
     void SetUp() override
     {
@@ -31,7 +28,7 @@ TEST_F(HalfBridgeTest, Construction)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
     ASSERT_EQ(pwm.getName(), "pwm_1");
 
     auto serialized = pwm.serialize();
@@ -46,7 +43,7 @@ TEST_F(HalfBridgeTest, Start)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.start();
     // check status
@@ -57,7 +54,7 @@ TEST_F(HalfBridgeTest, StartStop)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.start();
     pwm.stop();
@@ -69,7 +66,7 @@ TEST_F(HalfBridgeTest, SetEnabledATrue)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setEnabledA(true);
     // check status
@@ -80,7 +77,7 @@ TEST_F(HalfBridgeTest, SetEnabledBTrue)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setEnabledB(true);
     // check status
@@ -91,7 +88,7 @@ TEST_F(HalfBridgeTest, SetEnabledAFalse)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setEnabledA(false);
     // check status
@@ -102,7 +99,7 @@ TEST_F(HalfBridgeTest, SetEnabledBFalse)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setEnabledB(false);
     // check status
@@ -113,7 +110,7 @@ TEST_F(HalfBridgeTest, SetModulationIndex)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setModulationIndex(0.5);
     // check status
@@ -124,7 +121,7 @@ TEST_F(HalfBridgeTest, SetModulationIndexUndeflow)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setModulationIndex(-1.1);
     // check status
@@ -135,7 +132,7 @@ TEST_F(HalfBridgeTest, SetModulationIndexUndeflowInf)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setModulationIndex(-std::numeric_limits<float>::infinity());
     // check status
@@ -146,7 +143,7 @@ TEST_F(HalfBridgeTest, SetModulationIndexOverflow)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setModulationIndex(1.1);
     // check status
@@ -157,7 +154,7 @@ TEST_F(HalfBridgeTest, SetModulationIndexOverflowInf)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setModulationIndex(std::numeric_limits<float>::infinity());
     // check status
@@ -168,7 +165,7 @@ TEST_F(HalfBridgeTest, SetModulationIndexNaN)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setModulationIndex(std::numeric_limits<float>::quiet_NaN());
     // check status
@@ -179,7 +176,7 @@ TEST_F(HalfBridgeTest, SetHigh)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setHigh();
     // check status
@@ -190,7 +187,7 @@ TEST_F(HalfBridgeTest, SetLow)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setLow();
     // check status
@@ -201,7 +198,7 @@ TEST_F(HalfBridgeTest, SetAdditionalDeadTime)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setAdditionalDeadTime(10);   // 10 extra time cycles
     // check status
@@ -213,9 +210,9 @@ TEST_F(HalfBridgeTest, SetUpdateTypeImmediate)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
-    pwm.setUpdateType(hal::PWM::UpdateType::immediate);
+    pwm.setUpdateType(hal::PWM<0>::UpdateType::immediate);
     // check status
 }
 
@@ -224,9 +221,9 @@ TEST_F(HalfBridgeTest, SetUpdateTypeBottom)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
-    pwm.setUpdateType(hal::PWM::UpdateType::zero);
+    pwm.setUpdateType(hal::PWM<0>::UpdateType::zero);
     // check status
 }
 
@@ -235,9 +232,9 @@ TEST_F(HalfBridgeTest, SetUpdateTypeTop)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
-    pwm.setUpdateType(hal::PWM::UpdateType::prd);
+    pwm.setUpdateType(hal::PWM<0>::UpdateType::period);
     // check status
 }
 
@@ -246,9 +243,9 @@ TEST_F(HalfBridgeTest, SetUpdateTypeBottomTop)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
-    pwm.setUpdateType(hal::PWM::UpdateType::zeroPrd);
+    pwm.setUpdateType(hal::PWM<0>::UpdateType::zeroPeriod);
     // check status
 }
 
@@ -257,7 +254,7 @@ TEST_F(HalfBridgeTest, SetInverted)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setInverted(true);
     // check status
@@ -268,7 +265,7 @@ TEST_F(HalfBridgeTest, SetInvertedFalse)
 {
     RootComponent    root;
     std::string_view name = "pwm_1";
-    HalfBridge       pwm(name, root, m_buffer);
+    HalfBridge<0>    pwm(name, root);
 
     pwm.setInverted(true);
     pwm.setInverted(false);

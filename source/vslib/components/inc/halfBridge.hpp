@@ -12,12 +12,13 @@
 
 namespace vslib
 {
+    template<uint32_t pwm_id>
     class HalfBridge : public Component
     {
       public:
-        HalfBridge(std::string_view name, Component& parent, uint8_t* base_address) noexcept
+        HalfBridge(std::string_view name, Component& parent) noexcept
             : Component("HalfBridge", name, parent),
-              m_pwm(base_address)
+              m_pwm()
         {
             // initialize the right PWM IP out of the list of 12, TODO
             // right now, base_address is needed
@@ -93,7 +94,7 @@ namespace vslib
         //! Sets the update type.
         //!
         //! @param update_type Update type to be set, one of zero, prd, zero_prd, and immediate
-        void setUpdateType(hal::PWM::UpdateType update_type) noexcept
+        void setUpdateType(hal::PWM<pwm_id>::UpdateType update_type) noexcept
         {
             m_pwm.setUpdateType(update_type);
         }
@@ -124,10 +125,10 @@ namespace vslib
 
         static auto constexpr size() noexcept
         {
-            return hal::PWM::size();
+            return hal::PWM<pwm_id>::size();
         }
 
       private:
-        hal::PWM m_pwm;   //!< PWM IP core HAL
+        hal::PWM<pwm_id> m_pwm;   //!< PWM IP core HAL
     };
 }

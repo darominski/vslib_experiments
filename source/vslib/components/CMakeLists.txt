@@ -46,7 +46,7 @@ add_executable(${APP}
 
 add_subdirectory(${LIBRARIES_HOME}/csv-parser ${CMAKE_CURRENT_BINARY_DIR}/csv-parser)
 
-set(mmpp_DIR ${LIBRARIES_HOME}/mmpp/build/cmake/mmpp) # if needed
+set(mmpp_DIR ${LIBRARIES_HOME}/mmpp-v0.2.4/lib/cmake/mmpp) # if needed
 find_package(mmpp CONFIG REQUIRED)
 
 target_include_directories(${APP} PUBLIC

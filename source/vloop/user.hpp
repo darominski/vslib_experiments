@@ -7,13 +7,12 @@
 #include "afe.hpp"
 #include "afe_rst.hpp"
 #include "afe_vdc_bal.hpp"
-#include "cheby_gen/reg_to_stream_cpp.h"
-#include "cheby_gen/stream_to_reg_cpp.h"
-#include "peripherals/reg_to_stream.h"
-#include "peripherals/stream_to_reg.h"
+#include "cheby_gen/reg_to_stream.hpp"
+#include "cheby_gen/stream_to_reg.hpp"
 // #include "pops_current_balancing.hpp"
 // #include "pops_current_balancing_old.hpp"
 // #include "pops_dispatcher.hpp"
+#include "halfBridge.hpp"
 #include "vslib.hpp"
 
 namespace user
@@ -23,16 +22,17 @@ namespace user
       public:
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
-              interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
+              //   interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
+              interrupt_1("aurora", *this, std::chrono::microseconds(10), RTTask),
+              pwm("pwm_1", *this),
               m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
-              m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000)),
-              pwm("pwm_1", *this, m_buffer)
+              m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000))
         {
             // initialize all your objects that need initializing
         }
 
         // Define your public Components here
-        vslib::PeripheralInterrupt<Converter> interrupt_1;
+        vslib::TimerInterrupt<Converter> interrupt_1;
         // ...
         // end of your Components
 
@@ -72,6 +72,7 @@ namespace user
             m_r2scpp.numData.write(num_data * 2);
             m_r2scpp.tkeep.write(0x0000FFFF);
 
+            pwm.start();
             interrupt_1.start();
         }
 
@@ -114,44 +115,27 @@ namespace user
         static void RTTask(Converter& converter)
         {
             // collect inputs
-            for (uint32_t index = 0; index < num_data; index++)
-            {
-                converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
-            }
+            // for (uint32_t index = 0; index < num_data; index++)
+            // {
+            //     converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
+            // }
 
-            // write to output registers
-            for (uint32_t index = 0; index < num_data; index++)
-            {
-                converter.m_r2scpp.data[index].write(cast<double, uint64_t>(converter.m_data[index]));
-            }
+            // if(converter.counter)
+            // pwm.setModulationIndex()
+
+            // // write to output registers
+            // for (uint32_t index = 0; index < num_data; index++)
+            // {
+            //     converter.m_r2scpp.data[index].write(cast<double, uint64_t>(converter.m_data[index]));
+            // }
 
             // send it away
             // trigger connection
-            converter.m_r2scpp.ctrl.start.set(true);
+            // converter.m_r2scpp.ctrl.start.set(true);
             converter.counter++;
         }
 
-        // static void RTTaskPerf(Converter& converter)
-        // {
-        //     // for (int index=0; index<50; index++)
-        //     // {
-        //         asm volatile("isb; dsb sy");
-        //         const volatile double meas = 0.5;//static_cast<double>((std::rand() / RAND_MAX - 1) * 100.0);
-        //         const volatile double ref = 1.0;//static_cast<double>((std::rand() / RAND_MAX - 1) * 100.0);
-
-        //         converter.m_data[0] = meas;
-        //         converter.m_data[1] = ref;
-
-        //         const volatile double act = 0.0;
-        //     //     const volatile double act = converter.rst.control(ref, meas);
-
-        //         converter.m_data[2] = act;
-        //         asm volatile("isb; dsb sy");
-        //     // }
-        //     converter.counter++;
-        // }
-
-        vslib::HalfBridge pwm;
+        vslib::HalfBridge<0> pwm;
 
       private:
         int counter{0};
@@ -159,10 +143,8 @@ namespace user
         constexpr static uint32_t    num_data{20};
         std::array<double, num_data> m_data;
 
-        myModule::StreamToReg m_s2rcpp;
-        myModule::RegToStream m_r2scpp;
-
-        uint8_t m_buffer[myModule::StreamToReg::csize()];
+        ipCores::StreamToReg m_s2rcpp;
+        ipCores::RegToStream m_r2scpp;
     };
 
 }   // namespace user
