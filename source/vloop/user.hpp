@@ -23,10 +23,10 @@ namespace user
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
               //   interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              interrupt_1("aurora", *this, std::chrono::microseconds(10), RTTask),
-              pwm("pwm_1", *this),
-              m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
-              m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000))
+              interrupt_1("timer", *this, std::chrono::microseconds(100), RTTask),
+              pwm("pwm_1", *this, 20'000)
+        //   m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
+        //   m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000))
         {
             // initialize all your objects that need initializing
         }
@@ -42,37 +42,39 @@ namespace user
 
         void init() override
         {
-            m_s2rcpp.ctrl.pmaInit.set(false);
-            sleep(2);
+            // m_s2rcpp.ctrl.pmaInit.set(false);
+            // sleep(2);
 
-            m_s2rcpp.ctrl.resetPb.set(false);
-            sleep(1);
+            // m_s2rcpp.ctrl.resetPb.set(false);
+            // sleep(1);
 
-            m_s2rcpp.ctrl.selOutput.set(true);
+            // m_s2rcpp.ctrl.selOutput.set(true);
 
-            if (!(m_s2rcpp.status.channelUp.get() && m_s2rcpp.status.gtPllLock.get() && m_s2rcpp.status.laneUp.get()
-                  && m_s2rcpp.status.pllLocked.get() && m_s2rcpp.status.gtPowergood.get()))
-            {
-                printf("Unexpected status: 0x%#08x\n", m_s2rcpp.ctrl.read());
-            }
+            // if (!(m_s2rcpp.status.channelUp.get() && m_s2rcpp.status.gtPllLock.get() && m_s2rcpp.status.laneUp.get()
+            //       && m_s2rcpp.status.pllLocked.get() && m_s2rcpp.status.gtPowergood.get()))
+            // {
+            //     printf("Unexpected status: 0x%#08x\n", m_s2rcpp.ctrl.read());
+            // }
 
-            if (m_s2rcpp.status.linkReset.get() || m_s2rcpp.status.sysReset.get())
-            {
-                printf("Link is in reset\n");
-            }
+            // if (m_s2rcpp.status.linkReset.get() || m_s2rcpp.status.sysReset.get())
+            // {
+            //     printf("Link is in reset\n");
+            // }
 
-            if (m_s2rcpp.status.softErr.get() || m_s2rcpp.status.hardErr.get())
-            {
-                printf("Got an error\n");
-            }
+            // if (m_s2rcpp.status.softErr.get() || m_s2rcpp.status.hardErr.get())
+            // {
+            //     printf("Got an error\n");
+            // }
 
-            printf("Link up and good. Ready to receive data.\n");
+            // printf("Link up and good. Ready to receive data.\n");
 
-            // kria transfer rate: 100us
-            m_r2scpp.numData.write(num_data * 2);
-            m_r2scpp.tkeep.write(0x0000FFFF);
+            // // kria transfer rate: 100us
+            // m_r2scpp.numData.write(num_data * 2);
+            // m_r2scpp.tkeep.write(0x0000FFFF);
 
+            pwm.setUpdateType(hal::PWM<0>::UpdateType::zero);
             pwm.start();
+
             interrupt_1.start();
         }
 
@@ -120,8 +122,16 @@ namespace user
             //     converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
             // }
 
-            // if(converter.counter)
-            // pwm.setModulationIndex()
+            // const auto success = converter.pwm.setModulationIndex(converter.counter);
+            converter.pwm.m_pwm.m_regs.cc0Sc.write(converter.counter);
+
+            if (converter.counter % 1'000 == 0)
+            {
+                std::cout << std::boolalpha << converter.counter << " " << converter.pwm.m_pwm.m_regs.cc0Sc.read()
+                          << std::endl;
+                // std::cout << std::boolalpha << converter.counter << " " << success << " " <<
+                // converter.pwm.m_pwm.m_regs.cc0Sc.read() << std::endl;
+            }
 
             // // write to output registers
             // for (uint32_t index = 0; index < num_data; index++)
@@ -133,6 +143,10 @@ namespace user
             // trigger connection
             // converter.m_r2scpp.ctrl.start.set(true);
             converter.counter++;
+            if (converter.counter >= 20'000)
+            {
+                converter.counter = 0;
+            }
         }
 
         vslib::HalfBridge<0> pwm;
@@ -140,11 +154,11 @@ namespace user
       private:
         int counter{0};
 
-        constexpr static uint32_t    num_data{20};
-        std::array<double, num_data> m_data;
+        // constexpr static uint32_t    num_data{20};
+        // std::array<double, num_data> m_data;
 
-        ipCores::StreamToReg m_s2rcpp;
-        ipCores::RegToStream m_r2scpp;
+        // ipCores::StreamToReg m_s2rcpp;
+        // ipCores::RegToStream m_r2scpp;
     };
 
 }   // namespace user

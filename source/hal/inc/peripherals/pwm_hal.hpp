@@ -16,11 +16,13 @@ namespace hal
         typedef unnamed::Top::PwmArrayItem::Pwm::UpdateType UpdateType;
 
         //! Constructor for PWM HAL object.
-        PWM() noexcept
+        PWM(uint32_t ctrh) noexcept
         {
             static_assert(pwm_id < 12, "The PWM ID must be between 0 and 11.");
             unnamed::Top top(reinterpret_cast<uint8_t*>(0xa0000000));
             m_regs = top.pwm[pwm_id].pwm;
+
+            m_regs.ctrhSc.write(ctrh);
 
             // Assumption is made t hat the configuration does not change at runtime, so configuration can be
             // internalized in memory rather than always read from register
@@ -80,7 +82,7 @@ namespace hal
 
         //! Sets the update type.
         //!
-        //! @param type Update type to be set, one of zero, prd, zeroPrd, immediate
+        //! @param type Update type to be set, one of zero, period, zeroPeriod, immediate
         void setUpdateType(const UpdateType type) noexcept
         {
             m_regs.config.updateType.set(type);
@@ -168,7 +170,7 @@ namespace hal
             return unnamed::Top::PwmArrayItem::size;
         }
 
-      private:
+        //   private:
         unnamed::Top::PwmArrayItem::Pwm m_regs;
 
         //! Maximum counter value to which the PWM counter is counting to, a configuration parameter.

@@ -16,9 +16,9 @@ namespace vslib
     class HalfBridge : public Component
     {
       public:
-        HalfBridge(std::string_view name, Component& parent) noexcept
+        HalfBridge(std::string_view name, Component& parent, uint32_t ctrh) noexcept
             : Component("HalfBridge", name, parent),
-              m_pwm()
+              m_pwm(ctrh)
         {
             // initialize the right PWM IP out of the list of 12, TODO
             // right now, base_address is needed
@@ -128,7 +128,7 @@ namespace vslib
             return hal::PWM<pwm_id>::size();
         }
 
-      private:
+        //   private:
         hal::PWM<pwm_id> m_pwm;   //!< PWM IP core HAL
     };
 }
