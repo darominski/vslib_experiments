@@ -22,7 +22,7 @@ namespace unnamed
     //! ::Top
     //!
     //! Top level address space mapping for FGC4 Main Board FPGA
-    struct Top : MemModule<54784, uint32_t, attributes::ByteOrdering::big, attributes::WordOrdering::little>
+    struct Top : MemModule<54784, uint32_t, attributes::ByteOrdering::little, attributes::WordOrdering::little>
     {
         // No version information provided.
 
