@@ -23,8 +23,9 @@ namespace user
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
               //   interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              interrupt_1("timer", *this, std::chrono::microseconds(100), RTTask),
-              pwm("pwm_1", *this, 20'000)
+              interrupt_1("timer", *this, std::chrono::microseconds(1000), RTTask),
+              pwm_7("pwm_7", *this, 10'000),
+              pwm_8("pwm_8", *this, 10'000)
         //   m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
         //   m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000))
         {
@@ -72,8 +73,21 @@ namespace user
             // m_r2scpp.numData.write(num_data * 2);
             // m_r2scpp.tkeep.write(0x0000FFFF);
 
-            pwm.setUpdateType(hal::PWM<0>::UpdateType::zero);
-            pwm.start();
+            // pwm.stop();
+            pwm_7.start();
+            pwm_8.start();
+
+            // pwm_8.m_pwm.m_regs.ctrl.enable.set(true);
+            // pwm_8.m_pwm.m_regs.ctrl.reset.set(false);
+
+            // pwm_9.m_pwm.m_regs.ctrl.enable.set(true);
+            // pwm_9.m_pwm.m_regs.ctrl.reset.set(false);
+            // pwm_10.m_pwm.m_regs.ctrl.enable.set(true);
+            // pwm_10.m_pwm.m_regs.ctrl.reset.set(false);
+            // pwm_11.m_pwm.m_regs.ctrl.enable.set(true);
+            // pwm_11.m_pwm.m_regs.ctrl.reset.set(false);
+            // pwm_12.m_pwm.m_regs.ctrl.enable.set(true);
+            // pwm_12.m_pwm.m_regs.ctrl.reset.set(false);
 
             interrupt_1.start();
         }
@@ -123,14 +137,15 @@ namespace user
             // }
 
             // const auto success = converter.pwm.setModulationIndex(converter.counter);
-            converter.pwm.m_pwm.m_regs.cc0Sc.write(converter.counter);
-
-            if (converter.counter % 1'000 == 0)
+            converter.pwm_7.m_pwm.m_regs.cc0Sc.write(converter.counter);
+            if (converter.counter % 100 == 0)
             {
-                std::cout << std::boolalpha << converter.counter << " " << converter.pwm.m_pwm.m_regs.cc0Sc.read()
-                          << std::endl;
-                // std::cout << std::boolalpha << converter.counter << " " << success << " " <<
-                // converter.pwm.m_pwm.m_regs.cc0Sc.read() << std::endl;
+                //     std::cout << std::boolalpha << converter.counter << " " <<
+                //     converter.pwm.m_pwm.m_regs.cc0Sc.read()
+                //               << std::endl;
+                std::cout << std::boolalpha << converter.counter << " " << converter.pwm_7.m_pwm.m_regs.cc0Sc.read()
+                          << " " << converter.pwm_7.m_pwm.m_regs.ctrl.reset.get() << " "
+                          << converter.pwm_7.m_pwm.m_regs.ctrl.enable.get() << '\n';
             }
 
             // // write to output registers
@@ -142,18 +157,31 @@ namespace user
             // send it away
             // trigger connection
             // converter.m_r2scpp.ctrl.start.set(true);
-            converter.counter++;
-            if (converter.counter >= 20'000)
+            if (converter.count_up)
             {
-                converter.counter = 0;
+                converter.counter++;
+            }
+            else
+            {
+                converter.counter--;
+            }
+
+            if (converter.counter >= 10'000)
+            {
+                converter.count_up = false;
+            }
+            if (converter.counter <= 0)
+            {
+                converter.count_up = true;
             }
         }
 
-        vslib::HalfBridge<0> pwm;
+        vslib::HalfBridge<6> pwm_7;
+        vslib::HalfBridge<7> pwm_8;
 
       private:
-        int counter{0};
-
+        int  counter{0};
+        bool count_up{true};
         // constexpr static uint32_t    num_data{20};
         // std::array<double, num_data> m_data;
 

@@ -22,7 +22,23 @@ namespace hal
             unnamed::Top top(reinterpret_cast<uint8_t*>(0xa0000000));
             m_regs = top.pwm[pwm_id].pwm;
 
+            // TMP: This is done manually ATM, in the future will be handled the configurator
+            m_regs.config.updateType.set(UpdateType::zero);
+            m_regs.config.enablePwmCheck.set(false);
+            m_regs.config.enableStCheck.set(true);
+            m_regs.config.bypassDeadtime.set(false);
+            m_regs.config.enableValueCheck.set(true);
+            m_regs.config.invert.set(false);
+            m_regs.config.decoupleCc1.set(false);
+
             m_regs.ctrhSc.write(ctrh);
+            m_regs.deadtimeSc.write(1000);
+            m_regs.config.disableA.set(false);
+            m_regs.config.disableB.set(false);
+            m_regs.minSwitchTimeSc.write(ctrh / 4);
+
+            m_regs.cc0Sc.write(4000);
+            // END OF TMP
 
             // Assumption is made t hat the configuration does not change at runtime, so configuration can be
             // internalized in memory rather than always read from register
@@ -31,14 +47,42 @@ namespace hal
             const uint32_t dead_time = m_regs.deadtimeSc.read();   // dead time, in clock cycles
             const uint32_t min_switch_time
                 = m_regs.minSwitchTimeSc.read();   // minimum ON or OFF switch time, in clock cycles
+
             // max counter value serves as period in clock cycles
 
-            m_min_modulation_index
-                = 1.0 - static_cast<float>((m_max_counter_value - min_switch_time - dead_time) / m_max_counter_value);
-            m_max_modulation_index
-                = static_cast<float>(m_max_counter_value - min_switch_time - dead_time) / (m_max_counter_value);
+            // min and max modulation indices, 0-1 (normalised to period)
+            if (min_switch_time == 0)
+            {
+                if (m_regs.config.bypassDeadtime.get())
+                {
+                    m_max_modulation_index = 1.0;
+                }
+                else
+                {
+                    m_max_modulation_index = static_cast<float>(2 * m_max_counter_value - (dead_time + 1))
+                                             / static_cast<float>(2.0 * m_max_counter_value);
+                }
+            }
+            else
+            {
+                if (m_regs.config.bypassDeadtime.get())
+                {
+                    m_max_modulation_index = static_cast<float>(2 * m_max_counter_value - min_switch_time)
+                                             / static_cast<float>(2.0 * m_max_counter_value);
+                }
+                else
+                {
+                    m_max_modulation_index
+                        = static_cast<float>(2 * m_max_counter_value - (min_switch_time + dead_time + 1))
+                          / static_cast<float>(2.0 * m_max_counter_value);
+                }
+            }
+            m_min_modulation_index = 1.0 - m_max_modulation_index;
 
-            // TMP: Configurator will eventually configure this IP core:
+            // TMP: these values will be set by the configurator
+            m_regs.minModIdxSc.write(m_min_modulation_index * 2 * m_max_counter_value);
+            m_regs.maxModIdxSc.write(m_max_modulation_index * 2 * m_max_counter_value);
+            // END OF TMP
         }
 
         //! Sets the desired modulation index.
