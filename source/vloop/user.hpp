@@ -136,16 +136,11 @@ namespace user
             //     converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
             // }
 
-            // const auto success = converter.pwm.setModulationIndex(converter.counter);
-            converter.pwm_7.m_pwm.m_regs.cc0Sc.write(converter.counter);
+            const auto success1 = converter.pwm_7.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
+            const auto success2 = converter.pwm_8.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
             if (converter.counter % 100 == 0)
             {
-                //     std::cout << std::boolalpha << converter.counter << " " <<
-                //     converter.pwm.m_pwm.m_regs.cc0Sc.read()
-                //               << std::endl;
-                std::cout << std::boolalpha << converter.counter << " " << converter.pwm_7.m_pwm.m_regs.cc0Sc.read()
-                          << " " << converter.pwm_7.m_pwm.m_regs.ctrl.reset.get() << " "
-                          << converter.pwm_7.m_pwm.m_regs.ctrl.enable.get() << '\n';
+                std::cout << std::boolalpha << converter.counter << " " << success1 << " " << success2 << '\n';
             }
 
             // // write to output registers

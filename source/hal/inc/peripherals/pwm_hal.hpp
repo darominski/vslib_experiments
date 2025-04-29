@@ -92,10 +92,11 @@ namespace hal
         //! CC0 and CC1)
         //! @return Boolean value with information whether the modulation index value set is identical to the one
         //! provided (true), false otherwise
-        bool setModulationIndex(const float modulation_index, bool write_to_cc0 = true) noexcept
+        [[maybe_unused]] bool setModulationIndex(const float modulation_index, bool write_to_cc0 = true) noexcept
         {
             const float index     = forceLimit(modulation_index, m_min_modulation_index, m_max_modulation_index);
             const float threshold = getMaximumCounterValue() * index;
+
             if (isnanf(threshold))
             {
                 // avoid setting NaN to register, return early
