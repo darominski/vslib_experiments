@@ -13,13 +13,13 @@ namespace hal
     class PWM
     {
       public:
-        typedef unnamed::Top::PwmArrayItem::Pwm::UpdateType UpdateType;
+        typedef ipCores::Top::PwmArrayItem::Pwm::UpdateType UpdateType;
 
         //! Constructor for PWM HAL object.
         PWM(uint32_t ctrh) noexcept
         {
             static_assert(pwm_id < 12, "The PWM ID must be between 0 and 11.");
-            unnamed::Top top(reinterpret_cast<uint8_t*>(0xa0000000));
+            ipCores::Top top(reinterpret_cast<uint8_t*>(0xa0000000));
             m_regs = top.pwm[pwm_id].pwm;
 
             m_regs.ctrhSc.write(ctrh);
@@ -167,11 +167,11 @@ namespace hal
         //! @return Maximum size of the PWM registers
         static auto constexpr size() noexcept
         {
-            return unnamed::Top::PwmArrayItem::size;
+            return ipCores::Top::PwmArrayItem::size;
         }
 
         //   private:
-        unnamed::Top::PwmArrayItem::Pwm m_regs;
+        ipCores::Top::PwmArrayItem::Pwm m_regs;
 
         //! Maximum counter value to which the PWM counter is counting to, a configuration parameter.
         uint32_t m_max_counter_value{0};

@@ -15,7 +15,7 @@
 #include <mmpp.h>
 
 
-namespace unnamed
+namespace ipCores
 {
     using namespace mmpp;
 
@@ -2246,41 +2246,41 @@ namespace unnamed
     };
 }
 
-// Populate the `mmpp::utils` namespace with functions pertaining to `unnamed`
+// Populate the `mmpp::utils` namespace with functions pertaining to `ipCores`
 namespace mmpp::utils
 {
-    //! Specialization of `to_string` for `unnamed::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm`
+    //! Specialization of `to_string` for `ipCores::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm`
     template<>
-    inline std::string to_string(const unnamed::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm& val)
+    inline std::string to_string(const ipCores::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm& val)
     {
         switch (val)
         {
-            case unnamed::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm::notInUse:
+            case ipCores::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm::notInUse:
                 return "notInUse";
-            case unnamed::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm::accSlidingAvg:
+            case ipCores::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm::accSlidingAvg:
                 return "accSlidingAvg";
-            case unnamed::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm::firstOrderIir:
+            case ipCores::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm::firstOrderIir:
                 return "firstOrderIir";
-            case unnamed::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm::reserved:
+            case ipCores::Top::AnalogMs::ChannelArrayItem::Ms::MsAlgorithm::reserved:
                 return "reserved";
             default:
                 return "<undefined> (raw value: " + to_string(utils::as_unsigned(val)) + ")";
         }
     }
 
-    //! Specialization of `to_string` for `unnamed::Top::PwmArrayItem::Pwm::UpdateType`
+    //! Specialization of `to_string` for `ipCores::Top::PwmArrayItem::Pwm::UpdateType`
     template<>
-    inline std::string to_string(const unnamed::Top::PwmArrayItem::Pwm::UpdateType& val)
+    inline std::string to_string(const ipCores::Top::PwmArrayItem::Pwm::UpdateType& val)
     {
         switch (val)
         {
-            case unnamed::Top::PwmArrayItem::Pwm::UpdateType::zero:
+            case ipCores::Top::PwmArrayItem::Pwm::UpdateType::zero:
                 return "zero";
-            case unnamed::Top::PwmArrayItem::Pwm::UpdateType::period:
+            case ipCores::Top::PwmArrayItem::Pwm::UpdateType::period:
                 return "period";
-            case unnamed::Top::PwmArrayItem::Pwm::UpdateType::zeroPeriod:
+            case ipCores::Top::PwmArrayItem::Pwm::UpdateType::zeroPeriod:
                 return "zeroPeriod";
-            case unnamed::Top::PwmArrayItem::Pwm::UpdateType::immediate:
+            case ipCores::Top::PwmArrayItem::Pwm::UpdateType::immediate:
                 return "immediate";
             default:
                 return "<undefined> (raw value: " + to_string(utils::as_unsigned(val)) + ")";
@@ -2289,11 +2289,11 @@ namespace mmpp::utils
 
     // ************************************************************
 
-    //! Dump the register and fields of `unnamed::Top::AdcCalint::DataArray`
+    //! Dump the register and fields of `ipCores::Top::AdcCalint::DataArray`
     //!
     //! @param data A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under data
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AdcCalint::DataArray& data)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AdcCalint::DataArray& data)
     {
         DumpMap res{data.base()};
         res.insert_or_assign("data[0].value", DumpEntry{data[0].value});
@@ -2315,11 +2315,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AdcCalint`
+    //! Dump the register and fields of `ipCores::Top::AdcCalint`
     //!
     //! @param adcCalint A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under adcCalint
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AdcCalint& adcCalint)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AdcCalint& adcCalint)
     {
         DumpMap res{adcCalint.base()};
         res.insert_or_assign("adcCalint.ctrl", DumpEntry{adcCalint.ctrl});
@@ -2361,11 +2361,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AdcUncalintArrayItem::Adc::DataArray`
+    //! Dump the register and fields of `ipCores::Top::AdcUncalintArrayItem::Adc::DataArray`
     //!
     //! @param data A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under data
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AdcUncalintArrayItem::Adc::DataArray& data)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AdcUncalintArrayItem::Adc::DataArray& data)
     {
         DumpMap res{data.base()};
         res.insert_or_assign("data[0].value", DumpEntry{data[0].value});
@@ -2387,11 +2387,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AdcUncalintArrayItem::Adc`
+    //! Dump the register and fields of `ipCores::Top::AdcUncalintArrayItem::Adc`
     //!
     //! @param adc A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under adc
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AdcUncalintArrayItem::Adc& adc)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AdcUncalintArrayItem::Adc& adc)
     {
         DumpMap res{adc.base()};
         res.insert_or_assign("adc.ctrl", DumpEntry{adc.ctrl});
@@ -2433,11 +2433,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AdcUncalintArray`
+    //! Dump the register and fields of `ipCores::Top::AdcUncalintArray`
     //!
     //! @param adcUncalint A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under adcUncalint
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AdcUncalintArray& adcUncalint)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AdcUncalintArray& adcUncalint)
     {
         DumpMap res{adcUncalint.base()};
         res.insert_or_assign("adcUncalint[0].adc.ctrl", DumpEntry{adcUncalint[0].adc.ctrl});
@@ -2683,11 +2683,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::DacIntArrayItem::Dac::DataArray`
+    //! Dump the register and fields of `ipCores::Top::DacIntArrayItem::Dac::DataArray`
     //!
     //! @param data A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under data
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::DacIntArrayItem::Dac::DataArray& data)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::DacIntArrayItem::Dac::DataArray& data)
     {
         DumpMap res{data.base()};
         // data[0].value skipped (Register is not readable).
@@ -2709,11 +2709,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::DacIntArrayItem::Dac`
+    //! Dump the register and fields of `ipCores::Top::DacIntArrayItem::Dac`
     //!
     //! @param dac A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under dac
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::DacIntArrayItem::Dac& dac)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::DacIntArrayItem::Dac& dac)
     {
         DumpMap res{dac.base()};
         res.insert_or_assign("dac.ctrl", DumpEntry{dac.ctrl});
@@ -2753,11 +2753,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::DacIntArray`
+    //! Dump the register and fields of `ipCores::Top::DacIntArray`
     //!
     //! @param dacInt A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under dacInt
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::DacIntArray& dacInt)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::DacIntArray& dacInt)
     {
         DumpMap res{dacInt.base()};
         res.insert_or_assign("dacInt[0].dac.ctrl", DumpEntry{dacInt[0].dac.ctrl});
@@ -2831,11 +2831,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::SignalBank::RegArray`
+    //! Dump the register and fields of `ipCores::Top::SignalBank::RegArray`
     //!
     //! @param reg A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under reg
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::SignalBank::RegArray& reg)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::SignalBank::RegArray& reg)
     {
         DumpMap res{reg.base()};
         res.insert_or_assign("reg[0].fir", DumpEntry{reg[0].fir});
@@ -2903,11 +2903,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::SignalBank::VloopArray`
+    //! Dump the register and fields of `ipCores::Top::SignalBank::VloopArray`
     //!
     //! @param vloop A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under vloop
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::SignalBank::VloopArray& vloop)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::SignalBank::VloopArray& vloop)
     {
         DumpMap res{vloop.base()};
         res.insert_or_assign("vloop[0].fir", DumpEntry{vloop[0].fir});
@@ -2975,11 +2975,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::SignalBank::RawArray`
+    //! Dump the register and fields of `ipCores::Top::SignalBank::RawArray`
     //!
     //! @param raw A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under raw
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::SignalBank::RawArray& raw)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::SignalBank::RawArray& raw)
     {
         DumpMap res{raw.base()};
         res.insert_or_assign("raw[0].raw", DumpEntry{raw[0].raw});
@@ -3047,11 +3047,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::SignalBank::MmArray`
+    //! Dump the register and fields of `ipCores::Top::SignalBank::MmArray`
     //!
     //! @param mm A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under mm
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::SignalBank::MmArray& mm)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::SignalBank::MmArray& mm)
     {
         DumpMap res{mm.base()};
         res.insert_or_assign("mm[0].fir", DumpEntry{mm[0].fir});
@@ -3119,11 +3119,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::SignalBank::MsArray`
+    //! Dump the register and fields of `ipCores::Top::SignalBank::MsArray`
     //!
     //! @param ms A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under ms
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::SignalBank::MsArray& ms)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::SignalBank::MsArray& ms)
     {
         DumpMap res{ms.base()};
         res.insert_or_assign("ms[0].fir", DumpEntry{ms[0].fir});
@@ -3191,11 +3191,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::SignalBank`
+    //! Dump the register and fields of `ipCores::Top::SignalBank`
     //!
     //! @param signalBank A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under signalBank
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::SignalBank& signalBank)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::SignalBank& signalBank)
     {
         DumpMap res{signalBank.base()};
         res.insert_or_assign("signalBank.digI0", DumpEntry{signalBank.digI0});
@@ -3525,11 +3525,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AnalogFir::ChannelArrayItem::RFir`
+    //! Dump the register and fields of `ipCores::Top::AnalogFir::ChannelArrayItem::RFir`
     //!
     //! @param rFir A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under rFir
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AnalogFir::ChannelArrayItem::RFir& rFir)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AnalogFir::ChannelArrayItem::RFir& rFir)
     {
         DumpMap res{rFir.base()};
         res.insert_or_assign("rFir.m", DumpEntry{rFir.m});
@@ -3541,11 +3541,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AnalogFir::ChannelArrayItem::VFir`
+    //! Dump the register and fields of `ipCores::Top::AnalogFir::ChannelArrayItem::VFir`
     //!
     //! @param vFir A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under vFir
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AnalogFir::ChannelArrayItem::VFir& vFir)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AnalogFir::ChannelArrayItem::VFir& vFir)
     {
         DumpMap res{vFir.base()};
         res.insert_or_assign("vFir.m", DumpEntry{vFir.m});
@@ -3557,11 +3557,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AnalogFir::ChannelArrayItem::MmFir`
+    //! Dump the register and fields of `ipCores::Top::AnalogFir::ChannelArrayItem::MmFir`
     //!
     //! @param mmFir A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under mmFir
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AnalogFir::ChannelArrayItem::MmFir& mmFir)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AnalogFir::ChannelArrayItem::MmFir& mmFir)
     {
         DumpMap res{mmFir.base()};
         res.insert_or_assign("mmFir.m", DumpEntry{mmFir.m});
@@ -3573,11 +3573,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AnalogFir::ChannelArrayItem::Limit`
+    //! Dump the register and fields of `ipCores::Top::AnalogFir::ChannelArrayItem::Limit`
     //!
     //! @param limit A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under limit
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AnalogFir::ChannelArrayItem::Limit& limit)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AnalogFir::ChannelArrayItem::Limit& limit)
     {
         DumpMap res{limit.base()};
         res.insert_or_assign("limit.maxLimit", DumpEntry{limit.maxLimit});
@@ -3586,11 +3586,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AnalogFir::ChannelArray`
+    //! Dump the register and fields of `ipCores::Top::AnalogFir::ChannelArray`
     //!
     //! @param channel A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under channel
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AnalogFir::ChannelArray& channel)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AnalogFir::ChannelArray& channel)
     {
         DumpMap res{channel.base()};
         res.insert_or_assign("channel[0].rFir.m", DumpEntry{channel[0].rFir.m});
@@ -4898,11 +4898,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AnalogFir`
+    //! Dump the register and fields of `ipCores::Top::AnalogFir`
     //!
     //! @param analogFir A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under analogFir
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AnalogFir& analogFir)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AnalogFir& analogFir)
     {
         DumpMap res{analogFir.base()};
         res.insert_or_assign("analogFir.channel[0].rFir.m", DumpEntry{analogFir.channel[0].rFir.m});
@@ -6335,11 +6335,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AnalogMs::ChannelArrayItem::Ms`
+    //! Dump the register and fields of `ipCores::Top::AnalogMs::ChannelArrayItem::Ms`
     //!
     //! @param ms A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under ms
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AnalogMs::ChannelArrayItem::Ms& ms)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AnalogMs::ChannelArrayItem::Ms& ms)
     {
         DumpMap res{ms.base()};
         res.insert_or_assign("ms.algorithms", DumpEntry{ms.algorithms});
@@ -6354,11 +6354,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AnalogMs::ChannelArray`
+    //! Dump the register and fields of `ipCores::Top::AnalogMs::ChannelArray`
     //!
     //! @param channel A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under channel
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AnalogMs::ChannelArray& channel)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AnalogMs::ChannelArray& channel)
     {
         DumpMap res{channel.base()};
         res.insert_or_assign("channel[0].ms.algorithms", DumpEntry{channel[0].ms.algorithms});
@@ -6922,11 +6922,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::AnalogMs`
+    //! Dump the register and fields of `ipCores::Top::AnalogMs`
     //!
     //! @param analogMs A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under analogMs
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::AnalogMs& analogMs)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::AnalogMs& analogMs)
     {
         DumpMap res{analogMs.base()};
         res.insert_or_assign("analogMs.channel[0].ms.algorithms", DumpEntry{analogMs.channel[0].ms.algorithms});
@@ -7594,11 +7594,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::DigI0::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigI0::FilterLengthScArray`
     //!
     //! @param filterLengthSc A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::DigI0::FilterLengthScArray& filterLengthSc)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI0::FilterLengthScArray& filterLengthSc)
     {
         DumpMap res{filterLengthSc.base()};
         res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
@@ -7636,11 +7636,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::DigI0::ReTimeArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigI0::ReTimeArray`
     //!
     //! @param reTime A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under reTime
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::DigI0::ReTimeArray& reTime)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI0::ReTimeArray& reTime)
     {
         DumpMap res{reTime.base()};
         res.insert_or_assign("reTime[0].s", DumpEntry{reTime[0].s});
@@ -7710,11 +7710,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::DigI0`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigI0`
     //!
     //! @param digI0 A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under digI0
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::DigI0& digI0)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI0& digI0)
     {
         DumpMap res{digI0.base()};
         res.insert_or_assign("digI0.staticParams", DumpEntry{digI0.staticParams});
@@ -7831,11 +7831,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::DigI1::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigI1::FilterLengthScArray`
     //!
     //! @param filterLengthSc A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::DigI1::FilterLengthScArray& filterLengthSc)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI1::FilterLengthScArray& filterLengthSc)
     {
         DumpMap res{filterLengthSc.base()};
         res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
@@ -7873,11 +7873,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::DigI1::ReTimeArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigI1::ReTimeArray`
     //!
     //! @param reTime A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under reTime
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::DigI1::ReTimeArray& reTime)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI1::ReTimeArray& reTime)
     {
         DumpMap res{reTime.base()};
         res.insert_or_assign("reTime[0].s", DumpEntry{reTime[0].s});
@@ -7947,11 +7947,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::DigI1`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigI1`
     //!
     //! @param digI1 A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under digI1
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::DigI1& digI1)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI1& digI1)
     {
         DumpMap res{digI1.base()};
         res.insert_or_assign("digI1.staticParams", DumpEntry{digI1.staticParams});
@@ -8068,11 +8068,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::DigIndI::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigIndI::FilterLengthScArray`
     //!
     //! @param filterLengthSc A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::DigIndI::FilterLengthScArray& filterLengthSc)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigIndI::FilterLengthScArray& filterLengthSc)
     {
         DumpMap res{filterLengthSc.base()};
         res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
@@ -8110,11 +8110,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::DigIndI::ReTimeArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigIndI::ReTimeArray`
     //!
     //! @param reTime A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under reTime
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::DigIndI::ReTimeArray& reTime)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigIndI::ReTimeArray& reTime)
     {
         DumpMap res{reTime.base()};
         res.insert_or_assign("reTime[0].s", DumpEntry{reTime[0].s});
@@ -8184,11 +8184,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::DigIndI`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigIndI`
     //!
     //! @param digIndI A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under digIndI
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::DigIndI& digIndI)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigIndI& digIndI)
     {
         DumpMap res{digIndI.base()};
         res.insert_or_assign("digIndI.staticParams", DumpEntry{digIndI.staticParams});
@@ -8305,11 +8305,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::ContactI::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::ContactI::FilterLengthScArray`
     //!
     //! @param filterLengthSc A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::ContactI::FilterLengthScArray& filterLengthSc)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::ContactI::FilterLengthScArray& filterLengthSc)
     {
         DumpMap res{filterLengthSc.base()};
         res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
@@ -8347,11 +8347,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::ContactI::ReTimeArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::ContactI::ReTimeArray`
     //!
     //! @param reTime A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under reTime
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::ContactI::ReTimeArray& reTime)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::ContactI::ReTimeArray& reTime)
     {
         DumpMap res{reTime.base()};
         res.insert_or_assign("reTime[0].s", DumpEntry{reTime[0].s});
@@ -8421,11 +8421,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::ContactI`
+    //! Dump the register and fields of `ipCores::Top::Dig::ContactI`
     //!
     //! @param contactI A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under contactI
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::ContactI& contactI)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::ContactI& contactI)
     {
         DumpMap res{contactI.base()};
         res.insert_or_assign("contactI.staticParams", DumpEntry{contactI.staticParams});
@@ -8542,11 +8542,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::OpticalI::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::OpticalI::FilterLengthScArray`
     //!
     //! @param filterLengthSc A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::OpticalI::FilterLengthScArray& filterLengthSc)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::OpticalI::FilterLengthScArray& filterLengthSc)
     {
         DumpMap res{filterLengthSc.base()};
         res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
@@ -8584,11 +8584,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::OpticalI::ReTimeArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::OpticalI::ReTimeArray`
     //!
     //! @param reTime A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under reTime
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::OpticalI::ReTimeArray& reTime)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::OpticalI::ReTimeArray& reTime)
     {
         DumpMap res{reTime.base()};
         res.insert_or_assign("reTime[0].s", DumpEntry{reTime[0].s});
@@ -8658,11 +8658,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::OpticalI`
+    //! Dump the register and fields of `ipCores::Top::Dig::OpticalI`
     //!
     //! @param opticalI A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under opticalI
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::OpticalI& opticalI)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::OpticalI& opticalI)
     {
         DumpMap res{opticalI.base()};
         res.insert_or_assign("opticalI.staticParams", DumpEntry{opticalI.staticParams});
@@ -8779,11 +8779,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::MinMaxLim0::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim0::FilterLengthScArray`
     //!
     //! @param filterLengthSc A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::MinMaxLim0::FilterLengthScArray& filterLengthSc)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim0::FilterLengthScArray& filterLengthSc)
     {
         DumpMap res{filterLengthSc.base()};
         res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
@@ -8821,11 +8821,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::MinMaxLim0::ReTimeArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim0::ReTimeArray`
     //!
     //! @param reTime A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under reTime
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::MinMaxLim0::ReTimeArray& reTime)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim0::ReTimeArray& reTime)
     {
         DumpMap res{reTime.base()};
         res.insert_or_assign("reTime[0].s", DumpEntry{reTime[0].s});
@@ -8895,11 +8895,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::MinMaxLim0`
+    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim0`
     //!
     //! @param minMaxLim0 A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under minMaxLim0
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::MinMaxLim0& minMaxLim0)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim0& minMaxLim0)
     {
         DumpMap res{minMaxLim0.base()};
         res.insert_or_assign("minMaxLim0.staticParams", DumpEntry{minMaxLim0.staticParams});
@@ -9016,11 +9016,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::MinMaxLim1::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim1::FilterLengthScArray`
     //!
     //! @param filterLengthSc A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::MinMaxLim1::FilterLengthScArray& filterLengthSc)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim1::FilterLengthScArray& filterLengthSc)
     {
         DumpMap res{filterLengthSc.base()};
         res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
@@ -9058,11 +9058,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::MinMaxLim1::ReTimeArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim1::ReTimeArray`
     //!
     //! @param reTime A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under reTime
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::MinMaxLim1::ReTimeArray& reTime)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim1::ReTimeArray& reTime)
     {
         DumpMap res{reTime.base()};
         res.insert_or_assign("reTime[0].s", DumpEntry{reTime[0].s});
@@ -9132,11 +9132,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::MinMaxLim1`
+    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim1`
     //!
     //! @param minMaxLim1 A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under minMaxLim1
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::MinMaxLim1& minMaxLim1)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim1& minMaxLim1)
     {
         DumpMap res{minMaxLim1.base()};
         res.insert_or_assign("minMaxLim1.staticParams", DumpEntry{minMaxLim1.staticParams});
@@ -9253,11 +9253,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::RmsLim0::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim0::FilterLengthScArray`
     //!
     //! @param filterLengthSc A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::RmsLim0::FilterLengthScArray& filterLengthSc)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim0::FilterLengthScArray& filterLengthSc)
     {
         DumpMap res{filterLengthSc.base()};
         res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
@@ -9295,11 +9295,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::RmsLim0::ReTimeArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim0::ReTimeArray`
     //!
     //! @param reTime A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under reTime
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::RmsLim0::ReTimeArray& reTime)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim0::ReTimeArray& reTime)
     {
         DumpMap res{reTime.base()};
         res.insert_or_assign("reTime[0].s", DumpEntry{reTime[0].s});
@@ -9369,11 +9369,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::RmsLim0`
+    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim0`
     //!
     //! @param rmsLim0 A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under rmsLim0
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::RmsLim0& rmsLim0)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim0& rmsLim0)
     {
         DumpMap res{rmsLim0.base()};
         res.insert_or_assign("rmsLim0.staticParams", DumpEntry{rmsLim0.staticParams});
@@ -9490,11 +9490,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::RmsLim1::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim1::FilterLengthScArray`
     //!
     //! @param filterLengthSc A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::RmsLim1::FilterLengthScArray& filterLengthSc)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim1::FilterLengthScArray& filterLengthSc)
     {
         DumpMap res{filterLengthSc.base()};
         res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
@@ -9532,11 +9532,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::RmsLim1::ReTimeArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim1::ReTimeArray`
     //!
     //! @param reTime A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under reTime
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::RmsLim1::ReTimeArray& reTime)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim1::ReTimeArray& reTime)
     {
         DumpMap res{reTime.base()};
         res.insert_or_assign("reTime[0].s", DumpEntry{reTime[0].s});
@@ -9606,11 +9606,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig::RmsLim1`
+    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim1`
     //!
     //! @param rmsLim1 A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under rmsLim1
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig::RmsLim1& rmsLim1)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim1& rmsLim1)
     {
         DumpMap res{rmsLim1.base()};
         res.insert_or_assign("rmsLim1.staticParams", DumpEntry{rmsLim1.staticParams});
@@ -9727,11 +9727,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Dig`
+    //! Dump the register and fields of `ipCores::Top::Dig`
     //!
     //! @param dig A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under dig
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Dig& dig)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig& dig)
     {
         DumpMap res{dig.base()};
         res.insert_or_assign("dig.digI0.staticParams", DumpEntry{dig.digI0.staticParams});
@@ -10760,11 +10760,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::PwmArrayItem::Pwm`
+    //! Dump the register and fields of `ipCores::Top::PwmArrayItem::Pwm`
     //!
     //! @param pwm A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under pwm
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::PwmArrayItem::Pwm& pwm)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::PwmArrayItem::Pwm& pwm)
     {
         DumpMap res{pwm.base()};
         res.insert_or_assign("pwm.ctrl", DumpEntry{pwm.ctrl});
@@ -10794,11 +10794,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::PwmArray`
+    //! Dump the register and fields of `ipCores::Top::PwmArray`
     //!
     //! @param pwm A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under pwm
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::PwmArray& pwm)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::PwmArray& pwm)
     {
         DumpMap res{pwm.base()};
         res.insert_or_assign("pwm[0].pwm.ctrl", DumpEntry{pwm[0].pwm.ctrl});
@@ -11092,22 +11092,22 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Ddma::Trig`
+    //! Dump the register and fields of `ipCores::Top::Ddma::Trig`
     //!
     //! @param trig A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under trig
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Ddma::Trig& trig)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Ddma::Trig& trig)
     {
         DumpMap res{trig.base()};
         // trig.trig skipped (Register is not readable).
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Ddma::TdArray`
+    //! Dump the register and fields of `ipCores::Top::Ddma::TdArray`
     //!
     //! @param td A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under td
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Ddma::TdArray& td)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Ddma::TdArray& td)
     {
         DumpMap res{td.base()};
         res.insert_or_assign("td[0].srcAddr", DumpEntry{td[0].srcAddr});
@@ -11625,11 +11625,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::Ddma`
+    //! Dump the register and fields of `ipCores::Top::Ddma`
     //!
     //! @param ddma A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under ddma
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::Ddma& ddma)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Ddma& ddma)
     {
         DumpMap res{ddma.base()};
         // ddma.trig.trig skipped (Register is not readable).
@@ -12148,11 +12148,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::SyncTime`
+    //! Dump the register and fields of `ipCores::Top::SyncTime`
     //!
     //! @param syncTime A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under syncTime
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::SyncTime& syncTime)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::SyncTime& syncTime)
     {
         DumpMap res{syncTime.base()};
         res.insert_or_assign("syncTime.s", DumpEntry{syncTime.s});
@@ -12160,11 +12160,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::SyncTrigArrayItem::Stg`
+    //! Dump the register and fields of `ipCores::Top::SyncTrigArrayItem::Stg`
     //!
     //! @param stg A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under stg
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::SyncTrigArrayItem::Stg& stg)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::SyncTrigArrayItem::Stg& stg)
     {
         DumpMap res{stg.base()};
         res.insert_or_assign("stg.ctrl", DumpEntry{stg.ctrl});
@@ -12175,11 +12175,11 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::SyncTrigArray`
+    //! Dump the register and fields of `ipCores::Top::SyncTrigArray`
     //!
     //! @param syncTrig A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under syncTrig
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::SyncTrigArray& syncTrig)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::SyncTrigArray& syncTrig)
     {
         DumpMap res{syncTrig.base()};
         res.insert_or_assign("syncTrig[0].stg.ctrl", DumpEntry{syncTrig[0].stg.ctrl});
@@ -12260,32 +12260,32 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::XilSpi`
+    //! Dump the register and fields of `ipCores::Top::XilSpi`
     //!
     //! @param xilSpi A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under xilSpi
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::XilSpi& xilSpi)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::XilSpi& xilSpi)
     {
         DumpMap res{xilSpi.base()};
 
         return res;
     }
 
-    //! Dump the register and fields of `unnamed::Top::XilI2c`
+    //! Dump the register and fields of `ipCores::Top::XilI2c`
     //!
     //! @param xilI2c A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under xilI2c
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top::XilI2c& xilI2c)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::XilI2c& xilI2c)
     {
         DumpMap res{xilI2c.base()};
 
         return res;
     }
-    //! Dump the register and fields of `unnamed::Top`
+    //! Dump the register and fields of `ipCores::Top`
     //!
     //! @param top A reference to the module
     //! @returns A `dump_utils::DumpMap` with all the register and fields under top
-    inline DumpMap dump([[maybe_unused]] const unnamed::Top& top)
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top& top)
     {
         DumpMap res{top.base()};
         res.insert_or_assign("top.adcCalint.ctrl", DumpEntry{top.adcCalint.ctrl});
