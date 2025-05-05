@@ -65,10 +65,10 @@ namespace vslib
         //! Sets the modulation index.
         //!
         //! @param index Modulation index, -1 to 1
-        void setModulationIndex(const float index) noexcept
+        [[maybe_unused]] bool setModulationIndex(const float index) noexcept
         {
             // force limit of -1.0, 1.0
-            m_pwm.setModulationIndex(index);
+            return m_pwm.setModulationIndex(index);
         }
 
         //! Sets the output to high.
