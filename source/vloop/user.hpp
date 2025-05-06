@@ -13,6 +13,8 @@
 // #include "pops_current_balancing_old.hpp"
 // #include "pops_dispatcher.hpp"
 #include "halfBridge.hpp"
+#include "peripherals/bus.hpp"
+#include "peripherals/xil_axi_spi.hpp"
 #include "vslib.hpp"
 
 namespace user
@@ -22,14 +24,16 @@ namespace user
       public:
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
-              //   interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              interrupt_1("timer", *this, std::chrono::microseconds(1000), RTTask),
-              pwm_7("pwm_7", *this, 10'000),
-              pwm_8("pwm_8", *this, 10'000)
-        //   m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
-        //   m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000))
+              interrupt_1("timer", *this, std::chrono::microseconds(100'000), RTTask),
+              bus_1(0xA0000000, pow(2, 24)),
+              spi_1(bus_1, 0xD200),
+              adc_1(),
+              ad7606c_1(spi_1, 3, adc_1)
+        //   pwm_7("pwm_7", *this, 10'000),
+        //   pwm_8("pwm_8", *this, 10'000)
         {
             // initialize all your objects that need initializing
+            std::cout << "Initialized\n";
         }
 
         // Define your public Components here
@@ -73,22 +77,9 @@ namespace user
             // m_r2scpp.numData.write(num_data * 2);
             // m_r2scpp.tkeep.write(0x0000FFFF);
 
-            // pwm.stop();
-            pwm_7.start();
-            pwm_8.start();
-
-            // pwm_8.m_pwm.m_regs.ctrl.enable.set(true);
-            // pwm_8.m_pwm.m_regs.ctrl.reset.set(false);
-
-            // pwm_9.m_pwm.m_regs.ctrl.enable.set(true);
-            // pwm_9.m_pwm.m_regs.ctrl.reset.set(false);
-            // pwm_10.m_pwm.m_regs.ctrl.enable.set(true);
-            // pwm_10.m_pwm.m_regs.ctrl.reset.set(false);
-            // pwm_11.m_pwm.m_regs.ctrl.enable.set(true);
-            // pwm_11.m_pwm.m_regs.ctrl.reset.set(false);
-            // pwm_12.m_pwm.m_regs.ctrl.enable.set(true);
-            // pwm_12.m_pwm.m_regs.ctrl.reset.set(false);
-
+            // pwm_7.start();
+            // pwm_8.start();
+            adc_1.start();
             interrupt_1.start();
         }
 
@@ -130,49 +121,40 @@ namespace user
 
         static void RTTask(Converter& converter)
         {
-            // collect inputs
-            // for (uint32_t index = 0; index < num_data; index++)
+
+
+            // const auto success1 = converter.pwm_7.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
+            // const auto success2 = converter.pwm_8.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
+            // if (converter.counter % 100 == 0)
             // {
-            //     converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
+            //     std::cout << std::boolalpha << converter.counter << " " << success1 << " " << success2 << '\n';
+            //
+
+            // if (converter.count_up)
+            // {
+            //     converter.counter++;
+            // }
+            // else
+            // {
+            //     converter.counter--;
             // }
 
-            const auto success1 = converter.pwm_7.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
-            const auto success2 = converter.pwm_8.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
-            if (converter.counter % 100 == 0)
-            {
-                std::cout << std::boolalpha << converter.counter << " " << success1 << " " << success2 << '\n';
-            }
-
-            // // write to output registers
-            // for (uint32_t index = 0; index < num_data; index++)
+            // if (converter.counter >= 10'000)
             // {
-            //     converter.m_r2scpp.data[index].write(cast<double, uint64_t>(converter.m_data[index]));
+            //     converter.count_up = false;
             // }
-
-            // send it away
-            // trigger connection
-            // converter.m_r2scpp.ctrl.start.set(true);
-            if (converter.count_up)
-            {
-                converter.counter++;
-            }
-            else
-            {
-                converter.counter--;
-            }
-
-            if (converter.counter >= 10'000)
-            {
-                converter.count_up = false;
-            }
-            if (converter.counter <= 0)
-            {
-                converter.count_up = true;
-            }
+            // if (converter.counter <= 0)
+            // {
+            //     converter.count_up = true;
+            // }
         }
 
-        vslib::HalfBridge<6> pwm_7;
-        vslib::HalfBridge<7> pwm_8;
+        // vslib::HalfBridge<6> pwm_7;
+        // vslib::HalfBridge<7> pwm_8;
+        hal::Bus                bus_1;
+        hal::XilAxiSpi          spi_1;
+        hal::UncalibratedADC<0> adc_1;
+        hal::AD7606C<0>         ad7606c_1;
 
       private:
         int  counter{0};

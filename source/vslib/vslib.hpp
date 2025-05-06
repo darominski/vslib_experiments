@@ -57,3 +57,7 @@
 #include "halfBridge.hpp"
 // #include "fullBridge.hpp"
 // #include "twoLevelAFE.hpp"
+
+//! HAL items
+#include "peripherals/ad7606c.hpp"
+#include "peripherals/uncalibrated_adc.hpp"
