@@ -46,7 +46,6 @@ namespace hal
             {
                 throw std::invalid_argument("fifo_size must be 16 or 256");
             }
-            printf("Bus size: %ld\n", bus.size());
         }
 
         void reset()
@@ -104,7 +103,7 @@ namespace hal
             write(SPISSR_ADDR, mask & 0xFFFFFFFF);
         }
 
-        void write_data(const std::vector<uint8_t>& data)
+        void write_data(const std::vector<uint32_t>& data)
         {
             int tx_space = fifo_size_ - read(TX_FIFO_OCR_ADDR);
             if (data.size() > static_cast<size_t>(tx_space))

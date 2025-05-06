@@ -26,10 +26,6 @@ namespace hal
             // TMP: Configure an uncalibrated ADC manually, until the Configurator is developed
             setConfig(true, true, true, false, false, busy_src_ext, 0, false, data_width, false);
             // END OF TMP
-
-            // Initialize it following the strict order:
-            m_regs.ctrl.reset.set(true);
-            m_regs.ctrl.hwReset.set(true);
         }
 
         void setConfig(
@@ -56,7 +52,7 @@ namespace hal
             m_regs.ctrl.reset.set(true);
         }
 
-        void hardwareReset() noexcept
+        void resetHardware() noexcept
         {
             m_regs.ctrl.hwReset.set(true);
             sleep(0.001);
@@ -92,9 +88,9 @@ namespace hal
             return m_values;
         }
 
-        float readConverted() noexcept
+        float readConverted(const uint32_t channel_index) noexcept
         {
-            const uint32_t raw          = read();
+            const uint32_t raw          = read(channel_index);
             // check if the measured value is positive or negative, and shift accordingly:
             const int16_t signed_sample = static_cast<int16_t>(raw & 0xFFFF);
             return static_cast<int32_t>(signed_sample) * 381.44e-6;

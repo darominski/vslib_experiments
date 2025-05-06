@@ -19,16 +19,11 @@ namespace hal
               m_adc(adc),
               m_pin_index(pin_index)
         {
-        }
-
-        void resetAdc() noexcept
-        {
+            m_adc.setConfig(true, true, true, false, true, 0, 0, 0, 16, false);
             m_adc.reset();
-        }
-
-        void hardwareAdcReset() noexcept
-        {
-            m_adc.hardwareReset();
+            m_adc.resetHardware();
+            lockSPIMode();
+            configure();
         }
 
         //! Configure SPI master mode to work with this ADC.
@@ -55,7 +50,7 @@ namespace hal
         UncalibratedADC<adc_id> m_adc;
         uint8_t                 m_pin_index;
 
-        void write_register(uint8_t address, uint8_t data)
+        void write_register(uint32_t address, uint32_t data)
         {
             if (address >= 0x2F)
             {

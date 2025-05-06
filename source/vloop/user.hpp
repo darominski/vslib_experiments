@@ -79,7 +79,7 @@ namespace user
 
             // pwm_7.start();
             // pwm_8.start();
-            adc_1.start();
+            // adc_1.start();
             interrupt_1.start();
         }
 
@@ -121,8 +121,10 @@ namespace user
 
         static void RTTask(Converter& converter)
         {
-
-
+            converter.adc_1.start();
+            usleep(1);
+            std::cout << converter.adc_1.readConverted(0) << " " << converter.adc_1.readConverted(1) << " "
+                      << converter.adc_1.readConverted(2) << "\n";
             // const auto success1 = converter.pwm_7.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
             // const auto success2 = converter.pwm_8.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
             // if (converter.counter % 100 == 0)
