@@ -12,17 +12,17 @@ namespace hal
 
     class XilAxiSpi
     {
-        static constexpr uint32_t SRR_ADDR         = 0x40;
-        static constexpr uint32_t SPICR_ADDR       = 0x60;
-        static constexpr uint32_t SPISR_ADDR       = 0x64;
-        static constexpr uint32_t SPIDTR_ADDR      = 0x68;
-        static constexpr uint32_t SPIDRR_ADDR      = 0x6C;
-        static constexpr uint32_t SPISSR_ADDR      = 0x70;
-        static constexpr uint32_t TX_FIFO_OCR_ADDR = 0x74;
-        static constexpr uint32_t RX_FIFO_OCR_ADDR = 0x78;
-        static constexpr uint32_t DGIER_ADDR       = 0x1C;
-        static constexpr uint32_t IPISR_ADDR       = 0x20;
-        static constexpr uint32_t IPIER_ADDR       = 0x28;
+        static constexpr uint32_t SRR_ADDR         = 0x40;   // Software reset register
+        static constexpr uint32_t SPICR_ADDR       = 0x60;   // SPI control register
+        static constexpr uint32_t SPISR_ADDR       = 0x64;   // SPI status register
+        static constexpr uint32_t SPIDTR_ADDR      = 0x68;   // SPI data transmit register
+        static constexpr uint32_t SPIDRR_ADDR      = 0x6C;   // SPI data receive register
+        static constexpr uint32_t SPISSR_ADDR      = 0x70;   // SPI slave select register
+        static constexpr uint32_t TX_FIFO_OCR_ADDR = 0x74;   // Transmit FIFO occupancy register
+        static constexpr uint32_t RX_FIFO_OCR_ADDR = 0x78;   // Receive FIFO occupancy register
+        static constexpr uint32_t DGIER_ADDR       = 0x1C;   // Device global interrupt enable
+        static constexpr uint32_t IPISR_ADDR       = 0x20;   // IP interrupt status register
+        static constexpr uint32_t IPIER_ADDR       = 0x28;   // IP interrupt enable register
 
         static constexpr uint32_t LOOP_BIT          = 0;
         static constexpr uint32_t SPE_BIT           = 1;
@@ -36,11 +36,10 @@ namespace hal
         static constexpr uint32_t LSB_FIRST_BIT     = 9;
 
       public:
-        XilAxiSpi(Bus& bus, uint32_t offset, int fifo_size = 16)
+        XilAxiSpi(Bus& bus, uint32_t base, int fifo_size = 16)
             : m_bus(bus),
-              m_offset(offset),
-              spicr_val_(0),
-              fifo_size_(fifo_size)
+              m_base(base),
+              m_fifo_size(fifo_size)
         {
             if (fifo_size != 16 && fifo_size != 256)
             {
@@ -68,34 +67,53 @@ namespace hal
         )
         {
             uint32_t val = 0;
-            if (master_mode) val |= (1 << MASTER_BIT);
-            if (cpol) val |= (1 << CPOL_BIT);
-            if (cpha) val |= (1 << CPHA_BIT);
-            if (lsb_first) val |= (1 << LSB_FIRST_BIT);
-            if (manual_ss) val |= (1 << MANUAL_SS_BIT);
-            if (enable) val |= (1 << SPE_BIT);
+            if (master_mode)
+            {
+                val |= (1 << MASTER_BIT);
+            }
+            if (cpol)
+            {
+                val |= (1 << CPOL_BIT);
+            }
+            if (cpha)
+            {
+                val |= (1 << CPHA_BIT);
+            }
+            if (lsb_first)
+            {
+                val |= (1 << LSB_FIRST_BIT);
+            }
+            if (manual_ss)
+            {
+                val |= (1 << MANUAL_SS_BIT);
+            }
+            if (enable)
+            {
+                val |= (1 << SPE_BIT);
+            }
             val |= (1 << TRANS_INHIBIT_BIT);
 
-            spicr_val_ = val;
-            write(SPICR_ADDR, spicr_val_);
+            m_spicr_val = val;
+            std::cout << m_spicr_val << '\n';
+            write(SPICR_ADDR, m_spicr_val);
         }
 
         void reset_fifos()
         {
-            uint32_t val = spicr_val_ | (1 << TX_FIFO_RESET_BIT) | (1 << RX_FIFO_RESET_BIT);
+            uint32_t val = m_spicr_val | (1 << TX_FIFO_RESET_BIT) | (1 << RX_FIFO_RESET_BIT);
             write(SPICR_ADDR, val);
         }
 
         void start_transfer()
         {
-            spicr_val_ &= ~(1 << TRANS_INHIBIT_BIT);
-            write(SPICR_ADDR, spicr_val_);
+            m_spicr_val &= ~(1 << TRANS_INHIBIT_BIT);
+            write(SPICR_ADDR, m_spicr_val);
         }
 
         void inhibit_transfer()
         {
-            spicr_val_ |= (1 << TRANS_INHIBIT_BIT);
-            write(SPICR_ADDR, spicr_val_);
+            m_spicr_val |= (1 << TRANS_INHIBIT_BIT);
+            write(SPICR_ADDR, m_spicr_val);
         }
 
         void set_slave_select(uint32_t mask)
@@ -105,12 +123,12 @@ namespace hal
 
         void write_data(const std::vector<uint32_t>& data)
         {
-            int tx_space = fifo_size_ - read(TX_FIFO_OCR_ADDR);
+            int tx_space = m_fifo_size - read(TX_FIFO_OCR_ADDR);
             if (data.size() > static_cast<size_t>(tx_space))
             {
                 throw std::runtime_error("TX FIFO overflow");
             }
-            for (auto byte : data)
+            for (const auto& byte : data)
             {
                 write(SPIDTR_ADDR, byte & 0xFF);
             }
@@ -162,18 +180,18 @@ namespace hal
 
       private:
         Bus&     m_bus;
-        uint32_t m_offset;
-        uint32_t spicr_val_;
-        int      fifo_size_;
+        uint32_t m_base;
+        uint32_t m_spicr_val{0};
+        int      m_fifo_size;
 
         uint32_t read(uint32_t addr)
         {
-            return m_bus.read(m_offset + addr);
+            return m_bus.read(m_base + addr);
         }
 
         void write(uint32_t addr, uint32_t data)
         {
-            m_bus.write(m_offset + addr, data);
+            m_bus.write(m_base + addr, data);
         }
     };
 }   // namespace hal

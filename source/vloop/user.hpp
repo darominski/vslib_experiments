@@ -80,6 +80,7 @@ namespace user
             // pwm_7.start();
             // pwm_8.start();
             // adc_1.start();
+            sleep(10);
             interrupt_1.start();
         }
 

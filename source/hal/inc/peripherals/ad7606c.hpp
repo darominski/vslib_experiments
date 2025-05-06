@@ -9,17 +9,19 @@
 
 namespace hal
 {
-    template<uint8_t adc_id>
+    template<uint32_t adc_id>
     class AD7606C
     {
       public:
-        AD7606C(XilAxiSpi& spi, uint8_t pin_index, UncalibratedADC<adc_id>& adc)
+        AD7606C(XilAxiSpi& spi, uint32_t pin_index, UncalibratedADC<adc_id>& adc)
         noexcept
             : m_spi(spi),
               m_adc(adc),
               m_pin_index(pin_index)
         {
-            m_adc.setConfig(true, true, true, false, true, 0, 0, 0, 16, false);
+            // TMP: Configure an uncalibrated ADC manually, until the Configurator is developed
+            // END OF TMP
+            m_adc.setConfig(true, true, true, false, true, 0, 0, false, 16, false);
             m_adc.reset();
             m_adc.resetHardware();
             lockSPIMode();
@@ -48,7 +50,7 @@ namespace hal
       private:
         XilAxiSpi               m_spi;
         UncalibratedADC<adc_id> m_adc;
-        uint8_t                 m_pin_index;
+        uint32_t                m_pin_index;
 
         void write_register(uint32_t address, uint32_t data)
         {
@@ -60,6 +62,7 @@ namespace hal
             m_spi.set_slave_select(~(0x1 << m_pin_index));
             m_spi.start_transfer();
             m_spi.wait_for_transfer_complete();
+            m_spi.inhibit_transfer();
             m_spi.set_slave_select(~(0x0));
         }
     };

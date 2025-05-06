@@ -18,14 +18,10 @@ namespace hal
     class UncalibratedADC
     {
       public:
-        UncalibratedADC(uint8_t data_width = 16) noexcept
+        UncalibratedADC() noexcept
         {
             ipCores::Top top(reinterpret_cast<uint8_t*>(0xa0000000));
             m_regs = top.adcUncalint[adc_id].adc;
-
-            // TMP: Configure an uncalibrated ADC manually, until the Configurator is developed
-            setConfig(true, true, true, false, false, busy_src_ext, 0, false, data_width, false);
-            // END OF TMP
         }
 
         void setConfig(
@@ -67,9 +63,9 @@ namespace hal
             {
                 sleep(0.001);
                 // infinite loop possible while waiting? limit this to a couple of seconds wait?
-                if (counter++ > 5'000)   // 5 s wait
+                if (counter++ > 1'000)   // 5 s wait
                 {
-                    throw std::runtime_error("ADC start timeout after 5 s.\n");
+                    throw std::runtime_error("ADC start timeout after 1 s.\n");
                 }
             }
         }
