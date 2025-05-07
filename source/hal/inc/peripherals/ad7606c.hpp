@@ -13,14 +13,17 @@ namespace hal
     class AD7606C
     {
       public:
+        //! Constructor for a AD7606c features.
+        //!
+        //! @param spi SPI controller (tested with Xilinx SPI)
+        //! @param pin_index Slave select pin index
+        //! @param adc Associated ADC controller
         AD7606C(XilAxiSpi& spi, uint32_t pin_index, UncalibratedADC<adc_id>& adc)
         noexcept
             : m_spi(spi),
               m_adc(adc),
               m_pin_index(pin_index)
         {
-            // TMP: Configure an uncalibrated ADC manually, until the Configurator is developed
-            // END OF TMP
             m_adc.reset();
             m_adc.resetHardware();
             lockSPIMode();
@@ -51,12 +54,17 @@ namespace hal
         UncalibratedADC<adc_id> m_adc;
         uint32_t                m_pin_index;
 
+        //! Write to a register
+        //!
+        //! @param address Register address
+        //! @param data Data to be written
         void write_register(uint32_t address, uint32_t data)
         {
             if (address >= 0x2F)
             {
                 throw std::out_of_range("Address out of valid register range (0x00 to 0x2F)");
             }
+            // first two bits are /WEN and /WRRD
             m_spi.write_data({0x3F & address, data & 0xFF});
             m_spi.set_slave_select(~(0x1 << m_pin_index));
             m_spi.start_transfer();
