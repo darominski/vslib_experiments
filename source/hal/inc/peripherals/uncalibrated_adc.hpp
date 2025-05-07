@@ -8,30 +8,52 @@
 
 namespace hal
 {
-    // constants reimplemented from the Python cheby exports used by CCE:
-    constexpr uint32_t max_din_ports = 16;
-    constexpr uint32_t busy_src_ext  = 0;
-    constexpr uint32_t busy_src_sdo  = 1;
-    constexpr uint32_t busy_src_time = 2;
-
     template<uint32_t adc_id>
     class UncalibratedADC
     {
+        // constants reimplemented from the Python cheby exports used by CCE:
+        constexpr static uint32_t max_din_ports = 16;
+        constexpr static uint32_t busy_src_ext  = 0;
+        constexpr static uint32_t busy_src_sdo  = 1;
+        constexpr static uint32_t busy_src_time = 2;
+
+        // Constant holding the number of ADC ports
+        constexpr static uint32_t adc_number_ports = ipCores::Top::AdcUncalintArrayItem::Adc::DataArray::size;
+
       public:
+        //! Constructor for an uncalibrated ADC controller.
         UncalibratedADC() noexcept
         {
             ipCores::Top top(reinterpret_cast<uint8_t*>(0xa0000000));
             m_regs = top.adcUncalint[adc_id].adc;
+            std::cout << "Number of ports: " << adc_number_ports << std::endl;
+            // TMP: IP core needs to be configured before use, eventually this will be handled by FGC4 configurator
+            setConfig(true, true, true, false, true, 0, 0, false, 16, false);
+            // END OF TMP
         }
 
+        //! Sets the desired configuration of the serial (uncalibrated) ADC.
+        //!
+        //! @param clk_pol Clock polarity (0 - clock idle low, 1 - clock idle high)
+        //! @param clk_ph Clock phase (0 - latch on leading edge, 1 - trailing edge)
+        //! @param cnv_pol Polarity of ADC CNV input
+        //! @param cnv_with_cs CNV works also as CS signal
+        //! @param busy_pol Polarity of ADC BUSY output
+        //! @param busy_srcSource of BUSY signal. 0 - dedicated BUSY port, 1 - SDO data line, 2 - internal timer
+        //! @param busy_time When busy_src is set to internal timer, number of SPI clock cycles the controller will
+        //! spend in emulated BUSY state. Ignored otherwise.
+        //! @param clk_act_in_cnv SPI clock active (or not) during conversion/BUSY state
+        //! @param data_width Width (in bits) of data received from ADC. Depends on target ADC chip
+        //! @param gw_ctrl The ADC can be started by software (by calling the 'start' function) or through a gateware
+        //! port. 0 = SW, 1 = GW
         void setConfig(
-            const bool cpol, const bool cpha, const bool cnv_pol, const bool cnv_with_cs, const bool busy_pol,
+            const bool clk_pol, const bool clk_ph, const bool cnv_pol, const bool cnv_with_cs, const bool busy_pol,
             const uint8_t busy_src, const uint8_t busy_time, const bool clk_act_in_cnv, const uint8_t data_width,
             const bool gw_ctrl
         )
         {
-            m_regs.config.cpol.set(cpol);
-            m_regs.config.cpha.set(cpha);
+            m_regs.config.cpol.set(clk_pol);
+            m_regs.config.cpha.set(clk_ph);
             m_regs.config.cnvPol.set(cnv_pol);
             m_regs.config.cnvWithCs.set(cnv_with_cs);
             m_regs.config.busyPol.set(busy_pol);
@@ -43,11 +65,13 @@ namespace hal
             m_regs.config.gwCtrl.set(gw_ctrl);
         }
 
+        //! Reset the ADC controller.
         void reset() noexcept
         {
             m_regs.ctrl.reset.set(true);
         }
 
+        //! Reset the external ADC (hardware-dependent feature).
         void resetHardware() noexcept
         {
             m_regs.ctrl.hwReset.set(true);
@@ -55,6 +79,7 @@ namespace hal
             m_regs.ctrl.write(0x0);
         }
 
+        //! Start conversion and transmission from ADC, block until done.
         void start()
         {
             m_regs.ctrl.start.set(true);
@@ -70,32 +95,44 @@ namespace hal
             }
         }
 
-        uint32_t read(const uint32_t channel_index) noexcept
+        //! Read data received from an ADC port.
+        //!
+        //! @param port_index Port index
+        //! @return Raw data received from an ADC port
+        uint32_t read(const uint32_t port_index) noexcept
         {
-            return m_regs.data[channel_index].value.read();
+            return m_regs.data[port_index].value.read();
         }
 
-        const std::array<uint32_t, 16>& readAllChannels() noexcept
+        //! Reads data from all ports sequentially and returns the read values.
+        //!
+        //! @return Array with the read raw ADC values
+        const std::array<uint32_t, adc_number_ports>& readAllPorts() noexcept
         {
-            for (int index = 0; index < 16; index++)
+            for (auto index = 0; index < adc_number_ports; index++)
             {
                 m_values[index] = read(index);
             }
             return m_values;
         }
 
-        float readConverted(const uint32_t channel_index) noexcept
+        //! Reads a value from the ADC and converts it to a user-understandable scale
+        //!
+        //! @param port_index Port index
+        //! @return Converted data received from an ADC port
+        float readConverted(const uint32_t port_index) noexcept
         {
-            const uint32_t raw          = read(channel_index);
+            const uint32_t raw             = read(port_index);
             // check if the measured value is positive or negative, and shift accordingly:
-            const int16_t signed_sample = static_cast<int16_t>(raw & 0xFFFF);
-            return static_cast<int32_t>(signed_sample) * 381.44e-6;
+            const int16_t   signed_sample  = static_cast<int16_t>(raw & 0xFFFF);
+            constexpr float scaling_factor = 381.44e-6;
+            return static_cast<int32_t>(signed_sample) * scaling_factor;
         }
 
       private:
-        ipCores::Top::AdcUncalintArrayItem::Adc m_regs;
+        ipCores::Top::AdcUncalintArrayItem::Adc m_regs;   //!< IP core with register definitions
 
-        std::array<uint32_t, 16> m_values;
+        std::array<uint32_t, adc_number_ports> m_values;   //!< Array holding all port values from the ADC
     };
 
 }   // namespace hal
