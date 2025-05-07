@@ -94,7 +94,6 @@ namespace hal
             val |= (1 << TRANS_INHIBIT_BIT);
 
             m_spicr_val = val;
-            std::cout << m_spicr_val << '\n';
             write(SPICR_ADDR, m_spicr_val);
         }
 
@@ -118,7 +117,7 @@ namespace hal
 
         void set_slave_select(uint32_t mask)
         {
-            write(SPISSR_ADDR, mask & 0xFFFFFFFF);
+            write(SPISSR_ADDR, mask);
         }
 
         void write_data(const std::vector<uint32_t>& data)
