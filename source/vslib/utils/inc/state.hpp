@@ -86,8 +86,7 @@ namespace vslib::utils
 
         void onInitialization()
         {
-            bmboot::notifyPayloadStarted();
-            // everything generic that needs to be done to initialize the vloop
+            // everything generic that needs to be done to initialize the vslib
             m_init_done = true;
         }
 
