@@ -21,7 +21,6 @@ namespace hal
         {
             // TMP: Configure an uncalibrated ADC manually, until the Configurator is developed
             // END OF TMP
-            m_adc.setConfig(true, true, true, false, true, 0, 0, false, 16, false);
             m_adc.reset();
             m_adc.resetHardware();
             lockSPIMode();
