@@ -30,7 +30,7 @@ include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
 add_subdirectory(../vslib ${CMAKE_CURRENT_BINARY_DIR}/vslib)
 
 add_bmboot_payload(${APP}
-  main.cpp
+  ../vslib/main.cpp
   )
 
 target_link_options(${APP} PRIVATE
@@ -45,6 +45,7 @@ target_link_libraries(${APP} PRIVATE
 target_include_directories(${APP} PRIVATE
     ${CMAKE_SOURCE_DIR}/../utils # header files shared between fgc4 bare-metal applications
     ${CMAKE_SOURCE_DIR}/../hal/inc
+    ${CMAKE_SOURCE_DIR}
 )
 
 ############################################################
