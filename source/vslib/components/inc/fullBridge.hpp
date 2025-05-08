@@ -12,14 +12,14 @@
 
 namespace vslib
 {
-
+    template<uint32_t first_pwm_id>
     class FullBridge : public Component
     {
       public:
-        FullBridge(std::string_view name, Component& parent, uint8_t* base_address)
+        FullBridge(std::string_view name, Component& parent)
             : Component("FullBridge", name, parent),
-              leg_1("leg_1", *this, base_address),
-              leg_2("leg_2", *this, base_address + leg_1.size())
+              leg_1("leg_1", *this),
+              leg_2("leg_2", *this)
         {
         }
 
@@ -105,8 +105,8 @@ namespace vslib
         }
 
       private:
-        HalfBridge leg_1;   //!< Leg 1 of the Full Bridge
-        HalfBridge leg_2;   //!< Leg 2 of the FUll Bridge
+        HalfBridge<first_pwm_id>     leg_1;   //!< Leg 1 of the Full Bridge
+        HalfBridge<first_pwm_id + 1> leg_2;   //!< Leg 2 of the FUll Bridge
 
         //! Flag informing whether the full bridge is running in bipolar mode
         bool m_bipolar{false};
