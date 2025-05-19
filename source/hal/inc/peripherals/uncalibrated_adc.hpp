@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "cheby_gen/mb_top.hpp"
+#include "cheby_gen/mb_top_singleton.hpp"
 
 namespace hal
 {
@@ -24,9 +24,7 @@ namespace hal
         //! Constructor for an uncalibrated ADC controller.
         UncalibratedADC() noexcept
         {
-            ipCores::Top top(reinterpret_cast<uint8_t*>(0xa0000000));
-            m_regs = top.adcUncalint[adc_id].adc;
-            std::cout << "Number of ports: " << adc_number_ports << std::endl;
+            m_regs = hal::Top::instance().adcUncalint[adc_id].adc;
             // TMP: IP core needs to be configured before use, eventually this will be handled by FGC4 configurator
             setConfig(true, true, true, false, true, 0, 0, false, 16, false);
             // END OF TMP
