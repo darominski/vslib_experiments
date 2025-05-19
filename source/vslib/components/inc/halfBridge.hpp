@@ -8,7 +8,7 @@
 
 #include "component.hpp"
 #include "parameter.hpp"
-#include "peripherals/pwm_hal.hpp"
+#include "peripherals/pwm.hpp"
 
 namespace vslib
 {
