@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "cheby_gen/mb_top.hpp"
+#include "cheby_gen/mb_top_singleton.hpp"
 
 namespace hal
 {
@@ -19,27 +19,53 @@ namespace hal
         PWM(uint32_t ctrh) noexcept
         {
             static_assert(pwm_id < 12, "The PWM ID must be between 0 and 11.");
-            ipCores::Top top(reinterpret_cast<uint8_t*>(0xa0000000));
-            m_regs = top.pwm[pwm_id].pwm;
+            m_regs = hal::Top::instance().pwm[pwm_id].pwm;
 
-            // TMP: This is done manually ATM, in the future will be handled the configurator
-            m_regs.config.updateType.set(UpdateType::zero);
-            m_regs.config.enablePwmCheck.set(false);
-            m_regs.config.enableStCheck.set(true);
-            m_regs.config.bypassDeadtime.set(false);
-            m_regs.config.enableValueCheck.set(true);
-            m_regs.config.invert.set(false);
-            m_regs.config.decoupleCc1.set(false);
+            setConfiguration(20'000, 4'000, 1'000);
+            configureMinMaxModulation();
+        }
 
-            m_regs.ctrhSc.write(ctrh);
-            m_regs.deadtimeSc.write(1000);
-            m_regs.config.disableA.set(false);
-            m_regs.config.disableB.set(false);
-            m_regs.minSwitchTimeSc.write(ctrh / 4);
+        //! Configures the IP core in absence of the Configurator.
+        //!
+        //! @param max_counter_value Maximum value of the PWM counter (CTRH)
+        //! @param dead_time Dead time between PWMA and PWMB
+        //! @param min_switch_time Mininum switching off time
+        //! @param update_type Update type, one out of immediate or shadowed modes: zero, period, or zero_period
+        //! @param enable_pwm_check Switch to enable PWM minimum off time protection
+        //! @param enable_shoot_through_check Switch to enable shoot-through protection
+        //! @param bypass_dead_time Switch to bypass dead_time
+        //! @param enable_value_check Switch to enable checking whether the input is in the safe range of counter values
+        //! @param invert Switch to invert PWMA and PWMB signals
+        //! @param decouple_cc1 Switch to decouple CC1 from CC0 and steer them independently
+        //! @param disable_a Switch to disable PWMA
+        //! @param disable_b Switch to disable PWMB
+        void setConfiguration(
+            const uint32_t max_counter_value, const uint32_t dead_time, const uint32_t min_switch_time,
+            UpdateType update_type = UpdateType::zero, const bool enable_pwm_check = false,
+            const bool enable_shoot_through_check = true, const bool bypass_dead_time = false,
+            const bool enable_value_check = true, const bool invert = false, const bool decouple_cc1 = false,
+            const bool disable_a = false, const bool disable_b = false
+        )
+        {
+            m_regs.ctrhSc.write(max_counter_value);
+            m_regs.deadtimeSc.write(dead_time);
+            m_regs.minSwitchTimeSc.write(min_switch_time);
+            m_regs.cc0Sc.write(0);
 
-            m_regs.cc0Sc.write(4000);
-            // END OF TMP
+            m_regs.config.updateType.set(update_type);
+            m_regs.config.enablePwmCheck.set(enable_pwm_check);
+            m_regs.config.enableStCheck.set(enable_shoot_through_check);
+            m_regs.config.bypassDeadtime.set(bypass_dead_time);
+            m_regs.config.enableValueCheck.set(enable_value_check);
+            m_regs.config.invert.set(invert);
+            m_regs.config.decoupleCc1.set(decouple_cc1);
 
+            m_regs.config.disableA.set(disable_a);
+            m_regs.config.disableB.set(disable_b);
+        }
+
+        void configureMinMaxModulation()
+        {
             // Assumption is made t hat the configuration does not change at runtime, so configuration can be
             // internalized in memory rather than always read from register
             m_max_counter_value = m_regs.ctrhSc.read();

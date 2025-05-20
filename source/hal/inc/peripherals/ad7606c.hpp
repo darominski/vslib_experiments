@@ -50,11 +50,11 @@ namespace hal
         }
 
       private:
-        XilAxiSpi               m_spi;
-        UncalibratedADC<adc_id> m_adc;
-        uint32_t                m_pin_index;
+        XilAxiSpi               m_spi;         //!< HAL handle for SPI
+        UncalibratedADC<adc_id> m_adc;         //!< HAL handle for an ADC to be configured
+        uint32_t                m_pin_index;   //!< Index of the ADC pin
 
-        //! Write to a register
+        //! Write data to a register
         //!
         //! @param address Register address
         //! @param data Data to be written
