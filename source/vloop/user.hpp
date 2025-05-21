@@ -36,6 +36,12 @@ namespace user
               rst_inner_vd("rst_inner_vd", *this),
               rst_inner_vq("rst_inner_vq", *this),
               limit("limit", *this),
+              m0_saturation("m0_saturation", *this),
+              moving_average("moving_average", *this),
+              moving_average_id_meas("moving_average_id_meas", *this),
+              lookup_table(
+                  "lookup_table", *this, std::vector<std::pair<double, double>>{{-11, -1}, {-10, -1}, {10, 1}, {11, 1}}
+              ),
               rst_vdc("rst_vdc", *this),
               iir_vdc("iir_vdc", *this),
               inductance(*this, "inductance"),
@@ -45,6 +51,7 @@ namespace user
               theta_offset(*this, "theta_offset"),
               control_period(*this, "control_period"),
               rst_outer_period(*this, "rst_outer_period"),
+              m0_gain(*this, "m0_gain"),
               m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
               m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000))
         {
@@ -157,7 +164,8 @@ namespace user
                 converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
             }
 
-            const double regulation_on = converter.m_data[0];
+            const double regulation_on = 1;
+            // const double regulation_on = converter.m_data[0];
             const double v_dc_ref      = converter.m_data[1];
             const double v_dc_p        = converter.m_data[2];
             const double v_dc_n        = converter.m_data[3];
@@ -168,9 +176,9 @@ namespace user
             const double i_a           = converter.m_data[8];
             const double i_b           = converter.m_data[9];
             const double i_c           = converter.m_data[10];
+            const double pulse_in      = converter.m_data[14];
             // const double iq_ref        = converter.m_data[11];
             // const double id_ref        = converter.m_data[12];
-            const double in19          = converter.m_data[19];
 
             const double v_dc_meas = v_dc_p + v_dc_n;
             const double v_dc_diff = v_dc_p - v_dc_n;
@@ -195,7 +203,9 @@ namespace user
                 regulation_on * i_c
             );
 
-            if (regulation_on > 0)
+            const double pulse_filt = converter.moving_average.filter(pulse_in);
+
+            if (regulation_on > 0 && converter.rst_outer_ready())
             {
                 // needs to not run until regulation is set to ON
                 //
@@ -237,16 +247,25 @@ namespace user
             //     v_a, v_b, v_c, i_a, i_b, i_c, v_dc_ref, v_dc_meas, q_ref, regulation_on
             // );
 
-            const auto v_dc_diff_filtered = converter.iir_vdc.filter(regulation_on * v_dc_diff);
-            const auto m0                 = converter.rst_vdc.control(0.0, regulation_on * v_dc_diff_filtered);
+            // const auto v_dc_diff_filtered = converter.iir_vdc.filter(regulation_on * v_dc_diff);
+            // const auto m0                 = converter.rst_vdc.control(0.0, regulation_on * v_dc_diff_filtered);
+
+            const auto id_meas_scaled    = id_meas * converter.i_base;
+            const auto interpolate_input = converter.moving_average_id_meas.filter(id_meas_scaled);
+            const auto histeresis_lookup = converter.lookup_table.interpolate(interpolate_input);
+
+
+            const auto m0 = converter.m0_saturation.limit(
+                -regulation_on * converter.moving_average.filter(v_dc_diff) * converter.m0_gain * histeresis_lookup
+            );
 
             converter.m_data[0]  = v_a_ref;
             converter.m_data[1]  = v_b_ref;
             converter.m_data[2]  = v_c_ref;
             converter.m_data[3]  = m0;
-            converter.m_data[4]  = v_dc_diff;
-            converter.m_data[5]  = v_dc_diff_filtered;
-            converter.m_data[6]  = vd_ref;
+            converter.m_data[4]  = id_meas_scaled;
+            converter.m_data[5]  = interpolate_input;
+            converter.m_data[6]  = histeresis_lookup;
             converter.m_data[7]  = vq_ref;
             converter.m_data[8]  = p_ref;
             converter.m_data[9]  = iq_meas;
@@ -259,12 +278,11 @@ namespace user
             converter.m_data[16] = vq_meas;
             converter.m_data[17] = id_ref;
             converter.m_data[18] = q_meas;
-            converter.m_data[19] = in19;
+            // converter.m_data[19] = pulse_filt;
 
             // write to output registers
             for (uint32_t index = 0; index < num_data; index++)
             {
-                // converter.m_r2scpp.data[index].write(cast<double, uint64_t>(converter.m_data[index]));
                 converter.m_r2scpp.data[index].write(cast<double, uint64_t>(converter.m_data[index]));
             }
 
@@ -296,6 +314,10 @@ namespace user
         vslib::RST<2>                       rst_inner_vd;
         vslib::RST<2>                       rst_inner_vq;
         vslib::LimitRange<double>           limit;
+        vslib::LimitRange<double>           m0_saturation;
+        vslib::BoxFilter<200>               moving_average;
+        vslib::BoxFilter<400>               moving_average_id_meas;
+        vslib::LookupTable<double>          lookup_table;
 
         vslib::RST<1>       rst_vdc;
         vslib::IIRFilter<2> iir_vdc;
@@ -306,11 +328,12 @@ namespace user
         vslib::Parameter<double> v_base;         //!< Base voltage [V]
         vslib::Parameter<double> i_base;         //!< Base current [A]
         vslib::Parameter<double> theta_offset;   //!< Theta offset [rad]
+        vslib::Parameter<double> m0_gain;        //!< P controller for modulation m0
 
         vslib::Parameter<double> control_period;     //!< Iteration period of the main control loop
         vslib::Parameter<double> rst_outer_period;   //!< Iteration period of the RST outer controller
 
-        double p_ref;
+        double p_ref{0};
 
         std::optional<fgc4::utils::Warning> verifyParameters() override
         {
@@ -322,7 +345,7 @@ namespace user
 
             m_pu_to_v = 1.0 / m_si_to_pu;
 
-            m_rst_outer_wait_n_iter = control_period.toValidate() / rst_outer_period.toValidate();
+            m_rst_outer_wait_n_iter = rst_outer_period.toValidate() / control_period.toValidate();
 
             m_theta_offset = theta_offset.toValidate();
 

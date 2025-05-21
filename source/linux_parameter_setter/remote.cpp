@@ -76,7 +76,8 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     static constexpr double current_frequency        = 50;   // Hz
 
     values_to_set["example.control_period"]   = control_period;
-    values_to_set["example.rst_outer_period"] = static_cast<int>(1.0 / 50.0);
+    values_to_set["example.rst_outer_period"] = 1.0 / 50.0;
+    values_to_set["example.m0_gain"]          = 0.05;
 
     values_to_set["current_balancing_pos.i_base"]                   = i_base;
     values_to_set["current_balancing_pos.v_max"]                    = v_max;
@@ -195,10 +196,19 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["limit.upper_threshold"] = 1.5;
     values_to_set["limit.dead_zone"]       = std::array<double, 2>{0, 0};
 
+    // m0 saturation
+    values_to_set["m0_saturation.lower_threshold"] = -0.3;
+    values_to_set["m0_saturation.upper_threshold"] = 0.3;
+    values_to_set["m0_saturation.dead_zone"]       = std::array<double, 2>{0, 0};
+
     // RST outer vdc control
-    values_to_set["rst_outer_vdc.r"] = std::array<double, 4>{1.8361e-7, -1.7108e-7, -1.5545e-9, -6.3707e-12};
-    values_to_set["rst_outer_vdc.s"] = std::array<double, 4>{1.0, -0.95052, -0.049271, -0.00020886};
-    values_to_set["rst_outer_vdc.t"] = std::array<double, 4>{1.0968e-8, 0.0, 0.0, 0.0};
+    std::array<double, 4> r_outer_vdc{1.8361e-7, -1.7108e-7, -1.5545e-9, -6.3707e-12};
+    std::array<double, 4> s_outer_vdc{1.0, -0.95052, -0.049271, -0.00020886};
+    std::array<double, 4> t_outer_vdc{1.0968e-8, 0.0, 0.0, 0.0};
+
+    values_to_set["rst_outer_vdc.r"] = r_outer_vdc;
+    values_to_set["rst_outer_vdc.s"] = s_outer_vdc;
+    values_to_set["rst_outer_vdc.t"] = t_outer_vdc;
 
     // RST outer loop control
     std::array<double, 3> r_outer{2.4189, -5.44, 3.0294};
