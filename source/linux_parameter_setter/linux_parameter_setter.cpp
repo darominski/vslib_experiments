@@ -73,7 +73,7 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     static constexpr double v_base                   = 1950.0;
     static constexpr double i_base                   = 3300.0;
     static constexpr double v_max                    = 5000.0;
-    static constexpr double current_frequency        = 50;   // Hz
+    static constexpr double f_rated                  = 50;   // Hz
 
     values_to_set["example.control_period"]   = control_period;
     values_to_set["example.rst_outer_period"] = 1.0 / 50.0;
@@ -110,7 +110,7 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["dispatcher.operating_mode"] = "degraded_2";
 
     // PLL
-    values_to_set["pll.f_rated"]      = current_frequency;
+    values_to_set["pll.f_rated"]      = f_rated;
     values_to_set["pll.angle_offset"] = 0.0;
 
     values_to_set["pi.kp"]                      = 400.0;
@@ -178,15 +178,15 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
 
     // AFE parameters
     values_to_set["afe_rst.inductance"] = 0.7e-3;
-    values_to_set["afe_rst.frequency"]  = current_frequency;
+    values_to_set["afe_rst.frequency"]  = f_rated;
     values_to_set["afe_rst.v_base"]     = v_base;
     values_to_set["afe_rst.i_base"]     = i_base;
 
     values_to_set["example.inductance"]   = 0.7e-3;
-    values_to_set["example.frequency"]    = current_frequency;
+    values_to_set["example.frequency"]    = f_rated;
     values_to_set["example.v_base"]       = v_base;
     values_to_set["example.i_base"]       = i_base;
-    values_to_set["example.theta_offset"] = 0.047124;
+    values_to_set["example.theta_offset"] = 3.5 * control_period * 2.0 * std::numbers::pi * f_rated;
 
     values_to_set["power_3ph_instant.p_gain"] = sqrt(2) / (sqrt(3) * v_base * i_base);
     values_to_set["power_3ph_instant.q_gain"] = sqrt(2) / (sqrt(3) * v_base * i_base);
