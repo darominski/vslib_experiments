@@ -164,8 +164,7 @@ namespace user
                 converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
             }
 
-            const double regulation_on = 1;
-            // const double regulation_on = converter.m_data[0];
+            const double regulation_on = converter.m_data[0];
             const double v_dc_ref      = converter.m_data[1];
             const double v_dc_p        = converter.m_data[2];
             const double v_dc_n        = converter.m_data[3];
@@ -176,9 +175,6 @@ namespace user
             const double i_a           = converter.m_data[8];
             const double i_b           = converter.m_data[9];
             const double i_c           = converter.m_data[10];
-            const double pulse_in      = converter.m_data[14];
-            // const double iq_ref        = converter.m_data[11];
-            // const double id_ref        = converter.m_data[12];
 
             const double v_dc_meas = v_dc_p + v_dc_n;
             const double v_dc_diff = v_dc_p - v_dc_n;
@@ -202,8 +198,6 @@ namespace user
                 regulation_on * v_a, regulation_on * v_b, regulation_on * v_c, regulation_on * i_a, regulation_on * i_b,
                 regulation_on * i_c
             );
-
-            const double pulse_filt = converter.moving_average.filter(pulse_in);
 
             if (regulation_on > 0 && converter.rst_outer_ready())
             {
@@ -240,7 +234,7 @@ namespace user
             const auto vd_ref_lim = converter.limit.limit(vd_ref * converter.m_pu_to_v * 2.0 / v_dc_meas);
             const auto vq_ref_lim = converter.limit.limit(vq_ref * converter.m_pu_to_v * 2.0 / v_dc_meas);
 
-            const auto [v_a_ref, v_b_ref, v_c_ref]
+            auto [v_a_ref, v_b_ref, v_c_ref]
                 = converter.dq0_to_abc.transform(vd_ref_lim, vq_ref_lim, 0.0, wt_pll + converter.m_theta_offset);
 
             // const auto [v_a_ref, v_b_ref, v_c_ref] = converter.afe_vdc_bal.vdc_control(
@@ -250,22 +244,25 @@ namespace user
             // const auto v_dc_diff_filtered = converter.iir_vdc.filter(regulation_on * v_dc_diff);
             // const auto m0                 = converter.rst_vdc.control(0.0, regulation_on * v_dc_diff_filtered);
 
-            const auto id_meas_scaled    = id_meas * converter.i_base;
-            const auto interpolate_input = converter.moving_average_id_meas.filter(id_meas_scaled);
-            const auto histeresis_lookup = converter.lookup_table.interpolate(interpolate_input);
+            const auto id_meas_scaled             = id_meas * converter.i_base;
+            const auto id_meas_scaled_filtered    = converter.moving_average_id_meas.filter(id_meas_scaled);
+            const auto id_meas_scaled_filtered_lt = converter.lookup_table.interpolate(id_meas_scaled_filtered);
 
+            const auto vdc_diff_filt   = converter.moving_average.filter(v_dc_diff);
+            const auto vdc_prop_output = regulation_on * (0.0 - vdc_diff_filt) * converter.m0_gain;
+            const auto m0              = converter.m0_saturation.limit(vdc_prop_output * id_meas_scaled_filtered_lt);
 
-            const auto m0 = converter.m0_saturation.limit(
-                -regulation_on * converter.moving_average.filter(v_dc_diff) * converter.m0_gain * histeresis_lookup
-            );
+            v_a_ref = converter.limit.limit(v_a_ref + m0);
+            v_b_ref = converter.limit.limit(v_b_ref + m0);
+            v_c_ref = converter.limit.limit(v_c_ref + m0);
 
             converter.m_data[0]  = v_a_ref;
             converter.m_data[1]  = v_b_ref;
             converter.m_data[2]  = v_c_ref;
             converter.m_data[3]  = m0;
-            converter.m_data[4]  = id_meas_scaled;
-            converter.m_data[5]  = interpolate_input;
-            converter.m_data[6]  = histeresis_lookup;
+            converter.m_data[4]  = v_dc_diff;
+            converter.m_data[5]  = vdc_diff_filt;
+            converter.m_data[6]  = vdc_prop_output;
             converter.m_data[7]  = vq_ref;
             converter.m_data[8]  = p_ref;
             converter.m_data[9]  = iq_meas;
@@ -278,7 +275,6 @@ namespace user
             converter.m_data[16] = vq_meas;
             converter.m_data[17] = id_ref;
             converter.m_data[18] = q_meas;
-            // converter.m_data[19] = pulse_filt;
 
             // write to output registers
             for (uint32_t index = 0; index < num_data; index++)
@@ -315,8 +311,8 @@ namespace user
         vslib::RST<2>                       rst_inner_vq;
         vslib::LimitRange<double>           limit;
         vslib::LimitRange<double>           m0_saturation;
-        vslib::BoxFilter<200>               moving_average;
-        vslib::BoxFilter<400>               moving_average_id_meas;
+        vslib::BoxFilter<200, 1e6>          moving_average;
+        vslib::BoxFilter<1000, 1e6>         moving_average_id_meas;
         vslib::LookupTable<double>          lookup_table;
 
         vslib::RST<1>       rst_vdc;
