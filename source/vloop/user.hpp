@@ -25,12 +25,13 @@ namespace user
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
               interrupt_1("timer", *this, std::chrono::microseconds(100'000), RTTask),
-              bus_1(0xA0000000, pow(2, 24)),
-              spi_1(bus_1, 0xD200),
-              adc_1(),
-              ad7606c_1(spi_1, 3, adc_1)
-        //   pwm_7("pwm_7", *this, 10'000),
-        //   pwm_8("pwm_8", *this, 10'000)
+              //   bus_1(0xA0000000, pow(2, 24)),
+              //   spi_1(bus_1, 0xD200),
+              //   adc_1(),
+              //   ad7606c_1(spi_1, 3, adc_1),
+              pwm_6("pwm_6", *this, 10'000),
+              pwm_7("pwm_7", *this, 10'000),
+              pwm_8("pwm_8", *this, 10'000)
         {
             // initialize all your objects that need initializing
             std::cout << "Initialized\n";
@@ -77,10 +78,11 @@ namespace user
             // m_r2scpp.numData.write(num_data * 2);
             // m_r2scpp.tkeep.write(0x0000FFFF);
 
-            // pwm_7.start();
-            // pwm_8.start();
+            pwm_6.start();
+            pwm_7.start();
+            pwm_8.start();
             // adc_1.start();
-            sleep(10);
+            // sleep(10);
             interrupt_1.start();
         }
 
@@ -122,42 +124,42 @@ namespace user
 
         static void RTTask(Converter& converter)
         {
-            converter.adc_1.start();
-            usleep(1);
-            std::cout << converter.adc_1.readConverted(0) << " " << converter.adc_1.readConverted(1) << " "
-                      << converter.adc_1.readConverted(2) << "\n";
-            // const auto success1 = converter.pwm_7.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
-            // const auto success2 = converter.pwm_8.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
-            // if (converter.counter % 100 == 0)
-            // {
-            //     std::cout << std::boolalpha << converter.counter << " " << success1 << " " << success2 << '\n';
-            //
+            // converter.adc_1.start();
+            // std::cout << converter.adc_1.readConverted(0) << " " << converter.adc_1.readConverted(1) << " "
+            //   << converter.adc_1.readConverted(2) << "\n";
+            const auto success1 = converter.pwm_7.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
+            const auto success2 = converter.pwm_8.setModulationIndex(static_cast<float>(converter.counter) / 10'000);
+            if (converter.counter % 100 == 0)
+            {
+                std::cout << std::boolalpha << converter.counter << " " << success1 << " " << success2 << '\n';
+            }
 
-            // if (converter.count_up)
-            // {
-            //     converter.counter++;
-            // }
-            // else
-            // {
-            //     converter.counter--;
-            // }
+            if (converter.count_up)
+            {
+                converter.counter++;
+            }
+            else
+            {
+                converter.counter--;
+            }
 
-            // if (converter.counter >= 10'000)
-            // {
-            //     converter.count_up = false;
-            // }
-            // if (converter.counter <= 0)
-            // {
-            //     converter.count_up = true;
-            // }
+            if (converter.counter >= 10'000)
+            {
+                converter.count_up = false;
+            }
+            if (converter.counter <= 0)
+            {
+                converter.count_up = true;
+            }
         }
 
-        // vslib::HalfBridge<6> pwm_7;
-        // vslib::HalfBridge<7> pwm_8;
-        hal::Bus                bus_1;
-        hal::XilAxiSpi          spi_1;
-        hal::UncalibratedADC<0> adc_1;
-        hal::AD7606C<0>         ad7606c_1;
+        vslib::HalfBridge<6> pwm_6;
+        vslib::HalfBridge<7> pwm_7;
+        vslib::HalfBridge<8> pwm_8;
+        // hal::Bus                bus_1;
+        // hal::XilAxiSpi          spi_1;
+        // hal::UncalibratedADC<0> adc_1;
+        // hal::AD7606C<0>         ad7606c_1;
 
       private:
         int  counter{0};

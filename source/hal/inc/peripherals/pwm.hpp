@@ -21,7 +21,7 @@ namespace hal
             static_assert(pwm_id < 12, "The PWM ID must be between 0 and 11.");
             m_regs = hal::Top::instance().pwm[pwm_id].pwm;
 
-            setConfiguration(20'000, 4'000, 1'000);
+            setConfiguration(ctrh, 4'000, 1'000);
             configureMinMaxModulation();
         }
 
