@@ -2301,7 +2301,7 @@ namespace ipCores
                 //! 18 bits are used.
                 DelaySc delaySc{base() + 4};
                 //! Period register. The period is in system clock periods. Must
-                //! be 1 at minimum.
+                //! be 2 at minimum.
                 PeriodSc periodSc{base() + 8};
             };
 
