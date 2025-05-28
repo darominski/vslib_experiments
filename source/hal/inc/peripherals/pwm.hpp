@@ -41,7 +41,7 @@ namespace hal
         //! @param disable_b Switch to disable PWMB
         void setConfiguration(
             const uint32_t max_counter_value, const uint32_t dead_time, const uint32_t min_switch_time,
-            UpdateType update_type = UpdateType::zero, const bool enable_pwm_check = false,
+            UpdateType update_type = UpdateType::zero, const bool enable_pwm_check = true,
             const bool enable_shoot_through_check = true, const bool bypass_dead_time = false,
             const bool enable_value_check = true, const bool invert = false, const bool decouple_cc1 = false,
             const bool disable_a = false, const bool disable_b = false

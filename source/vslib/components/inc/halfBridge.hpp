@@ -20,8 +20,6 @@ namespace vslib
             : Component("HalfBridge", name, parent),
               m_pwm(ctrh)
         {
-            // initialize the right PWM IP out of the list of 12, TODO
-            // right now, base_address is needed
         }
 
         // ************************************************************
@@ -64,10 +62,10 @@ namespace vslib
 
         //! Sets the modulation index.
         //!
-        //! @param index Modulation index, -1 to 1
+        //! @param index Modulation index, 0 to 1
         [[maybe_unused]] bool setModulationIndex(const float index) noexcept
         {
-            // force limit of -1.0, 1.0
+            // force limit of 0.0, 1.0
             return m_pwm.setModulationIndex(index);
         }
 

@@ -16,10 +16,10 @@ namespace vslib
     class FullBridge : public Component
     {
       public:
-        FullBridge(std::string_view name, Component& parent)
+        FullBridge(std::string_view name, Component& parent, uint32_t maximal_counter_value)
             : Component("FullBridge", name, parent),
-              leg_1("leg_1", *this),
-              leg_2("leg_2", *this)
+              leg_1("leg_1", *this, maximal_counter_value),
+              leg_2("leg_2", *this, maximal_counter_value)
         {
         }
 
@@ -43,7 +43,7 @@ namespace vslib
 
         //! Sets the modulation index of a two-level unipolar full bridge.
         //!
-        //! @param modulation_index Modulation index, from -1.0 to 1.0, will be set to leg 2
+        //! @param modulation_index Modulation index, from 0.0 to 1.0, will be set to leg 2
         void setModulationIndexPositive(const float modulation_index) noexcept
         {
             if (m_bipolar)
@@ -57,7 +57,7 @@ namespace vslib
 
         //! Sets the modulation index of a two-level unipolar full bridge.
         //!
-        //! @param modulation_index Modulation index, from -1.0 to 1.0, will be set to leg 1
+        //! @param modulation_index Modulation index, from 0.0 to 1.0, will be set to leg 1
         void setModulationIndexNegative(const float modulation_index) noexcept
         {
             if (m_bipolar)
@@ -70,7 +70,7 @@ namespace vslib
 
         //! Sets the modulation index of a two-level bipolar full bridge.
         //!
-        //! @param modulation_index Modulation index, from -1.0 to 1.0, will be set to both leg 1 and 2
+        //! @param modulation_index Modulation index, from 0.0 to 1.0, will be set to both leg 1 and 2
         void setModulationIndex2L1Fsw(const float modulation_index) noexcept
         {
             leg_1.setModulationIndex(modulation_index);
@@ -95,8 +95,12 @@ namespace vslib
                 switchBipolar(false);
             }
 
-            leg_1.setModulationIndex(modulation_index);
-            leg_2.setModulationIndex(-modulation_index);
+            // recalculate modulation index to fit in 0 to 1:
+            const float modulatin_index_leg_1 = 0.5 * (modulation_index + 1);
+            const float modulatin_index_leg_2 = 0.5 * (-modulation_index + 1);
+
+            leg_1.setModulationIndex(modulatin_index_leg_1);
+            leg_2.setModulationIndex(modulatin_index_leg_2);
         }
 
         std::optional<fgc4::utils::Warning> verifyParameters() override
