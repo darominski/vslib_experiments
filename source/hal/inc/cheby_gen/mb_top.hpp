@@ -1,6 +1,6 @@
 // This header file was auto-generated using cheby
-// User: jonas
-// Date: 2025-05-15 14:14:08.056288
+// User: adrian
+// Date: 2025-05-28 17:16:38.897587
 // Source map: mb_top.cheby
 // Command used: /usr/local/bin/cheby --gen-cpp=cpp/mb_top.cpp --cpp-json=cpp/mb_top.json -i mb_top.cheby
 //
@@ -21,7 +21,7 @@ namespace ipCores
     //! ::Top
     //!
     //! Top level address space mapping for FGC4 Main Board FPGA
-    struct Top : MemModule<59392, uint32_t, attributes::ByteOrdering::little, attributes::WordOrdering::little>
+    struct Top : MemModule<59392, uint32_t, attributes::ByteOrdering::little, attributes::WordOrdering::big>
     {
         // No version information provided.
 
@@ -2245,7 +2245,7 @@ namespace ipCores
             NumChannels   numChannels{base() + 3588};   //!< (no comment provided)
         };
 
-        struct SyncTime : MemSubmodule<Top, 8>
+        struct SyncTime : MemSubmodule<Top, 16>
         {
 
             using MemSubmodule::MemSubmodule;
@@ -2260,10 +2260,22 @@ namespace ipCores
                 using MemReg::MemReg;
             };
 
+            struct UtcS : MemReg<SyncTime, 4, attributes::AccessMode::RO, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct UtcNs : MemReg<SyncTime, 4, attributes::AccessMode::RO, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
             S s{base() + 0};   //!< The seconds part of the sync time.
             //! The system clock periods part of the sync time. The period
             //! is 5 ns. Only the lower 28 bits are used.
-            Sc sc{base() + 4};
+            Sc    sc{base() + 4};
+            UtcS  utcS{base() + 8};     //!< The seconds part of UTC time coming from PS.
+            UtcNs utcNs{base() + 12};   //!< The nanoseconds part of UTC time coming from PS.
         };
 
         struct SyncTrigArrayItem : MemSubmodule<Top, 16>
@@ -2301,7 +2313,7 @@ namespace ipCores
                 //! 18 bits are used.
                 DelaySc delaySc{base() + 4};
                 //! Period register. The period is in system clock periods. Must
-                //! be 2 at minimum.
+                //! be 1 at minimum.
                 PeriodSc periodSc{base() + 8};
             };
 
@@ -13543,6 +13555,8 @@ namespace mmpp::utils
         DumpMap res{syncTime.base()};
         res.insert_or_assign("syncTime.s", DumpEntry{syncTime.s});
         res.insert_or_assign("syncTime.sc", DumpEntry{syncTime.sc});
+        res.insert_or_assign("syncTime.utcS", DumpEntry{syncTime.utcS});
+        res.insert_or_assign("syncTime.utcNs", DumpEntry{syncTime.utcNs});
         return res;
     }
 
@@ -19863,6 +19877,8 @@ namespace mmpp::utils
         res.insert_or_assign("top.ddma.numChannels", DumpEntry{top.ddma.numChannels});
         res.insert_or_assign("top.syncTime.s", DumpEntry{top.syncTime.s});
         res.insert_or_assign("top.syncTime.sc", DumpEntry{top.syncTime.sc});
+        res.insert_or_assign("top.syncTime.utcS", DumpEntry{top.syncTime.utcS});
+        res.insert_or_assign("top.syncTime.utcNs", DumpEntry{top.syncTime.utcNs});
         res.insert_or_assign("top.syncTrig[0].stg.ctrl", DumpEntry{top.syncTrig[0].stg.ctrl});
         res.insert_or_assign("top.syncTrig[0].stg.ctrl.periodic", DumpEntry{top.syncTrig[0].stg.ctrl.periodic});
         res.insert_or_assign("top.syncTrig[0].stg.ctrl.resync", DumpEntry{top.syncTrig[0].stg.ctrl.resync});
