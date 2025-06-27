@@ -16,6 +16,12 @@ namespace vslib
     class FullBridge : public Component
     {
       public:
+        //! Full Bridge Component constructor.
+        //!
+        //! @param name Name of this FullBridge instance
+        //! @param parent Parent of this FullBridge instance
+        //! @param maximal_counter_value Specifies the maximal counter value of the owned PWMs, impacting their
+        //! frequency. This argument will be removed once the Configurator is available.
         FullBridge(std::string_view name, Component& parent, uint32_t maximal_counter_value)
             : Component("FullBridge", name, parent),
               leg_1("leg_1", *this, maximal_counter_value),
@@ -26,12 +32,14 @@ namespace vslib
         // ************************************************************
         // Start and stop methods
 
+        //! Starts the owned PWM counters.
         void start() noexcept
         {
             leg_1.start();
             leg_2.start();
         }
 
+        //! Stops the owned PWM counters.
         void stop() noexcept
         {
             leg_1.stop();
@@ -110,7 +118,7 @@ namespace vslib
 
       private:
         HalfBridge<first_pwm_id>     leg_1;   //!< Leg 1 of the Full Bridge
-        HalfBridge<first_pwm_id + 1> leg_2;   //!< Leg 2 of the FUll Bridge
+        HalfBridge<first_pwm_id + 1> leg_2;   //!< Leg 2 of the Full Bridge
 
         //! Flag informing whether the full bridge is running in bipolar mode
         bool m_bipolar{false};
