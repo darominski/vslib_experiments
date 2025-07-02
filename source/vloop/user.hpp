@@ -4,27 +4,23 @@
 #include <string>
 #include <unistd.h>
 
-#include "afe.hpp"
-#include "afe_rst.hpp"
-#include "afe_vdc_bal.hpp"
 #include "cheby_gen/reg_to_stream.hpp"
 #include "cheby_gen/stream_to_reg.hpp"
-// #include "pops_current_balancing.hpp"
-// #include "pops_current_balancing_old.hpp"
-// #include "pops_dispatcher.hpp"
-#include "halfBridge.hpp"
-#include "peripherals/bus.hpp"
-#include "peripherals/xil_axi_spi.hpp"
 #include "vslib.hpp"
 
 namespace user
 {
     class Converter : public vslib::IConverter
     {
+        static constexpr int data_queue_size = fgc4::utils::constants::json_memory_pool_size;   // 1 MB
+
       public:
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
               interrupt_1("timer", *this, std::chrono::microseconds(100'000), RTTask),
+              data_queue{fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueWriter<void>>(
+                  reinterpret_cast<uint8_t*>(app_data_2_3_ADDRESS + 3 * data_queue_size), data_queue_size
+              )},
               bus_1(0xA0000000, pow(2, 24)),
               spi_1(bus_1, 0xE400),
               adc_1(),
@@ -93,8 +89,19 @@ namespace user
         static void RTTask(Converter& converter)
         {
             converter.adc_1.start();
-            std::cout << converter.adc_1.readConverted(1) << "\n";
+            const auto value = converter.adc_1.readConverted(1);
+            converter.data_queue.write(std::span<const uint8_t>{reinterpret_cast<const uint8_t*>(&value), sizeof(value)}
+            );
+
+            if (converter.counter++ % 1000)
+            {
+                std::cout << converter.adc_1.readConverted(1) << "\n";
+            }
         }
+
+        int counter{0};
+
+        fgc4::utils::MessageQueueWriter<void> data_queue;
 
         hal::Bus                bus_1;
         hal::XilAxiSpi          spi_1;

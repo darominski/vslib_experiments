@@ -60,4 +60,6 @@
 
 //! HAL items
 #include "peripherals/ad7606c.hpp"
+#include "peripherals/bus.hpp"
 #include "peripherals/uncalibrated_adc.hpp"
+#include "peripherals/xil_axi_spi.hpp"

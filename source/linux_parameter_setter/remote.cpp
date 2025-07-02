@@ -7,15 +7,17 @@
 
 #include "bmboot/domain.hpp"
 #include "bmboot/domain_helpers.hpp"
+#include "csv.hpp"
 #include "json/json.hpp"
 #include "messageQueue.hpp"
 #include "shared_memory.h"
-#include "vslibMessageQueue.h"
+#include "vslibMessageQueue.hpp"
 
 using Json = nlohmann::json;
 using namespace vslib;
 using namespace fgcd;
 using namespace fgc4;
+using namespace csv;
 
 void parseComponent(
     const Json& component, const std::string& base_name,
@@ -268,6 +270,7 @@ int main(int argc, char* argv[])
     constexpr size_t write_parameter_map_queue_address = read_commands_queue_address
                                                          + fgc4::utils::constants::json_memory_pool_size
                                                          + fgc4::utils::constants::string_memory_pool_size;
+    constexpr size_t read_data_queue_address = app_data_2_3_ADDRESS + 3 * fgc4::utils::constants::json_memory_pool_size;
 
     auto write_commands_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueWriter<void>>(
         (uint8_t*)buffer.data(), json_queue_size
@@ -281,26 +284,36 @@ int main(int argc, char* argv[])
         (uint8_t*)buffer.data() + json_queue_size + string_queue_size, json_queue_size
     );
 
+    auto read_data_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<double>>(
+        (uint8_t*)buffer.data() + json_queue_size * 3, json_queue_size
+    );
+
+    // Define the file to output the ADC values coming from the bare metal
+    std::filesystem::path adc_output_path = "./adc_output.csv";
+    std::ofstream         adc_output_file(adc_output_path.c_str());
+
     fprintf(stderr, "Run payload\n");
     bmboot::loadPayloadFromFileOrThrow(*domain, argv[1]);
     usleep(500'000);   // delay for initialization
 
     std::array<uint8_t, json_queue_size>   parameter_map_buffer;
     std::array<uint8_t, string_queue_size> command_status_buffer{0};
-    std::vector<Json>                      commands;
-    bool                                   commands_set  = false;
-    size_t                                 counter       = 0;
-    size_t                                 commands_sent = 0;
+    std::array<uint8_t, json_queue_size>   data_buffer;
+
+    std::vector<Json> commands;
+    bool              commands_set  = false;
+    size_t            counter       = 0;
+    size_t            commands_sent = 0;
     while (true)
     {
         std::cout << "Linux counter: " << counter++ << "\n";
         // TEST CODE FOR TRANSFERRING COMMANDS
         // there are 3 PID with 9 params + RST with 1 parameter, so 10 in total,
         // modulo prevents setting not used fields
-        auto message = read_parameter_map_queue.read(parameter_map_buffer);
-        if (message.has_value())
+        auto parameter_map_message = read_parameter_map_queue.read(parameter_map_buffer);
+        if (parameter_map_message.has_value())
         {
-            auto const json_manifest       = vslib::utils::readJsonFromMessageQueue(message.value());
+            auto const json_manifest       = vslib::utils::readJsonFromMessageQueue(parameter_map_message.value());
             // std::cout << json_manifest.dump(1) << "\n";
             auto const settable_parameters = parseManifest(json_manifest);
             commands                       = prepareCommands(settable_parameters);
@@ -310,11 +323,11 @@ int main(int argc, char* argv[])
         if (commands_set && (commands_sent <= commands.size()))
         {
             // check status of previous command
-            auto message = read_command_status_queue.read(command_status_buffer);
-            if (message.has_value())
+            auto status_message = read_command_status_queue.read(command_status_buffer);
+            if (status_message.has_value())
             {
 
-                std::cout << "Status: " << std::string(message->begin(), message->end()) << std::endl;
+                std::cout << "Status: " << std::string(status_message->begin(), status_message->end()) << std::endl;
             }
             else
             {
@@ -328,18 +341,27 @@ int main(int argc, char* argv[])
             }
         }
 
-        if (commands_sent >= commands.size())
+        // if (commands_sent >= commands.size())
+        // {
+        //     break;
+        // }
+
+        auto data_queue_message = read_data_queue.read(data_buffer);
+        if (data_queue_message.has_value())
         {
-            break;
+            const auto value = data_queue_message.value().first;
+            adc_output_file << value << '\n';
         }
 
         // END OF TEST CODE
 
         // Add some delay to simulate work
-        usleep(100'000);   // 100 ms
+        // usleep(100'000);   // 100 ms
     }
-    std::cout << "Now running the console: \n";
-    runConsoleUntilInterrupted(*domain);
+    // std::cout << "Now running the console: \n";
+    // runConsoleUntilInterrupted(*domain);
+
+    adc_output_file.close();
 
     return 0;
 }

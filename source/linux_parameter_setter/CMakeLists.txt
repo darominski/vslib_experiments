@@ -52,6 +52,8 @@ add_executable(remote
 # ${REMOTE_USER_SOURCES}
 # )
 
+add_subdirectory(${LIBRARIES_HOME}/csv-parser ${CMAKE_CURRENT_BINARY_DIR}/csv-parser)
+
 # Add external libraries
 include_directories(
     ${CMAKE_SOURCE_DIR}/../lib # all external libraries are stored in this directory
@@ -71,5 +73,6 @@ target_link_libraries(remote
   PRIVATE
   fmt::fmt
   bmboot_manager
+  csv
 )
 # target_link_libraries(remote_user PRIVATE fmt::fmt)
