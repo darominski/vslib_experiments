@@ -42,16 +42,42 @@ namespace user
         {
             m_s2rcpp.ctrl.pmaInit.set(false);
             sleep(2);
-
             m_s2rcpp.ctrl.resetPb.set(false);
             sleep(1);
 
             m_s2rcpp.ctrl.selOutput.set(true);
+            sleep(1);
 
             if (!(m_s2rcpp.status.channelUp.get() && m_s2rcpp.status.gtPllLock.get() && m_s2rcpp.status.laneUp.get()
                   && m_s2rcpp.status.pllLocked.get() && m_s2rcpp.status.gtPowergood.get()))
             {
-                printf("Unexpected status: 0x%#08x\n", m_s2rcpp.ctrl.read());
+                printf(
+                    "Unexpected state. Control: %#08x, status: %#08x\n", m_s2rcpp.ctrl.read(), m_s2rcpp.status.read()
+                );
+            }
+            else
+            {
+                printf("Link up and good. Ready to receive data.\n");
+            }
+            if (!m_s2rcpp.status.channelUp.get())
+            {
+                printf("Channel not up.\n");
+            }
+            if (!m_s2rcpp.status.gtPllLock.get())
+            {
+                printf("gtPllLock not OK.\n");
+            }
+            if (!m_s2rcpp.status.laneUp.get())
+            {
+                printf("Lane not up.\n");
+            }
+            if (!m_s2rcpp.status.pllLocked.get())
+            {
+                printf("Pll not locked.\n");
+            }
+            if (!m_s2rcpp.status.gtPowergood.get())
+            {
+                printf("Power not good.\n");
             }
 
             if (m_s2rcpp.status.linkReset.get() || m_s2rcpp.status.sysReset.get())
