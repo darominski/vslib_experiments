@@ -4,15 +4,11 @@
 #include <string>
 #include <unistd.h>
 
-#include "afe.hpp"
-#include "afe_rst.hpp"
-#include "afe_vdc_bal.hpp"
 #include "cheby_gen/reg_to_stream.hpp"
 #include "cheby_gen/stream_to_reg.hpp"
-// #include "pops_current_balancing.hpp"
-// #include "pops_current_balancing_old.hpp"
-// #include "pops_dispatcher.hpp"
-#include "halfBridge.hpp"
+#include "fsm_crowbar.hpp"
+#include "pops_constants.hpp"
+#include "pops_utils.hpp"
 #include "vslib.hpp"
 
 namespace user
@@ -22,17 +18,19 @@ namespace user
       public:
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
-              //   interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              interrupt_1("aurora", *this, std::chrono::microseconds(10), RTTask),
-              pwm("pwm_1", *this),
+              interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
+              //   interrupt_1("timer", *this, std::chrono::microseconds(10'000), RTTask),
               m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
-              m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000))
+              m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000)),
+              vs_state(*this)
         {
+            std::cout << "Class startup completed.\n";
             // initialize all your objects that need initializing
         }
 
         // Define your public Components here
-        vslib::TimerInterrupt<Converter> interrupt_1;
+        // vslib::TimerInterrupt<Converter> interrupt_1;
+        vslib::PeripheralInterrupt<Converter> interrupt_1;
         // ...
         // end of your Components
 
@@ -66,13 +64,10 @@ namespace user
                 printf("Got an error\n");
             }
 
-            printf("Link up and good. Ready to receive data.\n");
-
             // kria transfer rate: 100us
             m_r2scpp.numData.write(num_data * 2);
             m_r2scpp.tkeep.write(0x0000FFFF);
 
-            pwm.start();
             interrupt_1.start();
         }
 
@@ -115,27 +110,35 @@ namespace user
         static void RTTask(Converter& converter)
         {
             // collect inputs
-            // for (uint32_t index = 0; index < num_data; index++)
-            // {
-            //     converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
-            // }
+            for (uint32_t index = 0; index < num_data; index++)
+            {
+                converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
+            }
 
-            // if(converter.counter)
-            // pwm.setModulationIndex()
-
-            // // write to output registers
-            // for (uint32_t index = 0; index < num_data; index++)
-            // {
-            //     converter.m_r2scpp.data[index].write(cast<double, uint64_t>(converter.m_data[index]));
-            // }
+            // write to output registers
+            for (uint32_t index = 0; index < num_data; index++)
+            {
+                converter.m_r2scpp.data[index].write(cast<double, uint64_t>(converter.m_data[index]));
+            }
 
             // send it away
             // trigger connection
-            // converter.m_r2scpp.ctrl.start.set(true);
+            converter.m_r2scpp.ctrl.start.set(true);
             converter.counter++;
         }
 
-        vslib::HalfBridge<0> pwm;
+        ILoopStates m_i_loop_state{ILoopStates::FO};
+        int         m_i_loop_communication{0};
+
+        bool checkVSRunReceived() const
+        {
+            return (m_i_loop_communication == 1);
+        }
+
+        bool checkIntertripLight() const
+        {
+            return false;
+        }
 
       private:
         int counter{0};
@@ -145,6 +148,46 @@ namespace user
 
         ipCores::StreamToReg m_s2rcpp;
         ipCores::RegToStream m_r2scpp;
+
+        uint8_t m_buffer[ipCores::StreamToReg::size];
+
+        CWBStateMachine vs_state;
+
+        void setIloopState(const int state_value)
+        {
+            switch (state_value)
+            {
+                case 1:
+                    m_i_loop_state = ILoopStates::FO;
+                    break;
+                case 2:
+                    m_i_loop_state = ILoopStates::FS;
+                    break;
+                case 3:
+                    m_i_loop_state = ILoopStates::OF;
+                    break;
+                case 4:
+                    m_i_loop_state = ILoopStates::SP;
+                    break;
+                case 5:
+                    m_i_loop_state = ILoopStates::ST;
+                    break;
+                case 6:
+                    m_i_loop_state = ILoopStates::BK;
+                    break;
+                case 7:
+                    m_i_loop_state = ILoopStates::TS;
+                    break;
+                case 8:
+                    m_i_loop_state = ILoopStates::SB;
+                    break;
+                case 9:
+                    m_i_loop_state = ILoopStates::DT;
+                    break;
+                default:
+                    break;
+            }
+        }
     };
 
 }   // namespace user

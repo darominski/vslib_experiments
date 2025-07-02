@@ -17,6 +17,8 @@ namespace user
         ON    // on
     };
 
+    class Converter;
+
     class CWBStateMachine
     {
         using StateMachine = ::utils::Fsm<CWBVloopStates, CWBStateMachine, false>;
@@ -29,57 +31,24 @@ namespace user
         using TransitionFunc = ::utils::FsmTransitionResult<CWBVloopStates> (CWBStateMachine::*)();
 
       public:
-        CWBStateMachine()
-            : m_fsm(*this, CWBVloopStates::FO)
-        {
-            // obtain handles for the i_loop state and the intertrip light state
+        CWBStateMachine(Converter& crowbar);
 
-            // CAUTION: The order of transition method matters
-            // clang-format off
-            m_fsm.addState(CWBVloopStates::FO, &CWBStateMachine::onFaultOff, {&CWBStateMachine::toOn});
-            m_fsm.addState(CWBVloopStates::ON, &CWBStateMachine::onOn,       {&CWBStateMachine::toFaultOff});
-            // clang-format on
-        }
+        void update();
 
-        void update()
-        {
-            m_fsm.update();
-        }
-
-        [[nodiscard]] const auto getState() const noexcept
-        {
-            return m_fsm.getState();
-        }
+        [[nodiscard]] CWBVloopStates getState() const noexcept;
 
       private:
         StateMachine m_fsm;
 
-        void onFaultOff()
-        {
-            // open the safety chain?
-        }
+        Converter& m_crowbar;
 
-        void onOn()
-        {
-        }
+        void onFaultOff();
 
-        TransRes toOn()
-        {
-            if (checkVSRunReceived())
-            {
-                return TransRes{CWBVloopStates::ON};
-            }
-            return {};
-        }
+        void onOn();
 
-        TransRes toFaultOff()
-        {
-            if (!checkIntertripLight() || i_loop.getState() == IloopStates::FO)
-            {
-                return TransRes{CWBVloopStates::FO};
-            }
-            return {};
-        }
+        TransRes toOn();
+
+        TransRes toFaultOff();
     };
 
 }   // namespace user
