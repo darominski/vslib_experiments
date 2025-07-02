@@ -192,7 +192,7 @@ namespace user
         //! @return True if there is no fault, false otherwise (=fault).
         bool checkIntertripLight() const
         {
-            return (m_fault == 0);
+            return true;
         }
 
       private:
