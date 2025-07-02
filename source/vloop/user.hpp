@@ -19,7 +19,6 @@ namespace user
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
               interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
-              //   interrupt_1("timer", *this, std::chrono::microseconds(10'000), RTTask),
               m_s2rcpp(reinterpret_cast<uint8_t*>(0xA0200000)),
               m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000)),
               vs_state(*this)
@@ -29,7 +28,6 @@ namespace user
         }
 
         // Define your public Components here
-        // vslib::TimerInterrupt<Converter> interrupt_1;
         vslib::PeripheralInterrupt<Converter> interrupt_1;
         // ...
         // end of your Components
@@ -141,6 +139,29 @@ namespace user
                 converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
             }
 
+            const auto v_dc_meas          = converter.m_data[0];
+            const auto i_loop_state_value = converter.m_data[1];
+            converter.setIloopState(i_loop_state_value);
+            converter.m_i_loop_communication = converter.m_data[2];
+            const auto plc_comm              = converter.m_data[3];
+            const auto vloop_mask            = converter.m_data[4];
+            converter.m_fault                = converter.m_data[5];
+
+            converter.vs_state.update();
+
+            const auto current_state     = converter.vs_state.getState();
+            int        current_state_int = 0;
+
+            if (current_state == CWBVloopStates::FO)
+            {
+                current_state_int = 1;
+            }
+            else if (current_state == CWBVloopStates::ON)
+            {
+                current_state_int = 9;
+            }
+            converter.m_data[0] = current_state_int;
+
             // write to output registers
             for (uint32_t index = 0; index < num_data; index++)
             {
@@ -155,15 +176,23 @@ namespace user
 
         ILoopStates m_i_loop_state{ILoopStates::FO};
         int         m_i_loop_communication{0};
+        int         m_fault{0};
 
+        //! Provides information whether the VS_RUN has been received.
+        //!
+        //! @return True if VS_RUN has been received, false otherwise.
         bool checkVSRunReceived() const
         {
             return (m_i_loop_communication == 1);
         }
 
+        //! Provides a feature to recognize when a fault is signalled, will be replaced by a register in real FGC4
+        //! system.
+        //!
+        //! @return True if there is no fault, false otherwise (=fault).
         bool checkIntertripLight() const
         {
-            return false;
+            return (m_fault == 0);
         }
 
       private:
