@@ -9,7 +9,6 @@
 
 namespace hal
 {
-    template<uint32_t adc_id>
     class AD7606C
     {
       public:
@@ -18,7 +17,7 @@ namespace hal
         //! @param spi SPI controller (tested with Xilinx SPI)
         //! @param pin_index Slave select pin index
         //! @param adc Associated ADC controller
-        AD7606C(XilAxiSpi& spi, uint32_t pin_index, UncalibratedADC<adc_id>& adc)
+        AD7606C(XilAxiSpi& spi, uint32_t pin_index, UncalibratedADC& adc)
         noexcept
             : m_spi(spi),
               m_adc(adc),
@@ -50,9 +49,9 @@ namespace hal
         }
 
       private:
-        XilAxiSpi               m_spi;         //!< HAL handle for SPI
-        UncalibratedADC<adc_id> m_adc;         //!< HAL handle for an ADC to be configured
-        uint32_t                m_pin_index;   //!< Index of the ADC pin
+        XilAxiSpi       m_spi;         //!< HAL handle for SPI
+        UncalibratedADC m_adc;         //!< HAL handle for an ADC to be configured
+        uint32_t        m_pin_index;   //!< Index of the ADC pin
 
         //! Write data to a register
         //!

@@ -23,12 +23,12 @@ namespace user
               )},
               bus_1(0xA0000000, pow(2, 24)),
               spi_1(bus_1, 0xE400),
-              adc_1(),
-              adc_2(),
-              adc_3(),
-              adc_4(),
-              adc_5(),
-              adc_6(),
+              adc_1(0),
+              adc_2(1),
+              adc_3(2),
+              adc_4(3),
+              adc_5(4),
+              adc_6(5),
               ad7606c_1(spi_1, 3, adc_1)
         {
             // initialize all your objects that need initializing

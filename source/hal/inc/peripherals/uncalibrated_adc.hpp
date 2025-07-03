@@ -8,7 +8,6 @@
 
 namespace hal
 {
-    template<uint32_t adc_id>
     class UncalibratedADC
     {
         // constants reimplemented from the Python cheby exports used by CCE:
@@ -22,7 +21,7 @@ namespace hal
 
       public:
         //! Constructor for an uncalibrated ADC controller.
-        UncalibratedADC() noexcept
+        UncalibratedADC(const uint32_t adc_id) noexcept
         {
             m_regs = hal::Top::instance().adcUncalint[adc_id].adc;
             // TMP: IP core needs to be configured before use, eventually this will be handled by FGC4 configurator
@@ -107,7 +106,7 @@ namespace hal
         //! @return Array with the read raw ADC values
         const std::array<uint32_t, adc_number_ports>& readAllPorts() noexcept
         {
-            for (auto index = 0; index < adc_number_ports; index++)
+            for (uint32_t index = 0; index < adc_number_ports; index++)
             {
                 m_values[index] = read(index);
             }
