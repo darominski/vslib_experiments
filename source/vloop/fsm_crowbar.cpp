@@ -11,8 +11,8 @@ namespace user
 
         // CAUTION: The order of transition method matters
         // clang-format off
-            m_fsm.addState(CWBVloopStates::FO, &CWBStateMachine::onFaultOff, {&CWBStateMachine::toOn});
-            m_fsm.addState(CWBVloopStates::ON, &CWBStateMachine::onOn,       {&CWBStateMachine::toFaultOff});
+        m_fsm.addState(CWBVloopStates::FO, &CWBStateMachine::onFaultOff, {&CWBStateMachine::toOn});
+        m_fsm.addState(CWBVloopStates::ON, &CWBStateMachine::onOn,       {&CWBStateMachine::toFaultOff});
         // clang-format on
     }
 
