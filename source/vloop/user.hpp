@@ -11,6 +11,12 @@
 namespace user
 {
 
+    struct DataFrame
+    {
+        uint64_t             clk_cycles;
+        std::array<float, 9> data;
+    };
+
     template<typename T, std::size_t... Is>
     constexpr std::array<T, sizeof...(Is)> make_array(std::index_sequence<Is...>)
     {
@@ -30,22 +36,21 @@ namespace user
       public:
         Converter(vslib::RootComponent& root) noexcept
             : vslib::IConverter("example", root),
-              interrupt_1("timer", *this, std::chrono::microseconds(100'000), RTTask),
-              data_queue{fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueWriter<void>>(
+              interrupt_1("timer", *this, std::chrono::microseconds(100), RTTask),
+              data_queue{fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueWriter<DataFrame>>(
                   reinterpret_cast<uint8_t*>(app_data_2_3_ADDRESS + 3 * data_queue_size), data_queue_size
               )},
               bus_1(0xA0000000, pow(2, 24)),
               spi_1(bus_1, 0xE400),
-              //   adc_1(0),
-              //   adc_2(1),
-              //   adc_3(2),
-              //   adc_4(3),
-              //   adc_5(4),
-              //   adc_6(5),
-              adc_array(make_array<hal::UncalibratedADC, 24>()),
-              ad7606c_1(spi_1, 3, adc_array[0]),
-              ad7606c_2(spi_1, 4, adc_array[1]),
-              ad7606c_3(spi_1, 5, adc_array[2])
+              adc_1(0),
+              adc_2(1),
+              adc_3(2),
+              adc_4(3),
+              adc_5(4),
+              adc_6(5),
+              ad7606c_1(spi_1, 3, adc_1),
+              ad7606c_2(spi_1, 4, adc_2),
+              ad7606c_3(spi_1, 5, adc_3)
         {
             // initialize all your objects that need initializing
             std::cout << "Converter initialized\n";
@@ -54,19 +59,19 @@ namespace user
         // Define your public Components here
         vslib::TimerInterrupt<Converter> interrupt_1;
 
-        std::array<hal::UncalibratedADC, 24> adc_array;
+        // std::array<hal::UncalibratedADC, 24> adc_array;
 
-        hal::Bus       bus_1;
-        hal::XilAxiSpi spi_1;
-        // hal::UncalibratedADC adc_1;
-        // hal::UncalibratedADC adc_2;
-        // hal::UncalibratedADC adc_3;
-        // hal::UncalibratedADC adc_4;
-        // hal::UncalibratedADC adc_5;
-        // hal::UncalibratedADC adc_6;
-        hal::AD7606C ad7606c_1;
-        hal::AD7606C ad7606c_2;
-        hal::AD7606C ad7606c_3;
+        hal::Bus             bus_1;
+        hal::XilAxiSpi       spi_1;
+        hal::UncalibratedADC adc_1;
+        hal::UncalibratedADC adc_2;
+        hal::UncalibratedADC adc_3;
+        hal::UncalibratedADC adc_4;
+        hal::UncalibratedADC adc_5;
+        hal::UncalibratedADC adc_6;
+        hal::AD7606C         ad7606c_1;
+        hal::AD7606C         ad7606c_2;
+        hal::AD7606C         ad7606c_3;
 
         // ...
         // end of your Components
@@ -119,20 +124,34 @@ namespace user
 
         static void RTTask(Converter& converter)
         {
-            converter.adc_array[0].start();
-            const auto value = converter.adc_array[0].readConverted(1);
-            converter.data_queue.write(std::span<const uint8_t>{reinterpret_cast<const uint8_t*>(&value), sizeof(value)}
-            );
+            constexpr double scaling
+                = 2 * 1.0 / 1.2;   // 1 / 1.2 GHz but clock is running at half the 1.2 GHz frequency
 
-            if (converter.counter++ % 1000)
+            const uint64_t clk_value = scaling * bmboot::getCycleCounterValue();
+            converter.adc_1.start();
+            converter.adc_2.start();
+
+            converter.adc_values.clk_cycles = clk_value;
+            for (auto index = 0; index < 8; index++)
             {
-                std::cout << converter.adc_array[0].readConverted(1) << "\n";
+                // the first value is ground, then 7 meaningful channels
+                converter.adc_values.data[index] = converter.adc_1.readConverted(index);
+            }
+            // the 8th signal can be read from the next ADC chip
+            converter.adc_values.data[index] = converter.adc_2.readConverted(1);
+            converter.data_queue.write(converter.adc_values, {});
+            converter.counter++;
+            if (converter.counter > 100'000)
+            {
+                exit(0);
             }
         }
 
+        DataFrame adc_values;
+
         int counter{0};
 
-        fgc4::utils::MessageQueueWriter<void> data_queue;
+        fgc4::utils::MessageQueueWriter<DataFrame> data_queue;
     };
 
 }   // namespace user

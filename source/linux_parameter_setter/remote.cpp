@@ -1,5 +1,6 @@
 #include <array>
 #include <fcntl.h>
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <string>
@@ -247,6 +248,12 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     return commands;
 }
 
+struct DataFrame
+{
+    uint64_t             clk_cycles;
+    std::array<float, 9> data;
+};
+
 int main(int argc, char* argv[])
 {
     fprintf(stderr, "Start Bmboot\n");
@@ -284,13 +291,14 @@ int main(int argc, char* argv[])
         (uint8_t*)buffer.data() + json_queue_size + string_queue_size, json_queue_size
     );
 
-    auto read_data_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<double>>(
+    auto read_data_queue = fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueReader<DataFrame>>(
         (uint8_t*)buffer.data() + json_queue_size * 3, json_queue_size
     );
 
     // Define the file to output the ADC values coming from the bare metal
     std::filesystem::path adc_output_path = "./adc_output.csv";
-    std::ofstream         adc_output_file(adc_output_path.c_str());
+    std::ofstream         adc_output_file;
+    adc_output_file.open(adc_output_path.c_str());
 
     fprintf(stderr, "Run payload\n");
     bmboot::loadPayloadFromFileOrThrow(*domain, argv[1]);
@@ -306,7 +314,7 @@ int main(int argc, char* argv[])
     size_t            commands_sent = 0;
     while (true)
     {
-        std::cout << "Linux counter: " << counter++ << "\n";
+        // std::cout << "Linux counter: " << counter++ << "\n";
         // TEST CODE FOR TRANSFERRING COMMANDS
         // there are 3 PID with 9 params + RST with 1 parameter, so 10 in total,
         // modulo prevents setting not used fields
@@ -331,7 +339,7 @@ int main(int argc, char* argv[])
             }
             else
             {
-                std::cout << "No status\n";
+                // std::cout << "No status\n";
             }
             if (commands_sent < commands.size())
             {
@@ -346,11 +354,27 @@ int main(int argc, char* argv[])
         //     break;
         // }
 
+        uint64_t microseconds_since_epoch
+            = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch())
+                  .count();
         auto data_queue_message = read_data_queue.read(data_buffer);
         if (data_queue_message.has_value())
         {
-            const auto value = data_queue_message.value().first;
-            adc_output_file << value << '\n';
+            const std::array<float, 8> values = data_queue_message.value().first.data;
+
+            // std::cout << "received " << values[1] << " at " << microseconds_since_epoch << " or "
+            //   << data_queue_message.value().first.clk_cycles << '\n';
+
+            adc_output_file << data_queue_message.value().first.clk_cycles << ',' << microseconds_since_epoch << ',';
+            for (int index = 0; index < 9; index++)
+            {
+                adc_output_file << values[index] << ",";
+            }
+            adc_output_file << '\n';
+            // if (counter++ >= 100'000)
+            // {
+            // break;
+            // }
         }
 
         // END OF TEST CODE

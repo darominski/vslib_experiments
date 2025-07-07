@@ -129,7 +129,8 @@ namespace hal
       private:
         ipCores::Top::AdcUncalintArrayItem::Adc m_regs;   //!< IP core with register definitions
 
-        std::array<uint32_t, adc_number_ports> m_values;   //!< Array holding all port values from the ADC
+        std::array<uint32_t, adc_number_ports> m_values;        //!< Array holding all port values from the ADC
+        std::array<float, adc_number_ports>    m_values_conv;   //!< Array holding all port values from the ADC
     };
 
 }   // namespace hal
