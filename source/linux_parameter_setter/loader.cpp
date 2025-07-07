@@ -218,8 +218,7 @@ int main(int argc, char* argv[])
         {
             const std::array<float, 9> values = data_queue_message.value().first.data;
 
-            std::cout << "received " << values[1] << " at " << microseconds_since_epoch << " or "
-                      << data_queue_message.value().first.clk_cycles << '\n';
+            std::cout << "received " << values[1] << " at :" << data_queue_message.value().first.clk_cycles << '\n';
 
             adc_output_file << data_queue_message.value().first.clk_cycles << ',' << microseconds_since_epoch << ',';
             for (int index = 0; index < 9; index++)
