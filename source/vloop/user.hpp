@@ -14,7 +14,7 @@ namespace user
     struct DataFrame
     {
         uint64_t             clk_cycles;
-        std::array<float, 9> data;
+        std::array<float, 9> data{};
     };
 
     template<typename T, std::size_t... Is>
@@ -49,8 +49,8 @@ namespace user
               adc_5(4),
               adc_6(5),
               ad7606c_1(spi_1, 3, adc_1),
-              ad7606c_2(spi_1, 4, adc_2),
-              ad7606c_3(spi_1, 5, adc_3)
+              ad7606c_2(spi_1, 4, adc_2)
+        //   ad7606c_3(spi_1, 5, adc_3)
         {
             // initialize all your objects that need initializing
             std::cout << "Converter initialized\n";
@@ -71,7 +71,7 @@ namespace user
         hal::UncalibratedADC adc_6;
         hal::AD7606C         ad7606c_1;
         hal::AD7606C         ad7606c_2;
-        hal::AD7606C         ad7606c_3;
+        // hal::AD7606C         ad7606c_3;
 
         // ...
         // end of your Components
@@ -129,7 +129,6 @@ namespace user
 
             const uint64_t clk_value = scaling * bmboot::getCycleCounterValue();
             converter.adc_1.start();
-            converter.adc_2.start();
 
             converter.adc_values.clk_cycles = clk_value;
             for (auto index = 0; index < 8; index++)
@@ -137,14 +136,15 @@ namespace user
                 // the first value is ground, then 7 meaningful channels
                 converter.adc_values.data[index] = converter.adc_1.readConverted(index);
             }
+            converter.adc_2.start();
             // the 8th signal can be read from the next ADC chip
-            converter.adc_values.data[index] = converter.adc_2.readConverted(1);
+            converter.adc_values.data[8] = converter.adc_2.readConverted(1);
             converter.data_queue.write(converter.adc_values, {});
             converter.counter++;
-            if (converter.counter > 100'000)
-            {
-                exit(0);
-            }
+            // if (converter.counter > 100'000)
+            // {
+            //     exit(0);
+            // }
         }
 
         DataFrame adc_values;
