@@ -65,11 +65,17 @@ namespace hal
             }
             // first two bits are /WEN and /WRRD
             m_spi.write_data({0x3F & address, data & 0xFF});
+            usleep(1);
             m_spi.set_slave_select(~(0x1 << m_pin_index));
+            usleep(1);
             m_spi.start_transfer();
+            usleep(1);
             m_spi.wait_for_transfer_complete();
+            usleep(1);
             m_spi.inhibit_transfer();
+            usleep(1);
             m_spi.set_slave_select(~(0x0));
+            usleep(1);
         }
     };
 }   // namespace hal
