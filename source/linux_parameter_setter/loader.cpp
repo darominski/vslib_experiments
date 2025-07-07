@@ -91,7 +91,6 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["actuation_limits.upper_threshold"] = 1e12;
     values_to_set["actuation_limits.dead_zone"]       = std::array<double, 2>{0, 0};
 
-
     for (const auto& [name, _] : parameters)
     {
         const std::string param_name = name.substr(name.find_last_of(".") + 1, name.size());

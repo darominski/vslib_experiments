@@ -4,8 +4,6 @@
 #include <string>
 #include <unistd.h>
 
-#include "cheby_gen/reg_to_stream.hpp"
-#include "cheby_gen/stream_to_reg.hpp"
 #include "vslib.hpp"
 
 namespace user
@@ -17,25 +15,13 @@ namespace user
         std::array<float, 9> data{};
     };
 
-    template<typename T, std::size_t... Is>
-    constexpr std::array<T, sizeof...(Is)> make_array(std::index_sequence<Is...>)
-    {
-        return {{T(static_cast<int>(Is))...}};
-    }
-
-    template<typename T, std::size_t N>
-    constexpr std::array<T, N> make_array()
-    {
-        return make_array<T>(std::make_index_sequence<N>{});
-    }
-
     class Converter : public vslib::IConverter
     {
         static constexpr int data_queue_size = fgc4::utils::constants::json_memory_pool_size;   // 1 MB
 
       public:
         Converter(vslib::RootComponent& root) noexcept
-            : vslib::IConverter("example", root),
+            : vslib::IConverter("svc", root),
               interrupt_1("timer", *this, std::chrono::microseconds(100), RTTask),
               data_queue{fgc4::utils::createMessageQueue<fgc4::utils::MessageQueueWriter<DataFrame>>(
                   reinterpret_cast<uint8_t*>(app_data_2_3_ADDRESS + 3 * data_queue_size), data_queue_size
@@ -49,8 +35,8 @@ namespace user
               adc_5(4),
               adc_6(5),
               ad7606c_1(spi_1, 3, adc_1),
-              ad7606c_2(spi_1, 4, adc_2)
-        //   ad7606c_3(spi_1, 5, adc_3)
+              ad7606c_2(spi_1, 4, adc_2),
+              ad7606c_3(spi_1, 5, adc_3)
         {
             // initialize all your objects that need initializing
             std::cout << "Converter initialized\n";
@@ -58,8 +44,6 @@ namespace user
 
         // Define your public Components here
         vslib::TimerInterrupt<Converter> interrupt_1;
-
-        // std::array<hal::UncalibratedADC, 24> adc_array;
 
         hal::Bus             bus_1;
         hal::XilAxiSpi       spi_1;
@@ -71,7 +55,7 @@ namespace user
         hal::UncalibratedADC adc_6;
         hal::AD7606C         ad7606c_1;
         hal::AD7606C         ad7606c_2;
-        // hal::AD7606C         ad7606c_3;
+        hal::AD7606C         ad7606c_3;
 
         // ...
         // end of your Components
@@ -90,47 +74,18 @@ namespace user
 
         void backgroundTask() override
         {
-#ifdef PERFORMANCE_TESTS
-            if (counter > n_elements)
-            {
-                interrupt_1.stop();
-                const double scaling = 1.0 / 1.3333;   // 1 / 1.3333 GHz
-                double const mean    = interrupt_1.average() * scaling;
-                std::cout << "Average time per interrupt: (" << mean << " +- "
-                          << interrupt_1.standardDeviation(interrupt_1.average()) * scaling << ") ns" << std::endl;
-                auto const histogram = interrupt_1.histogramMeasurements<100>(interrupt_1.min(), interrupt_1.max());
-                for (auto const& value : histogram.getData())
-                {
-                    std::cout << value << " ";
-                }
-                std::cout << std::endl;
-                auto const bin_with_max = histogram.getBinWithMax();
-                auto const edges        = histogram.getBinEdges(bin_with_max);
-                std::cout << "bin with max: " << bin_with_max
-                          << ", centered at: " << 0.5 * (edges.first * scaling + edges.second * scaling) << std::endl;
-                const auto min = interrupt_1.min() * scaling;
-                const auto max = interrupt_1.max() * scaling;
-                std::cout << "min: " << min << " ns, max: " << max << " ns" << std::endl;
-                exit(0);
-            }
-#endif
-        }
-
-        template<typename SourceType, typename TargetType>
-        static TargetType cast(SourceType input)
-        {
-            return std::bit_cast<TargetType>(input);
         }
 
         static void RTTask(Converter& converter)
         {
-            constexpr double scaling
-                = 2 * 1.0 / 1.2;   // 1 / 1.2 GHz but clock is running at half the 1.2 GHz frequency
+            // 1 / 1.2 GHz but clock is running at half the 1.2 GHz frequency:
+            constexpr double scaling = 2 * 1.0 / 1.2;
 
             const uint64_t clk_value = scaling * bmboot::getCycleCounterValue();
+            converter.adc_values.clk_cycles = clk_value;
+
             converter.adc_1.start();
 
-            converter.adc_values.clk_cycles = clk_value;
             for (auto index = 0; index < 8; index++)
             {
                 // the first value is ground, then 7 meaningful channels
