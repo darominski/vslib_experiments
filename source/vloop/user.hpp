@@ -6,7 +6,7 @@
 
 #include "cheby_gen/reg_to_stream.hpp"
 #include "cheby_gen/stream_to_reg.hpp"
-#include "fsm_dcdc_floating.hpp"
+#include "fsm_dcdc_charging.hpp"
 #include "pops_constants.hpp"
 #include "pops_utils.hpp"
 #include "vslib.hpp"
@@ -243,6 +243,17 @@ namespace user
             return true;
         }
 
+        double getVdcFloatings()
+        {
+            return m_vdc_meas;
+        }
+
+        bool checkAllFloatingVloopInBK()
+        {
+            // TODO
+            return false;
+        }
+
       private:
         int counter{0};
 
@@ -254,7 +265,7 @@ namespace user
 
         uint8_t m_buffer[ipCores::StreamToReg::size];
 
-        DCDCFloatingStateMachine vs_state;
+        DCDCChargerStateMachine vs_state;
 
         ILoopStates m_i_loop_state{ILoopStates::FO};
         int         m_i_loop_communication{0};
@@ -304,39 +315,39 @@ namespace user
             const auto current_state        = vs_state.getState();
             int        state_representation = 0;
 
-            if (current_state == DCDCFloatingVloopStates::FO)
+            if (current_state == DCDCChargerVloopStates::FO)
             {
                 state_representation = 1;
             }
-            else if (current_state == DCDCFloatingVloopStates::FS)
+            else if (current_state == DCDCChargerVloopStates::FS)
             {
                 state_representation = 2;
             }
-            else if (current_state == DCDCFloatingVloopStates::OF)
+            else if (current_state == DCDCChargerVloopStates::OF)
             {
                 state_representation = 3;
             }
-            else if (current_state == DCDCFloatingVloopStates::SP)
+            else if (current_state == DCDCChargerVloopStates::SP)
             {
                 state_representation = 4;
             }
-            else if (current_state == DCDCFloatingVloopStates::ST)
+            else if (current_state == DCDCChargerVloopStates::ST)
             {
                 state_representation = 5;
             }
-            else if (current_state == DCDCFloatingVloopStates::BK)
+            else if (current_state == DCDCChargerVloopStates::BK)
             {
                 state_representation = 6;
             }
-            else if (current_state == DCDCFloatingVloopStates::CH)
-            {
-                state_representation = 7;
-            }
-            else if (current_state == DCDCFloatingVloopStates::CD)
-            {
-                state_representation = 8;
-            }
-            else if (current_state == DCDCFloatingVloopStates::DT)
+            // else if (current_state == DCDCChargerVloopStates::CH)
+            // {
+            //     state_representation = 7;
+            // }
+            // else if (current_state == DCDCChargerVloopStates::CD)
+            // {
+            //     state_representation = 8;
+            // }
+            else if (current_state == DCDCChargerVloopStates::DT)
             {
                 state_representation = 9;
             }

@@ -30,7 +30,7 @@ include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
 add_subdirectory(../vslib ${CMAKE_CURRENT_BINARY_DIR}/vslib)
 
 add_bmboot_payload(${APP}
-  fsm_dcdc_floating.cpp
+  fsm_dcdc_charging.cpp
   ../vslib/main.cpp
   )
 
