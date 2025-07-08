@@ -34,6 +34,13 @@ namespace user
         CY,
     };
 
+    enum class PFMStates
+    {
+        // TODO
+        FO,
+        ON
+    };
+
     // bool check400VOpen()
     // {
     //     // TODO: checks whether the 400 V is open
@@ -58,17 +65,11 @@ namespace user
     //     return false;
     // }
 
-    // bool checkIntertripLight()
-    // {
-    //     // TODO: check if intertrip is ON
-    //     return false;
-    // }
-
-    // bool checkHMIRequestStop()
-    // {
-    //     // TODO: check if the HMI force stop condition is fulfilled
-    //     return false;
-    // }
+    inline bool checkHMIRequestStop()
+    {
+        // TODO: check if the HMI force stop condition is fulfilled
+        return false;
+    }
 
     // bool checkHMIStop()
     // {
@@ -82,40 +83,31 @@ namespace user
     //     return false;
     // }
 
+    //! Checks for interlock, implementation TODO
+    //!
+    //! @return True for interlock issue, false otherwise
+    inline bool checkInterlock()
+    {
+        // TODO: check the status of the interlock
+        return false;
+    }
 
-    // bool checkInterlock()
-    // {
-    //     // TODO: check the status of the interlock
-    //     return false;
-    // }
+    //! Checks for gateware faults, implementation TODO
+    //!
+    //! @return True if a fault has been found, false otherwise
+    inline bool checkGatewareFault()
+    {
+        // TODO: check if conditions for a gateware fault are fulfilled
+        return false;
+    }
 
-    // bool checkGatewareFault()
-    // {
-    //     // TODO: check if conditions for a gateware fault are fulfilled
-    //     return false;
-    // }
+    //! Checks that outputs are equal to 0110.
+    //!
+    //! @return True if outputs are as expected, false otherwise
+    inline bool checkOutputsReady()
+    {
+        // TODO: check if outputs == 0110
+        return true;
+    }
 
-    // bool checkVSRunReceived()
-    // {
-    //     // TODO: check if VS_RUN has been received from I_loop
-    //     return false;
-    // }
-
-    // bool checkUnblockReceived()
-    // {
-    //     // TODO: check if 'Unblock' has been received from I_loop
-    //     return false;
-    // }
-
-    // bool checkOutputsReady()
-    // {
-    //     // TODO: check if outputs == 0110
-    //     return false;
-    // }
-
-    // int getVloopMask()
-    // {
-    //     // TODO: get Vloop mask setting
-    //     return false;
-    // }
 }   // namespace user

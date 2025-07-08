@@ -6,7 +6,7 @@
 
 #include "cheby_gen/reg_to_stream.hpp"
 #include "cheby_gen/stream_to_reg.hpp"
-#include "fsm_crowbar.hpp"
+#include "fsm_dcdc_floating.hpp"
 #include "pops_constants.hpp"
 #include "pops_utils.hpp"
 #include "vslib.hpp"
@@ -23,7 +23,7 @@ namespace user
               m_r2scpp(reinterpret_cast<uint8_t*>(0xA0100000)),
               vs_state(*this)
         {
-            std::cout << "Class startup completed.\n";
+            std::cout << "Converter object initialization completed.\n";
             // initialize all your objects that need initializing
         }
 
@@ -139,28 +139,16 @@ namespace user
                 converter.m_data[index] = cast<uint64_t, double>(converter.m_s2rcpp.data[index].read());
             }
 
-            const auto v_dc_meas          = converter.m_data[0];
+            converter.m_vdc_meas          = converter.m_data[0];
             const auto i_loop_state_value = converter.m_data[1];
             converter.setIloopState(i_loop_state_value);
             converter.m_i_loop_communication = converter.m_data[2];
-            const auto plc_comm              = converter.m_data[3];
-            const auto vloop_mask            = converter.m_data[4];
+            converter.m_plc_communication    = converter.m_data[3];
+            converter.m_vloop_mask           = converter.m_data[4];
             converter.m_fault                = converter.m_data[5];
 
             converter.vs_state.update();
-
-            const auto current_state     = converter.vs_state.getState();
-            int        current_state_int = 0;
-
-            if (current_state == CWBVloopStates::FO)
-            {
-                current_state_int = 1;
-            }
-            else if (current_state == CWBVloopStates::ON)
-            {
-                current_state_int = 9;
-            }
-            converter.m_data[0] = current_state_int;
+            converter.m_data[0] = converter.getFsmStateAsInt();
 
             // write to output registers
             for (uint32_t index = 0; index < num_data; index++)
@@ -174,16 +162,76 @@ namespace user
             converter.counter++;
         }
 
-        ILoopStates m_i_loop_state{ILoopStates::FO};
-        int         m_i_loop_communication{0};
-        int         m_fault{0};
-
         //! Provides information whether the VS_RUN has been received.
         //!
         //! @return True if VS_RUN has been received, false otherwise.
         bool checkVSRunReceived() const
         {
             return (m_i_loop_communication == 1);
+        }
+
+        //! Provides information whether the UNBLOCK has been received.
+        //!
+        //! @return True if UNBLOCK has been received, false otherwise.
+        bool checkUnblockReceived() const
+        {
+            return (m_i_loop_communication == 2);
+        }
+
+        //! Provides the status of the Vloop mask.
+        //!
+        //! @return Vloop mask value.
+        int getVloopMask() const
+        {
+            return m_vloop_mask;
+        }
+
+        //! Provides the value of the measured DC voltage
+        //!
+        //! @return Vdc meas value
+        double getVdc() const
+        {
+            return m_vdc_meas;
+        }
+
+        //! Provides the value of the output voltage
+        //!
+        //! @return Vout value
+        double getVout() const
+        {
+            return 0.0;
+        }
+
+        //! Provides the representation of the PLC communication.
+        //!
+        //! @return PLC communication status.
+        int getPLCCommunication() const
+        {
+            // 's vs reset' = 1
+            return m_plc_communication;
+        }
+
+        //! Returns the PFM state, currently it is not-functional
+        //!
+        //! @return The PFM state
+        PFMStates getPFMState() const
+        {
+            // real states TODO
+            return PFMStates::ON;
+        }
+
+        ILoopStates getILoopState() const
+        {
+            return m_i_loop_state;
+        }
+
+        //! Checks for gateware faults, implementation TODO
+        //!
+        //! @return True if a fault has been found, false otherwise
+        bool checkGatewareFault()
+        {
+            // TODO
+            return false;
         }
 
         //! Provides a feature to recognize when a fault is signalled, will be replaced by a register in real FGC4
@@ -206,7 +254,14 @@ namespace user
 
         uint8_t m_buffer[ipCores::StreamToReg::size];
 
-        CWBStateMachine vs_state;
+        DCDCFloatingStateMachine vs_state;
+
+        ILoopStates m_i_loop_state{ILoopStates::FO};
+        int         m_i_loop_communication{0};
+        int         m_fault{0};
+        int         m_plc_communication{0};
+        int         m_vloop_mask;
+        double      m_vdc_meas;
 
         void setIloopState(const int state_value)
         {
@@ -242,6 +297,50 @@ namespace user
                 default:
                     break;
             }
+        }
+
+        int getFsmStateAsInt() const
+        {
+            const auto current_state        = vs_state.getState();
+            int        state_representation = 0;
+
+            if (current_state == DCDCFloatingVloopStates::FO)
+            {
+                state_representation = 1;
+            }
+            else if (current_state == DCDCFloatingVloopStates::FS)
+            {
+                state_representation = 2;
+            }
+            else if (current_state == DCDCFloatingVloopStates::OF)
+            {
+                state_representation = 3;
+            }
+            else if (current_state == DCDCFloatingVloopStates::SP)
+            {
+                state_representation = 4;
+            }
+            else if (current_state == DCDCFloatingVloopStates::ST)
+            {
+                state_representation = 5;
+            }
+            else if (current_state == DCDCFloatingVloopStates::BK)
+            {
+                state_representation = 6;
+            }
+            else if (current_state == DCDCFloatingVloopStates::CH)
+            {
+                state_representation = 7;
+            }
+            else if (current_state == DCDCFloatingVloopStates::CD)
+            {
+                state_representation = 8;
+            }
+            else if (current_state == DCDCFloatingVloopStates::DT)
+            {
+                state_representation = 9;
+            }
+            return state_representation;
         }
     };
 

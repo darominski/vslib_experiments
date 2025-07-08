@@ -24,6 +24,8 @@ namespace user
         DT    // direct
     };
 
+    class Converter;
+
     class DCDCFloatingStateMachine
     {
         using StateMachine = ::utils::Fsm<DCDCFloatingVloopStates, DCDCFloatingStateMachine, false>;
@@ -36,209 +38,52 @@ namespace user
         using TransitionFunc = ::utils::FsmTransitionResult<DCDCFloatingVloopStates> (DCDCFloatingStateMachine::*)();
 
       public:
-        DCDCFloatingStateMachine()
-            : m_fsm(*this, DCDCFloatingVloopStates::FO)
-        {
-            // Initialize handles for the i_loop state, gateware status, interlock status, and PFM state
+        DCDCFloatingStateMachine(Converter&);
 
-            // CAUTION: The order of transition method matters
-            // clang-format off
-            m_fsm.addState(DCDCFloatingVloopStates::FO, &DCDCFloatingStateMachine::onFaultOff,      {&DCDCFloatingStateMachine::toOff});
-            m_fsm.addState(DCDCFloatingVloopStates::FS, &DCDCFloatingStateMachine::onFaultStopping, {&DCDCFloatingStateMachine::toFaultOff});
-            m_fsm.addState(DCDCFloatingVloopStates::OF, &DCDCFloatingStateMachine::onOff,           {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStarting});
-            m_fsm.addState(DCDCFloatingVloopStates::SP, &DCDCFloatingStateMachine::onStopping,      {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toOff});
-            m_fsm.addState(DCDCFloatingVloopStates::ST, &DCDCFloatingStateMachine::onStarting,      {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStopping, &DCDCFloatingStateMachine::toBlocking});
-            m_fsm.addState(DCDCFloatingVloopStates::BK, &DCDCFloatingStateMachine::onBlocking,      {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStopping, &DCDCFloatingStateMachine::toCharging});
-            m_fsm.addState(DCDCFloatingVloopStates::CH, &DCDCFloatingStateMachine::onCharging,      {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStopping, &DCDCFloatingStateMachine::toCharged});
-            m_fsm.addState(DCDCFloatingVloopStates::CD, &DCDCFloatingStateMachine::onCharged,       {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStopping, &DCDCFloatingStateMachine::toDirect});
-            m_fsm.addState(DCDCFloatingVloopStates::DT, &DCDCFloatingStateMachine::onDirect,        {&DCDCFloatingStateMachine::toFaultStopping, &DCDCFloatingStateMachine::toStopping, &DCDCFloatingStateMachine::toCharged});
-            // clang-format on
-        }
+        void update();
 
-        void update()
-        {
-            m_fsm.update();
-        }
-
-        [[nodiscard]] auto getState() const noexcept
-        {
-            return m_fsm.getState();
-        }
+        [[nodiscard]] DCDCFloatingVloopStates getState() const noexcept;
 
       private:
         StateMachine m_fsm;
 
-        void onFaultOff()
-        {
-            // open the safety chain?
-        }
-        void onFaultStopping()
-        {
-        }
-        void onOff()
-        {
-        }
-        void onStopping()
-        {
-        }
-        void onStarting()
-        {
-        }
-        void onBlocking()
-        {
-            // send VS power ON
-            // send VS ready
-        }
-        void onCharging()
-        {
-        }
-        void onCharged()
-        {
-        }
-        void onDirect()
-        {
-        }
+        Converter& m_dcdc_floating;
 
-        TransRes toFaultOff()
-        {
-            // from FS and DC bus is discharged
-            if (getVdc() < constants::v_dc_min)
-            {
-                return TransRes{DCDCFloatingVloopStates::FO};
-            }
+        void onFaultOff();
 
-            // no transition
-            return {};
-        }
+        void onFaultStopping();
 
-        TransRes toFaultStopping()
-        {
-            if (checkGatewareFault() || checkInterlock() || i_loop.getState() == IloopStates::FS
-                || pfm.getState() == PFMStates::FO)
-            {
-                return TransRes{DCDCFloatingVloopStates::FS};
-            }
+        void onOff();
 
-            // no transition
-            return {};
-        }
+        void onStopping();
 
-        TransRes toOff()
-        {
-            // Iloop goes to off
-            if (i_loop.getState() == IloopStates::OF)
-            {
-                return TransRes{DCDCFloatingVloopStates::OF};
-            }
+        void onStarting();
 
-            // no transition
-            return {};
-        }
+        void onBlocking();
 
-        TransRes toStopping()
-        {
-            // from any state if Iloop is stopping
-            if (i_loop.getState() == IloopStates::SP)
-            {
-                return TransRes{DCDCFloatingVloopStates::SP};
-            }
+        void onCharging();
 
-            // HMI request to stop
-            if (checkHMIRequestStop())
-            {
-                // transition to stopping if current state is CH, CD, and DT
-                if (getState() == DCDCFloatingVloopStates::CH || getState() == DCDCFloatingVloopStates::CD
-                    || getState() == DCDCFloatingVloopStates::DT)
-                {
-                    return TransRes{DCDCFloatingVloopStates::SP};
-                }
-                else   // FS otherwise
-                {
-                    return TransRes{DCDCFloatingVloopStates::FS};
-                }
-            }
+        void onCharged();
 
-            // no transition
-            return {};
-        }
+        void onDirect();
 
-        TransRes toStarting()
-        {
-            // VS_RUN received from Iloop
-            if (checkVSRunReceived())
-            {
-                return TransRes{DCDCFloatingVloopStates::ST};
-            }
+        TransRes toFaultOff();
 
-            // no transition
-            return {};
-        }
+        TransRes toFaultStopping();
 
-        TransRes toBlocking()
-        {
-            // 0110 on inputs and V_out = 0 V
-            if (checkOutputsReady() && getVout() < constants::v_out_threshold)
-            {
-                return TransRes{DCDCFloatingVloopStates::BK};
-            }
+        TransRes toOff();
 
-            // no transition
-            return {};
-        }
+        TransRes toStopping();
 
-        TransRes toCharging()
-        {
-            // 'unblock' received from Iloop
-            if (checkUnblockReceived())
-            {
-                return TransRes{DCDCFloatingVloopStates::CH};
-            }
+        TransRes toStarting();
 
-            // no transition
-            return {};
-        }
+        TransRes toBlocking();
 
-        TransRes toCharged()
-        {
-            // from CH, Vdc > threshold
-            if (getState() == DCDCFloatingVloopStates::CH && getVdc() >= constants::v_dc_floatings_charged_threshold)
-            {
-                return TransRes{DCDCFloatingVloopStates::CD};
-            }
+        TransRes toCharging();
 
-            // from DT, Vloop MASK set to 0
-            if (getState() == DCDCFloatingVloopStates::DT && getVloopMask() == 0)
-            {
-                return TransRes{DCDCFloatingVloopStates::CD};
-            }
+        TransRes toCharged();
 
-            // no transition
-            return {};
-        }
-
-        TransRes toDirect()
-        {
-            // Vloop MASK set to 1
-            if (getVloopMask() == 1)
-            {
-                return TransRes{DCDCFloatingVloopStates::DT};
-            }
-
-            // no transition
-            return {};
-        }
-
-        double getVdc()
-        {
-            // TODO: get V dc
-            return 0.0;
-        }
-
-        double getVout()
-        {
-            // TODO: get V out
-            return 0.0;
-        }
+        TransRes toDirect();
     };
 
 }   // namespace user
