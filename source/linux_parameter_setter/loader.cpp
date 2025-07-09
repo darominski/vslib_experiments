@@ -107,6 +107,7 @@ struct DataFrame
 {
     uint64_t             clk_cycles;
     std::array<float, 9> data;
+    double pll_data;
 };
 
 int main(int argc, char* argv[])
@@ -224,6 +225,7 @@ int main(int argc, char* argv[])
             {
                 adc_output_file << values[index] << ",";
             }
+            adc_output_file << data_queue_message.value().first.pll_data;
             adc_output_file << '\n';
             if (counter++ >= 100'000)
             {

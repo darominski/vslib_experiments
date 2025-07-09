@@ -13,6 +13,7 @@ namespace user
     {
         uint64_t             clk_cycles;
         std::array<float, 9> data{};
+        double pll_data;
     };
 
     class Converter : public vslib::IConverter
@@ -36,7 +37,8 @@ namespace user
               adc_6(5),
               ad7606c_1(spi_1, 3, adc_1),
               ad7606c_2(spi_1, 4, adc_2),
-              ad7606c_3(spi_1, 5, adc_3)
+              ad7606c_3(spi_1, 5, adc_3),
+              srfpll("pll", *this)
         {
             // initialize all your objects that need initializing
             std::cout << "Converter initialized\n";
@@ -56,6 +58,7 @@ namespace user
         hal::AD7606C         ad7606c_1;
         hal::AD7606C         ad7606c_2;
         hal::AD7606C         ad7606c_3;
+        vslib::SRFPLL        srfpll;
 
         // ...
         // end of your Components
@@ -94,12 +97,22 @@ namespace user
             converter.adc_2.start();
             // the 8th signal can be read from the next ADC chip
             converter.adc_values.data[8] = converter.adc_2.readConverted(1);
-            converter.data_queue.write(converter.adc_values, {});
-            converter.counter++;
+
             // if (converter.counter > 100'000)
             // {
             //     exit(0);
             // }
+
+            const double v_a = converter.adc_values.data[1];
+            const double v_b = converter.adc_values.data[2];
+            const double v_c = converter.adc_values.data[3];
+
+            converter.adc_values.pll_data = converter.srfpll.synchronise(v_a, v_b, v_c);
+            // std::cout << wt_pll << '\n';
+
+            converter.data_queue.write(converter.adc_values, {});
+            converter.counter++;
+
         }
 
         DataFrame adc_values;
