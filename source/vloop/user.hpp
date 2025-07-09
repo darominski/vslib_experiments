@@ -6,7 +6,7 @@
 
 #include "cheby_gen/reg_to_stream.hpp"
 #include "cheby_gen/stream_to_reg.hpp"
-#include "fsm_dcdc_charging.hpp"
+#include "fsm_afe.hpp"
 #include "pops_constants.hpp"
 #include "pops_utils.hpp"
 #include "vslib.hpp"
@@ -146,6 +146,11 @@ namespace user
             converter.m_plc_communication    = converter.m_data[3];
             converter.m_vloop_mask           = converter.m_data[4];
             converter.m_fault                = converter.m_data[5];
+            converter.m_cb_open              = converter.m_data[6];
+            converter.m_K1_open              = converter.m_data[7];
+            converter.m_K2_open              = converter.m_data[8];
+            converter.m_K3_open              = converter.m_data[9];
+            converter.m_reg_on               = converter.m_data[10];
 
             converter.vs_state.update();
             converter.m_data[0] = converter.getFsmStateAsInt();
@@ -254,6 +259,26 @@ namespace user
             return false;
         }
 
+        bool checkCBOpen()
+        {
+            return (m_cb_open == 1);
+        }
+
+        bool checkK1Open()
+        {
+            return (m_K1_open == 1);
+        }
+
+        bool checkK2Open()
+        {
+            return (m_K2_open == 1);
+        }
+
+        bool checkK3Open()
+        {
+            return (m_K3_open == 1);
+        }
+
       private:
         int counter{0};
 
@@ -265,14 +290,19 @@ namespace user
 
         uint8_t m_buffer[ipCores::StreamToReg::size];
 
-        DCDCChargerStateMachine vs_state;
+        AFEStateMachine vs_state;
 
         ILoopStates m_i_loop_state{ILoopStates::FO};
         int         m_i_loop_communication{0};
         int         m_fault{0};
         int         m_plc_communication{0};
-        int         m_vloop_mask;
+        int         m_vloop_mask{0};
         double      m_vdc_meas;
+        int         m_cb_open{0};
+        int         m_K1_open{0};
+        int         m_K2_open{0};
+        int         m_K3_open{0};
+        int         m_reg_on{0};
 
         void setIloopState(const int state_value)
         {
@@ -315,42 +345,42 @@ namespace user
             const auto current_state        = vs_state.getState();
             int        state_representation = 0;
 
-            if (current_state == DCDCChargerVloopStates::FO)
+            if (current_state == AFEVloopStates::FO)
             {
                 state_representation = 1;
             }
-            else if (current_state == DCDCChargerVloopStates::FS)
+            else if (current_state == AFEVloopStates::FS)
             {
                 state_representation = 2;
             }
-            else if (current_state == DCDCChargerVloopStates::OF)
+            else if (current_state == AFEVloopStates::OF)
             {
                 state_representation = 3;
             }
-            else if (current_state == DCDCChargerVloopStates::SP)
+            else if (current_state == AFEVloopStates::SP)
             {
                 state_representation = 4;
             }
-            else if (current_state == DCDCChargerVloopStates::ST)
+            else if (current_state == AFEVloopStates::SP)
             {
                 state_representation = 5;
             }
-            else if (current_state == DCDCChargerVloopStates::BK)
-            {
-                state_representation = 6;
-            }
-            // else if (current_state == DCDCChargerVloopStates::CH)
+            // else if (current_state == AFEVloopStates::ST)
             // {
-            //     state_representation = 7;
+            //     state_representation = 6;
             // }
-            // else if (current_state == DCDCChargerVloopStates::CD)
-            // {
-            //     state_representation = 8;
-            // }
-            else if (current_state == DCDCChargerVloopStates::DT)
+            else if (current_state == AFEVloopStates::PH)
             {
-                state_representation = 9;
+                state_representation = 7;
             }
+            else if (current_state == AFEVloopStates::PD)
+            {
+                state_representation = 8;
+            }
+            // else if (current_state == AFEVloopStates::DT)
+            // {
+            // state_representation = 9;
+            // }
             return state_representation;
         }
     };
