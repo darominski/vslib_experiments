@@ -13,7 +13,7 @@ namespace user
     {
         uint64_t             clk_cycles;
         std::array<float, 9> data{};
-        double pll_data;
+        double               pll_data;
     };
 
     class Converter : public vslib::IConverter
@@ -69,6 +69,8 @@ namespace user
 
         void init() override
         {
+            interrupt_1.stop();
+            usleep(10);
             std::cout << "Init finished\n";
             interrupt_1.start();
         }
@@ -82,9 +84,10 @@ namespace user
         static void RTTask(Converter& converter)
         {
             // 1 / 1.2 GHz but clock is running at half the 1.2 GHz frequency:
+            std::cout << "rt\n";
             constexpr double scaling = 2 * 1.0 / 1.2;
 
-            const uint64_t clk_value = scaling * bmboot::getCycleCounterValue();
+            const uint64_t clk_value        = scaling * bmboot::getCycleCounterValue();
             converter.adc_values.clk_cycles = clk_value;
 
             converter.adc_1.start();
@@ -94,14 +97,9 @@ namespace user
                 // the first value is ground, then 7 meaningful channels
                 converter.adc_values.data[index] = converter.adc_1.readConverted(index);
             }
-            converter.adc_2.start();
+            // converter.adc_2.start();
             // the 8th signal can be read from the next ADC chip
-            converter.adc_values.data[8] = converter.adc_2.readConverted(1);
-
-            // if (converter.counter > 100'000)
-            // {
-            //     exit(0);
-            // }
+            // converter.adc_values.data[8] = converter.adc_2.readConverted(1);
 
             const double v_a = converter.adc_values.data[1];
             const double v_b = converter.adc_values.data[2];
@@ -111,8 +109,12 @@ namespace user
             // std::cout << wt_pll << '\n';
 
             converter.data_queue.write(converter.adc_values, {});
-            converter.counter++;
 
+            if (converter.counter++ == 100'000)
+            {
+                converter.interrupt_1.stop();
+                exit(0);
+            }
         }
 
         DataFrame adc_values;
