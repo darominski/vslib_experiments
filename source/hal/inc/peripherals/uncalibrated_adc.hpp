@@ -25,7 +25,8 @@ namespace hal
         {
             m_regs = hal::Top::instance().adcUncalint[adc_id].adc;
             // TMP: IP core needs to be configured before use, eventually this will be handled by FGC4 configurator
-            setConfig(true, true, true, false, true, busy_src_ext, 0, false, 16, false);
+            setConfig(true, true, true, false, true, busy_src_ext, 0, false, 16, true);   // STG controlled
+            // setConfig(true, true, true, false, true, busy_src_ext, 0, false, 16, false); // user controlled
             // END OF TMP
         }
 
