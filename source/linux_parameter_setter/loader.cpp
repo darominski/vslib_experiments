@@ -218,7 +218,10 @@ int main(int argc, char* argv[])
         {
             const std::array<float, 9> values = data_queue_message.value().first.data;
 
-            std::cout << "received " << values[1] << " at :" << data_queue_message.value().first.clk_cycles << '\n';
+            if (counter++ % 10000 == 0)
+            {
+                std::cout << "received " << values[1] << " at :" << data_queue_message.value().first.clk_cycles << '\n';
+            }
 
             adc_output_file << data_queue_message.value().first.clk_cycles << ',' << microseconds_since_epoch << ',';
             for (int index = 0; index < 9; index++)
@@ -227,10 +230,10 @@ int main(int argc, char* argv[])
             }
             adc_output_file << data_queue_message.value().first.pll_data;
             adc_output_file << '\n';
-            // if (counter++ >= 100'000)
-            // {
-            //     break;
-            // }
+            if (counter++ >= 600'000)
+            {
+                break;
+            }
         }
 
         // END OF TEST CODE

@@ -84,7 +84,10 @@ namespace user
         static void RTTask(Converter& converter)
         {
             // 1 / 1.2 GHz but clock is running at half the 1.2 GHz frequency:
-            std::cout << "rt\n";
+            if (converter.counter % 1000 == 0)
+            {
+                std::cout << converter.counter << '\n';
+            }
             constexpr double scaling = 2 * 1.0 / 1.2;
 
             const uint64_t clk_value        = scaling * bmboot::getCycleCounterValue();
@@ -110,8 +113,9 @@ namespace user
 
             converter.data_queue.write(converter.adc_values, {});
 
-            if (converter.counter++ == 100'000)
+            if (converter.counter++ > 610'000)
             {
+                std::cout << "terminating\n";
                 converter.interrupt_1.stop();
                 exit(0);
             }
