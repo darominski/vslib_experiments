@@ -77,8 +77,8 @@ auto prepareCommands(const std::vector<std::pair<std::string, std::string>>& par
     values_to_set["pll.f_rated"]      = current_frequency;
     values_to_set["pll.angle_offset"] = 0.0;
 
-    values_to_set["pi.kp"]                      = 400.0;
-    values_to_set["pi.ki"]                      = 35000.0;
+    values_to_set["pi.kp"]                      = 10.0;
+    values_to_set["pi.ki"]                      = 320.0;
     values_to_set["pi.kd"]                      = 0.0;
     values_to_set["pi.kff"]                     = 0.0;
     values_to_set["pi.proportional_scaling"]    = 1.0;
