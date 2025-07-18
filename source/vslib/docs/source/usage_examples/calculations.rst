@@ -45,22 +45,52 @@ Usage example
 
 .. code-block:: cpp
 
-    #include "instantaneousPowerThreePhase.h"
-    #include "rootComponent.h"
+    #include "vslib.hpp"
 
-    using namespace vslib;
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              power_3ph_instant("power_3ph_instant", *this),
+            {
+            }
 
-    int main() {
-        RootComponent root;
-        InstantaneousPowerThreePhase power("power_3ph", root);
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
 
-        // set p_gain and q_gain to your values, for no gain set them to 1.0
+            // Define your public Components here
+            vslib::InstantaneousPowerThreePhase power_3ph_instant;
 
-        std::array<double, 3> v_abc{230.0, -115.0, 115.0};
-        std::array<double, 3> i_abc{10.0, -5.0, -5.0};
+            void init() override
+            {
+                interrupt_1.start();
+            }
 
-        const auto [p, q] = power.calculate(v_abc[0], v_abc[1], v_abc[2], i_abc[0], i_abc[1], i_abc[2]);
+            void backgroundTask() override
+            {
+            }
 
-        return 0;
-    }
+            static void RTTask(Converter& converter)
+            {
+                // Read the 3-phase voltages and currents
+                const double v_a           = converter.m_data[0];
+                const double v_b           = converter.m_data[1];
+                const double v_c           = converter.m_data[2];
+                const double i_a           = converter.m_data[3];
+                const double i_b           = converter.m_data[4];
+                const double i_c           = converter.m_data[5];
 
+                // calculate instantaneous P and Q components of power
+                const auto [p_meas, q_meas] = converter.power_3ph_instant.calculate(
+                    v_a, v_b, v_c, i_a, i_b, i_c
+                );
+            }
+
+            private:
+                std::array<double, 5> m_data{0.0};
+        };
+    }   // namespace fgc::user

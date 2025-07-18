@@ -152,6 +152,54 @@ Usage examples
         return 0;
     }
 
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              table("function", *this, fgc4::utils::generateFunction<int, double>([](const auto x){return 2*x + 1.5;}, 0.0, 10.0, 100), true)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::LookupTable<double> table;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input value:
+                const double data_x = converter.m_data[0];
+
+                const auto y = converter.table.interpolate(data_x);
+                // use the interpolated function value y at data_x
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 1> m_data{0.0};
+        };
+    }   // namespace fgc::user
+
 .. _periodicLookupTable_component:
 
 Periodic look-up table
@@ -198,6 +246,54 @@ Usage examples
 
         return 0;
     }
+
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              sin_table("function", *this, fgc4::utils::generateFunction<double, double>(std::sin, 0.0, two_pi, 1000), true);
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::PeriodicLookupTable<double> sin_table;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input value:
+                const double data_x = converter.m_data[0];
+
+                const auto y = converter.sin_table.interpolate(data_x);
+                // use the interpolated function value y at data_x
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 1> m_data{0.0};
+        };
+    }   // namespace fgc::user
 
 .. _sinLookupTable_component:
 

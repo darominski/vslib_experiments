@@ -67,6 +67,58 @@ Usage example
         return 0;
     }
 
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              pll("pll_1", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::SRFPLL pll;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input 3-phase voltage values:
+                const double v_a = converter.m_data[0];
+                const double v_b = converter.m_data[1];
+                const double v_c = converter.m_data[2];
+
+                // if you need only the angle:
+                const double wt_pll = converter.pll.synchronise(v_a, v_b, v_c);
+
+                // If observability of d an q components is required:
+                const auto [wt, d, q] = converter.pll.synchroniseWithDQ(v_a, v_b, v_c);
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 3> m_data{0.0};
+        };
+    }   // namespace fgc::user
 
 Performance
 -----------

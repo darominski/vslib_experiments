@@ -74,6 +74,61 @@ Usage example
         return 0;
     }
 
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              abc_to_dq0("abc_to_dq0", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::AbcToDq0Transform abc_to_dq0;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input 3-phase voltage values:
+                const double v_a    = converter.m_data[0];
+                const double v_b    = converter.m_data[1];
+                const double v_c    = converter.m_data[2];
+                const double theta  = converter.m_data[3];
+                const double offset = converter.m_data[4];
+
+                // no offset, q and a alignment:
+                auto [d_1, q_1, zero_1]   = abc_to_dq0.transform(v_a, v_b, v_c, theta);
+
+                // 90 degrees offset, d and a alignment:
+                auto [d_2, q_2, zero_2]   = abc_to_dq0.transform(v_a, v_b, v_c, theta, offset);
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 5> m_data{0.0};
+        };
+    }   // namespace fgc::user
+
 .. _dq0ToAbcTransform_component:
 
 dq0 to abc transformation
@@ -134,6 +189,61 @@ Usage example
         return 0;
     }
 
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              dq0_to_abc("dq0_to_abc", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::Dq0ToAbcTransform dq0_to_abc;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input 3-phase voltage values:
+                const double d    = converter.m_data[0];
+                const double q    = converter.m_data[1];
+                const double zero    = converter.m_data[2];
+                const double theta  = converter.m_data[3];
+                const double offset = converter.m_data[4];
+
+                // no offset, q and a alignment:
+                auto [a_1, b_2, c_2]   = dq0_to_abc.transform(d, q, zero, theta);
+
+                // 90 degrees offset, d and a alignment:
+                auto [a_2, b_2, c_2]   = dq0_to_abc.transform(d, q, zero, theta, offset);
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 5> m_data{0.0};
+        };
+    }   // namespace fgc::user
+
 .. _abcToAlphaBetaTransform_component:
 
 abc to alpha-beta transformation
@@ -178,6 +288,57 @@ Usage example
 
         return 0;
     }
+
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              abc_to_alphabeta("abc_to_alphabeta", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::AbcToAlphaBetaTransform abc_to_alphabeta;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input 3-phase voltage values:
+                const double v_a    = converter.m_data[0];
+                const double v_b    = converter.m_data[1];
+                const double v_c    = converter.m_data[2];
+
+                // no offset, q and a alignment:
+                auto [alpha, beta, zero] = abc_to_alphabeta.transform(v_a, v_b, v_c);
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 3> m_data{0.0};
+        };
+    }   // namespace fgc::user
+
 
 .. _alphaBetaToAbcTransform_component:
 

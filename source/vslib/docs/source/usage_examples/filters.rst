@@ -62,6 +62,55 @@ Usage example
         return 0;
     }
 
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              filter_1("box_filter_1", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::BoxFilter<5> filter_1;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input value:
+                const double input = converter.m_data[0];
+
+                const auto output = converter.filter_1.filter(input);
+                // use the output
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 1> m_data{0.0};
+        };
+    }   // namespace fgc::user
+
+
 .. _fir_component:
 
 Finite-impulse filter
@@ -112,6 +161,55 @@ Usage example
 
         return 0;
     }
+
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              filter_1("fir_filter_1", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::FIRFilter<5> filter_1;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input value:
+                const double input = converter.m_data[0];
+
+                const auto output = converter.filter_1.filter(input);
+                // use the output
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 1> m_data{0.0};
+        };
+    }   // namespace fgc::user
+
 
 .. _iir_component:
 
@@ -165,6 +263,55 @@ Usage example
 
         return 0;
     }
+
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              filter_1("iir_filter_1", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::IIRFilter<5> filter_1;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input value:
+                const double input = converter.m_data[0];
+
+                const auto output = converter.filter_1.filter(input);
+                // use the output
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 1> m_data{0.0};
+        };
+    }   // namespace fgc::user
+
 
 Performance
 -----------

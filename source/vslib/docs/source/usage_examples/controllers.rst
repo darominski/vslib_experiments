@@ -74,8 +74,10 @@ by the `RST` controller engine.
 
 For more details regarding the API, see the :ref:`API documentation for RST <rst_api>`.
 
-Usage example
-^^^^^^^^^^^^^
+Usage examples
+^^^^^^^^^^^^^^
+
+Features example in a free-standing main function (not vloop):
 
 .. code-block:: cpp
 
@@ -123,6 +125,55 @@ Usage example
 
         return 0;
     }
+
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              rst_1("rst_1", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::RST<2> rst_1;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the reference and measurement values:
+                const double reference   = converter.m_data[0];
+                const double measurement = converter.m_data[1];
+
+                const auto act = converter.rst_1.control(reference, measurement);
+                // use the act
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 2> m_data{0.0};
+        };
+    }   // namespace fgc::user
 
 .. _pid_component:
 
@@ -189,8 +240,10 @@ described in the :ref:`RST <rst_component>` section is performed.
 
 For more details regarding the API, see the :ref:`API documentation for PID <pid_api>`.
 
-Usage example
-^^^^^^^^^^^^^
+Usage examples
+^^^^^^^^^^^^^^
+
+Features example in a free-standing main function (not vloop):
 
 .. code-block:: cpp
 
@@ -242,6 +295,55 @@ Usage example
 
         return 0;
     }
+
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              pid_1("pid_1", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::PID pid_1;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the reference and measurement values:
+                const double reference   = converter.m_data[0];
+                const double measurement = converter.m_data[1];
+
+                const auto act = converter.pid.control(reference, measurement);
+                // use the act
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 2> m_data{0.0};
+        };
+    }   // namespace fgc::user
 
 
 Performance

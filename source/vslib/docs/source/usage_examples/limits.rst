@@ -66,7 +66,7 @@ Usage example
 
         double output;
 
-        output = limit.limit(3.14);   // output = 3.14
+        output = limit.limit(3.14);  // output = 3.14
         output = limit.limit(-5);    // output = 0
         output = limit.limit(11);    // output = 10
         output = limit.limit(14);    // output = 15
@@ -76,6 +76,55 @@ Usage example
 
         return 0;
     }
+
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              limit_1("range_limit_1", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::LimitRange<double> limit_1;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input value:
+                const double input = converter.m_data[0];
+
+                const auto limited_input = converter.limit_1.limit(input);
+                // use the limited_input
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 1> m_data{0.0};
+        };
+    }   // namespace fgc::user
+
 
 .. _limitRate_component:
 
@@ -154,6 +203,54 @@ Usage example
         return 0;
     }
 
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              limit_1("rate_limit_1", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::LimitRate<double> limit_1;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input value:
+                const double input = converter.m_data[0];
+
+                const auto limited_input = converter.limit_1.limit(input);
+                // use the limited_input
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 1> m_data{0.0};
+        };
+    }   // namespace fgc::user
+
 .. _limitIntegral_component:
 
 LimitIntegral
@@ -207,6 +304,54 @@ Usage example
 
         return 0;
     }
+
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              limit_1("integral_limit_1", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::LimitIntegral<double> limit_1;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input value:
+                const double input = converter.m_data[0];
+
+                const bool within_limits = converter.limit_1.limit(input);
+                // check if value is within limits
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 1> m_data{0.0};
+        };
+    }   // namespace fgc::user
 
 .. _limitRms_component:
 
@@ -283,3 +428,51 @@ Usage example
 
         return 0;
     }
+
+Example usage in a vloop:
+
+.. code-block:: cpp
+
+    #include "vslib.hpp"
+
+    namespace fgc::user
+    {
+        class Converter : public vslib::IConverter
+        {
+        public:
+            Converter(vslib::RootComponent& root) noexcept
+            : vslib::IConverter("example", root),
+              interrupt_1("stg", *this, 128, vslib::InterruptPriority::high, RTTask),
+              limit_1("rms_limit_1", *this)
+            {
+            }
+
+            // Define your interrupts here
+            vslib::PeripheralInterrupt<Converter> interrupt_1;
+
+            // Define your public Components here
+            vslib::LimitRms<double> limit_1;
+
+            void init() override
+            {
+                interrupt_1.start();
+            }
+
+            void backgroundTask() override
+            {
+            }
+
+            static void RTTask(Converter& converter)
+            {
+                // Read the input value:
+                const double input = converter.m_data[0];
+
+                const bool within_limits = converter.limit_1.limit(input);
+                // check if value is within limits
+            }
+
+            private:
+                // actual source of data omitted for simplicity
+                std::array<double, 1> m_data{0.0};
+        };
+    }   // namespace fgc::user
