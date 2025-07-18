@@ -1,8 +1,8 @@
 // This header file was auto-generated using cheby
-// User: adrian
-// Date: 2025-05-28 17:16:38.897587
+// User: jonas
+// Date: 2025-07-16 16:15:38.513191
 // Source map: mb_top.cheby
-// Command used: /usr/local/bin/cheby --gen-cpp=cpp/mb_top.cpp --cpp-json=cpp/mb_top.json -i mb_top.cheby
+// Command used: /usr/local/bin/cheby --gen-cpp=cpp/mb_top.hpp --cpp-json=cpp/mb_top.json -i mb_top.cheby
 //
 // It is meant to be used in conjunction with the MemMap++ library (mmpp):
 //     https://gitlab.cern.ch/czrounba/mmpp
@@ -21,7 +21,7 @@ namespace ipCores
     //! ::Top
     //!
     //! Top level address space mapping for FGC4 Main Board FPGA
-    struct Top : MemModule<59392, uint32_t, attributes::ByteOrdering::little, attributes::WordOrdering::big>
+    struct Top : MemModule<132112, uint32_t, attributes::ByteOrdering::little, attributes::WordOrdering::big>
     {
         // No version information provided.
 
@@ -35,6 +35,18 @@ namespace ipCores
             // Construct new item in place using the new base address
             *this = Top(new_base);
         }
+
+        struct XilSpi : MemSubmodule<Top, 128>
+        {
+
+            using MemSubmodule::MemSubmodule;
+        };
+
+        struct XilI2c : MemSubmodule<Top, 512>
+        {
+
+            using MemSubmodule::MemSubmodule;
+        };
 
         struct AdcCalint : MemSubmodule<Top, 128>
         {
@@ -760,12 +772,12 @@ namespace ipCores
             ChannelArray channel{base() + 0};   //!< The 62 ADCs
         };
 
-        struct Dig : MemSubmodule<Top, 8192>
+        struct Dig : MemSubmodule<Top, 16384>
         {
 
             using MemSubmodule::MemSubmodule;
 
-            struct DigI0 : MemSubmodule<Dig, 512>
+            struct DigI0 : MemSubmodule<Dig, 1024>
             {
 
                 using MemSubmodule::MemSubmodule;
@@ -828,19 +840,33 @@ namespace ipCores
                     using MemReg::MemReg;
                 };
 
-                struct FilterLengthScArrayItem : MemSubmodule<DigI0, 4>
+                struct FastFilterScArrayItem : MemSubmodule<DigI0, 4>
                 {
 
                     using MemSubmodule::MemSubmodule;
 
-                    struct Val : MemReg<FilterLengthScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    struct Val : MemReg<FastFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
                     {
                         using MemReg::MemReg;
                     };
 
                     Val val{base() + 0};   //!< (no comment provided)
                 };
-                using FilterLengthScArray = MemArray<DigI0, FilterLengthScArrayItem, 32, 4>;
+                using FastFilterScArray = MemArray<DigI0, FastFilterScArrayItem, 32, 4>;
+
+                struct SlowFilterScArrayItem : MemSubmodule<DigI0, 4>
+                {
+
+                    using MemSubmodule::MemSubmodule;
+
+                    struct Val : MemReg<SlowFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    {
+                        using MemReg::MemReg;
+                    };
+
+                    Val val{base() + 0};   //!< (no comment provided)
+                };
+                using SlowFilterScArray = MemArray<DigI0, SlowFilterScArrayItem, 32, 4>;
 
                 struct ReTimeArrayItem : MemSubmodule<DigI0, 8>
                 {
@@ -881,17 +907,23 @@ namespace ipCores
                 RstLatch         rstLatch{base() + 24};           //!< Resets the data latch/ff.
                 RisingInterrupt  risingInterrupt{base() + 28};    //!< Enables an interrupt on the rising-edge.
                 FallingInterrupt fallingInterrupt{base() + 32};   //!< Enables an interrupt on the falling-edge.
-                //! The length of the glitch filter in system clock periods. A
-                //! length of 0 disables the glitch filtering on this channel. A
+                //! The length of the fast filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
                 //! certain filter length means that all signals that are
                 //! SHORTER in duration are filtered out.
-                FilterLengthScArray filterLengthSc{base() + 128};
+                FastFilterScArray fastFilterSc{base() + 128};
+                //! The length of the slow filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
+                //! certain filter length means that all signals that are
+                //! SHORTER in duration are filtered out. The slow filter is
+                //! applied to the output of the fast filter.
+                SlowFilterScArray slowFilterSc{base() + 256};
                 //! The last time in seconds and nanoseconds that a rising edge
                 //! occurred on each channel.
-                ReTimeArray reTime{base() + 256};
+                ReTimeArray reTime{base() + 512};
             };
 
-            struct DigI1 : MemSubmodule<Dig, 512>
+            struct DigI1 : MemSubmodule<Dig, 1024>
             {
 
                 using MemSubmodule::MemSubmodule;
@@ -954,19 +986,33 @@ namespace ipCores
                     using MemReg::MemReg;
                 };
 
-                struct FilterLengthScArrayItem : MemSubmodule<DigI1, 4>
+                struct FastFilterScArrayItem : MemSubmodule<DigI1, 4>
                 {
 
                     using MemSubmodule::MemSubmodule;
 
-                    struct Val : MemReg<FilterLengthScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    struct Val : MemReg<FastFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
                     {
                         using MemReg::MemReg;
                     };
 
                     Val val{base() + 0};   //!< (no comment provided)
                 };
-                using FilterLengthScArray = MemArray<DigI1, FilterLengthScArrayItem, 32, 4>;
+                using FastFilterScArray = MemArray<DigI1, FastFilterScArrayItem, 32, 4>;
+
+                struct SlowFilterScArrayItem : MemSubmodule<DigI1, 4>
+                {
+
+                    using MemSubmodule::MemSubmodule;
+
+                    struct Val : MemReg<SlowFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    {
+                        using MemReg::MemReg;
+                    };
+
+                    Val val{base() + 0};   //!< (no comment provided)
+                };
+                using SlowFilterScArray = MemArray<DigI1, SlowFilterScArrayItem, 32, 4>;
 
                 struct ReTimeArrayItem : MemSubmodule<DigI1, 8>
                 {
@@ -1007,17 +1053,23 @@ namespace ipCores
                 RstLatch         rstLatch{base() + 24};           //!< Resets the data latch/ff.
                 RisingInterrupt  risingInterrupt{base() + 28};    //!< Enables an interrupt on the rising-edge.
                 FallingInterrupt fallingInterrupt{base() + 32};   //!< Enables an interrupt on the falling-edge.
-                //! The length of the glitch filter in system clock periods. A
-                //! length of 0 disables the glitch filtering on this channel. A
+                //! The length of the fast filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
                 //! certain filter length means that all signals that are
                 //! SHORTER in duration are filtered out.
-                FilterLengthScArray filterLengthSc{base() + 128};
+                FastFilterScArray fastFilterSc{base() + 128};
+                //! The length of the slow filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
+                //! certain filter length means that all signals that are
+                //! SHORTER in duration are filtered out. The slow filter is
+                //! applied to the output of the fast filter.
+                SlowFilterScArray slowFilterSc{base() + 256};
                 //! The last time in seconds and nanoseconds that a rising edge
                 //! occurred on each channel.
-                ReTimeArray reTime{base() + 256};
+                ReTimeArray reTime{base() + 512};
             };
 
-            struct DigIndI : MemSubmodule<Dig, 512>
+            struct DigIndI : MemSubmodule<Dig, 1024>
             {
 
                 using MemSubmodule::MemSubmodule;
@@ -1080,19 +1132,33 @@ namespace ipCores
                     using MemReg::MemReg;
                 };
 
-                struct FilterLengthScArrayItem : MemSubmodule<DigIndI, 4>
+                struct FastFilterScArrayItem : MemSubmodule<DigIndI, 4>
                 {
 
                     using MemSubmodule::MemSubmodule;
 
-                    struct Val : MemReg<FilterLengthScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    struct Val : MemReg<FastFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
                     {
                         using MemReg::MemReg;
                     };
 
                     Val val{base() + 0};   //!< (no comment provided)
                 };
-                using FilterLengthScArray = MemArray<DigIndI, FilterLengthScArrayItem, 32, 4>;
+                using FastFilterScArray = MemArray<DigIndI, FastFilterScArrayItem, 32, 4>;
+
+                struct SlowFilterScArrayItem : MemSubmodule<DigIndI, 4>
+                {
+
+                    using MemSubmodule::MemSubmodule;
+
+                    struct Val : MemReg<SlowFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    {
+                        using MemReg::MemReg;
+                    };
+
+                    Val val{base() + 0};   //!< (no comment provided)
+                };
+                using SlowFilterScArray = MemArray<DigIndI, SlowFilterScArrayItem, 32, 4>;
 
                 struct ReTimeArrayItem : MemSubmodule<DigIndI, 8>
                 {
@@ -1133,17 +1199,23 @@ namespace ipCores
                 RstLatch         rstLatch{base() + 24};           //!< Resets the data latch/ff.
                 RisingInterrupt  risingInterrupt{base() + 28};    //!< Enables an interrupt on the rising-edge.
                 FallingInterrupt fallingInterrupt{base() + 32};   //!< Enables an interrupt on the falling-edge.
-                //! The length of the glitch filter in system clock periods. A
-                //! length of 0 disables the glitch filtering on this channel. A
+                //! The length of the fast filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
                 //! certain filter length means that all signals that are
                 //! SHORTER in duration are filtered out.
-                FilterLengthScArray filterLengthSc{base() + 128};
+                FastFilterScArray fastFilterSc{base() + 128};
+                //! The length of the slow filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
+                //! certain filter length means that all signals that are
+                //! SHORTER in duration are filtered out. The slow filter is
+                //! applied to the output of the fast filter.
+                SlowFilterScArray slowFilterSc{base() + 256};
                 //! The last time in seconds and nanoseconds that a rising edge
                 //! occurred on each channel.
-                ReTimeArray reTime{base() + 256};
+                ReTimeArray reTime{base() + 512};
             };
 
-            struct ContactI : MemSubmodule<Dig, 512>
+            struct ContactI : MemSubmodule<Dig, 1024>
             {
 
                 using MemSubmodule::MemSubmodule;
@@ -1206,19 +1278,33 @@ namespace ipCores
                     using MemReg::MemReg;
                 };
 
-                struct FilterLengthScArrayItem : MemSubmodule<ContactI, 4>
+                struct FastFilterScArrayItem : MemSubmodule<ContactI, 4>
                 {
 
                     using MemSubmodule::MemSubmodule;
 
-                    struct Val : MemReg<FilterLengthScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    struct Val : MemReg<FastFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
                     {
                         using MemReg::MemReg;
                     };
 
                     Val val{base() + 0};   //!< (no comment provided)
                 };
-                using FilterLengthScArray = MemArray<ContactI, FilterLengthScArrayItem, 32, 4>;
+                using FastFilterScArray = MemArray<ContactI, FastFilterScArrayItem, 32, 4>;
+
+                struct SlowFilterScArrayItem : MemSubmodule<ContactI, 4>
+                {
+
+                    using MemSubmodule::MemSubmodule;
+
+                    struct Val : MemReg<SlowFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    {
+                        using MemReg::MemReg;
+                    };
+
+                    Val val{base() + 0};   //!< (no comment provided)
+                };
+                using SlowFilterScArray = MemArray<ContactI, SlowFilterScArrayItem, 32, 4>;
 
                 struct ReTimeArrayItem : MemSubmodule<ContactI, 8>
                 {
@@ -1259,17 +1345,23 @@ namespace ipCores
                 RstLatch         rstLatch{base() + 24};           //!< Resets the data latch/ff.
                 RisingInterrupt  risingInterrupt{base() + 28};    //!< Enables an interrupt on the rising-edge.
                 FallingInterrupt fallingInterrupt{base() + 32};   //!< Enables an interrupt on the falling-edge.
-                //! The length of the glitch filter in system clock periods. A
-                //! length of 0 disables the glitch filtering on this channel. A
+                //! The length of the fast filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
                 //! certain filter length means that all signals that are
                 //! SHORTER in duration are filtered out.
-                FilterLengthScArray filterLengthSc{base() + 128};
+                FastFilterScArray fastFilterSc{base() + 128};
+                //! The length of the slow filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
+                //! certain filter length means that all signals that are
+                //! SHORTER in duration are filtered out. The slow filter is
+                //! applied to the output of the fast filter.
+                SlowFilterScArray slowFilterSc{base() + 256};
                 //! The last time in seconds and nanoseconds that a rising edge
                 //! occurred on each channel.
-                ReTimeArray reTime{base() + 256};
+                ReTimeArray reTime{base() + 512};
             };
 
-            struct OpticalI : MemSubmodule<Dig, 512>
+            struct OpticalI : MemSubmodule<Dig, 1024>
             {
 
                 using MemSubmodule::MemSubmodule;
@@ -1332,19 +1424,33 @@ namespace ipCores
                     using MemReg::MemReg;
                 };
 
-                struct FilterLengthScArrayItem : MemSubmodule<OpticalI, 4>
+                struct FastFilterScArrayItem : MemSubmodule<OpticalI, 4>
                 {
 
                     using MemSubmodule::MemSubmodule;
 
-                    struct Val : MemReg<FilterLengthScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    struct Val : MemReg<FastFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
                     {
                         using MemReg::MemReg;
                     };
 
                     Val val{base() + 0};   //!< (no comment provided)
                 };
-                using FilterLengthScArray = MemArray<OpticalI, FilterLengthScArrayItem, 32, 4>;
+                using FastFilterScArray = MemArray<OpticalI, FastFilterScArrayItem, 32, 4>;
+
+                struct SlowFilterScArrayItem : MemSubmodule<OpticalI, 4>
+                {
+
+                    using MemSubmodule::MemSubmodule;
+
+                    struct Val : MemReg<SlowFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    {
+                        using MemReg::MemReg;
+                    };
+
+                    Val val{base() + 0};   //!< (no comment provided)
+                };
+                using SlowFilterScArray = MemArray<OpticalI, SlowFilterScArrayItem, 32, 4>;
 
                 struct ReTimeArrayItem : MemSubmodule<OpticalI, 8>
                 {
@@ -1385,17 +1491,23 @@ namespace ipCores
                 RstLatch         rstLatch{base() + 24};           //!< Resets the data latch/ff.
                 RisingInterrupt  risingInterrupt{base() + 28};    //!< Enables an interrupt on the rising-edge.
                 FallingInterrupt fallingInterrupt{base() + 32};   //!< Enables an interrupt on the falling-edge.
-                //! The length of the glitch filter in system clock periods. A
-                //! length of 0 disables the glitch filtering on this channel. A
+                //! The length of the fast filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
                 //! certain filter length means that all signals that are
                 //! SHORTER in duration are filtered out.
-                FilterLengthScArray filterLengthSc{base() + 128};
+                FastFilterScArray fastFilterSc{base() + 128};
+                //! The length of the slow filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
+                //! certain filter length means that all signals that are
+                //! SHORTER in duration are filtered out. The slow filter is
+                //! applied to the output of the fast filter.
+                SlowFilterScArray slowFilterSc{base() + 256};
                 //! The last time in seconds and nanoseconds that a rising edge
                 //! occurred on each channel.
-                ReTimeArray reTime{base() + 256};
+                ReTimeArray reTime{base() + 512};
             };
 
-            struct MinMaxLim0 : MemSubmodule<Dig, 512>
+            struct MinMaxLim0 : MemSubmodule<Dig, 1024>
             {
 
                 using MemSubmodule::MemSubmodule;
@@ -1458,19 +1570,33 @@ namespace ipCores
                     using MemReg::MemReg;
                 };
 
-                struct FilterLengthScArrayItem : MemSubmodule<MinMaxLim0, 4>
+                struct FastFilterScArrayItem : MemSubmodule<MinMaxLim0, 4>
                 {
 
                     using MemSubmodule::MemSubmodule;
 
-                    struct Val : MemReg<FilterLengthScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    struct Val : MemReg<FastFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
                     {
                         using MemReg::MemReg;
                     };
 
                     Val val{base() + 0};   //!< (no comment provided)
                 };
-                using FilterLengthScArray = MemArray<MinMaxLim0, FilterLengthScArrayItem, 32, 4>;
+                using FastFilterScArray = MemArray<MinMaxLim0, FastFilterScArrayItem, 32, 4>;
+
+                struct SlowFilterScArrayItem : MemSubmodule<MinMaxLim0, 4>
+                {
+
+                    using MemSubmodule::MemSubmodule;
+
+                    struct Val : MemReg<SlowFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    {
+                        using MemReg::MemReg;
+                    };
+
+                    Val val{base() + 0};   //!< (no comment provided)
+                };
+                using SlowFilterScArray = MemArray<MinMaxLim0, SlowFilterScArrayItem, 32, 4>;
 
                 struct ReTimeArrayItem : MemSubmodule<MinMaxLim0, 8>
                 {
@@ -1511,17 +1637,23 @@ namespace ipCores
                 RstLatch         rstLatch{base() + 24};           //!< Resets the data latch/ff.
                 RisingInterrupt  risingInterrupt{base() + 28};    //!< Enables an interrupt on the rising-edge.
                 FallingInterrupt fallingInterrupt{base() + 32};   //!< Enables an interrupt on the falling-edge.
-                //! The length of the glitch filter in system clock periods. A
-                //! length of 0 disables the glitch filtering on this channel. A
+                //! The length of the fast filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
                 //! certain filter length means that all signals that are
                 //! SHORTER in duration are filtered out.
-                FilterLengthScArray filterLengthSc{base() + 128};
+                FastFilterScArray fastFilterSc{base() + 128};
+                //! The length of the slow filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
+                //! certain filter length means that all signals that are
+                //! SHORTER in duration are filtered out. The slow filter is
+                //! applied to the output of the fast filter.
+                SlowFilterScArray slowFilterSc{base() + 256};
                 //! The last time in seconds and nanoseconds that a rising edge
                 //! occurred on each channel.
-                ReTimeArray reTime{base() + 256};
+                ReTimeArray reTime{base() + 512};
             };
 
-            struct MinMaxLim1 : MemSubmodule<Dig, 512>
+            struct MinMaxLim1 : MemSubmodule<Dig, 1024>
             {
 
                 using MemSubmodule::MemSubmodule;
@@ -1584,19 +1716,33 @@ namespace ipCores
                     using MemReg::MemReg;
                 };
 
-                struct FilterLengthScArrayItem : MemSubmodule<MinMaxLim1, 4>
+                struct FastFilterScArrayItem : MemSubmodule<MinMaxLim1, 4>
                 {
 
                     using MemSubmodule::MemSubmodule;
 
-                    struct Val : MemReg<FilterLengthScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    struct Val : MemReg<FastFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
                     {
                         using MemReg::MemReg;
                     };
 
                     Val val{base() + 0};   //!< (no comment provided)
                 };
-                using FilterLengthScArray = MemArray<MinMaxLim1, FilterLengthScArrayItem, 32, 4>;
+                using FastFilterScArray = MemArray<MinMaxLim1, FastFilterScArrayItem, 32, 4>;
+
+                struct SlowFilterScArrayItem : MemSubmodule<MinMaxLim1, 4>
+                {
+
+                    using MemSubmodule::MemSubmodule;
+
+                    struct Val : MemReg<SlowFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    {
+                        using MemReg::MemReg;
+                    };
+
+                    Val val{base() + 0};   //!< (no comment provided)
+                };
+                using SlowFilterScArray = MemArray<MinMaxLim1, SlowFilterScArrayItem, 32, 4>;
 
                 struct ReTimeArrayItem : MemSubmodule<MinMaxLim1, 8>
                 {
@@ -1637,17 +1783,23 @@ namespace ipCores
                 RstLatch         rstLatch{base() + 24};           //!< Resets the data latch/ff.
                 RisingInterrupt  risingInterrupt{base() + 28};    //!< Enables an interrupt on the rising-edge.
                 FallingInterrupt fallingInterrupt{base() + 32};   //!< Enables an interrupt on the falling-edge.
-                //! The length of the glitch filter in system clock periods. A
-                //! length of 0 disables the glitch filtering on this channel. A
+                //! The length of the fast filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
                 //! certain filter length means that all signals that are
                 //! SHORTER in duration are filtered out.
-                FilterLengthScArray filterLengthSc{base() + 128};
+                FastFilterScArray fastFilterSc{base() + 128};
+                //! The length of the slow filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
+                //! certain filter length means that all signals that are
+                //! SHORTER in duration are filtered out. The slow filter is
+                //! applied to the output of the fast filter.
+                SlowFilterScArray slowFilterSc{base() + 256};
                 //! The last time in seconds and nanoseconds that a rising edge
                 //! occurred on each channel.
-                ReTimeArray reTime{base() + 256};
+                ReTimeArray reTime{base() + 512};
             };
 
-            struct RmsLim0 : MemSubmodule<Dig, 512>
+            struct RmsLim0 : MemSubmodule<Dig, 1024>
             {
 
                 using MemSubmodule::MemSubmodule;
@@ -1710,19 +1862,33 @@ namespace ipCores
                     using MemReg::MemReg;
                 };
 
-                struct FilterLengthScArrayItem : MemSubmodule<RmsLim0, 4>
+                struct FastFilterScArrayItem : MemSubmodule<RmsLim0, 4>
                 {
 
                     using MemSubmodule::MemSubmodule;
 
-                    struct Val : MemReg<FilterLengthScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    struct Val : MemReg<FastFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
                     {
                         using MemReg::MemReg;
                     };
 
                     Val val{base() + 0};   //!< (no comment provided)
                 };
-                using FilterLengthScArray = MemArray<RmsLim0, FilterLengthScArrayItem, 32, 4>;
+                using FastFilterScArray = MemArray<RmsLim0, FastFilterScArrayItem, 32, 4>;
+
+                struct SlowFilterScArrayItem : MemSubmodule<RmsLim0, 4>
+                {
+
+                    using MemSubmodule::MemSubmodule;
+
+                    struct Val : MemReg<SlowFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    {
+                        using MemReg::MemReg;
+                    };
+
+                    Val val{base() + 0};   //!< (no comment provided)
+                };
+                using SlowFilterScArray = MemArray<RmsLim0, SlowFilterScArrayItem, 32, 4>;
 
                 struct ReTimeArrayItem : MemSubmodule<RmsLim0, 8>
                 {
@@ -1763,17 +1929,23 @@ namespace ipCores
                 RstLatch         rstLatch{base() + 24};           //!< Resets the data latch/ff.
                 RisingInterrupt  risingInterrupt{base() + 28};    //!< Enables an interrupt on the rising-edge.
                 FallingInterrupt fallingInterrupt{base() + 32};   //!< Enables an interrupt on the falling-edge.
-                //! The length of the glitch filter in system clock periods. A
-                //! length of 0 disables the glitch filtering on this channel. A
+                //! The length of the fast filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
                 //! certain filter length means that all signals that are
                 //! SHORTER in duration are filtered out.
-                FilterLengthScArray filterLengthSc{base() + 128};
+                FastFilterScArray fastFilterSc{base() + 128};
+                //! The length of the slow filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
+                //! certain filter length means that all signals that are
+                //! SHORTER in duration are filtered out. The slow filter is
+                //! applied to the output of the fast filter.
+                SlowFilterScArray slowFilterSc{base() + 256};
                 //! The last time in seconds and nanoseconds that a rising edge
                 //! occurred on each channel.
-                ReTimeArray reTime{base() + 256};
+                ReTimeArray reTime{base() + 512};
             };
 
-            struct RmsLim1 : MemSubmodule<Dig, 512>
+            struct RmsLim1 : MemSubmodule<Dig, 1024>
             {
 
                 using MemSubmodule::MemSubmodule;
@@ -1836,19 +2008,33 @@ namespace ipCores
                     using MemReg::MemReg;
                 };
 
-                struct FilterLengthScArrayItem : MemSubmodule<RmsLim1, 4>
+                struct FastFilterScArrayItem : MemSubmodule<RmsLim1, 4>
                 {
 
                     using MemSubmodule::MemSubmodule;
 
-                    struct Val : MemReg<FilterLengthScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    struct Val : MemReg<FastFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
                     {
                         using MemReg::MemReg;
                     };
 
                     Val val{base() + 0};   //!< (no comment provided)
                 };
-                using FilterLengthScArray = MemArray<RmsLim1, FilterLengthScArrayItem, 32, 4>;
+                using FastFilterScArray = MemArray<RmsLim1, FastFilterScArrayItem, 32, 4>;
+
+                struct SlowFilterScArrayItem : MemSubmodule<RmsLim1, 4>
+                {
+
+                    using MemSubmodule::MemSubmodule;
+
+                    struct Val : MemReg<SlowFilterScArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                    {
+                        using MemReg::MemReg;
+                    };
+
+                    Val val{base() + 0};   //!< (no comment provided)
+                };
+                using SlowFilterScArray = MemArray<RmsLim1, SlowFilterScArrayItem, 32, 4>;
 
                 struct ReTimeArrayItem : MemSubmodule<RmsLim1, 8>
                 {
@@ -1889,25 +2075,31 @@ namespace ipCores
                 RstLatch         rstLatch{base() + 24};           //!< Resets the data latch/ff.
                 RisingInterrupt  risingInterrupt{base() + 28};    //!< Enables an interrupt on the rising-edge.
                 FallingInterrupt fallingInterrupt{base() + 32};   //!< Enables an interrupt on the falling-edge.
-                //! The length of the glitch filter in system clock periods. A
-                //! length of 0 disables the glitch filtering on this channel. A
+                //! The length of the fast filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
                 //! certain filter length means that all signals that are
                 //! SHORTER in duration are filtered out.
-                FilterLengthScArray filterLengthSc{base() + 128};
+                FastFilterScArray fastFilterSc{base() + 128};
+                //! The length of the slow filter in system clock periods. A
+                //! length of 0 disables the filtering on this channel. A
+                //! certain filter length means that all signals that are
+                //! SHORTER in duration are filtered out. The slow filter is
+                //! applied to the output of the fast filter.
+                SlowFilterScArray slowFilterSc{base() + 256};
                 //! The last time in seconds and nanoseconds that a rising edge
                 //! occurred on each channel.
-                ReTimeArray reTime{base() + 256};
+                ReTimeArray reTime{base() + 512};
             };
 
             DigI0      digI0{base() + 0};           //!< (no comment provided)
-            DigI1      digI1{base() + 512};         //!< (no comment provided)
-            DigIndI    digIndI{base() + 1024};      //!< (no comment provided)
-            ContactI   contactI{base() + 1536};     //!< (no comment provided)
-            OpticalI   opticalI{base() + 2048};     //!< (no comment provided)
-            MinMaxLim0 minMaxLim0{base() + 2560};   //!< (no comment provided)
-            MinMaxLim1 minMaxLim1{base() + 3072};   //!< (no comment provided)
-            RmsLim0    rmsLim0{base() + 3584};      //!< (no comment provided)
-            RmsLim1    rmsLim1{base() + 4096};      //!< (no comment provided)
+            DigI1      digI1{base() + 1024};        //!< (no comment provided)
+            DigIndI    digIndI{base() + 2048};      //!< (no comment provided)
+            ContactI   contactI{base() + 3072};     //!< (no comment provided)
+            OpticalI   opticalI{base() + 4096};     //!< (no comment provided)
+            MinMaxLim0 minMaxLim0{base() + 5120};   //!< (no comment provided)
+            MinMaxLim1 minMaxLim1{base() + 6144};   //!< (no comment provided)
+            RmsLim0    rmsLim0{base() + 7168};      //!< (no comment provided)
+            RmsLim1    rmsLim1{base() + 8192};      //!< (no comment provided)
         };
 
         struct PwmArrayItem : MemSubmodule<Top, 64>
@@ -2133,7 +2325,7 @@ namespace ipCores
                 };
 
                 SrcAddr  srcAddr{base() + 0};    //!< Source address
-                DestAddr destAddr{base() + 4};   //!< Destination address
+                DestAddr destAddr{base() + 4};   //!< Destination address. HAS TO BE 64-BYTE ALIGNED!
                 Wtt      wtt{base() + 8};        //!< (no comment provided)
             };
             using TdPl2psArray = MemArray<Ddma, TdPl2psArrayItem, 64, 12>;
@@ -2161,7 +2353,7 @@ namespace ipCores
                         base() + 0};   //!< Words-to-transfer (one word is 32 bits)
                 };
 
-                SrcAddr  srcAddr{base() + 0};    //!< Source address
+                SrcAddr  srcAddr{base() + 0};    //!< Source address. HAS TO BE 64-BYTE ALIGNED!
                 DestAddr destAddr{base() + 4};   //!< Destination address
                 Wtt      wtt{base() + 8};        //!< (no comment provided)
             };
@@ -2309,43 +2501,440 @@ namespace ipCores
                 };
 
                 Ctrl ctrl{base() + 0};   //!< Control register
-                //! Delay register. The delay is in system clock periods. Only
-                //! 18 bits are used.
+                //! Delay register. The delay is in system clock periods.
                 DelaySc delaySc{base() + 4};
                 //! Period register. The period is in system clock periods. Must
-                //! be 1 at minimum.
+                //! be 2 at minimum.
                 PeriodSc periodSc{base() + 8};
             };
 
             Stg stg{base() + 0};   //!< Synced Trigger Generator
         };
-        using SyncTrigArray = MemArray<Top, SyncTrigArrayItem, 27, 16>;
+        using SyncTrigArray = MemArray<Top, SyncTrigArrayItem, 29, 16>;
 
-        struct XilSpi : MemSubmodule<Top, 128>
+        struct SyncUart : MemSubmodule<Top, 32>
         {
 
             using MemSubmodule::MemSubmodule;
+
+            struct Ctrl : MemReg<SyncUart, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+
+                //! Normally, the UART data is updated when the firing time is
+                //! reached. To set the initial data, this register is used.
+                MemField<Ctrl, 0, 0, attributes::AccessMode::RW, bool> setTxData{base() + 0};
+            };
+
+            struct Config : MemReg<SyncUart, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+
+                MemField<Config, 0, 0, attributes::AccessMode::RW, bool> enParity{
+                    base() + 0};   //!< (no comment provided)
+                //! The number of idle symbols between two UART frames. An idle
+                //! symbol has the same duration as a normal UART bit. Maximum
+                //! is 127.
+                MemField<Config, 1, 7, attributes::AccessMode::RW, uint8_t> interFrameGap{base() + 0};
+            };
+
+            struct UartSendTimeNs : MemReg<SyncUart, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct ScPerUartBit : MemReg<SyncUart, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+
+                MemField<ScPerUartBit, 0, 19, attributes::AccessMode::RW, uint32_t> val{
+                    base() + 0};   //!< (no comment provided)
+            };
+
+            struct UartData : MemReg<SyncUart, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+
+                MemField<UartData, 0, 7, attributes::AccessMode::RW, uint8_t> val{
+                    base() + 0};   //!< (no comment provided)
+            };
+
+            struct FiringTimeS : MemReg<SyncUart, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct FiringTimeNs : MemReg<SyncUart, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct Magic : MemReg<SyncUart, 4, attributes::AccessMode::RO, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            Ctrl   ctrl{base() + 0};     //!< (no comment provided)
+            Config config{base() + 4};   //!< (no comment provided)
+            //! The time it takes to send one whole UART packet. Includes
+            //! start and stop bits. This is used to avoid collisions
+            //! between periodically and time-triggered packets.
+            UartSendTimeNs uartSendTimeNs{base() + 8};
+            //! The time it takes to send one UART bit in system clocks.
+            //! This is the inverse of the baud rate.
+            ScPerUartBit scPerUartBit{base() + 12};
+            UartData     uartData{base() + 16};       //!< (no comment provided)
+            FiringTimeS  firingTimeS{base() + 20};    //!< (no comment provided)
+            FiringTimeNs firingTimeNs{base() + 24};   //!< (no comment provided)
+            Magic        magic{base() + 28};          //!< (no comment provided)
         };
 
-        struct XilI2c : MemSubmodule<Top, 512>
+        struct PwmBank : MemSubmodule<Top, 128>
         {
 
             using MemSubmodule::MemSubmodule;
+
+            struct Cc0ArrayItem : MemSubmodule<PwmBank, 4>
+            {
+
+                using MemSubmodule::MemSubmodule;
+
+                struct Value : MemReg<Cc0ArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                {
+                    using MemReg::MemReg;
+                };
+
+                Value value{base() + 0};   //!< cc0 in system clocks.
+            };
+            using Cc0Array = MemArray<PwmBank, Cc0ArrayItem, 12, 4>;
+
+            struct Cc1ArrayItem : MemSubmodule<PwmBank, 4>
+            {
+
+                using MemSubmodule::MemSubmodule;
+
+                struct Value : MemReg<Cc1ArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                {
+                    using MemReg::MemReg;
+                };
+
+                Value value{base() + 0};   //!< cc1 in system clocks.
+            };
+            using Cc1Array = MemArray<PwmBank, Cc1ArrayItem, 12, 4>;
+
+            Cc0Array cc0{base() + 0};    //!< (no comment provided)
+            Cc1Array cc1{base() + 64};   //!< (no comment provided)
         };
 
-        AdcCalint        adcCalint{base() + 0};        //!< Internal ADC controller (calibrated)
-        AdcUncalintArray adcUncalint{base() + 1024};   //!< Internal ADC controllers (uncalibrated)
-        DacIntArray      dacInt{base() + 2048};        //!< Internal DAC controllers
-        SignalBank       signalBank{base() + 4096};    //!< Analog/Digital signal bank
-        AnalogFir        analogFir{base() + 16384};    //!< Analog FIR filter config
-        AnalogMs         analogMs{base() + 32768};     //!< Analog Mean Square filter config
-        Dig              dig{base() + 40960};          //!< Digital I/O block config
-        PwmArray         pwm{base() + 49152};          //!< PWM block
-        Ddma             ddma{base() + 53248};         //!< Distribuded DMA controller
-        SyncTime         syncTime{base() + 57344};     //!< Central synchronised RUN trigger
-        SyncTrigArray    syncTrig{base() + 57856};     //!< Synchronised triggers
-        XilSpi           xilSpi{base() + 58368};       //!< Xilinx SPI controller
-        XilI2c           xilI2c{base() + 58880};       //!< Xilinx I2C controller
+        struct Scratchpad : MemSubmodule<Top, 4096>
+        {
+
+            using MemSubmodule::MemSubmodule;
+
+            struct Reg : MemReg<MemArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+            using MemArray = MemArray<Scratchpad, Reg, 1024, 4>;
+
+            MemArray mem{base() + 0};   //!< (no comment provided)
+        };
+
+        struct PwmVrefHeater : MemSubmodule<Top, 64>
+        {
+
+            using MemSubmodule::MemSubmodule;
+
+            // ************************************************************
+
+            enum class UpdateType : uint8_t
+            {
+                zero       = 0,   //!< Update when the carrier is equal to 0.
+                period     = 1,   //!< Update when the carrier is equal to period.
+                zeroPeriod = 2,   //!< Update at zero and period.
+                immediate  = 3,
+            };
+
+            // ************************************************************
+
+            struct Ctrl : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+
+                //! Enable the PWM. There are two ways to start the PWM:
+                //! 1.
+                //! First, the SW writes '1' to this register. The PWM then
+                //! starts when it receives the GW start signal.
+                //! 2. The GW start
+                //! signal is used first to synchronize the PWM carrier. Then,
+                //! SW writes '1' to this register. The SW enable is
+                //! synchronized with the carrier, and the PWM starts the next
+                //! time the carrier reaches 0.
+                MemField<Ctrl, 0, 0, attributes::AccessMode::RW, bool> enable{base() + 0};
+                //! Reset the PWM to the default state. Register values are not
+                //! reset.
+                MemField<Ctrl, 1, 1, attributes::AccessMode::RW, bool> reset{base() + 0};
+            };
+
+            struct CarrierBits : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RO, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct DeadtimeBits : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RO, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct Config : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+
+                MemField<Config, 0, 1, attributes::AccessMode::RW, UpdateType> updateType{
+                    base() + 0};   //!< See enum `update_type`.
+                //! Enable the minimum on/off-time protection on the PWM
+                //! signals. If a violation is detected, the PWM goes to a fail-
+                //! safe state (both PWM signals go to low).
+                MemField<Config, 2, 2, attributes::AccessMode::RW, bool> enablePwmCheck{base() + 0};
+                //! Enable the shoot-through protection. If a shoot-through is
+                //! detected (both PWM outputs '1'), the PWM goes to a fail-safe
+                //! state. Not yet implemented.
+                MemField<Config, 3, 3, attributes::AccessMode::RW, bool> enableStCheck{base() + 0};
+                //! Enable the safe range check of the modulation index.
+                MemField<Config, 4, 4, attributes::AccessMode::RW, bool> enableValueCheck{base() + 0};
+                MemField<Config, 5, 5, attributes::AccessMode::RW, bool> bypassDeadtime{
+                    base() + 0};   //!< Disable the deadtime.
+                MemField<Config, 6, 6, attributes::AccessMode::RW, bool> disableA{
+                    base() + 0};   //!< Individually disable PWMA.
+                MemField<Config, 7, 7, attributes::AccessMode::RW, bool> disableB{
+                    base() + 0};   //!< Individually disable PWMB.
+                MemField<Config, 8, 8, attributes::AccessMode::RW, bool> invert{
+                    base() + 0};   //!< Invert both PWM outputs.
+                //! If this is set to 0, cc1 is always set to cc0. Set this to 1
+                //! to set cc0 and cc1 independently.
+                MemField<Config, 9, 9, attributes::AccessMode::RW, bool> decoupleCc1{base() + 0};
+            };
+
+            struct Cc0Sc : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct Cc1Sc : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct CtrhSc : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct DeadtimeSc : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct ExtendedDeadtimeSc : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct MinSwitchTimeSc : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct MinModIdxSc : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct MaxModIdxSc : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct NumberCcErrors : MemReg<PwmVrefHeater, 4, attributes::AccessMode::RO, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            //! Control signals. These signals are intended to be used
+            //! during runtime.
+            Ctrl ctrl{base() + 0};
+            //! The number of available carrier bits. Static during runtime.
+            CarrierBits carrierBits{base() + 4};
+            //! The number of available deadtime bits. Static during
+            //! runtime.
+            DeadtimeBits deadtimeBits{base() + 8};
+            //! Configuration registers are meant to be set once during
+            //! startup (by the configurator).
+            Config config{base() + 12};
+            Cc0Sc  cc0Sc{base() + 16};   //!< cc0 in system clocks.
+            Cc1Sc  cc1Sc{base() + 20};   //!< cc1 in system clocks.
+            //! The maximum carrier value in system clocks. The PWM counts
+            //! up to ctrh and then counts down to zero again in one PWM
+            //! cycle.
+            CtrhSc ctrhSc{base() + 24};
+            //! Amount of deadtime in system clocks. This is a safety
+            //! parameter and must not be changed during runtime. Deadtime
+            //! is implemented similar to the TMS320 DSP
+            DeadtimeSc deadtimeSc{base() + 28};
+            //! Extended deadtime in system clocks. Is used by some (LPC)
+            //! converters to be more energy efficient.
+            ExtendedDeadtimeSc extendedDeadtimeSc{base() + 32};
+            //! Minimum switch time in system clocks. Deadtime is applied
+            //! after the minimum switch time, which means that
+            //! (min_switch_time_sc - deadtime) must be greater or equal to
+            //! the minimum switch time the converter can handle. For
+            //! example, if the converter requires a min_switch_time of 1000
+            //! sc and a deadtime of 200 sc, then min_switch_time_sc must be
+            //! 1200. Because of the (possibly) inverted PWMB signal, the
+            //! minimum on/off time must be symmetrical, which is why are no
+            //! separate min_on_time and min_off_time.
+            MinSwitchTimeSc minSwitchTimeSc{base() + 36};
+            //! Minimum safe modulation index. This applies to both cc0 and
+            //! cc1.
+            MinModIdxSc minModIdxSc{base() + 40};
+            //! Maximum safe modulation index. This applies to both cc0 and
+            //! cc1.
+            MaxModIdxSc maxModIdxSc{base() + 44};
+            //! Counts the number of times the value check clipped cc
+            //! values. Saturates at 0xFFFFFFFF.
+            NumberCcErrors numberCcErrors{base() + 48};
+        };
+
+        struct EventLog : MemSubmodule<Top, 512>
+        {
+
+            using MemSubmodule::MemSubmodule;
+
+            struct Status : MemReg<EventLog, 4, attributes::AccessMode::RO, uint32_t>
+            {
+                using MemReg::MemReg;
+
+                //! One or more entries were lost between the previous and this
+                //! entry
+                MemField<Status, 0, 0, attributes::AccessMode::RO, bool> entryLost{base() + 0};
+                MemField<Status, 1, 1, attributes::AccessMode::RO, bool> entryValid{base() + 0};   //!< Entry is valid
+                MemField<Status, 16, 23, attributes::AccessMode::RO, uint8_t> typeIndex{
+                    base() + 0};   //!< Type index of this entry
+                MemField<Status, 24, 31, attributes::AccessMode::RO, uint8_t> bankNumber{
+                    base() + 0};   //!< Bank number of this entry
+            };
+
+            struct TimestampS : MemReg<EventLog, 4, attributes::AccessMode::RO, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct TimestampUs : MemReg<EventLog, 4, attributes::AccessMode::RO, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct Data : MemReg<EventLog, 4, attributes::AccessMode::RO, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct FifoDataCount : MemReg<EventLog, 4, attributes::AccessMode::RO, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct MasksArrayItem : MemSubmodule<EventLog, 8>
+            {
+
+                using MemSubmodule::MemSubmodule;
+
+                struct Re : MemReg<MasksArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                {
+                    using MemReg::MemReg;
+                };
+
+                struct Fe : MemReg<MasksArrayItem, 4, attributes::AccessMode::RW, uint32_t>
+                {
+                    using MemReg::MemReg;
+                };
+
+                Re re{base() + 0};   //!< (no comment provided)
+                Fe fe{base() + 4};   //!< (no comment provided)
+            };
+            using MasksArray = MemArray<EventLog, MasksArrayItem, 32, 8>;
+
+            //! This register contains the flags, type index and bank number
+            Status        status{base() + 0};
+            TimestampS    timestampS{base() + 4};       //!< Seconds timestamp of this entry
+            TimestampUs   timestampUs{base() + 8};      //!< Microseconds timestamp of this entry
+            Data          data{base() + 12};            //!< The snapshot of the bank of signals
+            FifoDataCount fifoDataCount{base() + 16};   //!< The number of elements in the FIFO.
+            //! \ Rising-edge and falling-edge masks. Set high to disable
+            //! logging of a certain bit of the input data. xx_mask(i)(j)
+            //! corresponds to the j-th bit of the i-th bank =>
+            //! data_i(i)(j). For FGC4, the banks and the order of banks can
+            //! be seen in WP07.
+            MasksArray masks{base() + 256};
+        };
+
+        struct FreqWatchdog : MemSubmodule<Top, 16>
+        {
+
+            using MemSubmodule::MemSubmodule;
+
+            struct Alive : MemReg<FreqWatchdog, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct MinPeriodSc : MemReg<FreqWatchdog, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            struct MaxPeriodSc : MemReg<FreqWatchdog, 4, attributes::AccessMode::RW, uint32_t>
+            {
+                using MemReg::MemReg;
+            };
+
+            //! Writing any value to this register resets the watchdog
+            //! counter.
+            Alive alive{base() + 0};
+            //! The minimum period between two writes to the `alive`-
+            //! register in system clocks.
+            MinPeriodSc minPeriodSc{base() + 4};
+            //! The maximum period between two writes to the `alive`-
+            //! register in system clocks.
+            MaxPeriodSc maxPeriodSc{base() + 8};
+        };
+
+        XilSpi           xilSpi{base() + 58368};        //!< Xilinx SPI controller
+        XilI2c           xilI2c{base() + 58880};        //!< Xilinx I2C controller
+        AdcCalint        adcCalint{base() + 59392};     //!< Internal ADC controller (calibrated)
+        AdcUncalintArray adcUncalint{base() + 60416};   //!< Internal ADC controllers (uncalibrated)
+        DacIntArray      dacInt{base() + 61440};        //!< Internal DAC controllers
+        SignalBank       signalBank{base() + 63488};    //!< Analog/Digital signal bank
+        AnalogFir        analogFir{base() + 65536};     //!< Analog FIR filter config
+        AnalogMs         analogMs{base() + 81920};      //!< Analog Mean Square filter config
+        Dig              dig{base() + 98304};           //!< Digital I/O block config
+        PwmArray         pwm{base() + 114688};          //!< PWM block
+        Ddma             ddma{base() + 118784};         //!< Distribuded DMA controller
+        SyncTime         syncTime{base() + 122880};     //!< Central synchronised RUN trigger
+        SyncTrigArray    syncTrig{base() + 123392};     //!< Synchronised triggers
+        SyncUart         syncUart{base() + 123904};     //!< Sync UART controller
+        //! pwmBank
+        //!
+        //! The PWM bank allows the DMAing of all ccs (counter-compares)
+        PwmBank pwmBank{base() + 124032};
+        //! scratchpad
+        //!
+        //! The scratchpad is a 4 KiB memory which can be used to test
+        //! the DMA or measure performance etc.
+        Scratchpad    scratchpad{base() + 126976};
+        PwmVrefHeater pwmVrefHeater{base() + 131072};   //!< The PWM that drives the voltage reference heater
+        EventLog      eventLog{base() + 131584};        //!< Event log runnign at 1 MHz
+        FreqWatchdog  freqWatchdog{base() + 132096};    //!< Frequency Watchdog
     };
 }
 
@@ -2390,7 +2979,48 @@ namespace mmpp::utils
         }
     }
 
+    //! Specialization of `to_string` for `ipCores::Top::PwmVrefHeater::UpdateType`
+    template<>
+    inline std::string to_string(const ipCores::Top::PwmVrefHeater::UpdateType& val)
+    {
+        switch (val)
+        {
+            case ipCores::Top::PwmVrefHeater::UpdateType::zero:
+                return "zero";
+            case ipCores::Top::PwmVrefHeater::UpdateType::period:
+                return "period";
+            case ipCores::Top::PwmVrefHeater::UpdateType::zeroPeriod:
+                return "zeroPeriod";
+            case ipCores::Top::PwmVrefHeater::UpdateType::immediate:
+                return "immediate";
+            default:
+                return "<undefined> (raw value: " + to_string(utils::as_unsigned(val)) + ")";
+        }
+    }
+
     // ************************************************************
+
+    //! Dump the register and fields of `ipCores::Top::XilSpi`
+    //!
+    //! @param xilSpi A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under xilSpi
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::XilSpi& xilSpi)
+    {
+        DumpMap res{xilSpi.base()};
+
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::XilI2c`
+    //!
+    //! @param xilI2c A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under xilI2c
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::XilI2c& xilI2c)
+    {
+        DumpMap res{xilI2c.base()};
+
+        return res;
+    }
 
     //! Dump the register and fields of `ipCores::Top::AdcCalint::DataArray`
     //!
@@ -7697,45 +8327,87 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `ipCores::Top::Dig::DigI0::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigI0::FastFilterScArray`
     //!
-    //! @param filterLengthSc A reference to the module
-    //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI0::FilterLengthScArray& filterLengthSc)
+    //! @param fastFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under fastFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI0::FastFilterScArray& fastFilterSc)
     {
-        DumpMap res{filterLengthSc.base()};
-        res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
-        res.insert_or_assign("filterLengthSc[1].val", DumpEntry{filterLengthSc[1].val});
-        res.insert_or_assign("filterLengthSc[2].val", DumpEntry{filterLengthSc[2].val});
-        res.insert_or_assign("filterLengthSc[3].val", DumpEntry{filterLengthSc[3].val});
-        res.insert_or_assign("filterLengthSc[4].val", DumpEntry{filterLengthSc[4].val});
-        res.insert_or_assign("filterLengthSc[5].val", DumpEntry{filterLengthSc[5].val});
-        res.insert_or_assign("filterLengthSc[6].val", DumpEntry{filterLengthSc[6].val});
-        res.insert_or_assign("filterLengthSc[7].val", DumpEntry{filterLengthSc[7].val});
-        res.insert_or_assign("filterLengthSc[8].val", DumpEntry{filterLengthSc[8].val});
-        res.insert_or_assign("filterLengthSc[9].val", DumpEntry{filterLengthSc[9].val});
-        res.insert_or_assign("filterLengthSc[10].val", DumpEntry{filterLengthSc[10].val});
-        res.insert_or_assign("filterLengthSc[11].val", DumpEntry{filterLengthSc[11].val});
-        res.insert_or_assign("filterLengthSc[12].val", DumpEntry{filterLengthSc[12].val});
-        res.insert_or_assign("filterLengthSc[13].val", DumpEntry{filterLengthSc[13].val});
-        res.insert_or_assign("filterLengthSc[14].val", DumpEntry{filterLengthSc[14].val});
-        res.insert_or_assign("filterLengthSc[15].val", DumpEntry{filterLengthSc[15].val});
-        res.insert_or_assign("filterLengthSc[16].val", DumpEntry{filterLengthSc[16].val});
-        res.insert_or_assign("filterLengthSc[17].val", DumpEntry{filterLengthSc[17].val});
-        res.insert_or_assign("filterLengthSc[18].val", DumpEntry{filterLengthSc[18].val});
-        res.insert_or_assign("filterLengthSc[19].val", DumpEntry{filterLengthSc[19].val});
-        res.insert_or_assign("filterLengthSc[20].val", DumpEntry{filterLengthSc[20].val});
-        res.insert_or_assign("filterLengthSc[21].val", DumpEntry{filterLengthSc[21].val});
-        res.insert_or_assign("filterLengthSc[22].val", DumpEntry{filterLengthSc[22].val});
-        res.insert_or_assign("filterLengthSc[23].val", DumpEntry{filterLengthSc[23].val});
-        res.insert_or_assign("filterLengthSc[24].val", DumpEntry{filterLengthSc[24].val});
-        res.insert_or_assign("filterLengthSc[25].val", DumpEntry{filterLengthSc[25].val});
-        res.insert_or_assign("filterLengthSc[26].val", DumpEntry{filterLengthSc[26].val});
-        res.insert_or_assign("filterLengthSc[27].val", DumpEntry{filterLengthSc[27].val});
-        res.insert_or_assign("filterLengthSc[28].val", DumpEntry{filterLengthSc[28].val});
-        res.insert_or_assign("filterLengthSc[29].val", DumpEntry{filterLengthSc[29].val});
-        res.insert_or_assign("filterLengthSc[30].val", DumpEntry{filterLengthSc[30].val});
-        res.insert_or_assign("filterLengthSc[31].val", DumpEntry{filterLengthSc[31].val});
+        DumpMap res{fastFilterSc.base()};
+        res.insert_or_assign("fastFilterSc[0].val", DumpEntry{fastFilterSc[0].val});
+        res.insert_or_assign("fastFilterSc[1].val", DumpEntry{fastFilterSc[1].val});
+        res.insert_or_assign("fastFilterSc[2].val", DumpEntry{fastFilterSc[2].val});
+        res.insert_or_assign("fastFilterSc[3].val", DumpEntry{fastFilterSc[3].val});
+        res.insert_or_assign("fastFilterSc[4].val", DumpEntry{fastFilterSc[4].val});
+        res.insert_or_assign("fastFilterSc[5].val", DumpEntry{fastFilterSc[5].val});
+        res.insert_or_assign("fastFilterSc[6].val", DumpEntry{fastFilterSc[6].val});
+        res.insert_or_assign("fastFilterSc[7].val", DumpEntry{fastFilterSc[7].val});
+        res.insert_or_assign("fastFilterSc[8].val", DumpEntry{fastFilterSc[8].val});
+        res.insert_or_assign("fastFilterSc[9].val", DumpEntry{fastFilterSc[9].val});
+        res.insert_or_assign("fastFilterSc[10].val", DumpEntry{fastFilterSc[10].val});
+        res.insert_or_assign("fastFilterSc[11].val", DumpEntry{fastFilterSc[11].val});
+        res.insert_or_assign("fastFilterSc[12].val", DumpEntry{fastFilterSc[12].val});
+        res.insert_or_assign("fastFilterSc[13].val", DumpEntry{fastFilterSc[13].val});
+        res.insert_or_assign("fastFilterSc[14].val", DumpEntry{fastFilterSc[14].val});
+        res.insert_or_assign("fastFilterSc[15].val", DumpEntry{fastFilterSc[15].val});
+        res.insert_or_assign("fastFilterSc[16].val", DumpEntry{fastFilterSc[16].val});
+        res.insert_or_assign("fastFilterSc[17].val", DumpEntry{fastFilterSc[17].val});
+        res.insert_or_assign("fastFilterSc[18].val", DumpEntry{fastFilterSc[18].val});
+        res.insert_or_assign("fastFilterSc[19].val", DumpEntry{fastFilterSc[19].val});
+        res.insert_or_assign("fastFilterSc[20].val", DumpEntry{fastFilterSc[20].val});
+        res.insert_or_assign("fastFilterSc[21].val", DumpEntry{fastFilterSc[21].val});
+        res.insert_or_assign("fastFilterSc[22].val", DumpEntry{fastFilterSc[22].val});
+        res.insert_or_assign("fastFilterSc[23].val", DumpEntry{fastFilterSc[23].val});
+        res.insert_or_assign("fastFilterSc[24].val", DumpEntry{fastFilterSc[24].val});
+        res.insert_or_assign("fastFilterSc[25].val", DumpEntry{fastFilterSc[25].val});
+        res.insert_or_assign("fastFilterSc[26].val", DumpEntry{fastFilterSc[26].val});
+        res.insert_or_assign("fastFilterSc[27].val", DumpEntry{fastFilterSc[27].val});
+        res.insert_or_assign("fastFilterSc[28].val", DumpEntry{fastFilterSc[28].val});
+        res.insert_or_assign("fastFilterSc[29].val", DumpEntry{fastFilterSc[29].val});
+        res.insert_or_assign("fastFilterSc[30].val", DumpEntry{fastFilterSc[30].val});
+        res.insert_or_assign("fastFilterSc[31].val", DumpEntry{fastFilterSc[31].val});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::Dig::DigI0::SlowFilterScArray`
+    //!
+    //! @param slowFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under slowFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI0::SlowFilterScArray& slowFilterSc)
+    {
+        DumpMap res{slowFilterSc.base()};
+        res.insert_or_assign("slowFilterSc[0].val", DumpEntry{slowFilterSc[0].val});
+        res.insert_or_assign("slowFilterSc[1].val", DumpEntry{slowFilterSc[1].val});
+        res.insert_or_assign("slowFilterSc[2].val", DumpEntry{slowFilterSc[2].val});
+        res.insert_or_assign("slowFilterSc[3].val", DumpEntry{slowFilterSc[3].val});
+        res.insert_or_assign("slowFilterSc[4].val", DumpEntry{slowFilterSc[4].val});
+        res.insert_or_assign("slowFilterSc[5].val", DumpEntry{slowFilterSc[5].val});
+        res.insert_or_assign("slowFilterSc[6].val", DumpEntry{slowFilterSc[6].val});
+        res.insert_or_assign("slowFilterSc[7].val", DumpEntry{slowFilterSc[7].val});
+        res.insert_or_assign("slowFilterSc[8].val", DumpEntry{slowFilterSc[8].val});
+        res.insert_or_assign("slowFilterSc[9].val", DumpEntry{slowFilterSc[9].val});
+        res.insert_or_assign("slowFilterSc[10].val", DumpEntry{slowFilterSc[10].val});
+        res.insert_or_assign("slowFilterSc[11].val", DumpEntry{slowFilterSc[11].val});
+        res.insert_or_assign("slowFilterSc[12].val", DumpEntry{slowFilterSc[12].val});
+        res.insert_or_assign("slowFilterSc[13].val", DumpEntry{slowFilterSc[13].val});
+        res.insert_or_assign("slowFilterSc[14].val", DumpEntry{slowFilterSc[14].val});
+        res.insert_or_assign("slowFilterSc[15].val", DumpEntry{slowFilterSc[15].val});
+        res.insert_or_assign("slowFilterSc[16].val", DumpEntry{slowFilterSc[16].val});
+        res.insert_or_assign("slowFilterSc[17].val", DumpEntry{slowFilterSc[17].val});
+        res.insert_or_assign("slowFilterSc[18].val", DumpEntry{slowFilterSc[18].val});
+        res.insert_or_assign("slowFilterSc[19].val", DumpEntry{slowFilterSc[19].val});
+        res.insert_or_assign("slowFilterSc[20].val", DumpEntry{slowFilterSc[20].val});
+        res.insert_or_assign("slowFilterSc[21].val", DumpEntry{slowFilterSc[21].val});
+        res.insert_or_assign("slowFilterSc[22].val", DumpEntry{slowFilterSc[22].val});
+        res.insert_or_assign("slowFilterSc[23].val", DumpEntry{slowFilterSc[23].val});
+        res.insert_or_assign("slowFilterSc[24].val", DumpEntry{slowFilterSc[24].val});
+        res.insert_or_assign("slowFilterSc[25].val", DumpEntry{slowFilterSc[25].val});
+        res.insert_or_assign("slowFilterSc[26].val", DumpEntry{slowFilterSc[26].val});
+        res.insert_or_assign("slowFilterSc[27].val", DumpEntry{slowFilterSc[27].val});
+        res.insert_or_assign("slowFilterSc[28].val", DumpEntry{slowFilterSc[28].val});
+        res.insert_or_assign("slowFilterSc[29].val", DumpEntry{slowFilterSc[29].val});
+        res.insert_or_assign("slowFilterSc[30].val", DumpEntry{slowFilterSc[30].val});
+        res.insert_or_assign("slowFilterSc[31].val", DumpEntry{slowFilterSc[31].val});
         return res;
     }
 
@@ -7835,38 +8507,70 @@ namespace mmpp::utils
         res.insert_or_assign("digI0.rstLatch", DumpEntry{digI0.rstLatch});
         res.insert_or_assign("digI0.risingInterrupt", DumpEntry{digI0.risingInterrupt});
         res.insert_or_assign("digI0.fallingInterrupt", DumpEntry{digI0.fallingInterrupt});
-        res.insert_or_assign("digI0.filterLengthSc[0].val", DumpEntry{digI0.filterLengthSc[0].val});
-        res.insert_or_assign("digI0.filterLengthSc[1].val", DumpEntry{digI0.filterLengthSc[1].val});
-        res.insert_or_assign("digI0.filterLengthSc[2].val", DumpEntry{digI0.filterLengthSc[2].val});
-        res.insert_or_assign("digI0.filterLengthSc[3].val", DumpEntry{digI0.filterLengthSc[3].val});
-        res.insert_or_assign("digI0.filterLengthSc[4].val", DumpEntry{digI0.filterLengthSc[4].val});
-        res.insert_or_assign("digI0.filterLengthSc[5].val", DumpEntry{digI0.filterLengthSc[5].val});
-        res.insert_or_assign("digI0.filterLengthSc[6].val", DumpEntry{digI0.filterLengthSc[6].val});
-        res.insert_or_assign("digI0.filterLengthSc[7].val", DumpEntry{digI0.filterLengthSc[7].val});
-        res.insert_or_assign("digI0.filterLengthSc[8].val", DumpEntry{digI0.filterLengthSc[8].val});
-        res.insert_or_assign("digI0.filterLengthSc[9].val", DumpEntry{digI0.filterLengthSc[9].val});
-        res.insert_or_assign("digI0.filterLengthSc[10].val", DumpEntry{digI0.filterLengthSc[10].val});
-        res.insert_or_assign("digI0.filterLengthSc[11].val", DumpEntry{digI0.filterLengthSc[11].val});
-        res.insert_or_assign("digI0.filterLengthSc[12].val", DumpEntry{digI0.filterLengthSc[12].val});
-        res.insert_or_assign("digI0.filterLengthSc[13].val", DumpEntry{digI0.filterLengthSc[13].val});
-        res.insert_or_assign("digI0.filterLengthSc[14].val", DumpEntry{digI0.filterLengthSc[14].val});
-        res.insert_or_assign("digI0.filterLengthSc[15].val", DumpEntry{digI0.filterLengthSc[15].val});
-        res.insert_or_assign("digI0.filterLengthSc[16].val", DumpEntry{digI0.filterLengthSc[16].val});
-        res.insert_or_assign("digI0.filterLengthSc[17].val", DumpEntry{digI0.filterLengthSc[17].val});
-        res.insert_or_assign("digI0.filterLengthSc[18].val", DumpEntry{digI0.filterLengthSc[18].val});
-        res.insert_or_assign("digI0.filterLengthSc[19].val", DumpEntry{digI0.filterLengthSc[19].val});
-        res.insert_or_assign("digI0.filterLengthSc[20].val", DumpEntry{digI0.filterLengthSc[20].val});
-        res.insert_or_assign("digI0.filterLengthSc[21].val", DumpEntry{digI0.filterLengthSc[21].val});
-        res.insert_or_assign("digI0.filterLengthSc[22].val", DumpEntry{digI0.filterLengthSc[22].val});
-        res.insert_or_assign("digI0.filterLengthSc[23].val", DumpEntry{digI0.filterLengthSc[23].val});
-        res.insert_or_assign("digI0.filterLengthSc[24].val", DumpEntry{digI0.filterLengthSc[24].val});
-        res.insert_or_assign("digI0.filterLengthSc[25].val", DumpEntry{digI0.filterLengthSc[25].val});
-        res.insert_or_assign("digI0.filterLengthSc[26].val", DumpEntry{digI0.filterLengthSc[26].val});
-        res.insert_or_assign("digI0.filterLengthSc[27].val", DumpEntry{digI0.filterLengthSc[27].val});
-        res.insert_or_assign("digI0.filterLengthSc[28].val", DumpEntry{digI0.filterLengthSc[28].val});
-        res.insert_or_assign("digI0.filterLengthSc[29].val", DumpEntry{digI0.filterLengthSc[29].val});
-        res.insert_or_assign("digI0.filterLengthSc[30].val", DumpEntry{digI0.filterLengthSc[30].val});
-        res.insert_or_assign("digI0.filterLengthSc[31].val", DumpEntry{digI0.filterLengthSc[31].val});
+        res.insert_or_assign("digI0.fastFilterSc[0].val", DumpEntry{digI0.fastFilterSc[0].val});
+        res.insert_or_assign("digI0.fastFilterSc[1].val", DumpEntry{digI0.fastFilterSc[1].val});
+        res.insert_or_assign("digI0.fastFilterSc[2].val", DumpEntry{digI0.fastFilterSc[2].val});
+        res.insert_or_assign("digI0.fastFilterSc[3].val", DumpEntry{digI0.fastFilterSc[3].val});
+        res.insert_or_assign("digI0.fastFilterSc[4].val", DumpEntry{digI0.fastFilterSc[4].val});
+        res.insert_or_assign("digI0.fastFilterSc[5].val", DumpEntry{digI0.fastFilterSc[5].val});
+        res.insert_or_assign("digI0.fastFilterSc[6].val", DumpEntry{digI0.fastFilterSc[6].val});
+        res.insert_or_assign("digI0.fastFilterSc[7].val", DumpEntry{digI0.fastFilterSc[7].val});
+        res.insert_or_assign("digI0.fastFilterSc[8].val", DumpEntry{digI0.fastFilterSc[8].val});
+        res.insert_or_assign("digI0.fastFilterSc[9].val", DumpEntry{digI0.fastFilterSc[9].val});
+        res.insert_or_assign("digI0.fastFilterSc[10].val", DumpEntry{digI0.fastFilterSc[10].val});
+        res.insert_or_assign("digI0.fastFilterSc[11].val", DumpEntry{digI0.fastFilterSc[11].val});
+        res.insert_or_assign("digI0.fastFilterSc[12].val", DumpEntry{digI0.fastFilterSc[12].val});
+        res.insert_or_assign("digI0.fastFilterSc[13].val", DumpEntry{digI0.fastFilterSc[13].val});
+        res.insert_or_assign("digI0.fastFilterSc[14].val", DumpEntry{digI0.fastFilterSc[14].val});
+        res.insert_or_assign("digI0.fastFilterSc[15].val", DumpEntry{digI0.fastFilterSc[15].val});
+        res.insert_or_assign("digI0.fastFilterSc[16].val", DumpEntry{digI0.fastFilterSc[16].val});
+        res.insert_or_assign("digI0.fastFilterSc[17].val", DumpEntry{digI0.fastFilterSc[17].val});
+        res.insert_or_assign("digI0.fastFilterSc[18].val", DumpEntry{digI0.fastFilterSc[18].val});
+        res.insert_or_assign("digI0.fastFilterSc[19].val", DumpEntry{digI0.fastFilterSc[19].val});
+        res.insert_or_assign("digI0.fastFilterSc[20].val", DumpEntry{digI0.fastFilterSc[20].val});
+        res.insert_or_assign("digI0.fastFilterSc[21].val", DumpEntry{digI0.fastFilterSc[21].val});
+        res.insert_or_assign("digI0.fastFilterSc[22].val", DumpEntry{digI0.fastFilterSc[22].val});
+        res.insert_or_assign("digI0.fastFilterSc[23].val", DumpEntry{digI0.fastFilterSc[23].val});
+        res.insert_or_assign("digI0.fastFilterSc[24].val", DumpEntry{digI0.fastFilterSc[24].val});
+        res.insert_or_assign("digI0.fastFilterSc[25].val", DumpEntry{digI0.fastFilterSc[25].val});
+        res.insert_or_assign("digI0.fastFilterSc[26].val", DumpEntry{digI0.fastFilterSc[26].val});
+        res.insert_or_assign("digI0.fastFilterSc[27].val", DumpEntry{digI0.fastFilterSc[27].val});
+        res.insert_or_assign("digI0.fastFilterSc[28].val", DumpEntry{digI0.fastFilterSc[28].val});
+        res.insert_or_assign("digI0.fastFilterSc[29].val", DumpEntry{digI0.fastFilterSc[29].val});
+        res.insert_or_assign("digI0.fastFilterSc[30].val", DumpEntry{digI0.fastFilterSc[30].val});
+        res.insert_or_assign("digI0.fastFilterSc[31].val", DumpEntry{digI0.fastFilterSc[31].val});
+        res.insert_or_assign("digI0.slowFilterSc[0].val", DumpEntry{digI0.slowFilterSc[0].val});
+        res.insert_or_assign("digI0.slowFilterSc[1].val", DumpEntry{digI0.slowFilterSc[1].val});
+        res.insert_or_assign("digI0.slowFilterSc[2].val", DumpEntry{digI0.slowFilterSc[2].val});
+        res.insert_or_assign("digI0.slowFilterSc[3].val", DumpEntry{digI0.slowFilterSc[3].val});
+        res.insert_or_assign("digI0.slowFilterSc[4].val", DumpEntry{digI0.slowFilterSc[4].val});
+        res.insert_or_assign("digI0.slowFilterSc[5].val", DumpEntry{digI0.slowFilterSc[5].val});
+        res.insert_or_assign("digI0.slowFilterSc[6].val", DumpEntry{digI0.slowFilterSc[6].val});
+        res.insert_or_assign("digI0.slowFilterSc[7].val", DumpEntry{digI0.slowFilterSc[7].val});
+        res.insert_or_assign("digI0.slowFilterSc[8].val", DumpEntry{digI0.slowFilterSc[8].val});
+        res.insert_or_assign("digI0.slowFilterSc[9].val", DumpEntry{digI0.slowFilterSc[9].val});
+        res.insert_or_assign("digI0.slowFilterSc[10].val", DumpEntry{digI0.slowFilterSc[10].val});
+        res.insert_or_assign("digI0.slowFilterSc[11].val", DumpEntry{digI0.slowFilterSc[11].val});
+        res.insert_or_assign("digI0.slowFilterSc[12].val", DumpEntry{digI0.slowFilterSc[12].val});
+        res.insert_or_assign("digI0.slowFilterSc[13].val", DumpEntry{digI0.slowFilterSc[13].val});
+        res.insert_or_assign("digI0.slowFilterSc[14].val", DumpEntry{digI0.slowFilterSc[14].val});
+        res.insert_or_assign("digI0.slowFilterSc[15].val", DumpEntry{digI0.slowFilterSc[15].val});
+        res.insert_or_assign("digI0.slowFilterSc[16].val", DumpEntry{digI0.slowFilterSc[16].val});
+        res.insert_or_assign("digI0.slowFilterSc[17].val", DumpEntry{digI0.slowFilterSc[17].val});
+        res.insert_or_assign("digI0.slowFilterSc[18].val", DumpEntry{digI0.slowFilterSc[18].val});
+        res.insert_or_assign("digI0.slowFilterSc[19].val", DumpEntry{digI0.slowFilterSc[19].val});
+        res.insert_or_assign("digI0.slowFilterSc[20].val", DumpEntry{digI0.slowFilterSc[20].val});
+        res.insert_or_assign("digI0.slowFilterSc[21].val", DumpEntry{digI0.slowFilterSc[21].val});
+        res.insert_or_assign("digI0.slowFilterSc[22].val", DumpEntry{digI0.slowFilterSc[22].val});
+        res.insert_or_assign("digI0.slowFilterSc[23].val", DumpEntry{digI0.slowFilterSc[23].val});
+        res.insert_or_assign("digI0.slowFilterSc[24].val", DumpEntry{digI0.slowFilterSc[24].val});
+        res.insert_or_assign("digI0.slowFilterSc[25].val", DumpEntry{digI0.slowFilterSc[25].val});
+        res.insert_or_assign("digI0.slowFilterSc[26].val", DumpEntry{digI0.slowFilterSc[26].val});
+        res.insert_or_assign("digI0.slowFilterSc[27].val", DumpEntry{digI0.slowFilterSc[27].val});
+        res.insert_or_assign("digI0.slowFilterSc[28].val", DumpEntry{digI0.slowFilterSc[28].val});
+        res.insert_or_assign("digI0.slowFilterSc[29].val", DumpEntry{digI0.slowFilterSc[29].val});
+        res.insert_or_assign("digI0.slowFilterSc[30].val", DumpEntry{digI0.slowFilterSc[30].val});
+        res.insert_or_assign("digI0.slowFilterSc[31].val", DumpEntry{digI0.slowFilterSc[31].val});
         res.insert_or_assign("digI0.reTime[0].s", DumpEntry{digI0.reTime[0].s});
         res.insert_or_assign("digI0.reTime[0].ns", DumpEntry{digI0.reTime[0].ns});
         res.insert_or_assign("digI0.reTime[1].s", DumpEntry{digI0.reTime[1].s});
@@ -7934,45 +8638,87 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `ipCores::Top::Dig::DigI1::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigI1::FastFilterScArray`
     //!
-    //! @param filterLengthSc A reference to the module
-    //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI1::FilterLengthScArray& filterLengthSc)
+    //! @param fastFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under fastFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI1::FastFilterScArray& fastFilterSc)
     {
-        DumpMap res{filterLengthSc.base()};
-        res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
-        res.insert_or_assign("filterLengthSc[1].val", DumpEntry{filterLengthSc[1].val});
-        res.insert_or_assign("filterLengthSc[2].val", DumpEntry{filterLengthSc[2].val});
-        res.insert_or_assign("filterLengthSc[3].val", DumpEntry{filterLengthSc[3].val});
-        res.insert_or_assign("filterLengthSc[4].val", DumpEntry{filterLengthSc[4].val});
-        res.insert_or_assign("filterLengthSc[5].val", DumpEntry{filterLengthSc[5].val});
-        res.insert_or_assign("filterLengthSc[6].val", DumpEntry{filterLengthSc[6].val});
-        res.insert_or_assign("filterLengthSc[7].val", DumpEntry{filterLengthSc[7].val});
-        res.insert_or_assign("filterLengthSc[8].val", DumpEntry{filterLengthSc[8].val});
-        res.insert_or_assign("filterLengthSc[9].val", DumpEntry{filterLengthSc[9].val});
-        res.insert_or_assign("filterLengthSc[10].val", DumpEntry{filterLengthSc[10].val});
-        res.insert_or_assign("filterLengthSc[11].val", DumpEntry{filterLengthSc[11].val});
-        res.insert_or_assign("filterLengthSc[12].val", DumpEntry{filterLengthSc[12].val});
-        res.insert_or_assign("filterLengthSc[13].val", DumpEntry{filterLengthSc[13].val});
-        res.insert_or_assign("filterLengthSc[14].val", DumpEntry{filterLengthSc[14].val});
-        res.insert_or_assign("filterLengthSc[15].val", DumpEntry{filterLengthSc[15].val});
-        res.insert_or_assign("filterLengthSc[16].val", DumpEntry{filterLengthSc[16].val});
-        res.insert_or_assign("filterLengthSc[17].val", DumpEntry{filterLengthSc[17].val});
-        res.insert_or_assign("filterLengthSc[18].val", DumpEntry{filterLengthSc[18].val});
-        res.insert_or_assign("filterLengthSc[19].val", DumpEntry{filterLengthSc[19].val});
-        res.insert_or_assign("filterLengthSc[20].val", DumpEntry{filterLengthSc[20].val});
-        res.insert_or_assign("filterLengthSc[21].val", DumpEntry{filterLengthSc[21].val});
-        res.insert_or_assign("filterLengthSc[22].val", DumpEntry{filterLengthSc[22].val});
-        res.insert_or_assign("filterLengthSc[23].val", DumpEntry{filterLengthSc[23].val});
-        res.insert_or_assign("filterLengthSc[24].val", DumpEntry{filterLengthSc[24].val});
-        res.insert_or_assign("filterLengthSc[25].val", DumpEntry{filterLengthSc[25].val});
-        res.insert_or_assign("filterLengthSc[26].val", DumpEntry{filterLengthSc[26].val});
-        res.insert_or_assign("filterLengthSc[27].val", DumpEntry{filterLengthSc[27].val});
-        res.insert_or_assign("filterLengthSc[28].val", DumpEntry{filterLengthSc[28].val});
-        res.insert_or_assign("filterLengthSc[29].val", DumpEntry{filterLengthSc[29].val});
-        res.insert_or_assign("filterLengthSc[30].val", DumpEntry{filterLengthSc[30].val});
-        res.insert_or_assign("filterLengthSc[31].val", DumpEntry{filterLengthSc[31].val});
+        DumpMap res{fastFilterSc.base()};
+        res.insert_or_assign("fastFilterSc[0].val", DumpEntry{fastFilterSc[0].val});
+        res.insert_or_assign("fastFilterSc[1].val", DumpEntry{fastFilterSc[1].val});
+        res.insert_or_assign("fastFilterSc[2].val", DumpEntry{fastFilterSc[2].val});
+        res.insert_or_assign("fastFilterSc[3].val", DumpEntry{fastFilterSc[3].val});
+        res.insert_or_assign("fastFilterSc[4].val", DumpEntry{fastFilterSc[4].val});
+        res.insert_or_assign("fastFilterSc[5].val", DumpEntry{fastFilterSc[5].val});
+        res.insert_or_assign("fastFilterSc[6].val", DumpEntry{fastFilterSc[6].val});
+        res.insert_or_assign("fastFilterSc[7].val", DumpEntry{fastFilterSc[7].val});
+        res.insert_or_assign("fastFilterSc[8].val", DumpEntry{fastFilterSc[8].val});
+        res.insert_or_assign("fastFilterSc[9].val", DumpEntry{fastFilterSc[9].val});
+        res.insert_or_assign("fastFilterSc[10].val", DumpEntry{fastFilterSc[10].val});
+        res.insert_or_assign("fastFilterSc[11].val", DumpEntry{fastFilterSc[11].val});
+        res.insert_or_assign("fastFilterSc[12].val", DumpEntry{fastFilterSc[12].val});
+        res.insert_or_assign("fastFilterSc[13].val", DumpEntry{fastFilterSc[13].val});
+        res.insert_or_assign("fastFilterSc[14].val", DumpEntry{fastFilterSc[14].val});
+        res.insert_or_assign("fastFilterSc[15].val", DumpEntry{fastFilterSc[15].val});
+        res.insert_or_assign("fastFilterSc[16].val", DumpEntry{fastFilterSc[16].val});
+        res.insert_or_assign("fastFilterSc[17].val", DumpEntry{fastFilterSc[17].val});
+        res.insert_or_assign("fastFilterSc[18].val", DumpEntry{fastFilterSc[18].val});
+        res.insert_or_assign("fastFilterSc[19].val", DumpEntry{fastFilterSc[19].val});
+        res.insert_or_assign("fastFilterSc[20].val", DumpEntry{fastFilterSc[20].val});
+        res.insert_or_assign("fastFilterSc[21].val", DumpEntry{fastFilterSc[21].val});
+        res.insert_or_assign("fastFilterSc[22].val", DumpEntry{fastFilterSc[22].val});
+        res.insert_or_assign("fastFilterSc[23].val", DumpEntry{fastFilterSc[23].val});
+        res.insert_or_assign("fastFilterSc[24].val", DumpEntry{fastFilterSc[24].val});
+        res.insert_or_assign("fastFilterSc[25].val", DumpEntry{fastFilterSc[25].val});
+        res.insert_or_assign("fastFilterSc[26].val", DumpEntry{fastFilterSc[26].val});
+        res.insert_or_assign("fastFilterSc[27].val", DumpEntry{fastFilterSc[27].val});
+        res.insert_or_assign("fastFilterSc[28].val", DumpEntry{fastFilterSc[28].val});
+        res.insert_or_assign("fastFilterSc[29].val", DumpEntry{fastFilterSc[29].val});
+        res.insert_or_assign("fastFilterSc[30].val", DumpEntry{fastFilterSc[30].val});
+        res.insert_or_assign("fastFilterSc[31].val", DumpEntry{fastFilterSc[31].val});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::Dig::DigI1::SlowFilterScArray`
+    //!
+    //! @param slowFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under slowFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigI1::SlowFilterScArray& slowFilterSc)
+    {
+        DumpMap res{slowFilterSc.base()};
+        res.insert_or_assign("slowFilterSc[0].val", DumpEntry{slowFilterSc[0].val});
+        res.insert_or_assign("slowFilterSc[1].val", DumpEntry{slowFilterSc[1].val});
+        res.insert_or_assign("slowFilterSc[2].val", DumpEntry{slowFilterSc[2].val});
+        res.insert_or_assign("slowFilterSc[3].val", DumpEntry{slowFilterSc[3].val});
+        res.insert_or_assign("slowFilterSc[4].val", DumpEntry{slowFilterSc[4].val});
+        res.insert_or_assign("slowFilterSc[5].val", DumpEntry{slowFilterSc[5].val});
+        res.insert_or_assign("slowFilterSc[6].val", DumpEntry{slowFilterSc[6].val});
+        res.insert_or_assign("slowFilterSc[7].val", DumpEntry{slowFilterSc[7].val});
+        res.insert_or_assign("slowFilterSc[8].val", DumpEntry{slowFilterSc[8].val});
+        res.insert_or_assign("slowFilterSc[9].val", DumpEntry{slowFilterSc[9].val});
+        res.insert_or_assign("slowFilterSc[10].val", DumpEntry{slowFilterSc[10].val});
+        res.insert_or_assign("slowFilterSc[11].val", DumpEntry{slowFilterSc[11].val});
+        res.insert_or_assign("slowFilterSc[12].val", DumpEntry{slowFilterSc[12].val});
+        res.insert_or_assign("slowFilterSc[13].val", DumpEntry{slowFilterSc[13].val});
+        res.insert_or_assign("slowFilterSc[14].val", DumpEntry{slowFilterSc[14].val});
+        res.insert_or_assign("slowFilterSc[15].val", DumpEntry{slowFilterSc[15].val});
+        res.insert_or_assign("slowFilterSc[16].val", DumpEntry{slowFilterSc[16].val});
+        res.insert_or_assign("slowFilterSc[17].val", DumpEntry{slowFilterSc[17].val});
+        res.insert_or_assign("slowFilterSc[18].val", DumpEntry{slowFilterSc[18].val});
+        res.insert_or_assign("slowFilterSc[19].val", DumpEntry{slowFilterSc[19].val});
+        res.insert_or_assign("slowFilterSc[20].val", DumpEntry{slowFilterSc[20].val});
+        res.insert_or_assign("slowFilterSc[21].val", DumpEntry{slowFilterSc[21].val});
+        res.insert_or_assign("slowFilterSc[22].val", DumpEntry{slowFilterSc[22].val});
+        res.insert_or_assign("slowFilterSc[23].val", DumpEntry{slowFilterSc[23].val});
+        res.insert_or_assign("slowFilterSc[24].val", DumpEntry{slowFilterSc[24].val});
+        res.insert_or_assign("slowFilterSc[25].val", DumpEntry{slowFilterSc[25].val});
+        res.insert_or_assign("slowFilterSc[26].val", DumpEntry{slowFilterSc[26].val});
+        res.insert_or_assign("slowFilterSc[27].val", DumpEntry{slowFilterSc[27].val});
+        res.insert_or_assign("slowFilterSc[28].val", DumpEntry{slowFilterSc[28].val});
+        res.insert_or_assign("slowFilterSc[29].val", DumpEntry{slowFilterSc[29].val});
+        res.insert_or_assign("slowFilterSc[30].val", DumpEntry{slowFilterSc[30].val});
+        res.insert_or_assign("slowFilterSc[31].val", DumpEntry{slowFilterSc[31].val});
         return res;
     }
 
@@ -8072,38 +8818,70 @@ namespace mmpp::utils
         res.insert_or_assign("digI1.rstLatch", DumpEntry{digI1.rstLatch});
         res.insert_or_assign("digI1.risingInterrupt", DumpEntry{digI1.risingInterrupt});
         res.insert_or_assign("digI1.fallingInterrupt", DumpEntry{digI1.fallingInterrupt});
-        res.insert_or_assign("digI1.filterLengthSc[0].val", DumpEntry{digI1.filterLengthSc[0].val});
-        res.insert_or_assign("digI1.filterLengthSc[1].val", DumpEntry{digI1.filterLengthSc[1].val});
-        res.insert_or_assign("digI1.filterLengthSc[2].val", DumpEntry{digI1.filterLengthSc[2].val});
-        res.insert_or_assign("digI1.filterLengthSc[3].val", DumpEntry{digI1.filterLengthSc[3].val});
-        res.insert_or_assign("digI1.filterLengthSc[4].val", DumpEntry{digI1.filterLengthSc[4].val});
-        res.insert_or_assign("digI1.filterLengthSc[5].val", DumpEntry{digI1.filterLengthSc[5].val});
-        res.insert_or_assign("digI1.filterLengthSc[6].val", DumpEntry{digI1.filterLengthSc[6].val});
-        res.insert_or_assign("digI1.filterLengthSc[7].val", DumpEntry{digI1.filterLengthSc[7].val});
-        res.insert_or_assign("digI1.filterLengthSc[8].val", DumpEntry{digI1.filterLengthSc[8].val});
-        res.insert_or_assign("digI1.filterLengthSc[9].val", DumpEntry{digI1.filterLengthSc[9].val});
-        res.insert_or_assign("digI1.filterLengthSc[10].val", DumpEntry{digI1.filterLengthSc[10].val});
-        res.insert_or_assign("digI1.filterLengthSc[11].val", DumpEntry{digI1.filterLengthSc[11].val});
-        res.insert_or_assign("digI1.filterLengthSc[12].val", DumpEntry{digI1.filterLengthSc[12].val});
-        res.insert_or_assign("digI1.filterLengthSc[13].val", DumpEntry{digI1.filterLengthSc[13].val});
-        res.insert_or_assign("digI1.filterLengthSc[14].val", DumpEntry{digI1.filterLengthSc[14].val});
-        res.insert_or_assign("digI1.filterLengthSc[15].val", DumpEntry{digI1.filterLengthSc[15].val});
-        res.insert_or_assign("digI1.filterLengthSc[16].val", DumpEntry{digI1.filterLengthSc[16].val});
-        res.insert_or_assign("digI1.filterLengthSc[17].val", DumpEntry{digI1.filterLengthSc[17].val});
-        res.insert_or_assign("digI1.filterLengthSc[18].val", DumpEntry{digI1.filterLengthSc[18].val});
-        res.insert_or_assign("digI1.filterLengthSc[19].val", DumpEntry{digI1.filterLengthSc[19].val});
-        res.insert_or_assign("digI1.filterLengthSc[20].val", DumpEntry{digI1.filterLengthSc[20].val});
-        res.insert_or_assign("digI1.filterLengthSc[21].val", DumpEntry{digI1.filterLengthSc[21].val});
-        res.insert_or_assign("digI1.filterLengthSc[22].val", DumpEntry{digI1.filterLengthSc[22].val});
-        res.insert_or_assign("digI1.filterLengthSc[23].val", DumpEntry{digI1.filterLengthSc[23].val});
-        res.insert_or_assign("digI1.filterLengthSc[24].val", DumpEntry{digI1.filterLengthSc[24].val});
-        res.insert_or_assign("digI1.filterLengthSc[25].val", DumpEntry{digI1.filterLengthSc[25].val});
-        res.insert_or_assign("digI1.filterLengthSc[26].val", DumpEntry{digI1.filterLengthSc[26].val});
-        res.insert_or_assign("digI1.filterLengthSc[27].val", DumpEntry{digI1.filterLengthSc[27].val});
-        res.insert_or_assign("digI1.filterLengthSc[28].val", DumpEntry{digI1.filterLengthSc[28].val});
-        res.insert_or_assign("digI1.filterLengthSc[29].val", DumpEntry{digI1.filterLengthSc[29].val});
-        res.insert_or_assign("digI1.filterLengthSc[30].val", DumpEntry{digI1.filterLengthSc[30].val});
-        res.insert_or_assign("digI1.filterLengthSc[31].val", DumpEntry{digI1.filterLengthSc[31].val});
+        res.insert_or_assign("digI1.fastFilterSc[0].val", DumpEntry{digI1.fastFilterSc[0].val});
+        res.insert_or_assign("digI1.fastFilterSc[1].val", DumpEntry{digI1.fastFilterSc[1].val});
+        res.insert_or_assign("digI1.fastFilterSc[2].val", DumpEntry{digI1.fastFilterSc[2].val});
+        res.insert_or_assign("digI1.fastFilterSc[3].val", DumpEntry{digI1.fastFilterSc[3].val});
+        res.insert_or_assign("digI1.fastFilterSc[4].val", DumpEntry{digI1.fastFilterSc[4].val});
+        res.insert_or_assign("digI1.fastFilterSc[5].val", DumpEntry{digI1.fastFilterSc[5].val});
+        res.insert_or_assign("digI1.fastFilterSc[6].val", DumpEntry{digI1.fastFilterSc[6].val});
+        res.insert_or_assign("digI1.fastFilterSc[7].val", DumpEntry{digI1.fastFilterSc[7].val});
+        res.insert_or_assign("digI1.fastFilterSc[8].val", DumpEntry{digI1.fastFilterSc[8].val});
+        res.insert_or_assign("digI1.fastFilterSc[9].val", DumpEntry{digI1.fastFilterSc[9].val});
+        res.insert_or_assign("digI1.fastFilterSc[10].val", DumpEntry{digI1.fastFilterSc[10].val});
+        res.insert_or_assign("digI1.fastFilterSc[11].val", DumpEntry{digI1.fastFilterSc[11].val});
+        res.insert_or_assign("digI1.fastFilterSc[12].val", DumpEntry{digI1.fastFilterSc[12].val});
+        res.insert_or_assign("digI1.fastFilterSc[13].val", DumpEntry{digI1.fastFilterSc[13].val});
+        res.insert_or_assign("digI1.fastFilterSc[14].val", DumpEntry{digI1.fastFilterSc[14].val});
+        res.insert_or_assign("digI1.fastFilterSc[15].val", DumpEntry{digI1.fastFilterSc[15].val});
+        res.insert_or_assign("digI1.fastFilterSc[16].val", DumpEntry{digI1.fastFilterSc[16].val});
+        res.insert_or_assign("digI1.fastFilterSc[17].val", DumpEntry{digI1.fastFilterSc[17].val});
+        res.insert_or_assign("digI1.fastFilterSc[18].val", DumpEntry{digI1.fastFilterSc[18].val});
+        res.insert_or_assign("digI1.fastFilterSc[19].val", DumpEntry{digI1.fastFilterSc[19].val});
+        res.insert_or_assign("digI1.fastFilterSc[20].val", DumpEntry{digI1.fastFilterSc[20].val});
+        res.insert_or_assign("digI1.fastFilterSc[21].val", DumpEntry{digI1.fastFilterSc[21].val});
+        res.insert_or_assign("digI1.fastFilterSc[22].val", DumpEntry{digI1.fastFilterSc[22].val});
+        res.insert_or_assign("digI1.fastFilterSc[23].val", DumpEntry{digI1.fastFilterSc[23].val});
+        res.insert_or_assign("digI1.fastFilterSc[24].val", DumpEntry{digI1.fastFilterSc[24].val});
+        res.insert_or_assign("digI1.fastFilterSc[25].val", DumpEntry{digI1.fastFilterSc[25].val});
+        res.insert_or_assign("digI1.fastFilterSc[26].val", DumpEntry{digI1.fastFilterSc[26].val});
+        res.insert_or_assign("digI1.fastFilterSc[27].val", DumpEntry{digI1.fastFilterSc[27].val});
+        res.insert_or_assign("digI1.fastFilterSc[28].val", DumpEntry{digI1.fastFilterSc[28].val});
+        res.insert_or_assign("digI1.fastFilterSc[29].val", DumpEntry{digI1.fastFilterSc[29].val});
+        res.insert_or_assign("digI1.fastFilterSc[30].val", DumpEntry{digI1.fastFilterSc[30].val});
+        res.insert_or_assign("digI1.fastFilterSc[31].val", DumpEntry{digI1.fastFilterSc[31].val});
+        res.insert_or_assign("digI1.slowFilterSc[0].val", DumpEntry{digI1.slowFilterSc[0].val});
+        res.insert_or_assign("digI1.slowFilterSc[1].val", DumpEntry{digI1.slowFilterSc[1].val});
+        res.insert_or_assign("digI1.slowFilterSc[2].val", DumpEntry{digI1.slowFilterSc[2].val});
+        res.insert_or_assign("digI1.slowFilterSc[3].val", DumpEntry{digI1.slowFilterSc[3].val});
+        res.insert_or_assign("digI1.slowFilterSc[4].val", DumpEntry{digI1.slowFilterSc[4].val});
+        res.insert_or_assign("digI1.slowFilterSc[5].val", DumpEntry{digI1.slowFilterSc[5].val});
+        res.insert_or_assign("digI1.slowFilterSc[6].val", DumpEntry{digI1.slowFilterSc[6].val});
+        res.insert_or_assign("digI1.slowFilterSc[7].val", DumpEntry{digI1.slowFilterSc[7].val});
+        res.insert_or_assign("digI1.slowFilterSc[8].val", DumpEntry{digI1.slowFilterSc[8].val});
+        res.insert_or_assign("digI1.slowFilterSc[9].val", DumpEntry{digI1.slowFilterSc[9].val});
+        res.insert_or_assign("digI1.slowFilterSc[10].val", DumpEntry{digI1.slowFilterSc[10].val});
+        res.insert_or_assign("digI1.slowFilterSc[11].val", DumpEntry{digI1.slowFilterSc[11].val});
+        res.insert_or_assign("digI1.slowFilterSc[12].val", DumpEntry{digI1.slowFilterSc[12].val});
+        res.insert_or_assign("digI1.slowFilterSc[13].val", DumpEntry{digI1.slowFilterSc[13].val});
+        res.insert_or_assign("digI1.slowFilterSc[14].val", DumpEntry{digI1.slowFilterSc[14].val});
+        res.insert_or_assign("digI1.slowFilterSc[15].val", DumpEntry{digI1.slowFilterSc[15].val});
+        res.insert_or_assign("digI1.slowFilterSc[16].val", DumpEntry{digI1.slowFilterSc[16].val});
+        res.insert_or_assign("digI1.slowFilterSc[17].val", DumpEntry{digI1.slowFilterSc[17].val});
+        res.insert_or_assign("digI1.slowFilterSc[18].val", DumpEntry{digI1.slowFilterSc[18].val});
+        res.insert_or_assign("digI1.slowFilterSc[19].val", DumpEntry{digI1.slowFilterSc[19].val});
+        res.insert_or_assign("digI1.slowFilterSc[20].val", DumpEntry{digI1.slowFilterSc[20].val});
+        res.insert_or_assign("digI1.slowFilterSc[21].val", DumpEntry{digI1.slowFilterSc[21].val});
+        res.insert_or_assign("digI1.slowFilterSc[22].val", DumpEntry{digI1.slowFilterSc[22].val});
+        res.insert_or_assign("digI1.slowFilterSc[23].val", DumpEntry{digI1.slowFilterSc[23].val});
+        res.insert_or_assign("digI1.slowFilterSc[24].val", DumpEntry{digI1.slowFilterSc[24].val});
+        res.insert_or_assign("digI1.slowFilterSc[25].val", DumpEntry{digI1.slowFilterSc[25].val});
+        res.insert_or_assign("digI1.slowFilterSc[26].val", DumpEntry{digI1.slowFilterSc[26].val});
+        res.insert_or_assign("digI1.slowFilterSc[27].val", DumpEntry{digI1.slowFilterSc[27].val});
+        res.insert_or_assign("digI1.slowFilterSc[28].val", DumpEntry{digI1.slowFilterSc[28].val});
+        res.insert_or_assign("digI1.slowFilterSc[29].val", DumpEntry{digI1.slowFilterSc[29].val});
+        res.insert_or_assign("digI1.slowFilterSc[30].val", DumpEntry{digI1.slowFilterSc[30].val});
+        res.insert_or_assign("digI1.slowFilterSc[31].val", DumpEntry{digI1.slowFilterSc[31].val});
         res.insert_or_assign("digI1.reTime[0].s", DumpEntry{digI1.reTime[0].s});
         res.insert_or_assign("digI1.reTime[0].ns", DumpEntry{digI1.reTime[0].ns});
         res.insert_or_assign("digI1.reTime[1].s", DumpEntry{digI1.reTime[1].s});
@@ -8171,45 +8949,87 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `ipCores::Top::Dig::DigIndI::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::DigIndI::FastFilterScArray`
     //!
-    //! @param filterLengthSc A reference to the module
-    //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigIndI::FilterLengthScArray& filterLengthSc)
+    //! @param fastFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under fastFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigIndI::FastFilterScArray& fastFilterSc)
     {
-        DumpMap res{filterLengthSc.base()};
-        res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
-        res.insert_or_assign("filterLengthSc[1].val", DumpEntry{filterLengthSc[1].val});
-        res.insert_or_assign("filterLengthSc[2].val", DumpEntry{filterLengthSc[2].val});
-        res.insert_or_assign("filterLengthSc[3].val", DumpEntry{filterLengthSc[3].val});
-        res.insert_or_assign("filterLengthSc[4].val", DumpEntry{filterLengthSc[4].val});
-        res.insert_or_assign("filterLengthSc[5].val", DumpEntry{filterLengthSc[5].val});
-        res.insert_or_assign("filterLengthSc[6].val", DumpEntry{filterLengthSc[6].val});
-        res.insert_or_assign("filterLengthSc[7].val", DumpEntry{filterLengthSc[7].val});
-        res.insert_or_assign("filterLengthSc[8].val", DumpEntry{filterLengthSc[8].val});
-        res.insert_or_assign("filterLengthSc[9].val", DumpEntry{filterLengthSc[9].val});
-        res.insert_or_assign("filterLengthSc[10].val", DumpEntry{filterLengthSc[10].val});
-        res.insert_or_assign("filterLengthSc[11].val", DumpEntry{filterLengthSc[11].val});
-        res.insert_or_assign("filterLengthSc[12].val", DumpEntry{filterLengthSc[12].val});
-        res.insert_or_assign("filterLengthSc[13].val", DumpEntry{filterLengthSc[13].val});
-        res.insert_or_assign("filterLengthSc[14].val", DumpEntry{filterLengthSc[14].val});
-        res.insert_or_assign("filterLengthSc[15].val", DumpEntry{filterLengthSc[15].val});
-        res.insert_or_assign("filterLengthSc[16].val", DumpEntry{filterLengthSc[16].val});
-        res.insert_or_assign("filterLengthSc[17].val", DumpEntry{filterLengthSc[17].val});
-        res.insert_or_assign("filterLengthSc[18].val", DumpEntry{filterLengthSc[18].val});
-        res.insert_or_assign("filterLengthSc[19].val", DumpEntry{filterLengthSc[19].val});
-        res.insert_or_assign("filterLengthSc[20].val", DumpEntry{filterLengthSc[20].val});
-        res.insert_or_assign("filterLengthSc[21].val", DumpEntry{filterLengthSc[21].val});
-        res.insert_or_assign("filterLengthSc[22].val", DumpEntry{filterLengthSc[22].val});
-        res.insert_or_assign("filterLengthSc[23].val", DumpEntry{filterLengthSc[23].val});
-        res.insert_or_assign("filterLengthSc[24].val", DumpEntry{filterLengthSc[24].val});
-        res.insert_or_assign("filterLengthSc[25].val", DumpEntry{filterLengthSc[25].val});
-        res.insert_or_assign("filterLengthSc[26].val", DumpEntry{filterLengthSc[26].val});
-        res.insert_or_assign("filterLengthSc[27].val", DumpEntry{filterLengthSc[27].val});
-        res.insert_or_assign("filterLengthSc[28].val", DumpEntry{filterLengthSc[28].val});
-        res.insert_or_assign("filterLengthSc[29].val", DumpEntry{filterLengthSc[29].val});
-        res.insert_or_assign("filterLengthSc[30].val", DumpEntry{filterLengthSc[30].val});
-        res.insert_or_assign("filterLengthSc[31].val", DumpEntry{filterLengthSc[31].val});
+        DumpMap res{fastFilterSc.base()};
+        res.insert_or_assign("fastFilterSc[0].val", DumpEntry{fastFilterSc[0].val});
+        res.insert_or_assign("fastFilterSc[1].val", DumpEntry{fastFilterSc[1].val});
+        res.insert_or_assign("fastFilterSc[2].val", DumpEntry{fastFilterSc[2].val});
+        res.insert_or_assign("fastFilterSc[3].val", DumpEntry{fastFilterSc[3].val});
+        res.insert_or_assign("fastFilterSc[4].val", DumpEntry{fastFilterSc[4].val});
+        res.insert_or_assign("fastFilterSc[5].val", DumpEntry{fastFilterSc[5].val});
+        res.insert_or_assign("fastFilterSc[6].val", DumpEntry{fastFilterSc[6].val});
+        res.insert_or_assign("fastFilterSc[7].val", DumpEntry{fastFilterSc[7].val});
+        res.insert_or_assign("fastFilterSc[8].val", DumpEntry{fastFilterSc[8].val});
+        res.insert_or_assign("fastFilterSc[9].val", DumpEntry{fastFilterSc[9].val});
+        res.insert_or_assign("fastFilterSc[10].val", DumpEntry{fastFilterSc[10].val});
+        res.insert_or_assign("fastFilterSc[11].val", DumpEntry{fastFilterSc[11].val});
+        res.insert_or_assign("fastFilterSc[12].val", DumpEntry{fastFilterSc[12].val});
+        res.insert_or_assign("fastFilterSc[13].val", DumpEntry{fastFilterSc[13].val});
+        res.insert_or_assign("fastFilterSc[14].val", DumpEntry{fastFilterSc[14].val});
+        res.insert_or_assign("fastFilterSc[15].val", DumpEntry{fastFilterSc[15].val});
+        res.insert_or_assign("fastFilterSc[16].val", DumpEntry{fastFilterSc[16].val});
+        res.insert_or_assign("fastFilterSc[17].val", DumpEntry{fastFilterSc[17].val});
+        res.insert_or_assign("fastFilterSc[18].val", DumpEntry{fastFilterSc[18].val});
+        res.insert_or_assign("fastFilterSc[19].val", DumpEntry{fastFilterSc[19].val});
+        res.insert_or_assign("fastFilterSc[20].val", DumpEntry{fastFilterSc[20].val});
+        res.insert_or_assign("fastFilterSc[21].val", DumpEntry{fastFilterSc[21].val});
+        res.insert_or_assign("fastFilterSc[22].val", DumpEntry{fastFilterSc[22].val});
+        res.insert_or_assign("fastFilterSc[23].val", DumpEntry{fastFilterSc[23].val});
+        res.insert_or_assign("fastFilterSc[24].val", DumpEntry{fastFilterSc[24].val});
+        res.insert_or_assign("fastFilterSc[25].val", DumpEntry{fastFilterSc[25].val});
+        res.insert_or_assign("fastFilterSc[26].val", DumpEntry{fastFilterSc[26].val});
+        res.insert_or_assign("fastFilterSc[27].val", DumpEntry{fastFilterSc[27].val});
+        res.insert_or_assign("fastFilterSc[28].val", DumpEntry{fastFilterSc[28].val});
+        res.insert_or_assign("fastFilterSc[29].val", DumpEntry{fastFilterSc[29].val});
+        res.insert_or_assign("fastFilterSc[30].val", DumpEntry{fastFilterSc[30].val});
+        res.insert_or_assign("fastFilterSc[31].val", DumpEntry{fastFilterSc[31].val});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::Dig::DigIndI::SlowFilterScArray`
+    //!
+    //! @param slowFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under slowFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::DigIndI::SlowFilterScArray& slowFilterSc)
+    {
+        DumpMap res{slowFilterSc.base()};
+        res.insert_or_assign("slowFilterSc[0].val", DumpEntry{slowFilterSc[0].val});
+        res.insert_or_assign("slowFilterSc[1].val", DumpEntry{slowFilterSc[1].val});
+        res.insert_or_assign("slowFilterSc[2].val", DumpEntry{slowFilterSc[2].val});
+        res.insert_or_assign("slowFilterSc[3].val", DumpEntry{slowFilterSc[3].val});
+        res.insert_or_assign("slowFilterSc[4].val", DumpEntry{slowFilterSc[4].val});
+        res.insert_or_assign("slowFilterSc[5].val", DumpEntry{slowFilterSc[5].val});
+        res.insert_or_assign("slowFilterSc[6].val", DumpEntry{slowFilterSc[6].val});
+        res.insert_or_assign("slowFilterSc[7].val", DumpEntry{slowFilterSc[7].val});
+        res.insert_or_assign("slowFilterSc[8].val", DumpEntry{slowFilterSc[8].val});
+        res.insert_or_assign("slowFilterSc[9].val", DumpEntry{slowFilterSc[9].val});
+        res.insert_or_assign("slowFilterSc[10].val", DumpEntry{slowFilterSc[10].val});
+        res.insert_or_assign("slowFilterSc[11].val", DumpEntry{slowFilterSc[11].val});
+        res.insert_or_assign("slowFilterSc[12].val", DumpEntry{slowFilterSc[12].val});
+        res.insert_or_assign("slowFilterSc[13].val", DumpEntry{slowFilterSc[13].val});
+        res.insert_or_assign("slowFilterSc[14].val", DumpEntry{slowFilterSc[14].val});
+        res.insert_or_assign("slowFilterSc[15].val", DumpEntry{slowFilterSc[15].val});
+        res.insert_or_assign("slowFilterSc[16].val", DumpEntry{slowFilterSc[16].val});
+        res.insert_or_assign("slowFilterSc[17].val", DumpEntry{slowFilterSc[17].val});
+        res.insert_or_assign("slowFilterSc[18].val", DumpEntry{slowFilterSc[18].val});
+        res.insert_or_assign("slowFilterSc[19].val", DumpEntry{slowFilterSc[19].val});
+        res.insert_or_assign("slowFilterSc[20].val", DumpEntry{slowFilterSc[20].val});
+        res.insert_or_assign("slowFilterSc[21].val", DumpEntry{slowFilterSc[21].val});
+        res.insert_or_assign("slowFilterSc[22].val", DumpEntry{slowFilterSc[22].val});
+        res.insert_or_assign("slowFilterSc[23].val", DumpEntry{slowFilterSc[23].val});
+        res.insert_or_assign("slowFilterSc[24].val", DumpEntry{slowFilterSc[24].val});
+        res.insert_or_assign("slowFilterSc[25].val", DumpEntry{slowFilterSc[25].val});
+        res.insert_or_assign("slowFilterSc[26].val", DumpEntry{slowFilterSc[26].val});
+        res.insert_or_assign("slowFilterSc[27].val", DumpEntry{slowFilterSc[27].val});
+        res.insert_or_assign("slowFilterSc[28].val", DumpEntry{slowFilterSc[28].val});
+        res.insert_or_assign("slowFilterSc[29].val", DumpEntry{slowFilterSc[29].val});
+        res.insert_or_assign("slowFilterSc[30].val", DumpEntry{slowFilterSc[30].val});
+        res.insert_or_assign("slowFilterSc[31].val", DumpEntry{slowFilterSc[31].val});
         return res;
     }
 
@@ -8309,38 +9129,70 @@ namespace mmpp::utils
         res.insert_or_assign("digIndI.rstLatch", DumpEntry{digIndI.rstLatch});
         res.insert_or_assign("digIndI.risingInterrupt", DumpEntry{digIndI.risingInterrupt});
         res.insert_or_assign("digIndI.fallingInterrupt", DumpEntry{digIndI.fallingInterrupt});
-        res.insert_or_assign("digIndI.filterLengthSc[0].val", DumpEntry{digIndI.filterLengthSc[0].val});
-        res.insert_or_assign("digIndI.filterLengthSc[1].val", DumpEntry{digIndI.filterLengthSc[1].val});
-        res.insert_or_assign("digIndI.filterLengthSc[2].val", DumpEntry{digIndI.filterLengthSc[2].val});
-        res.insert_or_assign("digIndI.filterLengthSc[3].val", DumpEntry{digIndI.filterLengthSc[3].val});
-        res.insert_or_assign("digIndI.filterLengthSc[4].val", DumpEntry{digIndI.filterLengthSc[4].val});
-        res.insert_or_assign("digIndI.filterLengthSc[5].val", DumpEntry{digIndI.filterLengthSc[5].val});
-        res.insert_or_assign("digIndI.filterLengthSc[6].val", DumpEntry{digIndI.filterLengthSc[6].val});
-        res.insert_or_assign("digIndI.filterLengthSc[7].val", DumpEntry{digIndI.filterLengthSc[7].val});
-        res.insert_or_assign("digIndI.filterLengthSc[8].val", DumpEntry{digIndI.filterLengthSc[8].val});
-        res.insert_or_assign("digIndI.filterLengthSc[9].val", DumpEntry{digIndI.filterLengthSc[9].val});
-        res.insert_or_assign("digIndI.filterLengthSc[10].val", DumpEntry{digIndI.filterLengthSc[10].val});
-        res.insert_or_assign("digIndI.filterLengthSc[11].val", DumpEntry{digIndI.filterLengthSc[11].val});
-        res.insert_or_assign("digIndI.filterLengthSc[12].val", DumpEntry{digIndI.filterLengthSc[12].val});
-        res.insert_or_assign("digIndI.filterLengthSc[13].val", DumpEntry{digIndI.filterLengthSc[13].val});
-        res.insert_or_assign("digIndI.filterLengthSc[14].val", DumpEntry{digIndI.filterLengthSc[14].val});
-        res.insert_or_assign("digIndI.filterLengthSc[15].val", DumpEntry{digIndI.filterLengthSc[15].val});
-        res.insert_or_assign("digIndI.filterLengthSc[16].val", DumpEntry{digIndI.filterLengthSc[16].val});
-        res.insert_or_assign("digIndI.filterLengthSc[17].val", DumpEntry{digIndI.filterLengthSc[17].val});
-        res.insert_or_assign("digIndI.filterLengthSc[18].val", DumpEntry{digIndI.filterLengthSc[18].val});
-        res.insert_or_assign("digIndI.filterLengthSc[19].val", DumpEntry{digIndI.filterLengthSc[19].val});
-        res.insert_or_assign("digIndI.filterLengthSc[20].val", DumpEntry{digIndI.filterLengthSc[20].val});
-        res.insert_or_assign("digIndI.filterLengthSc[21].val", DumpEntry{digIndI.filterLengthSc[21].val});
-        res.insert_or_assign("digIndI.filterLengthSc[22].val", DumpEntry{digIndI.filterLengthSc[22].val});
-        res.insert_or_assign("digIndI.filterLengthSc[23].val", DumpEntry{digIndI.filterLengthSc[23].val});
-        res.insert_or_assign("digIndI.filterLengthSc[24].val", DumpEntry{digIndI.filterLengthSc[24].val});
-        res.insert_or_assign("digIndI.filterLengthSc[25].val", DumpEntry{digIndI.filterLengthSc[25].val});
-        res.insert_or_assign("digIndI.filterLengthSc[26].val", DumpEntry{digIndI.filterLengthSc[26].val});
-        res.insert_or_assign("digIndI.filterLengthSc[27].val", DumpEntry{digIndI.filterLengthSc[27].val});
-        res.insert_or_assign("digIndI.filterLengthSc[28].val", DumpEntry{digIndI.filterLengthSc[28].val});
-        res.insert_or_assign("digIndI.filterLengthSc[29].val", DumpEntry{digIndI.filterLengthSc[29].val});
-        res.insert_or_assign("digIndI.filterLengthSc[30].val", DumpEntry{digIndI.filterLengthSc[30].val});
-        res.insert_or_assign("digIndI.filterLengthSc[31].val", DumpEntry{digIndI.filterLengthSc[31].val});
+        res.insert_or_assign("digIndI.fastFilterSc[0].val", DumpEntry{digIndI.fastFilterSc[0].val});
+        res.insert_or_assign("digIndI.fastFilterSc[1].val", DumpEntry{digIndI.fastFilterSc[1].val});
+        res.insert_or_assign("digIndI.fastFilterSc[2].val", DumpEntry{digIndI.fastFilterSc[2].val});
+        res.insert_or_assign("digIndI.fastFilterSc[3].val", DumpEntry{digIndI.fastFilterSc[3].val});
+        res.insert_or_assign("digIndI.fastFilterSc[4].val", DumpEntry{digIndI.fastFilterSc[4].val});
+        res.insert_or_assign("digIndI.fastFilterSc[5].val", DumpEntry{digIndI.fastFilterSc[5].val});
+        res.insert_or_assign("digIndI.fastFilterSc[6].val", DumpEntry{digIndI.fastFilterSc[6].val});
+        res.insert_or_assign("digIndI.fastFilterSc[7].val", DumpEntry{digIndI.fastFilterSc[7].val});
+        res.insert_or_assign("digIndI.fastFilterSc[8].val", DumpEntry{digIndI.fastFilterSc[8].val});
+        res.insert_or_assign("digIndI.fastFilterSc[9].val", DumpEntry{digIndI.fastFilterSc[9].val});
+        res.insert_or_assign("digIndI.fastFilterSc[10].val", DumpEntry{digIndI.fastFilterSc[10].val});
+        res.insert_or_assign("digIndI.fastFilterSc[11].val", DumpEntry{digIndI.fastFilterSc[11].val});
+        res.insert_or_assign("digIndI.fastFilterSc[12].val", DumpEntry{digIndI.fastFilterSc[12].val});
+        res.insert_or_assign("digIndI.fastFilterSc[13].val", DumpEntry{digIndI.fastFilterSc[13].val});
+        res.insert_or_assign("digIndI.fastFilterSc[14].val", DumpEntry{digIndI.fastFilterSc[14].val});
+        res.insert_or_assign("digIndI.fastFilterSc[15].val", DumpEntry{digIndI.fastFilterSc[15].val});
+        res.insert_or_assign("digIndI.fastFilterSc[16].val", DumpEntry{digIndI.fastFilterSc[16].val});
+        res.insert_or_assign("digIndI.fastFilterSc[17].val", DumpEntry{digIndI.fastFilterSc[17].val});
+        res.insert_or_assign("digIndI.fastFilterSc[18].val", DumpEntry{digIndI.fastFilterSc[18].val});
+        res.insert_or_assign("digIndI.fastFilterSc[19].val", DumpEntry{digIndI.fastFilterSc[19].val});
+        res.insert_or_assign("digIndI.fastFilterSc[20].val", DumpEntry{digIndI.fastFilterSc[20].val});
+        res.insert_or_assign("digIndI.fastFilterSc[21].val", DumpEntry{digIndI.fastFilterSc[21].val});
+        res.insert_or_assign("digIndI.fastFilterSc[22].val", DumpEntry{digIndI.fastFilterSc[22].val});
+        res.insert_or_assign("digIndI.fastFilterSc[23].val", DumpEntry{digIndI.fastFilterSc[23].val});
+        res.insert_or_assign("digIndI.fastFilterSc[24].val", DumpEntry{digIndI.fastFilterSc[24].val});
+        res.insert_or_assign("digIndI.fastFilterSc[25].val", DumpEntry{digIndI.fastFilterSc[25].val});
+        res.insert_or_assign("digIndI.fastFilterSc[26].val", DumpEntry{digIndI.fastFilterSc[26].val});
+        res.insert_or_assign("digIndI.fastFilterSc[27].val", DumpEntry{digIndI.fastFilterSc[27].val});
+        res.insert_or_assign("digIndI.fastFilterSc[28].val", DumpEntry{digIndI.fastFilterSc[28].val});
+        res.insert_or_assign("digIndI.fastFilterSc[29].val", DumpEntry{digIndI.fastFilterSc[29].val});
+        res.insert_or_assign("digIndI.fastFilterSc[30].val", DumpEntry{digIndI.fastFilterSc[30].val});
+        res.insert_or_assign("digIndI.fastFilterSc[31].val", DumpEntry{digIndI.fastFilterSc[31].val});
+        res.insert_or_assign("digIndI.slowFilterSc[0].val", DumpEntry{digIndI.slowFilterSc[0].val});
+        res.insert_or_assign("digIndI.slowFilterSc[1].val", DumpEntry{digIndI.slowFilterSc[1].val});
+        res.insert_or_assign("digIndI.slowFilterSc[2].val", DumpEntry{digIndI.slowFilterSc[2].val});
+        res.insert_or_assign("digIndI.slowFilterSc[3].val", DumpEntry{digIndI.slowFilterSc[3].val});
+        res.insert_or_assign("digIndI.slowFilterSc[4].val", DumpEntry{digIndI.slowFilterSc[4].val});
+        res.insert_or_assign("digIndI.slowFilterSc[5].val", DumpEntry{digIndI.slowFilterSc[5].val});
+        res.insert_or_assign("digIndI.slowFilterSc[6].val", DumpEntry{digIndI.slowFilterSc[6].val});
+        res.insert_or_assign("digIndI.slowFilterSc[7].val", DumpEntry{digIndI.slowFilterSc[7].val});
+        res.insert_or_assign("digIndI.slowFilterSc[8].val", DumpEntry{digIndI.slowFilterSc[8].val});
+        res.insert_or_assign("digIndI.slowFilterSc[9].val", DumpEntry{digIndI.slowFilterSc[9].val});
+        res.insert_or_assign("digIndI.slowFilterSc[10].val", DumpEntry{digIndI.slowFilterSc[10].val});
+        res.insert_or_assign("digIndI.slowFilterSc[11].val", DumpEntry{digIndI.slowFilterSc[11].val});
+        res.insert_or_assign("digIndI.slowFilterSc[12].val", DumpEntry{digIndI.slowFilterSc[12].val});
+        res.insert_or_assign("digIndI.slowFilterSc[13].val", DumpEntry{digIndI.slowFilterSc[13].val});
+        res.insert_or_assign("digIndI.slowFilterSc[14].val", DumpEntry{digIndI.slowFilterSc[14].val});
+        res.insert_or_assign("digIndI.slowFilterSc[15].val", DumpEntry{digIndI.slowFilterSc[15].val});
+        res.insert_or_assign("digIndI.slowFilterSc[16].val", DumpEntry{digIndI.slowFilterSc[16].val});
+        res.insert_or_assign("digIndI.slowFilterSc[17].val", DumpEntry{digIndI.slowFilterSc[17].val});
+        res.insert_or_assign("digIndI.slowFilterSc[18].val", DumpEntry{digIndI.slowFilterSc[18].val});
+        res.insert_or_assign("digIndI.slowFilterSc[19].val", DumpEntry{digIndI.slowFilterSc[19].val});
+        res.insert_or_assign("digIndI.slowFilterSc[20].val", DumpEntry{digIndI.slowFilterSc[20].val});
+        res.insert_or_assign("digIndI.slowFilterSc[21].val", DumpEntry{digIndI.slowFilterSc[21].val});
+        res.insert_or_assign("digIndI.slowFilterSc[22].val", DumpEntry{digIndI.slowFilterSc[22].val});
+        res.insert_or_assign("digIndI.slowFilterSc[23].val", DumpEntry{digIndI.slowFilterSc[23].val});
+        res.insert_or_assign("digIndI.slowFilterSc[24].val", DumpEntry{digIndI.slowFilterSc[24].val});
+        res.insert_or_assign("digIndI.slowFilterSc[25].val", DumpEntry{digIndI.slowFilterSc[25].val});
+        res.insert_or_assign("digIndI.slowFilterSc[26].val", DumpEntry{digIndI.slowFilterSc[26].val});
+        res.insert_or_assign("digIndI.slowFilterSc[27].val", DumpEntry{digIndI.slowFilterSc[27].val});
+        res.insert_or_assign("digIndI.slowFilterSc[28].val", DumpEntry{digIndI.slowFilterSc[28].val});
+        res.insert_or_assign("digIndI.slowFilterSc[29].val", DumpEntry{digIndI.slowFilterSc[29].val});
+        res.insert_or_assign("digIndI.slowFilterSc[30].val", DumpEntry{digIndI.slowFilterSc[30].val});
+        res.insert_or_assign("digIndI.slowFilterSc[31].val", DumpEntry{digIndI.slowFilterSc[31].val});
         res.insert_or_assign("digIndI.reTime[0].s", DumpEntry{digIndI.reTime[0].s});
         res.insert_or_assign("digIndI.reTime[0].ns", DumpEntry{digIndI.reTime[0].ns});
         res.insert_or_assign("digIndI.reTime[1].s", DumpEntry{digIndI.reTime[1].s});
@@ -8408,45 +9260,87 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `ipCores::Top::Dig::ContactI::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::ContactI::FastFilterScArray`
     //!
-    //! @param filterLengthSc A reference to the module
-    //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::ContactI::FilterLengthScArray& filterLengthSc)
+    //! @param fastFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under fastFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::ContactI::FastFilterScArray& fastFilterSc)
     {
-        DumpMap res{filterLengthSc.base()};
-        res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
-        res.insert_or_assign("filterLengthSc[1].val", DumpEntry{filterLengthSc[1].val});
-        res.insert_or_assign("filterLengthSc[2].val", DumpEntry{filterLengthSc[2].val});
-        res.insert_or_assign("filterLengthSc[3].val", DumpEntry{filterLengthSc[3].val});
-        res.insert_or_assign("filterLengthSc[4].val", DumpEntry{filterLengthSc[4].val});
-        res.insert_or_assign("filterLengthSc[5].val", DumpEntry{filterLengthSc[5].val});
-        res.insert_or_assign("filterLengthSc[6].val", DumpEntry{filterLengthSc[6].val});
-        res.insert_or_assign("filterLengthSc[7].val", DumpEntry{filterLengthSc[7].val});
-        res.insert_or_assign("filterLengthSc[8].val", DumpEntry{filterLengthSc[8].val});
-        res.insert_or_assign("filterLengthSc[9].val", DumpEntry{filterLengthSc[9].val});
-        res.insert_or_assign("filterLengthSc[10].val", DumpEntry{filterLengthSc[10].val});
-        res.insert_or_assign("filterLengthSc[11].val", DumpEntry{filterLengthSc[11].val});
-        res.insert_or_assign("filterLengthSc[12].val", DumpEntry{filterLengthSc[12].val});
-        res.insert_or_assign("filterLengthSc[13].val", DumpEntry{filterLengthSc[13].val});
-        res.insert_or_assign("filterLengthSc[14].val", DumpEntry{filterLengthSc[14].val});
-        res.insert_or_assign("filterLengthSc[15].val", DumpEntry{filterLengthSc[15].val});
-        res.insert_or_assign("filterLengthSc[16].val", DumpEntry{filterLengthSc[16].val});
-        res.insert_or_assign("filterLengthSc[17].val", DumpEntry{filterLengthSc[17].val});
-        res.insert_or_assign("filterLengthSc[18].val", DumpEntry{filterLengthSc[18].val});
-        res.insert_or_assign("filterLengthSc[19].val", DumpEntry{filterLengthSc[19].val});
-        res.insert_or_assign("filterLengthSc[20].val", DumpEntry{filterLengthSc[20].val});
-        res.insert_or_assign("filterLengthSc[21].val", DumpEntry{filterLengthSc[21].val});
-        res.insert_or_assign("filterLengthSc[22].val", DumpEntry{filterLengthSc[22].val});
-        res.insert_or_assign("filterLengthSc[23].val", DumpEntry{filterLengthSc[23].val});
-        res.insert_or_assign("filterLengthSc[24].val", DumpEntry{filterLengthSc[24].val});
-        res.insert_or_assign("filterLengthSc[25].val", DumpEntry{filterLengthSc[25].val});
-        res.insert_or_assign("filterLengthSc[26].val", DumpEntry{filterLengthSc[26].val});
-        res.insert_or_assign("filterLengthSc[27].val", DumpEntry{filterLengthSc[27].val});
-        res.insert_or_assign("filterLengthSc[28].val", DumpEntry{filterLengthSc[28].val});
-        res.insert_or_assign("filterLengthSc[29].val", DumpEntry{filterLengthSc[29].val});
-        res.insert_or_assign("filterLengthSc[30].val", DumpEntry{filterLengthSc[30].val});
-        res.insert_or_assign("filterLengthSc[31].val", DumpEntry{filterLengthSc[31].val});
+        DumpMap res{fastFilterSc.base()};
+        res.insert_or_assign("fastFilterSc[0].val", DumpEntry{fastFilterSc[0].val});
+        res.insert_or_assign("fastFilterSc[1].val", DumpEntry{fastFilterSc[1].val});
+        res.insert_or_assign("fastFilterSc[2].val", DumpEntry{fastFilterSc[2].val});
+        res.insert_or_assign("fastFilterSc[3].val", DumpEntry{fastFilterSc[3].val});
+        res.insert_or_assign("fastFilterSc[4].val", DumpEntry{fastFilterSc[4].val});
+        res.insert_or_assign("fastFilterSc[5].val", DumpEntry{fastFilterSc[5].val});
+        res.insert_or_assign("fastFilterSc[6].val", DumpEntry{fastFilterSc[6].val});
+        res.insert_or_assign("fastFilterSc[7].val", DumpEntry{fastFilterSc[7].val});
+        res.insert_or_assign("fastFilterSc[8].val", DumpEntry{fastFilterSc[8].val});
+        res.insert_or_assign("fastFilterSc[9].val", DumpEntry{fastFilterSc[9].val});
+        res.insert_or_assign("fastFilterSc[10].val", DumpEntry{fastFilterSc[10].val});
+        res.insert_or_assign("fastFilterSc[11].val", DumpEntry{fastFilterSc[11].val});
+        res.insert_or_assign("fastFilterSc[12].val", DumpEntry{fastFilterSc[12].val});
+        res.insert_or_assign("fastFilterSc[13].val", DumpEntry{fastFilterSc[13].val});
+        res.insert_or_assign("fastFilterSc[14].val", DumpEntry{fastFilterSc[14].val});
+        res.insert_or_assign("fastFilterSc[15].val", DumpEntry{fastFilterSc[15].val});
+        res.insert_or_assign("fastFilterSc[16].val", DumpEntry{fastFilterSc[16].val});
+        res.insert_or_assign("fastFilterSc[17].val", DumpEntry{fastFilterSc[17].val});
+        res.insert_or_assign("fastFilterSc[18].val", DumpEntry{fastFilterSc[18].val});
+        res.insert_or_assign("fastFilterSc[19].val", DumpEntry{fastFilterSc[19].val});
+        res.insert_or_assign("fastFilterSc[20].val", DumpEntry{fastFilterSc[20].val});
+        res.insert_or_assign("fastFilterSc[21].val", DumpEntry{fastFilterSc[21].val});
+        res.insert_or_assign("fastFilterSc[22].val", DumpEntry{fastFilterSc[22].val});
+        res.insert_or_assign("fastFilterSc[23].val", DumpEntry{fastFilterSc[23].val});
+        res.insert_or_assign("fastFilterSc[24].val", DumpEntry{fastFilterSc[24].val});
+        res.insert_or_assign("fastFilterSc[25].val", DumpEntry{fastFilterSc[25].val});
+        res.insert_or_assign("fastFilterSc[26].val", DumpEntry{fastFilterSc[26].val});
+        res.insert_or_assign("fastFilterSc[27].val", DumpEntry{fastFilterSc[27].val});
+        res.insert_or_assign("fastFilterSc[28].val", DumpEntry{fastFilterSc[28].val});
+        res.insert_or_assign("fastFilterSc[29].val", DumpEntry{fastFilterSc[29].val});
+        res.insert_or_assign("fastFilterSc[30].val", DumpEntry{fastFilterSc[30].val});
+        res.insert_or_assign("fastFilterSc[31].val", DumpEntry{fastFilterSc[31].val});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::Dig::ContactI::SlowFilterScArray`
+    //!
+    //! @param slowFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under slowFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::ContactI::SlowFilterScArray& slowFilterSc)
+    {
+        DumpMap res{slowFilterSc.base()};
+        res.insert_or_assign("slowFilterSc[0].val", DumpEntry{slowFilterSc[0].val});
+        res.insert_or_assign("slowFilterSc[1].val", DumpEntry{slowFilterSc[1].val});
+        res.insert_or_assign("slowFilterSc[2].val", DumpEntry{slowFilterSc[2].val});
+        res.insert_or_assign("slowFilterSc[3].val", DumpEntry{slowFilterSc[3].val});
+        res.insert_or_assign("slowFilterSc[4].val", DumpEntry{slowFilterSc[4].val});
+        res.insert_or_assign("slowFilterSc[5].val", DumpEntry{slowFilterSc[5].val});
+        res.insert_or_assign("slowFilterSc[6].val", DumpEntry{slowFilterSc[6].val});
+        res.insert_or_assign("slowFilterSc[7].val", DumpEntry{slowFilterSc[7].val});
+        res.insert_or_assign("slowFilterSc[8].val", DumpEntry{slowFilterSc[8].val});
+        res.insert_or_assign("slowFilterSc[9].val", DumpEntry{slowFilterSc[9].val});
+        res.insert_or_assign("slowFilterSc[10].val", DumpEntry{slowFilterSc[10].val});
+        res.insert_or_assign("slowFilterSc[11].val", DumpEntry{slowFilterSc[11].val});
+        res.insert_or_assign("slowFilterSc[12].val", DumpEntry{slowFilterSc[12].val});
+        res.insert_or_assign("slowFilterSc[13].val", DumpEntry{slowFilterSc[13].val});
+        res.insert_or_assign("slowFilterSc[14].val", DumpEntry{slowFilterSc[14].val});
+        res.insert_or_assign("slowFilterSc[15].val", DumpEntry{slowFilterSc[15].val});
+        res.insert_or_assign("slowFilterSc[16].val", DumpEntry{slowFilterSc[16].val});
+        res.insert_or_assign("slowFilterSc[17].val", DumpEntry{slowFilterSc[17].val});
+        res.insert_or_assign("slowFilterSc[18].val", DumpEntry{slowFilterSc[18].val});
+        res.insert_or_assign("slowFilterSc[19].val", DumpEntry{slowFilterSc[19].val});
+        res.insert_or_assign("slowFilterSc[20].val", DumpEntry{slowFilterSc[20].val});
+        res.insert_or_assign("slowFilterSc[21].val", DumpEntry{slowFilterSc[21].val});
+        res.insert_or_assign("slowFilterSc[22].val", DumpEntry{slowFilterSc[22].val});
+        res.insert_or_assign("slowFilterSc[23].val", DumpEntry{slowFilterSc[23].val});
+        res.insert_or_assign("slowFilterSc[24].val", DumpEntry{slowFilterSc[24].val});
+        res.insert_or_assign("slowFilterSc[25].val", DumpEntry{slowFilterSc[25].val});
+        res.insert_or_assign("slowFilterSc[26].val", DumpEntry{slowFilterSc[26].val});
+        res.insert_or_assign("slowFilterSc[27].val", DumpEntry{slowFilterSc[27].val});
+        res.insert_or_assign("slowFilterSc[28].val", DumpEntry{slowFilterSc[28].val});
+        res.insert_or_assign("slowFilterSc[29].val", DumpEntry{slowFilterSc[29].val});
+        res.insert_or_assign("slowFilterSc[30].val", DumpEntry{slowFilterSc[30].val});
+        res.insert_or_assign("slowFilterSc[31].val", DumpEntry{slowFilterSc[31].val});
         return res;
     }
 
@@ -8546,38 +9440,70 @@ namespace mmpp::utils
         res.insert_or_assign("contactI.rstLatch", DumpEntry{contactI.rstLatch});
         res.insert_or_assign("contactI.risingInterrupt", DumpEntry{contactI.risingInterrupt});
         res.insert_or_assign("contactI.fallingInterrupt", DumpEntry{contactI.fallingInterrupt});
-        res.insert_or_assign("contactI.filterLengthSc[0].val", DumpEntry{contactI.filterLengthSc[0].val});
-        res.insert_or_assign("contactI.filterLengthSc[1].val", DumpEntry{contactI.filterLengthSc[1].val});
-        res.insert_or_assign("contactI.filterLengthSc[2].val", DumpEntry{contactI.filterLengthSc[2].val});
-        res.insert_or_assign("contactI.filterLengthSc[3].val", DumpEntry{contactI.filterLengthSc[3].val});
-        res.insert_or_assign("contactI.filterLengthSc[4].val", DumpEntry{contactI.filterLengthSc[4].val});
-        res.insert_or_assign("contactI.filterLengthSc[5].val", DumpEntry{contactI.filterLengthSc[5].val});
-        res.insert_or_assign("contactI.filterLengthSc[6].val", DumpEntry{contactI.filterLengthSc[6].val});
-        res.insert_or_assign("contactI.filterLengthSc[7].val", DumpEntry{contactI.filterLengthSc[7].val});
-        res.insert_or_assign("contactI.filterLengthSc[8].val", DumpEntry{contactI.filterLengthSc[8].val});
-        res.insert_or_assign("contactI.filterLengthSc[9].val", DumpEntry{contactI.filterLengthSc[9].val});
-        res.insert_or_assign("contactI.filterLengthSc[10].val", DumpEntry{contactI.filterLengthSc[10].val});
-        res.insert_or_assign("contactI.filterLengthSc[11].val", DumpEntry{contactI.filterLengthSc[11].val});
-        res.insert_or_assign("contactI.filterLengthSc[12].val", DumpEntry{contactI.filterLengthSc[12].val});
-        res.insert_or_assign("contactI.filterLengthSc[13].val", DumpEntry{contactI.filterLengthSc[13].val});
-        res.insert_or_assign("contactI.filterLengthSc[14].val", DumpEntry{contactI.filterLengthSc[14].val});
-        res.insert_or_assign("contactI.filterLengthSc[15].val", DumpEntry{contactI.filterLengthSc[15].val});
-        res.insert_or_assign("contactI.filterLengthSc[16].val", DumpEntry{contactI.filterLengthSc[16].val});
-        res.insert_or_assign("contactI.filterLengthSc[17].val", DumpEntry{contactI.filterLengthSc[17].val});
-        res.insert_or_assign("contactI.filterLengthSc[18].val", DumpEntry{contactI.filterLengthSc[18].val});
-        res.insert_or_assign("contactI.filterLengthSc[19].val", DumpEntry{contactI.filterLengthSc[19].val});
-        res.insert_or_assign("contactI.filterLengthSc[20].val", DumpEntry{contactI.filterLengthSc[20].val});
-        res.insert_or_assign("contactI.filterLengthSc[21].val", DumpEntry{contactI.filterLengthSc[21].val});
-        res.insert_or_assign("contactI.filterLengthSc[22].val", DumpEntry{contactI.filterLengthSc[22].val});
-        res.insert_or_assign("contactI.filterLengthSc[23].val", DumpEntry{contactI.filterLengthSc[23].val});
-        res.insert_or_assign("contactI.filterLengthSc[24].val", DumpEntry{contactI.filterLengthSc[24].val});
-        res.insert_or_assign("contactI.filterLengthSc[25].val", DumpEntry{contactI.filterLengthSc[25].val});
-        res.insert_or_assign("contactI.filterLengthSc[26].val", DumpEntry{contactI.filterLengthSc[26].val});
-        res.insert_or_assign("contactI.filterLengthSc[27].val", DumpEntry{contactI.filterLengthSc[27].val});
-        res.insert_or_assign("contactI.filterLengthSc[28].val", DumpEntry{contactI.filterLengthSc[28].val});
-        res.insert_or_assign("contactI.filterLengthSc[29].val", DumpEntry{contactI.filterLengthSc[29].val});
-        res.insert_or_assign("contactI.filterLengthSc[30].val", DumpEntry{contactI.filterLengthSc[30].val});
-        res.insert_or_assign("contactI.filterLengthSc[31].val", DumpEntry{contactI.filterLengthSc[31].val});
+        res.insert_or_assign("contactI.fastFilterSc[0].val", DumpEntry{contactI.fastFilterSc[0].val});
+        res.insert_or_assign("contactI.fastFilterSc[1].val", DumpEntry{contactI.fastFilterSc[1].val});
+        res.insert_or_assign("contactI.fastFilterSc[2].val", DumpEntry{contactI.fastFilterSc[2].val});
+        res.insert_or_assign("contactI.fastFilterSc[3].val", DumpEntry{contactI.fastFilterSc[3].val});
+        res.insert_or_assign("contactI.fastFilterSc[4].val", DumpEntry{contactI.fastFilterSc[4].val});
+        res.insert_or_assign("contactI.fastFilterSc[5].val", DumpEntry{contactI.fastFilterSc[5].val});
+        res.insert_or_assign("contactI.fastFilterSc[6].val", DumpEntry{contactI.fastFilterSc[6].val});
+        res.insert_or_assign("contactI.fastFilterSc[7].val", DumpEntry{contactI.fastFilterSc[7].val});
+        res.insert_or_assign("contactI.fastFilterSc[8].val", DumpEntry{contactI.fastFilterSc[8].val});
+        res.insert_or_assign("contactI.fastFilterSc[9].val", DumpEntry{contactI.fastFilterSc[9].val});
+        res.insert_or_assign("contactI.fastFilterSc[10].val", DumpEntry{contactI.fastFilterSc[10].val});
+        res.insert_or_assign("contactI.fastFilterSc[11].val", DumpEntry{contactI.fastFilterSc[11].val});
+        res.insert_or_assign("contactI.fastFilterSc[12].val", DumpEntry{contactI.fastFilterSc[12].val});
+        res.insert_or_assign("contactI.fastFilterSc[13].val", DumpEntry{contactI.fastFilterSc[13].val});
+        res.insert_or_assign("contactI.fastFilterSc[14].val", DumpEntry{contactI.fastFilterSc[14].val});
+        res.insert_or_assign("contactI.fastFilterSc[15].val", DumpEntry{contactI.fastFilterSc[15].val});
+        res.insert_or_assign("contactI.fastFilterSc[16].val", DumpEntry{contactI.fastFilterSc[16].val});
+        res.insert_or_assign("contactI.fastFilterSc[17].val", DumpEntry{contactI.fastFilterSc[17].val});
+        res.insert_or_assign("contactI.fastFilterSc[18].val", DumpEntry{contactI.fastFilterSc[18].val});
+        res.insert_or_assign("contactI.fastFilterSc[19].val", DumpEntry{contactI.fastFilterSc[19].val});
+        res.insert_or_assign("contactI.fastFilterSc[20].val", DumpEntry{contactI.fastFilterSc[20].val});
+        res.insert_or_assign("contactI.fastFilterSc[21].val", DumpEntry{contactI.fastFilterSc[21].val});
+        res.insert_or_assign("contactI.fastFilterSc[22].val", DumpEntry{contactI.fastFilterSc[22].val});
+        res.insert_or_assign("contactI.fastFilterSc[23].val", DumpEntry{contactI.fastFilterSc[23].val});
+        res.insert_or_assign("contactI.fastFilterSc[24].val", DumpEntry{contactI.fastFilterSc[24].val});
+        res.insert_or_assign("contactI.fastFilterSc[25].val", DumpEntry{contactI.fastFilterSc[25].val});
+        res.insert_or_assign("contactI.fastFilterSc[26].val", DumpEntry{contactI.fastFilterSc[26].val});
+        res.insert_or_assign("contactI.fastFilterSc[27].val", DumpEntry{contactI.fastFilterSc[27].val});
+        res.insert_or_assign("contactI.fastFilterSc[28].val", DumpEntry{contactI.fastFilterSc[28].val});
+        res.insert_or_assign("contactI.fastFilterSc[29].val", DumpEntry{contactI.fastFilterSc[29].val});
+        res.insert_or_assign("contactI.fastFilterSc[30].val", DumpEntry{contactI.fastFilterSc[30].val});
+        res.insert_or_assign("contactI.fastFilterSc[31].val", DumpEntry{contactI.fastFilterSc[31].val});
+        res.insert_or_assign("contactI.slowFilterSc[0].val", DumpEntry{contactI.slowFilterSc[0].val});
+        res.insert_or_assign("contactI.slowFilterSc[1].val", DumpEntry{contactI.slowFilterSc[1].val});
+        res.insert_or_assign("contactI.slowFilterSc[2].val", DumpEntry{contactI.slowFilterSc[2].val});
+        res.insert_or_assign("contactI.slowFilterSc[3].val", DumpEntry{contactI.slowFilterSc[3].val});
+        res.insert_or_assign("contactI.slowFilterSc[4].val", DumpEntry{contactI.slowFilterSc[4].val});
+        res.insert_or_assign("contactI.slowFilterSc[5].val", DumpEntry{contactI.slowFilterSc[5].val});
+        res.insert_or_assign("contactI.slowFilterSc[6].val", DumpEntry{contactI.slowFilterSc[6].val});
+        res.insert_or_assign("contactI.slowFilterSc[7].val", DumpEntry{contactI.slowFilterSc[7].val});
+        res.insert_or_assign("contactI.slowFilterSc[8].val", DumpEntry{contactI.slowFilterSc[8].val});
+        res.insert_or_assign("contactI.slowFilterSc[9].val", DumpEntry{contactI.slowFilterSc[9].val});
+        res.insert_or_assign("contactI.slowFilterSc[10].val", DumpEntry{contactI.slowFilterSc[10].val});
+        res.insert_or_assign("contactI.slowFilterSc[11].val", DumpEntry{contactI.slowFilterSc[11].val});
+        res.insert_or_assign("contactI.slowFilterSc[12].val", DumpEntry{contactI.slowFilterSc[12].val});
+        res.insert_or_assign("contactI.slowFilterSc[13].val", DumpEntry{contactI.slowFilterSc[13].val});
+        res.insert_or_assign("contactI.slowFilterSc[14].val", DumpEntry{contactI.slowFilterSc[14].val});
+        res.insert_or_assign("contactI.slowFilterSc[15].val", DumpEntry{contactI.slowFilterSc[15].val});
+        res.insert_or_assign("contactI.slowFilterSc[16].val", DumpEntry{contactI.slowFilterSc[16].val});
+        res.insert_or_assign("contactI.slowFilterSc[17].val", DumpEntry{contactI.slowFilterSc[17].val});
+        res.insert_or_assign("contactI.slowFilterSc[18].val", DumpEntry{contactI.slowFilterSc[18].val});
+        res.insert_or_assign("contactI.slowFilterSc[19].val", DumpEntry{contactI.slowFilterSc[19].val});
+        res.insert_or_assign("contactI.slowFilterSc[20].val", DumpEntry{contactI.slowFilterSc[20].val});
+        res.insert_or_assign("contactI.slowFilterSc[21].val", DumpEntry{contactI.slowFilterSc[21].val});
+        res.insert_or_assign("contactI.slowFilterSc[22].val", DumpEntry{contactI.slowFilterSc[22].val});
+        res.insert_or_assign("contactI.slowFilterSc[23].val", DumpEntry{contactI.slowFilterSc[23].val});
+        res.insert_or_assign("contactI.slowFilterSc[24].val", DumpEntry{contactI.slowFilterSc[24].val});
+        res.insert_or_assign("contactI.slowFilterSc[25].val", DumpEntry{contactI.slowFilterSc[25].val});
+        res.insert_or_assign("contactI.slowFilterSc[26].val", DumpEntry{contactI.slowFilterSc[26].val});
+        res.insert_or_assign("contactI.slowFilterSc[27].val", DumpEntry{contactI.slowFilterSc[27].val});
+        res.insert_or_assign("contactI.slowFilterSc[28].val", DumpEntry{contactI.slowFilterSc[28].val});
+        res.insert_or_assign("contactI.slowFilterSc[29].val", DumpEntry{contactI.slowFilterSc[29].val});
+        res.insert_or_assign("contactI.slowFilterSc[30].val", DumpEntry{contactI.slowFilterSc[30].val});
+        res.insert_or_assign("contactI.slowFilterSc[31].val", DumpEntry{contactI.slowFilterSc[31].val});
         res.insert_or_assign("contactI.reTime[0].s", DumpEntry{contactI.reTime[0].s});
         res.insert_or_assign("contactI.reTime[0].ns", DumpEntry{contactI.reTime[0].ns});
         res.insert_or_assign("contactI.reTime[1].s", DumpEntry{contactI.reTime[1].s});
@@ -8645,45 +9571,87 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `ipCores::Top::Dig::OpticalI::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::OpticalI::FastFilterScArray`
     //!
-    //! @param filterLengthSc A reference to the module
-    //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::OpticalI::FilterLengthScArray& filterLengthSc)
+    //! @param fastFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under fastFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::OpticalI::FastFilterScArray& fastFilterSc)
     {
-        DumpMap res{filterLengthSc.base()};
-        res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
-        res.insert_or_assign("filterLengthSc[1].val", DumpEntry{filterLengthSc[1].val});
-        res.insert_or_assign("filterLengthSc[2].val", DumpEntry{filterLengthSc[2].val});
-        res.insert_or_assign("filterLengthSc[3].val", DumpEntry{filterLengthSc[3].val});
-        res.insert_or_assign("filterLengthSc[4].val", DumpEntry{filterLengthSc[4].val});
-        res.insert_or_assign("filterLengthSc[5].val", DumpEntry{filterLengthSc[5].val});
-        res.insert_or_assign("filterLengthSc[6].val", DumpEntry{filterLengthSc[6].val});
-        res.insert_or_assign("filterLengthSc[7].val", DumpEntry{filterLengthSc[7].val});
-        res.insert_or_assign("filterLengthSc[8].val", DumpEntry{filterLengthSc[8].val});
-        res.insert_or_assign("filterLengthSc[9].val", DumpEntry{filterLengthSc[9].val});
-        res.insert_or_assign("filterLengthSc[10].val", DumpEntry{filterLengthSc[10].val});
-        res.insert_or_assign("filterLengthSc[11].val", DumpEntry{filterLengthSc[11].val});
-        res.insert_or_assign("filterLengthSc[12].val", DumpEntry{filterLengthSc[12].val});
-        res.insert_or_assign("filterLengthSc[13].val", DumpEntry{filterLengthSc[13].val});
-        res.insert_or_assign("filterLengthSc[14].val", DumpEntry{filterLengthSc[14].val});
-        res.insert_or_assign("filterLengthSc[15].val", DumpEntry{filterLengthSc[15].val});
-        res.insert_or_assign("filterLengthSc[16].val", DumpEntry{filterLengthSc[16].val});
-        res.insert_or_assign("filterLengthSc[17].val", DumpEntry{filterLengthSc[17].val});
-        res.insert_or_assign("filterLengthSc[18].val", DumpEntry{filterLengthSc[18].val});
-        res.insert_or_assign("filterLengthSc[19].val", DumpEntry{filterLengthSc[19].val});
-        res.insert_or_assign("filterLengthSc[20].val", DumpEntry{filterLengthSc[20].val});
-        res.insert_or_assign("filterLengthSc[21].val", DumpEntry{filterLengthSc[21].val});
-        res.insert_or_assign("filterLengthSc[22].val", DumpEntry{filterLengthSc[22].val});
-        res.insert_or_assign("filterLengthSc[23].val", DumpEntry{filterLengthSc[23].val});
-        res.insert_or_assign("filterLengthSc[24].val", DumpEntry{filterLengthSc[24].val});
-        res.insert_or_assign("filterLengthSc[25].val", DumpEntry{filterLengthSc[25].val});
-        res.insert_or_assign("filterLengthSc[26].val", DumpEntry{filterLengthSc[26].val});
-        res.insert_or_assign("filterLengthSc[27].val", DumpEntry{filterLengthSc[27].val});
-        res.insert_or_assign("filterLengthSc[28].val", DumpEntry{filterLengthSc[28].val});
-        res.insert_or_assign("filterLengthSc[29].val", DumpEntry{filterLengthSc[29].val});
-        res.insert_or_assign("filterLengthSc[30].val", DumpEntry{filterLengthSc[30].val});
-        res.insert_or_assign("filterLengthSc[31].val", DumpEntry{filterLengthSc[31].val});
+        DumpMap res{fastFilterSc.base()};
+        res.insert_or_assign("fastFilterSc[0].val", DumpEntry{fastFilterSc[0].val});
+        res.insert_or_assign("fastFilterSc[1].val", DumpEntry{fastFilterSc[1].val});
+        res.insert_or_assign("fastFilterSc[2].val", DumpEntry{fastFilterSc[2].val});
+        res.insert_or_assign("fastFilterSc[3].val", DumpEntry{fastFilterSc[3].val});
+        res.insert_or_assign("fastFilterSc[4].val", DumpEntry{fastFilterSc[4].val});
+        res.insert_or_assign("fastFilterSc[5].val", DumpEntry{fastFilterSc[5].val});
+        res.insert_or_assign("fastFilterSc[6].val", DumpEntry{fastFilterSc[6].val});
+        res.insert_or_assign("fastFilterSc[7].val", DumpEntry{fastFilterSc[7].val});
+        res.insert_or_assign("fastFilterSc[8].val", DumpEntry{fastFilterSc[8].val});
+        res.insert_or_assign("fastFilterSc[9].val", DumpEntry{fastFilterSc[9].val});
+        res.insert_or_assign("fastFilterSc[10].val", DumpEntry{fastFilterSc[10].val});
+        res.insert_or_assign("fastFilterSc[11].val", DumpEntry{fastFilterSc[11].val});
+        res.insert_or_assign("fastFilterSc[12].val", DumpEntry{fastFilterSc[12].val});
+        res.insert_or_assign("fastFilterSc[13].val", DumpEntry{fastFilterSc[13].val});
+        res.insert_or_assign("fastFilterSc[14].val", DumpEntry{fastFilterSc[14].val});
+        res.insert_or_assign("fastFilterSc[15].val", DumpEntry{fastFilterSc[15].val});
+        res.insert_or_assign("fastFilterSc[16].val", DumpEntry{fastFilterSc[16].val});
+        res.insert_or_assign("fastFilterSc[17].val", DumpEntry{fastFilterSc[17].val});
+        res.insert_or_assign("fastFilterSc[18].val", DumpEntry{fastFilterSc[18].val});
+        res.insert_or_assign("fastFilterSc[19].val", DumpEntry{fastFilterSc[19].val});
+        res.insert_or_assign("fastFilterSc[20].val", DumpEntry{fastFilterSc[20].val});
+        res.insert_or_assign("fastFilterSc[21].val", DumpEntry{fastFilterSc[21].val});
+        res.insert_or_assign("fastFilterSc[22].val", DumpEntry{fastFilterSc[22].val});
+        res.insert_or_assign("fastFilterSc[23].val", DumpEntry{fastFilterSc[23].val});
+        res.insert_or_assign("fastFilterSc[24].val", DumpEntry{fastFilterSc[24].val});
+        res.insert_or_assign("fastFilterSc[25].val", DumpEntry{fastFilterSc[25].val});
+        res.insert_or_assign("fastFilterSc[26].val", DumpEntry{fastFilterSc[26].val});
+        res.insert_or_assign("fastFilterSc[27].val", DumpEntry{fastFilterSc[27].val});
+        res.insert_or_assign("fastFilterSc[28].val", DumpEntry{fastFilterSc[28].val});
+        res.insert_or_assign("fastFilterSc[29].val", DumpEntry{fastFilterSc[29].val});
+        res.insert_or_assign("fastFilterSc[30].val", DumpEntry{fastFilterSc[30].val});
+        res.insert_or_assign("fastFilterSc[31].val", DumpEntry{fastFilterSc[31].val});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::Dig::OpticalI::SlowFilterScArray`
+    //!
+    //! @param slowFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under slowFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::OpticalI::SlowFilterScArray& slowFilterSc)
+    {
+        DumpMap res{slowFilterSc.base()};
+        res.insert_or_assign("slowFilterSc[0].val", DumpEntry{slowFilterSc[0].val});
+        res.insert_or_assign("slowFilterSc[1].val", DumpEntry{slowFilterSc[1].val});
+        res.insert_or_assign("slowFilterSc[2].val", DumpEntry{slowFilterSc[2].val});
+        res.insert_or_assign("slowFilterSc[3].val", DumpEntry{slowFilterSc[3].val});
+        res.insert_or_assign("slowFilterSc[4].val", DumpEntry{slowFilterSc[4].val});
+        res.insert_or_assign("slowFilterSc[5].val", DumpEntry{slowFilterSc[5].val});
+        res.insert_or_assign("slowFilterSc[6].val", DumpEntry{slowFilterSc[6].val});
+        res.insert_or_assign("slowFilterSc[7].val", DumpEntry{slowFilterSc[7].val});
+        res.insert_or_assign("slowFilterSc[8].val", DumpEntry{slowFilterSc[8].val});
+        res.insert_or_assign("slowFilterSc[9].val", DumpEntry{slowFilterSc[9].val});
+        res.insert_or_assign("slowFilterSc[10].val", DumpEntry{slowFilterSc[10].val});
+        res.insert_or_assign("slowFilterSc[11].val", DumpEntry{slowFilterSc[11].val});
+        res.insert_or_assign("slowFilterSc[12].val", DumpEntry{slowFilterSc[12].val});
+        res.insert_or_assign("slowFilterSc[13].val", DumpEntry{slowFilterSc[13].val});
+        res.insert_or_assign("slowFilterSc[14].val", DumpEntry{slowFilterSc[14].val});
+        res.insert_or_assign("slowFilterSc[15].val", DumpEntry{slowFilterSc[15].val});
+        res.insert_or_assign("slowFilterSc[16].val", DumpEntry{slowFilterSc[16].val});
+        res.insert_or_assign("slowFilterSc[17].val", DumpEntry{slowFilterSc[17].val});
+        res.insert_or_assign("slowFilterSc[18].val", DumpEntry{slowFilterSc[18].val});
+        res.insert_or_assign("slowFilterSc[19].val", DumpEntry{slowFilterSc[19].val});
+        res.insert_or_assign("slowFilterSc[20].val", DumpEntry{slowFilterSc[20].val});
+        res.insert_or_assign("slowFilterSc[21].val", DumpEntry{slowFilterSc[21].val});
+        res.insert_or_assign("slowFilterSc[22].val", DumpEntry{slowFilterSc[22].val});
+        res.insert_or_assign("slowFilterSc[23].val", DumpEntry{slowFilterSc[23].val});
+        res.insert_or_assign("slowFilterSc[24].val", DumpEntry{slowFilterSc[24].val});
+        res.insert_or_assign("slowFilterSc[25].val", DumpEntry{slowFilterSc[25].val});
+        res.insert_or_assign("slowFilterSc[26].val", DumpEntry{slowFilterSc[26].val});
+        res.insert_or_assign("slowFilterSc[27].val", DumpEntry{slowFilterSc[27].val});
+        res.insert_or_assign("slowFilterSc[28].val", DumpEntry{slowFilterSc[28].val});
+        res.insert_or_assign("slowFilterSc[29].val", DumpEntry{slowFilterSc[29].val});
+        res.insert_or_assign("slowFilterSc[30].val", DumpEntry{slowFilterSc[30].val});
+        res.insert_or_assign("slowFilterSc[31].val", DumpEntry{slowFilterSc[31].val});
         return res;
     }
 
@@ -8783,38 +9751,70 @@ namespace mmpp::utils
         res.insert_or_assign("opticalI.rstLatch", DumpEntry{opticalI.rstLatch});
         res.insert_or_assign("opticalI.risingInterrupt", DumpEntry{opticalI.risingInterrupt});
         res.insert_or_assign("opticalI.fallingInterrupt", DumpEntry{opticalI.fallingInterrupt});
-        res.insert_or_assign("opticalI.filterLengthSc[0].val", DumpEntry{opticalI.filterLengthSc[0].val});
-        res.insert_or_assign("opticalI.filterLengthSc[1].val", DumpEntry{opticalI.filterLengthSc[1].val});
-        res.insert_or_assign("opticalI.filterLengthSc[2].val", DumpEntry{opticalI.filterLengthSc[2].val});
-        res.insert_or_assign("opticalI.filterLengthSc[3].val", DumpEntry{opticalI.filterLengthSc[3].val});
-        res.insert_or_assign("opticalI.filterLengthSc[4].val", DumpEntry{opticalI.filterLengthSc[4].val});
-        res.insert_or_assign("opticalI.filterLengthSc[5].val", DumpEntry{opticalI.filterLengthSc[5].val});
-        res.insert_or_assign("opticalI.filterLengthSc[6].val", DumpEntry{opticalI.filterLengthSc[6].val});
-        res.insert_or_assign("opticalI.filterLengthSc[7].val", DumpEntry{opticalI.filterLengthSc[7].val});
-        res.insert_or_assign("opticalI.filterLengthSc[8].val", DumpEntry{opticalI.filterLengthSc[8].val});
-        res.insert_or_assign("opticalI.filterLengthSc[9].val", DumpEntry{opticalI.filterLengthSc[9].val});
-        res.insert_or_assign("opticalI.filterLengthSc[10].val", DumpEntry{opticalI.filterLengthSc[10].val});
-        res.insert_or_assign("opticalI.filterLengthSc[11].val", DumpEntry{opticalI.filterLengthSc[11].val});
-        res.insert_or_assign("opticalI.filterLengthSc[12].val", DumpEntry{opticalI.filterLengthSc[12].val});
-        res.insert_or_assign("opticalI.filterLengthSc[13].val", DumpEntry{opticalI.filterLengthSc[13].val});
-        res.insert_or_assign("opticalI.filterLengthSc[14].val", DumpEntry{opticalI.filterLengthSc[14].val});
-        res.insert_or_assign("opticalI.filterLengthSc[15].val", DumpEntry{opticalI.filterLengthSc[15].val});
-        res.insert_or_assign("opticalI.filterLengthSc[16].val", DumpEntry{opticalI.filterLengthSc[16].val});
-        res.insert_or_assign("opticalI.filterLengthSc[17].val", DumpEntry{opticalI.filterLengthSc[17].val});
-        res.insert_or_assign("opticalI.filterLengthSc[18].val", DumpEntry{opticalI.filterLengthSc[18].val});
-        res.insert_or_assign("opticalI.filterLengthSc[19].val", DumpEntry{opticalI.filterLengthSc[19].val});
-        res.insert_or_assign("opticalI.filterLengthSc[20].val", DumpEntry{opticalI.filterLengthSc[20].val});
-        res.insert_or_assign("opticalI.filterLengthSc[21].val", DumpEntry{opticalI.filterLengthSc[21].val});
-        res.insert_or_assign("opticalI.filterLengthSc[22].val", DumpEntry{opticalI.filterLengthSc[22].val});
-        res.insert_or_assign("opticalI.filterLengthSc[23].val", DumpEntry{opticalI.filterLengthSc[23].val});
-        res.insert_or_assign("opticalI.filterLengthSc[24].val", DumpEntry{opticalI.filterLengthSc[24].val});
-        res.insert_or_assign("opticalI.filterLengthSc[25].val", DumpEntry{opticalI.filterLengthSc[25].val});
-        res.insert_or_assign("opticalI.filterLengthSc[26].val", DumpEntry{opticalI.filterLengthSc[26].val});
-        res.insert_or_assign("opticalI.filterLengthSc[27].val", DumpEntry{opticalI.filterLengthSc[27].val});
-        res.insert_or_assign("opticalI.filterLengthSc[28].val", DumpEntry{opticalI.filterLengthSc[28].val});
-        res.insert_or_assign("opticalI.filterLengthSc[29].val", DumpEntry{opticalI.filterLengthSc[29].val});
-        res.insert_or_assign("opticalI.filterLengthSc[30].val", DumpEntry{opticalI.filterLengthSc[30].val});
-        res.insert_or_assign("opticalI.filterLengthSc[31].val", DumpEntry{opticalI.filterLengthSc[31].val});
+        res.insert_or_assign("opticalI.fastFilterSc[0].val", DumpEntry{opticalI.fastFilterSc[0].val});
+        res.insert_or_assign("opticalI.fastFilterSc[1].val", DumpEntry{opticalI.fastFilterSc[1].val});
+        res.insert_or_assign("opticalI.fastFilterSc[2].val", DumpEntry{opticalI.fastFilterSc[2].val});
+        res.insert_or_assign("opticalI.fastFilterSc[3].val", DumpEntry{opticalI.fastFilterSc[3].val});
+        res.insert_or_assign("opticalI.fastFilterSc[4].val", DumpEntry{opticalI.fastFilterSc[4].val});
+        res.insert_or_assign("opticalI.fastFilterSc[5].val", DumpEntry{opticalI.fastFilterSc[5].val});
+        res.insert_or_assign("opticalI.fastFilterSc[6].val", DumpEntry{opticalI.fastFilterSc[6].val});
+        res.insert_or_assign("opticalI.fastFilterSc[7].val", DumpEntry{opticalI.fastFilterSc[7].val});
+        res.insert_or_assign("opticalI.fastFilterSc[8].val", DumpEntry{opticalI.fastFilterSc[8].val});
+        res.insert_or_assign("opticalI.fastFilterSc[9].val", DumpEntry{opticalI.fastFilterSc[9].val});
+        res.insert_or_assign("opticalI.fastFilterSc[10].val", DumpEntry{opticalI.fastFilterSc[10].val});
+        res.insert_or_assign("opticalI.fastFilterSc[11].val", DumpEntry{opticalI.fastFilterSc[11].val});
+        res.insert_or_assign("opticalI.fastFilterSc[12].val", DumpEntry{opticalI.fastFilterSc[12].val});
+        res.insert_or_assign("opticalI.fastFilterSc[13].val", DumpEntry{opticalI.fastFilterSc[13].val});
+        res.insert_or_assign("opticalI.fastFilterSc[14].val", DumpEntry{opticalI.fastFilterSc[14].val});
+        res.insert_or_assign("opticalI.fastFilterSc[15].val", DumpEntry{opticalI.fastFilterSc[15].val});
+        res.insert_or_assign("opticalI.fastFilterSc[16].val", DumpEntry{opticalI.fastFilterSc[16].val});
+        res.insert_or_assign("opticalI.fastFilterSc[17].val", DumpEntry{opticalI.fastFilterSc[17].val});
+        res.insert_or_assign("opticalI.fastFilterSc[18].val", DumpEntry{opticalI.fastFilterSc[18].val});
+        res.insert_or_assign("opticalI.fastFilterSc[19].val", DumpEntry{opticalI.fastFilterSc[19].val});
+        res.insert_or_assign("opticalI.fastFilterSc[20].val", DumpEntry{opticalI.fastFilterSc[20].val});
+        res.insert_or_assign("opticalI.fastFilterSc[21].val", DumpEntry{opticalI.fastFilterSc[21].val});
+        res.insert_or_assign("opticalI.fastFilterSc[22].val", DumpEntry{opticalI.fastFilterSc[22].val});
+        res.insert_or_assign("opticalI.fastFilterSc[23].val", DumpEntry{opticalI.fastFilterSc[23].val});
+        res.insert_or_assign("opticalI.fastFilterSc[24].val", DumpEntry{opticalI.fastFilterSc[24].val});
+        res.insert_or_assign("opticalI.fastFilterSc[25].val", DumpEntry{opticalI.fastFilterSc[25].val});
+        res.insert_or_assign("opticalI.fastFilterSc[26].val", DumpEntry{opticalI.fastFilterSc[26].val});
+        res.insert_or_assign("opticalI.fastFilterSc[27].val", DumpEntry{opticalI.fastFilterSc[27].val});
+        res.insert_or_assign("opticalI.fastFilterSc[28].val", DumpEntry{opticalI.fastFilterSc[28].val});
+        res.insert_or_assign("opticalI.fastFilterSc[29].val", DumpEntry{opticalI.fastFilterSc[29].val});
+        res.insert_or_assign("opticalI.fastFilterSc[30].val", DumpEntry{opticalI.fastFilterSc[30].val});
+        res.insert_or_assign("opticalI.fastFilterSc[31].val", DumpEntry{opticalI.fastFilterSc[31].val});
+        res.insert_or_assign("opticalI.slowFilterSc[0].val", DumpEntry{opticalI.slowFilterSc[0].val});
+        res.insert_or_assign("opticalI.slowFilterSc[1].val", DumpEntry{opticalI.slowFilterSc[1].val});
+        res.insert_or_assign("opticalI.slowFilterSc[2].val", DumpEntry{opticalI.slowFilterSc[2].val});
+        res.insert_or_assign("opticalI.slowFilterSc[3].val", DumpEntry{opticalI.slowFilterSc[3].val});
+        res.insert_or_assign("opticalI.slowFilterSc[4].val", DumpEntry{opticalI.slowFilterSc[4].val});
+        res.insert_or_assign("opticalI.slowFilterSc[5].val", DumpEntry{opticalI.slowFilterSc[5].val});
+        res.insert_or_assign("opticalI.slowFilterSc[6].val", DumpEntry{opticalI.slowFilterSc[6].val});
+        res.insert_or_assign("opticalI.slowFilterSc[7].val", DumpEntry{opticalI.slowFilterSc[7].val});
+        res.insert_or_assign("opticalI.slowFilterSc[8].val", DumpEntry{opticalI.slowFilterSc[8].val});
+        res.insert_or_assign("opticalI.slowFilterSc[9].val", DumpEntry{opticalI.slowFilterSc[9].val});
+        res.insert_or_assign("opticalI.slowFilterSc[10].val", DumpEntry{opticalI.slowFilterSc[10].val});
+        res.insert_or_assign("opticalI.slowFilterSc[11].val", DumpEntry{opticalI.slowFilterSc[11].val});
+        res.insert_or_assign("opticalI.slowFilterSc[12].val", DumpEntry{opticalI.slowFilterSc[12].val});
+        res.insert_or_assign("opticalI.slowFilterSc[13].val", DumpEntry{opticalI.slowFilterSc[13].val});
+        res.insert_or_assign("opticalI.slowFilterSc[14].val", DumpEntry{opticalI.slowFilterSc[14].val});
+        res.insert_or_assign("opticalI.slowFilterSc[15].val", DumpEntry{opticalI.slowFilterSc[15].val});
+        res.insert_or_assign("opticalI.slowFilterSc[16].val", DumpEntry{opticalI.slowFilterSc[16].val});
+        res.insert_or_assign("opticalI.slowFilterSc[17].val", DumpEntry{opticalI.slowFilterSc[17].val});
+        res.insert_or_assign("opticalI.slowFilterSc[18].val", DumpEntry{opticalI.slowFilterSc[18].val});
+        res.insert_or_assign("opticalI.slowFilterSc[19].val", DumpEntry{opticalI.slowFilterSc[19].val});
+        res.insert_or_assign("opticalI.slowFilterSc[20].val", DumpEntry{opticalI.slowFilterSc[20].val});
+        res.insert_or_assign("opticalI.slowFilterSc[21].val", DumpEntry{opticalI.slowFilterSc[21].val});
+        res.insert_or_assign("opticalI.slowFilterSc[22].val", DumpEntry{opticalI.slowFilterSc[22].val});
+        res.insert_or_assign("opticalI.slowFilterSc[23].val", DumpEntry{opticalI.slowFilterSc[23].val});
+        res.insert_or_assign("opticalI.slowFilterSc[24].val", DumpEntry{opticalI.slowFilterSc[24].val});
+        res.insert_or_assign("opticalI.slowFilterSc[25].val", DumpEntry{opticalI.slowFilterSc[25].val});
+        res.insert_or_assign("opticalI.slowFilterSc[26].val", DumpEntry{opticalI.slowFilterSc[26].val});
+        res.insert_or_assign("opticalI.slowFilterSc[27].val", DumpEntry{opticalI.slowFilterSc[27].val});
+        res.insert_or_assign("opticalI.slowFilterSc[28].val", DumpEntry{opticalI.slowFilterSc[28].val});
+        res.insert_or_assign("opticalI.slowFilterSc[29].val", DumpEntry{opticalI.slowFilterSc[29].val});
+        res.insert_or_assign("opticalI.slowFilterSc[30].val", DumpEntry{opticalI.slowFilterSc[30].val});
+        res.insert_or_assign("opticalI.slowFilterSc[31].val", DumpEntry{opticalI.slowFilterSc[31].val});
         res.insert_or_assign("opticalI.reTime[0].s", DumpEntry{opticalI.reTime[0].s});
         res.insert_or_assign("opticalI.reTime[0].ns", DumpEntry{opticalI.reTime[0].ns});
         res.insert_or_assign("opticalI.reTime[1].s", DumpEntry{opticalI.reTime[1].s});
@@ -8882,45 +9882,87 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim0::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim0::FastFilterScArray`
     //!
-    //! @param filterLengthSc A reference to the module
-    //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim0::FilterLengthScArray& filterLengthSc)
+    //! @param fastFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under fastFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim0::FastFilterScArray& fastFilterSc)
     {
-        DumpMap res{filterLengthSc.base()};
-        res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
-        res.insert_or_assign("filterLengthSc[1].val", DumpEntry{filterLengthSc[1].val});
-        res.insert_or_assign("filterLengthSc[2].val", DumpEntry{filterLengthSc[2].val});
-        res.insert_or_assign("filterLengthSc[3].val", DumpEntry{filterLengthSc[3].val});
-        res.insert_or_assign("filterLengthSc[4].val", DumpEntry{filterLengthSc[4].val});
-        res.insert_or_assign("filterLengthSc[5].val", DumpEntry{filterLengthSc[5].val});
-        res.insert_or_assign("filterLengthSc[6].val", DumpEntry{filterLengthSc[6].val});
-        res.insert_or_assign("filterLengthSc[7].val", DumpEntry{filterLengthSc[7].val});
-        res.insert_or_assign("filterLengthSc[8].val", DumpEntry{filterLengthSc[8].val});
-        res.insert_or_assign("filterLengthSc[9].val", DumpEntry{filterLengthSc[9].val});
-        res.insert_or_assign("filterLengthSc[10].val", DumpEntry{filterLengthSc[10].val});
-        res.insert_or_assign("filterLengthSc[11].val", DumpEntry{filterLengthSc[11].val});
-        res.insert_or_assign("filterLengthSc[12].val", DumpEntry{filterLengthSc[12].val});
-        res.insert_or_assign("filterLengthSc[13].val", DumpEntry{filterLengthSc[13].val});
-        res.insert_or_assign("filterLengthSc[14].val", DumpEntry{filterLengthSc[14].val});
-        res.insert_or_assign("filterLengthSc[15].val", DumpEntry{filterLengthSc[15].val});
-        res.insert_or_assign("filterLengthSc[16].val", DumpEntry{filterLengthSc[16].val});
-        res.insert_or_assign("filterLengthSc[17].val", DumpEntry{filterLengthSc[17].val});
-        res.insert_or_assign("filterLengthSc[18].val", DumpEntry{filterLengthSc[18].val});
-        res.insert_or_assign("filterLengthSc[19].val", DumpEntry{filterLengthSc[19].val});
-        res.insert_or_assign("filterLengthSc[20].val", DumpEntry{filterLengthSc[20].val});
-        res.insert_or_assign("filterLengthSc[21].val", DumpEntry{filterLengthSc[21].val});
-        res.insert_or_assign("filterLengthSc[22].val", DumpEntry{filterLengthSc[22].val});
-        res.insert_or_assign("filterLengthSc[23].val", DumpEntry{filterLengthSc[23].val});
-        res.insert_or_assign("filterLengthSc[24].val", DumpEntry{filterLengthSc[24].val});
-        res.insert_or_assign("filterLengthSc[25].val", DumpEntry{filterLengthSc[25].val});
-        res.insert_or_assign("filterLengthSc[26].val", DumpEntry{filterLengthSc[26].val});
-        res.insert_or_assign("filterLengthSc[27].val", DumpEntry{filterLengthSc[27].val});
-        res.insert_or_assign("filterLengthSc[28].val", DumpEntry{filterLengthSc[28].val});
-        res.insert_or_assign("filterLengthSc[29].val", DumpEntry{filterLengthSc[29].val});
-        res.insert_or_assign("filterLengthSc[30].val", DumpEntry{filterLengthSc[30].val});
-        res.insert_or_assign("filterLengthSc[31].val", DumpEntry{filterLengthSc[31].val});
+        DumpMap res{fastFilterSc.base()};
+        res.insert_or_assign("fastFilterSc[0].val", DumpEntry{fastFilterSc[0].val});
+        res.insert_or_assign("fastFilterSc[1].val", DumpEntry{fastFilterSc[1].val});
+        res.insert_or_assign("fastFilterSc[2].val", DumpEntry{fastFilterSc[2].val});
+        res.insert_or_assign("fastFilterSc[3].val", DumpEntry{fastFilterSc[3].val});
+        res.insert_or_assign("fastFilterSc[4].val", DumpEntry{fastFilterSc[4].val});
+        res.insert_or_assign("fastFilterSc[5].val", DumpEntry{fastFilterSc[5].val});
+        res.insert_or_assign("fastFilterSc[6].val", DumpEntry{fastFilterSc[6].val});
+        res.insert_or_assign("fastFilterSc[7].val", DumpEntry{fastFilterSc[7].val});
+        res.insert_or_assign("fastFilterSc[8].val", DumpEntry{fastFilterSc[8].val});
+        res.insert_or_assign("fastFilterSc[9].val", DumpEntry{fastFilterSc[9].val});
+        res.insert_or_assign("fastFilterSc[10].val", DumpEntry{fastFilterSc[10].val});
+        res.insert_or_assign("fastFilterSc[11].val", DumpEntry{fastFilterSc[11].val});
+        res.insert_or_assign("fastFilterSc[12].val", DumpEntry{fastFilterSc[12].val});
+        res.insert_or_assign("fastFilterSc[13].val", DumpEntry{fastFilterSc[13].val});
+        res.insert_or_assign("fastFilterSc[14].val", DumpEntry{fastFilterSc[14].val});
+        res.insert_or_assign("fastFilterSc[15].val", DumpEntry{fastFilterSc[15].val});
+        res.insert_or_assign("fastFilterSc[16].val", DumpEntry{fastFilterSc[16].val});
+        res.insert_or_assign("fastFilterSc[17].val", DumpEntry{fastFilterSc[17].val});
+        res.insert_or_assign("fastFilterSc[18].val", DumpEntry{fastFilterSc[18].val});
+        res.insert_or_assign("fastFilterSc[19].val", DumpEntry{fastFilterSc[19].val});
+        res.insert_or_assign("fastFilterSc[20].val", DumpEntry{fastFilterSc[20].val});
+        res.insert_or_assign("fastFilterSc[21].val", DumpEntry{fastFilterSc[21].val});
+        res.insert_or_assign("fastFilterSc[22].val", DumpEntry{fastFilterSc[22].val});
+        res.insert_or_assign("fastFilterSc[23].val", DumpEntry{fastFilterSc[23].val});
+        res.insert_or_assign("fastFilterSc[24].val", DumpEntry{fastFilterSc[24].val});
+        res.insert_or_assign("fastFilterSc[25].val", DumpEntry{fastFilterSc[25].val});
+        res.insert_or_assign("fastFilterSc[26].val", DumpEntry{fastFilterSc[26].val});
+        res.insert_or_assign("fastFilterSc[27].val", DumpEntry{fastFilterSc[27].val});
+        res.insert_or_assign("fastFilterSc[28].val", DumpEntry{fastFilterSc[28].val});
+        res.insert_or_assign("fastFilterSc[29].val", DumpEntry{fastFilterSc[29].val});
+        res.insert_or_assign("fastFilterSc[30].val", DumpEntry{fastFilterSc[30].val});
+        res.insert_or_assign("fastFilterSc[31].val", DumpEntry{fastFilterSc[31].val});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim0::SlowFilterScArray`
+    //!
+    //! @param slowFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under slowFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim0::SlowFilterScArray& slowFilterSc)
+    {
+        DumpMap res{slowFilterSc.base()};
+        res.insert_or_assign("slowFilterSc[0].val", DumpEntry{slowFilterSc[0].val});
+        res.insert_or_assign("slowFilterSc[1].val", DumpEntry{slowFilterSc[1].val});
+        res.insert_or_assign("slowFilterSc[2].val", DumpEntry{slowFilterSc[2].val});
+        res.insert_or_assign("slowFilterSc[3].val", DumpEntry{slowFilterSc[3].val});
+        res.insert_or_assign("slowFilterSc[4].val", DumpEntry{slowFilterSc[4].val});
+        res.insert_or_assign("slowFilterSc[5].val", DumpEntry{slowFilterSc[5].val});
+        res.insert_or_assign("slowFilterSc[6].val", DumpEntry{slowFilterSc[6].val});
+        res.insert_or_assign("slowFilterSc[7].val", DumpEntry{slowFilterSc[7].val});
+        res.insert_or_assign("slowFilterSc[8].val", DumpEntry{slowFilterSc[8].val});
+        res.insert_or_assign("slowFilterSc[9].val", DumpEntry{slowFilterSc[9].val});
+        res.insert_or_assign("slowFilterSc[10].val", DumpEntry{slowFilterSc[10].val});
+        res.insert_or_assign("slowFilterSc[11].val", DumpEntry{slowFilterSc[11].val});
+        res.insert_or_assign("slowFilterSc[12].val", DumpEntry{slowFilterSc[12].val});
+        res.insert_or_assign("slowFilterSc[13].val", DumpEntry{slowFilterSc[13].val});
+        res.insert_or_assign("slowFilterSc[14].val", DumpEntry{slowFilterSc[14].val});
+        res.insert_or_assign("slowFilterSc[15].val", DumpEntry{slowFilterSc[15].val});
+        res.insert_or_assign("slowFilterSc[16].val", DumpEntry{slowFilterSc[16].val});
+        res.insert_or_assign("slowFilterSc[17].val", DumpEntry{slowFilterSc[17].val});
+        res.insert_or_assign("slowFilterSc[18].val", DumpEntry{slowFilterSc[18].val});
+        res.insert_or_assign("slowFilterSc[19].val", DumpEntry{slowFilterSc[19].val});
+        res.insert_or_assign("slowFilterSc[20].val", DumpEntry{slowFilterSc[20].val});
+        res.insert_or_assign("slowFilterSc[21].val", DumpEntry{slowFilterSc[21].val});
+        res.insert_or_assign("slowFilterSc[22].val", DumpEntry{slowFilterSc[22].val});
+        res.insert_or_assign("slowFilterSc[23].val", DumpEntry{slowFilterSc[23].val});
+        res.insert_or_assign("slowFilterSc[24].val", DumpEntry{slowFilterSc[24].val});
+        res.insert_or_assign("slowFilterSc[25].val", DumpEntry{slowFilterSc[25].val});
+        res.insert_or_assign("slowFilterSc[26].val", DumpEntry{slowFilterSc[26].val});
+        res.insert_or_assign("slowFilterSc[27].val", DumpEntry{slowFilterSc[27].val});
+        res.insert_or_assign("slowFilterSc[28].val", DumpEntry{slowFilterSc[28].val});
+        res.insert_or_assign("slowFilterSc[29].val", DumpEntry{slowFilterSc[29].val});
+        res.insert_or_assign("slowFilterSc[30].val", DumpEntry{slowFilterSc[30].val});
+        res.insert_or_assign("slowFilterSc[31].val", DumpEntry{slowFilterSc[31].val});
         return res;
     }
 
@@ -9020,38 +10062,70 @@ namespace mmpp::utils
         res.insert_or_assign("minMaxLim0.rstLatch", DumpEntry{minMaxLim0.rstLatch});
         res.insert_or_assign("minMaxLim0.risingInterrupt", DumpEntry{minMaxLim0.risingInterrupt});
         res.insert_or_assign("minMaxLim0.fallingInterrupt", DumpEntry{minMaxLim0.fallingInterrupt});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[0].val", DumpEntry{minMaxLim0.filterLengthSc[0].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[1].val", DumpEntry{minMaxLim0.filterLengthSc[1].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[2].val", DumpEntry{minMaxLim0.filterLengthSc[2].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[3].val", DumpEntry{minMaxLim0.filterLengthSc[3].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[4].val", DumpEntry{minMaxLim0.filterLengthSc[4].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[5].val", DumpEntry{minMaxLim0.filterLengthSc[5].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[6].val", DumpEntry{minMaxLim0.filterLengthSc[6].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[7].val", DumpEntry{minMaxLim0.filterLengthSc[7].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[8].val", DumpEntry{minMaxLim0.filterLengthSc[8].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[9].val", DumpEntry{minMaxLim0.filterLengthSc[9].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[10].val", DumpEntry{minMaxLim0.filterLengthSc[10].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[11].val", DumpEntry{minMaxLim0.filterLengthSc[11].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[12].val", DumpEntry{minMaxLim0.filterLengthSc[12].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[13].val", DumpEntry{minMaxLim0.filterLengthSc[13].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[14].val", DumpEntry{minMaxLim0.filterLengthSc[14].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[15].val", DumpEntry{minMaxLim0.filterLengthSc[15].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[16].val", DumpEntry{minMaxLim0.filterLengthSc[16].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[17].val", DumpEntry{minMaxLim0.filterLengthSc[17].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[18].val", DumpEntry{minMaxLim0.filterLengthSc[18].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[19].val", DumpEntry{minMaxLim0.filterLengthSc[19].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[20].val", DumpEntry{minMaxLim0.filterLengthSc[20].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[21].val", DumpEntry{minMaxLim0.filterLengthSc[21].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[22].val", DumpEntry{minMaxLim0.filterLengthSc[22].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[23].val", DumpEntry{minMaxLim0.filterLengthSc[23].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[24].val", DumpEntry{minMaxLim0.filterLengthSc[24].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[25].val", DumpEntry{minMaxLim0.filterLengthSc[25].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[26].val", DumpEntry{minMaxLim0.filterLengthSc[26].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[27].val", DumpEntry{minMaxLim0.filterLengthSc[27].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[28].val", DumpEntry{minMaxLim0.filterLengthSc[28].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[29].val", DumpEntry{minMaxLim0.filterLengthSc[29].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[30].val", DumpEntry{minMaxLim0.filterLengthSc[30].val});
-        res.insert_or_assign("minMaxLim0.filterLengthSc[31].val", DumpEntry{minMaxLim0.filterLengthSc[31].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[0].val", DumpEntry{minMaxLim0.fastFilterSc[0].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[1].val", DumpEntry{minMaxLim0.fastFilterSc[1].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[2].val", DumpEntry{minMaxLim0.fastFilterSc[2].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[3].val", DumpEntry{minMaxLim0.fastFilterSc[3].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[4].val", DumpEntry{minMaxLim0.fastFilterSc[4].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[5].val", DumpEntry{minMaxLim0.fastFilterSc[5].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[6].val", DumpEntry{minMaxLim0.fastFilterSc[6].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[7].val", DumpEntry{minMaxLim0.fastFilterSc[7].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[8].val", DumpEntry{minMaxLim0.fastFilterSc[8].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[9].val", DumpEntry{minMaxLim0.fastFilterSc[9].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[10].val", DumpEntry{minMaxLim0.fastFilterSc[10].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[11].val", DumpEntry{minMaxLim0.fastFilterSc[11].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[12].val", DumpEntry{minMaxLim0.fastFilterSc[12].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[13].val", DumpEntry{minMaxLim0.fastFilterSc[13].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[14].val", DumpEntry{minMaxLim0.fastFilterSc[14].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[15].val", DumpEntry{minMaxLim0.fastFilterSc[15].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[16].val", DumpEntry{minMaxLim0.fastFilterSc[16].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[17].val", DumpEntry{minMaxLim0.fastFilterSc[17].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[18].val", DumpEntry{minMaxLim0.fastFilterSc[18].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[19].val", DumpEntry{minMaxLim0.fastFilterSc[19].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[20].val", DumpEntry{minMaxLim0.fastFilterSc[20].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[21].val", DumpEntry{minMaxLim0.fastFilterSc[21].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[22].val", DumpEntry{minMaxLim0.fastFilterSc[22].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[23].val", DumpEntry{minMaxLim0.fastFilterSc[23].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[24].val", DumpEntry{minMaxLim0.fastFilterSc[24].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[25].val", DumpEntry{minMaxLim0.fastFilterSc[25].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[26].val", DumpEntry{minMaxLim0.fastFilterSc[26].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[27].val", DumpEntry{minMaxLim0.fastFilterSc[27].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[28].val", DumpEntry{minMaxLim0.fastFilterSc[28].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[29].val", DumpEntry{minMaxLim0.fastFilterSc[29].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[30].val", DumpEntry{minMaxLim0.fastFilterSc[30].val});
+        res.insert_or_assign("minMaxLim0.fastFilterSc[31].val", DumpEntry{minMaxLim0.fastFilterSc[31].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[0].val", DumpEntry{minMaxLim0.slowFilterSc[0].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[1].val", DumpEntry{minMaxLim0.slowFilterSc[1].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[2].val", DumpEntry{minMaxLim0.slowFilterSc[2].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[3].val", DumpEntry{minMaxLim0.slowFilterSc[3].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[4].val", DumpEntry{minMaxLim0.slowFilterSc[4].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[5].val", DumpEntry{minMaxLim0.slowFilterSc[5].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[6].val", DumpEntry{minMaxLim0.slowFilterSc[6].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[7].val", DumpEntry{minMaxLim0.slowFilterSc[7].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[8].val", DumpEntry{minMaxLim0.slowFilterSc[8].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[9].val", DumpEntry{minMaxLim0.slowFilterSc[9].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[10].val", DumpEntry{minMaxLim0.slowFilterSc[10].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[11].val", DumpEntry{minMaxLim0.slowFilterSc[11].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[12].val", DumpEntry{minMaxLim0.slowFilterSc[12].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[13].val", DumpEntry{minMaxLim0.slowFilterSc[13].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[14].val", DumpEntry{minMaxLim0.slowFilterSc[14].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[15].val", DumpEntry{minMaxLim0.slowFilterSc[15].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[16].val", DumpEntry{minMaxLim0.slowFilterSc[16].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[17].val", DumpEntry{minMaxLim0.slowFilterSc[17].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[18].val", DumpEntry{minMaxLim0.slowFilterSc[18].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[19].val", DumpEntry{minMaxLim0.slowFilterSc[19].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[20].val", DumpEntry{minMaxLim0.slowFilterSc[20].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[21].val", DumpEntry{minMaxLim0.slowFilterSc[21].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[22].val", DumpEntry{minMaxLim0.slowFilterSc[22].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[23].val", DumpEntry{minMaxLim0.slowFilterSc[23].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[24].val", DumpEntry{minMaxLim0.slowFilterSc[24].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[25].val", DumpEntry{minMaxLim0.slowFilterSc[25].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[26].val", DumpEntry{minMaxLim0.slowFilterSc[26].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[27].val", DumpEntry{minMaxLim0.slowFilterSc[27].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[28].val", DumpEntry{minMaxLim0.slowFilterSc[28].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[29].val", DumpEntry{minMaxLim0.slowFilterSc[29].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[30].val", DumpEntry{minMaxLim0.slowFilterSc[30].val});
+        res.insert_or_assign("minMaxLim0.slowFilterSc[31].val", DumpEntry{minMaxLim0.slowFilterSc[31].val});
         res.insert_or_assign("minMaxLim0.reTime[0].s", DumpEntry{minMaxLim0.reTime[0].s});
         res.insert_or_assign("minMaxLim0.reTime[0].ns", DumpEntry{minMaxLim0.reTime[0].ns});
         res.insert_or_assign("minMaxLim0.reTime[1].s", DumpEntry{minMaxLim0.reTime[1].s});
@@ -9119,45 +10193,87 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim1::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim1::FastFilterScArray`
     //!
-    //! @param filterLengthSc A reference to the module
-    //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim1::FilterLengthScArray& filterLengthSc)
+    //! @param fastFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under fastFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim1::FastFilterScArray& fastFilterSc)
     {
-        DumpMap res{filterLengthSc.base()};
-        res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
-        res.insert_or_assign("filterLengthSc[1].val", DumpEntry{filterLengthSc[1].val});
-        res.insert_or_assign("filterLengthSc[2].val", DumpEntry{filterLengthSc[2].val});
-        res.insert_or_assign("filterLengthSc[3].val", DumpEntry{filterLengthSc[3].val});
-        res.insert_or_assign("filterLengthSc[4].val", DumpEntry{filterLengthSc[4].val});
-        res.insert_or_assign("filterLengthSc[5].val", DumpEntry{filterLengthSc[5].val});
-        res.insert_or_assign("filterLengthSc[6].val", DumpEntry{filterLengthSc[6].val});
-        res.insert_or_assign("filterLengthSc[7].val", DumpEntry{filterLengthSc[7].val});
-        res.insert_or_assign("filterLengthSc[8].val", DumpEntry{filterLengthSc[8].val});
-        res.insert_or_assign("filterLengthSc[9].val", DumpEntry{filterLengthSc[9].val});
-        res.insert_or_assign("filterLengthSc[10].val", DumpEntry{filterLengthSc[10].val});
-        res.insert_or_assign("filterLengthSc[11].val", DumpEntry{filterLengthSc[11].val});
-        res.insert_or_assign("filterLengthSc[12].val", DumpEntry{filterLengthSc[12].val});
-        res.insert_or_assign("filterLengthSc[13].val", DumpEntry{filterLengthSc[13].val});
-        res.insert_or_assign("filterLengthSc[14].val", DumpEntry{filterLengthSc[14].val});
-        res.insert_or_assign("filterLengthSc[15].val", DumpEntry{filterLengthSc[15].val});
-        res.insert_or_assign("filterLengthSc[16].val", DumpEntry{filterLengthSc[16].val});
-        res.insert_or_assign("filterLengthSc[17].val", DumpEntry{filterLengthSc[17].val});
-        res.insert_or_assign("filterLengthSc[18].val", DumpEntry{filterLengthSc[18].val});
-        res.insert_or_assign("filterLengthSc[19].val", DumpEntry{filterLengthSc[19].val});
-        res.insert_or_assign("filterLengthSc[20].val", DumpEntry{filterLengthSc[20].val});
-        res.insert_or_assign("filterLengthSc[21].val", DumpEntry{filterLengthSc[21].val});
-        res.insert_or_assign("filterLengthSc[22].val", DumpEntry{filterLengthSc[22].val});
-        res.insert_or_assign("filterLengthSc[23].val", DumpEntry{filterLengthSc[23].val});
-        res.insert_or_assign("filterLengthSc[24].val", DumpEntry{filterLengthSc[24].val});
-        res.insert_or_assign("filterLengthSc[25].val", DumpEntry{filterLengthSc[25].val});
-        res.insert_or_assign("filterLengthSc[26].val", DumpEntry{filterLengthSc[26].val});
-        res.insert_or_assign("filterLengthSc[27].val", DumpEntry{filterLengthSc[27].val});
-        res.insert_or_assign("filterLengthSc[28].val", DumpEntry{filterLengthSc[28].val});
-        res.insert_or_assign("filterLengthSc[29].val", DumpEntry{filterLengthSc[29].val});
-        res.insert_or_assign("filterLengthSc[30].val", DumpEntry{filterLengthSc[30].val});
-        res.insert_or_assign("filterLengthSc[31].val", DumpEntry{filterLengthSc[31].val});
+        DumpMap res{fastFilterSc.base()};
+        res.insert_or_assign("fastFilterSc[0].val", DumpEntry{fastFilterSc[0].val});
+        res.insert_or_assign("fastFilterSc[1].val", DumpEntry{fastFilterSc[1].val});
+        res.insert_or_assign("fastFilterSc[2].val", DumpEntry{fastFilterSc[2].val});
+        res.insert_or_assign("fastFilterSc[3].val", DumpEntry{fastFilterSc[3].val});
+        res.insert_or_assign("fastFilterSc[4].val", DumpEntry{fastFilterSc[4].val});
+        res.insert_or_assign("fastFilterSc[5].val", DumpEntry{fastFilterSc[5].val});
+        res.insert_or_assign("fastFilterSc[6].val", DumpEntry{fastFilterSc[6].val});
+        res.insert_or_assign("fastFilterSc[7].val", DumpEntry{fastFilterSc[7].val});
+        res.insert_or_assign("fastFilterSc[8].val", DumpEntry{fastFilterSc[8].val});
+        res.insert_or_assign("fastFilterSc[9].val", DumpEntry{fastFilterSc[9].val});
+        res.insert_or_assign("fastFilterSc[10].val", DumpEntry{fastFilterSc[10].val});
+        res.insert_or_assign("fastFilterSc[11].val", DumpEntry{fastFilterSc[11].val});
+        res.insert_or_assign("fastFilterSc[12].val", DumpEntry{fastFilterSc[12].val});
+        res.insert_or_assign("fastFilterSc[13].val", DumpEntry{fastFilterSc[13].val});
+        res.insert_or_assign("fastFilterSc[14].val", DumpEntry{fastFilterSc[14].val});
+        res.insert_or_assign("fastFilterSc[15].val", DumpEntry{fastFilterSc[15].val});
+        res.insert_or_assign("fastFilterSc[16].val", DumpEntry{fastFilterSc[16].val});
+        res.insert_or_assign("fastFilterSc[17].val", DumpEntry{fastFilterSc[17].val});
+        res.insert_or_assign("fastFilterSc[18].val", DumpEntry{fastFilterSc[18].val});
+        res.insert_or_assign("fastFilterSc[19].val", DumpEntry{fastFilterSc[19].val});
+        res.insert_or_assign("fastFilterSc[20].val", DumpEntry{fastFilterSc[20].val});
+        res.insert_or_assign("fastFilterSc[21].val", DumpEntry{fastFilterSc[21].val});
+        res.insert_or_assign("fastFilterSc[22].val", DumpEntry{fastFilterSc[22].val});
+        res.insert_or_assign("fastFilterSc[23].val", DumpEntry{fastFilterSc[23].val});
+        res.insert_or_assign("fastFilterSc[24].val", DumpEntry{fastFilterSc[24].val});
+        res.insert_or_assign("fastFilterSc[25].val", DumpEntry{fastFilterSc[25].val});
+        res.insert_or_assign("fastFilterSc[26].val", DumpEntry{fastFilterSc[26].val});
+        res.insert_or_assign("fastFilterSc[27].val", DumpEntry{fastFilterSc[27].val});
+        res.insert_or_assign("fastFilterSc[28].val", DumpEntry{fastFilterSc[28].val});
+        res.insert_or_assign("fastFilterSc[29].val", DumpEntry{fastFilterSc[29].val});
+        res.insert_or_assign("fastFilterSc[30].val", DumpEntry{fastFilterSc[30].val});
+        res.insert_or_assign("fastFilterSc[31].val", DumpEntry{fastFilterSc[31].val});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::Dig::MinMaxLim1::SlowFilterScArray`
+    //!
+    //! @param slowFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under slowFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::MinMaxLim1::SlowFilterScArray& slowFilterSc)
+    {
+        DumpMap res{slowFilterSc.base()};
+        res.insert_or_assign("slowFilterSc[0].val", DumpEntry{slowFilterSc[0].val});
+        res.insert_or_assign("slowFilterSc[1].val", DumpEntry{slowFilterSc[1].val});
+        res.insert_or_assign("slowFilterSc[2].val", DumpEntry{slowFilterSc[2].val});
+        res.insert_or_assign("slowFilterSc[3].val", DumpEntry{slowFilterSc[3].val});
+        res.insert_or_assign("slowFilterSc[4].val", DumpEntry{slowFilterSc[4].val});
+        res.insert_or_assign("slowFilterSc[5].val", DumpEntry{slowFilterSc[5].val});
+        res.insert_or_assign("slowFilterSc[6].val", DumpEntry{slowFilterSc[6].val});
+        res.insert_or_assign("slowFilterSc[7].val", DumpEntry{slowFilterSc[7].val});
+        res.insert_or_assign("slowFilterSc[8].val", DumpEntry{slowFilterSc[8].val});
+        res.insert_or_assign("slowFilterSc[9].val", DumpEntry{slowFilterSc[9].val});
+        res.insert_or_assign("slowFilterSc[10].val", DumpEntry{slowFilterSc[10].val});
+        res.insert_or_assign("slowFilterSc[11].val", DumpEntry{slowFilterSc[11].val});
+        res.insert_or_assign("slowFilterSc[12].val", DumpEntry{slowFilterSc[12].val});
+        res.insert_or_assign("slowFilterSc[13].val", DumpEntry{slowFilterSc[13].val});
+        res.insert_or_assign("slowFilterSc[14].val", DumpEntry{slowFilterSc[14].val});
+        res.insert_or_assign("slowFilterSc[15].val", DumpEntry{slowFilterSc[15].val});
+        res.insert_or_assign("slowFilterSc[16].val", DumpEntry{slowFilterSc[16].val});
+        res.insert_or_assign("slowFilterSc[17].val", DumpEntry{slowFilterSc[17].val});
+        res.insert_or_assign("slowFilterSc[18].val", DumpEntry{slowFilterSc[18].val});
+        res.insert_or_assign("slowFilterSc[19].val", DumpEntry{slowFilterSc[19].val});
+        res.insert_or_assign("slowFilterSc[20].val", DumpEntry{slowFilterSc[20].val});
+        res.insert_or_assign("slowFilterSc[21].val", DumpEntry{slowFilterSc[21].val});
+        res.insert_or_assign("slowFilterSc[22].val", DumpEntry{slowFilterSc[22].val});
+        res.insert_or_assign("slowFilterSc[23].val", DumpEntry{slowFilterSc[23].val});
+        res.insert_or_assign("slowFilterSc[24].val", DumpEntry{slowFilterSc[24].val});
+        res.insert_or_assign("slowFilterSc[25].val", DumpEntry{slowFilterSc[25].val});
+        res.insert_or_assign("slowFilterSc[26].val", DumpEntry{slowFilterSc[26].val});
+        res.insert_or_assign("slowFilterSc[27].val", DumpEntry{slowFilterSc[27].val});
+        res.insert_or_assign("slowFilterSc[28].val", DumpEntry{slowFilterSc[28].val});
+        res.insert_or_assign("slowFilterSc[29].val", DumpEntry{slowFilterSc[29].val});
+        res.insert_or_assign("slowFilterSc[30].val", DumpEntry{slowFilterSc[30].val});
+        res.insert_or_assign("slowFilterSc[31].val", DumpEntry{slowFilterSc[31].val});
         return res;
     }
 
@@ -9257,38 +10373,70 @@ namespace mmpp::utils
         res.insert_or_assign("minMaxLim1.rstLatch", DumpEntry{minMaxLim1.rstLatch});
         res.insert_or_assign("minMaxLim1.risingInterrupt", DumpEntry{minMaxLim1.risingInterrupt});
         res.insert_or_assign("minMaxLim1.fallingInterrupt", DumpEntry{minMaxLim1.fallingInterrupt});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[0].val", DumpEntry{minMaxLim1.filterLengthSc[0].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[1].val", DumpEntry{minMaxLim1.filterLengthSc[1].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[2].val", DumpEntry{minMaxLim1.filterLengthSc[2].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[3].val", DumpEntry{minMaxLim1.filterLengthSc[3].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[4].val", DumpEntry{minMaxLim1.filterLengthSc[4].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[5].val", DumpEntry{minMaxLim1.filterLengthSc[5].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[6].val", DumpEntry{minMaxLim1.filterLengthSc[6].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[7].val", DumpEntry{minMaxLim1.filterLengthSc[7].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[8].val", DumpEntry{minMaxLim1.filterLengthSc[8].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[9].val", DumpEntry{minMaxLim1.filterLengthSc[9].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[10].val", DumpEntry{minMaxLim1.filterLengthSc[10].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[11].val", DumpEntry{minMaxLim1.filterLengthSc[11].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[12].val", DumpEntry{minMaxLim1.filterLengthSc[12].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[13].val", DumpEntry{minMaxLim1.filterLengthSc[13].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[14].val", DumpEntry{minMaxLim1.filterLengthSc[14].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[15].val", DumpEntry{minMaxLim1.filterLengthSc[15].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[16].val", DumpEntry{minMaxLim1.filterLengthSc[16].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[17].val", DumpEntry{minMaxLim1.filterLengthSc[17].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[18].val", DumpEntry{minMaxLim1.filterLengthSc[18].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[19].val", DumpEntry{minMaxLim1.filterLengthSc[19].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[20].val", DumpEntry{minMaxLim1.filterLengthSc[20].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[21].val", DumpEntry{minMaxLim1.filterLengthSc[21].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[22].val", DumpEntry{minMaxLim1.filterLengthSc[22].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[23].val", DumpEntry{minMaxLim1.filterLengthSc[23].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[24].val", DumpEntry{minMaxLim1.filterLengthSc[24].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[25].val", DumpEntry{minMaxLim1.filterLengthSc[25].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[26].val", DumpEntry{minMaxLim1.filterLengthSc[26].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[27].val", DumpEntry{minMaxLim1.filterLengthSc[27].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[28].val", DumpEntry{minMaxLim1.filterLengthSc[28].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[29].val", DumpEntry{minMaxLim1.filterLengthSc[29].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[30].val", DumpEntry{minMaxLim1.filterLengthSc[30].val});
-        res.insert_or_assign("minMaxLim1.filterLengthSc[31].val", DumpEntry{minMaxLim1.filterLengthSc[31].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[0].val", DumpEntry{minMaxLim1.fastFilterSc[0].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[1].val", DumpEntry{minMaxLim1.fastFilterSc[1].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[2].val", DumpEntry{minMaxLim1.fastFilterSc[2].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[3].val", DumpEntry{minMaxLim1.fastFilterSc[3].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[4].val", DumpEntry{minMaxLim1.fastFilterSc[4].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[5].val", DumpEntry{minMaxLim1.fastFilterSc[5].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[6].val", DumpEntry{minMaxLim1.fastFilterSc[6].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[7].val", DumpEntry{minMaxLim1.fastFilterSc[7].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[8].val", DumpEntry{minMaxLim1.fastFilterSc[8].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[9].val", DumpEntry{minMaxLim1.fastFilterSc[9].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[10].val", DumpEntry{minMaxLim1.fastFilterSc[10].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[11].val", DumpEntry{minMaxLim1.fastFilterSc[11].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[12].val", DumpEntry{minMaxLim1.fastFilterSc[12].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[13].val", DumpEntry{minMaxLim1.fastFilterSc[13].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[14].val", DumpEntry{minMaxLim1.fastFilterSc[14].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[15].val", DumpEntry{minMaxLim1.fastFilterSc[15].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[16].val", DumpEntry{minMaxLim1.fastFilterSc[16].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[17].val", DumpEntry{minMaxLim1.fastFilterSc[17].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[18].val", DumpEntry{minMaxLim1.fastFilterSc[18].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[19].val", DumpEntry{minMaxLim1.fastFilterSc[19].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[20].val", DumpEntry{minMaxLim1.fastFilterSc[20].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[21].val", DumpEntry{minMaxLim1.fastFilterSc[21].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[22].val", DumpEntry{minMaxLim1.fastFilterSc[22].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[23].val", DumpEntry{minMaxLim1.fastFilterSc[23].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[24].val", DumpEntry{minMaxLim1.fastFilterSc[24].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[25].val", DumpEntry{minMaxLim1.fastFilterSc[25].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[26].val", DumpEntry{minMaxLim1.fastFilterSc[26].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[27].val", DumpEntry{minMaxLim1.fastFilterSc[27].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[28].val", DumpEntry{minMaxLim1.fastFilterSc[28].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[29].val", DumpEntry{minMaxLim1.fastFilterSc[29].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[30].val", DumpEntry{minMaxLim1.fastFilterSc[30].val});
+        res.insert_or_assign("minMaxLim1.fastFilterSc[31].val", DumpEntry{minMaxLim1.fastFilterSc[31].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[0].val", DumpEntry{minMaxLim1.slowFilterSc[0].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[1].val", DumpEntry{minMaxLim1.slowFilterSc[1].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[2].val", DumpEntry{minMaxLim1.slowFilterSc[2].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[3].val", DumpEntry{minMaxLim1.slowFilterSc[3].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[4].val", DumpEntry{minMaxLim1.slowFilterSc[4].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[5].val", DumpEntry{minMaxLim1.slowFilterSc[5].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[6].val", DumpEntry{minMaxLim1.slowFilterSc[6].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[7].val", DumpEntry{minMaxLim1.slowFilterSc[7].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[8].val", DumpEntry{minMaxLim1.slowFilterSc[8].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[9].val", DumpEntry{minMaxLim1.slowFilterSc[9].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[10].val", DumpEntry{minMaxLim1.slowFilterSc[10].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[11].val", DumpEntry{minMaxLim1.slowFilterSc[11].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[12].val", DumpEntry{minMaxLim1.slowFilterSc[12].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[13].val", DumpEntry{minMaxLim1.slowFilterSc[13].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[14].val", DumpEntry{minMaxLim1.slowFilterSc[14].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[15].val", DumpEntry{minMaxLim1.slowFilterSc[15].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[16].val", DumpEntry{minMaxLim1.slowFilterSc[16].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[17].val", DumpEntry{minMaxLim1.slowFilterSc[17].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[18].val", DumpEntry{minMaxLim1.slowFilterSc[18].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[19].val", DumpEntry{minMaxLim1.slowFilterSc[19].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[20].val", DumpEntry{minMaxLim1.slowFilterSc[20].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[21].val", DumpEntry{minMaxLim1.slowFilterSc[21].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[22].val", DumpEntry{minMaxLim1.slowFilterSc[22].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[23].val", DumpEntry{minMaxLim1.slowFilterSc[23].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[24].val", DumpEntry{minMaxLim1.slowFilterSc[24].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[25].val", DumpEntry{minMaxLim1.slowFilterSc[25].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[26].val", DumpEntry{minMaxLim1.slowFilterSc[26].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[27].val", DumpEntry{minMaxLim1.slowFilterSc[27].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[28].val", DumpEntry{minMaxLim1.slowFilterSc[28].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[29].val", DumpEntry{minMaxLim1.slowFilterSc[29].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[30].val", DumpEntry{minMaxLim1.slowFilterSc[30].val});
+        res.insert_or_assign("minMaxLim1.slowFilterSc[31].val", DumpEntry{minMaxLim1.slowFilterSc[31].val});
         res.insert_or_assign("minMaxLim1.reTime[0].s", DumpEntry{minMaxLim1.reTime[0].s});
         res.insert_or_assign("minMaxLim1.reTime[0].ns", DumpEntry{minMaxLim1.reTime[0].ns});
         res.insert_or_assign("minMaxLim1.reTime[1].s", DumpEntry{minMaxLim1.reTime[1].s});
@@ -9356,45 +10504,87 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim0::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim0::FastFilterScArray`
     //!
-    //! @param filterLengthSc A reference to the module
-    //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim0::FilterLengthScArray& filterLengthSc)
+    //! @param fastFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under fastFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim0::FastFilterScArray& fastFilterSc)
     {
-        DumpMap res{filterLengthSc.base()};
-        res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
-        res.insert_or_assign("filterLengthSc[1].val", DumpEntry{filterLengthSc[1].val});
-        res.insert_or_assign("filterLengthSc[2].val", DumpEntry{filterLengthSc[2].val});
-        res.insert_or_assign("filterLengthSc[3].val", DumpEntry{filterLengthSc[3].val});
-        res.insert_or_assign("filterLengthSc[4].val", DumpEntry{filterLengthSc[4].val});
-        res.insert_or_assign("filterLengthSc[5].val", DumpEntry{filterLengthSc[5].val});
-        res.insert_or_assign("filterLengthSc[6].val", DumpEntry{filterLengthSc[6].val});
-        res.insert_or_assign("filterLengthSc[7].val", DumpEntry{filterLengthSc[7].val});
-        res.insert_or_assign("filterLengthSc[8].val", DumpEntry{filterLengthSc[8].val});
-        res.insert_or_assign("filterLengthSc[9].val", DumpEntry{filterLengthSc[9].val});
-        res.insert_or_assign("filterLengthSc[10].val", DumpEntry{filterLengthSc[10].val});
-        res.insert_or_assign("filterLengthSc[11].val", DumpEntry{filterLengthSc[11].val});
-        res.insert_or_assign("filterLengthSc[12].val", DumpEntry{filterLengthSc[12].val});
-        res.insert_or_assign("filterLengthSc[13].val", DumpEntry{filterLengthSc[13].val});
-        res.insert_or_assign("filterLengthSc[14].val", DumpEntry{filterLengthSc[14].val});
-        res.insert_or_assign("filterLengthSc[15].val", DumpEntry{filterLengthSc[15].val});
-        res.insert_or_assign("filterLengthSc[16].val", DumpEntry{filterLengthSc[16].val});
-        res.insert_or_assign("filterLengthSc[17].val", DumpEntry{filterLengthSc[17].val});
-        res.insert_or_assign("filterLengthSc[18].val", DumpEntry{filterLengthSc[18].val});
-        res.insert_or_assign("filterLengthSc[19].val", DumpEntry{filterLengthSc[19].val});
-        res.insert_or_assign("filterLengthSc[20].val", DumpEntry{filterLengthSc[20].val});
-        res.insert_or_assign("filterLengthSc[21].val", DumpEntry{filterLengthSc[21].val});
-        res.insert_or_assign("filterLengthSc[22].val", DumpEntry{filterLengthSc[22].val});
-        res.insert_or_assign("filterLengthSc[23].val", DumpEntry{filterLengthSc[23].val});
-        res.insert_or_assign("filterLengthSc[24].val", DumpEntry{filterLengthSc[24].val});
-        res.insert_or_assign("filterLengthSc[25].val", DumpEntry{filterLengthSc[25].val});
-        res.insert_or_assign("filterLengthSc[26].val", DumpEntry{filterLengthSc[26].val});
-        res.insert_or_assign("filterLengthSc[27].val", DumpEntry{filterLengthSc[27].val});
-        res.insert_or_assign("filterLengthSc[28].val", DumpEntry{filterLengthSc[28].val});
-        res.insert_or_assign("filterLengthSc[29].val", DumpEntry{filterLengthSc[29].val});
-        res.insert_or_assign("filterLengthSc[30].val", DumpEntry{filterLengthSc[30].val});
-        res.insert_or_assign("filterLengthSc[31].val", DumpEntry{filterLengthSc[31].val});
+        DumpMap res{fastFilterSc.base()};
+        res.insert_or_assign("fastFilterSc[0].val", DumpEntry{fastFilterSc[0].val});
+        res.insert_or_assign("fastFilterSc[1].val", DumpEntry{fastFilterSc[1].val});
+        res.insert_or_assign("fastFilterSc[2].val", DumpEntry{fastFilterSc[2].val});
+        res.insert_or_assign("fastFilterSc[3].val", DumpEntry{fastFilterSc[3].val});
+        res.insert_or_assign("fastFilterSc[4].val", DumpEntry{fastFilterSc[4].val});
+        res.insert_or_assign("fastFilterSc[5].val", DumpEntry{fastFilterSc[5].val});
+        res.insert_or_assign("fastFilterSc[6].val", DumpEntry{fastFilterSc[6].val});
+        res.insert_or_assign("fastFilterSc[7].val", DumpEntry{fastFilterSc[7].val});
+        res.insert_or_assign("fastFilterSc[8].val", DumpEntry{fastFilterSc[8].val});
+        res.insert_or_assign("fastFilterSc[9].val", DumpEntry{fastFilterSc[9].val});
+        res.insert_or_assign("fastFilterSc[10].val", DumpEntry{fastFilterSc[10].val});
+        res.insert_or_assign("fastFilterSc[11].val", DumpEntry{fastFilterSc[11].val});
+        res.insert_or_assign("fastFilterSc[12].val", DumpEntry{fastFilterSc[12].val});
+        res.insert_or_assign("fastFilterSc[13].val", DumpEntry{fastFilterSc[13].val});
+        res.insert_or_assign("fastFilterSc[14].val", DumpEntry{fastFilterSc[14].val});
+        res.insert_or_assign("fastFilterSc[15].val", DumpEntry{fastFilterSc[15].val});
+        res.insert_or_assign("fastFilterSc[16].val", DumpEntry{fastFilterSc[16].val});
+        res.insert_or_assign("fastFilterSc[17].val", DumpEntry{fastFilterSc[17].val});
+        res.insert_or_assign("fastFilterSc[18].val", DumpEntry{fastFilterSc[18].val});
+        res.insert_or_assign("fastFilterSc[19].val", DumpEntry{fastFilterSc[19].val});
+        res.insert_or_assign("fastFilterSc[20].val", DumpEntry{fastFilterSc[20].val});
+        res.insert_or_assign("fastFilterSc[21].val", DumpEntry{fastFilterSc[21].val});
+        res.insert_or_assign("fastFilterSc[22].val", DumpEntry{fastFilterSc[22].val});
+        res.insert_or_assign("fastFilterSc[23].val", DumpEntry{fastFilterSc[23].val});
+        res.insert_or_assign("fastFilterSc[24].val", DumpEntry{fastFilterSc[24].val});
+        res.insert_or_assign("fastFilterSc[25].val", DumpEntry{fastFilterSc[25].val});
+        res.insert_or_assign("fastFilterSc[26].val", DumpEntry{fastFilterSc[26].val});
+        res.insert_or_assign("fastFilterSc[27].val", DumpEntry{fastFilterSc[27].val});
+        res.insert_or_assign("fastFilterSc[28].val", DumpEntry{fastFilterSc[28].val});
+        res.insert_or_assign("fastFilterSc[29].val", DumpEntry{fastFilterSc[29].val});
+        res.insert_or_assign("fastFilterSc[30].val", DumpEntry{fastFilterSc[30].val});
+        res.insert_or_assign("fastFilterSc[31].val", DumpEntry{fastFilterSc[31].val});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim0::SlowFilterScArray`
+    //!
+    //! @param slowFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under slowFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim0::SlowFilterScArray& slowFilterSc)
+    {
+        DumpMap res{slowFilterSc.base()};
+        res.insert_or_assign("slowFilterSc[0].val", DumpEntry{slowFilterSc[0].val});
+        res.insert_or_assign("slowFilterSc[1].val", DumpEntry{slowFilterSc[1].val});
+        res.insert_or_assign("slowFilterSc[2].val", DumpEntry{slowFilterSc[2].val});
+        res.insert_or_assign("slowFilterSc[3].val", DumpEntry{slowFilterSc[3].val});
+        res.insert_or_assign("slowFilterSc[4].val", DumpEntry{slowFilterSc[4].val});
+        res.insert_or_assign("slowFilterSc[5].val", DumpEntry{slowFilterSc[5].val});
+        res.insert_or_assign("slowFilterSc[6].val", DumpEntry{slowFilterSc[6].val});
+        res.insert_or_assign("slowFilterSc[7].val", DumpEntry{slowFilterSc[7].val});
+        res.insert_or_assign("slowFilterSc[8].val", DumpEntry{slowFilterSc[8].val});
+        res.insert_or_assign("slowFilterSc[9].val", DumpEntry{slowFilterSc[9].val});
+        res.insert_or_assign("slowFilterSc[10].val", DumpEntry{slowFilterSc[10].val});
+        res.insert_or_assign("slowFilterSc[11].val", DumpEntry{slowFilterSc[11].val});
+        res.insert_or_assign("slowFilterSc[12].val", DumpEntry{slowFilterSc[12].val});
+        res.insert_or_assign("slowFilterSc[13].val", DumpEntry{slowFilterSc[13].val});
+        res.insert_or_assign("slowFilterSc[14].val", DumpEntry{slowFilterSc[14].val});
+        res.insert_or_assign("slowFilterSc[15].val", DumpEntry{slowFilterSc[15].val});
+        res.insert_or_assign("slowFilterSc[16].val", DumpEntry{slowFilterSc[16].val});
+        res.insert_or_assign("slowFilterSc[17].val", DumpEntry{slowFilterSc[17].val});
+        res.insert_or_assign("slowFilterSc[18].val", DumpEntry{slowFilterSc[18].val});
+        res.insert_or_assign("slowFilterSc[19].val", DumpEntry{slowFilterSc[19].val});
+        res.insert_or_assign("slowFilterSc[20].val", DumpEntry{slowFilterSc[20].val});
+        res.insert_or_assign("slowFilterSc[21].val", DumpEntry{slowFilterSc[21].val});
+        res.insert_or_assign("slowFilterSc[22].val", DumpEntry{slowFilterSc[22].val});
+        res.insert_or_assign("slowFilterSc[23].val", DumpEntry{slowFilterSc[23].val});
+        res.insert_or_assign("slowFilterSc[24].val", DumpEntry{slowFilterSc[24].val});
+        res.insert_or_assign("slowFilterSc[25].val", DumpEntry{slowFilterSc[25].val});
+        res.insert_or_assign("slowFilterSc[26].val", DumpEntry{slowFilterSc[26].val});
+        res.insert_or_assign("slowFilterSc[27].val", DumpEntry{slowFilterSc[27].val});
+        res.insert_or_assign("slowFilterSc[28].val", DumpEntry{slowFilterSc[28].val});
+        res.insert_or_assign("slowFilterSc[29].val", DumpEntry{slowFilterSc[29].val});
+        res.insert_or_assign("slowFilterSc[30].val", DumpEntry{slowFilterSc[30].val});
+        res.insert_or_assign("slowFilterSc[31].val", DumpEntry{slowFilterSc[31].val});
         return res;
     }
 
@@ -9494,38 +10684,70 @@ namespace mmpp::utils
         res.insert_or_assign("rmsLim0.rstLatch", DumpEntry{rmsLim0.rstLatch});
         res.insert_or_assign("rmsLim0.risingInterrupt", DumpEntry{rmsLim0.risingInterrupt});
         res.insert_or_assign("rmsLim0.fallingInterrupt", DumpEntry{rmsLim0.fallingInterrupt});
-        res.insert_or_assign("rmsLim0.filterLengthSc[0].val", DumpEntry{rmsLim0.filterLengthSc[0].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[1].val", DumpEntry{rmsLim0.filterLengthSc[1].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[2].val", DumpEntry{rmsLim0.filterLengthSc[2].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[3].val", DumpEntry{rmsLim0.filterLengthSc[3].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[4].val", DumpEntry{rmsLim0.filterLengthSc[4].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[5].val", DumpEntry{rmsLim0.filterLengthSc[5].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[6].val", DumpEntry{rmsLim0.filterLengthSc[6].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[7].val", DumpEntry{rmsLim0.filterLengthSc[7].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[8].val", DumpEntry{rmsLim0.filterLengthSc[8].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[9].val", DumpEntry{rmsLim0.filterLengthSc[9].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[10].val", DumpEntry{rmsLim0.filterLengthSc[10].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[11].val", DumpEntry{rmsLim0.filterLengthSc[11].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[12].val", DumpEntry{rmsLim0.filterLengthSc[12].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[13].val", DumpEntry{rmsLim0.filterLengthSc[13].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[14].val", DumpEntry{rmsLim0.filterLengthSc[14].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[15].val", DumpEntry{rmsLim0.filterLengthSc[15].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[16].val", DumpEntry{rmsLim0.filterLengthSc[16].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[17].val", DumpEntry{rmsLim0.filterLengthSc[17].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[18].val", DumpEntry{rmsLim0.filterLengthSc[18].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[19].val", DumpEntry{rmsLim0.filterLengthSc[19].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[20].val", DumpEntry{rmsLim0.filterLengthSc[20].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[21].val", DumpEntry{rmsLim0.filterLengthSc[21].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[22].val", DumpEntry{rmsLim0.filterLengthSc[22].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[23].val", DumpEntry{rmsLim0.filterLengthSc[23].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[24].val", DumpEntry{rmsLim0.filterLengthSc[24].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[25].val", DumpEntry{rmsLim0.filterLengthSc[25].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[26].val", DumpEntry{rmsLim0.filterLengthSc[26].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[27].val", DumpEntry{rmsLim0.filterLengthSc[27].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[28].val", DumpEntry{rmsLim0.filterLengthSc[28].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[29].val", DumpEntry{rmsLim0.filterLengthSc[29].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[30].val", DumpEntry{rmsLim0.filterLengthSc[30].val});
-        res.insert_or_assign("rmsLim0.filterLengthSc[31].val", DumpEntry{rmsLim0.filterLengthSc[31].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[0].val", DumpEntry{rmsLim0.fastFilterSc[0].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[1].val", DumpEntry{rmsLim0.fastFilterSc[1].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[2].val", DumpEntry{rmsLim0.fastFilterSc[2].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[3].val", DumpEntry{rmsLim0.fastFilterSc[3].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[4].val", DumpEntry{rmsLim0.fastFilterSc[4].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[5].val", DumpEntry{rmsLim0.fastFilterSc[5].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[6].val", DumpEntry{rmsLim0.fastFilterSc[6].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[7].val", DumpEntry{rmsLim0.fastFilterSc[7].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[8].val", DumpEntry{rmsLim0.fastFilterSc[8].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[9].val", DumpEntry{rmsLim0.fastFilterSc[9].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[10].val", DumpEntry{rmsLim0.fastFilterSc[10].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[11].val", DumpEntry{rmsLim0.fastFilterSc[11].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[12].val", DumpEntry{rmsLim0.fastFilterSc[12].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[13].val", DumpEntry{rmsLim0.fastFilterSc[13].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[14].val", DumpEntry{rmsLim0.fastFilterSc[14].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[15].val", DumpEntry{rmsLim0.fastFilterSc[15].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[16].val", DumpEntry{rmsLim0.fastFilterSc[16].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[17].val", DumpEntry{rmsLim0.fastFilterSc[17].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[18].val", DumpEntry{rmsLim0.fastFilterSc[18].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[19].val", DumpEntry{rmsLim0.fastFilterSc[19].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[20].val", DumpEntry{rmsLim0.fastFilterSc[20].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[21].val", DumpEntry{rmsLim0.fastFilterSc[21].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[22].val", DumpEntry{rmsLim0.fastFilterSc[22].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[23].val", DumpEntry{rmsLim0.fastFilterSc[23].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[24].val", DumpEntry{rmsLim0.fastFilterSc[24].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[25].val", DumpEntry{rmsLim0.fastFilterSc[25].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[26].val", DumpEntry{rmsLim0.fastFilterSc[26].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[27].val", DumpEntry{rmsLim0.fastFilterSc[27].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[28].val", DumpEntry{rmsLim0.fastFilterSc[28].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[29].val", DumpEntry{rmsLim0.fastFilterSc[29].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[30].val", DumpEntry{rmsLim0.fastFilterSc[30].val});
+        res.insert_or_assign("rmsLim0.fastFilterSc[31].val", DumpEntry{rmsLim0.fastFilterSc[31].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[0].val", DumpEntry{rmsLim0.slowFilterSc[0].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[1].val", DumpEntry{rmsLim0.slowFilterSc[1].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[2].val", DumpEntry{rmsLim0.slowFilterSc[2].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[3].val", DumpEntry{rmsLim0.slowFilterSc[3].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[4].val", DumpEntry{rmsLim0.slowFilterSc[4].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[5].val", DumpEntry{rmsLim0.slowFilterSc[5].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[6].val", DumpEntry{rmsLim0.slowFilterSc[6].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[7].val", DumpEntry{rmsLim0.slowFilterSc[7].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[8].val", DumpEntry{rmsLim0.slowFilterSc[8].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[9].val", DumpEntry{rmsLim0.slowFilterSc[9].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[10].val", DumpEntry{rmsLim0.slowFilterSc[10].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[11].val", DumpEntry{rmsLim0.slowFilterSc[11].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[12].val", DumpEntry{rmsLim0.slowFilterSc[12].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[13].val", DumpEntry{rmsLim0.slowFilterSc[13].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[14].val", DumpEntry{rmsLim0.slowFilterSc[14].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[15].val", DumpEntry{rmsLim0.slowFilterSc[15].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[16].val", DumpEntry{rmsLim0.slowFilterSc[16].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[17].val", DumpEntry{rmsLim0.slowFilterSc[17].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[18].val", DumpEntry{rmsLim0.slowFilterSc[18].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[19].val", DumpEntry{rmsLim0.slowFilterSc[19].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[20].val", DumpEntry{rmsLim0.slowFilterSc[20].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[21].val", DumpEntry{rmsLim0.slowFilterSc[21].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[22].val", DumpEntry{rmsLim0.slowFilterSc[22].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[23].val", DumpEntry{rmsLim0.slowFilterSc[23].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[24].val", DumpEntry{rmsLim0.slowFilterSc[24].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[25].val", DumpEntry{rmsLim0.slowFilterSc[25].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[26].val", DumpEntry{rmsLim0.slowFilterSc[26].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[27].val", DumpEntry{rmsLim0.slowFilterSc[27].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[28].val", DumpEntry{rmsLim0.slowFilterSc[28].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[29].val", DumpEntry{rmsLim0.slowFilterSc[29].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[30].val", DumpEntry{rmsLim0.slowFilterSc[30].val});
+        res.insert_or_assign("rmsLim0.slowFilterSc[31].val", DumpEntry{rmsLim0.slowFilterSc[31].val});
         res.insert_or_assign("rmsLim0.reTime[0].s", DumpEntry{rmsLim0.reTime[0].s});
         res.insert_or_assign("rmsLim0.reTime[0].ns", DumpEntry{rmsLim0.reTime[0].ns});
         res.insert_or_assign("rmsLim0.reTime[1].s", DumpEntry{rmsLim0.reTime[1].s});
@@ -9593,45 +10815,87 @@ namespace mmpp::utils
         return res;
     }
 
-    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim1::FilterLengthScArray`
+    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim1::FastFilterScArray`
     //!
-    //! @param filterLengthSc A reference to the module
-    //! @returns A `dump_utils::DumpMap` with all the register and fields under filterLengthSc
-    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim1::FilterLengthScArray& filterLengthSc)
+    //! @param fastFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under fastFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim1::FastFilterScArray& fastFilterSc)
     {
-        DumpMap res{filterLengthSc.base()};
-        res.insert_or_assign("filterLengthSc[0].val", DumpEntry{filterLengthSc[0].val});
-        res.insert_or_assign("filterLengthSc[1].val", DumpEntry{filterLengthSc[1].val});
-        res.insert_or_assign("filterLengthSc[2].val", DumpEntry{filterLengthSc[2].val});
-        res.insert_or_assign("filterLengthSc[3].val", DumpEntry{filterLengthSc[3].val});
-        res.insert_or_assign("filterLengthSc[4].val", DumpEntry{filterLengthSc[4].val});
-        res.insert_or_assign("filterLengthSc[5].val", DumpEntry{filterLengthSc[5].val});
-        res.insert_or_assign("filterLengthSc[6].val", DumpEntry{filterLengthSc[6].val});
-        res.insert_or_assign("filterLengthSc[7].val", DumpEntry{filterLengthSc[7].val});
-        res.insert_or_assign("filterLengthSc[8].val", DumpEntry{filterLengthSc[8].val});
-        res.insert_or_assign("filterLengthSc[9].val", DumpEntry{filterLengthSc[9].val});
-        res.insert_or_assign("filterLengthSc[10].val", DumpEntry{filterLengthSc[10].val});
-        res.insert_or_assign("filterLengthSc[11].val", DumpEntry{filterLengthSc[11].val});
-        res.insert_or_assign("filterLengthSc[12].val", DumpEntry{filterLengthSc[12].val});
-        res.insert_or_assign("filterLengthSc[13].val", DumpEntry{filterLengthSc[13].val});
-        res.insert_or_assign("filterLengthSc[14].val", DumpEntry{filterLengthSc[14].val});
-        res.insert_or_assign("filterLengthSc[15].val", DumpEntry{filterLengthSc[15].val});
-        res.insert_or_assign("filterLengthSc[16].val", DumpEntry{filterLengthSc[16].val});
-        res.insert_or_assign("filterLengthSc[17].val", DumpEntry{filterLengthSc[17].val});
-        res.insert_or_assign("filterLengthSc[18].val", DumpEntry{filterLengthSc[18].val});
-        res.insert_or_assign("filterLengthSc[19].val", DumpEntry{filterLengthSc[19].val});
-        res.insert_or_assign("filterLengthSc[20].val", DumpEntry{filterLengthSc[20].val});
-        res.insert_or_assign("filterLengthSc[21].val", DumpEntry{filterLengthSc[21].val});
-        res.insert_or_assign("filterLengthSc[22].val", DumpEntry{filterLengthSc[22].val});
-        res.insert_or_assign("filterLengthSc[23].val", DumpEntry{filterLengthSc[23].val});
-        res.insert_or_assign("filterLengthSc[24].val", DumpEntry{filterLengthSc[24].val});
-        res.insert_or_assign("filterLengthSc[25].val", DumpEntry{filterLengthSc[25].val});
-        res.insert_or_assign("filterLengthSc[26].val", DumpEntry{filterLengthSc[26].val});
-        res.insert_or_assign("filterLengthSc[27].val", DumpEntry{filterLengthSc[27].val});
-        res.insert_or_assign("filterLengthSc[28].val", DumpEntry{filterLengthSc[28].val});
-        res.insert_or_assign("filterLengthSc[29].val", DumpEntry{filterLengthSc[29].val});
-        res.insert_or_assign("filterLengthSc[30].val", DumpEntry{filterLengthSc[30].val});
-        res.insert_or_assign("filterLengthSc[31].val", DumpEntry{filterLengthSc[31].val});
+        DumpMap res{fastFilterSc.base()};
+        res.insert_or_assign("fastFilterSc[0].val", DumpEntry{fastFilterSc[0].val});
+        res.insert_or_assign("fastFilterSc[1].val", DumpEntry{fastFilterSc[1].val});
+        res.insert_or_assign("fastFilterSc[2].val", DumpEntry{fastFilterSc[2].val});
+        res.insert_or_assign("fastFilterSc[3].val", DumpEntry{fastFilterSc[3].val});
+        res.insert_or_assign("fastFilterSc[4].val", DumpEntry{fastFilterSc[4].val});
+        res.insert_or_assign("fastFilterSc[5].val", DumpEntry{fastFilterSc[5].val});
+        res.insert_or_assign("fastFilterSc[6].val", DumpEntry{fastFilterSc[6].val});
+        res.insert_or_assign("fastFilterSc[7].val", DumpEntry{fastFilterSc[7].val});
+        res.insert_or_assign("fastFilterSc[8].val", DumpEntry{fastFilterSc[8].val});
+        res.insert_or_assign("fastFilterSc[9].val", DumpEntry{fastFilterSc[9].val});
+        res.insert_or_assign("fastFilterSc[10].val", DumpEntry{fastFilterSc[10].val});
+        res.insert_or_assign("fastFilterSc[11].val", DumpEntry{fastFilterSc[11].val});
+        res.insert_or_assign("fastFilterSc[12].val", DumpEntry{fastFilterSc[12].val});
+        res.insert_or_assign("fastFilterSc[13].val", DumpEntry{fastFilterSc[13].val});
+        res.insert_or_assign("fastFilterSc[14].val", DumpEntry{fastFilterSc[14].val});
+        res.insert_or_assign("fastFilterSc[15].val", DumpEntry{fastFilterSc[15].val});
+        res.insert_or_assign("fastFilterSc[16].val", DumpEntry{fastFilterSc[16].val});
+        res.insert_or_assign("fastFilterSc[17].val", DumpEntry{fastFilterSc[17].val});
+        res.insert_or_assign("fastFilterSc[18].val", DumpEntry{fastFilterSc[18].val});
+        res.insert_or_assign("fastFilterSc[19].val", DumpEntry{fastFilterSc[19].val});
+        res.insert_or_assign("fastFilterSc[20].val", DumpEntry{fastFilterSc[20].val});
+        res.insert_or_assign("fastFilterSc[21].val", DumpEntry{fastFilterSc[21].val});
+        res.insert_or_assign("fastFilterSc[22].val", DumpEntry{fastFilterSc[22].val});
+        res.insert_or_assign("fastFilterSc[23].val", DumpEntry{fastFilterSc[23].val});
+        res.insert_or_assign("fastFilterSc[24].val", DumpEntry{fastFilterSc[24].val});
+        res.insert_or_assign("fastFilterSc[25].val", DumpEntry{fastFilterSc[25].val});
+        res.insert_or_assign("fastFilterSc[26].val", DumpEntry{fastFilterSc[26].val});
+        res.insert_or_assign("fastFilterSc[27].val", DumpEntry{fastFilterSc[27].val});
+        res.insert_or_assign("fastFilterSc[28].val", DumpEntry{fastFilterSc[28].val});
+        res.insert_or_assign("fastFilterSc[29].val", DumpEntry{fastFilterSc[29].val});
+        res.insert_or_assign("fastFilterSc[30].val", DumpEntry{fastFilterSc[30].val});
+        res.insert_or_assign("fastFilterSc[31].val", DumpEntry{fastFilterSc[31].val});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::Dig::RmsLim1::SlowFilterScArray`
+    //!
+    //! @param slowFilterSc A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under slowFilterSc
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Dig::RmsLim1::SlowFilterScArray& slowFilterSc)
+    {
+        DumpMap res{slowFilterSc.base()};
+        res.insert_or_assign("slowFilterSc[0].val", DumpEntry{slowFilterSc[0].val});
+        res.insert_or_assign("slowFilterSc[1].val", DumpEntry{slowFilterSc[1].val});
+        res.insert_or_assign("slowFilterSc[2].val", DumpEntry{slowFilterSc[2].val});
+        res.insert_or_assign("slowFilterSc[3].val", DumpEntry{slowFilterSc[3].val});
+        res.insert_or_assign("slowFilterSc[4].val", DumpEntry{slowFilterSc[4].val});
+        res.insert_or_assign("slowFilterSc[5].val", DumpEntry{slowFilterSc[5].val});
+        res.insert_or_assign("slowFilterSc[6].val", DumpEntry{slowFilterSc[6].val});
+        res.insert_or_assign("slowFilterSc[7].val", DumpEntry{slowFilterSc[7].val});
+        res.insert_or_assign("slowFilterSc[8].val", DumpEntry{slowFilterSc[8].val});
+        res.insert_or_assign("slowFilterSc[9].val", DumpEntry{slowFilterSc[9].val});
+        res.insert_or_assign("slowFilterSc[10].val", DumpEntry{slowFilterSc[10].val});
+        res.insert_or_assign("slowFilterSc[11].val", DumpEntry{slowFilterSc[11].val});
+        res.insert_or_assign("slowFilterSc[12].val", DumpEntry{slowFilterSc[12].val});
+        res.insert_or_assign("slowFilterSc[13].val", DumpEntry{slowFilterSc[13].val});
+        res.insert_or_assign("slowFilterSc[14].val", DumpEntry{slowFilterSc[14].val});
+        res.insert_or_assign("slowFilterSc[15].val", DumpEntry{slowFilterSc[15].val});
+        res.insert_or_assign("slowFilterSc[16].val", DumpEntry{slowFilterSc[16].val});
+        res.insert_or_assign("slowFilterSc[17].val", DumpEntry{slowFilterSc[17].val});
+        res.insert_or_assign("slowFilterSc[18].val", DumpEntry{slowFilterSc[18].val});
+        res.insert_or_assign("slowFilterSc[19].val", DumpEntry{slowFilterSc[19].val});
+        res.insert_or_assign("slowFilterSc[20].val", DumpEntry{slowFilterSc[20].val});
+        res.insert_or_assign("slowFilterSc[21].val", DumpEntry{slowFilterSc[21].val});
+        res.insert_or_assign("slowFilterSc[22].val", DumpEntry{slowFilterSc[22].val});
+        res.insert_or_assign("slowFilterSc[23].val", DumpEntry{slowFilterSc[23].val});
+        res.insert_or_assign("slowFilterSc[24].val", DumpEntry{slowFilterSc[24].val});
+        res.insert_or_assign("slowFilterSc[25].val", DumpEntry{slowFilterSc[25].val});
+        res.insert_or_assign("slowFilterSc[26].val", DumpEntry{slowFilterSc[26].val});
+        res.insert_or_assign("slowFilterSc[27].val", DumpEntry{slowFilterSc[27].val});
+        res.insert_or_assign("slowFilterSc[28].val", DumpEntry{slowFilterSc[28].val});
+        res.insert_or_assign("slowFilterSc[29].val", DumpEntry{slowFilterSc[29].val});
+        res.insert_or_assign("slowFilterSc[30].val", DumpEntry{slowFilterSc[30].val});
+        res.insert_or_assign("slowFilterSc[31].val", DumpEntry{slowFilterSc[31].val});
         return res;
     }
 
@@ -9731,38 +10995,70 @@ namespace mmpp::utils
         res.insert_or_assign("rmsLim1.rstLatch", DumpEntry{rmsLim1.rstLatch});
         res.insert_or_assign("rmsLim1.risingInterrupt", DumpEntry{rmsLim1.risingInterrupt});
         res.insert_or_assign("rmsLim1.fallingInterrupt", DumpEntry{rmsLim1.fallingInterrupt});
-        res.insert_or_assign("rmsLim1.filterLengthSc[0].val", DumpEntry{rmsLim1.filterLengthSc[0].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[1].val", DumpEntry{rmsLim1.filterLengthSc[1].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[2].val", DumpEntry{rmsLim1.filterLengthSc[2].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[3].val", DumpEntry{rmsLim1.filterLengthSc[3].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[4].val", DumpEntry{rmsLim1.filterLengthSc[4].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[5].val", DumpEntry{rmsLim1.filterLengthSc[5].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[6].val", DumpEntry{rmsLim1.filterLengthSc[6].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[7].val", DumpEntry{rmsLim1.filterLengthSc[7].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[8].val", DumpEntry{rmsLim1.filterLengthSc[8].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[9].val", DumpEntry{rmsLim1.filterLengthSc[9].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[10].val", DumpEntry{rmsLim1.filterLengthSc[10].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[11].val", DumpEntry{rmsLim1.filterLengthSc[11].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[12].val", DumpEntry{rmsLim1.filterLengthSc[12].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[13].val", DumpEntry{rmsLim1.filterLengthSc[13].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[14].val", DumpEntry{rmsLim1.filterLengthSc[14].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[15].val", DumpEntry{rmsLim1.filterLengthSc[15].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[16].val", DumpEntry{rmsLim1.filterLengthSc[16].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[17].val", DumpEntry{rmsLim1.filterLengthSc[17].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[18].val", DumpEntry{rmsLim1.filterLengthSc[18].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[19].val", DumpEntry{rmsLim1.filterLengthSc[19].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[20].val", DumpEntry{rmsLim1.filterLengthSc[20].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[21].val", DumpEntry{rmsLim1.filterLengthSc[21].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[22].val", DumpEntry{rmsLim1.filterLengthSc[22].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[23].val", DumpEntry{rmsLim1.filterLengthSc[23].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[24].val", DumpEntry{rmsLim1.filterLengthSc[24].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[25].val", DumpEntry{rmsLim1.filterLengthSc[25].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[26].val", DumpEntry{rmsLim1.filterLengthSc[26].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[27].val", DumpEntry{rmsLim1.filterLengthSc[27].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[28].val", DumpEntry{rmsLim1.filterLengthSc[28].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[29].val", DumpEntry{rmsLim1.filterLengthSc[29].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[30].val", DumpEntry{rmsLim1.filterLengthSc[30].val});
-        res.insert_or_assign("rmsLim1.filterLengthSc[31].val", DumpEntry{rmsLim1.filterLengthSc[31].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[0].val", DumpEntry{rmsLim1.fastFilterSc[0].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[1].val", DumpEntry{rmsLim1.fastFilterSc[1].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[2].val", DumpEntry{rmsLim1.fastFilterSc[2].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[3].val", DumpEntry{rmsLim1.fastFilterSc[3].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[4].val", DumpEntry{rmsLim1.fastFilterSc[4].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[5].val", DumpEntry{rmsLim1.fastFilterSc[5].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[6].val", DumpEntry{rmsLim1.fastFilterSc[6].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[7].val", DumpEntry{rmsLim1.fastFilterSc[7].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[8].val", DumpEntry{rmsLim1.fastFilterSc[8].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[9].val", DumpEntry{rmsLim1.fastFilterSc[9].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[10].val", DumpEntry{rmsLim1.fastFilterSc[10].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[11].val", DumpEntry{rmsLim1.fastFilterSc[11].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[12].val", DumpEntry{rmsLim1.fastFilterSc[12].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[13].val", DumpEntry{rmsLim1.fastFilterSc[13].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[14].val", DumpEntry{rmsLim1.fastFilterSc[14].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[15].val", DumpEntry{rmsLim1.fastFilterSc[15].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[16].val", DumpEntry{rmsLim1.fastFilterSc[16].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[17].val", DumpEntry{rmsLim1.fastFilterSc[17].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[18].val", DumpEntry{rmsLim1.fastFilterSc[18].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[19].val", DumpEntry{rmsLim1.fastFilterSc[19].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[20].val", DumpEntry{rmsLim1.fastFilterSc[20].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[21].val", DumpEntry{rmsLim1.fastFilterSc[21].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[22].val", DumpEntry{rmsLim1.fastFilterSc[22].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[23].val", DumpEntry{rmsLim1.fastFilterSc[23].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[24].val", DumpEntry{rmsLim1.fastFilterSc[24].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[25].val", DumpEntry{rmsLim1.fastFilterSc[25].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[26].val", DumpEntry{rmsLim1.fastFilterSc[26].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[27].val", DumpEntry{rmsLim1.fastFilterSc[27].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[28].val", DumpEntry{rmsLim1.fastFilterSc[28].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[29].val", DumpEntry{rmsLim1.fastFilterSc[29].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[30].val", DumpEntry{rmsLim1.fastFilterSc[30].val});
+        res.insert_or_assign("rmsLim1.fastFilterSc[31].val", DumpEntry{rmsLim1.fastFilterSc[31].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[0].val", DumpEntry{rmsLim1.slowFilterSc[0].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[1].val", DumpEntry{rmsLim1.slowFilterSc[1].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[2].val", DumpEntry{rmsLim1.slowFilterSc[2].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[3].val", DumpEntry{rmsLim1.slowFilterSc[3].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[4].val", DumpEntry{rmsLim1.slowFilterSc[4].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[5].val", DumpEntry{rmsLim1.slowFilterSc[5].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[6].val", DumpEntry{rmsLim1.slowFilterSc[6].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[7].val", DumpEntry{rmsLim1.slowFilterSc[7].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[8].val", DumpEntry{rmsLim1.slowFilterSc[8].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[9].val", DumpEntry{rmsLim1.slowFilterSc[9].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[10].val", DumpEntry{rmsLim1.slowFilterSc[10].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[11].val", DumpEntry{rmsLim1.slowFilterSc[11].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[12].val", DumpEntry{rmsLim1.slowFilterSc[12].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[13].val", DumpEntry{rmsLim1.slowFilterSc[13].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[14].val", DumpEntry{rmsLim1.slowFilterSc[14].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[15].val", DumpEntry{rmsLim1.slowFilterSc[15].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[16].val", DumpEntry{rmsLim1.slowFilterSc[16].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[17].val", DumpEntry{rmsLim1.slowFilterSc[17].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[18].val", DumpEntry{rmsLim1.slowFilterSc[18].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[19].val", DumpEntry{rmsLim1.slowFilterSc[19].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[20].val", DumpEntry{rmsLim1.slowFilterSc[20].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[21].val", DumpEntry{rmsLim1.slowFilterSc[21].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[22].val", DumpEntry{rmsLim1.slowFilterSc[22].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[23].val", DumpEntry{rmsLim1.slowFilterSc[23].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[24].val", DumpEntry{rmsLim1.slowFilterSc[24].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[25].val", DumpEntry{rmsLim1.slowFilterSc[25].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[26].val", DumpEntry{rmsLim1.slowFilterSc[26].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[27].val", DumpEntry{rmsLim1.slowFilterSc[27].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[28].val", DumpEntry{rmsLim1.slowFilterSc[28].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[29].val", DumpEntry{rmsLim1.slowFilterSc[29].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[30].val", DumpEntry{rmsLim1.slowFilterSc[30].val});
+        res.insert_or_assign("rmsLim1.slowFilterSc[31].val", DumpEntry{rmsLim1.slowFilterSc[31].val});
         res.insert_or_assign("rmsLim1.reTime[0].s", DumpEntry{rmsLim1.reTime[0].s});
         res.insert_or_assign("rmsLim1.reTime[0].ns", DumpEntry{rmsLim1.reTime[0].ns});
         res.insert_or_assign("rmsLim1.reTime[1].s", DumpEntry{rmsLim1.reTime[1].s});
@@ -9852,38 +11148,70 @@ namespace mmpp::utils
         res.insert_or_assign("dig.digI0.rstLatch", DumpEntry{dig.digI0.rstLatch});
         res.insert_or_assign("dig.digI0.risingInterrupt", DumpEntry{dig.digI0.risingInterrupt});
         res.insert_or_assign("dig.digI0.fallingInterrupt", DumpEntry{dig.digI0.fallingInterrupt});
-        res.insert_or_assign("dig.digI0.filterLengthSc[0].val", DumpEntry{dig.digI0.filterLengthSc[0].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[1].val", DumpEntry{dig.digI0.filterLengthSc[1].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[2].val", DumpEntry{dig.digI0.filterLengthSc[2].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[3].val", DumpEntry{dig.digI0.filterLengthSc[3].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[4].val", DumpEntry{dig.digI0.filterLengthSc[4].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[5].val", DumpEntry{dig.digI0.filterLengthSc[5].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[6].val", DumpEntry{dig.digI0.filterLengthSc[6].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[7].val", DumpEntry{dig.digI0.filterLengthSc[7].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[8].val", DumpEntry{dig.digI0.filterLengthSc[8].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[9].val", DumpEntry{dig.digI0.filterLengthSc[9].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[10].val", DumpEntry{dig.digI0.filterLengthSc[10].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[11].val", DumpEntry{dig.digI0.filterLengthSc[11].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[12].val", DumpEntry{dig.digI0.filterLengthSc[12].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[13].val", DumpEntry{dig.digI0.filterLengthSc[13].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[14].val", DumpEntry{dig.digI0.filterLengthSc[14].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[15].val", DumpEntry{dig.digI0.filterLengthSc[15].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[16].val", DumpEntry{dig.digI0.filterLengthSc[16].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[17].val", DumpEntry{dig.digI0.filterLengthSc[17].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[18].val", DumpEntry{dig.digI0.filterLengthSc[18].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[19].val", DumpEntry{dig.digI0.filterLengthSc[19].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[20].val", DumpEntry{dig.digI0.filterLengthSc[20].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[21].val", DumpEntry{dig.digI0.filterLengthSc[21].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[22].val", DumpEntry{dig.digI0.filterLengthSc[22].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[23].val", DumpEntry{dig.digI0.filterLengthSc[23].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[24].val", DumpEntry{dig.digI0.filterLengthSc[24].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[25].val", DumpEntry{dig.digI0.filterLengthSc[25].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[26].val", DumpEntry{dig.digI0.filterLengthSc[26].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[27].val", DumpEntry{dig.digI0.filterLengthSc[27].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[28].val", DumpEntry{dig.digI0.filterLengthSc[28].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[29].val", DumpEntry{dig.digI0.filterLengthSc[29].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[30].val", DumpEntry{dig.digI0.filterLengthSc[30].val});
-        res.insert_or_assign("dig.digI0.filterLengthSc[31].val", DumpEntry{dig.digI0.filterLengthSc[31].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[0].val", DumpEntry{dig.digI0.fastFilterSc[0].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[1].val", DumpEntry{dig.digI0.fastFilterSc[1].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[2].val", DumpEntry{dig.digI0.fastFilterSc[2].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[3].val", DumpEntry{dig.digI0.fastFilterSc[3].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[4].val", DumpEntry{dig.digI0.fastFilterSc[4].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[5].val", DumpEntry{dig.digI0.fastFilterSc[5].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[6].val", DumpEntry{dig.digI0.fastFilterSc[6].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[7].val", DumpEntry{dig.digI0.fastFilterSc[7].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[8].val", DumpEntry{dig.digI0.fastFilterSc[8].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[9].val", DumpEntry{dig.digI0.fastFilterSc[9].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[10].val", DumpEntry{dig.digI0.fastFilterSc[10].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[11].val", DumpEntry{dig.digI0.fastFilterSc[11].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[12].val", DumpEntry{dig.digI0.fastFilterSc[12].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[13].val", DumpEntry{dig.digI0.fastFilterSc[13].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[14].val", DumpEntry{dig.digI0.fastFilterSc[14].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[15].val", DumpEntry{dig.digI0.fastFilterSc[15].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[16].val", DumpEntry{dig.digI0.fastFilterSc[16].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[17].val", DumpEntry{dig.digI0.fastFilterSc[17].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[18].val", DumpEntry{dig.digI0.fastFilterSc[18].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[19].val", DumpEntry{dig.digI0.fastFilterSc[19].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[20].val", DumpEntry{dig.digI0.fastFilterSc[20].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[21].val", DumpEntry{dig.digI0.fastFilterSc[21].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[22].val", DumpEntry{dig.digI0.fastFilterSc[22].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[23].val", DumpEntry{dig.digI0.fastFilterSc[23].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[24].val", DumpEntry{dig.digI0.fastFilterSc[24].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[25].val", DumpEntry{dig.digI0.fastFilterSc[25].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[26].val", DumpEntry{dig.digI0.fastFilterSc[26].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[27].val", DumpEntry{dig.digI0.fastFilterSc[27].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[28].val", DumpEntry{dig.digI0.fastFilterSc[28].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[29].val", DumpEntry{dig.digI0.fastFilterSc[29].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[30].val", DumpEntry{dig.digI0.fastFilterSc[30].val});
+        res.insert_or_assign("dig.digI0.fastFilterSc[31].val", DumpEntry{dig.digI0.fastFilterSc[31].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[0].val", DumpEntry{dig.digI0.slowFilterSc[0].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[1].val", DumpEntry{dig.digI0.slowFilterSc[1].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[2].val", DumpEntry{dig.digI0.slowFilterSc[2].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[3].val", DumpEntry{dig.digI0.slowFilterSc[3].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[4].val", DumpEntry{dig.digI0.slowFilterSc[4].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[5].val", DumpEntry{dig.digI0.slowFilterSc[5].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[6].val", DumpEntry{dig.digI0.slowFilterSc[6].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[7].val", DumpEntry{dig.digI0.slowFilterSc[7].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[8].val", DumpEntry{dig.digI0.slowFilterSc[8].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[9].val", DumpEntry{dig.digI0.slowFilterSc[9].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[10].val", DumpEntry{dig.digI0.slowFilterSc[10].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[11].val", DumpEntry{dig.digI0.slowFilterSc[11].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[12].val", DumpEntry{dig.digI0.slowFilterSc[12].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[13].val", DumpEntry{dig.digI0.slowFilterSc[13].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[14].val", DumpEntry{dig.digI0.slowFilterSc[14].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[15].val", DumpEntry{dig.digI0.slowFilterSc[15].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[16].val", DumpEntry{dig.digI0.slowFilterSc[16].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[17].val", DumpEntry{dig.digI0.slowFilterSc[17].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[18].val", DumpEntry{dig.digI0.slowFilterSc[18].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[19].val", DumpEntry{dig.digI0.slowFilterSc[19].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[20].val", DumpEntry{dig.digI0.slowFilterSc[20].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[21].val", DumpEntry{dig.digI0.slowFilterSc[21].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[22].val", DumpEntry{dig.digI0.slowFilterSc[22].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[23].val", DumpEntry{dig.digI0.slowFilterSc[23].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[24].val", DumpEntry{dig.digI0.slowFilterSc[24].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[25].val", DumpEntry{dig.digI0.slowFilterSc[25].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[26].val", DumpEntry{dig.digI0.slowFilterSc[26].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[27].val", DumpEntry{dig.digI0.slowFilterSc[27].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[28].val", DumpEntry{dig.digI0.slowFilterSc[28].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[29].val", DumpEntry{dig.digI0.slowFilterSc[29].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[30].val", DumpEntry{dig.digI0.slowFilterSc[30].val});
+        res.insert_or_assign("dig.digI0.slowFilterSc[31].val", DumpEntry{dig.digI0.slowFilterSc[31].val});
         res.insert_or_assign("dig.digI0.reTime[0].s", DumpEntry{dig.digI0.reTime[0].s});
         res.insert_or_assign("dig.digI0.reTime[0].ns", DumpEntry{dig.digI0.reTime[0].ns});
         res.insert_or_assign("dig.digI0.reTime[1].s", DumpEntry{dig.digI0.reTime[1].s});
@@ -9963,38 +11291,70 @@ namespace mmpp::utils
         res.insert_or_assign("dig.digI1.rstLatch", DumpEntry{dig.digI1.rstLatch});
         res.insert_or_assign("dig.digI1.risingInterrupt", DumpEntry{dig.digI1.risingInterrupt});
         res.insert_or_assign("dig.digI1.fallingInterrupt", DumpEntry{dig.digI1.fallingInterrupt});
-        res.insert_or_assign("dig.digI1.filterLengthSc[0].val", DumpEntry{dig.digI1.filterLengthSc[0].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[1].val", DumpEntry{dig.digI1.filterLengthSc[1].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[2].val", DumpEntry{dig.digI1.filterLengthSc[2].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[3].val", DumpEntry{dig.digI1.filterLengthSc[3].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[4].val", DumpEntry{dig.digI1.filterLengthSc[4].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[5].val", DumpEntry{dig.digI1.filterLengthSc[5].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[6].val", DumpEntry{dig.digI1.filterLengthSc[6].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[7].val", DumpEntry{dig.digI1.filterLengthSc[7].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[8].val", DumpEntry{dig.digI1.filterLengthSc[8].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[9].val", DumpEntry{dig.digI1.filterLengthSc[9].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[10].val", DumpEntry{dig.digI1.filterLengthSc[10].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[11].val", DumpEntry{dig.digI1.filterLengthSc[11].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[12].val", DumpEntry{dig.digI1.filterLengthSc[12].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[13].val", DumpEntry{dig.digI1.filterLengthSc[13].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[14].val", DumpEntry{dig.digI1.filterLengthSc[14].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[15].val", DumpEntry{dig.digI1.filterLengthSc[15].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[16].val", DumpEntry{dig.digI1.filterLengthSc[16].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[17].val", DumpEntry{dig.digI1.filterLengthSc[17].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[18].val", DumpEntry{dig.digI1.filterLengthSc[18].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[19].val", DumpEntry{dig.digI1.filterLengthSc[19].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[20].val", DumpEntry{dig.digI1.filterLengthSc[20].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[21].val", DumpEntry{dig.digI1.filterLengthSc[21].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[22].val", DumpEntry{dig.digI1.filterLengthSc[22].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[23].val", DumpEntry{dig.digI1.filterLengthSc[23].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[24].val", DumpEntry{dig.digI1.filterLengthSc[24].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[25].val", DumpEntry{dig.digI1.filterLengthSc[25].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[26].val", DumpEntry{dig.digI1.filterLengthSc[26].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[27].val", DumpEntry{dig.digI1.filterLengthSc[27].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[28].val", DumpEntry{dig.digI1.filterLengthSc[28].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[29].val", DumpEntry{dig.digI1.filterLengthSc[29].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[30].val", DumpEntry{dig.digI1.filterLengthSc[30].val});
-        res.insert_or_assign("dig.digI1.filterLengthSc[31].val", DumpEntry{dig.digI1.filterLengthSc[31].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[0].val", DumpEntry{dig.digI1.fastFilterSc[0].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[1].val", DumpEntry{dig.digI1.fastFilterSc[1].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[2].val", DumpEntry{dig.digI1.fastFilterSc[2].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[3].val", DumpEntry{dig.digI1.fastFilterSc[3].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[4].val", DumpEntry{dig.digI1.fastFilterSc[4].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[5].val", DumpEntry{dig.digI1.fastFilterSc[5].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[6].val", DumpEntry{dig.digI1.fastFilterSc[6].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[7].val", DumpEntry{dig.digI1.fastFilterSc[7].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[8].val", DumpEntry{dig.digI1.fastFilterSc[8].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[9].val", DumpEntry{dig.digI1.fastFilterSc[9].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[10].val", DumpEntry{dig.digI1.fastFilterSc[10].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[11].val", DumpEntry{dig.digI1.fastFilterSc[11].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[12].val", DumpEntry{dig.digI1.fastFilterSc[12].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[13].val", DumpEntry{dig.digI1.fastFilterSc[13].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[14].val", DumpEntry{dig.digI1.fastFilterSc[14].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[15].val", DumpEntry{dig.digI1.fastFilterSc[15].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[16].val", DumpEntry{dig.digI1.fastFilterSc[16].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[17].val", DumpEntry{dig.digI1.fastFilterSc[17].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[18].val", DumpEntry{dig.digI1.fastFilterSc[18].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[19].val", DumpEntry{dig.digI1.fastFilterSc[19].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[20].val", DumpEntry{dig.digI1.fastFilterSc[20].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[21].val", DumpEntry{dig.digI1.fastFilterSc[21].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[22].val", DumpEntry{dig.digI1.fastFilterSc[22].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[23].val", DumpEntry{dig.digI1.fastFilterSc[23].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[24].val", DumpEntry{dig.digI1.fastFilterSc[24].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[25].val", DumpEntry{dig.digI1.fastFilterSc[25].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[26].val", DumpEntry{dig.digI1.fastFilterSc[26].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[27].val", DumpEntry{dig.digI1.fastFilterSc[27].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[28].val", DumpEntry{dig.digI1.fastFilterSc[28].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[29].val", DumpEntry{dig.digI1.fastFilterSc[29].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[30].val", DumpEntry{dig.digI1.fastFilterSc[30].val});
+        res.insert_or_assign("dig.digI1.fastFilterSc[31].val", DumpEntry{dig.digI1.fastFilterSc[31].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[0].val", DumpEntry{dig.digI1.slowFilterSc[0].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[1].val", DumpEntry{dig.digI1.slowFilterSc[1].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[2].val", DumpEntry{dig.digI1.slowFilterSc[2].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[3].val", DumpEntry{dig.digI1.slowFilterSc[3].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[4].val", DumpEntry{dig.digI1.slowFilterSc[4].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[5].val", DumpEntry{dig.digI1.slowFilterSc[5].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[6].val", DumpEntry{dig.digI1.slowFilterSc[6].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[7].val", DumpEntry{dig.digI1.slowFilterSc[7].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[8].val", DumpEntry{dig.digI1.slowFilterSc[8].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[9].val", DumpEntry{dig.digI1.slowFilterSc[9].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[10].val", DumpEntry{dig.digI1.slowFilterSc[10].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[11].val", DumpEntry{dig.digI1.slowFilterSc[11].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[12].val", DumpEntry{dig.digI1.slowFilterSc[12].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[13].val", DumpEntry{dig.digI1.slowFilterSc[13].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[14].val", DumpEntry{dig.digI1.slowFilterSc[14].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[15].val", DumpEntry{dig.digI1.slowFilterSc[15].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[16].val", DumpEntry{dig.digI1.slowFilterSc[16].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[17].val", DumpEntry{dig.digI1.slowFilterSc[17].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[18].val", DumpEntry{dig.digI1.slowFilterSc[18].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[19].val", DumpEntry{dig.digI1.slowFilterSc[19].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[20].val", DumpEntry{dig.digI1.slowFilterSc[20].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[21].val", DumpEntry{dig.digI1.slowFilterSc[21].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[22].val", DumpEntry{dig.digI1.slowFilterSc[22].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[23].val", DumpEntry{dig.digI1.slowFilterSc[23].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[24].val", DumpEntry{dig.digI1.slowFilterSc[24].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[25].val", DumpEntry{dig.digI1.slowFilterSc[25].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[26].val", DumpEntry{dig.digI1.slowFilterSc[26].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[27].val", DumpEntry{dig.digI1.slowFilterSc[27].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[28].val", DumpEntry{dig.digI1.slowFilterSc[28].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[29].val", DumpEntry{dig.digI1.slowFilterSc[29].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[30].val", DumpEntry{dig.digI1.slowFilterSc[30].val});
+        res.insert_or_assign("dig.digI1.slowFilterSc[31].val", DumpEntry{dig.digI1.slowFilterSc[31].val});
         res.insert_or_assign("dig.digI1.reTime[0].s", DumpEntry{dig.digI1.reTime[0].s});
         res.insert_or_assign("dig.digI1.reTime[0].ns", DumpEntry{dig.digI1.reTime[0].ns});
         res.insert_or_assign("dig.digI1.reTime[1].s", DumpEntry{dig.digI1.reTime[1].s});
@@ -10074,38 +11434,70 @@ namespace mmpp::utils
         res.insert_or_assign("dig.digIndI.rstLatch", DumpEntry{dig.digIndI.rstLatch});
         res.insert_or_assign("dig.digIndI.risingInterrupt", DumpEntry{dig.digIndI.risingInterrupt});
         res.insert_or_assign("dig.digIndI.fallingInterrupt", DumpEntry{dig.digIndI.fallingInterrupt});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[0].val", DumpEntry{dig.digIndI.filterLengthSc[0].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[1].val", DumpEntry{dig.digIndI.filterLengthSc[1].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[2].val", DumpEntry{dig.digIndI.filterLengthSc[2].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[3].val", DumpEntry{dig.digIndI.filterLengthSc[3].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[4].val", DumpEntry{dig.digIndI.filterLengthSc[4].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[5].val", DumpEntry{dig.digIndI.filterLengthSc[5].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[6].val", DumpEntry{dig.digIndI.filterLengthSc[6].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[7].val", DumpEntry{dig.digIndI.filterLengthSc[7].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[8].val", DumpEntry{dig.digIndI.filterLengthSc[8].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[9].val", DumpEntry{dig.digIndI.filterLengthSc[9].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[10].val", DumpEntry{dig.digIndI.filterLengthSc[10].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[11].val", DumpEntry{dig.digIndI.filterLengthSc[11].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[12].val", DumpEntry{dig.digIndI.filterLengthSc[12].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[13].val", DumpEntry{dig.digIndI.filterLengthSc[13].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[14].val", DumpEntry{dig.digIndI.filterLengthSc[14].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[15].val", DumpEntry{dig.digIndI.filterLengthSc[15].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[16].val", DumpEntry{dig.digIndI.filterLengthSc[16].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[17].val", DumpEntry{dig.digIndI.filterLengthSc[17].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[18].val", DumpEntry{dig.digIndI.filterLengthSc[18].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[19].val", DumpEntry{dig.digIndI.filterLengthSc[19].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[20].val", DumpEntry{dig.digIndI.filterLengthSc[20].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[21].val", DumpEntry{dig.digIndI.filterLengthSc[21].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[22].val", DumpEntry{dig.digIndI.filterLengthSc[22].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[23].val", DumpEntry{dig.digIndI.filterLengthSc[23].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[24].val", DumpEntry{dig.digIndI.filterLengthSc[24].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[25].val", DumpEntry{dig.digIndI.filterLengthSc[25].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[26].val", DumpEntry{dig.digIndI.filterLengthSc[26].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[27].val", DumpEntry{dig.digIndI.filterLengthSc[27].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[28].val", DumpEntry{dig.digIndI.filterLengthSc[28].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[29].val", DumpEntry{dig.digIndI.filterLengthSc[29].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[30].val", DumpEntry{dig.digIndI.filterLengthSc[30].val});
-        res.insert_or_assign("dig.digIndI.filterLengthSc[31].val", DumpEntry{dig.digIndI.filterLengthSc[31].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[0].val", DumpEntry{dig.digIndI.fastFilterSc[0].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[1].val", DumpEntry{dig.digIndI.fastFilterSc[1].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[2].val", DumpEntry{dig.digIndI.fastFilterSc[2].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[3].val", DumpEntry{dig.digIndI.fastFilterSc[3].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[4].val", DumpEntry{dig.digIndI.fastFilterSc[4].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[5].val", DumpEntry{dig.digIndI.fastFilterSc[5].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[6].val", DumpEntry{dig.digIndI.fastFilterSc[6].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[7].val", DumpEntry{dig.digIndI.fastFilterSc[7].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[8].val", DumpEntry{dig.digIndI.fastFilterSc[8].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[9].val", DumpEntry{dig.digIndI.fastFilterSc[9].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[10].val", DumpEntry{dig.digIndI.fastFilterSc[10].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[11].val", DumpEntry{dig.digIndI.fastFilterSc[11].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[12].val", DumpEntry{dig.digIndI.fastFilterSc[12].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[13].val", DumpEntry{dig.digIndI.fastFilterSc[13].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[14].val", DumpEntry{dig.digIndI.fastFilterSc[14].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[15].val", DumpEntry{dig.digIndI.fastFilterSc[15].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[16].val", DumpEntry{dig.digIndI.fastFilterSc[16].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[17].val", DumpEntry{dig.digIndI.fastFilterSc[17].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[18].val", DumpEntry{dig.digIndI.fastFilterSc[18].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[19].val", DumpEntry{dig.digIndI.fastFilterSc[19].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[20].val", DumpEntry{dig.digIndI.fastFilterSc[20].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[21].val", DumpEntry{dig.digIndI.fastFilterSc[21].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[22].val", DumpEntry{dig.digIndI.fastFilterSc[22].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[23].val", DumpEntry{dig.digIndI.fastFilterSc[23].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[24].val", DumpEntry{dig.digIndI.fastFilterSc[24].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[25].val", DumpEntry{dig.digIndI.fastFilterSc[25].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[26].val", DumpEntry{dig.digIndI.fastFilterSc[26].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[27].val", DumpEntry{dig.digIndI.fastFilterSc[27].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[28].val", DumpEntry{dig.digIndI.fastFilterSc[28].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[29].val", DumpEntry{dig.digIndI.fastFilterSc[29].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[30].val", DumpEntry{dig.digIndI.fastFilterSc[30].val});
+        res.insert_or_assign("dig.digIndI.fastFilterSc[31].val", DumpEntry{dig.digIndI.fastFilterSc[31].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[0].val", DumpEntry{dig.digIndI.slowFilterSc[0].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[1].val", DumpEntry{dig.digIndI.slowFilterSc[1].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[2].val", DumpEntry{dig.digIndI.slowFilterSc[2].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[3].val", DumpEntry{dig.digIndI.slowFilterSc[3].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[4].val", DumpEntry{dig.digIndI.slowFilterSc[4].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[5].val", DumpEntry{dig.digIndI.slowFilterSc[5].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[6].val", DumpEntry{dig.digIndI.slowFilterSc[6].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[7].val", DumpEntry{dig.digIndI.slowFilterSc[7].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[8].val", DumpEntry{dig.digIndI.slowFilterSc[8].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[9].val", DumpEntry{dig.digIndI.slowFilterSc[9].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[10].val", DumpEntry{dig.digIndI.slowFilterSc[10].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[11].val", DumpEntry{dig.digIndI.slowFilterSc[11].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[12].val", DumpEntry{dig.digIndI.slowFilterSc[12].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[13].val", DumpEntry{dig.digIndI.slowFilterSc[13].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[14].val", DumpEntry{dig.digIndI.slowFilterSc[14].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[15].val", DumpEntry{dig.digIndI.slowFilterSc[15].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[16].val", DumpEntry{dig.digIndI.slowFilterSc[16].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[17].val", DumpEntry{dig.digIndI.slowFilterSc[17].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[18].val", DumpEntry{dig.digIndI.slowFilterSc[18].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[19].val", DumpEntry{dig.digIndI.slowFilterSc[19].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[20].val", DumpEntry{dig.digIndI.slowFilterSc[20].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[21].val", DumpEntry{dig.digIndI.slowFilterSc[21].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[22].val", DumpEntry{dig.digIndI.slowFilterSc[22].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[23].val", DumpEntry{dig.digIndI.slowFilterSc[23].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[24].val", DumpEntry{dig.digIndI.slowFilterSc[24].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[25].val", DumpEntry{dig.digIndI.slowFilterSc[25].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[26].val", DumpEntry{dig.digIndI.slowFilterSc[26].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[27].val", DumpEntry{dig.digIndI.slowFilterSc[27].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[28].val", DumpEntry{dig.digIndI.slowFilterSc[28].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[29].val", DumpEntry{dig.digIndI.slowFilterSc[29].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[30].val", DumpEntry{dig.digIndI.slowFilterSc[30].val});
+        res.insert_or_assign("dig.digIndI.slowFilterSc[31].val", DumpEntry{dig.digIndI.slowFilterSc[31].val});
         res.insert_or_assign("dig.digIndI.reTime[0].s", DumpEntry{dig.digIndI.reTime[0].s});
         res.insert_or_assign("dig.digIndI.reTime[0].ns", DumpEntry{dig.digIndI.reTime[0].ns});
         res.insert_or_assign("dig.digIndI.reTime[1].s", DumpEntry{dig.digIndI.reTime[1].s});
@@ -10187,38 +11579,70 @@ namespace mmpp::utils
         res.insert_or_assign("dig.contactI.rstLatch", DumpEntry{dig.contactI.rstLatch});
         res.insert_or_assign("dig.contactI.risingInterrupt", DumpEntry{dig.contactI.risingInterrupt});
         res.insert_or_assign("dig.contactI.fallingInterrupt", DumpEntry{dig.contactI.fallingInterrupt});
-        res.insert_or_assign("dig.contactI.filterLengthSc[0].val", DumpEntry{dig.contactI.filterLengthSc[0].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[1].val", DumpEntry{dig.contactI.filterLengthSc[1].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[2].val", DumpEntry{dig.contactI.filterLengthSc[2].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[3].val", DumpEntry{dig.contactI.filterLengthSc[3].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[4].val", DumpEntry{dig.contactI.filterLengthSc[4].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[5].val", DumpEntry{dig.contactI.filterLengthSc[5].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[6].val", DumpEntry{dig.contactI.filterLengthSc[6].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[7].val", DumpEntry{dig.contactI.filterLengthSc[7].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[8].val", DumpEntry{dig.contactI.filterLengthSc[8].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[9].val", DumpEntry{dig.contactI.filterLengthSc[9].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[10].val", DumpEntry{dig.contactI.filterLengthSc[10].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[11].val", DumpEntry{dig.contactI.filterLengthSc[11].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[12].val", DumpEntry{dig.contactI.filterLengthSc[12].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[13].val", DumpEntry{dig.contactI.filterLengthSc[13].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[14].val", DumpEntry{dig.contactI.filterLengthSc[14].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[15].val", DumpEntry{dig.contactI.filterLengthSc[15].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[16].val", DumpEntry{dig.contactI.filterLengthSc[16].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[17].val", DumpEntry{dig.contactI.filterLengthSc[17].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[18].val", DumpEntry{dig.contactI.filterLengthSc[18].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[19].val", DumpEntry{dig.contactI.filterLengthSc[19].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[20].val", DumpEntry{dig.contactI.filterLengthSc[20].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[21].val", DumpEntry{dig.contactI.filterLengthSc[21].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[22].val", DumpEntry{dig.contactI.filterLengthSc[22].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[23].val", DumpEntry{dig.contactI.filterLengthSc[23].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[24].val", DumpEntry{dig.contactI.filterLengthSc[24].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[25].val", DumpEntry{dig.contactI.filterLengthSc[25].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[26].val", DumpEntry{dig.contactI.filterLengthSc[26].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[27].val", DumpEntry{dig.contactI.filterLengthSc[27].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[28].val", DumpEntry{dig.contactI.filterLengthSc[28].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[29].val", DumpEntry{dig.contactI.filterLengthSc[29].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[30].val", DumpEntry{dig.contactI.filterLengthSc[30].val});
-        res.insert_or_assign("dig.contactI.filterLengthSc[31].val", DumpEntry{dig.contactI.filterLengthSc[31].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[0].val", DumpEntry{dig.contactI.fastFilterSc[0].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[1].val", DumpEntry{dig.contactI.fastFilterSc[1].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[2].val", DumpEntry{dig.contactI.fastFilterSc[2].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[3].val", DumpEntry{dig.contactI.fastFilterSc[3].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[4].val", DumpEntry{dig.contactI.fastFilterSc[4].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[5].val", DumpEntry{dig.contactI.fastFilterSc[5].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[6].val", DumpEntry{dig.contactI.fastFilterSc[6].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[7].val", DumpEntry{dig.contactI.fastFilterSc[7].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[8].val", DumpEntry{dig.contactI.fastFilterSc[8].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[9].val", DumpEntry{dig.contactI.fastFilterSc[9].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[10].val", DumpEntry{dig.contactI.fastFilterSc[10].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[11].val", DumpEntry{dig.contactI.fastFilterSc[11].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[12].val", DumpEntry{dig.contactI.fastFilterSc[12].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[13].val", DumpEntry{dig.contactI.fastFilterSc[13].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[14].val", DumpEntry{dig.contactI.fastFilterSc[14].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[15].val", DumpEntry{dig.contactI.fastFilterSc[15].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[16].val", DumpEntry{dig.contactI.fastFilterSc[16].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[17].val", DumpEntry{dig.contactI.fastFilterSc[17].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[18].val", DumpEntry{dig.contactI.fastFilterSc[18].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[19].val", DumpEntry{dig.contactI.fastFilterSc[19].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[20].val", DumpEntry{dig.contactI.fastFilterSc[20].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[21].val", DumpEntry{dig.contactI.fastFilterSc[21].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[22].val", DumpEntry{dig.contactI.fastFilterSc[22].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[23].val", DumpEntry{dig.contactI.fastFilterSc[23].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[24].val", DumpEntry{dig.contactI.fastFilterSc[24].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[25].val", DumpEntry{dig.contactI.fastFilterSc[25].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[26].val", DumpEntry{dig.contactI.fastFilterSc[26].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[27].val", DumpEntry{dig.contactI.fastFilterSc[27].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[28].val", DumpEntry{dig.contactI.fastFilterSc[28].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[29].val", DumpEntry{dig.contactI.fastFilterSc[29].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[30].val", DumpEntry{dig.contactI.fastFilterSc[30].val});
+        res.insert_or_assign("dig.contactI.fastFilterSc[31].val", DumpEntry{dig.contactI.fastFilterSc[31].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[0].val", DumpEntry{dig.contactI.slowFilterSc[0].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[1].val", DumpEntry{dig.contactI.slowFilterSc[1].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[2].val", DumpEntry{dig.contactI.slowFilterSc[2].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[3].val", DumpEntry{dig.contactI.slowFilterSc[3].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[4].val", DumpEntry{dig.contactI.slowFilterSc[4].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[5].val", DumpEntry{dig.contactI.slowFilterSc[5].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[6].val", DumpEntry{dig.contactI.slowFilterSc[6].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[7].val", DumpEntry{dig.contactI.slowFilterSc[7].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[8].val", DumpEntry{dig.contactI.slowFilterSc[8].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[9].val", DumpEntry{dig.contactI.slowFilterSc[9].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[10].val", DumpEntry{dig.contactI.slowFilterSc[10].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[11].val", DumpEntry{dig.contactI.slowFilterSc[11].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[12].val", DumpEntry{dig.contactI.slowFilterSc[12].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[13].val", DumpEntry{dig.contactI.slowFilterSc[13].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[14].val", DumpEntry{dig.contactI.slowFilterSc[14].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[15].val", DumpEntry{dig.contactI.slowFilterSc[15].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[16].val", DumpEntry{dig.contactI.slowFilterSc[16].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[17].val", DumpEntry{dig.contactI.slowFilterSc[17].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[18].val", DumpEntry{dig.contactI.slowFilterSc[18].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[19].val", DumpEntry{dig.contactI.slowFilterSc[19].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[20].val", DumpEntry{dig.contactI.slowFilterSc[20].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[21].val", DumpEntry{dig.contactI.slowFilterSc[21].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[22].val", DumpEntry{dig.contactI.slowFilterSc[22].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[23].val", DumpEntry{dig.contactI.slowFilterSc[23].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[24].val", DumpEntry{dig.contactI.slowFilterSc[24].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[25].val", DumpEntry{dig.contactI.slowFilterSc[25].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[26].val", DumpEntry{dig.contactI.slowFilterSc[26].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[27].val", DumpEntry{dig.contactI.slowFilterSc[27].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[28].val", DumpEntry{dig.contactI.slowFilterSc[28].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[29].val", DumpEntry{dig.contactI.slowFilterSc[29].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[30].val", DumpEntry{dig.contactI.slowFilterSc[30].val});
+        res.insert_or_assign("dig.contactI.slowFilterSc[31].val", DumpEntry{dig.contactI.slowFilterSc[31].val});
         res.insert_or_assign("dig.contactI.reTime[0].s", DumpEntry{dig.contactI.reTime[0].s});
         res.insert_or_assign("dig.contactI.reTime[0].ns", DumpEntry{dig.contactI.reTime[0].ns});
         res.insert_or_assign("dig.contactI.reTime[1].s", DumpEntry{dig.contactI.reTime[1].s});
@@ -10300,38 +11724,70 @@ namespace mmpp::utils
         res.insert_or_assign("dig.opticalI.rstLatch", DumpEntry{dig.opticalI.rstLatch});
         res.insert_or_assign("dig.opticalI.risingInterrupt", DumpEntry{dig.opticalI.risingInterrupt});
         res.insert_or_assign("dig.opticalI.fallingInterrupt", DumpEntry{dig.opticalI.fallingInterrupt});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[0].val", DumpEntry{dig.opticalI.filterLengthSc[0].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[1].val", DumpEntry{dig.opticalI.filterLengthSc[1].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[2].val", DumpEntry{dig.opticalI.filterLengthSc[2].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[3].val", DumpEntry{dig.opticalI.filterLengthSc[3].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[4].val", DumpEntry{dig.opticalI.filterLengthSc[4].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[5].val", DumpEntry{dig.opticalI.filterLengthSc[5].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[6].val", DumpEntry{dig.opticalI.filterLengthSc[6].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[7].val", DumpEntry{dig.opticalI.filterLengthSc[7].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[8].val", DumpEntry{dig.opticalI.filterLengthSc[8].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[9].val", DumpEntry{dig.opticalI.filterLengthSc[9].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[10].val", DumpEntry{dig.opticalI.filterLengthSc[10].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[11].val", DumpEntry{dig.opticalI.filterLengthSc[11].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[12].val", DumpEntry{dig.opticalI.filterLengthSc[12].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[13].val", DumpEntry{dig.opticalI.filterLengthSc[13].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[14].val", DumpEntry{dig.opticalI.filterLengthSc[14].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[15].val", DumpEntry{dig.opticalI.filterLengthSc[15].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[16].val", DumpEntry{dig.opticalI.filterLengthSc[16].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[17].val", DumpEntry{dig.opticalI.filterLengthSc[17].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[18].val", DumpEntry{dig.opticalI.filterLengthSc[18].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[19].val", DumpEntry{dig.opticalI.filterLengthSc[19].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[20].val", DumpEntry{dig.opticalI.filterLengthSc[20].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[21].val", DumpEntry{dig.opticalI.filterLengthSc[21].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[22].val", DumpEntry{dig.opticalI.filterLengthSc[22].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[23].val", DumpEntry{dig.opticalI.filterLengthSc[23].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[24].val", DumpEntry{dig.opticalI.filterLengthSc[24].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[25].val", DumpEntry{dig.opticalI.filterLengthSc[25].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[26].val", DumpEntry{dig.opticalI.filterLengthSc[26].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[27].val", DumpEntry{dig.opticalI.filterLengthSc[27].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[28].val", DumpEntry{dig.opticalI.filterLengthSc[28].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[29].val", DumpEntry{dig.opticalI.filterLengthSc[29].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[30].val", DumpEntry{dig.opticalI.filterLengthSc[30].val});
-        res.insert_or_assign("dig.opticalI.filterLengthSc[31].val", DumpEntry{dig.opticalI.filterLengthSc[31].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[0].val", DumpEntry{dig.opticalI.fastFilterSc[0].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[1].val", DumpEntry{dig.opticalI.fastFilterSc[1].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[2].val", DumpEntry{dig.opticalI.fastFilterSc[2].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[3].val", DumpEntry{dig.opticalI.fastFilterSc[3].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[4].val", DumpEntry{dig.opticalI.fastFilterSc[4].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[5].val", DumpEntry{dig.opticalI.fastFilterSc[5].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[6].val", DumpEntry{dig.opticalI.fastFilterSc[6].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[7].val", DumpEntry{dig.opticalI.fastFilterSc[7].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[8].val", DumpEntry{dig.opticalI.fastFilterSc[8].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[9].val", DumpEntry{dig.opticalI.fastFilterSc[9].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[10].val", DumpEntry{dig.opticalI.fastFilterSc[10].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[11].val", DumpEntry{dig.opticalI.fastFilterSc[11].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[12].val", DumpEntry{dig.opticalI.fastFilterSc[12].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[13].val", DumpEntry{dig.opticalI.fastFilterSc[13].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[14].val", DumpEntry{dig.opticalI.fastFilterSc[14].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[15].val", DumpEntry{dig.opticalI.fastFilterSc[15].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[16].val", DumpEntry{dig.opticalI.fastFilterSc[16].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[17].val", DumpEntry{dig.opticalI.fastFilterSc[17].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[18].val", DumpEntry{dig.opticalI.fastFilterSc[18].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[19].val", DumpEntry{dig.opticalI.fastFilterSc[19].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[20].val", DumpEntry{dig.opticalI.fastFilterSc[20].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[21].val", DumpEntry{dig.opticalI.fastFilterSc[21].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[22].val", DumpEntry{dig.opticalI.fastFilterSc[22].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[23].val", DumpEntry{dig.opticalI.fastFilterSc[23].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[24].val", DumpEntry{dig.opticalI.fastFilterSc[24].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[25].val", DumpEntry{dig.opticalI.fastFilterSc[25].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[26].val", DumpEntry{dig.opticalI.fastFilterSc[26].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[27].val", DumpEntry{dig.opticalI.fastFilterSc[27].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[28].val", DumpEntry{dig.opticalI.fastFilterSc[28].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[29].val", DumpEntry{dig.opticalI.fastFilterSc[29].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[30].val", DumpEntry{dig.opticalI.fastFilterSc[30].val});
+        res.insert_or_assign("dig.opticalI.fastFilterSc[31].val", DumpEntry{dig.opticalI.fastFilterSc[31].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[0].val", DumpEntry{dig.opticalI.slowFilterSc[0].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[1].val", DumpEntry{dig.opticalI.slowFilterSc[1].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[2].val", DumpEntry{dig.opticalI.slowFilterSc[2].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[3].val", DumpEntry{dig.opticalI.slowFilterSc[3].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[4].val", DumpEntry{dig.opticalI.slowFilterSc[4].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[5].val", DumpEntry{dig.opticalI.slowFilterSc[5].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[6].val", DumpEntry{dig.opticalI.slowFilterSc[6].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[7].val", DumpEntry{dig.opticalI.slowFilterSc[7].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[8].val", DumpEntry{dig.opticalI.slowFilterSc[8].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[9].val", DumpEntry{dig.opticalI.slowFilterSc[9].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[10].val", DumpEntry{dig.opticalI.slowFilterSc[10].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[11].val", DumpEntry{dig.opticalI.slowFilterSc[11].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[12].val", DumpEntry{dig.opticalI.slowFilterSc[12].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[13].val", DumpEntry{dig.opticalI.slowFilterSc[13].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[14].val", DumpEntry{dig.opticalI.slowFilterSc[14].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[15].val", DumpEntry{dig.opticalI.slowFilterSc[15].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[16].val", DumpEntry{dig.opticalI.slowFilterSc[16].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[17].val", DumpEntry{dig.opticalI.slowFilterSc[17].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[18].val", DumpEntry{dig.opticalI.slowFilterSc[18].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[19].val", DumpEntry{dig.opticalI.slowFilterSc[19].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[20].val", DumpEntry{dig.opticalI.slowFilterSc[20].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[21].val", DumpEntry{dig.opticalI.slowFilterSc[21].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[22].val", DumpEntry{dig.opticalI.slowFilterSc[22].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[23].val", DumpEntry{dig.opticalI.slowFilterSc[23].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[24].val", DumpEntry{dig.opticalI.slowFilterSc[24].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[25].val", DumpEntry{dig.opticalI.slowFilterSc[25].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[26].val", DumpEntry{dig.opticalI.slowFilterSc[26].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[27].val", DumpEntry{dig.opticalI.slowFilterSc[27].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[28].val", DumpEntry{dig.opticalI.slowFilterSc[28].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[29].val", DumpEntry{dig.opticalI.slowFilterSc[29].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[30].val", DumpEntry{dig.opticalI.slowFilterSc[30].val});
+        res.insert_or_assign("dig.opticalI.slowFilterSc[31].val", DumpEntry{dig.opticalI.slowFilterSc[31].val});
         res.insert_or_assign("dig.opticalI.reTime[0].s", DumpEntry{dig.opticalI.reTime[0].s});
         res.insert_or_assign("dig.opticalI.reTime[0].ns", DumpEntry{dig.opticalI.reTime[0].ns});
         res.insert_or_assign("dig.opticalI.reTime[1].s", DumpEntry{dig.opticalI.reTime[1].s});
@@ -10421,38 +11877,70 @@ namespace mmpp::utils
         res.insert_or_assign("dig.minMaxLim0.rstLatch", DumpEntry{dig.minMaxLim0.rstLatch});
         res.insert_or_assign("dig.minMaxLim0.risingInterrupt", DumpEntry{dig.minMaxLim0.risingInterrupt});
         res.insert_or_assign("dig.minMaxLim0.fallingInterrupt", DumpEntry{dig.minMaxLim0.fallingInterrupt});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[0].val", DumpEntry{dig.minMaxLim0.filterLengthSc[0].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[1].val", DumpEntry{dig.minMaxLim0.filterLengthSc[1].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[2].val", DumpEntry{dig.minMaxLim0.filterLengthSc[2].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[3].val", DumpEntry{dig.minMaxLim0.filterLengthSc[3].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[4].val", DumpEntry{dig.minMaxLim0.filterLengthSc[4].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[5].val", DumpEntry{dig.minMaxLim0.filterLengthSc[5].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[6].val", DumpEntry{dig.minMaxLim0.filterLengthSc[6].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[7].val", DumpEntry{dig.minMaxLim0.filterLengthSc[7].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[8].val", DumpEntry{dig.minMaxLim0.filterLengthSc[8].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[9].val", DumpEntry{dig.minMaxLim0.filterLengthSc[9].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[10].val", DumpEntry{dig.minMaxLim0.filterLengthSc[10].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[11].val", DumpEntry{dig.minMaxLim0.filterLengthSc[11].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[12].val", DumpEntry{dig.minMaxLim0.filterLengthSc[12].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[13].val", DumpEntry{dig.minMaxLim0.filterLengthSc[13].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[14].val", DumpEntry{dig.minMaxLim0.filterLengthSc[14].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[15].val", DumpEntry{dig.minMaxLim0.filterLengthSc[15].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[16].val", DumpEntry{dig.minMaxLim0.filterLengthSc[16].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[17].val", DumpEntry{dig.minMaxLim0.filterLengthSc[17].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[18].val", DumpEntry{dig.minMaxLim0.filterLengthSc[18].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[19].val", DumpEntry{dig.minMaxLim0.filterLengthSc[19].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[20].val", DumpEntry{dig.minMaxLim0.filterLengthSc[20].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[21].val", DumpEntry{dig.minMaxLim0.filterLengthSc[21].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[22].val", DumpEntry{dig.minMaxLim0.filterLengthSc[22].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[23].val", DumpEntry{dig.minMaxLim0.filterLengthSc[23].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[24].val", DumpEntry{dig.minMaxLim0.filterLengthSc[24].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[25].val", DumpEntry{dig.minMaxLim0.filterLengthSc[25].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[26].val", DumpEntry{dig.minMaxLim0.filterLengthSc[26].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[27].val", DumpEntry{dig.minMaxLim0.filterLengthSc[27].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[28].val", DumpEntry{dig.minMaxLim0.filterLengthSc[28].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[29].val", DumpEntry{dig.minMaxLim0.filterLengthSc[29].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[30].val", DumpEntry{dig.minMaxLim0.filterLengthSc[30].val});
-        res.insert_or_assign("dig.minMaxLim0.filterLengthSc[31].val", DumpEntry{dig.minMaxLim0.filterLengthSc[31].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[0].val", DumpEntry{dig.minMaxLim0.fastFilterSc[0].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[1].val", DumpEntry{dig.minMaxLim0.fastFilterSc[1].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[2].val", DumpEntry{dig.minMaxLim0.fastFilterSc[2].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[3].val", DumpEntry{dig.minMaxLim0.fastFilterSc[3].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[4].val", DumpEntry{dig.minMaxLim0.fastFilterSc[4].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[5].val", DumpEntry{dig.minMaxLim0.fastFilterSc[5].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[6].val", DumpEntry{dig.minMaxLim0.fastFilterSc[6].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[7].val", DumpEntry{dig.minMaxLim0.fastFilterSc[7].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[8].val", DumpEntry{dig.minMaxLim0.fastFilterSc[8].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[9].val", DumpEntry{dig.minMaxLim0.fastFilterSc[9].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[10].val", DumpEntry{dig.minMaxLim0.fastFilterSc[10].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[11].val", DumpEntry{dig.minMaxLim0.fastFilterSc[11].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[12].val", DumpEntry{dig.minMaxLim0.fastFilterSc[12].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[13].val", DumpEntry{dig.minMaxLim0.fastFilterSc[13].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[14].val", DumpEntry{dig.minMaxLim0.fastFilterSc[14].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[15].val", DumpEntry{dig.minMaxLim0.fastFilterSc[15].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[16].val", DumpEntry{dig.minMaxLim0.fastFilterSc[16].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[17].val", DumpEntry{dig.minMaxLim0.fastFilterSc[17].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[18].val", DumpEntry{dig.minMaxLim0.fastFilterSc[18].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[19].val", DumpEntry{dig.minMaxLim0.fastFilterSc[19].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[20].val", DumpEntry{dig.minMaxLim0.fastFilterSc[20].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[21].val", DumpEntry{dig.minMaxLim0.fastFilterSc[21].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[22].val", DumpEntry{dig.minMaxLim0.fastFilterSc[22].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[23].val", DumpEntry{dig.minMaxLim0.fastFilterSc[23].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[24].val", DumpEntry{dig.minMaxLim0.fastFilterSc[24].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[25].val", DumpEntry{dig.minMaxLim0.fastFilterSc[25].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[26].val", DumpEntry{dig.minMaxLim0.fastFilterSc[26].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[27].val", DumpEntry{dig.minMaxLim0.fastFilterSc[27].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[28].val", DumpEntry{dig.minMaxLim0.fastFilterSc[28].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[29].val", DumpEntry{dig.minMaxLim0.fastFilterSc[29].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[30].val", DumpEntry{dig.minMaxLim0.fastFilterSc[30].val});
+        res.insert_or_assign("dig.minMaxLim0.fastFilterSc[31].val", DumpEntry{dig.minMaxLim0.fastFilterSc[31].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[0].val", DumpEntry{dig.minMaxLim0.slowFilterSc[0].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[1].val", DumpEntry{dig.minMaxLim0.slowFilterSc[1].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[2].val", DumpEntry{dig.minMaxLim0.slowFilterSc[2].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[3].val", DumpEntry{dig.minMaxLim0.slowFilterSc[3].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[4].val", DumpEntry{dig.minMaxLim0.slowFilterSc[4].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[5].val", DumpEntry{dig.minMaxLim0.slowFilterSc[5].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[6].val", DumpEntry{dig.minMaxLim0.slowFilterSc[6].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[7].val", DumpEntry{dig.minMaxLim0.slowFilterSc[7].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[8].val", DumpEntry{dig.minMaxLim0.slowFilterSc[8].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[9].val", DumpEntry{dig.minMaxLim0.slowFilterSc[9].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[10].val", DumpEntry{dig.minMaxLim0.slowFilterSc[10].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[11].val", DumpEntry{dig.minMaxLim0.slowFilterSc[11].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[12].val", DumpEntry{dig.minMaxLim0.slowFilterSc[12].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[13].val", DumpEntry{dig.minMaxLim0.slowFilterSc[13].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[14].val", DumpEntry{dig.minMaxLim0.slowFilterSc[14].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[15].val", DumpEntry{dig.minMaxLim0.slowFilterSc[15].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[16].val", DumpEntry{dig.minMaxLim0.slowFilterSc[16].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[17].val", DumpEntry{dig.minMaxLim0.slowFilterSc[17].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[18].val", DumpEntry{dig.minMaxLim0.slowFilterSc[18].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[19].val", DumpEntry{dig.minMaxLim0.slowFilterSc[19].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[20].val", DumpEntry{dig.minMaxLim0.slowFilterSc[20].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[21].val", DumpEntry{dig.minMaxLim0.slowFilterSc[21].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[22].val", DumpEntry{dig.minMaxLim0.slowFilterSc[22].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[23].val", DumpEntry{dig.minMaxLim0.slowFilterSc[23].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[24].val", DumpEntry{dig.minMaxLim0.slowFilterSc[24].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[25].val", DumpEntry{dig.minMaxLim0.slowFilterSc[25].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[26].val", DumpEntry{dig.minMaxLim0.slowFilterSc[26].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[27].val", DumpEntry{dig.minMaxLim0.slowFilterSc[27].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[28].val", DumpEntry{dig.minMaxLim0.slowFilterSc[28].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[29].val", DumpEntry{dig.minMaxLim0.slowFilterSc[29].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[30].val", DumpEntry{dig.minMaxLim0.slowFilterSc[30].val});
+        res.insert_or_assign("dig.minMaxLim0.slowFilterSc[31].val", DumpEntry{dig.minMaxLim0.slowFilterSc[31].val});
         res.insert_or_assign("dig.minMaxLim0.reTime[0].s", DumpEntry{dig.minMaxLim0.reTime[0].s});
         res.insert_or_assign("dig.minMaxLim0.reTime[0].ns", DumpEntry{dig.minMaxLim0.reTime[0].ns});
         res.insert_or_assign("dig.minMaxLim0.reTime[1].s", DumpEntry{dig.minMaxLim0.reTime[1].s});
@@ -10542,38 +12030,70 @@ namespace mmpp::utils
         res.insert_or_assign("dig.minMaxLim1.rstLatch", DumpEntry{dig.minMaxLim1.rstLatch});
         res.insert_or_assign("dig.minMaxLim1.risingInterrupt", DumpEntry{dig.minMaxLim1.risingInterrupt});
         res.insert_or_assign("dig.minMaxLim1.fallingInterrupt", DumpEntry{dig.minMaxLim1.fallingInterrupt});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[0].val", DumpEntry{dig.minMaxLim1.filterLengthSc[0].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[1].val", DumpEntry{dig.minMaxLim1.filterLengthSc[1].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[2].val", DumpEntry{dig.minMaxLim1.filterLengthSc[2].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[3].val", DumpEntry{dig.minMaxLim1.filterLengthSc[3].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[4].val", DumpEntry{dig.minMaxLim1.filterLengthSc[4].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[5].val", DumpEntry{dig.minMaxLim1.filterLengthSc[5].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[6].val", DumpEntry{dig.minMaxLim1.filterLengthSc[6].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[7].val", DumpEntry{dig.minMaxLim1.filterLengthSc[7].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[8].val", DumpEntry{dig.minMaxLim1.filterLengthSc[8].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[9].val", DumpEntry{dig.minMaxLim1.filterLengthSc[9].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[10].val", DumpEntry{dig.minMaxLim1.filterLengthSc[10].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[11].val", DumpEntry{dig.minMaxLim1.filterLengthSc[11].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[12].val", DumpEntry{dig.minMaxLim1.filterLengthSc[12].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[13].val", DumpEntry{dig.minMaxLim1.filterLengthSc[13].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[14].val", DumpEntry{dig.minMaxLim1.filterLengthSc[14].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[15].val", DumpEntry{dig.minMaxLim1.filterLengthSc[15].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[16].val", DumpEntry{dig.minMaxLim1.filterLengthSc[16].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[17].val", DumpEntry{dig.minMaxLim1.filterLengthSc[17].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[18].val", DumpEntry{dig.minMaxLim1.filterLengthSc[18].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[19].val", DumpEntry{dig.minMaxLim1.filterLengthSc[19].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[20].val", DumpEntry{dig.minMaxLim1.filterLengthSc[20].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[21].val", DumpEntry{dig.minMaxLim1.filterLengthSc[21].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[22].val", DumpEntry{dig.minMaxLim1.filterLengthSc[22].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[23].val", DumpEntry{dig.minMaxLim1.filterLengthSc[23].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[24].val", DumpEntry{dig.minMaxLim1.filterLengthSc[24].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[25].val", DumpEntry{dig.minMaxLim1.filterLengthSc[25].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[26].val", DumpEntry{dig.minMaxLim1.filterLengthSc[26].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[27].val", DumpEntry{dig.minMaxLim1.filterLengthSc[27].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[28].val", DumpEntry{dig.minMaxLim1.filterLengthSc[28].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[29].val", DumpEntry{dig.minMaxLim1.filterLengthSc[29].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[30].val", DumpEntry{dig.minMaxLim1.filterLengthSc[30].val});
-        res.insert_or_assign("dig.minMaxLim1.filterLengthSc[31].val", DumpEntry{dig.minMaxLim1.filterLengthSc[31].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[0].val", DumpEntry{dig.minMaxLim1.fastFilterSc[0].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[1].val", DumpEntry{dig.minMaxLim1.fastFilterSc[1].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[2].val", DumpEntry{dig.minMaxLim1.fastFilterSc[2].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[3].val", DumpEntry{dig.minMaxLim1.fastFilterSc[3].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[4].val", DumpEntry{dig.minMaxLim1.fastFilterSc[4].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[5].val", DumpEntry{dig.minMaxLim1.fastFilterSc[5].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[6].val", DumpEntry{dig.minMaxLim1.fastFilterSc[6].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[7].val", DumpEntry{dig.minMaxLim1.fastFilterSc[7].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[8].val", DumpEntry{dig.minMaxLim1.fastFilterSc[8].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[9].val", DumpEntry{dig.minMaxLim1.fastFilterSc[9].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[10].val", DumpEntry{dig.minMaxLim1.fastFilterSc[10].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[11].val", DumpEntry{dig.minMaxLim1.fastFilterSc[11].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[12].val", DumpEntry{dig.minMaxLim1.fastFilterSc[12].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[13].val", DumpEntry{dig.minMaxLim1.fastFilterSc[13].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[14].val", DumpEntry{dig.minMaxLim1.fastFilterSc[14].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[15].val", DumpEntry{dig.minMaxLim1.fastFilterSc[15].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[16].val", DumpEntry{dig.minMaxLim1.fastFilterSc[16].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[17].val", DumpEntry{dig.minMaxLim1.fastFilterSc[17].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[18].val", DumpEntry{dig.minMaxLim1.fastFilterSc[18].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[19].val", DumpEntry{dig.minMaxLim1.fastFilterSc[19].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[20].val", DumpEntry{dig.minMaxLim1.fastFilterSc[20].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[21].val", DumpEntry{dig.minMaxLim1.fastFilterSc[21].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[22].val", DumpEntry{dig.minMaxLim1.fastFilterSc[22].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[23].val", DumpEntry{dig.minMaxLim1.fastFilterSc[23].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[24].val", DumpEntry{dig.minMaxLim1.fastFilterSc[24].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[25].val", DumpEntry{dig.minMaxLim1.fastFilterSc[25].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[26].val", DumpEntry{dig.minMaxLim1.fastFilterSc[26].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[27].val", DumpEntry{dig.minMaxLim1.fastFilterSc[27].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[28].val", DumpEntry{dig.minMaxLim1.fastFilterSc[28].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[29].val", DumpEntry{dig.minMaxLim1.fastFilterSc[29].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[30].val", DumpEntry{dig.minMaxLim1.fastFilterSc[30].val});
+        res.insert_or_assign("dig.minMaxLim1.fastFilterSc[31].val", DumpEntry{dig.minMaxLim1.fastFilterSc[31].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[0].val", DumpEntry{dig.minMaxLim1.slowFilterSc[0].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[1].val", DumpEntry{dig.minMaxLim1.slowFilterSc[1].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[2].val", DumpEntry{dig.minMaxLim1.slowFilterSc[2].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[3].val", DumpEntry{dig.minMaxLim1.slowFilterSc[3].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[4].val", DumpEntry{dig.minMaxLim1.slowFilterSc[4].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[5].val", DumpEntry{dig.minMaxLim1.slowFilterSc[5].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[6].val", DumpEntry{dig.minMaxLim1.slowFilterSc[6].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[7].val", DumpEntry{dig.minMaxLim1.slowFilterSc[7].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[8].val", DumpEntry{dig.minMaxLim1.slowFilterSc[8].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[9].val", DumpEntry{dig.minMaxLim1.slowFilterSc[9].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[10].val", DumpEntry{dig.minMaxLim1.slowFilterSc[10].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[11].val", DumpEntry{dig.minMaxLim1.slowFilterSc[11].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[12].val", DumpEntry{dig.minMaxLim1.slowFilterSc[12].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[13].val", DumpEntry{dig.minMaxLim1.slowFilterSc[13].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[14].val", DumpEntry{dig.minMaxLim1.slowFilterSc[14].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[15].val", DumpEntry{dig.minMaxLim1.slowFilterSc[15].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[16].val", DumpEntry{dig.minMaxLim1.slowFilterSc[16].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[17].val", DumpEntry{dig.minMaxLim1.slowFilterSc[17].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[18].val", DumpEntry{dig.minMaxLim1.slowFilterSc[18].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[19].val", DumpEntry{dig.minMaxLim1.slowFilterSc[19].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[20].val", DumpEntry{dig.minMaxLim1.slowFilterSc[20].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[21].val", DumpEntry{dig.minMaxLim1.slowFilterSc[21].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[22].val", DumpEntry{dig.minMaxLim1.slowFilterSc[22].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[23].val", DumpEntry{dig.minMaxLim1.slowFilterSc[23].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[24].val", DumpEntry{dig.minMaxLim1.slowFilterSc[24].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[25].val", DumpEntry{dig.minMaxLim1.slowFilterSc[25].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[26].val", DumpEntry{dig.minMaxLim1.slowFilterSc[26].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[27].val", DumpEntry{dig.minMaxLim1.slowFilterSc[27].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[28].val", DumpEntry{dig.minMaxLim1.slowFilterSc[28].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[29].val", DumpEntry{dig.minMaxLim1.slowFilterSc[29].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[30].val", DumpEntry{dig.minMaxLim1.slowFilterSc[30].val});
+        res.insert_or_assign("dig.minMaxLim1.slowFilterSc[31].val", DumpEntry{dig.minMaxLim1.slowFilterSc[31].val});
         res.insert_or_assign("dig.minMaxLim1.reTime[0].s", DumpEntry{dig.minMaxLim1.reTime[0].s});
         res.insert_or_assign("dig.minMaxLim1.reTime[0].ns", DumpEntry{dig.minMaxLim1.reTime[0].ns});
         res.insert_or_assign("dig.minMaxLim1.reTime[1].s", DumpEntry{dig.minMaxLim1.reTime[1].s});
@@ -10653,38 +12173,70 @@ namespace mmpp::utils
         res.insert_or_assign("dig.rmsLim0.rstLatch", DumpEntry{dig.rmsLim0.rstLatch});
         res.insert_or_assign("dig.rmsLim0.risingInterrupt", DumpEntry{dig.rmsLim0.risingInterrupt});
         res.insert_or_assign("dig.rmsLim0.fallingInterrupt", DumpEntry{dig.rmsLim0.fallingInterrupt});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[0].val", DumpEntry{dig.rmsLim0.filterLengthSc[0].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[1].val", DumpEntry{dig.rmsLim0.filterLengthSc[1].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[2].val", DumpEntry{dig.rmsLim0.filterLengthSc[2].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[3].val", DumpEntry{dig.rmsLim0.filterLengthSc[3].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[4].val", DumpEntry{dig.rmsLim0.filterLengthSc[4].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[5].val", DumpEntry{dig.rmsLim0.filterLengthSc[5].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[6].val", DumpEntry{dig.rmsLim0.filterLengthSc[6].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[7].val", DumpEntry{dig.rmsLim0.filterLengthSc[7].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[8].val", DumpEntry{dig.rmsLim0.filterLengthSc[8].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[9].val", DumpEntry{dig.rmsLim0.filterLengthSc[9].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[10].val", DumpEntry{dig.rmsLim0.filterLengthSc[10].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[11].val", DumpEntry{dig.rmsLim0.filterLengthSc[11].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[12].val", DumpEntry{dig.rmsLim0.filterLengthSc[12].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[13].val", DumpEntry{dig.rmsLim0.filterLengthSc[13].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[14].val", DumpEntry{dig.rmsLim0.filterLengthSc[14].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[15].val", DumpEntry{dig.rmsLim0.filterLengthSc[15].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[16].val", DumpEntry{dig.rmsLim0.filterLengthSc[16].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[17].val", DumpEntry{dig.rmsLim0.filterLengthSc[17].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[18].val", DumpEntry{dig.rmsLim0.filterLengthSc[18].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[19].val", DumpEntry{dig.rmsLim0.filterLengthSc[19].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[20].val", DumpEntry{dig.rmsLim0.filterLengthSc[20].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[21].val", DumpEntry{dig.rmsLim0.filterLengthSc[21].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[22].val", DumpEntry{dig.rmsLim0.filterLengthSc[22].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[23].val", DumpEntry{dig.rmsLim0.filterLengthSc[23].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[24].val", DumpEntry{dig.rmsLim0.filterLengthSc[24].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[25].val", DumpEntry{dig.rmsLim0.filterLengthSc[25].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[26].val", DumpEntry{dig.rmsLim0.filterLengthSc[26].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[27].val", DumpEntry{dig.rmsLim0.filterLengthSc[27].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[28].val", DumpEntry{dig.rmsLim0.filterLengthSc[28].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[29].val", DumpEntry{dig.rmsLim0.filterLengthSc[29].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[30].val", DumpEntry{dig.rmsLim0.filterLengthSc[30].val});
-        res.insert_or_assign("dig.rmsLim0.filterLengthSc[31].val", DumpEntry{dig.rmsLim0.filterLengthSc[31].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[0].val", DumpEntry{dig.rmsLim0.fastFilterSc[0].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[1].val", DumpEntry{dig.rmsLim0.fastFilterSc[1].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[2].val", DumpEntry{dig.rmsLim0.fastFilterSc[2].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[3].val", DumpEntry{dig.rmsLim0.fastFilterSc[3].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[4].val", DumpEntry{dig.rmsLim0.fastFilterSc[4].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[5].val", DumpEntry{dig.rmsLim0.fastFilterSc[5].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[6].val", DumpEntry{dig.rmsLim0.fastFilterSc[6].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[7].val", DumpEntry{dig.rmsLim0.fastFilterSc[7].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[8].val", DumpEntry{dig.rmsLim0.fastFilterSc[8].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[9].val", DumpEntry{dig.rmsLim0.fastFilterSc[9].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[10].val", DumpEntry{dig.rmsLim0.fastFilterSc[10].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[11].val", DumpEntry{dig.rmsLim0.fastFilterSc[11].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[12].val", DumpEntry{dig.rmsLim0.fastFilterSc[12].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[13].val", DumpEntry{dig.rmsLim0.fastFilterSc[13].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[14].val", DumpEntry{dig.rmsLim0.fastFilterSc[14].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[15].val", DumpEntry{dig.rmsLim0.fastFilterSc[15].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[16].val", DumpEntry{dig.rmsLim0.fastFilterSc[16].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[17].val", DumpEntry{dig.rmsLim0.fastFilterSc[17].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[18].val", DumpEntry{dig.rmsLim0.fastFilterSc[18].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[19].val", DumpEntry{dig.rmsLim0.fastFilterSc[19].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[20].val", DumpEntry{dig.rmsLim0.fastFilterSc[20].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[21].val", DumpEntry{dig.rmsLim0.fastFilterSc[21].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[22].val", DumpEntry{dig.rmsLim0.fastFilterSc[22].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[23].val", DumpEntry{dig.rmsLim0.fastFilterSc[23].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[24].val", DumpEntry{dig.rmsLim0.fastFilterSc[24].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[25].val", DumpEntry{dig.rmsLim0.fastFilterSc[25].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[26].val", DumpEntry{dig.rmsLim0.fastFilterSc[26].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[27].val", DumpEntry{dig.rmsLim0.fastFilterSc[27].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[28].val", DumpEntry{dig.rmsLim0.fastFilterSc[28].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[29].val", DumpEntry{dig.rmsLim0.fastFilterSc[29].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[30].val", DumpEntry{dig.rmsLim0.fastFilterSc[30].val});
+        res.insert_or_assign("dig.rmsLim0.fastFilterSc[31].val", DumpEntry{dig.rmsLim0.fastFilterSc[31].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[0].val", DumpEntry{dig.rmsLim0.slowFilterSc[0].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[1].val", DumpEntry{dig.rmsLim0.slowFilterSc[1].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[2].val", DumpEntry{dig.rmsLim0.slowFilterSc[2].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[3].val", DumpEntry{dig.rmsLim0.slowFilterSc[3].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[4].val", DumpEntry{dig.rmsLim0.slowFilterSc[4].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[5].val", DumpEntry{dig.rmsLim0.slowFilterSc[5].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[6].val", DumpEntry{dig.rmsLim0.slowFilterSc[6].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[7].val", DumpEntry{dig.rmsLim0.slowFilterSc[7].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[8].val", DumpEntry{dig.rmsLim0.slowFilterSc[8].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[9].val", DumpEntry{dig.rmsLim0.slowFilterSc[9].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[10].val", DumpEntry{dig.rmsLim0.slowFilterSc[10].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[11].val", DumpEntry{dig.rmsLim0.slowFilterSc[11].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[12].val", DumpEntry{dig.rmsLim0.slowFilterSc[12].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[13].val", DumpEntry{dig.rmsLim0.slowFilterSc[13].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[14].val", DumpEntry{dig.rmsLim0.slowFilterSc[14].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[15].val", DumpEntry{dig.rmsLim0.slowFilterSc[15].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[16].val", DumpEntry{dig.rmsLim0.slowFilterSc[16].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[17].val", DumpEntry{dig.rmsLim0.slowFilterSc[17].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[18].val", DumpEntry{dig.rmsLim0.slowFilterSc[18].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[19].val", DumpEntry{dig.rmsLim0.slowFilterSc[19].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[20].val", DumpEntry{dig.rmsLim0.slowFilterSc[20].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[21].val", DumpEntry{dig.rmsLim0.slowFilterSc[21].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[22].val", DumpEntry{dig.rmsLim0.slowFilterSc[22].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[23].val", DumpEntry{dig.rmsLim0.slowFilterSc[23].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[24].val", DumpEntry{dig.rmsLim0.slowFilterSc[24].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[25].val", DumpEntry{dig.rmsLim0.slowFilterSc[25].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[26].val", DumpEntry{dig.rmsLim0.slowFilterSc[26].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[27].val", DumpEntry{dig.rmsLim0.slowFilterSc[27].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[28].val", DumpEntry{dig.rmsLim0.slowFilterSc[28].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[29].val", DumpEntry{dig.rmsLim0.slowFilterSc[29].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[30].val", DumpEntry{dig.rmsLim0.slowFilterSc[30].val});
+        res.insert_or_assign("dig.rmsLim0.slowFilterSc[31].val", DumpEntry{dig.rmsLim0.slowFilterSc[31].val});
         res.insert_or_assign("dig.rmsLim0.reTime[0].s", DumpEntry{dig.rmsLim0.reTime[0].s});
         res.insert_or_assign("dig.rmsLim0.reTime[0].ns", DumpEntry{dig.rmsLim0.reTime[0].ns});
         res.insert_or_assign("dig.rmsLim0.reTime[1].s", DumpEntry{dig.rmsLim0.reTime[1].s});
@@ -10764,38 +12316,70 @@ namespace mmpp::utils
         res.insert_or_assign("dig.rmsLim1.rstLatch", DumpEntry{dig.rmsLim1.rstLatch});
         res.insert_or_assign("dig.rmsLim1.risingInterrupt", DumpEntry{dig.rmsLim1.risingInterrupt});
         res.insert_or_assign("dig.rmsLim1.fallingInterrupt", DumpEntry{dig.rmsLim1.fallingInterrupt});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[0].val", DumpEntry{dig.rmsLim1.filterLengthSc[0].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[1].val", DumpEntry{dig.rmsLim1.filterLengthSc[1].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[2].val", DumpEntry{dig.rmsLim1.filterLengthSc[2].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[3].val", DumpEntry{dig.rmsLim1.filterLengthSc[3].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[4].val", DumpEntry{dig.rmsLim1.filterLengthSc[4].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[5].val", DumpEntry{dig.rmsLim1.filterLengthSc[5].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[6].val", DumpEntry{dig.rmsLim1.filterLengthSc[6].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[7].val", DumpEntry{dig.rmsLim1.filterLengthSc[7].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[8].val", DumpEntry{dig.rmsLim1.filterLengthSc[8].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[9].val", DumpEntry{dig.rmsLim1.filterLengthSc[9].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[10].val", DumpEntry{dig.rmsLim1.filterLengthSc[10].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[11].val", DumpEntry{dig.rmsLim1.filterLengthSc[11].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[12].val", DumpEntry{dig.rmsLim1.filterLengthSc[12].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[13].val", DumpEntry{dig.rmsLim1.filterLengthSc[13].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[14].val", DumpEntry{dig.rmsLim1.filterLengthSc[14].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[15].val", DumpEntry{dig.rmsLim1.filterLengthSc[15].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[16].val", DumpEntry{dig.rmsLim1.filterLengthSc[16].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[17].val", DumpEntry{dig.rmsLim1.filterLengthSc[17].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[18].val", DumpEntry{dig.rmsLim1.filterLengthSc[18].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[19].val", DumpEntry{dig.rmsLim1.filterLengthSc[19].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[20].val", DumpEntry{dig.rmsLim1.filterLengthSc[20].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[21].val", DumpEntry{dig.rmsLim1.filterLengthSc[21].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[22].val", DumpEntry{dig.rmsLim1.filterLengthSc[22].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[23].val", DumpEntry{dig.rmsLim1.filterLengthSc[23].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[24].val", DumpEntry{dig.rmsLim1.filterLengthSc[24].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[25].val", DumpEntry{dig.rmsLim1.filterLengthSc[25].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[26].val", DumpEntry{dig.rmsLim1.filterLengthSc[26].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[27].val", DumpEntry{dig.rmsLim1.filterLengthSc[27].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[28].val", DumpEntry{dig.rmsLim1.filterLengthSc[28].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[29].val", DumpEntry{dig.rmsLim1.filterLengthSc[29].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[30].val", DumpEntry{dig.rmsLim1.filterLengthSc[30].val});
-        res.insert_or_assign("dig.rmsLim1.filterLengthSc[31].val", DumpEntry{dig.rmsLim1.filterLengthSc[31].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[0].val", DumpEntry{dig.rmsLim1.fastFilterSc[0].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[1].val", DumpEntry{dig.rmsLim1.fastFilterSc[1].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[2].val", DumpEntry{dig.rmsLim1.fastFilterSc[2].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[3].val", DumpEntry{dig.rmsLim1.fastFilterSc[3].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[4].val", DumpEntry{dig.rmsLim1.fastFilterSc[4].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[5].val", DumpEntry{dig.rmsLim1.fastFilterSc[5].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[6].val", DumpEntry{dig.rmsLim1.fastFilterSc[6].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[7].val", DumpEntry{dig.rmsLim1.fastFilterSc[7].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[8].val", DumpEntry{dig.rmsLim1.fastFilterSc[8].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[9].val", DumpEntry{dig.rmsLim1.fastFilterSc[9].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[10].val", DumpEntry{dig.rmsLim1.fastFilterSc[10].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[11].val", DumpEntry{dig.rmsLim1.fastFilterSc[11].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[12].val", DumpEntry{dig.rmsLim1.fastFilterSc[12].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[13].val", DumpEntry{dig.rmsLim1.fastFilterSc[13].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[14].val", DumpEntry{dig.rmsLim1.fastFilterSc[14].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[15].val", DumpEntry{dig.rmsLim1.fastFilterSc[15].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[16].val", DumpEntry{dig.rmsLim1.fastFilterSc[16].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[17].val", DumpEntry{dig.rmsLim1.fastFilterSc[17].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[18].val", DumpEntry{dig.rmsLim1.fastFilterSc[18].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[19].val", DumpEntry{dig.rmsLim1.fastFilterSc[19].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[20].val", DumpEntry{dig.rmsLim1.fastFilterSc[20].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[21].val", DumpEntry{dig.rmsLim1.fastFilterSc[21].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[22].val", DumpEntry{dig.rmsLim1.fastFilterSc[22].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[23].val", DumpEntry{dig.rmsLim1.fastFilterSc[23].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[24].val", DumpEntry{dig.rmsLim1.fastFilterSc[24].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[25].val", DumpEntry{dig.rmsLim1.fastFilterSc[25].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[26].val", DumpEntry{dig.rmsLim1.fastFilterSc[26].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[27].val", DumpEntry{dig.rmsLim1.fastFilterSc[27].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[28].val", DumpEntry{dig.rmsLim1.fastFilterSc[28].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[29].val", DumpEntry{dig.rmsLim1.fastFilterSc[29].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[30].val", DumpEntry{dig.rmsLim1.fastFilterSc[30].val});
+        res.insert_or_assign("dig.rmsLim1.fastFilterSc[31].val", DumpEntry{dig.rmsLim1.fastFilterSc[31].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[0].val", DumpEntry{dig.rmsLim1.slowFilterSc[0].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[1].val", DumpEntry{dig.rmsLim1.slowFilterSc[1].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[2].val", DumpEntry{dig.rmsLim1.slowFilterSc[2].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[3].val", DumpEntry{dig.rmsLim1.slowFilterSc[3].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[4].val", DumpEntry{dig.rmsLim1.slowFilterSc[4].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[5].val", DumpEntry{dig.rmsLim1.slowFilterSc[5].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[6].val", DumpEntry{dig.rmsLim1.slowFilterSc[6].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[7].val", DumpEntry{dig.rmsLim1.slowFilterSc[7].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[8].val", DumpEntry{dig.rmsLim1.slowFilterSc[8].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[9].val", DumpEntry{dig.rmsLim1.slowFilterSc[9].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[10].val", DumpEntry{dig.rmsLim1.slowFilterSc[10].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[11].val", DumpEntry{dig.rmsLim1.slowFilterSc[11].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[12].val", DumpEntry{dig.rmsLim1.slowFilterSc[12].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[13].val", DumpEntry{dig.rmsLim1.slowFilterSc[13].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[14].val", DumpEntry{dig.rmsLim1.slowFilterSc[14].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[15].val", DumpEntry{dig.rmsLim1.slowFilterSc[15].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[16].val", DumpEntry{dig.rmsLim1.slowFilterSc[16].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[17].val", DumpEntry{dig.rmsLim1.slowFilterSc[17].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[18].val", DumpEntry{dig.rmsLim1.slowFilterSc[18].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[19].val", DumpEntry{dig.rmsLim1.slowFilterSc[19].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[20].val", DumpEntry{dig.rmsLim1.slowFilterSc[20].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[21].val", DumpEntry{dig.rmsLim1.slowFilterSc[21].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[22].val", DumpEntry{dig.rmsLim1.slowFilterSc[22].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[23].val", DumpEntry{dig.rmsLim1.slowFilterSc[23].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[24].val", DumpEntry{dig.rmsLim1.slowFilterSc[24].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[25].val", DumpEntry{dig.rmsLim1.slowFilterSc[25].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[26].val", DumpEntry{dig.rmsLim1.slowFilterSc[26].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[27].val", DumpEntry{dig.rmsLim1.slowFilterSc[27].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[28].val", DumpEntry{dig.rmsLim1.slowFilterSc[28].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[29].val", DumpEntry{dig.rmsLim1.slowFilterSc[29].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[30].val", DumpEntry{dig.rmsLim1.slowFilterSc[30].val});
+        res.insert_or_assign("dig.rmsLim1.slowFilterSc[31].val", DumpEntry{dig.rmsLim1.slowFilterSc[31].val});
         res.insert_or_assign("dig.rmsLim1.reTime[0].s", DumpEntry{dig.rmsLim1.reTime[0].s});
         res.insert_or_assign("dig.rmsLim1.reTime[0].ns", DumpEntry{dig.rmsLim1.reTime[0].ns});
         res.insert_or_assign("dig.rmsLim1.reTime[1].s", DumpEntry{dig.rmsLim1.reTime[1].s});
@@ -13717,28 +15301,2389 @@ namespace mmpp::utils
         res.insert_or_assign("syncTrig[26].stg.ctrl.resync", DumpEntry{syncTrig[26].stg.ctrl.resync});
         res.insert_or_assign("syncTrig[26].stg.delaySc", DumpEntry{syncTrig[26].stg.delaySc});
         res.insert_or_assign("syncTrig[26].stg.periodSc", DumpEntry{syncTrig[26].stg.periodSc});
+        res.insert_or_assign("syncTrig[27].stg.ctrl", DumpEntry{syncTrig[27].stg.ctrl});
+        res.insert_or_assign("syncTrig[27].stg.ctrl.periodic", DumpEntry{syncTrig[27].stg.ctrl.periodic});
+        res.insert_or_assign("syncTrig[27].stg.ctrl.resync", DumpEntry{syncTrig[27].stg.ctrl.resync});
+        res.insert_or_assign("syncTrig[27].stg.delaySc", DumpEntry{syncTrig[27].stg.delaySc});
+        res.insert_or_assign("syncTrig[27].stg.periodSc", DumpEntry{syncTrig[27].stg.periodSc});
+        res.insert_or_assign("syncTrig[28].stg.ctrl", DumpEntry{syncTrig[28].stg.ctrl});
+        res.insert_or_assign("syncTrig[28].stg.ctrl.periodic", DumpEntry{syncTrig[28].stg.ctrl.periodic});
+        res.insert_or_assign("syncTrig[28].stg.ctrl.resync", DumpEntry{syncTrig[28].stg.ctrl.resync});
+        res.insert_or_assign("syncTrig[28].stg.delaySc", DumpEntry{syncTrig[28].stg.delaySc});
+        res.insert_or_assign("syncTrig[28].stg.periodSc", DumpEntry{syncTrig[28].stg.periodSc});
         return res;
     }
 
-    //! Dump the register and fields of `ipCores::Top::XilSpi`
+    //! Dump the register and fields of `ipCores::Top::SyncUart`
     //!
-    //! @param xilSpi A reference to the module
-    //! @returns A `dump_utils::DumpMap` with all the register and fields under xilSpi
-    inline DumpMap dump([[maybe_unused]] const ipCores::Top::XilSpi& xilSpi)
+    //! @param syncUart A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under syncUart
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::SyncUart& syncUart)
     {
-        DumpMap res{xilSpi.base()};
-
+        DumpMap res{syncUart.base()};
+        res.insert_or_assign("syncUart.ctrl", DumpEntry{syncUart.ctrl});
+        res.insert_or_assign("syncUart.ctrl.setTxData", DumpEntry{syncUart.ctrl.setTxData});
+        res.insert_or_assign("syncUart.config", DumpEntry{syncUart.config});
+        res.insert_or_assign("syncUart.config.enParity", DumpEntry{syncUart.config.enParity});
+        res.insert_or_assign("syncUart.config.interFrameGap", DumpEntry{syncUart.config.interFrameGap});
+        res.insert_or_assign("syncUart.uartSendTimeNs", DumpEntry{syncUart.uartSendTimeNs});
+        res.insert_or_assign("syncUart.scPerUartBit", DumpEntry{syncUart.scPerUartBit});
+        res.insert_or_assign("syncUart.scPerUartBit.val", DumpEntry{syncUart.scPerUartBit.val});
+        res.insert_or_assign("syncUart.uartData", DumpEntry{syncUart.uartData});
+        res.insert_or_assign("syncUart.uartData.val", DumpEntry{syncUart.uartData.val});
+        res.insert_or_assign("syncUart.firingTimeS", DumpEntry{syncUart.firingTimeS});
+        res.insert_or_assign("syncUart.firingTimeNs", DumpEntry{syncUart.firingTimeNs});
+        res.insert_or_assign("syncUart.magic", DumpEntry{syncUart.magic});
         return res;
     }
 
-    //! Dump the register and fields of `ipCores::Top::XilI2c`
+    //! Dump the register and fields of `ipCores::Top::PwmBank::Cc0Array`
     //!
-    //! @param xilI2c A reference to the module
-    //! @returns A `dump_utils::DumpMap` with all the register and fields under xilI2c
-    inline DumpMap dump([[maybe_unused]] const ipCores::Top::XilI2c& xilI2c)
+    //! @param cc0 A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under cc0
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::PwmBank::Cc0Array& cc0)
     {
-        DumpMap res{xilI2c.base()};
+        DumpMap res{cc0.base()};
+        res.insert_or_assign("cc0[0].value", DumpEntry{cc0[0].value});
+        res.insert_or_assign("cc0[1].value", DumpEntry{cc0[1].value});
+        res.insert_or_assign("cc0[2].value", DumpEntry{cc0[2].value});
+        res.insert_or_assign("cc0[3].value", DumpEntry{cc0[3].value});
+        res.insert_or_assign("cc0[4].value", DumpEntry{cc0[4].value});
+        res.insert_or_assign("cc0[5].value", DumpEntry{cc0[5].value});
+        res.insert_or_assign("cc0[6].value", DumpEntry{cc0[6].value});
+        res.insert_or_assign("cc0[7].value", DumpEntry{cc0[7].value});
+        res.insert_or_assign("cc0[8].value", DumpEntry{cc0[8].value});
+        res.insert_or_assign("cc0[9].value", DumpEntry{cc0[9].value});
+        res.insert_or_assign("cc0[10].value", DumpEntry{cc0[10].value});
+        res.insert_or_assign("cc0[11].value", DumpEntry{cc0[11].value});
+        return res;
+    }
 
+    //! Dump the register and fields of `ipCores::Top::PwmBank::Cc1Array`
+    //!
+    //! @param cc1 A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under cc1
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::PwmBank::Cc1Array& cc1)
+    {
+        DumpMap res{cc1.base()};
+        res.insert_or_assign("cc1[0].value", DumpEntry{cc1[0].value});
+        res.insert_or_assign("cc1[1].value", DumpEntry{cc1[1].value});
+        res.insert_or_assign("cc1[2].value", DumpEntry{cc1[2].value});
+        res.insert_or_assign("cc1[3].value", DumpEntry{cc1[3].value});
+        res.insert_or_assign("cc1[4].value", DumpEntry{cc1[4].value});
+        res.insert_or_assign("cc1[5].value", DumpEntry{cc1[5].value});
+        res.insert_or_assign("cc1[6].value", DumpEntry{cc1[6].value});
+        res.insert_or_assign("cc1[7].value", DumpEntry{cc1[7].value});
+        res.insert_or_assign("cc1[8].value", DumpEntry{cc1[8].value});
+        res.insert_or_assign("cc1[9].value", DumpEntry{cc1[9].value});
+        res.insert_or_assign("cc1[10].value", DumpEntry{cc1[10].value});
+        res.insert_or_assign("cc1[11].value", DumpEntry{cc1[11].value});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::PwmBank`
+    //!
+    //! @param pwmBank A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under pwmBank
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::PwmBank& pwmBank)
+    {
+        DumpMap res{pwmBank.base()};
+        res.insert_or_assign("pwmBank.cc0[0].value", DumpEntry{pwmBank.cc0[0].value});
+        res.insert_or_assign("pwmBank.cc0[1].value", DumpEntry{pwmBank.cc0[1].value});
+        res.insert_or_assign("pwmBank.cc0[2].value", DumpEntry{pwmBank.cc0[2].value});
+        res.insert_or_assign("pwmBank.cc0[3].value", DumpEntry{pwmBank.cc0[3].value});
+        res.insert_or_assign("pwmBank.cc0[4].value", DumpEntry{pwmBank.cc0[4].value});
+        res.insert_or_assign("pwmBank.cc0[5].value", DumpEntry{pwmBank.cc0[5].value});
+        res.insert_or_assign("pwmBank.cc0[6].value", DumpEntry{pwmBank.cc0[6].value});
+        res.insert_or_assign("pwmBank.cc0[7].value", DumpEntry{pwmBank.cc0[7].value});
+        res.insert_or_assign("pwmBank.cc0[8].value", DumpEntry{pwmBank.cc0[8].value});
+        res.insert_or_assign("pwmBank.cc0[9].value", DumpEntry{pwmBank.cc0[9].value});
+        res.insert_or_assign("pwmBank.cc0[10].value", DumpEntry{pwmBank.cc0[10].value});
+        res.insert_or_assign("pwmBank.cc0[11].value", DumpEntry{pwmBank.cc0[11].value});
+        res.insert_or_assign("pwmBank.cc1[0].value", DumpEntry{pwmBank.cc1[0].value});
+        res.insert_or_assign("pwmBank.cc1[1].value", DumpEntry{pwmBank.cc1[1].value});
+        res.insert_or_assign("pwmBank.cc1[2].value", DumpEntry{pwmBank.cc1[2].value});
+        res.insert_or_assign("pwmBank.cc1[3].value", DumpEntry{pwmBank.cc1[3].value});
+        res.insert_or_assign("pwmBank.cc1[4].value", DumpEntry{pwmBank.cc1[4].value});
+        res.insert_or_assign("pwmBank.cc1[5].value", DumpEntry{pwmBank.cc1[5].value});
+        res.insert_or_assign("pwmBank.cc1[6].value", DumpEntry{pwmBank.cc1[6].value});
+        res.insert_or_assign("pwmBank.cc1[7].value", DumpEntry{pwmBank.cc1[7].value});
+        res.insert_or_assign("pwmBank.cc1[8].value", DumpEntry{pwmBank.cc1[8].value});
+        res.insert_or_assign("pwmBank.cc1[9].value", DumpEntry{pwmBank.cc1[9].value});
+        res.insert_or_assign("pwmBank.cc1[10].value", DumpEntry{pwmBank.cc1[10].value});
+        res.insert_or_assign("pwmBank.cc1[11].value", DumpEntry{pwmBank.cc1[11].value});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::Scratchpad::MemArray`
+    //!
+    //! @param mem A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under mem
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Scratchpad::MemArray& mem)
+    {
+        DumpMap res{mem.base()};
+        res.insert_or_assign("mem[0]reg", DumpEntry{mem[0] reg});
+        res.insert_or_assign("mem[1]reg", DumpEntry{mem[1] reg});
+        res.insert_or_assign("mem[2]reg", DumpEntry{mem[2] reg});
+        res.insert_or_assign("mem[3]reg", DumpEntry{mem[3] reg});
+        res.insert_or_assign("mem[4]reg", DumpEntry{mem[4] reg});
+        res.insert_or_assign("mem[5]reg", DumpEntry{mem[5] reg});
+        res.insert_or_assign("mem[6]reg", DumpEntry{mem[6] reg});
+        res.insert_or_assign("mem[7]reg", DumpEntry{mem[7] reg});
+        res.insert_or_assign("mem[8]reg", DumpEntry{mem[8] reg});
+        res.insert_or_assign("mem[9]reg", DumpEntry{mem[9] reg});
+        res.insert_or_assign("mem[10]reg", DumpEntry{mem[10] reg});
+        res.insert_or_assign("mem[11]reg", DumpEntry{mem[11] reg});
+        res.insert_or_assign("mem[12]reg", DumpEntry{mem[12] reg});
+        res.insert_or_assign("mem[13]reg", DumpEntry{mem[13] reg});
+        res.insert_or_assign("mem[14]reg", DumpEntry{mem[14] reg});
+        res.insert_or_assign("mem[15]reg", DumpEntry{mem[15] reg});
+        res.insert_or_assign("mem[16]reg", DumpEntry{mem[16] reg});
+        res.insert_or_assign("mem[17]reg", DumpEntry{mem[17] reg});
+        res.insert_or_assign("mem[18]reg", DumpEntry{mem[18] reg});
+        res.insert_or_assign("mem[19]reg", DumpEntry{mem[19] reg});
+        res.insert_or_assign("mem[20]reg", DumpEntry{mem[20] reg});
+        res.insert_or_assign("mem[21]reg", DumpEntry{mem[21] reg});
+        res.insert_or_assign("mem[22]reg", DumpEntry{mem[22] reg});
+        res.insert_or_assign("mem[23]reg", DumpEntry{mem[23] reg});
+        res.insert_or_assign("mem[24]reg", DumpEntry{mem[24] reg});
+        res.insert_or_assign("mem[25]reg", DumpEntry{mem[25] reg});
+        res.insert_or_assign("mem[26]reg", DumpEntry{mem[26] reg});
+        res.insert_or_assign("mem[27]reg", DumpEntry{mem[27] reg});
+        res.insert_or_assign("mem[28]reg", DumpEntry{mem[28] reg});
+        res.insert_or_assign("mem[29]reg", DumpEntry{mem[29] reg});
+        res.insert_or_assign("mem[30]reg", DumpEntry{mem[30] reg});
+        res.insert_or_assign("mem[31]reg", DumpEntry{mem[31] reg});
+        res.insert_or_assign("mem[32]reg", DumpEntry{mem[32] reg});
+        res.insert_or_assign("mem[33]reg", DumpEntry{mem[33] reg});
+        res.insert_or_assign("mem[34]reg", DumpEntry{mem[34] reg});
+        res.insert_or_assign("mem[35]reg", DumpEntry{mem[35] reg});
+        res.insert_or_assign("mem[36]reg", DumpEntry{mem[36] reg});
+        res.insert_or_assign("mem[37]reg", DumpEntry{mem[37] reg});
+        res.insert_or_assign("mem[38]reg", DumpEntry{mem[38] reg});
+        res.insert_or_assign("mem[39]reg", DumpEntry{mem[39] reg});
+        res.insert_or_assign("mem[40]reg", DumpEntry{mem[40] reg});
+        res.insert_or_assign("mem[41]reg", DumpEntry{mem[41] reg});
+        res.insert_or_assign("mem[42]reg", DumpEntry{mem[42] reg});
+        res.insert_or_assign("mem[43]reg", DumpEntry{mem[43] reg});
+        res.insert_or_assign("mem[44]reg", DumpEntry{mem[44] reg});
+        res.insert_or_assign("mem[45]reg", DumpEntry{mem[45] reg});
+        res.insert_or_assign("mem[46]reg", DumpEntry{mem[46] reg});
+        res.insert_or_assign("mem[47]reg", DumpEntry{mem[47] reg});
+        res.insert_or_assign("mem[48]reg", DumpEntry{mem[48] reg});
+        res.insert_or_assign("mem[49]reg", DumpEntry{mem[49] reg});
+        res.insert_or_assign("mem[50]reg", DumpEntry{mem[50] reg});
+        res.insert_or_assign("mem[51]reg", DumpEntry{mem[51] reg});
+        res.insert_or_assign("mem[52]reg", DumpEntry{mem[52] reg});
+        res.insert_or_assign("mem[53]reg", DumpEntry{mem[53] reg});
+        res.insert_or_assign("mem[54]reg", DumpEntry{mem[54] reg});
+        res.insert_or_assign("mem[55]reg", DumpEntry{mem[55] reg});
+        res.insert_or_assign("mem[56]reg", DumpEntry{mem[56] reg});
+        res.insert_or_assign("mem[57]reg", DumpEntry{mem[57] reg});
+        res.insert_or_assign("mem[58]reg", DumpEntry{mem[58] reg});
+        res.insert_or_assign("mem[59]reg", DumpEntry{mem[59] reg});
+        res.insert_or_assign("mem[60]reg", DumpEntry{mem[60] reg});
+        res.insert_or_assign("mem[61]reg", DumpEntry{mem[61] reg});
+        res.insert_or_assign("mem[62]reg", DumpEntry{mem[62] reg});
+        res.insert_or_assign("mem[63]reg", DumpEntry{mem[63] reg});
+        res.insert_or_assign("mem[64]reg", DumpEntry{mem[64] reg});
+        res.insert_or_assign("mem[65]reg", DumpEntry{mem[65] reg});
+        res.insert_or_assign("mem[66]reg", DumpEntry{mem[66] reg});
+        res.insert_or_assign("mem[67]reg", DumpEntry{mem[67] reg});
+        res.insert_or_assign("mem[68]reg", DumpEntry{mem[68] reg});
+        res.insert_or_assign("mem[69]reg", DumpEntry{mem[69] reg});
+        res.insert_or_assign("mem[70]reg", DumpEntry{mem[70] reg});
+        res.insert_or_assign("mem[71]reg", DumpEntry{mem[71] reg});
+        res.insert_or_assign("mem[72]reg", DumpEntry{mem[72] reg});
+        res.insert_or_assign("mem[73]reg", DumpEntry{mem[73] reg});
+        res.insert_or_assign("mem[74]reg", DumpEntry{mem[74] reg});
+        res.insert_or_assign("mem[75]reg", DumpEntry{mem[75] reg});
+        res.insert_or_assign("mem[76]reg", DumpEntry{mem[76] reg});
+        res.insert_or_assign("mem[77]reg", DumpEntry{mem[77] reg});
+        res.insert_or_assign("mem[78]reg", DumpEntry{mem[78] reg});
+        res.insert_or_assign("mem[79]reg", DumpEntry{mem[79] reg});
+        res.insert_or_assign("mem[80]reg", DumpEntry{mem[80] reg});
+        res.insert_or_assign("mem[81]reg", DumpEntry{mem[81] reg});
+        res.insert_or_assign("mem[82]reg", DumpEntry{mem[82] reg});
+        res.insert_or_assign("mem[83]reg", DumpEntry{mem[83] reg});
+        res.insert_or_assign("mem[84]reg", DumpEntry{mem[84] reg});
+        res.insert_or_assign("mem[85]reg", DumpEntry{mem[85] reg});
+        res.insert_or_assign("mem[86]reg", DumpEntry{mem[86] reg});
+        res.insert_or_assign("mem[87]reg", DumpEntry{mem[87] reg});
+        res.insert_or_assign("mem[88]reg", DumpEntry{mem[88] reg});
+        res.insert_or_assign("mem[89]reg", DumpEntry{mem[89] reg});
+        res.insert_or_assign("mem[90]reg", DumpEntry{mem[90] reg});
+        res.insert_or_assign("mem[91]reg", DumpEntry{mem[91] reg});
+        res.insert_or_assign("mem[92]reg", DumpEntry{mem[92] reg});
+        res.insert_or_assign("mem[93]reg", DumpEntry{mem[93] reg});
+        res.insert_or_assign("mem[94]reg", DumpEntry{mem[94] reg});
+        res.insert_or_assign("mem[95]reg", DumpEntry{mem[95] reg});
+        res.insert_or_assign("mem[96]reg", DumpEntry{mem[96] reg});
+        res.insert_or_assign("mem[97]reg", DumpEntry{mem[97] reg});
+        res.insert_or_assign("mem[98]reg", DumpEntry{mem[98] reg});
+        res.insert_or_assign("mem[99]reg", DumpEntry{mem[99] reg});
+        res.insert_or_assign("mem[100]reg", DumpEntry{mem[100] reg});
+        res.insert_or_assign("mem[101]reg", DumpEntry{mem[101] reg});
+        res.insert_or_assign("mem[102]reg", DumpEntry{mem[102] reg});
+        res.insert_or_assign("mem[103]reg", DumpEntry{mem[103] reg});
+        res.insert_or_assign("mem[104]reg", DumpEntry{mem[104] reg});
+        res.insert_or_assign("mem[105]reg", DumpEntry{mem[105] reg});
+        res.insert_or_assign("mem[106]reg", DumpEntry{mem[106] reg});
+        res.insert_or_assign("mem[107]reg", DumpEntry{mem[107] reg});
+        res.insert_or_assign("mem[108]reg", DumpEntry{mem[108] reg});
+        res.insert_or_assign("mem[109]reg", DumpEntry{mem[109] reg});
+        res.insert_or_assign("mem[110]reg", DumpEntry{mem[110] reg});
+        res.insert_or_assign("mem[111]reg", DumpEntry{mem[111] reg});
+        res.insert_or_assign("mem[112]reg", DumpEntry{mem[112] reg});
+        res.insert_or_assign("mem[113]reg", DumpEntry{mem[113] reg});
+        res.insert_or_assign("mem[114]reg", DumpEntry{mem[114] reg});
+        res.insert_or_assign("mem[115]reg", DumpEntry{mem[115] reg});
+        res.insert_or_assign("mem[116]reg", DumpEntry{mem[116] reg});
+        res.insert_or_assign("mem[117]reg", DumpEntry{mem[117] reg});
+        res.insert_or_assign("mem[118]reg", DumpEntry{mem[118] reg});
+        res.insert_or_assign("mem[119]reg", DumpEntry{mem[119] reg});
+        res.insert_or_assign("mem[120]reg", DumpEntry{mem[120] reg});
+        res.insert_or_assign("mem[121]reg", DumpEntry{mem[121] reg});
+        res.insert_or_assign("mem[122]reg", DumpEntry{mem[122] reg});
+        res.insert_or_assign("mem[123]reg", DumpEntry{mem[123] reg});
+        res.insert_or_assign("mem[124]reg", DumpEntry{mem[124] reg});
+        res.insert_or_assign("mem[125]reg", DumpEntry{mem[125] reg});
+        res.insert_or_assign("mem[126]reg", DumpEntry{mem[126] reg});
+        res.insert_or_assign("mem[127]reg", DumpEntry{mem[127] reg});
+        res.insert_or_assign("mem[128]reg", DumpEntry{mem[128] reg});
+        res.insert_or_assign("mem[129]reg", DumpEntry{mem[129] reg});
+        res.insert_or_assign("mem[130]reg", DumpEntry{mem[130] reg});
+        res.insert_or_assign("mem[131]reg", DumpEntry{mem[131] reg});
+        res.insert_or_assign("mem[132]reg", DumpEntry{mem[132] reg});
+        res.insert_or_assign("mem[133]reg", DumpEntry{mem[133] reg});
+        res.insert_or_assign("mem[134]reg", DumpEntry{mem[134] reg});
+        res.insert_or_assign("mem[135]reg", DumpEntry{mem[135] reg});
+        res.insert_or_assign("mem[136]reg", DumpEntry{mem[136] reg});
+        res.insert_or_assign("mem[137]reg", DumpEntry{mem[137] reg});
+        res.insert_or_assign("mem[138]reg", DumpEntry{mem[138] reg});
+        res.insert_or_assign("mem[139]reg", DumpEntry{mem[139] reg});
+        res.insert_or_assign("mem[140]reg", DumpEntry{mem[140] reg});
+        res.insert_or_assign("mem[141]reg", DumpEntry{mem[141] reg});
+        res.insert_or_assign("mem[142]reg", DumpEntry{mem[142] reg});
+        res.insert_or_assign("mem[143]reg", DumpEntry{mem[143] reg});
+        res.insert_or_assign("mem[144]reg", DumpEntry{mem[144] reg});
+        res.insert_or_assign("mem[145]reg", DumpEntry{mem[145] reg});
+        res.insert_or_assign("mem[146]reg", DumpEntry{mem[146] reg});
+        res.insert_or_assign("mem[147]reg", DumpEntry{mem[147] reg});
+        res.insert_or_assign("mem[148]reg", DumpEntry{mem[148] reg});
+        res.insert_or_assign("mem[149]reg", DumpEntry{mem[149] reg});
+        res.insert_or_assign("mem[150]reg", DumpEntry{mem[150] reg});
+        res.insert_or_assign("mem[151]reg", DumpEntry{mem[151] reg});
+        res.insert_or_assign("mem[152]reg", DumpEntry{mem[152] reg});
+        res.insert_or_assign("mem[153]reg", DumpEntry{mem[153] reg});
+        res.insert_or_assign("mem[154]reg", DumpEntry{mem[154] reg});
+        res.insert_or_assign("mem[155]reg", DumpEntry{mem[155] reg});
+        res.insert_or_assign("mem[156]reg", DumpEntry{mem[156] reg});
+        res.insert_or_assign("mem[157]reg", DumpEntry{mem[157] reg});
+        res.insert_or_assign("mem[158]reg", DumpEntry{mem[158] reg});
+        res.insert_or_assign("mem[159]reg", DumpEntry{mem[159] reg});
+        res.insert_or_assign("mem[160]reg", DumpEntry{mem[160] reg});
+        res.insert_or_assign("mem[161]reg", DumpEntry{mem[161] reg});
+        res.insert_or_assign("mem[162]reg", DumpEntry{mem[162] reg});
+        res.insert_or_assign("mem[163]reg", DumpEntry{mem[163] reg});
+        res.insert_or_assign("mem[164]reg", DumpEntry{mem[164] reg});
+        res.insert_or_assign("mem[165]reg", DumpEntry{mem[165] reg});
+        res.insert_or_assign("mem[166]reg", DumpEntry{mem[166] reg});
+        res.insert_or_assign("mem[167]reg", DumpEntry{mem[167] reg});
+        res.insert_or_assign("mem[168]reg", DumpEntry{mem[168] reg});
+        res.insert_or_assign("mem[169]reg", DumpEntry{mem[169] reg});
+        res.insert_or_assign("mem[170]reg", DumpEntry{mem[170] reg});
+        res.insert_or_assign("mem[171]reg", DumpEntry{mem[171] reg});
+        res.insert_or_assign("mem[172]reg", DumpEntry{mem[172] reg});
+        res.insert_or_assign("mem[173]reg", DumpEntry{mem[173] reg});
+        res.insert_or_assign("mem[174]reg", DumpEntry{mem[174] reg});
+        res.insert_or_assign("mem[175]reg", DumpEntry{mem[175] reg});
+        res.insert_or_assign("mem[176]reg", DumpEntry{mem[176] reg});
+        res.insert_or_assign("mem[177]reg", DumpEntry{mem[177] reg});
+        res.insert_or_assign("mem[178]reg", DumpEntry{mem[178] reg});
+        res.insert_or_assign("mem[179]reg", DumpEntry{mem[179] reg});
+        res.insert_or_assign("mem[180]reg", DumpEntry{mem[180] reg});
+        res.insert_or_assign("mem[181]reg", DumpEntry{mem[181] reg});
+        res.insert_or_assign("mem[182]reg", DumpEntry{mem[182] reg});
+        res.insert_or_assign("mem[183]reg", DumpEntry{mem[183] reg});
+        res.insert_or_assign("mem[184]reg", DumpEntry{mem[184] reg});
+        res.insert_or_assign("mem[185]reg", DumpEntry{mem[185] reg});
+        res.insert_or_assign("mem[186]reg", DumpEntry{mem[186] reg});
+        res.insert_or_assign("mem[187]reg", DumpEntry{mem[187] reg});
+        res.insert_or_assign("mem[188]reg", DumpEntry{mem[188] reg});
+        res.insert_or_assign("mem[189]reg", DumpEntry{mem[189] reg});
+        res.insert_or_assign("mem[190]reg", DumpEntry{mem[190] reg});
+        res.insert_or_assign("mem[191]reg", DumpEntry{mem[191] reg});
+        res.insert_or_assign("mem[192]reg", DumpEntry{mem[192] reg});
+        res.insert_or_assign("mem[193]reg", DumpEntry{mem[193] reg});
+        res.insert_or_assign("mem[194]reg", DumpEntry{mem[194] reg});
+        res.insert_or_assign("mem[195]reg", DumpEntry{mem[195] reg});
+        res.insert_or_assign("mem[196]reg", DumpEntry{mem[196] reg});
+        res.insert_or_assign("mem[197]reg", DumpEntry{mem[197] reg});
+        res.insert_or_assign("mem[198]reg", DumpEntry{mem[198] reg});
+        res.insert_or_assign("mem[199]reg", DumpEntry{mem[199] reg});
+        res.insert_or_assign("mem[200]reg", DumpEntry{mem[200] reg});
+        res.insert_or_assign("mem[201]reg", DumpEntry{mem[201] reg});
+        res.insert_or_assign("mem[202]reg", DumpEntry{mem[202] reg});
+        res.insert_or_assign("mem[203]reg", DumpEntry{mem[203] reg});
+        res.insert_or_assign("mem[204]reg", DumpEntry{mem[204] reg});
+        res.insert_or_assign("mem[205]reg", DumpEntry{mem[205] reg});
+        res.insert_or_assign("mem[206]reg", DumpEntry{mem[206] reg});
+        res.insert_or_assign("mem[207]reg", DumpEntry{mem[207] reg});
+        res.insert_or_assign("mem[208]reg", DumpEntry{mem[208] reg});
+        res.insert_or_assign("mem[209]reg", DumpEntry{mem[209] reg});
+        res.insert_or_assign("mem[210]reg", DumpEntry{mem[210] reg});
+        res.insert_or_assign("mem[211]reg", DumpEntry{mem[211] reg});
+        res.insert_or_assign("mem[212]reg", DumpEntry{mem[212] reg});
+        res.insert_or_assign("mem[213]reg", DumpEntry{mem[213] reg});
+        res.insert_or_assign("mem[214]reg", DumpEntry{mem[214] reg});
+        res.insert_or_assign("mem[215]reg", DumpEntry{mem[215] reg});
+        res.insert_or_assign("mem[216]reg", DumpEntry{mem[216] reg});
+        res.insert_or_assign("mem[217]reg", DumpEntry{mem[217] reg});
+        res.insert_or_assign("mem[218]reg", DumpEntry{mem[218] reg});
+        res.insert_or_assign("mem[219]reg", DumpEntry{mem[219] reg});
+        res.insert_or_assign("mem[220]reg", DumpEntry{mem[220] reg});
+        res.insert_or_assign("mem[221]reg", DumpEntry{mem[221] reg});
+        res.insert_or_assign("mem[222]reg", DumpEntry{mem[222] reg});
+        res.insert_or_assign("mem[223]reg", DumpEntry{mem[223] reg});
+        res.insert_or_assign("mem[224]reg", DumpEntry{mem[224] reg});
+        res.insert_or_assign("mem[225]reg", DumpEntry{mem[225] reg});
+        res.insert_or_assign("mem[226]reg", DumpEntry{mem[226] reg});
+        res.insert_or_assign("mem[227]reg", DumpEntry{mem[227] reg});
+        res.insert_or_assign("mem[228]reg", DumpEntry{mem[228] reg});
+        res.insert_or_assign("mem[229]reg", DumpEntry{mem[229] reg});
+        res.insert_or_assign("mem[230]reg", DumpEntry{mem[230] reg});
+        res.insert_or_assign("mem[231]reg", DumpEntry{mem[231] reg});
+        res.insert_or_assign("mem[232]reg", DumpEntry{mem[232] reg});
+        res.insert_or_assign("mem[233]reg", DumpEntry{mem[233] reg});
+        res.insert_or_assign("mem[234]reg", DumpEntry{mem[234] reg});
+        res.insert_or_assign("mem[235]reg", DumpEntry{mem[235] reg});
+        res.insert_or_assign("mem[236]reg", DumpEntry{mem[236] reg});
+        res.insert_or_assign("mem[237]reg", DumpEntry{mem[237] reg});
+        res.insert_or_assign("mem[238]reg", DumpEntry{mem[238] reg});
+        res.insert_or_assign("mem[239]reg", DumpEntry{mem[239] reg});
+        res.insert_or_assign("mem[240]reg", DumpEntry{mem[240] reg});
+        res.insert_or_assign("mem[241]reg", DumpEntry{mem[241] reg});
+        res.insert_or_assign("mem[242]reg", DumpEntry{mem[242] reg});
+        res.insert_or_assign("mem[243]reg", DumpEntry{mem[243] reg});
+        res.insert_or_assign("mem[244]reg", DumpEntry{mem[244] reg});
+        res.insert_or_assign("mem[245]reg", DumpEntry{mem[245] reg});
+        res.insert_or_assign("mem[246]reg", DumpEntry{mem[246] reg});
+        res.insert_or_assign("mem[247]reg", DumpEntry{mem[247] reg});
+        res.insert_or_assign("mem[248]reg", DumpEntry{mem[248] reg});
+        res.insert_or_assign("mem[249]reg", DumpEntry{mem[249] reg});
+        res.insert_or_assign("mem[250]reg", DumpEntry{mem[250] reg});
+        res.insert_or_assign("mem[251]reg", DumpEntry{mem[251] reg});
+        res.insert_or_assign("mem[252]reg", DumpEntry{mem[252] reg});
+        res.insert_or_assign("mem[253]reg", DumpEntry{mem[253] reg});
+        res.insert_or_assign("mem[254]reg", DumpEntry{mem[254] reg});
+        res.insert_or_assign("mem[255]reg", DumpEntry{mem[255] reg});
+        res.insert_or_assign("mem[256]reg", DumpEntry{mem[256] reg});
+        res.insert_or_assign("mem[257]reg", DumpEntry{mem[257] reg});
+        res.insert_or_assign("mem[258]reg", DumpEntry{mem[258] reg});
+        res.insert_or_assign("mem[259]reg", DumpEntry{mem[259] reg});
+        res.insert_or_assign("mem[260]reg", DumpEntry{mem[260] reg});
+        res.insert_or_assign("mem[261]reg", DumpEntry{mem[261] reg});
+        res.insert_or_assign("mem[262]reg", DumpEntry{mem[262] reg});
+        res.insert_or_assign("mem[263]reg", DumpEntry{mem[263] reg});
+        res.insert_or_assign("mem[264]reg", DumpEntry{mem[264] reg});
+        res.insert_or_assign("mem[265]reg", DumpEntry{mem[265] reg});
+        res.insert_or_assign("mem[266]reg", DumpEntry{mem[266] reg});
+        res.insert_or_assign("mem[267]reg", DumpEntry{mem[267] reg});
+        res.insert_or_assign("mem[268]reg", DumpEntry{mem[268] reg});
+        res.insert_or_assign("mem[269]reg", DumpEntry{mem[269] reg});
+        res.insert_or_assign("mem[270]reg", DumpEntry{mem[270] reg});
+        res.insert_or_assign("mem[271]reg", DumpEntry{mem[271] reg});
+        res.insert_or_assign("mem[272]reg", DumpEntry{mem[272] reg});
+        res.insert_or_assign("mem[273]reg", DumpEntry{mem[273] reg});
+        res.insert_or_assign("mem[274]reg", DumpEntry{mem[274] reg});
+        res.insert_or_assign("mem[275]reg", DumpEntry{mem[275] reg});
+        res.insert_or_assign("mem[276]reg", DumpEntry{mem[276] reg});
+        res.insert_or_assign("mem[277]reg", DumpEntry{mem[277] reg});
+        res.insert_or_assign("mem[278]reg", DumpEntry{mem[278] reg});
+        res.insert_or_assign("mem[279]reg", DumpEntry{mem[279] reg});
+        res.insert_or_assign("mem[280]reg", DumpEntry{mem[280] reg});
+        res.insert_or_assign("mem[281]reg", DumpEntry{mem[281] reg});
+        res.insert_or_assign("mem[282]reg", DumpEntry{mem[282] reg});
+        res.insert_or_assign("mem[283]reg", DumpEntry{mem[283] reg});
+        res.insert_or_assign("mem[284]reg", DumpEntry{mem[284] reg});
+        res.insert_or_assign("mem[285]reg", DumpEntry{mem[285] reg});
+        res.insert_or_assign("mem[286]reg", DumpEntry{mem[286] reg});
+        res.insert_or_assign("mem[287]reg", DumpEntry{mem[287] reg});
+        res.insert_or_assign("mem[288]reg", DumpEntry{mem[288] reg});
+        res.insert_or_assign("mem[289]reg", DumpEntry{mem[289] reg});
+        res.insert_or_assign("mem[290]reg", DumpEntry{mem[290] reg});
+        res.insert_or_assign("mem[291]reg", DumpEntry{mem[291] reg});
+        res.insert_or_assign("mem[292]reg", DumpEntry{mem[292] reg});
+        res.insert_or_assign("mem[293]reg", DumpEntry{mem[293] reg});
+        res.insert_or_assign("mem[294]reg", DumpEntry{mem[294] reg});
+        res.insert_or_assign("mem[295]reg", DumpEntry{mem[295] reg});
+        res.insert_or_assign("mem[296]reg", DumpEntry{mem[296] reg});
+        res.insert_or_assign("mem[297]reg", DumpEntry{mem[297] reg});
+        res.insert_or_assign("mem[298]reg", DumpEntry{mem[298] reg});
+        res.insert_or_assign("mem[299]reg", DumpEntry{mem[299] reg});
+        res.insert_or_assign("mem[300]reg", DumpEntry{mem[300] reg});
+        res.insert_or_assign("mem[301]reg", DumpEntry{mem[301] reg});
+        res.insert_or_assign("mem[302]reg", DumpEntry{mem[302] reg});
+        res.insert_or_assign("mem[303]reg", DumpEntry{mem[303] reg});
+        res.insert_or_assign("mem[304]reg", DumpEntry{mem[304] reg});
+        res.insert_or_assign("mem[305]reg", DumpEntry{mem[305] reg});
+        res.insert_or_assign("mem[306]reg", DumpEntry{mem[306] reg});
+        res.insert_or_assign("mem[307]reg", DumpEntry{mem[307] reg});
+        res.insert_or_assign("mem[308]reg", DumpEntry{mem[308] reg});
+        res.insert_or_assign("mem[309]reg", DumpEntry{mem[309] reg});
+        res.insert_or_assign("mem[310]reg", DumpEntry{mem[310] reg});
+        res.insert_or_assign("mem[311]reg", DumpEntry{mem[311] reg});
+        res.insert_or_assign("mem[312]reg", DumpEntry{mem[312] reg});
+        res.insert_or_assign("mem[313]reg", DumpEntry{mem[313] reg});
+        res.insert_or_assign("mem[314]reg", DumpEntry{mem[314] reg});
+        res.insert_or_assign("mem[315]reg", DumpEntry{mem[315] reg});
+        res.insert_or_assign("mem[316]reg", DumpEntry{mem[316] reg});
+        res.insert_or_assign("mem[317]reg", DumpEntry{mem[317] reg});
+        res.insert_or_assign("mem[318]reg", DumpEntry{mem[318] reg});
+        res.insert_or_assign("mem[319]reg", DumpEntry{mem[319] reg});
+        res.insert_or_assign("mem[320]reg", DumpEntry{mem[320] reg});
+        res.insert_or_assign("mem[321]reg", DumpEntry{mem[321] reg});
+        res.insert_or_assign("mem[322]reg", DumpEntry{mem[322] reg});
+        res.insert_or_assign("mem[323]reg", DumpEntry{mem[323] reg});
+        res.insert_or_assign("mem[324]reg", DumpEntry{mem[324] reg});
+        res.insert_or_assign("mem[325]reg", DumpEntry{mem[325] reg});
+        res.insert_or_assign("mem[326]reg", DumpEntry{mem[326] reg});
+        res.insert_or_assign("mem[327]reg", DumpEntry{mem[327] reg});
+        res.insert_or_assign("mem[328]reg", DumpEntry{mem[328] reg});
+        res.insert_or_assign("mem[329]reg", DumpEntry{mem[329] reg});
+        res.insert_or_assign("mem[330]reg", DumpEntry{mem[330] reg});
+        res.insert_or_assign("mem[331]reg", DumpEntry{mem[331] reg});
+        res.insert_or_assign("mem[332]reg", DumpEntry{mem[332] reg});
+        res.insert_or_assign("mem[333]reg", DumpEntry{mem[333] reg});
+        res.insert_or_assign("mem[334]reg", DumpEntry{mem[334] reg});
+        res.insert_or_assign("mem[335]reg", DumpEntry{mem[335] reg});
+        res.insert_or_assign("mem[336]reg", DumpEntry{mem[336] reg});
+        res.insert_or_assign("mem[337]reg", DumpEntry{mem[337] reg});
+        res.insert_or_assign("mem[338]reg", DumpEntry{mem[338] reg});
+        res.insert_or_assign("mem[339]reg", DumpEntry{mem[339] reg});
+        res.insert_or_assign("mem[340]reg", DumpEntry{mem[340] reg});
+        res.insert_or_assign("mem[341]reg", DumpEntry{mem[341] reg});
+        res.insert_or_assign("mem[342]reg", DumpEntry{mem[342] reg});
+        res.insert_or_assign("mem[343]reg", DumpEntry{mem[343] reg});
+        res.insert_or_assign("mem[344]reg", DumpEntry{mem[344] reg});
+        res.insert_or_assign("mem[345]reg", DumpEntry{mem[345] reg});
+        res.insert_or_assign("mem[346]reg", DumpEntry{mem[346] reg});
+        res.insert_or_assign("mem[347]reg", DumpEntry{mem[347] reg});
+        res.insert_or_assign("mem[348]reg", DumpEntry{mem[348] reg});
+        res.insert_or_assign("mem[349]reg", DumpEntry{mem[349] reg});
+        res.insert_or_assign("mem[350]reg", DumpEntry{mem[350] reg});
+        res.insert_or_assign("mem[351]reg", DumpEntry{mem[351] reg});
+        res.insert_or_assign("mem[352]reg", DumpEntry{mem[352] reg});
+        res.insert_or_assign("mem[353]reg", DumpEntry{mem[353] reg});
+        res.insert_or_assign("mem[354]reg", DumpEntry{mem[354] reg});
+        res.insert_or_assign("mem[355]reg", DumpEntry{mem[355] reg});
+        res.insert_or_assign("mem[356]reg", DumpEntry{mem[356] reg});
+        res.insert_or_assign("mem[357]reg", DumpEntry{mem[357] reg});
+        res.insert_or_assign("mem[358]reg", DumpEntry{mem[358] reg});
+        res.insert_or_assign("mem[359]reg", DumpEntry{mem[359] reg});
+        res.insert_or_assign("mem[360]reg", DumpEntry{mem[360] reg});
+        res.insert_or_assign("mem[361]reg", DumpEntry{mem[361] reg});
+        res.insert_or_assign("mem[362]reg", DumpEntry{mem[362] reg});
+        res.insert_or_assign("mem[363]reg", DumpEntry{mem[363] reg});
+        res.insert_or_assign("mem[364]reg", DumpEntry{mem[364] reg});
+        res.insert_or_assign("mem[365]reg", DumpEntry{mem[365] reg});
+        res.insert_or_assign("mem[366]reg", DumpEntry{mem[366] reg});
+        res.insert_or_assign("mem[367]reg", DumpEntry{mem[367] reg});
+        res.insert_or_assign("mem[368]reg", DumpEntry{mem[368] reg});
+        res.insert_or_assign("mem[369]reg", DumpEntry{mem[369] reg});
+        res.insert_or_assign("mem[370]reg", DumpEntry{mem[370] reg});
+        res.insert_or_assign("mem[371]reg", DumpEntry{mem[371] reg});
+        res.insert_or_assign("mem[372]reg", DumpEntry{mem[372] reg});
+        res.insert_or_assign("mem[373]reg", DumpEntry{mem[373] reg});
+        res.insert_or_assign("mem[374]reg", DumpEntry{mem[374] reg});
+        res.insert_or_assign("mem[375]reg", DumpEntry{mem[375] reg});
+        res.insert_or_assign("mem[376]reg", DumpEntry{mem[376] reg});
+        res.insert_or_assign("mem[377]reg", DumpEntry{mem[377] reg});
+        res.insert_or_assign("mem[378]reg", DumpEntry{mem[378] reg});
+        res.insert_or_assign("mem[379]reg", DumpEntry{mem[379] reg});
+        res.insert_or_assign("mem[380]reg", DumpEntry{mem[380] reg});
+        res.insert_or_assign("mem[381]reg", DumpEntry{mem[381] reg});
+        res.insert_or_assign("mem[382]reg", DumpEntry{mem[382] reg});
+        res.insert_or_assign("mem[383]reg", DumpEntry{mem[383] reg});
+        res.insert_or_assign("mem[384]reg", DumpEntry{mem[384] reg});
+        res.insert_or_assign("mem[385]reg", DumpEntry{mem[385] reg});
+        res.insert_or_assign("mem[386]reg", DumpEntry{mem[386] reg});
+        res.insert_or_assign("mem[387]reg", DumpEntry{mem[387] reg});
+        res.insert_or_assign("mem[388]reg", DumpEntry{mem[388] reg});
+        res.insert_or_assign("mem[389]reg", DumpEntry{mem[389] reg});
+        res.insert_or_assign("mem[390]reg", DumpEntry{mem[390] reg});
+        res.insert_or_assign("mem[391]reg", DumpEntry{mem[391] reg});
+        res.insert_or_assign("mem[392]reg", DumpEntry{mem[392] reg});
+        res.insert_or_assign("mem[393]reg", DumpEntry{mem[393] reg});
+        res.insert_or_assign("mem[394]reg", DumpEntry{mem[394] reg});
+        res.insert_or_assign("mem[395]reg", DumpEntry{mem[395] reg});
+        res.insert_or_assign("mem[396]reg", DumpEntry{mem[396] reg});
+        res.insert_or_assign("mem[397]reg", DumpEntry{mem[397] reg});
+        res.insert_or_assign("mem[398]reg", DumpEntry{mem[398] reg});
+        res.insert_or_assign("mem[399]reg", DumpEntry{mem[399] reg});
+        res.insert_or_assign("mem[400]reg", DumpEntry{mem[400] reg});
+        res.insert_or_assign("mem[401]reg", DumpEntry{mem[401] reg});
+        res.insert_or_assign("mem[402]reg", DumpEntry{mem[402] reg});
+        res.insert_or_assign("mem[403]reg", DumpEntry{mem[403] reg});
+        res.insert_or_assign("mem[404]reg", DumpEntry{mem[404] reg});
+        res.insert_or_assign("mem[405]reg", DumpEntry{mem[405] reg});
+        res.insert_or_assign("mem[406]reg", DumpEntry{mem[406] reg});
+        res.insert_or_assign("mem[407]reg", DumpEntry{mem[407] reg});
+        res.insert_or_assign("mem[408]reg", DumpEntry{mem[408] reg});
+        res.insert_or_assign("mem[409]reg", DumpEntry{mem[409] reg});
+        res.insert_or_assign("mem[410]reg", DumpEntry{mem[410] reg});
+        res.insert_or_assign("mem[411]reg", DumpEntry{mem[411] reg});
+        res.insert_or_assign("mem[412]reg", DumpEntry{mem[412] reg});
+        res.insert_or_assign("mem[413]reg", DumpEntry{mem[413] reg});
+        res.insert_or_assign("mem[414]reg", DumpEntry{mem[414] reg});
+        res.insert_or_assign("mem[415]reg", DumpEntry{mem[415] reg});
+        res.insert_or_assign("mem[416]reg", DumpEntry{mem[416] reg});
+        res.insert_or_assign("mem[417]reg", DumpEntry{mem[417] reg});
+        res.insert_or_assign("mem[418]reg", DumpEntry{mem[418] reg});
+        res.insert_or_assign("mem[419]reg", DumpEntry{mem[419] reg});
+        res.insert_or_assign("mem[420]reg", DumpEntry{mem[420] reg});
+        res.insert_or_assign("mem[421]reg", DumpEntry{mem[421] reg});
+        res.insert_or_assign("mem[422]reg", DumpEntry{mem[422] reg});
+        res.insert_or_assign("mem[423]reg", DumpEntry{mem[423] reg});
+        res.insert_or_assign("mem[424]reg", DumpEntry{mem[424] reg});
+        res.insert_or_assign("mem[425]reg", DumpEntry{mem[425] reg});
+        res.insert_or_assign("mem[426]reg", DumpEntry{mem[426] reg});
+        res.insert_or_assign("mem[427]reg", DumpEntry{mem[427] reg});
+        res.insert_or_assign("mem[428]reg", DumpEntry{mem[428] reg});
+        res.insert_or_assign("mem[429]reg", DumpEntry{mem[429] reg});
+        res.insert_or_assign("mem[430]reg", DumpEntry{mem[430] reg});
+        res.insert_or_assign("mem[431]reg", DumpEntry{mem[431] reg});
+        res.insert_or_assign("mem[432]reg", DumpEntry{mem[432] reg});
+        res.insert_or_assign("mem[433]reg", DumpEntry{mem[433] reg});
+        res.insert_or_assign("mem[434]reg", DumpEntry{mem[434] reg});
+        res.insert_or_assign("mem[435]reg", DumpEntry{mem[435] reg});
+        res.insert_or_assign("mem[436]reg", DumpEntry{mem[436] reg});
+        res.insert_or_assign("mem[437]reg", DumpEntry{mem[437] reg});
+        res.insert_or_assign("mem[438]reg", DumpEntry{mem[438] reg});
+        res.insert_or_assign("mem[439]reg", DumpEntry{mem[439] reg});
+        res.insert_or_assign("mem[440]reg", DumpEntry{mem[440] reg});
+        res.insert_or_assign("mem[441]reg", DumpEntry{mem[441] reg});
+        res.insert_or_assign("mem[442]reg", DumpEntry{mem[442] reg});
+        res.insert_or_assign("mem[443]reg", DumpEntry{mem[443] reg});
+        res.insert_or_assign("mem[444]reg", DumpEntry{mem[444] reg});
+        res.insert_or_assign("mem[445]reg", DumpEntry{mem[445] reg});
+        res.insert_or_assign("mem[446]reg", DumpEntry{mem[446] reg});
+        res.insert_or_assign("mem[447]reg", DumpEntry{mem[447] reg});
+        res.insert_or_assign("mem[448]reg", DumpEntry{mem[448] reg});
+        res.insert_or_assign("mem[449]reg", DumpEntry{mem[449] reg});
+        res.insert_or_assign("mem[450]reg", DumpEntry{mem[450] reg});
+        res.insert_or_assign("mem[451]reg", DumpEntry{mem[451] reg});
+        res.insert_or_assign("mem[452]reg", DumpEntry{mem[452] reg});
+        res.insert_or_assign("mem[453]reg", DumpEntry{mem[453] reg});
+        res.insert_or_assign("mem[454]reg", DumpEntry{mem[454] reg});
+        res.insert_or_assign("mem[455]reg", DumpEntry{mem[455] reg});
+        res.insert_or_assign("mem[456]reg", DumpEntry{mem[456] reg});
+        res.insert_or_assign("mem[457]reg", DumpEntry{mem[457] reg});
+        res.insert_or_assign("mem[458]reg", DumpEntry{mem[458] reg});
+        res.insert_or_assign("mem[459]reg", DumpEntry{mem[459] reg});
+        res.insert_or_assign("mem[460]reg", DumpEntry{mem[460] reg});
+        res.insert_or_assign("mem[461]reg", DumpEntry{mem[461] reg});
+        res.insert_or_assign("mem[462]reg", DumpEntry{mem[462] reg});
+        res.insert_or_assign("mem[463]reg", DumpEntry{mem[463] reg});
+        res.insert_or_assign("mem[464]reg", DumpEntry{mem[464] reg});
+        res.insert_or_assign("mem[465]reg", DumpEntry{mem[465] reg});
+        res.insert_or_assign("mem[466]reg", DumpEntry{mem[466] reg});
+        res.insert_or_assign("mem[467]reg", DumpEntry{mem[467] reg});
+        res.insert_or_assign("mem[468]reg", DumpEntry{mem[468] reg});
+        res.insert_or_assign("mem[469]reg", DumpEntry{mem[469] reg});
+        res.insert_or_assign("mem[470]reg", DumpEntry{mem[470] reg});
+        res.insert_or_assign("mem[471]reg", DumpEntry{mem[471] reg});
+        res.insert_or_assign("mem[472]reg", DumpEntry{mem[472] reg});
+        res.insert_or_assign("mem[473]reg", DumpEntry{mem[473] reg});
+        res.insert_or_assign("mem[474]reg", DumpEntry{mem[474] reg});
+        res.insert_or_assign("mem[475]reg", DumpEntry{mem[475] reg});
+        res.insert_or_assign("mem[476]reg", DumpEntry{mem[476] reg});
+        res.insert_or_assign("mem[477]reg", DumpEntry{mem[477] reg});
+        res.insert_or_assign("mem[478]reg", DumpEntry{mem[478] reg});
+        res.insert_or_assign("mem[479]reg", DumpEntry{mem[479] reg});
+        res.insert_or_assign("mem[480]reg", DumpEntry{mem[480] reg});
+        res.insert_or_assign("mem[481]reg", DumpEntry{mem[481] reg});
+        res.insert_or_assign("mem[482]reg", DumpEntry{mem[482] reg});
+        res.insert_or_assign("mem[483]reg", DumpEntry{mem[483] reg});
+        res.insert_or_assign("mem[484]reg", DumpEntry{mem[484] reg});
+        res.insert_or_assign("mem[485]reg", DumpEntry{mem[485] reg});
+        res.insert_or_assign("mem[486]reg", DumpEntry{mem[486] reg});
+        res.insert_or_assign("mem[487]reg", DumpEntry{mem[487] reg});
+        res.insert_or_assign("mem[488]reg", DumpEntry{mem[488] reg});
+        res.insert_or_assign("mem[489]reg", DumpEntry{mem[489] reg});
+        res.insert_or_assign("mem[490]reg", DumpEntry{mem[490] reg});
+        res.insert_or_assign("mem[491]reg", DumpEntry{mem[491] reg});
+        res.insert_or_assign("mem[492]reg", DumpEntry{mem[492] reg});
+        res.insert_or_assign("mem[493]reg", DumpEntry{mem[493] reg});
+        res.insert_or_assign("mem[494]reg", DumpEntry{mem[494] reg});
+        res.insert_or_assign("mem[495]reg", DumpEntry{mem[495] reg});
+        res.insert_or_assign("mem[496]reg", DumpEntry{mem[496] reg});
+        res.insert_or_assign("mem[497]reg", DumpEntry{mem[497] reg});
+        res.insert_or_assign("mem[498]reg", DumpEntry{mem[498] reg});
+        res.insert_or_assign("mem[499]reg", DumpEntry{mem[499] reg});
+        res.insert_or_assign("mem[500]reg", DumpEntry{mem[500] reg});
+        res.insert_or_assign("mem[501]reg", DumpEntry{mem[501] reg});
+        res.insert_or_assign("mem[502]reg", DumpEntry{mem[502] reg});
+        res.insert_or_assign("mem[503]reg", DumpEntry{mem[503] reg});
+        res.insert_or_assign("mem[504]reg", DumpEntry{mem[504] reg});
+        res.insert_or_assign("mem[505]reg", DumpEntry{mem[505] reg});
+        res.insert_or_assign("mem[506]reg", DumpEntry{mem[506] reg});
+        res.insert_or_assign("mem[507]reg", DumpEntry{mem[507] reg});
+        res.insert_or_assign("mem[508]reg", DumpEntry{mem[508] reg});
+        res.insert_or_assign("mem[509]reg", DumpEntry{mem[509] reg});
+        res.insert_or_assign("mem[510]reg", DumpEntry{mem[510] reg});
+        res.insert_or_assign("mem[511]reg", DumpEntry{mem[511] reg});
+        res.insert_or_assign("mem[512]reg", DumpEntry{mem[512] reg});
+        res.insert_or_assign("mem[513]reg", DumpEntry{mem[513] reg});
+        res.insert_or_assign("mem[514]reg", DumpEntry{mem[514] reg});
+        res.insert_or_assign("mem[515]reg", DumpEntry{mem[515] reg});
+        res.insert_or_assign("mem[516]reg", DumpEntry{mem[516] reg});
+        res.insert_or_assign("mem[517]reg", DumpEntry{mem[517] reg});
+        res.insert_or_assign("mem[518]reg", DumpEntry{mem[518] reg});
+        res.insert_or_assign("mem[519]reg", DumpEntry{mem[519] reg});
+        res.insert_or_assign("mem[520]reg", DumpEntry{mem[520] reg});
+        res.insert_or_assign("mem[521]reg", DumpEntry{mem[521] reg});
+        res.insert_or_assign("mem[522]reg", DumpEntry{mem[522] reg});
+        res.insert_or_assign("mem[523]reg", DumpEntry{mem[523] reg});
+        res.insert_or_assign("mem[524]reg", DumpEntry{mem[524] reg});
+        res.insert_or_assign("mem[525]reg", DumpEntry{mem[525] reg});
+        res.insert_or_assign("mem[526]reg", DumpEntry{mem[526] reg});
+        res.insert_or_assign("mem[527]reg", DumpEntry{mem[527] reg});
+        res.insert_or_assign("mem[528]reg", DumpEntry{mem[528] reg});
+        res.insert_or_assign("mem[529]reg", DumpEntry{mem[529] reg});
+        res.insert_or_assign("mem[530]reg", DumpEntry{mem[530] reg});
+        res.insert_or_assign("mem[531]reg", DumpEntry{mem[531] reg});
+        res.insert_or_assign("mem[532]reg", DumpEntry{mem[532] reg});
+        res.insert_or_assign("mem[533]reg", DumpEntry{mem[533] reg});
+        res.insert_or_assign("mem[534]reg", DumpEntry{mem[534] reg});
+        res.insert_or_assign("mem[535]reg", DumpEntry{mem[535] reg});
+        res.insert_or_assign("mem[536]reg", DumpEntry{mem[536] reg});
+        res.insert_or_assign("mem[537]reg", DumpEntry{mem[537] reg});
+        res.insert_or_assign("mem[538]reg", DumpEntry{mem[538] reg});
+        res.insert_or_assign("mem[539]reg", DumpEntry{mem[539] reg});
+        res.insert_or_assign("mem[540]reg", DumpEntry{mem[540] reg});
+        res.insert_or_assign("mem[541]reg", DumpEntry{mem[541] reg});
+        res.insert_or_assign("mem[542]reg", DumpEntry{mem[542] reg});
+        res.insert_or_assign("mem[543]reg", DumpEntry{mem[543] reg});
+        res.insert_or_assign("mem[544]reg", DumpEntry{mem[544] reg});
+        res.insert_or_assign("mem[545]reg", DumpEntry{mem[545] reg});
+        res.insert_or_assign("mem[546]reg", DumpEntry{mem[546] reg});
+        res.insert_or_assign("mem[547]reg", DumpEntry{mem[547] reg});
+        res.insert_or_assign("mem[548]reg", DumpEntry{mem[548] reg});
+        res.insert_or_assign("mem[549]reg", DumpEntry{mem[549] reg});
+        res.insert_or_assign("mem[550]reg", DumpEntry{mem[550] reg});
+        res.insert_or_assign("mem[551]reg", DumpEntry{mem[551] reg});
+        res.insert_or_assign("mem[552]reg", DumpEntry{mem[552] reg});
+        res.insert_or_assign("mem[553]reg", DumpEntry{mem[553] reg});
+        res.insert_or_assign("mem[554]reg", DumpEntry{mem[554] reg});
+        res.insert_or_assign("mem[555]reg", DumpEntry{mem[555] reg});
+        res.insert_or_assign("mem[556]reg", DumpEntry{mem[556] reg});
+        res.insert_or_assign("mem[557]reg", DumpEntry{mem[557] reg});
+        res.insert_or_assign("mem[558]reg", DumpEntry{mem[558] reg});
+        res.insert_or_assign("mem[559]reg", DumpEntry{mem[559] reg});
+        res.insert_or_assign("mem[560]reg", DumpEntry{mem[560] reg});
+        res.insert_or_assign("mem[561]reg", DumpEntry{mem[561] reg});
+        res.insert_or_assign("mem[562]reg", DumpEntry{mem[562] reg});
+        res.insert_or_assign("mem[563]reg", DumpEntry{mem[563] reg});
+        res.insert_or_assign("mem[564]reg", DumpEntry{mem[564] reg});
+        res.insert_or_assign("mem[565]reg", DumpEntry{mem[565] reg});
+        res.insert_or_assign("mem[566]reg", DumpEntry{mem[566] reg});
+        res.insert_or_assign("mem[567]reg", DumpEntry{mem[567] reg});
+        res.insert_or_assign("mem[568]reg", DumpEntry{mem[568] reg});
+        res.insert_or_assign("mem[569]reg", DumpEntry{mem[569] reg});
+        res.insert_or_assign("mem[570]reg", DumpEntry{mem[570] reg});
+        res.insert_or_assign("mem[571]reg", DumpEntry{mem[571] reg});
+        res.insert_or_assign("mem[572]reg", DumpEntry{mem[572] reg});
+        res.insert_or_assign("mem[573]reg", DumpEntry{mem[573] reg});
+        res.insert_or_assign("mem[574]reg", DumpEntry{mem[574] reg});
+        res.insert_or_assign("mem[575]reg", DumpEntry{mem[575] reg});
+        res.insert_or_assign("mem[576]reg", DumpEntry{mem[576] reg});
+        res.insert_or_assign("mem[577]reg", DumpEntry{mem[577] reg});
+        res.insert_or_assign("mem[578]reg", DumpEntry{mem[578] reg});
+        res.insert_or_assign("mem[579]reg", DumpEntry{mem[579] reg});
+        res.insert_or_assign("mem[580]reg", DumpEntry{mem[580] reg});
+        res.insert_or_assign("mem[581]reg", DumpEntry{mem[581] reg});
+        res.insert_or_assign("mem[582]reg", DumpEntry{mem[582] reg});
+        res.insert_or_assign("mem[583]reg", DumpEntry{mem[583] reg});
+        res.insert_or_assign("mem[584]reg", DumpEntry{mem[584] reg});
+        res.insert_or_assign("mem[585]reg", DumpEntry{mem[585] reg});
+        res.insert_or_assign("mem[586]reg", DumpEntry{mem[586] reg});
+        res.insert_or_assign("mem[587]reg", DumpEntry{mem[587] reg});
+        res.insert_or_assign("mem[588]reg", DumpEntry{mem[588] reg});
+        res.insert_or_assign("mem[589]reg", DumpEntry{mem[589] reg});
+        res.insert_or_assign("mem[590]reg", DumpEntry{mem[590] reg});
+        res.insert_or_assign("mem[591]reg", DumpEntry{mem[591] reg});
+        res.insert_or_assign("mem[592]reg", DumpEntry{mem[592] reg});
+        res.insert_or_assign("mem[593]reg", DumpEntry{mem[593] reg});
+        res.insert_or_assign("mem[594]reg", DumpEntry{mem[594] reg});
+        res.insert_or_assign("mem[595]reg", DumpEntry{mem[595] reg});
+        res.insert_or_assign("mem[596]reg", DumpEntry{mem[596] reg});
+        res.insert_or_assign("mem[597]reg", DumpEntry{mem[597] reg});
+        res.insert_or_assign("mem[598]reg", DumpEntry{mem[598] reg});
+        res.insert_or_assign("mem[599]reg", DumpEntry{mem[599] reg});
+        res.insert_or_assign("mem[600]reg", DumpEntry{mem[600] reg});
+        res.insert_or_assign("mem[601]reg", DumpEntry{mem[601] reg});
+        res.insert_or_assign("mem[602]reg", DumpEntry{mem[602] reg});
+        res.insert_or_assign("mem[603]reg", DumpEntry{mem[603] reg});
+        res.insert_or_assign("mem[604]reg", DumpEntry{mem[604] reg});
+        res.insert_or_assign("mem[605]reg", DumpEntry{mem[605] reg});
+        res.insert_or_assign("mem[606]reg", DumpEntry{mem[606] reg});
+        res.insert_or_assign("mem[607]reg", DumpEntry{mem[607] reg});
+        res.insert_or_assign("mem[608]reg", DumpEntry{mem[608] reg});
+        res.insert_or_assign("mem[609]reg", DumpEntry{mem[609] reg});
+        res.insert_or_assign("mem[610]reg", DumpEntry{mem[610] reg});
+        res.insert_or_assign("mem[611]reg", DumpEntry{mem[611] reg});
+        res.insert_or_assign("mem[612]reg", DumpEntry{mem[612] reg});
+        res.insert_or_assign("mem[613]reg", DumpEntry{mem[613] reg});
+        res.insert_or_assign("mem[614]reg", DumpEntry{mem[614] reg});
+        res.insert_or_assign("mem[615]reg", DumpEntry{mem[615] reg});
+        res.insert_or_assign("mem[616]reg", DumpEntry{mem[616] reg});
+        res.insert_or_assign("mem[617]reg", DumpEntry{mem[617] reg});
+        res.insert_or_assign("mem[618]reg", DumpEntry{mem[618] reg});
+        res.insert_or_assign("mem[619]reg", DumpEntry{mem[619] reg});
+        res.insert_or_assign("mem[620]reg", DumpEntry{mem[620] reg});
+        res.insert_or_assign("mem[621]reg", DumpEntry{mem[621] reg});
+        res.insert_or_assign("mem[622]reg", DumpEntry{mem[622] reg});
+        res.insert_or_assign("mem[623]reg", DumpEntry{mem[623] reg});
+        res.insert_or_assign("mem[624]reg", DumpEntry{mem[624] reg});
+        res.insert_or_assign("mem[625]reg", DumpEntry{mem[625] reg});
+        res.insert_or_assign("mem[626]reg", DumpEntry{mem[626] reg});
+        res.insert_or_assign("mem[627]reg", DumpEntry{mem[627] reg});
+        res.insert_or_assign("mem[628]reg", DumpEntry{mem[628] reg});
+        res.insert_or_assign("mem[629]reg", DumpEntry{mem[629] reg});
+        res.insert_or_assign("mem[630]reg", DumpEntry{mem[630] reg});
+        res.insert_or_assign("mem[631]reg", DumpEntry{mem[631] reg});
+        res.insert_or_assign("mem[632]reg", DumpEntry{mem[632] reg});
+        res.insert_or_assign("mem[633]reg", DumpEntry{mem[633] reg});
+        res.insert_or_assign("mem[634]reg", DumpEntry{mem[634] reg});
+        res.insert_or_assign("mem[635]reg", DumpEntry{mem[635] reg});
+        res.insert_or_assign("mem[636]reg", DumpEntry{mem[636] reg});
+        res.insert_or_assign("mem[637]reg", DumpEntry{mem[637] reg});
+        res.insert_or_assign("mem[638]reg", DumpEntry{mem[638] reg});
+        res.insert_or_assign("mem[639]reg", DumpEntry{mem[639] reg});
+        res.insert_or_assign("mem[640]reg", DumpEntry{mem[640] reg});
+        res.insert_or_assign("mem[641]reg", DumpEntry{mem[641] reg});
+        res.insert_or_assign("mem[642]reg", DumpEntry{mem[642] reg});
+        res.insert_or_assign("mem[643]reg", DumpEntry{mem[643] reg});
+        res.insert_or_assign("mem[644]reg", DumpEntry{mem[644] reg});
+        res.insert_or_assign("mem[645]reg", DumpEntry{mem[645] reg});
+        res.insert_or_assign("mem[646]reg", DumpEntry{mem[646] reg});
+        res.insert_or_assign("mem[647]reg", DumpEntry{mem[647] reg});
+        res.insert_or_assign("mem[648]reg", DumpEntry{mem[648] reg});
+        res.insert_or_assign("mem[649]reg", DumpEntry{mem[649] reg});
+        res.insert_or_assign("mem[650]reg", DumpEntry{mem[650] reg});
+        res.insert_or_assign("mem[651]reg", DumpEntry{mem[651] reg});
+        res.insert_or_assign("mem[652]reg", DumpEntry{mem[652] reg});
+        res.insert_or_assign("mem[653]reg", DumpEntry{mem[653] reg});
+        res.insert_or_assign("mem[654]reg", DumpEntry{mem[654] reg});
+        res.insert_or_assign("mem[655]reg", DumpEntry{mem[655] reg});
+        res.insert_or_assign("mem[656]reg", DumpEntry{mem[656] reg});
+        res.insert_or_assign("mem[657]reg", DumpEntry{mem[657] reg});
+        res.insert_or_assign("mem[658]reg", DumpEntry{mem[658] reg});
+        res.insert_or_assign("mem[659]reg", DumpEntry{mem[659] reg});
+        res.insert_or_assign("mem[660]reg", DumpEntry{mem[660] reg});
+        res.insert_or_assign("mem[661]reg", DumpEntry{mem[661] reg});
+        res.insert_or_assign("mem[662]reg", DumpEntry{mem[662] reg});
+        res.insert_or_assign("mem[663]reg", DumpEntry{mem[663] reg});
+        res.insert_or_assign("mem[664]reg", DumpEntry{mem[664] reg});
+        res.insert_or_assign("mem[665]reg", DumpEntry{mem[665] reg});
+        res.insert_or_assign("mem[666]reg", DumpEntry{mem[666] reg});
+        res.insert_or_assign("mem[667]reg", DumpEntry{mem[667] reg});
+        res.insert_or_assign("mem[668]reg", DumpEntry{mem[668] reg});
+        res.insert_or_assign("mem[669]reg", DumpEntry{mem[669] reg});
+        res.insert_or_assign("mem[670]reg", DumpEntry{mem[670] reg});
+        res.insert_or_assign("mem[671]reg", DumpEntry{mem[671] reg});
+        res.insert_or_assign("mem[672]reg", DumpEntry{mem[672] reg});
+        res.insert_or_assign("mem[673]reg", DumpEntry{mem[673] reg});
+        res.insert_or_assign("mem[674]reg", DumpEntry{mem[674] reg});
+        res.insert_or_assign("mem[675]reg", DumpEntry{mem[675] reg});
+        res.insert_or_assign("mem[676]reg", DumpEntry{mem[676] reg});
+        res.insert_or_assign("mem[677]reg", DumpEntry{mem[677] reg});
+        res.insert_or_assign("mem[678]reg", DumpEntry{mem[678] reg});
+        res.insert_or_assign("mem[679]reg", DumpEntry{mem[679] reg});
+        res.insert_or_assign("mem[680]reg", DumpEntry{mem[680] reg});
+        res.insert_or_assign("mem[681]reg", DumpEntry{mem[681] reg});
+        res.insert_or_assign("mem[682]reg", DumpEntry{mem[682] reg});
+        res.insert_or_assign("mem[683]reg", DumpEntry{mem[683] reg});
+        res.insert_or_assign("mem[684]reg", DumpEntry{mem[684] reg});
+        res.insert_or_assign("mem[685]reg", DumpEntry{mem[685] reg});
+        res.insert_or_assign("mem[686]reg", DumpEntry{mem[686] reg});
+        res.insert_or_assign("mem[687]reg", DumpEntry{mem[687] reg});
+        res.insert_or_assign("mem[688]reg", DumpEntry{mem[688] reg});
+        res.insert_or_assign("mem[689]reg", DumpEntry{mem[689] reg});
+        res.insert_or_assign("mem[690]reg", DumpEntry{mem[690] reg});
+        res.insert_or_assign("mem[691]reg", DumpEntry{mem[691] reg});
+        res.insert_or_assign("mem[692]reg", DumpEntry{mem[692] reg});
+        res.insert_or_assign("mem[693]reg", DumpEntry{mem[693] reg});
+        res.insert_or_assign("mem[694]reg", DumpEntry{mem[694] reg});
+        res.insert_or_assign("mem[695]reg", DumpEntry{mem[695] reg});
+        res.insert_or_assign("mem[696]reg", DumpEntry{mem[696] reg});
+        res.insert_or_assign("mem[697]reg", DumpEntry{mem[697] reg});
+        res.insert_or_assign("mem[698]reg", DumpEntry{mem[698] reg});
+        res.insert_or_assign("mem[699]reg", DumpEntry{mem[699] reg});
+        res.insert_or_assign("mem[700]reg", DumpEntry{mem[700] reg});
+        res.insert_or_assign("mem[701]reg", DumpEntry{mem[701] reg});
+        res.insert_or_assign("mem[702]reg", DumpEntry{mem[702] reg});
+        res.insert_or_assign("mem[703]reg", DumpEntry{mem[703] reg});
+        res.insert_or_assign("mem[704]reg", DumpEntry{mem[704] reg});
+        res.insert_or_assign("mem[705]reg", DumpEntry{mem[705] reg});
+        res.insert_or_assign("mem[706]reg", DumpEntry{mem[706] reg});
+        res.insert_or_assign("mem[707]reg", DumpEntry{mem[707] reg});
+        res.insert_or_assign("mem[708]reg", DumpEntry{mem[708] reg});
+        res.insert_or_assign("mem[709]reg", DumpEntry{mem[709] reg});
+        res.insert_or_assign("mem[710]reg", DumpEntry{mem[710] reg});
+        res.insert_or_assign("mem[711]reg", DumpEntry{mem[711] reg});
+        res.insert_or_assign("mem[712]reg", DumpEntry{mem[712] reg});
+        res.insert_or_assign("mem[713]reg", DumpEntry{mem[713] reg});
+        res.insert_or_assign("mem[714]reg", DumpEntry{mem[714] reg});
+        res.insert_or_assign("mem[715]reg", DumpEntry{mem[715] reg});
+        res.insert_or_assign("mem[716]reg", DumpEntry{mem[716] reg});
+        res.insert_or_assign("mem[717]reg", DumpEntry{mem[717] reg});
+        res.insert_or_assign("mem[718]reg", DumpEntry{mem[718] reg});
+        res.insert_or_assign("mem[719]reg", DumpEntry{mem[719] reg});
+        res.insert_or_assign("mem[720]reg", DumpEntry{mem[720] reg});
+        res.insert_or_assign("mem[721]reg", DumpEntry{mem[721] reg});
+        res.insert_or_assign("mem[722]reg", DumpEntry{mem[722] reg});
+        res.insert_or_assign("mem[723]reg", DumpEntry{mem[723] reg});
+        res.insert_or_assign("mem[724]reg", DumpEntry{mem[724] reg});
+        res.insert_or_assign("mem[725]reg", DumpEntry{mem[725] reg});
+        res.insert_or_assign("mem[726]reg", DumpEntry{mem[726] reg});
+        res.insert_or_assign("mem[727]reg", DumpEntry{mem[727] reg});
+        res.insert_or_assign("mem[728]reg", DumpEntry{mem[728] reg});
+        res.insert_or_assign("mem[729]reg", DumpEntry{mem[729] reg});
+        res.insert_or_assign("mem[730]reg", DumpEntry{mem[730] reg});
+        res.insert_or_assign("mem[731]reg", DumpEntry{mem[731] reg});
+        res.insert_or_assign("mem[732]reg", DumpEntry{mem[732] reg});
+        res.insert_or_assign("mem[733]reg", DumpEntry{mem[733] reg});
+        res.insert_or_assign("mem[734]reg", DumpEntry{mem[734] reg});
+        res.insert_or_assign("mem[735]reg", DumpEntry{mem[735] reg});
+        res.insert_or_assign("mem[736]reg", DumpEntry{mem[736] reg});
+        res.insert_or_assign("mem[737]reg", DumpEntry{mem[737] reg});
+        res.insert_or_assign("mem[738]reg", DumpEntry{mem[738] reg});
+        res.insert_or_assign("mem[739]reg", DumpEntry{mem[739] reg});
+        res.insert_or_assign("mem[740]reg", DumpEntry{mem[740] reg});
+        res.insert_or_assign("mem[741]reg", DumpEntry{mem[741] reg});
+        res.insert_or_assign("mem[742]reg", DumpEntry{mem[742] reg});
+        res.insert_or_assign("mem[743]reg", DumpEntry{mem[743] reg});
+        res.insert_or_assign("mem[744]reg", DumpEntry{mem[744] reg});
+        res.insert_or_assign("mem[745]reg", DumpEntry{mem[745] reg});
+        res.insert_or_assign("mem[746]reg", DumpEntry{mem[746] reg});
+        res.insert_or_assign("mem[747]reg", DumpEntry{mem[747] reg});
+        res.insert_or_assign("mem[748]reg", DumpEntry{mem[748] reg});
+        res.insert_or_assign("mem[749]reg", DumpEntry{mem[749] reg});
+        res.insert_or_assign("mem[750]reg", DumpEntry{mem[750] reg});
+        res.insert_or_assign("mem[751]reg", DumpEntry{mem[751] reg});
+        res.insert_or_assign("mem[752]reg", DumpEntry{mem[752] reg});
+        res.insert_or_assign("mem[753]reg", DumpEntry{mem[753] reg});
+        res.insert_or_assign("mem[754]reg", DumpEntry{mem[754] reg});
+        res.insert_or_assign("mem[755]reg", DumpEntry{mem[755] reg});
+        res.insert_or_assign("mem[756]reg", DumpEntry{mem[756] reg});
+        res.insert_or_assign("mem[757]reg", DumpEntry{mem[757] reg});
+        res.insert_or_assign("mem[758]reg", DumpEntry{mem[758] reg});
+        res.insert_or_assign("mem[759]reg", DumpEntry{mem[759] reg});
+        res.insert_or_assign("mem[760]reg", DumpEntry{mem[760] reg});
+        res.insert_or_assign("mem[761]reg", DumpEntry{mem[761] reg});
+        res.insert_or_assign("mem[762]reg", DumpEntry{mem[762] reg});
+        res.insert_or_assign("mem[763]reg", DumpEntry{mem[763] reg});
+        res.insert_or_assign("mem[764]reg", DumpEntry{mem[764] reg});
+        res.insert_or_assign("mem[765]reg", DumpEntry{mem[765] reg});
+        res.insert_or_assign("mem[766]reg", DumpEntry{mem[766] reg});
+        res.insert_or_assign("mem[767]reg", DumpEntry{mem[767] reg});
+        res.insert_or_assign("mem[768]reg", DumpEntry{mem[768] reg});
+        res.insert_or_assign("mem[769]reg", DumpEntry{mem[769] reg});
+        res.insert_or_assign("mem[770]reg", DumpEntry{mem[770] reg});
+        res.insert_or_assign("mem[771]reg", DumpEntry{mem[771] reg});
+        res.insert_or_assign("mem[772]reg", DumpEntry{mem[772] reg});
+        res.insert_or_assign("mem[773]reg", DumpEntry{mem[773] reg});
+        res.insert_or_assign("mem[774]reg", DumpEntry{mem[774] reg});
+        res.insert_or_assign("mem[775]reg", DumpEntry{mem[775] reg});
+        res.insert_or_assign("mem[776]reg", DumpEntry{mem[776] reg});
+        res.insert_or_assign("mem[777]reg", DumpEntry{mem[777] reg});
+        res.insert_or_assign("mem[778]reg", DumpEntry{mem[778] reg});
+        res.insert_or_assign("mem[779]reg", DumpEntry{mem[779] reg});
+        res.insert_or_assign("mem[780]reg", DumpEntry{mem[780] reg});
+        res.insert_or_assign("mem[781]reg", DumpEntry{mem[781] reg});
+        res.insert_or_assign("mem[782]reg", DumpEntry{mem[782] reg});
+        res.insert_or_assign("mem[783]reg", DumpEntry{mem[783] reg});
+        res.insert_or_assign("mem[784]reg", DumpEntry{mem[784] reg});
+        res.insert_or_assign("mem[785]reg", DumpEntry{mem[785] reg});
+        res.insert_or_assign("mem[786]reg", DumpEntry{mem[786] reg});
+        res.insert_or_assign("mem[787]reg", DumpEntry{mem[787] reg});
+        res.insert_or_assign("mem[788]reg", DumpEntry{mem[788] reg});
+        res.insert_or_assign("mem[789]reg", DumpEntry{mem[789] reg});
+        res.insert_or_assign("mem[790]reg", DumpEntry{mem[790] reg});
+        res.insert_or_assign("mem[791]reg", DumpEntry{mem[791] reg});
+        res.insert_or_assign("mem[792]reg", DumpEntry{mem[792] reg});
+        res.insert_or_assign("mem[793]reg", DumpEntry{mem[793] reg});
+        res.insert_or_assign("mem[794]reg", DumpEntry{mem[794] reg});
+        res.insert_or_assign("mem[795]reg", DumpEntry{mem[795] reg});
+        res.insert_or_assign("mem[796]reg", DumpEntry{mem[796] reg});
+        res.insert_or_assign("mem[797]reg", DumpEntry{mem[797] reg});
+        res.insert_or_assign("mem[798]reg", DumpEntry{mem[798] reg});
+        res.insert_or_assign("mem[799]reg", DumpEntry{mem[799] reg});
+        res.insert_or_assign("mem[800]reg", DumpEntry{mem[800] reg});
+        res.insert_or_assign("mem[801]reg", DumpEntry{mem[801] reg});
+        res.insert_or_assign("mem[802]reg", DumpEntry{mem[802] reg});
+        res.insert_or_assign("mem[803]reg", DumpEntry{mem[803] reg});
+        res.insert_or_assign("mem[804]reg", DumpEntry{mem[804] reg});
+        res.insert_or_assign("mem[805]reg", DumpEntry{mem[805] reg});
+        res.insert_or_assign("mem[806]reg", DumpEntry{mem[806] reg});
+        res.insert_or_assign("mem[807]reg", DumpEntry{mem[807] reg});
+        res.insert_or_assign("mem[808]reg", DumpEntry{mem[808] reg});
+        res.insert_or_assign("mem[809]reg", DumpEntry{mem[809] reg});
+        res.insert_or_assign("mem[810]reg", DumpEntry{mem[810] reg});
+        res.insert_or_assign("mem[811]reg", DumpEntry{mem[811] reg});
+        res.insert_or_assign("mem[812]reg", DumpEntry{mem[812] reg});
+        res.insert_or_assign("mem[813]reg", DumpEntry{mem[813] reg});
+        res.insert_or_assign("mem[814]reg", DumpEntry{mem[814] reg});
+        res.insert_or_assign("mem[815]reg", DumpEntry{mem[815] reg});
+        res.insert_or_assign("mem[816]reg", DumpEntry{mem[816] reg});
+        res.insert_or_assign("mem[817]reg", DumpEntry{mem[817] reg});
+        res.insert_or_assign("mem[818]reg", DumpEntry{mem[818] reg});
+        res.insert_or_assign("mem[819]reg", DumpEntry{mem[819] reg});
+        res.insert_or_assign("mem[820]reg", DumpEntry{mem[820] reg});
+        res.insert_or_assign("mem[821]reg", DumpEntry{mem[821] reg});
+        res.insert_or_assign("mem[822]reg", DumpEntry{mem[822] reg});
+        res.insert_or_assign("mem[823]reg", DumpEntry{mem[823] reg});
+        res.insert_or_assign("mem[824]reg", DumpEntry{mem[824] reg});
+        res.insert_or_assign("mem[825]reg", DumpEntry{mem[825] reg});
+        res.insert_or_assign("mem[826]reg", DumpEntry{mem[826] reg});
+        res.insert_or_assign("mem[827]reg", DumpEntry{mem[827] reg});
+        res.insert_or_assign("mem[828]reg", DumpEntry{mem[828] reg});
+        res.insert_or_assign("mem[829]reg", DumpEntry{mem[829] reg});
+        res.insert_or_assign("mem[830]reg", DumpEntry{mem[830] reg});
+        res.insert_or_assign("mem[831]reg", DumpEntry{mem[831] reg});
+        res.insert_or_assign("mem[832]reg", DumpEntry{mem[832] reg});
+        res.insert_or_assign("mem[833]reg", DumpEntry{mem[833] reg});
+        res.insert_or_assign("mem[834]reg", DumpEntry{mem[834] reg});
+        res.insert_or_assign("mem[835]reg", DumpEntry{mem[835] reg});
+        res.insert_or_assign("mem[836]reg", DumpEntry{mem[836] reg});
+        res.insert_or_assign("mem[837]reg", DumpEntry{mem[837] reg});
+        res.insert_or_assign("mem[838]reg", DumpEntry{mem[838] reg});
+        res.insert_or_assign("mem[839]reg", DumpEntry{mem[839] reg});
+        res.insert_or_assign("mem[840]reg", DumpEntry{mem[840] reg});
+        res.insert_or_assign("mem[841]reg", DumpEntry{mem[841] reg});
+        res.insert_or_assign("mem[842]reg", DumpEntry{mem[842] reg});
+        res.insert_or_assign("mem[843]reg", DumpEntry{mem[843] reg});
+        res.insert_or_assign("mem[844]reg", DumpEntry{mem[844] reg});
+        res.insert_or_assign("mem[845]reg", DumpEntry{mem[845] reg});
+        res.insert_or_assign("mem[846]reg", DumpEntry{mem[846] reg});
+        res.insert_or_assign("mem[847]reg", DumpEntry{mem[847] reg});
+        res.insert_or_assign("mem[848]reg", DumpEntry{mem[848] reg});
+        res.insert_or_assign("mem[849]reg", DumpEntry{mem[849] reg});
+        res.insert_or_assign("mem[850]reg", DumpEntry{mem[850] reg});
+        res.insert_or_assign("mem[851]reg", DumpEntry{mem[851] reg});
+        res.insert_or_assign("mem[852]reg", DumpEntry{mem[852] reg});
+        res.insert_or_assign("mem[853]reg", DumpEntry{mem[853] reg});
+        res.insert_or_assign("mem[854]reg", DumpEntry{mem[854] reg});
+        res.insert_or_assign("mem[855]reg", DumpEntry{mem[855] reg});
+        res.insert_or_assign("mem[856]reg", DumpEntry{mem[856] reg});
+        res.insert_or_assign("mem[857]reg", DumpEntry{mem[857] reg});
+        res.insert_or_assign("mem[858]reg", DumpEntry{mem[858] reg});
+        res.insert_or_assign("mem[859]reg", DumpEntry{mem[859] reg});
+        res.insert_or_assign("mem[860]reg", DumpEntry{mem[860] reg});
+        res.insert_or_assign("mem[861]reg", DumpEntry{mem[861] reg});
+        res.insert_or_assign("mem[862]reg", DumpEntry{mem[862] reg});
+        res.insert_or_assign("mem[863]reg", DumpEntry{mem[863] reg});
+        res.insert_or_assign("mem[864]reg", DumpEntry{mem[864] reg});
+        res.insert_or_assign("mem[865]reg", DumpEntry{mem[865] reg});
+        res.insert_or_assign("mem[866]reg", DumpEntry{mem[866] reg});
+        res.insert_or_assign("mem[867]reg", DumpEntry{mem[867] reg});
+        res.insert_or_assign("mem[868]reg", DumpEntry{mem[868] reg});
+        res.insert_or_assign("mem[869]reg", DumpEntry{mem[869] reg});
+        res.insert_or_assign("mem[870]reg", DumpEntry{mem[870] reg});
+        res.insert_or_assign("mem[871]reg", DumpEntry{mem[871] reg});
+        res.insert_or_assign("mem[872]reg", DumpEntry{mem[872] reg});
+        res.insert_or_assign("mem[873]reg", DumpEntry{mem[873] reg});
+        res.insert_or_assign("mem[874]reg", DumpEntry{mem[874] reg});
+        res.insert_or_assign("mem[875]reg", DumpEntry{mem[875] reg});
+        res.insert_or_assign("mem[876]reg", DumpEntry{mem[876] reg});
+        res.insert_or_assign("mem[877]reg", DumpEntry{mem[877] reg});
+        res.insert_or_assign("mem[878]reg", DumpEntry{mem[878] reg});
+        res.insert_or_assign("mem[879]reg", DumpEntry{mem[879] reg});
+        res.insert_or_assign("mem[880]reg", DumpEntry{mem[880] reg});
+        res.insert_or_assign("mem[881]reg", DumpEntry{mem[881] reg});
+        res.insert_or_assign("mem[882]reg", DumpEntry{mem[882] reg});
+        res.insert_or_assign("mem[883]reg", DumpEntry{mem[883] reg});
+        res.insert_or_assign("mem[884]reg", DumpEntry{mem[884] reg});
+        res.insert_or_assign("mem[885]reg", DumpEntry{mem[885] reg});
+        res.insert_or_assign("mem[886]reg", DumpEntry{mem[886] reg});
+        res.insert_or_assign("mem[887]reg", DumpEntry{mem[887] reg});
+        res.insert_or_assign("mem[888]reg", DumpEntry{mem[888] reg});
+        res.insert_or_assign("mem[889]reg", DumpEntry{mem[889] reg});
+        res.insert_or_assign("mem[890]reg", DumpEntry{mem[890] reg});
+        res.insert_or_assign("mem[891]reg", DumpEntry{mem[891] reg});
+        res.insert_or_assign("mem[892]reg", DumpEntry{mem[892] reg});
+        res.insert_or_assign("mem[893]reg", DumpEntry{mem[893] reg});
+        res.insert_or_assign("mem[894]reg", DumpEntry{mem[894] reg});
+        res.insert_or_assign("mem[895]reg", DumpEntry{mem[895] reg});
+        res.insert_or_assign("mem[896]reg", DumpEntry{mem[896] reg});
+        res.insert_or_assign("mem[897]reg", DumpEntry{mem[897] reg});
+        res.insert_or_assign("mem[898]reg", DumpEntry{mem[898] reg});
+        res.insert_or_assign("mem[899]reg", DumpEntry{mem[899] reg});
+        res.insert_or_assign("mem[900]reg", DumpEntry{mem[900] reg});
+        res.insert_or_assign("mem[901]reg", DumpEntry{mem[901] reg});
+        res.insert_or_assign("mem[902]reg", DumpEntry{mem[902] reg});
+        res.insert_or_assign("mem[903]reg", DumpEntry{mem[903] reg});
+        res.insert_or_assign("mem[904]reg", DumpEntry{mem[904] reg});
+        res.insert_or_assign("mem[905]reg", DumpEntry{mem[905] reg});
+        res.insert_or_assign("mem[906]reg", DumpEntry{mem[906] reg});
+        res.insert_or_assign("mem[907]reg", DumpEntry{mem[907] reg});
+        res.insert_or_assign("mem[908]reg", DumpEntry{mem[908] reg});
+        res.insert_or_assign("mem[909]reg", DumpEntry{mem[909] reg});
+        res.insert_or_assign("mem[910]reg", DumpEntry{mem[910] reg});
+        res.insert_or_assign("mem[911]reg", DumpEntry{mem[911] reg});
+        res.insert_or_assign("mem[912]reg", DumpEntry{mem[912] reg});
+        res.insert_or_assign("mem[913]reg", DumpEntry{mem[913] reg});
+        res.insert_or_assign("mem[914]reg", DumpEntry{mem[914] reg});
+        res.insert_or_assign("mem[915]reg", DumpEntry{mem[915] reg});
+        res.insert_or_assign("mem[916]reg", DumpEntry{mem[916] reg});
+        res.insert_or_assign("mem[917]reg", DumpEntry{mem[917] reg});
+        res.insert_or_assign("mem[918]reg", DumpEntry{mem[918] reg});
+        res.insert_or_assign("mem[919]reg", DumpEntry{mem[919] reg});
+        res.insert_or_assign("mem[920]reg", DumpEntry{mem[920] reg});
+        res.insert_or_assign("mem[921]reg", DumpEntry{mem[921] reg});
+        res.insert_or_assign("mem[922]reg", DumpEntry{mem[922] reg});
+        res.insert_or_assign("mem[923]reg", DumpEntry{mem[923] reg});
+        res.insert_or_assign("mem[924]reg", DumpEntry{mem[924] reg});
+        res.insert_or_assign("mem[925]reg", DumpEntry{mem[925] reg});
+        res.insert_or_assign("mem[926]reg", DumpEntry{mem[926] reg});
+        res.insert_or_assign("mem[927]reg", DumpEntry{mem[927] reg});
+        res.insert_or_assign("mem[928]reg", DumpEntry{mem[928] reg});
+        res.insert_or_assign("mem[929]reg", DumpEntry{mem[929] reg});
+        res.insert_or_assign("mem[930]reg", DumpEntry{mem[930] reg});
+        res.insert_or_assign("mem[931]reg", DumpEntry{mem[931] reg});
+        res.insert_or_assign("mem[932]reg", DumpEntry{mem[932] reg});
+        res.insert_or_assign("mem[933]reg", DumpEntry{mem[933] reg});
+        res.insert_or_assign("mem[934]reg", DumpEntry{mem[934] reg});
+        res.insert_or_assign("mem[935]reg", DumpEntry{mem[935] reg});
+        res.insert_or_assign("mem[936]reg", DumpEntry{mem[936] reg});
+        res.insert_or_assign("mem[937]reg", DumpEntry{mem[937] reg});
+        res.insert_or_assign("mem[938]reg", DumpEntry{mem[938] reg});
+        res.insert_or_assign("mem[939]reg", DumpEntry{mem[939] reg});
+        res.insert_or_assign("mem[940]reg", DumpEntry{mem[940] reg});
+        res.insert_or_assign("mem[941]reg", DumpEntry{mem[941] reg});
+        res.insert_or_assign("mem[942]reg", DumpEntry{mem[942] reg});
+        res.insert_or_assign("mem[943]reg", DumpEntry{mem[943] reg});
+        res.insert_or_assign("mem[944]reg", DumpEntry{mem[944] reg});
+        res.insert_or_assign("mem[945]reg", DumpEntry{mem[945] reg});
+        res.insert_or_assign("mem[946]reg", DumpEntry{mem[946] reg});
+        res.insert_or_assign("mem[947]reg", DumpEntry{mem[947] reg});
+        res.insert_or_assign("mem[948]reg", DumpEntry{mem[948] reg});
+        res.insert_or_assign("mem[949]reg", DumpEntry{mem[949] reg});
+        res.insert_or_assign("mem[950]reg", DumpEntry{mem[950] reg});
+        res.insert_or_assign("mem[951]reg", DumpEntry{mem[951] reg});
+        res.insert_or_assign("mem[952]reg", DumpEntry{mem[952] reg});
+        res.insert_or_assign("mem[953]reg", DumpEntry{mem[953] reg});
+        res.insert_or_assign("mem[954]reg", DumpEntry{mem[954] reg});
+        res.insert_or_assign("mem[955]reg", DumpEntry{mem[955] reg});
+        res.insert_or_assign("mem[956]reg", DumpEntry{mem[956] reg});
+        res.insert_or_assign("mem[957]reg", DumpEntry{mem[957] reg});
+        res.insert_or_assign("mem[958]reg", DumpEntry{mem[958] reg});
+        res.insert_or_assign("mem[959]reg", DumpEntry{mem[959] reg});
+        res.insert_or_assign("mem[960]reg", DumpEntry{mem[960] reg});
+        res.insert_or_assign("mem[961]reg", DumpEntry{mem[961] reg});
+        res.insert_or_assign("mem[962]reg", DumpEntry{mem[962] reg});
+        res.insert_or_assign("mem[963]reg", DumpEntry{mem[963] reg});
+        res.insert_or_assign("mem[964]reg", DumpEntry{mem[964] reg});
+        res.insert_or_assign("mem[965]reg", DumpEntry{mem[965] reg});
+        res.insert_or_assign("mem[966]reg", DumpEntry{mem[966] reg});
+        res.insert_or_assign("mem[967]reg", DumpEntry{mem[967] reg});
+        res.insert_or_assign("mem[968]reg", DumpEntry{mem[968] reg});
+        res.insert_or_assign("mem[969]reg", DumpEntry{mem[969] reg});
+        res.insert_or_assign("mem[970]reg", DumpEntry{mem[970] reg});
+        res.insert_or_assign("mem[971]reg", DumpEntry{mem[971] reg});
+        res.insert_or_assign("mem[972]reg", DumpEntry{mem[972] reg});
+        res.insert_or_assign("mem[973]reg", DumpEntry{mem[973] reg});
+        res.insert_or_assign("mem[974]reg", DumpEntry{mem[974] reg});
+        res.insert_or_assign("mem[975]reg", DumpEntry{mem[975] reg});
+        res.insert_or_assign("mem[976]reg", DumpEntry{mem[976] reg});
+        res.insert_or_assign("mem[977]reg", DumpEntry{mem[977] reg});
+        res.insert_or_assign("mem[978]reg", DumpEntry{mem[978] reg});
+        res.insert_or_assign("mem[979]reg", DumpEntry{mem[979] reg});
+        res.insert_or_assign("mem[980]reg", DumpEntry{mem[980] reg});
+        res.insert_or_assign("mem[981]reg", DumpEntry{mem[981] reg});
+        res.insert_or_assign("mem[982]reg", DumpEntry{mem[982] reg});
+        res.insert_or_assign("mem[983]reg", DumpEntry{mem[983] reg});
+        res.insert_or_assign("mem[984]reg", DumpEntry{mem[984] reg});
+        res.insert_or_assign("mem[985]reg", DumpEntry{mem[985] reg});
+        res.insert_or_assign("mem[986]reg", DumpEntry{mem[986] reg});
+        res.insert_or_assign("mem[987]reg", DumpEntry{mem[987] reg});
+        res.insert_or_assign("mem[988]reg", DumpEntry{mem[988] reg});
+        res.insert_or_assign("mem[989]reg", DumpEntry{mem[989] reg});
+        res.insert_or_assign("mem[990]reg", DumpEntry{mem[990] reg});
+        res.insert_or_assign("mem[991]reg", DumpEntry{mem[991] reg});
+        res.insert_or_assign("mem[992]reg", DumpEntry{mem[992] reg});
+        res.insert_or_assign("mem[993]reg", DumpEntry{mem[993] reg});
+        res.insert_or_assign("mem[994]reg", DumpEntry{mem[994] reg});
+        res.insert_or_assign("mem[995]reg", DumpEntry{mem[995] reg});
+        res.insert_or_assign("mem[996]reg", DumpEntry{mem[996] reg});
+        res.insert_or_assign("mem[997]reg", DumpEntry{mem[997] reg});
+        res.insert_or_assign("mem[998]reg", DumpEntry{mem[998] reg});
+        res.insert_or_assign("mem[999]reg", DumpEntry{mem[999] reg});
+        res.insert_or_assign("mem[1000]reg", DumpEntry{mem[1000] reg});
+        res.insert_or_assign("mem[1001]reg", DumpEntry{mem[1001] reg});
+        res.insert_or_assign("mem[1002]reg", DumpEntry{mem[1002] reg});
+        res.insert_or_assign("mem[1003]reg", DumpEntry{mem[1003] reg});
+        res.insert_or_assign("mem[1004]reg", DumpEntry{mem[1004] reg});
+        res.insert_or_assign("mem[1005]reg", DumpEntry{mem[1005] reg});
+        res.insert_or_assign("mem[1006]reg", DumpEntry{mem[1006] reg});
+        res.insert_or_assign("mem[1007]reg", DumpEntry{mem[1007] reg});
+        res.insert_or_assign("mem[1008]reg", DumpEntry{mem[1008] reg});
+        res.insert_or_assign("mem[1009]reg", DumpEntry{mem[1009] reg});
+        res.insert_or_assign("mem[1010]reg", DumpEntry{mem[1010] reg});
+        res.insert_or_assign("mem[1011]reg", DumpEntry{mem[1011] reg});
+        res.insert_or_assign("mem[1012]reg", DumpEntry{mem[1012] reg});
+        res.insert_or_assign("mem[1013]reg", DumpEntry{mem[1013] reg});
+        res.insert_or_assign("mem[1014]reg", DumpEntry{mem[1014] reg});
+        res.insert_or_assign("mem[1015]reg", DumpEntry{mem[1015] reg});
+        res.insert_or_assign("mem[1016]reg", DumpEntry{mem[1016] reg});
+        res.insert_or_assign("mem[1017]reg", DumpEntry{mem[1017] reg});
+        res.insert_or_assign("mem[1018]reg", DumpEntry{mem[1018] reg});
+        res.insert_or_assign("mem[1019]reg", DumpEntry{mem[1019] reg});
+        res.insert_or_assign("mem[1020]reg", DumpEntry{mem[1020] reg});
+        res.insert_or_assign("mem[1021]reg", DumpEntry{mem[1021] reg});
+        res.insert_or_assign("mem[1022]reg", DumpEntry{mem[1022] reg});
+        res.insert_or_assign("mem[1023]reg", DumpEntry{mem[1023] reg});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::Scratchpad`
+    //!
+    //! @param scratchpad A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under scratchpad
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::Scratchpad& scratchpad)
+    {
+        DumpMap res{scratchpad.base()};
+        res.insert_or_assign("scratchpad.mem[0]reg", DumpEntry{scratchpad.mem[0] reg});
+        res.insert_or_assign("scratchpad.mem[1]reg", DumpEntry{scratchpad.mem[1] reg});
+        res.insert_or_assign("scratchpad.mem[2]reg", DumpEntry{scratchpad.mem[2] reg});
+        res.insert_or_assign("scratchpad.mem[3]reg", DumpEntry{scratchpad.mem[3] reg});
+        res.insert_or_assign("scratchpad.mem[4]reg", DumpEntry{scratchpad.mem[4] reg});
+        res.insert_or_assign("scratchpad.mem[5]reg", DumpEntry{scratchpad.mem[5] reg});
+        res.insert_or_assign("scratchpad.mem[6]reg", DumpEntry{scratchpad.mem[6] reg});
+        res.insert_or_assign("scratchpad.mem[7]reg", DumpEntry{scratchpad.mem[7] reg});
+        res.insert_or_assign("scratchpad.mem[8]reg", DumpEntry{scratchpad.mem[8] reg});
+        res.insert_or_assign("scratchpad.mem[9]reg", DumpEntry{scratchpad.mem[9] reg});
+        res.insert_or_assign("scratchpad.mem[10]reg", DumpEntry{scratchpad.mem[10] reg});
+        res.insert_or_assign("scratchpad.mem[11]reg", DumpEntry{scratchpad.mem[11] reg});
+        res.insert_or_assign("scratchpad.mem[12]reg", DumpEntry{scratchpad.mem[12] reg});
+        res.insert_or_assign("scratchpad.mem[13]reg", DumpEntry{scratchpad.mem[13] reg});
+        res.insert_or_assign("scratchpad.mem[14]reg", DumpEntry{scratchpad.mem[14] reg});
+        res.insert_or_assign("scratchpad.mem[15]reg", DumpEntry{scratchpad.mem[15] reg});
+        res.insert_or_assign("scratchpad.mem[16]reg", DumpEntry{scratchpad.mem[16] reg});
+        res.insert_or_assign("scratchpad.mem[17]reg", DumpEntry{scratchpad.mem[17] reg});
+        res.insert_or_assign("scratchpad.mem[18]reg", DumpEntry{scratchpad.mem[18] reg});
+        res.insert_or_assign("scratchpad.mem[19]reg", DumpEntry{scratchpad.mem[19] reg});
+        res.insert_or_assign("scratchpad.mem[20]reg", DumpEntry{scratchpad.mem[20] reg});
+        res.insert_or_assign("scratchpad.mem[21]reg", DumpEntry{scratchpad.mem[21] reg});
+        res.insert_or_assign("scratchpad.mem[22]reg", DumpEntry{scratchpad.mem[22] reg});
+        res.insert_or_assign("scratchpad.mem[23]reg", DumpEntry{scratchpad.mem[23] reg});
+        res.insert_or_assign("scratchpad.mem[24]reg", DumpEntry{scratchpad.mem[24] reg});
+        res.insert_or_assign("scratchpad.mem[25]reg", DumpEntry{scratchpad.mem[25] reg});
+        res.insert_or_assign("scratchpad.mem[26]reg", DumpEntry{scratchpad.mem[26] reg});
+        res.insert_or_assign("scratchpad.mem[27]reg", DumpEntry{scratchpad.mem[27] reg});
+        res.insert_or_assign("scratchpad.mem[28]reg", DumpEntry{scratchpad.mem[28] reg});
+        res.insert_or_assign("scratchpad.mem[29]reg", DumpEntry{scratchpad.mem[29] reg});
+        res.insert_or_assign("scratchpad.mem[30]reg", DumpEntry{scratchpad.mem[30] reg});
+        res.insert_or_assign("scratchpad.mem[31]reg", DumpEntry{scratchpad.mem[31] reg});
+        res.insert_or_assign("scratchpad.mem[32]reg", DumpEntry{scratchpad.mem[32] reg});
+        res.insert_or_assign("scratchpad.mem[33]reg", DumpEntry{scratchpad.mem[33] reg});
+        res.insert_or_assign("scratchpad.mem[34]reg", DumpEntry{scratchpad.mem[34] reg});
+        res.insert_or_assign("scratchpad.mem[35]reg", DumpEntry{scratchpad.mem[35] reg});
+        res.insert_or_assign("scratchpad.mem[36]reg", DumpEntry{scratchpad.mem[36] reg});
+        res.insert_or_assign("scratchpad.mem[37]reg", DumpEntry{scratchpad.mem[37] reg});
+        res.insert_or_assign("scratchpad.mem[38]reg", DumpEntry{scratchpad.mem[38] reg});
+        res.insert_or_assign("scratchpad.mem[39]reg", DumpEntry{scratchpad.mem[39] reg});
+        res.insert_or_assign("scratchpad.mem[40]reg", DumpEntry{scratchpad.mem[40] reg});
+        res.insert_or_assign("scratchpad.mem[41]reg", DumpEntry{scratchpad.mem[41] reg});
+        res.insert_or_assign("scratchpad.mem[42]reg", DumpEntry{scratchpad.mem[42] reg});
+        res.insert_or_assign("scratchpad.mem[43]reg", DumpEntry{scratchpad.mem[43] reg});
+        res.insert_or_assign("scratchpad.mem[44]reg", DumpEntry{scratchpad.mem[44] reg});
+        res.insert_or_assign("scratchpad.mem[45]reg", DumpEntry{scratchpad.mem[45] reg});
+        res.insert_or_assign("scratchpad.mem[46]reg", DumpEntry{scratchpad.mem[46] reg});
+        res.insert_or_assign("scratchpad.mem[47]reg", DumpEntry{scratchpad.mem[47] reg});
+        res.insert_or_assign("scratchpad.mem[48]reg", DumpEntry{scratchpad.mem[48] reg});
+        res.insert_or_assign("scratchpad.mem[49]reg", DumpEntry{scratchpad.mem[49] reg});
+        res.insert_or_assign("scratchpad.mem[50]reg", DumpEntry{scratchpad.mem[50] reg});
+        res.insert_or_assign("scratchpad.mem[51]reg", DumpEntry{scratchpad.mem[51] reg});
+        res.insert_or_assign("scratchpad.mem[52]reg", DumpEntry{scratchpad.mem[52] reg});
+        res.insert_or_assign("scratchpad.mem[53]reg", DumpEntry{scratchpad.mem[53] reg});
+        res.insert_or_assign("scratchpad.mem[54]reg", DumpEntry{scratchpad.mem[54] reg});
+        res.insert_or_assign("scratchpad.mem[55]reg", DumpEntry{scratchpad.mem[55] reg});
+        res.insert_or_assign("scratchpad.mem[56]reg", DumpEntry{scratchpad.mem[56] reg});
+        res.insert_or_assign("scratchpad.mem[57]reg", DumpEntry{scratchpad.mem[57] reg});
+        res.insert_or_assign("scratchpad.mem[58]reg", DumpEntry{scratchpad.mem[58] reg});
+        res.insert_or_assign("scratchpad.mem[59]reg", DumpEntry{scratchpad.mem[59] reg});
+        res.insert_or_assign("scratchpad.mem[60]reg", DumpEntry{scratchpad.mem[60] reg});
+        res.insert_or_assign("scratchpad.mem[61]reg", DumpEntry{scratchpad.mem[61] reg});
+        res.insert_or_assign("scratchpad.mem[62]reg", DumpEntry{scratchpad.mem[62] reg});
+        res.insert_or_assign("scratchpad.mem[63]reg", DumpEntry{scratchpad.mem[63] reg});
+        res.insert_or_assign("scratchpad.mem[64]reg", DumpEntry{scratchpad.mem[64] reg});
+        res.insert_or_assign("scratchpad.mem[65]reg", DumpEntry{scratchpad.mem[65] reg});
+        res.insert_or_assign("scratchpad.mem[66]reg", DumpEntry{scratchpad.mem[66] reg});
+        res.insert_or_assign("scratchpad.mem[67]reg", DumpEntry{scratchpad.mem[67] reg});
+        res.insert_or_assign("scratchpad.mem[68]reg", DumpEntry{scratchpad.mem[68] reg});
+        res.insert_or_assign("scratchpad.mem[69]reg", DumpEntry{scratchpad.mem[69] reg});
+        res.insert_or_assign("scratchpad.mem[70]reg", DumpEntry{scratchpad.mem[70] reg});
+        res.insert_or_assign("scratchpad.mem[71]reg", DumpEntry{scratchpad.mem[71] reg});
+        res.insert_or_assign("scratchpad.mem[72]reg", DumpEntry{scratchpad.mem[72] reg});
+        res.insert_or_assign("scratchpad.mem[73]reg", DumpEntry{scratchpad.mem[73] reg});
+        res.insert_or_assign("scratchpad.mem[74]reg", DumpEntry{scratchpad.mem[74] reg});
+        res.insert_or_assign("scratchpad.mem[75]reg", DumpEntry{scratchpad.mem[75] reg});
+        res.insert_or_assign("scratchpad.mem[76]reg", DumpEntry{scratchpad.mem[76] reg});
+        res.insert_or_assign("scratchpad.mem[77]reg", DumpEntry{scratchpad.mem[77] reg});
+        res.insert_or_assign("scratchpad.mem[78]reg", DumpEntry{scratchpad.mem[78] reg});
+        res.insert_or_assign("scratchpad.mem[79]reg", DumpEntry{scratchpad.mem[79] reg});
+        res.insert_or_assign("scratchpad.mem[80]reg", DumpEntry{scratchpad.mem[80] reg});
+        res.insert_or_assign("scratchpad.mem[81]reg", DumpEntry{scratchpad.mem[81] reg});
+        res.insert_or_assign("scratchpad.mem[82]reg", DumpEntry{scratchpad.mem[82] reg});
+        res.insert_or_assign("scratchpad.mem[83]reg", DumpEntry{scratchpad.mem[83] reg});
+        res.insert_or_assign("scratchpad.mem[84]reg", DumpEntry{scratchpad.mem[84] reg});
+        res.insert_or_assign("scratchpad.mem[85]reg", DumpEntry{scratchpad.mem[85] reg});
+        res.insert_or_assign("scratchpad.mem[86]reg", DumpEntry{scratchpad.mem[86] reg});
+        res.insert_or_assign("scratchpad.mem[87]reg", DumpEntry{scratchpad.mem[87] reg});
+        res.insert_or_assign("scratchpad.mem[88]reg", DumpEntry{scratchpad.mem[88] reg});
+        res.insert_or_assign("scratchpad.mem[89]reg", DumpEntry{scratchpad.mem[89] reg});
+        res.insert_or_assign("scratchpad.mem[90]reg", DumpEntry{scratchpad.mem[90] reg});
+        res.insert_or_assign("scratchpad.mem[91]reg", DumpEntry{scratchpad.mem[91] reg});
+        res.insert_or_assign("scratchpad.mem[92]reg", DumpEntry{scratchpad.mem[92] reg});
+        res.insert_or_assign("scratchpad.mem[93]reg", DumpEntry{scratchpad.mem[93] reg});
+        res.insert_or_assign("scratchpad.mem[94]reg", DumpEntry{scratchpad.mem[94] reg});
+        res.insert_or_assign("scratchpad.mem[95]reg", DumpEntry{scratchpad.mem[95] reg});
+        res.insert_or_assign("scratchpad.mem[96]reg", DumpEntry{scratchpad.mem[96] reg});
+        res.insert_or_assign("scratchpad.mem[97]reg", DumpEntry{scratchpad.mem[97] reg});
+        res.insert_or_assign("scratchpad.mem[98]reg", DumpEntry{scratchpad.mem[98] reg});
+        res.insert_or_assign("scratchpad.mem[99]reg", DumpEntry{scratchpad.mem[99] reg});
+        res.insert_or_assign("scratchpad.mem[100]reg", DumpEntry{scratchpad.mem[100] reg});
+        res.insert_or_assign("scratchpad.mem[101]reg", DumpEntry{scratchpad.mem[101] reg});
+        res.insert_or_assign("scratchpad.mem[102]reg", DumpEntry{scratchpad.mem[102] reg});
+        res.insert_or_assign("scratchpad.mem[103]reg", DumpEntry{scratchpad.mem[103] reg});
+        res.insert_or_assign("scratchpad.mem[104]reg", DumpEntry{scratchpad.mem[104] reg});
+        res.insert_or_assign("scratchpad.mem[105]reg", DumpEntry{scratchpad.mem[105] reg});
+        res.insert_or_assign("scratchpad.mem[106]reg", DumpEntry{scratchpad.mem[106] reg});
+        res.insert_or_assign("scratchpad.mem[107]reg", DumpEntry{scratchpad.mem[107] reg});
+        res.insert_or_assign("scratchpad.mem[108]reg", DumpEntry{scratchpad.mem[108] reg});
+        res.insert_or_assign("scratchpad.mem[109]reg", DumpEntry{scratchpad.mem[109] reg});
+        res.insert_or_assign("scratchpad.mem[110]reg", DumpEntry{scratchpad.mem[110] reg});
+        res.insert_or_assign("scratchpad.mem[111]reg", DumpEntry{scratchpad.mem[111] reg});
+        res.insert_or_assign("scratchpad.mem[112]reg", DumpEntry{scratchpad.mem[112] reg});
+        res.insert_or_assign("scratchpad.mem[113]reg", DumpEntry{scratchpad.mem[113] reg});
+        res.insert_or_assign("scratchpad.mem[114]reg", DumpEntry{scratchpad.mem[114] reg});
+        res.insert_or_assign("scratchpad.mem[115]reg", DumpEntry{scratchpad.mem[115] reg});
+        res.insert_or_assign("scratchpad.mem[116]reg", DumpEntry{scratchpad.mem[116] reg});
+        res.insert_or_assign("scratchpad.mem[117]reg", DumpEntry{scratchpad.mem[117] reg});
+        res.insert_or_assign("scratchpad.mem[118]reg", DumpEntry{scratchpad.mem[118] reg});
+        res.insert_or_assign("scratchpad.mem[119]reg", DumpEntry{scratchpad.mem[119] reg});
+        res.insert_or_assign("scratchpad.mem[120]reg", DumpEntry{scratchpad.mem[120] reg});
+        res.insert_or_assign("scratchpad.mem[121]reg", DumpEntry{scratchpad.mem[121] reg});
+        res.insert_or_assign("scratchpad.mem[122]reg", DumpEntry{scratchpad.mem[122] reg});
+        res.insert_or_assign("scratchpad.mem[123]reg", DumpEntry{scratchpad.mem[123] reg});
+        res.insert_or_assign("scratchpad.mem[124]reg", DumpEntry{scratchpad.mem[124] reg});
+        res.insert_or_assign("scratchpad.mem[125]reg", DumpEntry{scratchpad.mem[125] reg});
+        res.insert_or_assign("scratchpad.mem[126]reg", DumpEntry{scratchpad.mem[126] reg});
+        res.insert_or_assign("scratchpad.mem[127]reg", DumpEntry{scratchpad.mem[127] reg});
+        res.insert_or_assign("scratchpad.mem[128]reg", DumpEntry{scratchpad.mem[128] reg});
+        res.insert_or_assign("scratchpad.mem[129]reg", DumpEntry{scratchpad.mem[129] reg});
+        res.insert_or_assign("scratchpad.mem[130]reg", DumpEntry{scratchpad.mem[130] reg});
+        res.insert_or_assign("scratchpad.mem[131]reg", DumpEntry{scratchpad.mem[131] reg});
+        res.insert_or_assign("scratchpad.mem[132]reg", DumpEntry{scratchpad.mem[132] reg});
+        res.insert_or_assign("scratchpad.mem[133]reg", DumpEntry{scratchpad.mem[133] reg});
+        res.insert_or_assign("scratchpad.mem[134]reg", DumpEntry{scratchpad.mem[134] reg});
+        res.insert_or_assign("scratchpad.mem[135]reg", DumpEntry{scratchpad.mem[135] reg});
+        res.insert_or_assign("scratchpad.mem[136]reg", DumpEntry{scratchpad.mem[136] reg});
+        res.insert_or_assign("scratchpad.mem[137]reg", DumpEntry{scratchpad.mem[137] reg});
+        res.insert_or_assign("scratchpad.mem[138]reg", DumpEntry{scratchpad.mem[138] reg});
+        res.insert_or_assign("scratchpad.mem[139]reg", DumpEntry{scratchpad.mem[139] reg});
+        res.insert_or_assign("scratchpad.mem[140]reg", DumpEntry{scratchpad.mem[140] reg});
+        res.insert_or_assign("scratchpad.mem[141]reg", DumpEntry{scratchpad.mem[141] reg});
+        res.insert_or_assign("scratchpad.mem[142]reg", DumpEntry{scratchpad.mem[142] reg});
+        res.insert_or_assign("scratchpad.mem[143]reg", DumpEntry{scratchpad.mem[143] reg});
+        res.insert_or_assign("scratchpad.mem[144]reg", DumpEntry{scratchpad.mem[144] reg});
+        res.insert_or_assign("scratchpad.mem[145]reg", DumpEntry{scratchpad.mem[145] reg});
+        res.insert_or_assign("scratchpad.mem[146]reg", DumpEntry{scratchpad.mem[146] reg});
+        res.insert_or_assign("scratchpad.mem[147]reg", DumpEntry{scratchpad.mem[147] reg});
+        res.insert_or_assign("scratchpad.mem[148]reg", DumpEntry{scratchpad.mem[148] reg});
+        res.insert_or_assign("scratchpad.mem[149]reg", DumpEntry{scratchpad.mem[149] reg});
+        res.insert_or_assign("scratchpad.mem[150]reg", DumpEntry{scratchpad.mem[150] reg});
+        res.insert_or_assign("scratchpad.mem[151]reg", DumpEntry{scratchpad.mem[151] reg});
+        res.insert_or_assign("scratchpad.mem[152]reg", DumpEntry{scratchpad.mem[152] reg});
+        res.insert_or_assign("scratchpad.mem[153]reg", DumpEntry{scratchpad.mem[153] reg});
+        res.insert_or_assign("scratchpad.mem[154]reg", DumpEntry{scratchpad.mem[154] reg});
+        res.insert_or_assign("scratchpad.mem[155]reg", DumpEntry{scratchpad.mem[155] reg});
+        res.insert_or_assign("scratchpad.mem[156]reg", DumpEntry{scratchpad.mem[156] reg});
+        res.insert_or_assign("scratchpad.mem[157]reg", DumpEntry{scratchpad.mem[157] reg});
+        res.insert_or_assign("scratchpad.mem[158]reg", DumpEntry{scratchpad.mem[158] reg});
+        res.insert_or_assign("scratchpad.mem[159]reg", DumpEntry{scratchpad.mem[159] reg});
+        res.insert_or_assign("scratchpad.mem[160]reg", DumpEntry{scratchpad.mem[160] reg});
+        res.insert_or_assign("scratchpad.mem[161]reg", DumpEntry{scratchpad.mem[161] reg});
+        res.insert_or_assign("scratchpad.mem[162]reg", DumpEntry{scratchpad.mem[162] reg});
+        res.insert_or_assign("scratchpad.mem[163]reg", DumpEntry{scratchpad.mem[163] reg});
+        res.insert_or_assign("scratchpad.mem[164]reg", DumpEntry{scratchpad.mem[164] reg});
+        res.insert_or_assign("scratchpad.mem[165]reg", DumpEntry{scratchpad.mem[165] reg});
+        res.insert_or_assign("scratchpad.mem[166]reg", DumpEntry{scratchpad.mem[166] reg});
+        res.insert_or_assign("scratchpad.mem[167]reg", DumpEntry{scratchpad.mem[167] reg});
+        res.insert_or_assign("scratchpad.mem[168]reg", DumpEntry{scratchpad.mem[168] reg});
+        res.insert_or_assign("scratchpad.mem[169]reg", DumpEntry{scratchpad.mem[169] reg});
+        res.insert_or_assign("scratchpad.mem[170]reg", DumpEntry{scratchpad.mem[170] reg});
+        res.insert_or_assign("scratchpad.mem[171]reg", DumpEntry{scratchpad.mem[171] reg});
+        res.insert_or_assign("scratchpad.mem[172]reg", DumpEntry{scratchpad.mem[172] reg});
+        res.insert_or_assign("scratchpad.mem[173]reg", DumpEntry{scratchpad.mem[173] reg});
+        res.insert_or_assign("scratchpad.mem[174]reg", DumpEntry{scratchpad.mem[174] reg});
+        res.insert_or_assign("scratchpad.mem[175]reg", DumpEntry{scratchpad.mem[175] reg});
+        res.insert_or_assign("scratchpad.mem[176]reg", DumpEntry{scratchpad.mem[176] reg});
+        res.insert_or_assign("scratchpad.mem[177]reg", DumpEntry{scratchpad.mem[177] reg});
+        res.insert_or_assign("scratchpad.mem[178]reg", DumpEntry{scratchpad.mem[178] reg});
+        res.insert_or_assign("scratchpad.mem[179]reg", DumpEntry{scratchpad.mem[179] reg});
+        res.insert_or_assign("scratchpad.mem[180]reg", DumpEntry{scratchpad.mem[180] reg});
+        res.insert_or_assign("scratchpad.mem[181]reg", DumpEntry{scratchpad.mem[181] reg});
+        res.insert_or_assign("scratchpad.mem[182]reg", DumpEntry{scratchpad.mem[182] reg});
+        res.insert_or_assign("scratchpad.mem[183]reg", DumpEntry{scratchpad.mem[183] reg});
+        res.insert_or_assign("scratchpad.mem[184]reg", DumpEntry{scratchpad.mem[184] reg});
+        res.insert_or_assign("scratchpad.mem[185]reg", DumpEntry{scratchpad.mem[185] reg});
+        res.insert_or_assign("scratchpad.mem[186]reg", DumpEntry{scratchpad.mem[186] reg});
+        res.insert_or_assign("scratchpad.mem[187]reg", DumpEntry{scratchpad.mem[187] reg});
+        res.insert_or_assign("scratchpad.mem[188]reg", DumpEntry{scratchpad.mem[188] reg});
+        res.insert_or_assign("scratchpad.mem[189]reg", DumpEntry{scratchpad.mem[189] reg});
+        res.insert_or_assign("scratchpad.mem[190]reg", DumpEntry{scratchpad.mem[190] reg});
+        res.insert_or_assign("scratchpad.mem[191]reg", DumpEntry{scratchpad.mem[191] reg});
+        res.insert_or_assign("scratchpad.mem[192]reg", DumpEntry{scratchpad.mem[192] reg});
+        res.insert_or_assign("scratchpad.mem[193]reg", DumpEntry{scratchpad.mem[193] reg});
+        res.insert_or_assign("scratchpad.mem[194]reg", DumpEntry{scratchpad.mem[194] reg});
+        res.insert_or_assign("scratchpad.mem[195]reg", DumpEntry{scratchpad.mem[195] reg});
+        res.insert_or_assign("scratchpad.mem[196]reg", DumpEntry{scratchpad.mem[196] reg});
+        res.insert_or_assign("scratchpad.mem[197]reg", DumpEntry{scratchpad.mem[197] reg});
+        res.insert_or_assign("scratchpad.mem[198]reg", DumpEntry{scratchpad.mem[198] reg});
+        res.insert_or_assign("scratchpad.mem[199]reg", DumpEntry{scratchpad.mem[199] reg});
+        res.insert_or_assign("scratchpad.mem[200]reg", DumpEntry{scratchpad.mem[200] reg});
+        res.insert_or_assign("scratchpad.mem[201]reg", DumpEntry{scratchpad.mem[201] reg});
+        res.insert_or_assign("scratchpad.mem[202]reg", DumpEntry{scratchpad.mem[202] reg});
+        res.insert_or_assign("scratchpad.mem[203]reg", DumpEntry{scratchpad.mem[203] reg});
+        res.insert_or_assign("scratchpad.mem[204]reg", DumpEntry{scratchpad.mem[204] reg});
+        res.insert_or_assign("scratchpad.mem[205]reg", DumpEntry{scratchpad.mem[205] reg});
+        res.insert_or_assign("scratchpad.mem[206]reg", DumpEntry{scratchpad.mem[206] reg});
+        res.insert_or_assign("scratchpad.mem[207]reg", DumpEntry{scratchpad.mem[207] reg});
+        res.insert_or_assign("scratchpad.mem[208]reg", DumpEntry{scratchpad.mem[208] reg});
+        res.insert_or_assign("scratchpad.mem[209]reg", DumpEntry{scratchpad.mem[209] reg});
+        res.insert_or_assign("scratchpad.mem[210]reg", DumpEntry{scratchpad.mem[210] reg});
+        res.insert_or_assign("scratchpad.mem[211]reg", DumpEntry{scratchpad.mem[211] reg});
+        res.insert_or_assign("scratchpad.mem[212]reg", DumpEntry{scratchpad.mem[212] reg});
+        res.insert_or_assign("scratchpad.mem[213]reg", DumpEntry{scratchpad.mem[213] reg});
+        res.insert_or_assign("scratchpad.mem[214]reg", DumpEntry{scratchpad.mem[214] reg});
+        res.insert_or_assign("scratchpad.mem[215]reg", DumpEntry{scratchpad.mem[215] reg});
+        res.insert_or_assign("scratchpad.mem[216]reg", DumpEntry{scratchpad.mem[216] reg});
+        res.insert_or_assign("scratchpad.mem[217]reg", DumpEntry{scratchpad.mem[217] reg});
+        res.insert_or_assign("scratchpad.mem[218]reg", DumpEntry{scratchpad.mem[218] reg});
+        res.insert_or_assign("scratchpad.mem[219]reg", DumpEntry{scratchpad.mem[219] reg});
+        res.insert_or_assign("scratchpad.mem[220]reg", DumpEntry{scratchpad.mem[220] reg});
+        res.insert_or_assign("scratchpad.mem[221]reg", DumpEntry{scratchpad.mem[221] reg});
+        res.insert_or_assign("scratchpad.mem[222]reg", DumpEntry{scratchpad.mem[222] reg});
+        res.insert_or_assign("scratchpad.mem[223]reg", DumpEntry{scratchpad.mem[223] reg});
+        res.insert_or_assign("scratchpad.mem[224]reg", DumpEntry{scratchpad.mem[224] reg});
+        res.insert_or_assign("scratchpad.mem[225]reg", DumpEntry{scratchpad.mem[225] reg});
+        res.insert_or_assign("scratchpad.mem[226]reg", DumpEntry{scratchpad.mem[226] reg});
+        res.insert_or_assign("scratchpad.mem[227]reg", DumpEntry{scratchpad.mem[227] reg});
+        res.insert_or_assign("scratchpad.mem[228]reg", DumpEntry{scratchpad.mem[228] reg});
+        res.insert_or_assign("scratchpad.mem[229]reg", DumpEntry{scratchpad.mem[229] reg});
+        res.insert_or_assign("scratchpad.mem[230]reg", DumpEntry{scratchpad.mem[230] reg});
+        res.insert_or_assign("scratchpad.mem[231]reg", DumpEntry{scratchpad.mem[231] reg});
+        res.insert_or_assign("scratchpad.mem[232]reg", DumpEntry{scratchpad.mem[232] reg});
+        res.insert_or_assign("scratchpad.mem[233]reg", DumpEntry{scratchpad.mem[233] reg});
+        res.insert_or_assign("scratchpad.mem[234]reg", DumpEntry{scratchpad.mem[234] reg});
+        res.insert_or_assign("scratchpad.mem[235]reg", DumpEntry{scratchpad.mem[235] reg});
+        res.insert_or_assign("scratchpad.mem[236]reg", DumpEntry{scratchpad.mem[236] reg});
+        res.insert_or_assign("scratchpad.mem[237]reg", DumpEntry{scratchpad.mem[237] reg});
+        res.insert_or_assign("scratchpad.mem[238]reg", DumpEntry{scratchpad.mem[238] reg});
+        res.insert_or_assign("scratchpad.mem[239]reg", DumpEntry{scratchpad.mem[239] reg});
+        res.insert_or_assign("scratchpad.mem[240]reg", DumpEntry{scratchpad.mem[240] reg});
+        res.insert_or_assign("scratchpad.mem[241]reg", DumpEntry{scratchpad.mem[241] reg});
+        res.insert_or_assign("scratchpad.mem[242]reg", DumpEntry{scratchpad.mem[242] reg});
+        res.insert_or_assign("scratchpad.mem[243]reg", DumpEntry{scratchpad.mem[243] reg});
+        res.insert_or_assign("scratchpad.mem[244]reg", DumpEntry{scratchpad.mem[244] reg});
+        res.insert_or_assign("scratchpad.mem[245]reg", DumpEntry{scratchpad.mem[245] reg});
+        res.insert_or_assign("scratchpad.mem[246]reg", DumpEntry{scratchpad.mem[246] reg});
+        res.insert_or_assign("scratchpad.mem[247]reg", DumpEntry{scratchpad.mem[247] reg});
+        res.insert_or_assign("scratchpad.mem[248]reg", DumpEntry{scratchpad.mem[248] reg});
+        res.insert_or_assign("scratchpad.mem[249]reg", DumpEntry{scratchpad.mem[249] reg});
+        res.insert_or_assign("scratchpad.mem[250]reg", DumpEntry{scratchpad.mem[250] reg});
+        res.insert_or_assign("scratchpad.mem[251]reg", DumpEntry{scratchpad.mem[251] reg});
+        res.insert_or_assign("scratchpad.mem[252]reg", DumpEntry{scratchpad.mem[252] reg});
+        res.insert_or_assign("scratchpad.mem[253]reg", DumpEntry{scratchpad.mem[253] reg});
+        res.insert_or_assign("scratchpad.mem[254]reg", DumpEntry{scratchpad.mem[254] reg});
+        res.insert_or_assign("scratchpad.mem[255]reg", DumpEntry{scratchpad.mem[255] reg});
+        res.insert_or_assign("scratchpad.mem[256]reg", DumpEntry{scratchpad.mem[256] reg});
+        res.insert_or_assign("scratchpad.mem[257]reg", DumpEntry{scratchpad.mem[257] reg});
+        res.insert_or_assign("scratchpad.mem[258]reg", DumpEntry{scratchpad.mem[258] reg});
+        res.insert_or_assign("scratchpad.mem[259]reg", DumpEntry{scratchpad.mem[259] reg});
+        res.insert_or_assign("scratchpad.mem[260]reg", DumpEntry{scratchpad.mem[260] reg});
+        res.insert_or_assign("scratchpad.mem[261]reg", DumpEntry{scratchpad.mem[261] reg});
+        res.insert_or_assign("scratchpad.mem[262]reg", DumpEntry{scratchpad.mem[262] reg});
+        res.insert_or_assign("scratchpad.mem[263]reg", DumpEntry{scratchpad.mem[263] reg});
+        res.insert_or_assign("scratchpad.mem[264]reg", DumpEntry{scratchpad.mem[264] reg});
+        res.insert_or_assign("scratchpad.mem[265]reg", DumpEntry{scratchpad.mem[265] reg});
+        res.insert_or_assign("scratchpad.mem[266]reg", DumpEntry{scratchpad.mem[266] reg});
+        res.insert_or_assign("scratchpad.mem[267]reg", DumpEntry{scratchpad.mem[267] reg});
+        res.insert_or_assign("scratchpad.mem[268]reg", DumpEntry{scratchpad.mem[268] reg});
+        res.insert_or_assign("scratchpad.mem[269]reg", DumpEntry{scratchpad.mem[269] reg});
+        res.insert_or_assign("scratchpad.mem[270]reg", DumpEntry{scratchpad.mem[270] reg});
+        res.insert_or_assign("scratchpad.mem[271]reg", DumpEntry{scratchpad.mem[271] reg});
+        res.insert_or_assign("scratchpad.mem[272]reg", DumpEntry{scratchpad.mem[272] reg});
+        res.insert_or_assign("scratchpad.mem[273]reg", DumpEntry{scratchpad.mem[273] reg});
+        res.insert_or_assign("scratchpad.mem[274]reg", DumpEntry{scratchpad.mem[274] reg});
+        res.insert_or_assign("scratchpad.mem[275]reg", DumpEntry{scratchpad.mem[275] reg});
+        res.insert_or_assign("scratchpad.mem[276]reg", DumpEntry{scratchpad.mem[276] reg});
+        res.insert_or_assign("scratchpad.mem[277]reg", DumpEntry{scratchpad.mem[277] reg});
+        res.insert_or_assign("scratchpad.mem[278]reg", DumpEntry{scratchpad.mem[278] reg});
+        res.insert_or_assign("scratchpad.mem[279]reg", DumpEntry{scratchpad.mem[279] reg});
+        res.insert_or_assign("scratchpad.mem[280]reg", DumpEntry{scratchpad.mem[280] reg});
+        res.insert_or_assign("scratchpad.mem[281]reg", DumpEntry{scratchpad.mem[281] reg});
+        res.insert_or_assign("scratchpad.mem[282]reg", DumpEntry{scratchpad.mem[282] reg});
+        res.insert_or_assign("scratchpad.mem[283]reg", DumpEntry{scratchpad.mem[283] reg});
+        res.insert_or_assign("scratchpad.mem[284]reg", DumpEntry{scratchpad.mem[284] reg});
+        res.insert_or_assign("scratchpad.mem[285]reg", DumpEntry{scratchpad.mem[285] reg});
+        res.insert_or_assign("scratchpad.mem[286]reg", DumpEntry{scratchpad.mem[286] reg});
+        res.insert_or_assign("scratchpad.mem[287]reg", DumpEntry{scratchpad.mem[287] reg});
+        res.insert_or_assign("scratchpad.mem[288]reg", DumpEntry{scratchpad.mem[288] reg});
+        res.insert_or_assign("scratchpad.mem[289]reg", DumpEntry{scratchpad.mem[289] reg});
+        res.insert_or_assign("scratchpad.mem[290]reg", DumpEntry{scratchpad.mem[290] reg});
+        res.insert_or_assign("scratchpad.mem[291]reg", DumpEntry{scratchpad.mem[291] reg});
+        res.insert_or_assign("scratchpad.mem[292]reg", DumpEntry{scratchpad.mem[292] reg});
+        res.insert_or_assign("scratchpad.mem[293]reg", DumpEntry{scratchpad.mem[293] reg});
+        res.insert_or_assign("scratchpad.mem[294]reg", DumpEntry{scratchpad.mem[294] reg});
+        res.insert_or_assign("scratchpad.mem[295]reg", DumpEntry{scratchpad.mem[295] reg});
+        res.insert_or_assign("scratchpad.mem[296]reg", DumpEntry{scratchpad.mem[296] reg});
+        res.insert_or_assign("scratchpad.mem[297]reg", DumpEntry{scratchpad.mem[297] reg});
+        res.insert_or_assign("scratchpad.mem[298]reg", DumpEntry{scratchpad.mem[298] reg});
+        res.insert_or_assign("scratchpad.mem[299]reg", DumpEntry{scratchpad.mem[299] reg});
+        res.insert_or_assign("scratchpad.mem[300]reg", DumpEntry{scratchpad.mem[300] reg});
+        res.insert_or_assign("scratchpad.mem[301]reg", DumpEntry{scratchpad.mem[301] reg});
+        res.insert_or_assign("scratchpad.mem[302]reg", DumpEntry{scratchpad.mem[302] reg});
+        res.insert_or_assign("scratchpad.mem[303]reg", DumpEntry{scratchpad.mem[303] reg});
+        res.insert_or_assign("scratchpad.mem[304]reg", DumpEntry{scratchpad.mem[304] reg});
+        res.insert_or_assign("scratchpad.mem[305]reg", DumpEntry{scratchpad.mem[305] reg});
+        res.insert_or_assign("scratchpad.mem[306]reg", DumpEntry{scratchpad.mem[306] reg});
+        res.insert_or_assign("scratchpad.mem[307]reg", DumpEntry{scratchpad.mem[307] reg});
+        res.insert_or_assign("scratchpad.mem[308]reg", DumpEntry{scratchpad.mem[308] reg});
+        res.insert_or_assign("scratchpad.mem[309]reg", DumpEntry{scratchpad.mem[309] reg});
+        res.insert_or_assign("scratchpad.mem[310]reg", DumpEntry{scratchpad.mem[310] reg});
+        res.insert_or_assign("scratchpad.mem[311]reg", DumpEntry{scratchpad.mem[311] reg});
+        res.insert_or_assign("scratchpad.mem[312]reg", DumpEntry{scratchpad.mem[312] reg});
+        res.insert_or_assign("scratchpad.mem[313]reg", DumpEntry{scratchpad.mem[313] reg});
+        res.insert_or_assign("scratchpad.mem[314]reg", DumpEntry{scratchpad.mem[314] reg});
+        res.insert_or_assign("scratchpad.mem[315]reg", DumpEntry{scratchpad.mem[315] reg});
+        res.insert_or_assign("scratchpad.mem[316]reg", DumpEntry{scratchpad.mem[316] reg});
+        res.insert_or_assign("scratchpad.mem[317]reg", DumpEntry{scratchpad.mem[317] reg});
+        res.insert_or_assign("scratchpad.mem[318]reg", DumpEntry{scratchpad.mem[318] reg});
+        res.insert_or_assign("scratchpad.mem[319]reg", DumpEntry{scratchpad.mem[319] reg});
+        res.insert_or_assign("scratchpad.mem[320]reg", DumpEntry{scratchpad.mem[320] reg});
+        res.insert_or_assign("scratchpad.mem[321]reg", DumpEntry{scratchpad.mem[321] reg});
+        res.insert_or_assign("scratchpad.mem[322]reg", DumpEntry{scratchpad.mem[322] reg});
+        res.insert_or_assign("scratchpad.mem[323]reg", DumpEntry{scratchpad.mem[323] reg});
+        res.insert_or_assign("scratchpad.mem[324]reg", DumpEntry{scratchpad.mem[324] reg});
+        res.insert_or_assign("scratchpad.mem[325]reg", DumpEntry{scratchpad.mem[325] reg});
+        res.insert_or_assign("scratchpad.mem[326]reg", DumpEntry{scratchpad.mem[326] reg});
+        res.insert_or_assign("scratchpad.mem[327]reg", DumpEntry{scratchpad.mem[327] reg});
+        res.insert_or_assign("scratchpad.mem[328]reg", DumpEntry{scratchpad.mem[328] reg});
+        res.insert_or_assign("scratchpad.mem[329]reg", DumpEntry{scratchpad.mem[329] reg});
+        res.insert_or_assign("scratchpad.mem[330]reg", DumpEntry{scratchpad.mem[330] reg});
+        res.insert_or_assign("scratchpad.mem[331]reg", DumpEntry{scratchpad.mem[331] reg});
+        res.insert_or_assign("scratchpad.mem[332]reg", DumpEntry{scratchpad.mem[332] reg});
+        res.insert_or_assign("scratchpad.mem[333]reg", DumpEntry{scratchpad.mem[333] reg});
+        res.insert_or_assign("scratchpad.mem[334]reg", DumpEntry{scratchpad.mem[334] reg});
+        res.insert_or_assign("scratchpad.mem[335]reg", DumpEntry{scratchpad.mem[335] reg});
+        res.insert_or_assign("scratchpad.mem[336]reg", DumpEntry{scratchpad.mem[336] reg});
+        res.insert_or_assign("scratchpad.mem[337]reg", DumpEntry{scratchpad.mem[337] reg});
+        res.insert_or_assign("scratchpad.mem[338]reg", DumpEntry{scratchpad.mem[338] reg});
+        res.insert_or_assign("scratchpad.mem[339]reg", DumpEntry{scratchpad.mem[339] reg});
+        res.insert_or_assign("scratchpad.mem[340]reg", DumpEntry{scratchpad.mem[340] reg});
+        res.insert_or_assign("scratchpad.mem[341]reg", DumpEntry{scratchpad.mem[341] reg});
+        res.insert_or_assign("scratchpad.mem[342]reg", DumpEntry{scratchpad.mem[342] reg});
+        res.insert_or_assign("scratchpad.mem[343]reg", DumpEntry{scratchpad.mem[343] reg});
+        res.insert_or_assign("scratchpad.mem[344]reg", DumpEntry{scratchpad.mem[344] reg});
+        res.insert_or_assign("scratchpad.mem[345]reg", DumpEntry{scratchpad.mem[345] reg});
+        res.insert_or_assign("scratchpad.mem[346]reg", DumpEntry{scratchpad.mem[346] reg});
+        res.insert_or_assign("scratchpad.mem[347]reg", DumpEntry{scratchpad.mem[347] reg});
+        res.insert_or_assign("scratchpad.mem[348]reg", DumpEntry{scratchpad.mem[348] reg});
+        res.insert_or_assign("scratchpad.mem[349]reg", DumpEntry{scratchpad.mem[349] reg});
+        res.insert_or_assign("scratchpad.mem[350]reg", DumpEntry{scratchpad.mem[350] reg});
+        res.insert_or_assign("scratchpad.mem[351]reg", DumpEntry{scratchpad.mem[351] reg});
+        res.insert_or_assign("scratchpad.mem[352]reg", DumpEntry{scratchpad.mem[352] reg});
+        res.insert_or_assign("scratchpad.mem[353]reg", DumpEntry{scratchpad.mem[353] reg});
+        res.insert_or_assign("scratchpad.mem[354]reg", DumpEntry{scratchpad.mem[354] reg});
+        res.insert_or_assign("scratchpad.mem[355]reg", DumpEntry{scratchpad.mem[355] reg});
+        res.insert_or_assign("scratchpad.mem[356]reg", DumpEntry{scratchpad.mem[356] reg});
+        res.insert_or_assign("scratchpad.mem[357]reg", DumpEntry{scratchpad.mem[357] reg});
+        res.insert_or_assign("scratchpad.mem[358]reg", DumpEntry{scratchpad.mem[358] reg});
+        res.insert_or_assign("scratchpad.mem[359]reg", DumpEntry{scratchpad.mem[359] reg});
+        res.insert_or_assign("scratchpad.mem[360]reg", DumpEntry{scratchpad.mem[360] reg});
+        res.insert_or_assign("scratchpad.mem[361]reg", DumpEntry{scratchpad.mem[361] reg});
+        res.insert_or_assign("scratchpad.mem[362]reg", DumpEntry{scratchpad.mem[362] reg});
+        res.insert_or_assign("scratchpad.mem[363]reg", DumpEntry{scratchpad.mem[363] reg});
+        res.insert_or_assign("scratchpad.mem[364]reg", DumpEntry{scratchpad.mem[364] reg});
+        res.insert_or_assign("scratchpad.mem[365]reg", DumpEntry{scratchpad.mem[365] reg});
+        res.insert_or_assign("scratchpad.mem[366]reg", DumpEntry{scratchpad.mem[366] reg});
+        res.insert_or_assign("scratchpad.mem[367]reg", DumpEntry{scratchpad.mem[367] reg});
+        res.insert_or_assign("scratchpad.mem[368]reg", DumpEntry{scratchpad.mem[368] reg});
+        res.insert_or_assign("scratchpad.mem[369]reg", DumpEntry{scratchpad.mem[369] reg});
+        res.insert_or_assign("scratchpad.mem[370]reg", DumpEntry{scratchpad.mem[370] reg});
+        res.insert_or_assign("scratchpad.mem[371]reg", DumpEntry{scratchpad.mem[371] reg});
+        res.insert_or_assign("scratchpad.mem[372]reg", DumpEntry{scratchpad.mem[372] reg});
+        res.insert_or_assign("scratchpad.mem[373]reg", DumpEntry{scratchpad.mem[373] reg});
+        res.insert_or_assign("scratchpad.mem[374]reg", DumpEntry{scratchpad.mem[374] reg});
+        res.insert_or_assign("scratchpad.mem[375]reg", DumpEntry{scratchpad.mem[375] reg});
+        res.insert_or_assign("scratchpad.mem[376]reg", DumpEntry{scratchpad.mem[376] reg});
+        res.insert_or_assign("scratchpad.mem[377]reg", DumpEntry{scratchpad.mem[377] reg});
+        res.insert_or_assign("scratchpad.mem[378]reg", DumpEntry{scratchpad.mem[378] reg});
+        res.insert_or_assign("scratchpad.mem[379]reg", DumpEntry{scratchpad.mem[379] reg});
+        res.insert_or_assign("scratchpad.mem[380]reg", DumpEntry{scratchpad.mem[380] reg});
+        res.insert_or_assign("scratchpad.mem[381]reg", DumpEntry{scratchpad.mem[381] reg});
+        res.insert_or_assign("scratchpad.mem[382]reg", DumpEntry{scratchpad.mem[382] reg});
+        res.insert_or_assign("scratchpad.mem[383]reg", DumpEntry{scratchpad.mem[383] reg});
+        res.insert_or_assign("scratchpad.mem[384]reg", DumpEntry{scratchpad.mem[384] reg});
+        res.insert_or_assign("scratchpad.mem[385]reg", DumpEntry{scratchpad.mem[385] reg});
+        res.insert_or_assign("scratchpad.mem[386]reg", DumpEntry{scratchpad.mem[386] reg});
+        res.insert_or_assign("scratchpad.mem[387]reg", DumpEntry{scratchpad.mem[387] reg});
+        res.insert_or_assign("scratchpad.mem[388]reg", DumpEntry{scratchpad.mem[388] reg});
+        res.insert_or_assign("scratchpad.mem[389]reg", DumpEntry{scratchpad.mem[389] reg});
+        res.insert_or_assign("scratchpad.mem[390]reg", DumpEntry{scratchpad.mem[390] reg});
+        res.insert_or_assign("scratchpad.mem[391]reg", DumpEntry{scratchpad.mem[391] reg});
+        res.insert_or_assign("scratchpad.mem[392]reg", DumpEntry{scratchpad.mem[392] reg});
+        res.insert_or_assign("scratchpad.mem[393]reg", DumpEntry{scratchpad.mem[393] reg});
+        res.insert_or_assign("scratchpad.mem[394]reg", DumpEntry{scratchpad.mem[394] reg});
+        res.insert_or_assign("scratchpad.mem[395]reg", DumpEntry{scratchpad.mem[395] reg});
+        res.insert_or_assign("scratchpad.mem[396]reg", DumpEntry{scratchpad.mem[396] reg});
+        res.insert_or_assign("scratchpad.mem[397]reg", DumpEntry{scratchpad.mem[397] reg});
+        res.insert_or_assign("scratchpad.mem[398]reg", DumpEntry{scratchpad.mem[398] reg});
+        res.insert_or_assign("scratchpad.mem[399]reg", DumpEntry{scratchpad.mem[399] reg});
+        res.insert_or_assign("scratchpad.mem[400]reg", DumpEntry{scratchpad.mem[400] reg});
+        res.insert_or_assign("scratchpad.mem[401]reg", DumpEntry{scratchpad.mem[401] reg});
+        res.insert_or_assign("scratchpad.mem[402]reg", DumpEntry{scratchpad.mem[402] reg});
+        res.insert_or_assign("scratchpad.mem[403]reg", DumpEntry{scratchpad.mem[403] reg});
+        res.insert_or_assign("scratchpad.mem[404]reg", DumpEntry{scratchpad.mem[404] reg});
+        res.insert_or_assign("scratchpad.mem[405]reg", DumpEntry{scratchpad.mem[405] reg});
+        res.insert_or_assign("scratchpad.mem[406]reg", DumpEntry{scratchpad.mem[406] reg});
+        res.insert_or_assign("scratchpad.mem[407]reg", DumpEntry{scratchpad.mem[407] reg});
+        res.insert_or_assign("scratchpad.mem[408]reg", DumpEntry{scratchpad.mem[408] reg});
+        res.insert_or_assign("scratchpad.mem[409]reg", DumpEntry{scratchpad.mem[409] reg});
+        res.insert_or_assign("scratchpad.mem[410]reg", DumpEntry{scratchpad.mem[410] reg});
+        res.insert_or_assign("scratchpad.mem[411]reg", DumpEntry{scratchpad.mem[411] reg});
+        res.insert_or_assign("scratchpad.mem[412]reg", DumpEntry{scratchpad.mem[412] reg});
+        res.insert_or_assign("scratchpad.mem[413]reg", DumpEntry{scratchpad.mem[413] reg});
+        res.insert_or_assign("scratchpad.mem[414]reg", DumpEntry{scratchpad.mem[414] reg});
+        res.insert_or_assign("scratchpad.mem[415]reg", DumpEntry{scratchpad.mem[415] reg});
+        res.insert_or_assign("scratchpad.mem[416]reg", DumpEntry{scratchpad.mem[416] reg});
+        res.insert_or_assign("scratchpad.mem[417]reg", DumpEntry{scratchpad.mem[417] reg});
+        res.insert_or_assign("scratchpad.mem[418]reg", DumpEntry{scratchpad.mem[418] reg});
+        res.insert_or_assign("scratchpad.mem[419]reg", DumpEntry{scratchpad.mem[419] reg});
+        res.insert_or_assign("scratchpad.mem[420]reg", DumpEntry{scratchpad.mem[420] reg});
+        res.insert_or_assign("scratchpad.mem[421]reg", DumpEntry{scratchpad.mem[421] reg});
+        res.insert_or_assign("scratchpad.mem[422]reg", DumpEntry{scratchpad.mem[422] reg});
+        res.insert_or_assign("scratchpad.mem[423]reg", DumpEntry{scratchpad.mem[423] reg});
+        res.insert_or_assign("scratchpad.mem[424]reg", DumpEntry{scratchpad.mem[424] reg});
+        res.insert_or_assign("scratchpad.mem[425]reg", DumpEntry{scratchpad.mem[425] reg});
+        res.insert_or_assign("scratchpad.mem[426]reg", DumpEntry{scratchpad.mem[426] reg});
+        res.insert_or_assign("scratchpad.mem[427]reg", DumpEntry{scratchpad.mem[427] reg});
+        res.insert_or_assign("scratchpad.mem[428]reg", DumpEntry{scratchpad.mem[428] reg});
+        res.insert_or_assign("scratchpad.mem[429]reg", DumpEntry{scratchpad.mem[429] reg});
+        res.insert_or_assign("scratchpad.mem[430]reg", DumpEntry{scratchpad.mem[430] reg});
+        res.insert_or_assign("scratchpad.mem[431]reg", DumpEntry{scratchpad.mem[431] reg});
+        res.insert_or_assign("scratchpad.mem[432]reg", DumpEntry{scratchpad.mem[432] reg});
+        res.insert_or_assign("scratchpad.mem[433]reg", DumpEntry{scratchpad.mem[433] reg});
+        res.insert_or_assign("scratchpad.mem[434]reg", DumpEntry{scratchpad.mem[434] reg});
+        res.insert_or_assign("scratchpad.mem[435]reg", DumpEntry{scratchpad.mem[435] reg});
+        res.insert_or_assign("scratchpad.mem[436]reg", DumpEntry{scratchpad.mem[436] reg});
+        res.insert_or_assign("scratchpad.mem[437]reg", DumpEntry{scratchpad.mem[437] reg});
+        res.insert_or_assign("scratchpad.mem[438]reg", DumpEntry{scratchpad.mem[438] reg});
+        res.insert_or_assign("scratchpad.mem[439]reg", DumpEntry{scratchpad.mem[439] reg});
+        res.insert_or_assign("scratchpad.mem[440]reg", DumpEntry{scratchpad.mem[440] reg});
+        res.insert_or_assign("scratchpad.mem[441]reg", DumpEntry{scratchpad.mem[441] reg});
+        res.insert_or_assign("scratchpad.mem[442]reg", DumpEntry{scratchpad.mem[442] reg});
+        res.insert_or_assign("scratchpad.mem[443]reg", DumpEntry{scratchpad.mem[443] reg});
+        res.insert_or_assign("scratchpad.mem[444]reg", DumpEntry{scratchpad.mem[444] reg});
+        res.insert_or_assign("scratchpad.mem[445]reg", DumpEntry{scratchpad.mem[445] reg});
+        res.insert_or_assign("scratchpad.mem[446]reg", DumpEntry{scratchpad.mem[446] reg});
+        res.insert_or_assign("scratchpad.mem[447]reg", DumpEntry{scratchpad.mem[447] reg});
+        res.insert_or_assign("scratchpad.mem[448]reg", DumpEntry{scratchpad.mem[448] reg});
+        res.insert_or_assign("scratchpad.mem[449]reg", DumpEntry{scratchpad.mem[449] reg});
+        res.insert_or_assign("scratchpad.mem[450]reg", DumpEntry{scratchpad.mem[450] reg});
+        res.insert_or_assign("scratchpad.mem[451]reg", DumpEntry{scratchpad.mem[451] reg});
+        res.insert_or_assign("scratchpad.mem[452]reg", DumpEntry{scratchpad.mem[452] reg});
+        res.insert_or_assign("scratchpad.mem[453]reg", DumpEntry{scratchpad.mem[453] reg});
+        res.insert_or_assign("scratchpad.mem[454]reg", DumpEntry{scratchpad.mem[454] reg});
+        res.insert_or_assign("scratchpad.mem[455]reg", DumpEntry{scratchpad.mem[455] reg});
+        res.insert_or_assign("scratchpad.mem[456]reg", DumpEntry{scratchpad.mem[456] reg});
+        res.insert_or_assign("scratchpad.mem[457]reg", DumpEntry{scratchpad.mem[457] reg});
+        res.insert_or_assign("scratchpad.mem[458]reg", DumpEntry{scratchpad.mem[458] reg});
+        res.insert_or_assign("scratchpad.mem[459]reg", DumpEntry{scratchpad.mem[459] reg});
+        res.insert_or_assign("scratchpad.mem[460]reg", DumpEntry{scratchpad.mem[460] reg});
+        res.insert_or_assign("scratchpad.mem[461]reg", DumpEntry{scratchpad.mem[461] reg});
+        res.insert_or_assign("scratchpad.mem[462]reg", DumpEntry{scratchpad.mem[462] reg});
+        res.insert_or_assign("scratchpad.mem[463]reg", DumpEntry{scratchpad.mem[463] reg});
+        res.insert_or_assign("scratchpad.mem[464]reg", DumpEntry{scratchpad.mem[464] reg});
+        res.insert_or_assign("scratchpad.mem[465]reg", DumpEntry{scratchpad.mem[465] reg});
+        res.insert_or_assign("scratchpad.mem[466]reg", DumpEntry{scratchpad.mem[466] reg});
+        res.insert_or_assign("scratchpad.mem[467]reg", DumpEntry{scratchpad.mem[467] reg});
+        res.insert_or_assign("scratchpad.mem[468]reg", DumpEntry{scratchpad.mem[468] reg});
+        res.insert_or_assign("scratchpad.mem[469]reg", DumpEntry{scratchpad.mem[469] reg});
+        res.insert_or_assign("scratchpad.mem[470]reg", DumpEntry{scratchpad.mem[470] reg});
+        res.insert_or_assign("scratchpad.mem[471]reg", DumpEntry{scratchpad.mem[471] reg});
+        res.insert_or_assign("scratchpad.mem[472]reg", DumpEntry{scratchpad.mem[472] reg});
+        res.insert_or_assign("scratchpad.mem[473]reg", DumpEntry{scratchpad.mem[473] reg});
+        res.insert_or_assign("scratchpad.mem[474]reg", DumpEntry{scratchpad.mem[474] reg});
+        res.insert_or_assign("scratchpad.mem[475]reg", DumpEntry{scratchpad.mem[475] reg});
+        res.insert_or_assign("scratchpad.mem[476]reg", DumpEntry{scratchpad.mem[476] reg});
+        res.insert_or_assign("scratchpad.mem[477]reg", DumpEntry{scratchpad.mem[477] reg});
+        res.insert_or_assign("scratchpad.mem[478]reg", DumpEntry{scratchpad.mem[478] reg});
+        res.insert_or_assign("scratchpad.mem[479]reg", DumpEntry{scratchpad.mem[479] reg});
+        res.insert_or_assign("scratchpad.mem[480]reg", DumpEntry{scratchpad.mem[480] reg});
+        res.insert_or_assign("scratchpad.mem[481]reg", DumpEntry{scratchpad.mem[481] reg});
+        res.insert_or_assign("scratchpad.mem[482]reg", DumpEntry{scratchpad.mem[482] reg});
+        res.insert_or_assign("scratchpad.mem[483]reg", DumpEntry{scratchpad.mem[483] reg});
+        res.insert_or_assign("scratchpad.mem[484]reg", DumpEntry{scratchpad.mem[484] reg});
+        res.insert_or_assign("scratchpad.mem[485]reg", DumpEntry{scratchpad.mem[485] reg});
+        res.insert_or_assign("scratchpad.mem[486]reg", DumpEntry{scratchpad.mem[486] reg});
+        res.insert_or_assign("scratchpad.mem[487]reg", DumpEntry{scratchpad.mem[487] reg});
+        res.insert_or_assign("scratchpad.mem[488]reg", DumpEntry{scratchpad.mem[488] reg});
+        res.insert_or_assign("scratchpad.mem[489]reg", DumpEntry{scratchpad.mem[489] reg});
+        res.insert_or_assign("scratchpad.mem[490]reg", DumpEntry{scratchpad.mem[490] reg});
+        res.insert_or_assign("scratchpad.mem[491]reg", DumpEntry{scratchpad.mem[491] reg});
+        res.insert_or_assign("scratchpad.mem[492]reg", DumpEntry{scratchpad.mem[492] reg});
+        res.insert_or_assign("scratchpad.mem[493]reg", DumpEntry{scratchpad.mem[493] reg});
+        res.insert_or_assign("scratchpad.mem[494]reg", DumpEntry{scratchpad.mem[494] reg});
+        res.insert_or_assign("scratchpad.mem[495]reg", DumpEntry{scratchpad.mem[495] reg});
+        res.insert_or_assign("scratchpad.mem[496]reg", DumpEntry{scratchpad.mem[496] reg});
+        res.insert_or_assign("scratchpad.mem[497]reg", DumpEntry{scratchpad.mem[497] reg});
+        res.insert_or_assign("scratchpad.mem[498]reg", DumpEntry{scratchpad.mem[498] reg});
+        res.insert_or_assign("scratchpad.mem[499]reg", DumpEntry{scratchpad.mem[499] reg});
+        res.insert_or_assign("scratchpad.mem[500]reg", DumpEntry{scratchpad.mem[500] reg});
+        res.insert_or_assign("scratchpad.mem[501]reg", DumpEntry{scratchpad.mem[501] reg});
+        res.insert_or_assign("scratchpad.mem[502]reg", DumpEntry{scratchpad.mem[502] reg});
+        res.insert_or_assign("scratchpad.mem[503]reg", DumpEntry{scratchpad.mem[503] reg});
+        res.insert_or_assign("scratchpad.mem[504]reg", DumpEntry{scratchpad.mem[504] reg});
+        res.insert_or_assign("scratchpad.mem[505]reg", DumpEntry{scratchpad.mem[505] reg});
+        res.insert_or_assign("scratchpad.mem[506]reg", DumpEntry{scratchpad.mem[506] reg});
+        res.insert_or_assign("scratchpad.mem[507]reg", DumpEntry{scratchpad.mem[507] reg});
+        res.insert_or_assign("scratchpad.mem[508]reg", DumpEntry{scratchpad.mem[508] reg});
+        res.insert_or_assign("scratchpad.mem[509]reg", DumpEntry{scratchpad.mem[509] reg});
+        res.insert_or_assign("scratchpad.mem[510]reg", DumpEntry{scratchpad.mem[510] reg});
+        res.insert_or_assign("scratchpad.mem[511]reg", DumpEntry{scratchpad.mem[511] reg});
+        res.insert_or_assign("scratchpad.mem[512]reg", DumpEntry{scratchpad.mem[512] reg});
+        res.insert_or_assign("scratchpad.mem[513]reg", DumpEntry{scratchpad.mem[513] reg});
+        res.insert_or_assign("scratchpad.mem[514]reg", DumpEntry{scratchpad.mem[514] reg});
+        res.insert_or_assign("scratchpad.mem[515]reg", DumpEntry{scratchpad.mem[515] reg});
+        res.insert_or_assign("scratchpad.mem[516]reg", DumpEntry{scratchpad.mem[516] reg});
+        res.insert_or_assign("scratchpad.mem[517]reg", DumpEntry{scratchpad.mem[517] reg});
+        res.insert_or_assign("scratchpad.mem[518]reg", DumpEntry{scratchpad.mem[518] reg});
+        res.insert_or_assign("scratchpad.mem[519]reg", DumpEntry{scratchpad.mem[519] reg});
+        res.insert_or_assign("scratchpad.mem[520]reg", DumpEntry{scratchpad.mem[520] reg});
+        res.insert_or_assign("scratchpad.mem[521]reg", DumpEntry{scratchpad.mem[521] reg});
+        res.insert_or_assign("scratchpad.mem[522]reg", DumpEntry{scratchpad.mem[522] reg});
+        res.insert_or_assign("scratchpad.mem[523]reg", DumpEntry{scratchpad.mem[523] reg});
+        res.insert_or_assign("scratchpad.mem[524]reg", DumpEntry{scratchpad.mem[524] reg});
+        res.insert_or_assign("scratchpad.mem[525]reg", DumpEntry{scratchpad.mem[525] reg});
+        res.insert_or_assign("scratchpad.mem[526]reg", DumpEntry{scratchpad.mem[526] reg});
+        res.insert_or_assign("scratchpad.mem[527]reg", DumpEntry{scratchpad.mem[527] reg});
+        res.insert_or_assign("scratchpad.mem[528]reg", DumpEntry{scratchpad.mem[528] reg});
+        res.insert_or_assign("scratchpad.mem[529]reg", DumpEntry{scratchpad.mem[529] reg});
+        res.insert_or_assign("scratchpad.mem[530]reg", DumpEntry{scratchpad.mem[530] reg});
+        res.insert_or_assign("scratchpad.mem[531]reg", DumpEntry{scratchpad.mem[531] reg});
+        res.insert_or_assign("scratchpad.mem[532]reg", DumpEntry{scratchpad.mem[532] reg});
+        res.insert_or_assign("scratchpad.mem[533]reg", DumpEntry{scratchpad.mem[533] reg});
+        res.insert_or_assign("scratchpad.mem[534]reg", DumpEntry{scratchpad.mem[534] reg});
+        res.insert_or_assign("scratchpad.mem[535]reg", DumpEntry{scratchpad.mem[535] reg});
+        res.insert_or_assign("scratchpad.mem[536]reg", DumpEntry{scratchpad.mem[536] reg});
+        res.insert_or_assign("scratchpad.mem[537]reg", DumpEntry{scratchpad.mem[537] reg});
+        res.insert_or_assign("scratchpad.mem[538]reg", DumpEntry{scratchpad.mem[538] reg});
+        res.insert_or_assign("scratchpad.mem[539]reg", DumpEntry{scratchpad.mem[539] reg});
+        res.insert_or_assign("scratchpad.mem[540]reg", DumpEntry{scratchpad.mem[540] reg});
+        res.insert_or_assign("scratchpad.mem[541]reg", DumpEntry{scratchpad.mem[541] reg});
+        res.insert_or_assign("scratchpad.mem[542]reg", DumpEntry{scratchpad.mem[542] reg});
+        res.insert_or_assign("scratchpad.mem[543]reg", DumpEntry{scratchpad.mem[543] reg});
+        res.insert_or_assign("scratchpad.mem[544]reg", DumpEntry{scratchpad.mem[544] reg});
+        res.insert_or_assign("scratchpad.mem[545]reg", DumpEntry{scratchpad.mem[545] reg});
+        res.insert_or_assign("scratchpad.mem[546]reg", DumpEntry{scratchpad.mem[546] reg});
+        res.insert_or_assign("scratchpad.mem[547]reg", DumpEntry{scratchpad.mem[547] reg});
+        res.insert_or_assign("scratchpad.mem[548]reg", DumpEntry{scratchpad.mem[548] reg});
+        res.insert_or_assign("scratchpad.mem[549]reg", DumpEntry{scratchpad.mem[549] reg});
+        res.insert_or_assign("scratchpad.mem[550]reg", DumpEntry{scratchpad.mem[550] reg});
+        res.insert_or_assign("scratchpad.mem[551]reg", DumpEntry{scratchpad.mem[551] reg});
+        res.insert_or_assign("scratchpad.mem[552]reg", DumpEntry{scratchpad.mem[552] reg});
+        res.insert_or_assign("scratchpad.mem[553]reg", DumpEntry{scratchpad.mem[553] reg});
+        res.insert_or_assign("scratchpad.mem[554]reg", DumpEntry{scratchpad.mem[554] reg});
+        res.insert_or_assign("scratchpad.mem[555]reg", DumpEntry{scratchpad.mem[555] reg});
+        res.insert_or_assign("scratchpad.mem[556]reg", DumpEntry{scratchpad.mem[556] reg});
+        res.insert_or_assign("scratchpad.mem[557]reg", DumpEntry{scratchpad.mem[557] reg});
+        res.insert_or_assign("scratchpad.mem[558]reg", DumpEntry{scratchpad.mem[558] reg});
+        res.insert_or_assign("scratchpad.mem[559]reg", DumpEntry{scratchpad.mem[559] reg});
+        res.insert_or_assign("scratchpad.mem[560]reg", DumpEntry{scratchpad.mem[560] reg});
+        res.insert_or_assign("scratchpad.mem[561]reg", DumpEntry{scratchpad.mem[561] reg});
+        res.insert_or_assign("scratchpad.mem[562]reg", DumpEntry{scratchpad.mem[562] reg});
+        res.insert_or_assign("scratchpad.mem[563]reg", DumpEntry{scratchpad.mem[563] reg});
+        res.insert_or_assign("scratchpad.mem[564]reg", DumpEntry{scratchpad.mem[564] reg});
+        res.insert_or_assign("scratchpad.mem[565]reg", DumpEntry{scratchpad.mem[565] reg});
+        res.insert_or_assign("scratchpad.mem[566]reg", DumpEntry{scratchpad.mem[566] reg});
+        res.insert_or_assign("scratchpad.mem[567]reg", DumpEntry{scratchpad.mem[567] reg});
+        res.insert_or_assign("scratchpad.mem[568]reg", DumpEntry{scratchpad.mem[568] reg});
+        res.insert_or_assign("scratchpad.mem[569]reg", DumpEntry{scratchpad.mem[569] reg});
+        res.insert_or_assign("scratchpad.mem[570]reg", DumpEntry{scratchpad.mem[570] reg});
+        res.insert_or_assign("scratchpad.mem[571]reg", DumpEntry{scratchpad.mem[571] reg});
+        res.insert_or_assign("scratchpad.mem[572]reg", DumpEntry{scratchpad.mem[572] reg});
+        res.insert_or_assign("scratchpad.mem[573]reg", DumpEntry{scratchpad.mem[573] reg});
+        res.insert_or_assign("scratchpad.mem[574]reg", DumpEntry{scratchpad.mem[574] reg});
+        res.insert_or_assign("scratchpad.mem[575]reg", DumpEntry{scratchpad.mem[575] reg});
+        res.insert_or_assign("scratchpad.mem[576]reg", DumpEntry{scratchpad.mem[576] reg});
+        res.insert_or_assign("scratchpad.mem[577]reg", DumpEntry{scratchpad.mem[577] reg});
+        res.insert_or_assign("scratchpad.mem[578]reg", DumpEntry{scratchpad.mem[578] reg});
+        res.insert_or_assign("scratchpad.mem[579]reg", DumpEntry{scratchpad.mem[579] reg});
+        res.insert_or_assign("scratchpad.mem[580]reg", DumpEntry{scratchpad.mem[580] reg});
+        res.insert_or_assign("scratchpad.mem[581]reg", DumpEntry{scratchpad.mem[581] reg});
+        res.insert_or_assign("scratchpad.mem[582]reg", DumpEntry{scratchpad.mem[582] reg});
+        res.insert_or_assign("scratchpad.mem[583]reg", DumpEntry{scratchpad.mem[583] reg});
+        res.insert_or_assign("scratchpad.mem[584]reg", DumpEntry{scratchpad.mem[584] reg});
+        res.insert_or_assign("scratchpad.mem[585]reg", DumpEntry{scratchpad.mem[585] reg});
+        res.insert_or_assign("scratchpad.mem[586]reg", DumpEntry{scratchpad.mem[586] reg});
+        res.insert_or_assign("scratchpad.mem[587]reg", DumpEntry{scratchpad.mem[587] reg});
+        res.insert_or_assign("scratchpad.mem[588]reg", DumpEntry{scratchpad.mem[588] reg});
+        res.insert_or_assign("scratchpad.mem[589]reg", DumpEntry{scratchpad.mem[589] reg});
+        res.insert_or_assign("scratchpad.mem[590]reg", DumpEntry{scratchpad.mem[590] reg});
+        res.insert_or_assign("scratchpad.mem[591]reg", DumpEntry{scratchpad.mem[591] reg});
+        res.insert_or_assign("scratchpad.mem[592]reg", DumpEntry{scratchpad.mem[592] reg});
+        res.insert_or_assign("scratchpad.mem[593]reg", DumpEntry{scratchpad.mem[593] reg});
+        res.insert_or_assign("scratchpad.mem[594]reg", DumpEntry{scratchpad.mem[594] reg});
+        res.insert_or_assign("scratchpad.mem[595]reg", DumpEntry{scratchpad.mem[595] reg});
+        res.insert_or_assign("scratchpad.mem[596]reg", DumpEntry{scratchpad.mem[596] reg});
+        res.insert_or_assign("scratchpad.mem[597]reg", DumpEntry{scratchpad.mem[597] reg});
+        res.insert_or_assign("scratchpad.mem[598]reg", DumpEntry{scratchpad.mem[598] reg});
+        res.insert_or_assign("scratchpad.mem[599]reg", DumpEntry{scratchpad.mem[599] reg});
+        res.insert_or_assign("scratchpad.mem[600]reg", DumpEntry{scratchpad.mem[600] reg});
+        res.insert_or_assign("scratchpad.mem[601]reg", DumpEntry{scratchpad.mem[601] reg});
+        res.insert_or_assign("scratchpad.mem[602]reg", DumpEntry{scratchpad.mem[602] reg});
+        res.insert_or_assign("scratchpad.mem[603]reg", DumpEntry{scratchpad.mem[603] reg});
+        res.insert_or_assign("scratchpad.mem[604]reg", DumpEntry{scratchpad.mem[604] reg});
+        res.insert_or_assign("scratchpad.mem[605]reg", DumpEntry{scratchpad.mem[605] reg});
+        res.insert_or_assign("scratchpad.mem[606]reg", DumpEntry{scratchpad.mem[606] reg});
+        res.insert_or_assign("scratchpad.mem[607]reg", DumpEntry{scratchpad.mem[607] reg});
+        res.insert_or_assign("scratchpad.mem[608]reg", DumpEntry{scratchpad.mem[608] reg});
+        res.insert_or_assign("scratchpad.mem[609]reg", DumpEntry{scratchpad.mem[609] reg});
+        res.insert_or_assign("scratchpad.mem[610]reg", DumpEntry{scratchpad.mem[610] reg});
+        res.insert_or_assign("scratchpad.mem[611]reg", DumpEntry{scratchpad.mem[611] reg});
+        res.insert_or_assign("scratchpad.mem[612]reg", DumpEntry{scratchpad.mem[612] reg});
+        res.insert_or_assign("scratchpad.mem[613]reg", DumpEntry{scratchpad.mem[613] reg});
+        res.insert_or_assign("scratchpad.mem[614]reg", DumpEntry{scratchpad.mem[614] reg});
+        res.insert_or_assign("scratchpad.mem[615]reg", DumpEntry{scratchpad.mem[615] reg});
+        res.insert_or_assign("scratchpad.mem[616]reg", DumpEntry{scratchpad.mem[616] reg});
+        res.insert_or_assign("scratchpad.mem[617]reg", DumpEntry{scratchpad.mem[617] reg});
+        res.insert_or_assign("scratchpad.mem[618]reg", DumpEntry{scratchpad.mem[618] reg});
+        res.insert_or_assign("scratchpad.mem[619]reg", DumpEntry{scratchpad.mem[619] reg});
+        res.insert_or_assign("scratchpad.mem[620]reg", DumpEntry{scratchpad.mem[620] reg});
+        res.insert_or_assign("scratchpad.mem[621]reg", DumpEntry{scratchpad.mem[621] reg});
+        res.insert_or_assign("scratchpad.mem[622]reg", DumpEntry{scratchpad.mem[622] reg});
+        res.insert_or_assign("scratchpad.mem[623]reg", DumpEntry{scratchpad.mem[623] reg});
+        res.insert_or_assign("scratchpad.mem[624]reg", DumpEntry{scratchpad.mem[624] reg});
+        res.insert_or_assign("scratchpad.mem[625]reg", DumpEntry{scratchpad.mem[625] reg});
+        res.insert_or_assign("scratchpad.mem[626]reg", DumpEntry{scratchpad.mem[626] reg});
+        res.insert_or_assign("scratchpad.mem[627]reg", DumpEntry{scratchpad.mem[627] reg});
+        res.insert_or_assign("scratchpad.mem[628]reg", DumpEntry{scratchpad.mem[628] reg});
+        res.insert_or_assign("scratchpad.mem[629]reg", DumpEntry{scratchpad.mem[629] reg});
+        res.insert_or_assign("scratchpad.mem[630]reg", DumpEntry{scratchpad.mem[630] reg});
+        res.insert_or_assign("scratchpad.mem[631]reg", DumpEntry{scratchpad.mem[631] reg});
+        res.insert_or_assign("scratchpad.mem[632]reg", DumpEntry{scratchpad.mem[632] reg});
+        res.insert_or_assign("scratchpad.mem[633]reg", DumpEntry{scratchpad.mem[633] reg});
+        res.insert_or_assign("scratchpad.mem[634]reg", DumpEntry{scratchpad.mem[634] reg});
+        res.insert_or_assign("scratchpad.mem[635]reg", DumpEntry{scratchpad.mem[635] reg});
+        res.insert_or_assign("scratchpad.mem[636]reg", DumpEntry{scratchpad.mem[636] reg});
+        res.insert_or_assign("scratchpad.mem[637]reg", DumpEntry{scratchpad.mem[637] reg});
+        res.insert_or_assign("scratchpad.mem[638]reg", DumpEntry{scratchpad.mem[638] reg});
+        res.insert_or_assign("scratchpad.mem[639]reg", DumpEntry{scratchpad.mem[639] reg});
+        res.insert_or_assign("scratchpad.mem[640]reg", DumpEntry{scratchpad.mem[640] reg});
+        res.insert_or_assign("scratchpad.mem[641]reg", DumpEntry{scratchpad.mem[641] reg});
+        res.insert_or_assign("scratchpad.mem[642]reg", DumpEntry{scratchpad.mem[642] reg});
+        res.insert_or_assign("scratchpad.mem[643]reg", DumpEntry{scratchpad.mem[643] reg});
+        res.insert_or_assign("scratchpad.mem[644]reg", DumpEntry{scratchpad.mem[644] reg});
+        res.insert_or_assign("scratchpad.mem[645]reg", DumpEntry{scratchpad.mem[645] reg});
+        res.insert_or_assign("scratchpad.mem[646]reg", DumpEntry{scratchpad.mem[646] reg});
+        res.insert_or_assign("scratchpad.mem[647]reg", DumpEntry{scratchpad.mem[647] reg});
+        res.insert_or_assign("scratchpad.mem[648]reg", DumpEntry{scratchpad.mem[648] reg});
+        res.insert_or_assign("scratchpad.mem[649]reg", DumpEntry{scratchpad.mem[649] reg});
+        res.insert_or_assign("scratchpad.mem[650]reg", DumpEntry{scratchpad.mem[650] reg});
+        res.insert_or_assign("scratchpad.mem[651]reg", DumpEntry{scratchpad.mem[651] reg});
+        res.insert_or_assign("scratchpad.mem[652]reg", DumpEntry{scratchpad.mem[652] reg});
+        res.insert_or_assign("scratchpad.mem[653]reg", DumpEntry{scratchpad.mem[653] reg});
+        res.insert_or_assign("scratchpad.mem[654]reg", DumpEntry{scratchpad.mem[654] reg});
+        res.insert_or_assign("scratchpad.mem[655]reg", DumpEntry{scratchpad.mem[655] reg});
+        res.insert_or_assign("scratchpad.mem[656]reg", DumpEntry{scratchpad.mem[656] reg});
+        res.insert_or_assign("scratchpad.mem[657]reg", DumpEntry{scratchpad.mem[657] reg});
+        res.insert_or_assign("scratchpad.mem[658]reg", DumpEntry{scratchpad.mem[658] reg});
+        res.insert_or_assign("scratchpad.mem[659]reg", DumpEntry{scratchpad.mem[659] reg});
+        res.insert_or_assign("scratchpad.mem[660]reg", DumpEntry{scratchpad.mem[660] reg});
+        res.insert_or_assign("scratchpad.mem[661]reg", DumpEntry{scratchpad.mem[661] reg});
+        res.insert_or_assign("scratchpad.mem[662]reg", DumpEntry{scratchpad.mem[662] reg});
+        res.insert_or_assign("scratchpad.mem[663]reg", DumpEntry{scratchpad.mem[663] reg});
+        res.insert_or_assign("scratchpad.mem[664]reg", DumpEntry{scratchpad.mem[664] reg});
+        res.insert_or_assign("scratchpad.mem[665]reg", DumpEntry{scratchpad.mem[665] reg});
+        res.insert_or_assign("scratchpad.mem[666]reg", DumpEntry{scratchpad.mem[666] reg});
+        res.insert_or_assign("scratchpad.mem[667]reg", DumpEntry{scratchpad.mem[667] reg});
+        res.insert_or_assign("scratchpad.mem[668]reg", DumpEntry{scratchpad.mem[668] reg});
+        res.insert_or_assign("scratchpad.mem[669]reg", DumpEntry{scratchpad.mem[669] reg});
+        res.insert_or_assign("scratchpad.mem[670]reg", DumpEntry{scratchpad.mem[670] reg});
+        res.insert_or_assign("scratchpad.mem[671]reg", DumpEntry{scratchpad.mem[671] reg});
+        res.insert_or_assign("scratchpad.mem[672]reg", DumpEntry{scratchpad.mem[672] reg});
+        res.insert_or_assign("scratchpad.mem[673]reg", DumpEntry{scratchpad.mem[673] reg});
+        res.insert_or_assign("scratchpad.mem[674]reg", DumpEntry{scratchpad.mem[674] reg});
+        res.insert_or_assign("scratchpad.mem[675]reg", DumpEntry{scratchpad.mem[675] reg});
+        res.insert_or_assign("scratchpad.mem[676]reg", DumpEntry{scratchpad.mem[676] reg});
+        res.insert_or_assign("scratchpad.mem[677]reg", DumpEntry{scratchpad.mem[677] reg});
+        res.insert_or_assign("scratchpad.mem[678]reg", DumpEntry{scratchpad.mem[678] reg});
+        res.insert_or_assign("scratchpad.mem[679]reg", DumpEntry{scratchpad.mem[679] reg});
+        res.insert_or_assign("scratchpad.mem[680]reg", DumpEntry{scratchpad.mem[680] reg});
+        res.insert_or_assign("scratchpad.mem[681]reg", DumpEntry{scratchpad.mem[681] reg});
+        res.insert_or_assign("scratchpad.mem[682]reg", DumpEntry{scratchpad.mem[682] reg});
+        res.insert_or_assign("scratchpad.mem[683]reg", DumpEntry{scratchpad.mem[683] reg});
+        res.insert_or_assign("scratchpad.mem[684]reg", DumpEntry{scratchpad.mem[684] reg});
+        res.insert_or_assign("scratchpad.mem[685]reg", DumpEntry{scratchpad.mem[685] reg});
+        res.insert_or_assign("scratchpad.mem[686]reg", DumpEntry{scratchpad.mem[686] reg});
+        res.insert_or_assign("scratchpad.mem[687]reg", DumpEntry{scratchpad.mem[687] reg});
+        res.insert_or_assign("scratchpad.mem[688]reg", DumpEntry{scratchpad.mem[688] reg});
+        res.insert_or_assign("scratchpad.mem[689]reg", DumpEntry{scratchpad.mem[689] reg});
+        res.insert_or_assign("scratchpad.mem[690]reg", DumpEntry{scratchpad.mem[690] reg});
+        res.insert_or_assign("scratchpad.mem[691]reg", DumpEntry{scratchpad.mem[691] reg});
+        res.insert_or_assign("scratchpad.mem[692]reg", DumpEntry{scratchpad.mem[692] reg});
+        res.insert_or_assign("scratchpad.mem[693]reg", DumpEntry{scratchpad.mem[693] reg});
+        res.insert_or_assign("scratchpad.mem[694]reg", DumpEntry{scratchpad.mem[694] reg});
+        res.insert_or_assign("scratchpad.mem[695]reg", DumpEntry{scratchpad.mem[695] reg});
+        res.insert_or_assign("scratchpad.mem[696]reg", DumpEntry{scratchpad.mem[696] reg});
+        res.insert_or_assign("scratchpad.mem[697]reg", DumpEntry{scratchpad.mem[697] reg});
+        res.insert_or_assign("scratchpad.mem[698]reg", DumpEntry{scratchpad.mem[698] reg});
+        res.insert_or_assign("scratchpad.mem[699]reg", DumpEntry{scratchpad.mem[699] reg});
+        res.insert_or_assign("scratchpad.mem[700]reg", DumpEntry{scratchpad.mem[700] reg});
+        res.insert_or_assign("scratchpad.mem[701]reg", DumpEntry{scratchpad.mem[701] reg});
+        res.insert_or_assign("scratchpad.mem[702]reg", DumpEntry{scratchpad.mem[702] reg});
+        res.insert_or_assign("scratchpad.mem[703]reg", DumpEntry{scratchpad.mem[703] reg});
+        res.insert_or_assign("scratchpad.mem[704]reg", DumpEntry{scratchpad.mem[704] reg});
+        res.insert_or_assign("scratchpad.mem[705]reg", DumpEntry{scratchpad.mem[705] reg});
+        res.insert_or_assign("scratchpad.mem[706]reg", DumpEntry{scratchpad.mem[706] reg});
+        res.insert_or_assign("scratchpad.mem[707]reg", DumpEntry{scratchpad.mem[707] reg});
+        res.insert_or_assign("scratchpad.mem[708]reg", DumpEntry{scratchpad.mem[708] reg});
+        res.insert_or_assign("scratchpad.mem[709]reg", DumpEntry{scratchpad.mem[709] reg});
+        res.insert_or_assign("scratchpad.mem[710]reg", DumpEntry{scratchpad.mem[710] reg});
+        res.insert_or_assign("scratchpad.mem[711]reg", DumpEntry{scratchpad.mem[711] reg});
+        res.insert_or_assign("scratchpad.mem[712]reg", DumpEntry{scratchpad.mem[712] reg});
+        res.insert_or_assign("scratchpad.mem[713]reg", DumpEntry{scratchpad.mem[713] reg});
+        res.insert_or_assign("scratchpad.mem[714]reg", DumpEntry{scratchpad.mem[714] reg});
+        res.insert_or_assign("scratchpad.mem[715]reg", DumpEntry{scratchpad.mem[715] reg});
+        res.insert_or_assign("scratchpad.mem[716]reg", DumpEntry{scratchpad.mem[716] reg});
+        res.insert_or_assign("scratchpad.mem[717]reg", DumpEntry{scratchpad.mem[717] reg});
+        res.insert_or_assign("scratchpad.mem[718]reg", DumpEntry{scratchpad.mem[718] reg});
+        res.insert_or_assign("scratchpad.mem[719]reg", DumpEntry{scratchpad.mem[719] reg});
+        res.insert_or_assign("scratchpad.mem[720]reg", DumpEntry{scratchpad.mem[720] reg});
+        res.insert_or_assign("scratchpad.mem[721]reg", DumpEntry{scratchpad.mem[721] reg});
+        res.insert_or_assign("scratchpad.mem[722]reg", DumpEntry{scratchpad.mem[722] reg});
+        res.insert_or_assign("scratchpad.mem[723]reg", DumpEntry{scratchpad.mem[723] reg});
+        res.insert_or_assign("scratchpad.mem[724]reg", DumpEntry{scratchpad.mem[724] reg});
+        res.insert_or_assign("scratchpad.mem[725]reg", DumpEntry{scratchpad.mem[725] reg});
+        res.insert_or_assign("scratchpad.mem[726]reg", DumpEntry{scratchpad.mem[726] reg});
+        res.insert_or_assign("scratchpad.mem[727]reg", DumpEntry{scratchpad.mem[727] reg});
+        res.insert_or_assign("scratchpad.mem[728]reg", DumpEntry{scratchpad.mem[728] reg});
+        res.insert_or_assign("scratchpad.mem[729]reg", DumpEntry{scratchpad.mem[729] reg});
+        res.insert_or_assign("scratchpad.mem[730]reg", DumpEntry{scratchpad.mem[730] reg});
+        res.insert_or_assign("scratchpad.mem[731]reg", DumpEntry{scratchpad.mem[731] reg});
+        res.insert_or_assign("scratchpad.mem[732]reg", DumpEntry{scratchpad.mem[732] reg});
+        res.insert_or_assign("scratchpad.mem[733]reg", DumpEntry{scratchpad.mem[733] reg});
+        res.insert_or_assign("scratchpad.mem[734]reg", DumpEntry{scratchpad.mem[734] reg});
+        res.insert_or_assign("scratchpad.mem[735]reg", DumpEntry{scratchpad.mem[735] reg});
+        res.insert_or_assign("scratchpad.mem[736]reg", DumpEntry{scratchpad.mem[736] reg});
+        res.insert_or_assign("scratchpad.mem[737]reg", DumpEntry{scratchpad.mem[737] reg});
+        res.insert_or_assign("scratchpad.mem[738]reg", DumpEntry{scratchpad.mem[738] reg});
+        res.insert_or_assign("scratchpad.mem[739]reg", DumpEntry{scratchpad.mem[739] reg});
+        res.insert_or_assign("scratchpad.mem[740]reg", DumpEntry{scratchpad.mem[740] reg});
+        res.insert_or_assign("scratchpad.mem[741]reg", DumpEntry{scratchpad.mem[741] reg});
+        res.insert_or_assign("scratchpad.mem[742]reg", DumpEntry{scratchpad.mem[742] reg});
+        res.insert_or_assign("scratchpad.mem[743]reg", DumpEntry{scratchpad.mem[743] reg});
+        res.insert_or_assign("scratchpad.mem[744]reg", DumpEntry{scratchpad.mem[744] reg});
+        res.insert_or_assign("scratchpad.mem[745]reg", DumpEntry{scratchpad.mem[745] reg});
+        res.insert_or_assign("scratchpad.mem[746]reg", DumpEntry{scratchpad.mem[746] reg});
+        res.insert_or_assign("scratchpad.mem[747]reg", DumpEntry{scratchpad.mem[747] reg});
+        res.insert_or_assign("scratchpad.mem[748]reg", DumpEntry{scratchpad.mem[748] reg});
+        res.insert_or_assign("scratchpad.mem[749]reg", DumpEntry{scratchpad.mem[749] reg});
+        res.insert_or_assign("scratchpad.mem[750]reg", DumpEntry{scratchpad.mem[750] reg});
+        res.insert_or_assign("scratchpad.mem[751]reg", DumpEntry{scratchpad.mem[751] reg});
+        res.insert_or_assign("scratchpad.mem[752]reg", DumpEntry{scratchpad.mem[752] reg});
+        res.insert_or_assign("scratchpad.mem[753]reg", DumpEntry{scratchpad.mem[753] reg});
+        res.insert_or_assign("scratchpad.mem[754]reg", DumpEntry{scratchpad.mem[754] reg});
+        res.insert_or_assign("scratchpad.mem[755]reg", DumpEntry{scratchpad.mem[755] reg});
+        res.insert_or_assign("scratchpad.mem[756]reg", DumpEntry{scratchpad.mem[756] reg});
+        res.insert_or_assign("scratchpad.mem[757]reg", DumpEntry{scratchpad.mem[757] reg});
+        res.insert_or_assign("scratchpad.mem[758]reg", DumpEntry{scratchpad.mem[758] reg});
+        res.insert_or_assign("scratchpad.mem[759]reg", DumpEntry{scratchpad.mem[759] reg});
+        res.insert_or_assign("scratchpad.mem[760]reg", DumpEntry{scratchpad.mem[760] reg});
+        res.insert_or_assign("scratchpad.mem[761]reg", DumpEntry{scratchpad.mem[761] reg});
+        res.insert_or_assign("scratchpad.mem[762]reg", DumpEntry{scratchpad.mem[762] reg});
+        res.insert_or_assign("scratchpad.mem[763]reg", DumpEntry{scratchpad.mem[763] reg});
+        res.insert_or_assign("scratchpad.mem[764]reg", DumpEntry{scratchpad.mem[764] reg});
+        res.insert_or_assign("scratchpad.mem[765]reg", DumpEntry{scratchpad.mem[765] reg});
+        res.insert_or_assign("scratchpad.mem[766]reg", DumpEntry{scratchpad.mem[766] reg});
+        res.insert_or_assign("scratchpad.mem[767]reg", DumpEntry{scratchpad.mem[767] reg});
+        res.insert_or_assign("scratchpad.mem[768]reg", DumpEntry{scratchpad.mem[768] reg});
+        res.insert_or_assign("scratchpad.mem[769]reg", DumpEntry{scratchpad.mem[769] reg});
+        res.insert_or_assign("scratchpad.mem[770]reg", DumpEntry{scratchpad.mem[770] reg});
+        res.insert_or_assign("scratchpad.mem[771]reg", DumpEntry{scratchpad.mem[771] reg});
+        res.insert_or_assign("scratchpad.mem[772]reg", DumpEntry{scratchpad.mem[772] reg});
+        res.insert_or_assign("scratchpad.mem[773]reg", DumpEntry{scratchpad.mem[773] reg});
+        res.insert_or_assign("scratchpad.mem[774]reg", DumpEntry{scratchpad.mem[774] reg});
+        res.insert_or_assign("scratchpad.mem[775]reg", DumpEntry{scratchpad.mem[775] reg});
+        res.insert_or_assign("scratchpad.mem[776]reg", DumpEntry{scratchpad.mem[776] reg});
+        res.insert_or_assign("scratchpad.mem[777]reg", DumpEntry{scratchpad.mem[777] reg});
+        res.insert_or_assign("scratchpad.mem[778]reg", DumpEntry{scratchpad.mem[778] reg});
+        res.insert_or_assign("scratchpad.mem[779]reg", DumpEntry{scratchpad.mem[779] reg});
+        res.insert_or_assign("scratchpad.mem[780]reg", DumpEntry{scratchpad.mem[780] reg});
+        res.insert_or_assign("scratchpad.mem[781]reg", DumpEntry{scratchpad.mem[781] reg});
+        res.insert_or_assign("scratchpad.mem[782]reg", DumpEntry{scratchpad.mem[782] reg});
+        res.insert_or_assign("scratchpad.mem[783]reg", DumpEntry{scratchpad.mem[783] reg});
+        res.insert_or_assign("scratchpad.mem[784]reg", DumpEntry{scratchpad.mem[784] reg});
+        res.insert_or_assign("scratchpad.mem[785]reg", DumpEntry{scratchpad.mem[785] reg});
+        res.insert_or_assign("scratchpad.mem[786]reg", DumpEntry{scratchpad.mem[786] reg});
+        res.insert_or_assign("scratchpad.mem[787]reg", DumpEntry{scratchpad.mem[787] reg});
+        res.insert_or_assign("scratchpad.mem[788]reg", DumpEntry{scratchpad.mem[788] reg});
+        res.insert_or_assign("scratchpad.mem[789]reg", DumpEntry{scratchpad.mem[789] reg});
+        res.insert_or_assign("scratchpad.mem[790]reg", DumpEntry{scratchpad.mem[790] reg});
+        res.insert_or_assign("scratchpad.mem[791]reg", DumpEntry{scratchpad.mem[791] reg});
+        res.insert_or_assign("scratchpad.mem[792]reg", DumpEntry{scratchpad.mem[792] reg});
+        res.insert_or_assign("scratchpad.mem[793]reg", DumpEntry{scratchpad.mem[793] reg});
+        res.insert_or_assign("scratchpad.mem[794]reg", DumpEntry{scratchpad.mem[794] reg});
+        res.insert_or_assign("scratchpad.mem[795]reg", DumpEntry{scratchpad.mem[795] reg});
+        res.insert_or_assign("scratchpad.mem[796]reg", DumpEntry{scratchpad.mem[796] reg});
+        res.insert_or_assign("scratchpad.mem[797]reg", DumpEntry{scratchpad.mem[797] reg});
+        res.insert_or_assign("scratchpad.mem[798]reg", DumpEntry{scratchpad.mem[798] reg});
+        res.insert_or_assign("scratchpad.mem[799]reg", DumpEntry{scratchpad.mem[799] reg});
+        res.insert_or_assign("scratchpad.mem[800]reg", DumpEntry{scratchpad.mem[800] reg});
+        res.insert_or_assign("scratchpad.mem[801]reg", DumpEntry{scratchpad.mem[801] reg});
+        res.insert_or_assign("scratchpad.mem[802]reg", DumpEntry{scratchpad.mem[802] reg});
+        res.insert_or_assign("scratchpad.mem[803]reg", DumpEntry{scratchpad.mem[803] reg});
+        res.insert_or_assign("scratchpad.mem[804]reg", DumpEntry{scratchpad.mem[804] reg});
+        res.insert_or_assign("scratchpad.mem[805]reg", DumpEntry{scratchpad.mem[805] reg});
+        res.insert_or_assign("scratchpad.mem[806]reg", DumpEntry{scratchpad.mem[806] reg});
+        res.insert_or_assign("scratchpad.mem[807]reg", DumpEntry{scratchpad.mem[807] reg});
+        res.insert_or_assign("scratchpad.mem[808]reg", DumpEntry{scratchpad.mem[808] reg});
+        res.insert_or_assign("scratchpad.mem[809]reg", DumpEntry{scratchpad.mem[809] reg});
+        res.insert_or_assign("scratchpad.mem[810]reg", DumpEntry{scratchpad.mem[810] reg});
+        res.insert_or_assign("scratchpad.mem[811]reg", DumpEntry{scratchpad.mem[811] reg});
+        res.insert_or_assign("scratchpad.mem[812]reg", DumpEntry{scratchpad.mem[812] reg});
+        res.insert_or_assign("scratchpad.mem[813]reg", DumpEntry{scratchpad.mem[813] reg});
+        res.insert_or_assign("scratchpad.mem[814]reg", DumpEntry{scratchpad.mem[814] reg});
+        res.insert_or_assign("scratchpad.mem[815]reg", DumpEntry{scratchpad.mem[815] reg});
+        res.insert_or_assign("scratchpad.mem[816]reg", DumpEntry{scratchpad.mem[816] reg});
+        res.insert_or_assign("scratchpad.mem[817]reg", DumpEntry{scratchpad.mem[817] reg});
+        res.insert_or_assign("scratchpad.mem[818]reg", DumpEntry{scratchpad.mem[818] reg});
+        res.insert_or_assign("scratchpad.mem[819]reg", DumpEntry{scratchpad.mem[819] reg});
+        res.insert_or_assign("scratchpad.mem[820]reg", DumpEntry{scratchpad.mem[820] reg});
+        res.insert_or_assign("scratchpad.mem[821]reg", DumpEntry{scratchpad.mem[821] reg});
+        res.insert_or_assign("scratchpad.mem[822]reg", DumpEntry{scratchpad.mem[822] reg});
+        res.insert_or_assign("scratchpad.mem[823]reg", DumpEntry{scratchpad.mem[823] reg});
+        res.insert_or_assign("scratchpad.mem[824]reg", DumpEntry{scratchpad.mem[824] reg});
+        res.insert_or_assign("scratchpad.mem[825]reg", DumpEntry{scratchpad.mem[825] reg});
+        res.insert_or_assign("scratchpad.mem[826]reg", DumpEntry{scratchpad.mem[826] reg});
+        res.insert_or_assign("scratchpad.mem[827]reg", DumpEntry{scratchpad.mem[827] reg});
+        res.insert_or_assign("scratchpad.mem[828]reg", DumpEntry{scratchpad.mem[828] reg});
+        res.insert_or_assign("scratchpad.mem[829]reg", DumpEntry{scratchpad.mem[829] reg});
+        res.insert_or_assign("scratchpad.mem[830]reg", DumpEntry{scratchpad.mem[830] reg});
+        res.insert_or_assign("scratchpad.mem[831]reg", DumpEntry{scratchpad.mem[831] reg});
+        res.insert_or_assign("scratchpad.mem[832]reg", DumpEntry{scratchpad.mem[832] reg});
+        res.insert_or_assign("scratchpad.mem[833]reg", DumpEntry{scratchpad.mem[833] reg});
+        res.insert_or_assign("scratchpad.mem[834]reg", DumpEntry{scratchpad.mem[834] reg});
+        res.insert_or_assign("scratchpad.mem[835]reg", DumpEntry{scratchpad.mem[835] reg});
+        res.insert_or_assign("scratchpad.mem[836]reg", DumpEntry{scratchpad.mem[836] reg});
+        res.insert_or_assign("scratchpad.mem[837]reg", DumpEntry{scratchpad.mem[837] reg});
+        res.insert_or_assign("scratchpad.mem[838]reg", DumpEntry{scratchpad.mem[838] reg});
+        res.insert_or_assign("scratchpad.mem[839]reg", DumpEntry{scratchpad.mem[839] reg});
+        res.insert_or_assign("scratchpad.mem[840]reg", DumpEntry{scratchpad.mem[840] reg});
+        res.insert_or_assign("scratchpad.mem[841]reg", DumpEntry{scratchpad.mem[841] reg});
+        res.insert_or_assign("scratchpad.mem[842]reg", DumpEntry{scratchpad.mem[842] reg});
+        res.insert_or_assign("scratchpad.mem[843]reg", DumpEntry{scratchpad.mem[843] reg});
+        res.insert_or_assign("scratchpad.mem[844]reg", DumpEntry{scratchpad.mem[844] reg});
+        res.insert_or_assign("scratchpad.mem[845]reg", DumpEntry{scratchpad.mem[845] reg});
+        res.insert_or_assign("scratchpad.mem[846]reg", DumpEntry{scratchpad.mem[846] reg});
+        res.insert_or_assign("scratchpad.mem[847]reg", DumpEntry{scratchpad.mem[847] reg});
+        res.insert_or_assign("scratchpad.mem[848]reg", DumpEntry{scratchpad.mem[848] reg});
+        res.insert_or_assign("scratchpad.mem[849]reg", DumpEntry{scratchpad.mem[849] reg});
+        res.insert_or_assign("scratchpad.mem[850]reg", DumpEntry{scratchpad.mem[850] reg});
+        res.insert_or_assign("scratchpad.mem[851]reg", DumpEntry{scratchpad.mem[851] reg});
+        res.insert_or_assign("scratchpad.mem[852]reg", DumpEntry{scratchpad.mem[852] reg});
+        res.insert_or_assign("scratchpad.mem[853]reg", DumpEntry{scratchpad.mem[853] reg});
+        res.insert_or_assign("scratchpad.mem[854]reg", DumpEntry{scratchpad.mem[854] reg});
+        res.insert_or_assign("scratchpad.mem[855]reg", DumpEntry{scratchpad.mem[855] reg});
+        res.insert_or_assign("scratchpad.mem[856]reg", DumpEntry{scratchpad.mem[856] reg});
+        res.insert_or_assign("scratchpad.mem[857]reg", DumpEntry{scratchpad.mem[857] reg});
+        res.insert_or_assign("scratchpad.mem[858]reg", DumpEntry{scratchpad.mem[858] reg});
+        res.insert_or_assign("scratchpad.mem[859]reg", DumpEntry{scratchpad.mem[859] reg});
+        res.insert_or_assign("scratchpad.mem[860]reg", DumpEntry{scratchpad.mem[860] reg});
+        res.insert_or_assign("scratchpad.mem[861]reg", DumpEntry{scratchpad.mem[861] reg});
+        res.insert_or_assign("scratchpad.mem[862]reg", DumpEntry{scratchpad.mem[862] reg});
+        res.insert_or_assign("scratchpad.mem[863]reg", DumpEntry{scratchpad.mem[863] reg});
+        res.insert_or_assign("scratchpad.mem[864]reg", DumpEntry{scratchpad.mem[864] reg});
+        res.insert_or_assign("scratchpad.mem[865]reg", DumpEntry{scratchpad.mem[865] reg});
+        res.insert_or_assign("scratchpad.mem[866]reg", DumpEntry{scratchpad.mem[866] reg});
+        res.insert_or_assign("scratchpad.mem[867]reg", DumpEntry{scratchpad.mem[867] reg});
+        res.insert_or_assign("scratchpad.mem[868]reg", DumpEntry{scratchpad.mem[868] reg});
+        res.insert_or_assign("scratchpad.mem[869]reg", DumpEntry{scratchpad.mem[869] reg});
+        res.insert_or_assign("scratchpad.mem[870]reg", DumpEntry{scratchpad.mem[870] reg});
+        res.insert_or_assign("scratchpad.mem[871]reg", DumpEntry{scratchpad.mem[871] reg});
+        res.insert_or_assign("scratchpad.mem[872]reg", DumpEntry{scratchpad.mem[872] reg});
+        res.insert_or_assign("scratchpad.mem[873]reg", DumpEntry{scratchpad.mem[873] reg});
+        res.insert_or_assign("scratchpad.mem[874]reg", DumpEntry{scratchpad.mem[874] reg});
+        res.insert_or_assign("scratchpad.mem[875]reg", DumpEntry{scratchpad.mem[875] reg});
+        res.insert_or_assign("scratchpad.mem[876]reg", DumpEntry{scratchpad.mem[876] reg});
+        res.insert_or_assign("scratchpad.mem[877]reg", DumpEntry{scratchpad.mem[877] reg});
+        res.insert_or_assign("scratchpad.mem[878]reg", DumpEntry{scratchpad.mem[878] reg});
+        res.insert_or_assign("scratchpad.mem[879]reg", DumpEntry{scratchpad.mem[879] reg});
+        res.insert_or_assign("scratchpad.mem[880]reg", DumpEntry{scratchpad.mem[880] reg});
+        res.insert_or_assign("scratchpad.mem[881]reg", DumpEntry{scratchpad.mem[881] reg});
+        res.insert_or_assign("scratchpad.mem[882]reg", DumpEntry{scratchpad.mem[882] reg});
+        res.insert_or_assign("scratchpad.mem[883]reg", DumpEntry{scratchpad.mem[883] reg});
+        res.insert_or_assign("scratchpad.mem[884]reg", DumpEntry{scratchpad.mem[884] reg});
+        res.insert_or_assign("scratchpad.mem[885]reg", DumpEntry{scratchpad.mem[885] reg});
+        res.insert_or_assign("scratchpad.mem[886]reg", DumpEntry{scratchpad.mem[886] reg});
+        res.insert_or_assign("scratchpad.mem[887]reg", DumpEntry{scratchpad.mem[887] reg});
+        res.insert_or_assign("scratchpad.mem[888]reg", DumpEntry{scratchpad.mem[888] reg});
+        res.insert_or_assign("scratchpad.mem[889]reg", DumpEntry{scratchpad.mem[889] reg});
+        res.insert_or_assign("scratchpad.mem[890]reg", DumpEntry{scratchpad.mem[890] reg});
+        res.insert_or_assign("scratchpad.mem[891]reg", DumpEntry{scratchpad.mem[891] reg});
+        res.insert_or_assign("scratchpad.mem[892]reg", DumpEntry{scratchpad.mem[892] reg});
+        res.insert_or_assign("scratchpad.mem[893]reg", DumpEntry{scratchpad.mem[893] reg});
+        res.insert_or_assign("scratchpad.mem[894]reg", DumpEntry{scratchpad.mem[894] reg});
+        res.insert_or_assign("scratchpad.mem[895]reg", DumpEntry{scratchpad.mem[895] reg});
+        res.insert_or_assign("scratchpad.mem[896]reg", DumpEntry{scratchpad.mem[896] reg});
+        res.insert_or_assign("scratchpad.mem[897]reg", DumpEntry{scratchpad.mem[897] reg});
+        res.insert_or_assign("scratchpad.mem[898]reg", DumpEntry{scratchpad.mem[898] reg});
+        res.insert_or_assign("scratchpad.mem[899]reg", DumpEntry{scratchpad.mem[899] reg});
+        res.insert_or_assign("scratchpad.mem[900]reg", DumpEntry{scratchpad.mem[900] reg});
+        res.insert_or_assign("scratchpad.mem[901]reg", DumpEntry{scratchpad.mem[901] reg});
+        res.insert_or_assign("scratchpad.mem[902]reg", DumpEntry{scratchpad.mem[902] reg});
+        res.insert_or_assign("scratchpad.mem[903]reg", DumpEntry{scratchpad.mem[903] reg});
+        res.insert_or_assign("scratchpad.mem[904]reg", DumpEntry{scratchpad.mem[904] reg});
+        res.insert_or_assign("scratchpad.mem[905]reg", DumpEntry{scratchpad.mem[905] reg});
+        res.insert_or_assign("scratchpad.mem[906]reg", DumpEntry{scratchpad.mem[906] reg});
+        res.insert_or_assign("scratchpad.mem[907]reg", DumpEntry{scratchpad.mem[907] reg});
+        res.insert_or_assign("scratchpad.mem[908]reg", DumpEntry{scratchpad.mem[908] reg});
+        res.insert_or_assign("scratchpad.mem[909]reg", DumpEntry{scratchpad.mem[909] reg});
+        res.insert_or_assign("scratchpad.mem[910]reg", DumpEntry{scratchpad.mem[910] reg});
+        res.insert_or_assign("scratchpad.mem[911]reg", DumpEntry{scratchpad.mem[911] reg});
+        res.insert_or_assign("scratchpad.mem[912]reg", DumpEntry{scratchpad.mem[912] reg});
+        res.insert_or_assign("scratchpad.mem[913]reg", DumpEntry{scratchpad.mem[913] reg});
+        res.insert_or_assign("scratchpad.mem[914]reg", DumpEntry{scratchpad.mem[914] reg});
+        res.insert_or_assign("scratchpad.mem[915]reg", DumpEntry{scratchpad.mem[915] reg});
+        res.insert_or_assign("scratchpad.mem[916]reg", DumpEntry{scratchpad.mem[916] reg});
+        res.insert_or_assign("scratchpad.mem[917]reg", DumpEntry{scratchpad.mem[917] reg});
+        res.insert_or_assign("scratchpad.mem[918]reg", DumpEntry{scratchpad.mem[918] reg});
+        res.insert_or_assign("scratchpad.mem[919]reg", DumpEntry{scratchpad.mem[919] reg});
+        res.insert_or_assign("scratchpad.mem[920]reg", DumpEntry{scratchpad.mem[920] reg});
+        res.insert_or_assign("scratchpad.mem[921]reg", DumpEntry{scratchpad.mem[921] reg});
+        res.insert_or_assign("scratchpad.mem[922]reg", DumpEntry{scratchpad.mem[922] reg});
+        res.insert_or_assign("scratchpad.mem[923]reg", DumpEntry{scratchpad.mem[923] reg});
+        res.insert_or_assign("scratchpad.mem[924]reg", DumpEntry{scratchpad.mem[924] reg});
+        res.insert_or_assign("scratchpad.mem[925]reg", DumpEntry{scratchpad.mem[925] reg});
+        res.insert_or_assign("scratchpad.mem[926]reg", DumpEntry{scratchpad.mem[926] reg});
+        res.insert_or_assign("scratchpad.mem[927]reg", DumpEntry{scratchpad.mem[927] reg});
+        res.insert_or_assign("scratchpad.mem[928]reg", DumpEntry{scratchpad.mem[928] reg});
+        res.insert_or_assign("scratchpad.mem[929]reg", DumpEntry{scratchpad.mem[929] reg});
+        res.insert_or_assign("scratchpad.mem[930]reg", DumpEntry{scratchpad.mem[930] reg});
+        res.insert_or_assign("scratchpad.mem[931]reg", DumpEntry{scratchpad.mem[931] reg});
+        res.insert_or_assign("scratchpad.mem[932]reg", DumpEntry{scratchpad.mem[932] reg});
+        res.insert_or_assign("scratchpad.mem[933]reg", DumpEntry{scratchpad.mem[933] reg});
+        res.insert_or_assign("scratchpad.mem[934]reg", DumpEntry{scratchpad.mem[934] reg});
+        res.insert_or_assign("scratchpad.mem[935]reg", DumpEntry{scratchpad.mem[935] reg});
+        res.insert_or_assign("scratchpad.mem[936]reg", DumpEntry{scratchpad.mem[936] reg});
+        res.insert_or_assign("scratchpad.mem[937]reg", DumpEntry{scratchpad.mem[937] reg});
+        res.insert_or_assign("scratchpad.mem[938]reg", DumpEntry{scratchpad.mem[938] reg});
+        res.insert_or_assign("scratchpad.mem[939]reg", DumpEntry{scratchpad.mem[939] reg});
+        res.insert_or_assign("scratchpad.mem[940]reg", DumpEntry{scratchpad.mem[940] reg});
+        res.insert_or_assign("scratchpad.mem[941]reg", DumpEntry{scratchpad.mem[941] reg});
+        res.insert_or_assign("scratchpad.mem[942]reg", DumpEntry{scratchpad.mem[942] reg});
+        res.insert_or_assign("scratchpad.mem[943]reg", DumpEntry{scratchpad.mem[943] reg});
+        res.insert_or_assign("scratchpad.mem[944]reg", DumpEntry{scratchpad.mem[944] reg});
+        res.insert_or_assign("scratchpad.mem[945]reg", DumpEntry{scratchpad.mem[945] reg});
+        res.insert_or_assign("scratchpad.mem[946]reg", DumpEntry{scratchpad.mem[946] reg});
+        res.insert_or_assign("scratchpad.mem[947]reg", DumpEntry{scratchpad.mem[947] reg});
+        res.insert_or_assign("scratchpad.mem[948]reg", DumpEntry{scratchpad.mem[948] reg});
+        res.insert_or_assign("scratchpad.mem[949]reg", DumpEntry{scratchpad.mem[949] reg});
+        res.insert_or_assign("scratchpad.mem[950]reg", DumpEntry{scratchpad.mem[950] reg});
+        res.insert_or_assign("scratchpad.mem[951]reg", DumpEntry{scratchpad.mem[951] reg});
+        res.insert_or_assign("scratchpad.mem[952]reg", DumpEntry{scratchpad.mem[952] reg});
+        res.insert_or_assign("scratchpad.mem[953]reg", DumpEntry{scratchpad.mem[953] reg});
+        res.insert_or_assign("scratchpad.mem[954]reg", DumpEntry{scratchpad.mem[954] reg});
+        res.insert_or_assign("scratchpad.mem[955]reg", DumpEntry{scratchpad.mem[955] reg});
+        res.insert_or_assign("scratchpad.mem[956]reg", DumpEntry{scratchpad.mem[956] reg});
+        res.insert_or_assign("scratchpad.mem[957]reg", DumpEntry{scratchpad.mem[957] reg});
+        res.insert_or_assign("scratchpad.mem[958]reg", DumpEntry{scratchpad.mem[958] reg});
+        res.insert_or_assign("scratchpad.mem[959]reg", DumpEntry{scratchpad.mem[959] reg});
+        res.insert_or_assign("scratchpad.mem[960]reg", DumpEntry{scratchpad.mem[960] reg});
+        res.insert_or_assign("scratchpad.mem[961]reg", DumpEntry{scratchpad.mem[961] reg});
+        res.insert_or_assign("scratchpad.mem[962]reg", DumpEntry{scratchpad.mem[962] reg});
+        res.insert_or_assign("scratchpad.mem[963]reg", DumpEntry{scratchpad.mem[963] reg});
+        res.insert_or_assign("scratchpad.mem[964]reg", DumpEntry{scratchpad.mem[964] reg});
+        res.insert_or_assign("scratchpad.mem[965]reg", DumpEntry{scratchpad.mem[965] reg});
+        res.insert_or_assign("scratchpad.mem[966]reg", DumpEntry{scratchpad.mem[966] reg});
+        res.insert_or_assign("scratchpad.mem[967]reg", DumpEntry{scratchpad.mem[967] reg});
+        res.insert_or_assign("scratchpad.mem[968]reg", DumpEntry{scratchpad.mem[968] reg});
+        res.insert_or_assign("scratchpad.mem[969]reg", DumpEntry{scratchpad.mem[969] reg});
+        res.insert_or_assign("scratchpad.mem[970]reg", DumpEntry{scratchpad.mem[970] reg});
+        res.insert_or_assign("scratchpad.mem[971]reg", DumpEntry{scratchpad.mem[971] reg});
+        res.insert_or_assign("scratchpad.mem[972]reg", DumpEntry{scratchpad.mem[972] reg});
+        res.insert_or_assign("scratchpad.mem[973]reg", DumpEntry{scratchpad.mem[973] reg});
+        res.insert_or_assign("scratchpad.mem[974]reg", DumpEntry{scratchpad.mem[974] reg});
+        res.insert_or_assign("scratchpad.mem[975]reg", DumpEntry{scratchpad.mem[975] reg});
+        res.insert_or_assign("scratchpad.mem[976]reg", DumpEntry{scratchpad.mem[976] reg});
+        res.insert_or_assign("scratchpad.mem[977]reg", DumpEntry{scratchpad.mem[977] reg});
+        res.insert_or_assign("scratchpad.mem[978]reg", DumpEntry{scratchpad.mem[978] reg});
+        res.insert_or_assign("scratchpad.mem[979]reg", DumpEntry{scratchpad.mem[979] reg});
+        res.insert_or_assign("scratchpad.mem[980]reg", DumpEntry{scratchpad.mem[980] reg});
+        res.insert_or_assign("scratchpad.mem[981]reg", DumpEntry{scratchpad.mem[981] reg});
+        res.insert_or_assign("scratchpad.mem[982]reg", DumpEntry{scratchpad.mem[982] reg});
+        res.insert_or_assign("scratchpad.mem[983]reg", DumpEntry{scratchpad.mem[983] reg});
+        res.insert_or_assign("scratchpad.mem[984]reg", DumpEntry{scratchpad.mem[984] reg});
+        res.insert_or_assign("scratchpad.mem[985]reg", DumpEntry{scratchpad.mem[985] reg});
+        res.insert_or_assign("scratchpad.mem[986]reg", DumpEntry{scratchpad.mem[986] reg});
+        res.insert_or_assign("scratchpad.mem[987]reg", DumpEntry{scratchpad.mem[987] reg});
+        res.insert_or_assign("scratchpad.mem[988]reg", DumpEntry{scratchpad.mem[988] reg});
+        res.insert_or_assign("scratchpad.mem[989]reg", DumpEntry{scratchpad.mem[989] reg});
+        res.insert_or_assign("scratchpad.mem[990]reg", DumpEntry{scratchpad.mem[990] reg});
+        res.insert_or_assign("scratchpad.mem[991]reg", DumpEntry{scratchpad.mem[991] reg});
+        res.insert_or_assign("scratchpad.mem[992]reg", DumpEntry{scratchpad.mem[992] reg});
+        res.insert_or_assign("scratchpad.mem[993]reg", DumpEntry{scratchpad.mem[993] reg});
+        res.insert_or_assign("scratchpad.mem[994]reg", DumpEntry{scratchpad.mem[994] reg});
+        res.insert_or_assign("scratchpad.mem[995]reg", DumpEntry{scratchpad.mem[995] reg});
+        res.insert_or_assign("scratchpad.mem[996]reg", DumpEntry{scratchpad.mem[996] reg});
+        res.insert_or_assign("scratchpad.mem[997]reg", DumpEntry{scratchpad.mem[997] reg});
+        res.insert_or_assign("scratchpad.mem[998]reg", DumpEntry{scratchpad.mem[998] reg});
+        res.insert_or_assign("scratchpad.mem[999]reg", DumpEntry{scratchpad.mem[999] reg});
+        res.insert_or_assign("scratchpad.mem[1000]reg", DumpEntry{scratchpad.mem[1000] reg});
+        res.insert_or_assign("scratchpad.mem[1001]reg", DumpEntry{scratchpad.mem[1001] reg});
+        res.insert_or_assign("scratchpad.mem[1002]reg", DumpEntry{scratchpad.mem[1002] reg});
+        res.insert_or_assign("scratchpad.mem[1003]reg", DumpEntry{scratchpad.mem[1003] reg});
+        res.insert_or_assign("scratchpad.mem[1004]reg", DumpEntry{scratchpad.mem[1004] reg});
+        res.insert_or_assign("scratchpad.mem[1005]reg", DumpEntry{scratchpad.mem[1005] reg});
+        res.insert_or_assign("scratchpad.mem[1006]reg", DumpEntry{scratchpad.mem[1006] reg});
+        res.insert_or_assign("scratchpad.mem[1007]reg", DumpEntry{scratchpad.mem[1007] reg});
+        res.insert_or_assign("scratchpad.mem[1008]reg", DumpEntry{scratchpad.mem[1008] reg});
+        res.insert_or_assign("scratchpad.mem[1009]reg", DumpEntry{scratchpad.mem[1009] reg});
+        res.insert_or_assign("scratchpad.mem[1010]reg", DumpEntry{scratchpad.mem[1010] reg});
+        res.insert_or_assign("scratchpad.mem[1011]reg", DumpEntry{scratchpad.mem[1011] reg});
+        res.insert_or_assign("scratchpad.mem[1012]reg", DumpEntry{scratchpad.mem[1012] reg});
+        res.insert_or_assign("scratchpad.mem[1013]reg", DumpEntry{scratchpad.mem[1013] reg});
+        res.insert_or_assign("scratchpad.mem[1014]reg", DumpEntry{scratchpad.mem[1014] reg});
+        res.insert_or_assign("scratchpad.mem[1015]reg", DumpEntry{scratchpad.mem[1015] reg});
+        res.insert_or_assign("scratchpad.mem[1016]reg", DumpEntry{scratchpad.mem[1016] reg});
+        res.insert_or_assign("scratchpad.mem[1017]reg", DumpEntry{scratchpad.mem[1017] reg});
+        res.insert_or_assign("scratchpad.mem[1018]reg", DumpEntry{scratchpad.mem[1018] reg});
+        res.insert_or_assign("scratchpad.mem[1019]reg", DumpEntry{scratchpad.mem[1019] reg});
+        res.insert_or_assign("scratchpad.mem[1020]reg", DumpEntry{scratchpad.mem[1020] reg});
+        res.insert_or_assign("scratchpad.mem[1021]reg", DumpEntry{scratchpad.mem[1021] reg});
+        res.insert_or_assign("scratchpad.mem[1022]reg", DumpEntry{scratchpad.mem[1022] reg});
+        res.insert_or_assign("scratchpad.mem[1023]reg", DumpEntry{scratchpad.mem[1023] reg});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::PwmVrefHeater`
+    //!
+    //! @param pwmVrefHeater A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under pwmVrefHeater
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::PwmVrefHeater& pwmVrefHeater)
+    {
+        DumpMap res{pwmVrefHeater.base()};
+        res.insert_or_assign("pwmVrefHeater.ctrl", DumpEntry{pwmVrefHeater.ctrl});
+        res.insert_or_assign("pwmVrefHeater.ctrl.enable", DumpEntry{pwmVrefHeater.ctrl.enable});
+        res.insert_or_assign("pwmVrefHeater.ctrl.reset", DumpEntry{pwmVrefHeater.ctrl.reset});
+        res.insert_or_assign("pwmVrefHeater.carrierBits", DumpEntry{pwmVrefHeater.carrierBits});
+        res.insert_or_assign("pwmVrefHeater.deadtimeBits", DumpEntry{pwmVrefHeater.deadtimeBits});
+        res.insert_or_assign("pwmVrefHeater.config", DumpEntry{pwmVrefHeater.config});
+        res.insert_or_assign("pwmVrefHeater.config.updateType", DumpEntry{pwmVrefHeater.config.updateType});
+        res.insert_or_assign("pwmVrefHeater.config.enablePwmCheck", DumpEntry{pwmVrefHeater.config.enablePwmCheck});
+        res.insert_or_assign("pwmVrefHeater.config.enableStCheck", DumpEntry{pwmVrefHeater.config.enableStCheck});
+        res.insert_or_assign("pwmVrefHeater.config.enableValueCheck", DumpEntry{pwmVrefHeater.config.enableValueCheck});
+        res.insert_or_assign("pwmVrefHeater.config.bypassDeadtime", DumpEntry{pwmVrefHeater.config.bypassDeadtime});
+        res.insert_or_assign("pwmVrefHeater.config.disableA", DumpEntry{pwmVrefHeater.config.disableA});
+        res.insert_or_assign("pwmVrefHeater.config.disableB", DumpEntry{pwmVrefHeater.config.disableB});
+        res.insert_or_assign("pwmVrefHeater.config.invert", DumpEntry{pwmVrefHeater.config.invert});
+        res.insert_or_assign("pwmVrefHeater.config.decoupleCc1", DumpEntry{pwmVrefHeater.config.decoupleCc1});
+        res.insert_or_assign("pwmVrefHeater.cc0Sc", DumpEntry{pwmVrefHeater.cc0Sc});
+        res.insert_or_assign("pwmVrefHeater.cc1Sc", DumpEntry{pwmVrefHeater.cc1Sc});
+        res.insert_or_assign("pwmVrefHeater.ctrhSc", DumpEntry{pwmVrefHeater.ctrhSc});
+        res.insert_or_assign("pwmVrefHeater.deadtimeSc", DumpEntry{pwmVrefHeater.deadtimeSc});
+        res.insert_or_assign("pwmVrefHeater.extendedDeadtimeSc", DumpEntry{pwmVrefHeater.extendedDeadtimeSc});
+        res.insert_or_assign("pwmVrefHeater.minSwitchTimeSc", DumpEntry{pwmVrefHeater.minSwitchTimeSc});
+        res.insert_or_assign("pwmVrefHeater.minModIdxSc", DumpEntry{pwmVrefHeater.minModIdxSc});
+        res.insert_or_assign("pwmVrefHeater.maxModIdxSc", DumpEntry{pwmVrefHeater.maxModIdxSc});
+        res.insert_or_assign("pwmVrefHeater.numberCcErrors", DumpEntry{pwmVrefHeater.numberCcErrors});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::EventLog::MasksArray`
+    //!
+    //! @param masks A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under masks
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::EventLog::MasksArray& masks)
+    {
+        DumpMap res{masks.base()};
+        res.insert_or_assign("masks[0].re", DumpEntry{masks[0].re});
+        res.insert_or_assign("masks[0].fe", DumpEntry{masks[0].fe});
+        res.insert_or_assign("masks[1].re", DumpEntry{masks[1].re});
+        res.insert_or_assign("masks[1].fe", DumpEntry{masks[1].fe});
+        res.insert_or_assign("masks[2].re", DumpEntry{masks[2].re});
+        res.insert_or_assign("masks[2].fe", DumpEntry{masks[2].fe});
+        res.insert_or_assign("masks[3].re", DumpEntry{masks[3].re});
+        res.insert_or_assign("masks[3].fe", DumpEntry{masks[3].fe});
+        res.insert_or_assign("masks[4].re", DumpEntry{masks[4].re});
+        res.insert_or_assign("masks[4].fe", DumpEntry{masks[4].fe});
+        res.insert_or_assign("masks[5].re", DumpEntry{masks[5].re});
+        res.insert_or_assign("masks[5].fe", DumpEntry{masks[5].fe});
+        res.insert_or_assign("masks[6].re", DumpEntry{masks[6].re});
+        res.insert_or_assign("masks[6].fe", DumpEntry{masks[6].fe});
+        res.insert_or_assign("masks[7].re", DumpEntry{masks[7].re});
+        res.insert_or_assign("masks[7].fe", DumpEntry{masks[7].fe});
+        res.insert_or_assign("masks[8].re", DumpEntry{masks[8].re});
+        res.insert_or_assign("masks[8].fe", DumpEntry{masks[8].fe});
+        res.insert_or_assign("masks[9].re", DumpEntry{masks[9].re});
+        res.insert_or_assign("masks[9].fe", DumpEntry{masks[9].fe});
+        res.insert_or_assign("masks[10].re", DumpEntry{masks[10].re});
+        res.insert_or_assign("masks[10].fe", DumpEntry{masks[10].fe});
+        res.insert_or_assign("masks[11].re", DumpEntry{masks[11].re});
+        res.insert_or_assign("masks[11].fe", DumpEntry{masks[11].fe});
+        res.insert_or_assign("masks[12].re", DumpEntry{masks[12].re});
+        res.insert_or_assign("masks[12].fe", DumpEntry{masks[12].fe});
+        res.insert_or_assign("masks[13].re", DumpEntry{masks[13].re});
+        res.insert_or_assign("masks[13].fe", DumpEntry{masks[13].fe});
+        res.insert_or_assign("masks[14].re", DumpEntry{masks[14].re});
+        res.insert_or_assign("masks[14].fe", DumpEntry{masks[14].fe});
+        res.insert_or_assign("masks[15].re", DumpEntry{masks[15].re});
+        res.insert_or_assign("masks[15].fe", DumpEntry{masks[15].fe});
+        res.insert_or_assign("masks[16].re", DumpEntry{masks[16].re});
+        res.insert_or_assign("masks[16].fe", DumpEntry{masks[16].fe});
+        res.insert_or_assign("masks[17].re", DumpEntry{masks[17].re});
+        res.insert_or_assign("masks[17].fe", DumpEntry{masks[17].fe});
+        res.insert_or_assign("masks[18].re", DumpEntry{masks[18].re});
+        res.insert_or_assign("masks[18].fe", DumpEntry{masks[18].fe});
+        res.insert_or_assign("masks[19].re", DumpEntry{masks[19].re});
+        res.insert_or_assign("masks[19].fe", DumpEntry{masks[19].fe});
+        res.insert_or_assign("masks[20].re", DumpEntry{masks[20].re});
+        res.insert_or_assign("masks[20].fe", DumpEntry{masks[20].fe});
+        res.insert_or_assign("masks[21].re", DumpEntry{masks[21].re});
+        res.insert_or_assign("masks[21].fe", DumpEntry{masks[21].fe});
+        res.insert_or_assign("masks[22].re", DumpEntry{masks[22].re});
+        res.insert_or_assign("masks[22].fe", DumpEntry{masks[22].fe});
+        res.insert_or_assign("masks[23].re", DumpEntry{masks[23].re});
+        res.insert_or_assign("masks[23].fe", DumpEntry{masks[23].fe});
+        res.insert_or_assign("masks[24].re", DumpEntry{masks[24].re});
+        res.insert_or_assign("masks[24].fe", DumpEntry{masks[24].fe});
+        res.insert_or_assign("masks[25].re", DumpEntry{masks[25].re});
+        res.insert_or_assign("masks[25].fe", DumpEntry{masks[25].fe});
+        res.insert_or_assign("masks[26].re", DumpEntry{masks[26].re});
+        res.insert_or_assign("masks[26].fe", DumpEntry{masks[26].fe});
+        res.insert_or_assign("masks[27].re", DumpEntry{masks[27].re});
+        res.insert_or_assign("masks[27].fe", DumpEntry{masks[27].fe});
+        res.insert_or_assign("masks[28].re", DumpEntry{masks[28].re});
+        res.insert_or_assign("masks[28].fe", DumpEntry{masks[28].fe});
+        res.insert_or_assign("masks[29].re", DumpEntry{masks[29].re});
+        res.insert_or_assign("masks[29].fe", DumpEntry{masks[29].fe});
+        res.insert_or_assign("masks[30].re", DumpEntry{masks[30].re});
+        res.insert_or_assign("masks[30].fe", DumpEntry{masks[30].fe});
+        res.insert_or_assign("masks[31].re", DumpEntry{masks[31].re});
+        res.insert_or_assign("masks[31].fe", DumpEntry{masks[31].fe});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::EventLog`
+    //!
+    //! @param eventLog A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under eventLog
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::EventLog& eventLog)
+    {
+        DumpMap res{eventLog.base()};
+        res.insert_or_assign("eventLog.status", DumpEntry{eventLog.status});
+        res.insert_or_assign("eventLog.status.entryLost", DumpEntry{eventLog.status.entryLost});
+        res.insert_or_assign("eventLog.status.entryValid", DumpEntry{eventLog.status.entryValid});
+        res.insert_or_assign("eventLog.status.typeIndex", DumpEntry{eventLog.status.typeIndex});
+        res.insert_or_assign("eventLog.status.bankNumber", DumpEntry{eventLog.status.bankNumber});
+        res.insert_or_assign("eventLog.timestampS", DumpEntry{eventLog.timestampS});
+        res.insert_or_assign("eventLog.timestampUs", DumpEntry{eventLog.timestampUs});
+        res.insert_or_assign("eventLog.data", DumpEntry{eventLog.data});
+        res.insert_or_assign("eventLog.fifoDataCount", DumpEntry{eventLog.fifoDataCount});
+        res.insert_or_assign("eventLog.masks[0].re", DumpEntry{eventLog.masks[0].re});
+        res.insert_or_assign("eventLog.masks[0].fe", DumpEntry{eventLog.masks[0].fe});
+        res.insert_or_assign("eventLog.masks[1].re", DumpEntry{eventLog.masks[1].re});
+        res.insert_or_assign("eventLog.masks[1].fe", DumpEntry{eventLog.masks[1].fe});
+        res.insert_or_assign("eventLog.masks[2].re", DumpEntry{eventLog.masks[2].re});
+        res.insert_or_assign("eventLog.masks[2].fe", DumpEntry{eventLog.masks[2].fe});
+        res.insert_or_assign("eventLog.masks[3].re", DumpEntry{eventLog.masks[3].re});
+        res.insert_or_assign("eventLog.masks[3].fe", DumpEntry{eventLog.masks[3].fe});
+        res.insert_or_assign("eventLog.masks[4].re", DumpEntry{eventLog.masks[4].re});
+        res.insert_or_assign("eventLog.masks[4].fe", DumpEntry{eventLog.masks[4].fe});
+        res.insert_or_assign("eventLog.masks[5].re", DumpEntry{eventLog.masks[5].re});
+        res.insert_or_assign("eventLog.masks[5].fe", DumpEntry{eventLog.masks[5].fe});
+        res.insert_or_assign("eventLog.masks[6].re", DumpEntry{eventLog.masks[6].re});
+        res.insert_or_assign("eventLog.masks[6].fe", DumpEntry{eventLog.masks[6].fe});
+        res.insert_or_assign("eventLog.masks[7].re", DumpEntry{eventLog.masks[7].re});
+        res.insert_or_assign("eventLog.masks[7].fe", DumpEntry{eventLog.masks[7].fe});
+        res.insert_or_assign("eventLog.masks[8].re", DumpEntry{eventLog.masks[8].re});
+        res.insert_or_assign("eventLog.masks[8].fe", DumpEntry{eventLog.masks[8].fe});
+        res.insert_or_assign("eventLog.masks[9].re", DumpEntry{eventLog.masks[9].re});
+        res.insert_or_assign("eventLog.masks[9].fe", DumpEntry{eventLog.masks[9].fe});
+        res.insert_or_assign("eventLog.masks[10].re", DumpEntry{eventLog.masks[10].re});
+        res.insert_or_assign("eventLog.masks[10].fe", DumpEntry{eventLog.masks[10].fe});
+        res.insert_or_assign("eventLog.masks[11].re", DumpEntry{eventLog.masks[11].re});
+        res.insert_or_assign("eventLog.masks[11].fe", DumpEntry{eventLog.masks[11].fe});
+        res.insert_or_assign("eventLog.masks[12].re", DumpEntry{eventLog.masks[12].re});
+        res.insert_or_assign("eventLog.masks[12].fe", DumpEntry{eventLog.masks[12].fe});
+        res.insert_or_assign("eventLog.masks[13].re", DumpEntry{eventLog.masks[13].re});
+        res.insert_or_assign("eventLog.masks[13].fe", DumpEntry{eventLog.masks[13].fe});
+        res.insert_or_assign("eventLog.masks[14].re", DumpEntry{eventLog.masks[14].re});
+        res.insert_or_assign("eventLog.masks[14].fe", DumpEntry{eventLog.masks[14].fe});
+        res.insert_or_assign("eventLog.masks[15].re", DumpEntry{eventLog.masks[15].re});
+        res.insert_or_assign("eventLog.masks[15].fe", DumpEntry{eventLog.masks[15].fe});
+        res.insert_or_assign("eventLog.masks[16].re", DumpEntry{eventLog.masks[16].re});
+        res.insert_or_assign("eventLog.masks[16].fe", DumpEntry{eventLog.masks[16].fe});
+        res.insert_or_assign("eventLog.masks[17].re", DumpEntry{eventLog.masks[17].re});
+        res.insert_or_assign("eventLog.masks[17].fe", DumpEntry{eventLog.masks[17].fe});
+        res.insert_or_assign("eventLog.masks[18].re", DumpEntry{eventLog.masks[18].re});
+        res.insert_or_assign("eventLog.masks[18].fe", DumpEntry{eventLog.masks[18].fe});
+        res.insert_or_assign("eventLog.masks[19].re", DumpEntry{eventLog.masks[19].re});
+        res.insert_or_assign("eventLog.masks[19].fe", DumpEntry{eventLog.masks[19].fe});
+        res.insert_or_assign("eventLog.masks[20].re", DumpEntry{eventLog.masks[20].re});
+        res.insert_or_assign("eventLog.masks[20].fe", DumpEntry{eventLog.masks[20].fe});
+        res.insert_or_assign("eventLog.masks[21].re", DumpEntry{eventLog.masks[21].re});
+        res.insert_or_assign("eventLog.masks[21].fe", DumpEntry{eventLog.masks[21].fe});
+        res.insert_or_assign("eventLog.masks[22].re", DumpEntry{eventLog.masks[22].re});
+        res.insert_or_assign("eventLog.masks[22].fe", DumpEntry{eventLog.masks[22].fe});
+        res.insert_or_assign("eventLog.masks[23].re", DumpEntry{eventLog.masks[23].re});
+        res.insert_or_assign("eventLog.masks[23].fe", DumpEntry{eventLog.masks[23].fe});
+        res.insert_or_assign("eventLog.masks[24].re", DumpEntry{eventLog.masks[24].re});
+        res.insert_or_assign("eventLog.masks[24].fe", DumpEntry{eventLog.masks[24].fe});
+        res.insert_or_assign("eventLog.masks[25].re", DumpEntry{eventLog.masks[25].re});
+        res.insert_or_assign("eventLog.masks[25].fe", DumpEntry{eventLog.masks[25].fe});
+        res.insert_or_assign("eventLog.masks[26].re", DumpEntry{eventLog.masks[26].re});
+        res.insert_or_assign("eventLog.masks[26].fe", DumpEntry{eventLog.masks[26].fe});
+        res.insert_or_assign("eventLog.masks[27].re", DumpEntry{eventLog.masks[27].re});
+        res.insert_or_assign("eventLog.masks[27].fe", DumpEntry{eventLog.masks[27].fe});
+        res.insert_or_assign("eventLog.masks[28].re", DumpEntry{eventLog.masks[28].re});
+        res.insert_or_assign("eventLog.masks[28].fe", DumpEntry{eventLog.masks[28].fe});
+        res.insert_or_assign("eventLog.masks[29].re", DumpEntry{eventLog.masks[29].re});
+        res.insert_or_assign("eventLog.masks[29].fe", DumpEntry{eventLog.masks[29].fe});
+        res.insert_or_assign("eventLog.masks[30].re", DumpEntry{eventLog.masks[30].re});
+        res.insert_or_assign("eventLog.masks[30].fe", DumpEntry{eventLog.masks[30].fe});
+        res.insert_or_assign("eventLog.masks[31].re", DumpEntry{eventLog.masks[31].re});
+        res.insert_or_assign("eventLog.masks[31].fe", DumpEntry{eventLog.masks[31].fe});
+        return res;
+    }
+
+    //! Dump the register and fields of `ipCores::Top::FreqWatchdog`
+    //!
+    //! @param freqWatchdog A reference to the module
+    //! @returns A `dump_utils::DumpMap` with all the register and fields under freqWatchdog
+    inline DumpMap dump([[maybe_unused]] const ipCores::Top::FreqWatchdog& freqWatchdog)
+    {
+        DumpMap res{freqWatchdog.base()};
+        res.insert_or_assign("freqWatchdog.alive", DumpEntry{freqWatchdog.alive});
+        res.insert_or_assign("freqWatchdog.minPeriodSc", DumpEntry{freqWatchdog.minPeriodSc});
+        res.insert_or_assign("freqWatchdog.maxPeriodSc", DumpEntry{freqWatchdog.maxPeriodSc});
         return res;
     }
     //! Dump the register and fields of `ipCores::Top`
@@ -16944,38 +20889,70 @@ namespace mmpp::utils
         res.insert_or_assign("top.dig.digI0.rstLatch", DumpEntry{top.dig.digI0.rstLatch});
         res.insert_or_assign("top.dig.digI0.risingInterrupt", DumpEntry{top.dig.digI0.risingInterrupt});
         res.insert_or_assign("top.dig.digI0.fallingInterrupt", DumpEntry{top.dig.digI0.fallingInterrupt});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[0].val", DumpEntry{top.dig.digI0.filterLengthSc[0].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[1].val", DumpEntry{top.dig.digI0.filterLengthSc[1].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[2].val", DumpEntry{top.dig.digI0.filterLengthSc[2].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[3].val", DumpEntry{top.dig.digI0.filterLengthSc[3].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[4].val", DumpEntry{top.dig.digI0.filterLengthSc[4].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[5].val", DumpEntry{top.dig.digI0.filterLengthSc[5].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[6].val", DumpEntry{top.dig.digI0.filterLengthSc[6].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[7].val", DumpEntry{top.dig.digI0.filterLengthSc[7].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[8].val", DumpEntry{top.dig.digI0.filterLengthSc[8].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[9].val", DumpEntry{top.dig.digI0.filterLengthSc[9].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[10].val", DumpEntry{top.dig.digI0.filterLengthSc[10].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[11].val", DumpEntry{top.dig.digI0.filterLengthSc[11].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[12].val", DumpEntry{top.dig.digI0.filterLengthSc[12].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[13].val", DumpEntry{top.dig.digI0.filterLengthSc[13].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[14].val", DumpEntry{top.dig.digI0.filterLengthSc[14].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[15].val", DumpEntry{top.dig.digI0.filterLengthSc[15].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[16].val", DumpEntry{top.dig.digI0.filterLengthSc[16].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[17].val", DumpEntry{top.dig.digI0.filterLengthSc[17].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[18].val", DumpEntry{top.dig.digI0.filterLengthSc[18].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[19].val", DumpEntry{top.dig.digI0.filterLengthSc[19].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[20].val", DumpEntry{top.dig.digI0.filterLengthSc[20].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[21].val", DumpEntry{top.dig.digI0.filterLengthSc[21].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[22].val", DumpEntry{top.dig.digI0.filterLengthSc[22].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[23].val", DumpEntry{top.dig.digI0.filterLengthSc[23].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[24].val", DumpEntry{top.dig.digI0.filterLengthSc[24].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[25].val", DumpEntry{top.dig.digI0.filterLengthSc[25].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[26].val", DumpEntry{top.dig.digI0.filterLengthSc[26].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[27].val", DumpEntry{top.dig.digI0.filterLengthSc[27].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[28].val", DumpEntry{top.dig.digI0.filterLengthSc[28].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[29].val", DumpEntry{top.dig.digI0.filterLengthSc[29].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[30].val", DumpEntry{top.dig.digI0.filterLengthSc[30].val});
-        res.insert_or_assign("top.dig.digI0.filterLengthSc[31].val", DumpEntry{top.dig.digI0.filterLengthSc[31].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[0].val", DumpEntry{top.dig.digI0.fastFilterSc[0].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[1].val", DumpEntry{top.dig.digI0.fastFilterSc[1].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[2].val", DumpEntry{top.dig.digI0.fastFilterSc[2].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[3].val", DumpEntry{top.dig.digI0.fastFilterSc[3].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[4].val", DumpEntry{top.dig.digI0.fastFilterSc[4].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[5].val", DumpEntry{top.dig.digI0.fastFilterSc[5].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[6].val", DumpEntry{top.dig.digI0.fastFilterSc[6].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[7].val", DumpEntry{top.dig.digI0.fastFilterSc[7].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[8].val", DumpEntry{top.dig.digI0.fastFilterSc[8].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[9].val", DumpEntry{top.dig.digI0.fastFilterSc[9].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[10].val", DumpEntry{top.dig.digI0.fastFilterSc[10].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[11].val", DumpEntry{top.dig.digI0.fastFilterSc[11].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[12].val", DumpEntry{top.dig.digI0.fastFilterSc[12].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[13].val", DumpEntry{top.dig.digI0.fastFilterSc[13].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[14].val", DumpEntry{top.dig.digI0.fastFilterSc[14].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[15].val", DumpEntry{top.dig.digI0.fastFilterSc[15].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[16].val", DumpEntry{top.dig.digI0.fastFilterSc[16].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[17].val", DumpEntry{top.dig.digI0.fastFilterSc[17].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[18].val", DumpEntry{top.dig.digI0.fastFilterSc[18].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[19].val", DumpEntry{top.dig.digI0.fastFilterSc[19].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[20].val", DumpEntry{top.dig.digI0.fastFilterSc[20].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[21].val", DumpEntry{top.dig.digI0.fastFilterSc[21].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[22].val", DumpEntry{top.dig.digI0.fastFilterSc[22].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[23].val", DumpEntry{top.dig.digI0.fastFilterSc[23].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[24].val", DumpEntry{top.dig.digI0.fastFilterSc[24].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[25].val", DumpEntry{top.dig.digI0.fastFilterSc[25].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[26].val", DumpEntry{top.dig.digI0.fastFilterSc[26].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[27].val", DumpEntry{top.dig.digI0.fastFilterSc[27].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[28].val", DumpEntry{top.dig.digI0.fastFilterSc[28].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[29].val", DumpEntry{top.dig.digI0.fastFilterSc[29].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[30].val", DumpEntry{top.dig.digI0.fastFilterSc[30].val});
+        res.insert_or_assign("top.dig.digI0.fastFilterSc[31].val", DumpEntry{top.dig.digI0.fastFilterSc[31].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[0].val", DumpEntry{top.dig.digI0.slowFilterSc[0].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[1].val", DumpEntry{top.dig.digI0.slowFilterSc[1].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[2].val", DumpEntry{top.dig.digI0.slowFilterSc[2].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[3].val", DumpEntry{top.dig.digI0.slowFilterSc[3].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[4].val", DumpEntry{top.dig.digI0.slowFilterSc[4].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[5].val", DumpEntry{top.dig.digI0.slowFilterSc[5].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[6].val", DumpEntry{top.dig.digI0.slowFilterSc[6].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[7].val", DumpEntry{top.dig.digI0.slowFilterSc[7].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[8].val", DumpEntry{top.dig.digI0.slowFilterSc[8].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[9].val", DumpEntry{top.dig.digI0.slowFilterSc[9].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[10].val", DumpEntry{top.dig.digI0.slowFilterSc[10].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[11].val", DumpEntry{top.dig.digI0.slowFilterSc[11].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[12].val", DumpEntry{top.dig.digI0.slowFilterSc[12].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[13].val", DumpEntry{top.dig.digI0.slowFilterSc[13].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[14].val", DumpEntry{top.dig.digI0.slowFilterSc[14].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[15].val", DumpEntry{top.dig.digI0.slowFilterSc[15].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[16].val", DumpEntry{top.dig.digI0.slowFilterSc[16].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[17].val", DumpEntry{top.dig.digI0.slowFilterSc[17].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[18].val", DumpEntry{top.dig.digI0.slowFilterSc[18].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[19].val", DumpEntry{top.dig.digI0.slowFilterSc[19].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[20].val", DumpEntry{top.dig.digI0.slowFilterSc[20].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[21].val", DumpEntry{top.dig.digI0.slowFilterSc[21].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[22].val", DumpEntry{top.dig.digI0.slowFilterSc[22].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[23].val", DumpEntry{top.dig.digI0.slowFilterSc[23].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[24].val", DumpEntry{top.dig.digI0.slowFilterSc[24].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[25].val", DumpEntry{top.dig.digI0.slowFilterSc[25].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[26].val", DumpEntry{top.dig.digI0.slowFilterSc[26].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[27].val", DumpEntry{top.dig.digI0.slowFilterSc[27].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[28].val", DumpEntry{top.dig.digI0.slowFilterSc[28].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[29].val", DumpEntry{top.dig.digI0.slowFilterSc[29].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[30].val", DumpEntry{top.dig.digI0.slowFilterSc[30].val});
+        res.insert_or_assign("top.dig.digI0.slowFilterSc[31].val", DumpEntry{top.dig.digI0.slowFilterSc[31].val});
         res.insert_or_assign("top.dig.digI0.reTime[0].s", DumpEntry{top.dig.digI0.reTime[0].s});
         res.insert_or_assign("top.dig.digI0.reTime[0].ns", DumpEntry{top.dig.digI0.reTime[0].ns});
         res.insert_or_assign("top.dig.digI0.reTime[1].s", DumpEntry{top.dig.digI0.reTime[1].s});
@@ -17059,38 +21036,70 @@ namespace mmpp::utils
         res.insert_or_assign("top.dig.digI1.rstLatch", DumpEntry{top.dig.digI1.rstLatch});
         res.insert_or_assign("top.dig.digI1.risingInterrupt", DumpEntry{top.dig.digI1.risingInterrupt});
         res.insert_or_assign("top.dig.digI1.fallingInterrupt", DumpEntry{top.dig.digI1.fallingInterrupt});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[0].val", DumpEntry{top.dig.digI1.filterLengthSc[0].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[1].val", DumpEntry{top.dig.digI1.filterLengthSc[1].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[2].val", DumpEntry{top.dig.digI1.filterLengthSc[2].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[3].val", DumpEntry{top.dig.digI1.filterLengthSc[3].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[4].val", DumpEntry{top.dig.digI1.filterLengthSc[4].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[5].val", DumpEntry{top.dig.digI1.filterLengthSc[5].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[6].val", DumpEntry{top.dig.digI1.filterLengthSc[6].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[7].val", DumpEntry{top.dig.digI1.filterLengthSc[7].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[8].val", DumpEntry{top.dig.digI1.filterLengthSc[8].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[9].val", DumpEntry{top.dig.digI1.filterLengthSc[9].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[10].val", DumpEntry{top.dig.digI1.filterLengthSc[10].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[11].val", DumpEntry{top.dig.digI1.filterLengthSc[11].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[12].val", DumpEntry{top.dig.digI1.filterLengthSc[12].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[13].val", DumpEntry{top.dig.digI1.filterLengthSc[13].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[14].val", DumpEntry{top.dig.digI1.filterLengthSc[14].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[15].val", DumpEntry{top.dig.digI1.filterLengthSc[15].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[16].val", DumpEntry{top.dig.digI1.filterLengthSc[16].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[17].val", DumpEntry{top.dig.digI1.filterLengthSc[17].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[18].val", DumpEntry{top.dig.digI1.filterLengthSc[18].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[19].val", DumpEntry{top.dig.digI1.filterLengthSc[19].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[20].val", DumpEntry{top.dig.digI1.filterLengthSc[20].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[21].val", DumpEntry{top.dig.digI1.filterLengthSc[21].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[22].val", DumpEntry{top.dig.digI1.filterLengthSc[22].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[23].val", DumpEntry{top.dig.digI1.filterLengthSc[23].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[24].val", DumpEntry{top.dig.digI1.filterLengthSc[24].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[25].val", DumpEntry{top.dig.digI1.filterLengthSc[25].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[26].val", DumpEntry{top.dig.digI1.filterLengthSc[26].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[27].val", DumpEntry{top.dig.digI1.filterLengthSc[27].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[28].val", DumpEntry{top.dig.digI1.filterLengthSc[28].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[29].val", DumpEntry{top.dig.digI1.filterLengthSc[29].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[30].val", DumpEntry{top.dig.digI1.filterLengthSc[30].val});
-        res.insert_or_assign("top.dig.digI1.filterLengthSc[31].val", DumpEntry{top.dig.digI1.filterLengthSc[31].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[0].val", DumpEntry{top.dig.digI1.fastFilterSc[0].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[1].val", DumpEntry{top.dig.digI1.fastFilterSc[1].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[2].val", DumpEntry{top.dig.digI1.fastFilterSc[2].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[3].val", DumpEntry{top.dig.digI1.fastFilterSc[3].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[4].val", DumpEntry{top.dig.digI1.fastFilterSc[4].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[5].val", DumpEntry{top.dig.digI1.fastFilterSc[5].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[6].val", DumpEntry{top.dig.digI1.fastFilterSc[6].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[7].val", DumpEntry{top.dig.digI1.fastFilterSc[7].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[8].val", DumpEntry{top.dig.digI1.fastFilterSc[8].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[9].val", DumpEntry{top.dig.digI1.fastFilterSc[9].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[10].val", DumpEntry{top.dig.digI1.fastFilterSc[10].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[11].val", DumpEntry{top.dig.digI1.fastFilterSc[11].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[12].val", DumpEntry{top.dig.digI1.fastFilterSc[12].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[13].val", DumpEntry{top.dig.digI1.fastFilterSc[13].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[14].val", DumpEntry{top.dig.digI1.fastFilterSc[14].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[15].val", DumpEntry{top.dig.digI1.fastFilterSc[15].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[16].val", DumpEntry{top.dig.digI1.fastFilterSc[16].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[17].val", DumpEntry{top.dig.digI1.fastFilterSc[17].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[18].val", DumpEntry{top.dig.digI1.fastFilterSc[18].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[19].val", DumpEntry{top.dig.digI1.fastFilterSc[19].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[20].val", DumpEntry{top.dig.digI1.fastFilterSc[20].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[21].val", DumpEntry{top.dig.digI1.fastFilterSc[21].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[22].val", DumpEntry{top.dig.digI1.fastFilterSc[22].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[23].val", DumpEntry{top.dig.digI1.fastFilterSc[23].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[24].val", DumpEntry{top.dig.digI1.fastFilterSc[24].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[25].val", DumpEntry{top.dig.digI1.fastFilterSc[25].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[26].val", DumpEntry{top.dig.digI1.fastFilterSc[26].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[27].val", DumpEntry{top.dig.digI1.fastFilterSc[27].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[28].val", DumpEntry{top.dig.digI1.fastFilterSc[28].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[29].val", DumpEntry{top.dig.digI1.fastFilterSc[29].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[30].val", DumpEntry{top.dig.digI1.fastFilterSc[30].val});
+        res.insert_or_assign("top.dig.digI1.fastFilterSc[31].val", DumpEntry{top.dig.digI1.fastFilterSc[31].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[0].val", DumpEntry{top.dig.digI1.slowFilterSc[0].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[1].val", DumpEntry{top.dig.digI1.slowFilterSc[1].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[2].val", DumpEntry{top.dig.digI1.slowFilterSc[2].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[3].val", DumpEntry{top.dig.digI1.slowFilterSc[3].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[4].val", DumpEntry{top.dig.digI1.slowFilterSc[4].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[5].val", DumpEntry{top.dig.digI1.slowFilterSc[5].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[6].val", DumpEntry{top.dig.digI1.slowFilterSc[6].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[7].val", DumpEntry{top.dig.digI1.slowFilterSc[7].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[8].val", DumpEntry{top.dig.digI1.slowFilterSc[8].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[9].val", DumpEntry{top.dig.digI1.slowFilterSc[9].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[10].val", DumpEntry{top.dig.digI1.slowFilterSc[10].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[11].val", DumpEntry{top.dig.digI1.slowFilterSc[11].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[12].val", DumpEntry{top.dig.digI1.slowFilterSc[12].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[13].val", DumpEntry{top.dig.digI1.slowFilterSc[13].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[14].val", DumpEntry{top.dig.digI1.slowFilterSc[14].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[15].val", DumpEntry{top.dig.digI1.slowFilterSc[15].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[16].val", DumpEntry{top.dig.digI1.slowFilterSc[16].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[17].val", DumpEntry{top.dig.digI1.slowFilterSc[17].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[18].val", DumpEntry{top.dig.digI1.slowFilterSc[18].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[19].val", DumpEntry{top.dig.digI1.slowFilterSc[19].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[20].val", DumpEntry{top.dig.digI1.slowFilterSc[20].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[21].val", DumpEntry{top.dig.digI1.slowFilterSc[21].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[22].val", DumpEntry{top.dig.digI1.slowFilterSc[22].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[23].val", DumpEntry{top.dig.digI1.slowFilterSc[23].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[24].val", DumpEntry{top.dig.digI1.slowFilterSc[24].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[25].val", DumpEntry{top.dig.digI1.slowFilterSc[25].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[26].val", DumpEntry{top.dig.digI1.slowFilterSc[26].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[27].val", DumpEntry{top.dig.digI1.slowFilterSc[27].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[28].val", DumpEntry{top.dig.digI1.slowFilterSc[28].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[29].val", DumpEntry{top.dig.digI1.slowFilterSc[29].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[30].val", DumpEntry{top.dig.digI1.slowFilterSc[30].val});
+        res.insert_or_assign("top.dig.digI1.slowFilterSc[31].val", DumpEntry{top.dig.digI1.slowFilterSc[31].val});
         res.insert_or_assign("top.dig.digI1.reTime[0].s", DumpEntry{top.dig.digI1.reTime[0].s});
         res.insert_or_assign("top.dig.digI1.reTime[0].ns", DumpEntry{top.dig.digI1.reTime[0].ns});
         res.insert_or_assign("top.dig.digI1.reTime[1].s", DumpEntry{top.dig.digI1.reTime[1].s});
@@ -17182,82 +21191,70 @@ namespace mmpp::utils
         res.insert_or_assign("top.dig.digIndI.rstLatch", DumpEntry{top.dig.digIndI.rstLatch});
         res.insert_or_assign("top.dig.digIndI.risingInterrupt", DumpEntry{top.dig.digIndI.risingInterrupt});
         res.insert_or_assign("top.dig.digIndI.fallingInterrupt", DumpEntry{top.dig.digIndI.fallingInterrupt});
-        res.insert_or_assign("top.dig.digIndI.filterLengthSc[0].val", DumpEntry{top.dig.digIndI.filterLengthSc[0].val});
-        res.insert_or_assign("top.dig.digIndI.filterLengthSc[1].val", DumpEntry{top.dig.digIndI.filterLengthSc[1].val});
-        res.insert_or_assign("top.dig.digIndI.filterLengthSc[2].val", DumpEntry{top.dig.digIndI.filterLengthSc[2].val});
-        res.insert_or_assign("top.dig.digIndI.filterLengthSc[3].val", DumpEntry{top.dig.digIndI.filterLengthSc[3].val});
-        res.insert_or_assign("top.dig.digIndI.filterLengthSc[4].val", DumpEntry{top.dig.digIndI.filterLengthSc[4].val});
-        res.insert_or_assign("top.dig.digIndI.filterLengthSc[5].val", DumpEntry{top.dig.digIndI.filterLengthSc[5].val});
-        res.insert_or_assign("top.dig.digIndI.filterLengthSc[6].val", DumpEntry{top.dig.digIndI.filterLengthSc[6].val});
-        res.insert_or_assign("top.dig.digIndI.filterLengthSc[7].val", DumpEntry{top.dig.digIndI.filterLengthSc[7].val});
-        res.insert_or_assign("top.dig.digIndI.filterLengthSc[8].val", DumpEntry{top.dig.digIndI.filterLengthSc[8].val});
-        res.insert_or_assign("top.dig.digIndI.filterLengthSc[9].val", DumpEntry{top.dig.digIndI.filterLengthSc[9].val});
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[10].val", DumpEntry{top.dig.digIndI.filterLengthSc[10].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[11].val", DumpEntry{top.dig.digIndI.filterLengthSc[11].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[12].val", DumpEntry{top.dig.digIndI.filterLengthSc[12].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[13].val", DumpEntry{top.dig.digIndI.filterLengthSc[13].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[14].val", DumpEntry{top.dig.digIndI.filterLengthSc[14].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[15].val", DumpEntry{top.dig.digIndI.filterLengthSc[15].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[16].val", DumpEntry{top.dig.digIndI.filterLengthSc[16].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[17].val", DumpEntry{top.dig.digIndI.filterLengthSc[17].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[18].val", DumpEntry{top.dig.digIndI.filterLengthSc[18].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[19].val", DumpEntry{top.dig.digIndI.filterLengthSc[19].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[20].val", DumpEntry{top.dig.digIndI.filterLengthSc[20].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[21].val", DumpEntry{top.dig.digIndI.filterLengthSc[21].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[22].val", DumpEntry{top.dig.digIndI.filterLengthSc[22].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[23].val", DumpEntry{top.dig.digIndI.filterLengthSc[23].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[24].val", DumpEntry{top.dig.digIndI.filterLengthSc[24].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[25].val", DumpEntry{top.dig.digIndI.filterLengthSc[25].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[26].val", DumpEntry{top.dig.digIndI.filterLengthSc[26].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[27].val", DumpEntry{top.dig.digIndI.filterLengthSc[27].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[28].val", DumpEntry{top.dig.digIndI.filterLengthSc[28].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[29].val", DumpEntry{top.dig.digIndI.filterLengthSc[29].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[30].val", DumpEntry{top.dig.digIndI.filterLengthSc[30].val}
-        );
-        res.insert_or_assign(
-            "top.dig.digIndI.filterLengthSc[31].val", DumpEntry{top.dig.digIndI.filterLengthSc[31].val}
-        );
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[0].val", DumpEntry{top.dig.digIndI.fastFilterSc[0].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[1].val", DumpEntry{top.dig.digIndI.fastFilterSc[1].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[2].val", DumpEntry{top.dig.digIndI.fastFilterSc[2].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[3].val", DumpEntry{top.dig.digIndI.fastFilterSc[3].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[4].val", DumpEntry{top.dig.digIndI.fastFilterSc[4].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[5].val", DumpEntry{top.dig.digIndI.fastFilterSc[5].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[6].val", DumpEntry{top.dig.digIndI.fastFilterSc[6].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[7].val", DumpEntry{top.dig.digIndI.fastFilterSc[7].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[8].val", DumpEntry{top.dig.digIndI.fastFilterSc[8].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[9].val", DumpEntry{top.dig.digIndI.fastFilterSc[9].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[10].val", DumpEntry{top.dig.digIndI.fastFilterSc[10].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[11].val", DumpEntry{top.dig.digIndI.fastFilterSc[11].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[12].val", DumpEntry{top.dig.digIndI.fastFilterSc[12].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[13].val", DumpEntry{top.dig.digIndI.fastFilterSc[13].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[14].val", DumpEntry{top.dig.digIndI.fastFilterSc[14].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[15].val", DumpEntry{top.dig.digIndI.fastFilterSc[15].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[16].val", DumpEntry{top.dig.digIndI.fastFilterSc[16].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[17].val", DumpEntry{top.dig.digIndI.fastFilterSc[17].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[18].val", DumpEntry{top.dig.digIndI.fastFilterSc[18].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[19].val", DumpEntry{top.dig.digIndI.fastFilterSc[19].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[20].val", DumpEntry{top.dig.digIndI.fastFilterSc[20].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[21].val", DumpEntry{top.dig.digIndI.fastFilterSc[21].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[22].val", DumpEntry{top.dig.digIndI.fastFilterSc[22].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[23].val", DumpEntry{top.dig.digIndI.fastFilterSc[23].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[24].val", DumpEntry{top.dig.digIndI.fastFilterSc[24].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[25].val", DumpEntry{top.dig.digIndI.fastFilterSc[25].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[26].val", DumpEntry{top.dig.digIndI.fastFilterSc[26].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[27].val", DumpEntry{top.dig.digIndI.fastFilterSc[27].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[28].val", DumpEntry{top.dig.digIndI.fastFilterSc[28].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[29].val", DumpEntry{top.dig.digIndI.fastFilterSc[29].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[30].val", DumpEntry{top.dig.digIndI.fastFilterSc[30].val});
+        res.insert_or_assign("top.dig.digIndI.fastFilterSc[31].val", DumpEntry{top.dig.digIndI.fastFilterSc[31].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[0].val", DumpEntry{top.dig.digIndI.slowFilterSc[0].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[1].val", DumpEntry{top.dig.digIndI.slowFilterSc[1].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[2].val", DumpEntry{top.dig.digIndI.slowFilterSc[2].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[3].val", DumpEntry{top.dig.digIndI.slowFilterSc[3].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[4].val", DumpEntry{top.dig.digIndI.slowFilterSc[4].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[5].val", DumpEntry{top.dig.digIndI.slowFilterSc[5].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[6].val", DumpEntry{top.dig.digIndI.slowFilterSc[6].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[7].val", DumpEntry{top.dig.digIndI.slowFilterSc[7].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[8].val", DumpEntry{top.dig.digIndI.slowFilterSc[8].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[9].val", DumpEntry{top.dig.digIndI.slowFilterSc[9].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[10].val", DumpEntry{top.dig.digIndI.slowFilterSc[10].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[11].val", DumpEntry{top.dig.digIndI.slowFilterSc[11].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[12].val", DumpEntry{top.dig.digIndI.slowFilterSc[12].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[13].val", DumpEntry{top.dig.digIndI.slowFilterSc[13].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[14].val", DumpEntry{top.dig.digIndI.slowFilterSc[14].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[15].val", DumpEntry{top.dig.digIndI.slowFilterSc[15].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[16].val", DumpEntry{top.dig.digIndI.slowFilterSc[16].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[17].val", DumpEntry{top.dig.digIndI.slowFilterSc[17].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[18].val", DumpEntry{top.dig.digIndI.slowFilterSc[18].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[19].val", DumpEntry{top.dig.digIndI.slowFilterSc[19].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[20].val", DumpEntry{top.dig.digIndI.slowFilterSc[20].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[21].val", DumpEntry{top.dig.digIndI.slowFilterSc[21].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[22].val", DumpEntry{top.dig.digIndI.slowFilterSc[22].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[23].val", DumpEntry{top.dig.digIndI.slowFilterSc[23].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[24].val", DumpEntry{top.dig.digIndI.slowFilterSc[24].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[25].val", DumpEntry{top.dig.digIndI.slowFilterSc[25].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[26].val", DumpEntry{top.dig.digIndI.slowFilterSc[26].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[27].val", DumpEntry{top.dig.digIndI.slowFilterSc[27].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[28].val", DumpEntry{top.dig.digIndI.slowFilterSc[28].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[29].val", DumpEntry{top.dig.digIndI.slowFilterSc[29].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[30].val", DumpEntry{top.dig.digIndI.slowFilterSc[30].val});
+        res.insert_or_assign("top.dig.digIndI.slowFilterSc[31].val", DumpEntry{top.dig.digIndI.slowFilterSc[31].val});
         res.insert_or_assign("top.dig.digIndI.reTime[0].s", DumpEntry{top.dig.digIndI.reTime[0].s});
         res.insert_or_assign("top.dig.digIndI.reTime[0].ns", DumpEntry{top.dig.digIndI.reTime[0].ns});
         res.insert_or_assign("top.dig.digIndI.reTime[1].s", DumpEntry{top.dig.digIndI.reTime[1].s});
@@ -17349,102 +21346,70 @@ namespace mmpp::utils
         res.insert_or_assign("top.dig.contactI.rstLatch", DumpEntry{top.dig.contactI.rstLatch});
         res.insert_or_assign("top.dig.contactI.risingInterrupt", DumpEntry{top.dig.contactI.risingInterrupt});
         res.insert_or_assign("top.dig.contactI.fallingInterrupt", DumpEntry{top.dig.contactI.fallingInterrupt});
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[0].val", DumpEntry{top.dig.contactI.filterLengthSc[0].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[1].val", DumpEntry{top.dig.contactI.filterLengthSc[1].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[2].val", DumpEntry{top.dig.contactI.filterLengthSc[2].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[3].val", DumpEntry{top.dig.contactI.filterLengthSc[3].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[4].val", DumpEntry{top.dig.contactI.filterLengthSc[4].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[5].val", DumpEntry{top.dig.contactI.filterLengthSc[5].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[6].val", DumpEntry{top.dig.contactI.filterLengthSc[6].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[7].val", DumpEntry{top.dig.contactI.filterLengthSc[7].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[8].val", DumpEntry{top.dig.contactI.filterLengthSc[8].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[9].val", DumpEntry{top.dig.contactI.filterLengthSc[9].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[10].val", DumpEntry{top.dig.contactI.filterLengthSc[10].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[11].val", DumpEntry{top.dig.contactI.filterLengthSc[11].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[12].val", DumpEntry{top.dig.contactI.filterLengthSc[12].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[13].val", DumpEntry{top.dig.contactI.filterLengthSc[13].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[14].val", DumpEntry{top.dig.contactI.filterLengthSc[14].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[15].val", DumpEntry{top.dig.contactI.filterLengthSc[15].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[16].val", DumpEntry{top.dig.contactI.filterLengthSc[16].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[17].val", DumpEntry{top.dig.contactI.filterLengthSc[17].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[18].val", DumpEntry{top.dig.contactI.filterLengthSc[18].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[19].val", DumpEntry{top.dig.contactI.filterLengthSc[19].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[20].val", DumpEntry{top.dig.contactI.filterLengthSc[20].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[21].val", DumpEntry{top.dig.contactI.filterLengthSc[21].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[22].val", DumpEntry{top.dig.contactI.filterLengthSc[22].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[23].val", DumpEntry{top.dig.contactI.filterLengthSc[23].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[24].val", DumpEntry{top.dig.contactI.filterLengthSc[24].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[25].val", DumpEntry{top.dig.contactI.filterLengthSc[25].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[26].val", DumpEntry{top.dig.contactI.filterLengthSc[26].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[27].val", DumpEntry{top.dig.contactI.filterLengthSc[27].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[28].val", DumpEntry{top.dig.contactI.filterLengthSc[28].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[29].val", DumpEntry{top.dig.contactI.filterLengthSc[29].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[30].val", DumpEntry{top.dig.contactI.filterLengthSc[30].val}
-        );
-        res.insert_or_assign(
-            "top.dig.contactI.filterLengthSc[31].val", DumpEntry{top.dig.contactI.filterLengthSc[31].val}
-        );
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[0].val", DumpEntry{top.dig.contactI.fastFilterSc[0].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[1].val", DumpEntry{top.dig.contactI.fastFilterSc[1].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[2].val", DumpEntry{top.dig.contactI.fastFilterSc[2].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[3].val", DumpEntry{top.dig.contactI.fastFilterSc[3].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[4].val", DumpEntry{top.dig.contactI.fastFilterSc[4].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[5].val", DumpEntry{top.dig.contactI.fastFilterSc[5].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[6].val", DumpEntry{top.dig.contactI.fastFilterSc[6].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[7].val", DumpEntry{top.dig.contactI.fastFilterSc[7].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[8].val", DumpEntry{top.dig.contactI.fastFilterSc[8].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[9].val", DumpEntry{top.dig.contactI.fastFilterSc[9].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[10].val", DumpEntry{top.dig.contactI.fastFilterSc[10].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[11].val", DumpEntry{top.dig.contactI.fastFilterSc[11].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[12].val", DumpEntry{top.dig.contactI.fastFilterSc[12].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[13].val", DumpEntry{top.dig.contactI.fastFilterSc[13].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[14].val", DumpEntry{top.dig.contactI.fastFilterSc[14].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[15].val", DumpEntry{top.dig.contactI.fastFilterSc[15].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[16].val", DumpEntry{top.dig.contactI.fastFilterSc[16].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[17].val", DumpEntry{top.dig.contactI.fastFilterSc[17].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[18].val", DumpEntry{top.dig.contactI.fastFilterSc[18].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[19].val", DumpEntry{top.dig.contactI.fastFilterSc[19].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[20].val", DumpEntry{top.dig.contactI.fastFilterSc[20].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[21].val", DumpEntry{top.dig.contactI.fastFilterSc[21].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[22].val", DumpEntry{top.dig.contactI.fastFilterSc[22].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[23].val", DumpEntry{top.dig.contactI.fastFilterSc[23].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[24].val", DumpEntry{top.dig.contactI.fastFilterSc[24].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[25].val", DumpEntry{top.dig.contactI.fastFilterSc[25].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[26].val", DumpEntry{top.dig.contactI.fastFilterSc[26].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[27].val", DumpEntry{top.dig.contactI.fastFilterSc[27].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[28].val", DumpEntry{top.dig.contactI.fastFilterSc[28].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[29].val", DumpEntry{top.dig.contactI.fastFilterSc[29].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[30].val", DumpEntry{top.dig.contactI.fastFilterSc[30].val});
+        res.insert_or_assign("top.dig.contactI.fastFilterSc[31].val", DumpEntry{top.dig.contactI.fastFilterSc[31].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[0].val", DumpEntry{top.dig.contactI.slowFilterSc[0].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[1].val", DumpEntry{top.dig.contactI.slowFilterSc[1].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[2].val", DumpEntry{top.dig.contactI.slowFilterSc[2].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[3].val", DumpEntry{top.dig.contactI.slowFilterSc[3].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[4].val", DumpEntry{top.dig.contactI.slowFilterSc[4].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[5].val", DumpEntry{top.dig.contactI.slowFilterSc[5].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[6].val", DumpEntry{top.dig.contactI.slowFilterSc[6].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[7].val", DumpEntry{top.dig.contactI.slowFilterSc[7].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[8].val", DumpEntry{top.dig.contactI.slowFilterSc[8].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[9].val", DumpEntry{top.dig.contactI.slowFilterSc[9].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[10].val", DumpEntry{top.dig.contactI.slowFilterSc[10].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[11].val", DumpEntry{top.dig.contactI.slowFilterSc[11].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[12].val", DumpEntry{top.dig.contactI.slowFilterSc[12].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[13].val", DumpEntry{top.dig.contactI.slowFilterSc[13].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[14].val", DumpEntry{top.dig.contactI.slowFilterSc[14].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[15].val", DumpEntry{top.dig.contactI.slowFilterSc[15].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[16].val", DumpEntry{top.dig.contactI.slowFilterSc[16].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[17].val", DumpEntry{top.dig.contactI.slowFilterSc[17].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[18].val", DumpEntry{top.dig.contactI.slowFilterSc[18].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[19].val", DumpEntry{top.dig.contactI.slowFilterSc[19].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[20].val", DumpEntry{top.dig.contactI.slowFilterSc[20].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[21].val", DumpEntry{top.dig.contactI.slowFilterSc[21].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[22].val", DumpEntry{top.dig.contactI.slowFilterSc[22].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[23].val", DumpEntry{top.dig.contactI.slowFilterSc[23].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[24].val", DumpEntry{top.dig.contactI.slowFilterSc[24].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[25].val", DumpEntry{top.dig.contactI.slowFilterSc[25].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[26].val", DumpEntry{top.dig.contactI.slowFilterSc[26].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[27].val", DumpEntry{top.dig.contactI.slowFilterSc[27].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[28].val", DumpEntry{top.dig.contactI.slowFilterSc[28].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[29].val", DumpEntry{top.dig.contactI.slowFilterSc[29].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[30].val", DumpEntry{top.dig.contactI.slowFilterSc[30].val});
+        res.insert_or_assign("top.dig.contactI.slowFilterSc[31].val", DumpEntry{top.dig.contactI.slowFilterSc[31].val});
         res.insert_or_assign("top.dig.contactI.reTime[0].s", DumpEntry{top.dig.contactI.reTime[0].s});
         res.insert_or_assign("top.dig.contactI.reTime[0].ns", DumpEntry{top.dig.contactI.reTime[0].ns});
         res.insert_or_assign("top.dig.contactI.reTime[1].s", DumpEntry{top.dig.contactI.reTime[1].s});
@@ -17536,102 +21501,70 @@ namespace mmpp::utils
         res.insert_or_assign("top.dig.opticalI.rstLatch", DumpEntry{top.dig.opticalI.rstLatch});
         res.insert_or_assign("top.dig.opticalI.risingInterrupt", DumpEntry{top.dig.opticalI.risingInterrupt});
         res.insert_or_assign("top.dig.opticalI.fallingInterrupt", DumpEntry{top.dig.opticalI.fallingInterrupt});
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[0].val", DumpEntry{top.dig.opticalI.filterLengthSc[0].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[1].val", DumpEntry{top.dig.opticalI.filterLengthSc[1].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[2].val", DumpEntry{top.dig.opticalI.filterLengthSc[2].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[3].val", DumpEntry{top.dig.opticalI.filterLengthSc[3].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[4].val", DumpEntry{top.dig.opticalI.filterLengthSc[4].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[5].val", DumpEntry{top.dig.opticalI.filterLengthSc[5].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[6].val", DumpEntry{top.dig.opticalI.filterLengthSc[6].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[7].val", DumpEntry{top.dig.opticalI.filterLengthSc[7].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[8].val", DumpEntry{top.dig.opticalI.filterLengthSc[8].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[9].val", DumpEntry{top.dig.opticalI.filterLengthSc[9].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[10].val", DumpEntry{top.dig.opticalI.filterLengthSc[10].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[11].val", DumpEntry{top.dig.opticalI.filterLengthSc[11].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[12].val", DumpEntry{top.dig.opticalI.filterLengthSc[12].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[13].val", DumpEntry{top.dig.opticalI.filterLengthSc[13].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[14].val", DumpEntry{top.dig.opticalI.filterLengthSc[14].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[15].val", DumpEntry{top.dig.opticalI.filterLengthSc[15].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[16].val", DumpEntry{top.dig.opticalI.filterLengthSc[16].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[17].val", DumpEntry{top.dig.opticalI.filterLengthSc[17].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[18].val", DumpEntry{top.dig.opticalI.filterLengthSc[18].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[19].val", DumpEntry{top.dig.opticalI.filterLengthSc[19].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[20].val", DumpEntry{top.dig.opticalI.filterLengthSc[20].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[21].val", DumpEntry{top.dig.opticalI.filterLengthSc[21].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[22].val", DumpEntry{top.dig.opticalI.filterLengthSc[22].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[23].val", DumpEntry{top.dig.opticalI.filterLengthSc[23].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[24].val", DumpEntry{top.dig.opticalI.filterLengthSc[24].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[25].val", DumpEntry{top.dig.opticalI.filterLengthSc[25].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[26].val", DumpEntry{top.dig.opticalI.filterLengthSc[26].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[27].val", DumpEntry{top.dig.opticalI.filterLengthSc[27].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[28].val", DumpEntry{top.dig.opticalI.filterLengthSc[28].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[29].val", DumpEntry{top.dig.opticalI.filterLengthSc[29].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[30].val", DumpEntry{top.dig.opticalI.filterLengthSc[30].val}
-        );
-        res.insert_or_assign(
-            "top.dig.opticalI.filterLengthSc[31].val", DumpEntry{top.dig.opticalI.filterLengthSc[31].val}
-        );
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[0].val", DumpEntry{top.dig.opticalI.fastFilterSc[0].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[1].val", DumpEntry{top.dig.opticalI.fastFilterSc[1].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[2].val", DumpEntry{top.dig.opticalI.fastFilterSc[2].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[3].val", DumpEntry{top.dig.opticalI.fastFilterSc[3].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[4].val", DumpEntry{top.dig.opticalI.fastFilterSc[4].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[5].val", DumpEntry{top.dig.opticalI.fastFilterSc[5].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[6].val", DumpEntry{top.dig.opticalI.fastFilterSc[6].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[7].val", DumpEntry{top.dig.opticalI.fastFilterSc[7].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[8].val", DumpEntry{top.dig.opticalI.fastFilterSc[8].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[9].val", DumpEntry{top.dig.opticalI.fastFilterSc[9].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[10].val", DumpEntry{top.dig.opticalI.fastFilterSc[10].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[11].val", DumpEntry{top.dig.opticalI.fastFilterSc[11].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[12].val", DumpEntry{top.dig.opticalI.fastFilterSc[12].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[13].val", DumpEntry{top.dig.opticalI.fastFilterSc[13].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[14].val", DumpEntry{top.dig.opticalI.fastFilterSc[14].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[15].val", DumpEntry{top.dig.opticalI.fastFilterSc[15].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[16].val", DumpEntry{top.dig.opticalI.fastFilterSc[16].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[17].val", DumpEntry{top.dig.opticalI.fastFilterSc[17].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[18].val", DumpEntry{top.dig.opticalI.fastFilterSc[18].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[19].val", DumpEntry{top.dig.opticalI.fastFilterSc[19].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[20].val", DumpEntry{top.dig.opticalI.fastFilterSc[20].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[21].val", DumpEntry{top.dig.opticalI.fastFilterSc[21].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[22].val", DumpEntry{top.dig.opticalI.fastFilterSc[22].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[23].val", DumpEntry{top.dig.opticalI.fastFilterSc[23].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[24].val", DumpEntry{top.dig.opticalI.fastFilterSc[24].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[25].val", DumpEntry{top.dig.opticalI.fastFilterSc[25].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[26].val", DumpEntry{top.dig.opticalI.fastFilterSc[26].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[27].val", DumpEntry{top.dig.opticalI.fastFilterSc[27].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[28].val", DumpEntry{top.dig.opticalI.fastFilterSc[28].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[29].val", DumpEntry{top.dig.opticalI.fastFilterSc[29].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[30].val", DumpEntry{top.dig.opticalI.fastFilterSc[30].val});
+        res.insert_or_assign("top.dig.opticalI.fastFilterSc[31].val", DumpEntry{top.dig.opticalI.fastFilterSc[31].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[0].val", DumpEntry{top.dig.opticalI.slowFilterSc[0].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[1].val", DumpEntry{top.dig.opticalI.slowFilterSc[1].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[2].val", DumpEntry{top.dig.opticalI.slowFilterSc[2].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[3].val", DumpEntry{top.dig.opticalI.slowFilterSc[3].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[4].val", DumpEntry{top.dig.opticalI.slowFilterSc[4].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[5].val", DumpEntry{top.dig.opticalI.slowFilterSc[5].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[6].val", DumpEntry{top.dig.opticalI.slowFilterSc[6].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[7].val", DumpEntry{top.dig.opticalI.slowFilterSc[7].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[8].val", DumpEntry{top.dig.opticalI.slowFilterSc[8].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[9].val", DumpEntry{top.dig.opticalI.slowFilterSc[9].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[10].val", DumpEntry{top.dig.opticalI.slowFilterSc[10].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[11].val", DumpEntry{top.dig.opticalI.slowFilterSc[11].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[12].val", DumpEntry{top.dig.opticalI.slowFilterSc[12].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[13].val", DumpEntry{top.dig.opticalI.slowFilterSc[13].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[14].val", DumpEntry{top.dig.opticalI.slowFilterSc[14].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[15].val", DumpEntry{top.dig.opticalI.slowFilterSc[15].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[16].val", DumpEntry{top.dig.opticalI.slowFilterSc[16].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[17].val", DumpEntry{top.dig.opticalI.slowFilterSc[17].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[18].val", DumpEntry{top.dig.opticalI.slowFilterSc[18].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[19].val", DumpEntry{top.dig.opticalI.slowFilterSc[19].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[20].val", DumpEntry{top.dig.opticalI.slowFilterSc[20].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[21].val", DumpEntry{top.dig.opticalI.slowFilterSc[21].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[22].val", DumpEntry{top.dig.opticalI.slowFilterSc[22].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[23].val", DumpEntry{top.dig.opticalI.slowFilterSc[23].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[24].val", DumpEntry{top.dig.opticalI.slowFilterSc[24].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[25].val", DumpEntry{top.dig.opticalI.slowFilterSc[25].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[26].val", DumpEntry{top.dig.opticalI.slowFilterSc[26].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[27].val", DumpEntry{top.dig.opticalI.slowFilterSc[27].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[28].val", DumpEntry{top.dig.opticalI.slowFilterSc[28].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[29].val", DumpEntry{top.dig.opticalI.slowFilterSc[29].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[30].val", DumpEntry{top.dig.opticalI.slowFilterSc[30].val});
+        res.insert_or_assign("top.dig.opticalI.slowFilterSc[31].val", DumpEntry{top.dig.opticalI.slowFilterSc[31].val});
         res.insert_or_assign("top.dig.opticalI.reTime[0].s", DumpEntry{top.dig.opticalI.reTime[0].s});
         res.insert_or_assign("top.dig.opticalI.reTime[0].ns", DumpEntry{top.dig.opticalI.reTime[0].ns});
         res.insert_or_assign("top.dig.opticalI.reTime[1].s", DumpEntry{top.dig.opticalI.reTime[1].s});
@@ -17724,100 +21657,196 @@ namespace mmpp::utils
         res.insert_or_assign("top.dig.minMaxLim0.risingInterrupt", DumpEntry{top.dig.minMaxLim0.risingInterrupt});
         res.insert_or_assign("top.dig.minMaxLim0.fallingInterrupt", DumpEntry{top.dig.minMaxLim0.fallingInterrupt});
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[0].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[0].val}
+            "top.dig.minMaxLim0.fastFilterSc[0].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[0].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[1].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[1].val}
+            "top.dig.minMaxLim0.fastFilterSc[1].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[1].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[2].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[2].val}
+            "top.dig.minMaxLim0.fastFilterSc[2].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[2].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[3].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[3].val}
+            "top.dig.minMaxLim0.fastFilterSc[3].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[3].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[4].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[4].val}
+            "top.dig.minMaxLim0.fastFilterSc[4].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[4].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[5].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[5].val}
+            "top.dig.minMaxLim0.fastFilterSc[5].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[5].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[6].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[6].val}
+            "top.dig.minMaxLim0.fastFilterSc[6].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[6].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[7].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[7].val}
+            "top.dig.minMaxLim0.fastFilterSc[7].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[7].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[8].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[8].val}
+            "top.dig.minMaxLim0.fastFilterSc[8].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[8].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[9].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[9].val}
+            "top.dig.minMaxLim0.fastFilterSc[9].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[9].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[10].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[10].val}
+            "top.dig.minMaxLim0.fastFilterSc[10].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[10].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[11].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[11].val}
+            "top.dig.minMaxLim0.fastFilterSc[11].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[11].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[12].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[12].val}
+            "top.dig.minMaxLim0.fastFilterSc[12].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[12].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[13].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[13].val}
+            "top.dig.minMaxLim0.fastFilterSc[13].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[13].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[14].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[14].val}
+            "top.dig.minMaxLim0.fastFilterSc[14].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[14].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[15].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[15].val}
+            "top.dig.minMaxLim0.fastFilterSc[15].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[15].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[16].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[16].val}
+            "top.dig.minMaxLim0.fastFilterSc[16].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[16].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[17].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[17].val}
+            "top.dig.minMaxLim0.fastFilterSc[17].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[17].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[18].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[18].val}
+            "top.dig.minMaxLim0.fastFilterSc[18].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[18].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[19].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[19].val}
+            "top.dig.minMaxLim0.fastFilterSc[19].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[19].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[20].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[20].val}
+            "top.dig.minMaxLim0.fastFilterSc[20].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[20].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[21].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[21].val}
+            "top.dig.minMaxLim0.fastFilterSc[21].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[21].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[22].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[22].val}
+            "top.dig.minMaxLim0.fastFilterSc[22].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[22].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[23].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[23].val}
+            "top.dig.minMaxLim0.fastFilterSc[23].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[23].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[24].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[24].val}
+            "top.dig.minMaxLim0.fastFilterSc[24].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[24].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[25].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[25].val}
+            "top.dig.minMaxLim0.fastFilterSc[25].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[25].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[26].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[26].val}
+            "top.dig.minMaxLim0.fastFilterSc[26].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[26].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[27].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[27].val}
+            "top.dig.minMaxLim0.fastFilterSc[27].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[27].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[28].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[28].val}
+            "top.dig.minMaxLim0.fastFilterSc[28].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[28].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[29].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[29].val}
+            "top.dig.minMaxLim0.fastFilterSc[29].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[29].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[30].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[30].val}
+            "top.dig.minMaxLim0.fastFilterSc[30].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[30].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim0.filterLengthSc[31].val", DumpEntry{top.dig.minMaxLim0.filterLengthSc[31].val}
+            "top.dig.minMaxLim0.fastFilterSc[31].val", DumpEntry{top.dig.minMaxLim0.fastFilterSc[31].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[0].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[0].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[1].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[1].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[2].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[2].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[3].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[3].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[4].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[4].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[5].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[5].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[6].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[6].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[7].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[7].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[8].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[8].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[9].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[9].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[10].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[10].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[11].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[11].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[12].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[12].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[13].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[13].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[14].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[14].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[15].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[15].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[16].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[16].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[17].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[17].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[18].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[18].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[19].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[19].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[20].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[20].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[21].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[21].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[22].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[22].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[23].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[23].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[24].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[24].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[25].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[25].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[26].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[26].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[27].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[27].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[28].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[28].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[29].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[29].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[30].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[30].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim0.slowFilterSc[31].val", DumpEntry{top.dig.minMaxLim0.slowFilterSc[31].val}
         );
         res.insert_or_assign("top.dig.minMaxLim0.reTime[0].s", DumpEntry{top.dig.minMaxLim0.reTime[0].s});
         res.insert_or_assign("top.dig.minMaxLim0.reTime[0].ns", DumpEntry{top.dig.minMaxLim0.reTime[0].ns});
@@ -17911,100 +21940,196 @@ namespace mmpp::utils
         res.insert_or_assign("top.dig.minMaxLim1.risingInterrupt", DumpEntry{top.dig.minMaxLim1.risingInterrupt});
         res.insert_or_assign("top.dig.minMaxLim1.fallingInterrupt", DumpEntry{top.dig.minMaxLim1.fallingInterrupt});
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[0].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[0].val}
+            "top.dig.minMaxLim1.fastFilterSc[0].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[0].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[1].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[1].val}
+            "top.dig.minMaxLim1.fastFilterSc[1].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[1].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[2].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[2].val}
+            "top.dig.minMaxLim1.fastFilterSc[2].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[2].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[3].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[3].val}
+            "top.dig.minMaxLim1.fastFilterSc[3].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[3].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[4].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[4].val}
+            "top.dig.minMaxLim1.fastFilterSc[4].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[4].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[5].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[5].val}
+            "top.dig.minMaxLim1.fastFilterSc[5].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[5].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[6].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[6].val}
+            "top.dig.minMaxLim1.fastFilterSc[6].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[6].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[7].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[7].val}
+            "top.dig.minMaxLim1.fastFilterSc[7].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[7].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[8].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[8].val}
+            "top.dig.minMaxLim1.fastFilterSc[8].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[8].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[9].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[9].val}
+            "top.dig.minMaxLim1.fastFilterSc[9].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[9].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[10].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[10].val}
+            "top.dig.minMaxLim1.fastFilterSc[10].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[10].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[11].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[11].val}
+            "top.dig.minMaxLim1.fastFilterSc[11].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[11].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[12].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[12].val}
+            "top.dig.minMaxLim1.fastFilterSc[12].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[12].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[13].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[13].val}
+            "top.dig.minMaxLim1.fastFilterSc[13].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[13].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[14].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[14].val}
+            "top.dig.minMaxLim1.fastFilterSc[14].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[14].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[15].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[15].val}
+            "top.dig.minMaxLim1.fastFilterSc[15].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[15].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[16].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[16].val}
+            "top.dig.minMaxLim1.fastFilterSc[16].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[16].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[17].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[17].val}
+            "top.dig.minMaxLim1.fastFilterSc[17].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[17].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[18].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[18].val}
+            "top.dig.minMaxLim1.fastFilterSc[18].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[18].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[19].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[19].val}
+            "top.dig.minMaxLim1.fastFilterSc[19].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[19].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[20].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[20].val}
+            "top.dig.minMaxLim1.fastFilterSc[20].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[20].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[21].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[21].val}
+            "top.dig.minMaxLim1.fastFilterSc[21].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[21].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[22].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[22].val}
+            "top.dig.minMaxLim1.fastFilterSc[22].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[22].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[23].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[23].val}
+            "top.dig.minMaxLim1.fastFilterSc[23].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[23].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[24].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[24].val}
+            "top.dig.minMaxLim1.fastFilterSc[24].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[24].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[25].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[25].val}
+            "top.dig.minMaxLim1.fastFilterSc[25].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[25].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[26].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[26].val}
+            "top.dig.minMaxLim1.fastFilterSc[26].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[26].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[27].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[27].val}
+            "top.dig.minMaxLim1.fastFilterSc[27].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[27].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[28].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[28].val}
+            "top.dig.minMaxLim1.fastFilterSc[28].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[28].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[29].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[29].val}
+            "top.dig.minMaxLim1.fastFilterSc[29].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[29].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[30].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[30].val}
+            "top.dig.minMaxLim1.fastFilterSc[30].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[30].val}
         );
         res.insert_or_assign(
-            "top.dig.minMaxLim1.filterLengthSc[31].val", DumpEntry{top.dig.minMaxLim1.filterLengthSc[31].val}
+            "top.dig.minMaxLim1.fastFilterSc[31].val", DumpEntry{top.dig.minMaxLim1.fastFilterSc[31].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[0].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[0].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[1].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[1].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[2].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[2].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[3].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[3].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[4].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[4].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[5].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[5].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[6].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[6].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[7].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[7].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[8].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[8].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[9].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[9].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[10].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[10].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[11].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[11].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[12].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[12].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[13].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[13].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[14].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[14].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[15].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[15].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[16].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[16].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[17].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[17].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[18].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[18].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[19].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[19].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[20].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[20].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[21].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[21].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[22].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[22].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[23].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[23].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[24].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[24].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[25].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[25].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[26].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[26].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[27].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[27].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[28].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[28].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[29].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[29].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[30].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[30].val}
+        );
+        res.insert_or_assign(
+            "top.dig.minMaxLim1.slowFilterSc[31].val", DumpEntry{top.dig.minMaxLim1.slowFilterSc[31].val}
         );
         res.insert_or_assign("top.dig.minMaxLim1.reTime[0].s", DumpEntry{top.dig.minMaxLim1.reTime[0].s});
         res.insert_or_assign("top.dig.minMaxLim1.reTime[0].ns", DumpEntry{top.dig.minMaxLim1.reTime[0].ns});
@@ -18097,82 +22222,70 @@ namespace mmpp::utils
         res.insert_or_assign("top.dig.rmsLim0.rstLatch", DumpEntry{top.dig.rmsLim0.rstLatch});
         res.insert_or_assign("top.dig.rmsLim0.risingInterrupt", DumpEntry{top.dig.rmsLim0.risingInterrupt});
         res.insert_or_assign("top.dig.rmsLim0.fallingInterrupt", DumpEntry{top.dig.rmsLim0.fallingInterrupt});
-        res.insert_or_assign("top.dig.rmsLim0.filterLengthSc[0].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[0].val});
-        res.insert_or_assign("top.dig.rmsLim0.filterLengthSc[1].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[1].val});
-        res.insert_or_assign("top.dig.rmsLim0.filterLengthSc[2].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[2].val});
-        res.insert_or_assign("top.dig.rmsLim0.filterLengthSc[3].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[3].val});
-        res.insert_or_assign("top.dig.rmsLim0.filterLengthSc[4].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[4].val});
-        res.insert_or_assign("top.dig.rmsLim0.filterLengthSc[5].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[5].val});
-        res.insert_or_assign("top.dig.rmsLim0.filterLengthSc[6].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[6].val});
-        res.insert_or_assign("top.dig.rmsLim0.filterLengthSc[7].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[7].val});
-        res.insert_or_assign("top.dig.rmsLim0.filterLengthSc[8].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[8].val});
-        res.insert_or_assign("top.dig.rmsLim0.filterLengthSc[9].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[9].val});
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[10].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[10].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[11].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[11].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[12].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[12].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[13].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[13].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[14].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[14].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[15].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[15].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[16].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[16].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[17].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[17].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[18].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[18].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[19].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[19].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[20].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[20].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[21].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[21].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[22].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[22].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[23].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[23].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[24].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[24].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[25].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[25].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[26].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[26].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[27].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[27].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[28].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[28].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[29].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[29].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[30].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[30].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim0.filterLengthSc[31].val", DumpEntry{top.dig.rmsLim0.filterLengthSc[31].val}
-        );
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[0].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[0].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[1].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[1].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[2].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[2].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[3].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[3].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[4].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[4].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[5].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[5].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[6].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[6].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[7].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[7].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[8].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[8].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[9].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[9].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[10].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[10].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[11].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[11].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[12].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[12].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[13].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[13].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[14].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[14].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[15].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[15].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[16].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[16].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[17].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[17].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[18].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[18].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[19].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[19].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[20].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[20].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[21].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[21].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[22].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[22].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[23].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[23].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[24].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[24].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[25].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[25].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[26].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[26].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[27].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[27].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[28].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[28].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[29].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[29].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[30].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[30].val});
+        res.insert_or_assign("top.dig.rmsLim0.fastFilterSc[31].val", DumpEntry{top.dig.rmsLim0.fastFilterSc[31].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[0].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[0].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[1].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[1].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[2].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[2].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[3].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[3].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[4].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[4].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[5].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[5].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[6].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[6].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[7].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[7].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[8].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[8].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[9].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[9].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[10].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[10].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[11].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[11].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[12].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[12].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[13].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[13].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[14].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[14].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[15].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[15].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[16].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[16].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[17].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[17].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[18].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[18].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[19].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[19].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[20].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[20].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[21].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[21].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[22].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[22].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[23].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[23].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[24].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[24].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[25].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[25].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[26].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[26].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[27].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[27].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[28].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[28].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[29].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[29].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[30].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[30].val});
+        res.insert_or_assign("top.dig.rmsLim0.slowFilterSc[31].val", DumpEntry{top.dig.rmsLim0.slowFilterSc[31].val});
         res.insert_or_assign("top.dig.rmsLim0.reTime[0].s", DumpEntry{top.dig.rmsLim0.reTime[0].s});
         res.insert_or_assign("top.dig.rmsLim0.reTime[0].ns", DumpEntry{top.dig.rmsLim0.reTime[0].ns});
         res.insert_or_assign("top.dig.rmsLim0.reTime[1].s", DumpEntry{top.dig.rmsLim0.reTime[1].s});
@@ -18264,82 +22377,70 @@ namespace mmpp::utils
         res.insert_or_assign("top.dig.rmsLim1.rstLatch", DumpEntry{top.dig.rmsLim1.rstLatch});
         res.insert_or_assign("top.dig.rmsLim1.risingInterrupt", DumpEntry{top.dig.rmsLim1.risingInterrupt});
         res.insert_or_assign("top.dig.rmsLim1.fallingInterrupt", DumpEntry{top.dig.rmsLim1.fallingInterrupt});
-        res.insert_or_assign("top.dig.rmsLim1.filterLengthSc[0].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[0].val});
-        res.insert_or_assign("top.dig.rmsLim1.filterLengthSc[1].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[1].val});
-        res.insert_or_assign("top.dig.rmsLim1.filterLengthSc[2].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[2].val});
-        res.insert_or_assign("top.dig.rmsLim1.filterLengthSc[3].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[3].val});
-        res.insert_or_assign("top.dig.rmsLim1.filterLengthSc[4].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[4].val});
-        res.insert_or_assign("top.dig.rmsLim1.filterLengthSc[5].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[5].val});
-        res.insert_or_assign("top.dig.rmsLim1.filterLengthSc[6].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[6].val});
-        res.insert_or_assign("top.dig.rmsLim1.filterLengthSc[7].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[7].val});
-        res.insert_or_assign("top.dig.rmsLim1.filterLengthSc[8].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[8].val});
-        res.insert_or_assign("top.dig.rmsLim1.filterLengthSc[9].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[9].val});
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[10].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[10].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[11].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[11].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[12].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[12].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[13].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[13].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[14].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[14].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[15].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[15].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[16].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[16].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[17].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[17].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[18].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[18].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[19].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[19].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[20].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[20].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[21].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[21].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[22].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[22].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[23].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[23].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[24].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[24].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[25].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[25].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[26].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[26].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[27].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[27].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[28].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[28].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[29].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[29].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[30].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[30].val}
-        );
-        res.insert_or_assign(
-            "top.dig.rmsLim1.filterLengthSc[31].val", DumpEntry{top.dig.rmsLim1.filterLengthSc[31].val}
-        );
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[0].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[0].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[1].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[1].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[2].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[2].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[3].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[3].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[4].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[4].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[5].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[5].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[6].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[6].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[7].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[7].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[8].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[8].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[9].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[9].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[10].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[10].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[11].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[11].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[12].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[12].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[13].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[13].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[14].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[14].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[15].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[15].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[16].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[16].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[17].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[17].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[18].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[18].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[19].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[19].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[20].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[20].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[21].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[21].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[22].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[22].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[23].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[23].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[24].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[24].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[25].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[25].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[26].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[26].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[27].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[27].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[28].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[28].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[29].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[29].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[30].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[30].val});
+        res.insert_or_assign("top.dig.rmsLim1.fastFilterSc[31].val", DumpEntry{top.dig.rmsLim1.fastFilterSc[31].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[0].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[0].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[1].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[1].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[2].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[2].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[3].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[3].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[4].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[4].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[5].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[5].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[6].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[6].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[7].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[7].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[8].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[8].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[9].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[9].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[10].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[10].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[11].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[11].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[12].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[12].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[13].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[13].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[14].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[14].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[15].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[15].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[16].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[16].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[17].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[17].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[18].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[18].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[19].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[19].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[20].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[20].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[21].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[21].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[22].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[22].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[23].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[23].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[24].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[24].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[25].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[25].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[26].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[26].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[27].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[27].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[28].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[28].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[29].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[29].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[30].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[30].val});
+        res.insert_or_assign("top.dig.rmsLim1.slowFilterSc[31].val", DumpEntry{top.dig.rmsLim1.slowFilterSc[31].val});
         res.insert_or_assign("top.dig.rmsLim1.reTime[0].s", DumpEntry{top.dig.rmsLim1.reTime[0].s});
         res.insert_or_assign("top.dig.rmsLim1.reTime[0].ns", DumpEntry{top.dig.rmsLim1.reTime[0].ns});
         res.insert_or_assign("top.dig.rmsLim1.reTime[1].s", DumpEntry{top.dig.rmsLim1.reTime[1].s});
@@ -20014,6 +24115,1185 @@ namespace mmpp::utils
         res.insert_or_assign("top.syncTrig[26].stg.ctrl.resync", DumpEntry{top.syncTrig[26].stg.ctrl.resync});
         res.insert_or_assign("top.syncTrig[26].stg.delaySc", DumpEntry{top.syncTrig[26].stg.delaySc});
         res.insert_or_assign("top.syncTrig[26].stg.periodSc", DumpEntry{top.syncTrig[26].stg.periodSc});
+        res.insert_or_assign("top.syncTrig[27].stg.ctrl", DumpEntry{top.syncTrig[27].stg.ctrl});
+        res.insert_or_assign("top.syncTrig[27].stg.ctrl.periodic", DumpEntry{top.syncTrig[27].stg.ctrl.periodic});
+        res.insert_or_assign("top.syncTrig[27].stg.ctrl.resync", DumpEntry{top.syncTrig[27].stg.ctrl.resync});
+        res.insert_or_assign("top.syncTrig[27].stg.delaySc", DumpEntry{top.syncTrig[27].stg.delaySc});
+        res.insert_or_assign("top.syncTrig[27].stg.periodSc", DumpEntry{top.syncTrig[27].stg.periodSc});
+        res.insert_or_assign("top.syncTrig[28].stg.ctrl", DumpEntry{top.syncTrig[28].stg.ctrl});
+        res.insert_or_assign("top.syncTrig[28].stg.ctrl.periodic", DumpEntry{top.syncTrig[28].stg.ctrl.periodic});
+        res.insert_or_assign("top.syncTrig[28].stg.ctrl.resync", DumpEntry{top.syncTrig[28].stg.ctrl.resync});
+        res.insert_or_assign("top.syncTrig[28].stg.delaySc", DumpEntry{top.syncTrig[28].stg.delaySc});
+        res.insert_or_assign("top.syncTrig[28].stg.periodSc", DumpEntry{top.syncTrig[28].stg.periodSc});
+        res.insert_or_assign("top.syncUart.ctrl", DumpEntry{top.syncUart.ctrl});
+        res.insert_or_assign("top.syncUart.ctrl.setTxData", DumpEntry{top.syncUart.ctrl.setTxData});
+        res.insert_or_assign("top.syncUart.config", DumpEntry{top.syncUart.config});
+        res.insert_or_assign("top.syncUart.config.enParity", DumpEntry{top.syncUart.config.enParity});
+        res.insert_or_assign("top.syncUart.config.interFrameGap", DumpEntry{top.syncUart.config.interFrameGap});
+        res.insert_or_assign("top.syncUart.uartSendTimeNs", DumpEntry{top.syncUart.uartSendTimeNs});
+        res.insert_or_assign("top.syncUart.scPerUartBit", DumpEntry{top.syncUart.scPerUartBit});
+        res.insert_or_assign("top.syncUart.scPerUartBit.val", DumpEntry{top.syncUart.scPerUartBit.val});
+        res.insert_or_assign("top.syncUart.uartData", DumpEntry{top.syncUart.uartData});
+        res.insert_or_assign("top.syncUart.uartData.val", DumpEntry{top.syncUart.uartData.val});
+        res.insert_or_assign("top.syncUart.firingTimeS", DumpEntry{top.syncUart.firingTimeS});
+        res.insert_or_assign("top.syncUart.firingTimeNs", DumpEntry{top.syncUart.firingTimeNs});
+        res.insert_or_assign("top.syncUart.magic", DumpEntry{top.syncUart.magic});
+        res.insert_or_assign("top.pwmBank.cc0[0].value", DumpEntry{top.pwmBank.cc0[0].value});
+        res.insert_or_assign("top.pwmBank.cc0[1].value", DumpEntry{top.pwmBank.cc0[1].value});
+        res.insert_or_assign("top.pwmBank.cc0[2].value", DumpEntry{top.pwmBank.cc0[2].value});
+        res.insert_or_assign("top.pwmBank.cc0[3].value", DumpEntry{top.pwmBank.cc0[3].value});
+        res.insert_or_assign("top.pwmBank.cc0[4].value", DumpEntry{top.pwmBank.cc0[4].value});
+        res.insert_or_assign("top.pwmBank.cc0[5].value", DumpEntry{top.pwmBank.cc0[5].value});
+        res.insert_or_assign("top.pwmBank.cc0[6].value", DumpEntry{top.pwmBank.cc0[6].value});
+        res.insert_or_assign("top.pwmBank.cc0[7].value", DumpEntry{top.pwmBank.cc0[7].value});
+        res.insert_or_assign("top.pwmBank.cc0[8].value", DumpEntry{top.pwmBank.cc0[8].value});
+        res.insert_or_assign("top.pwmBank.cc0[9].value", DumpEntry{top.pwmBank.cc0[9].value});
+        res.insert_or_assign("top.pwmBank.cc0[10].value", DumpEntry{top.pwmBank.cc0[10].value});
+        res.insert_or_assign("top.pwmBank.cc0[11].value", DumpEntry{top.pwmBank.cc0[11].value});
+        res.insert_or_assign("top.pwmBank.cc1[0].value", DumpEntry{top.pwmBank.cc1[0].value});
+        res.insert_or_assign("top.pwmBank.cc1[1].value", DumpEntry{top.pwmBank.cc1[1].value});
+        res.insert_or_assign("top.pwmBank.cc1[2].value", DumpEntry{top.pwmBank.cc1[2].value});
+        res.insert_or_assign("top.pwmBank.cc1[3].value", DumpEntry{top.pwmBank.cc1[3].value});
+        res.insert_or_assign("top.pwmBank.cc1[4].value", DumpEntry{top.pwmBank.cc1[4].value});
+        res.insert_or_assign("top.pwmBank.cc1[5].value", DumpEntry{top.pwmBank.cc1[5].value});
+        res.insert_or_assign("top.pwmBank.cc1[6].value", DumpEntry{top.pwmBank.cc1[6].value});
+        res.insert_or_assign("top.pwmBank.cc1[7].value", DumpEntry{top.pwmBank.cc1[7].value});
+        res.insert_or_assign("top.pwmBank.cc1[8].value", DumpEntry{top.pwmBank.cc1[8].value});
+        res.insert_or_assign("top.pwmBank.cc1[9].value", DumpEntry{top.pwmBank.cc1[9].value});
+        res.insert_or_assign("top.pwmBank.cc1[10].value", DumpEntry{top.pwmBank.cc1[10].value});
+        res.insert_or_assign("top.pwmBank.cc1[11].value", DumpEntry{top.pwmBank.cc1[11].value});
+        res.insert_or_assign("top.scratchpad.mem[0]reg", DumpEntry{top.scratchpad.mem[0] reg});
+        res.insert_or_assign("top.scratchpad.mem[1]reg", DumpEntry{top.scratchpad.mem[1] reg});
+        res.insert_or_assign("top.scratchpad.mem[2]reg", DumpEntry{top.scratchpad.mem[2] reg});
+        res.insert_or_assign("top.scratchpad.mem[3]reg", DumpEntry{top.scratchpad.mem[3] reg});
+        res.insert_or_assign("top.scratchpad.mem[4]reg", DumpEntry{top.scratchpad.mem[4] reg});
+        res.insert_or_assign("top.scratchpad.mem[5]reg", DumpEntry{top.scratchpad.mem[5] reg});
+        res.insert_or_assign("top.scratchpad.mem[6]reg", DumpEntry{top.scratchpad.mem[6] reg});
+        res.insert_or_assign("top.scratchpad.mem[7]reg", DumpEntry{top.scratchpad.mem[7] reg});
+        res.insert_or_assign("top.scratchpad.mem[8]reg", DumpEntry{top.scratchpad.mem[8] reg});
+        res.insert_or_assign("top.scratchpad.mem[9]reg", DumpEntry{top.scratchpad.mem[9] reg});
+        res.insert_or_assign("top.scratchpad.mem[10]reg", DumpEntry{top.scratchpad.mem[10] reg});
+        res.insert_or_assign("top.scratchpad.mem[11]reg", DumpEntry{top.scratchpad.mem[11] reg});
+        res.insert_or_assign("top.scratchpad.mem[12]reg", DumpEntry{top.scratchpad.mem[12] reg});
+        res.insert_or_assign("top.scratchpad.mem[13]reg", DumpEntry{top.scratchpad.mem[13] reg});
+        res.insert_or_assign("top.scratchpad.mem[14]reg", DumpEntry{top.scratchpad.mem[14] reg});
+        res.insert_or_assign("top.scratchpad.mem[15]reg", DumpEntry{top.scratchpad.mem[15] reg});
+        res.insert_or_assign("top.scratchpad.mem[16]reg", DumpEntry{top.scratchpad.mem[16] reg});
+        res.insert_or_assign("top.scratchpad.mem[17]reg", DumpEntry{top.scratchpad.mem[17] reg});
+        res.insert_or_assign("top.scratchpad.mem[18]reg", DumpEntry{top.scratchpad.mem[18] reg});
+        res.insert_or_assign("top.scratchpad.mem[19]reg", DumpEntry{top.scratchpad.mem[19] reg});
+        res.insert_or_assign("top.scratchpad.mem[20]reg", DumpEntry{top.scratchpad.mem[20] reg});
+        res.insert_or_assign("top.scratchpad.mem[21]reg", DumpEntry{top.scratchpad.mem[21] reg});
+        res.insert_or_assign("top.scratchpad.mem[22]reg", DumpEntry{top.scratchpad.mem[22] reg});
+        res.insert_or_assign("top.scratchpad.mem[23]reg", DumpEntry{top.scratchpad.mem[23] reg});
+        res.insert_or_assign("top.scratchpad.mem[24]reg", DumpEntry{top.scratchpad.mem[24] reg});
+        res.insert_or_assign("top.scratchpad.mem[25]reg", DumpEntry{top.scratchpad.mem[25] reg});
+        res.insert_or_assign("top.scratchpad.mem[26]reg", DumpEntry{top.scratchpad.mem[26] reg});
+        res.insert_or_assign("top.scratchpad.mem[27]reg", DumpEntry{top.scratchpad.mem[27] reg});
+        res.insert_or_assign("top.scratchpad.mem[28]reg", DumpEntry{top.scratchpad.mem[28] reg});
+        res.insert_or_assign("top.scratchpad.mem[29]reg", DumpEntry{top.scratchpad.mem[29] reg});
+        res.insert_or_assign("top.scratchpad.mem[30]reg", DumpEntry{top.scratchpad.mem[30] reg});
+        res.insert_or_assign("top.scratchpad.mem[31]reg", DumpEntry{top.scratchpad.mem[31] reg});
+        res.insert_or_assign("top.scratchpad.mem[32]reg", DumpEntry{top.scratchpad.mem[32] reg});
+        res.insert_or_assign("top.scratchpad.mem[33]reg", DumpEntry{top.scratchpad.mem[33] reg});
+        res.insert_or_assign("top.scratchpad.mem[34]reg", DumpEntry{top.scratchpad.mem[34] reg});
+        res.insert_or_assign("top.scratchpad.mem[35]reg", DumpEntry{top.scratchpad.mem[35] reg});
+        res.insert_or_assign("top.scratchpad.mem[36]reg", DumpEntry{top.scratchpad.mem[36] reg});
+        res.insert_or_assign("top.scratchpad.mem[37]reg", DumpEntry{top.scratchpad.mem[37] reg});
+        res.insert_or_assign("top.scratchpad.mem[38]reg", DumpEntry{top.scratchpad.mem[38] reg});
+        res.insert_or_assign("top.scratchpad.mem[39]reg", DumpEntry{top.scratchpad.mem[39] reg});
+        res.insert_or_assign("top.scratchpad.mem[40]reg", DumpEntry{top.scratchpad.mem[40] reg});
+        res.insert_or_assign("top.scratchpad.mem[41]reg", DumpEntry{top.scratchpad.mem[41] reg});
+        res.insert_or_assign("top.scratchpad.mem[42]reg", DumpEntry{top.scratchpad.mem[42] reg});
+        res.insert_or_assign("top.scratchpad.mem[43]reg", DumpEntry{top.scratchpad.mem[43] reg});
+        res.insert_or_assign("top.scratchpad.mem[44]reg", DumpEntry{top.scratchpad.mem[44] reg});
+        res.insert_or_assign("top.scratchpad.mem[45]reg", DumpEntry{top.scratchpad.mem[45] reg});
+        res.insert_or_assign("top.scratchpad.mem[46]reg", DumpEntry{top.scratchpad.mem[46] reg});
+        res.insert_or_assign("top.scratchpad.mem[47]reg", DumpEntry{top.scratchpad.mem[47] reg});
+        res.insert_or_assign("top.scratchpad.mem[48]reg", DumpEntry{top.scratchpad.mem[48] reg});
+        res.insert_or_assign("top.scratchpad.mem[49]reg", DumpEntry{top.scratchpad.mem[49] reg});
+        res.insert_or_assign("top.scratchpad.mem[50]reg", DumpEntry{top.scratchpad.mem[50] reg});
+        res.insert_or_assign("top.scratchpad.mem[51]reg", DumpEntry{top.scratchpad.mem[51] reg});
+        res.insert_or_assign("top.scratchpad.mem[52]reg", DumpEntry{top.scratchpad.mem[52] reg});
+        res.insert_or_assign("top.scratchpad.mem[53]reg", DumpEntry{top.scratchpad.mem[53] reg});
+        res.insert_or_assign("top.scratchpad.mem[54]reg", DumpEntry{top.scratchpad.mem[54] reg});
+        res.insert_or_assign("top.scratchpad.mem[55]reg", DumpEntry{top.scratchpad.mem[55] reg});
+        res.insert_or_assign("top.scratchpad.mem[56]reg", DumpEntry{top.scratchpad.mem[56] reg});
+        res.insert_or_assign("top.scratchpad.mem[57]reg", DumpEntry{top.scratchpad.mem[57] reg});
+        res.insert_or_assign("top.scratchpad.mem[58]reg", DumpEntry{top.scratchpad.mem[58] reg});
+        res.insert_or_assign("top.scratchpad.mem[59]reg", DumpEntry{top.scratchpad.mem[59] reg});
+        res.insert_or_assign("top.scratchpad.mem[60]reg", DumpEntry{top.scratchpad.mem[60] reg});
+        res.insert_or_assign("top.scratchpad.mem[61]reg", DumpEntry{top.scratchpad.mem[61] reg});
+        res.insert_or_assign("top.scratchpad.mem[62]reg", DumpEntry{top.scratchpad.mem[62] reg});
+        res.insert_or_assign("top.scratchpad.mem[63]reg", DumpEntry{top.scratchpad.mem[63] reg});
+        res.insert_or_assign("top.scratchpad.mem[64]reg", DumpEntry{top.scratchpad.mem[64] reg});
+        res.insert_or_assign("top.scratchpad.mem[65]reg", DumpEntry{top.scratchpad.mem[65] reg});
+        res.insert_or_assign("top.scratchpad.mem[66]reg", DumpEntry{top.scratchpad.mem[66] reg});
+        res.insert_or_assign("top.scratchpad.mem[67]reg", DumpEntry{top.scratchpad.mem[67] reg});
+        res.insert_or_assign("top.scratchpad.mem[68]reg", DumpEntry{top.scratchpad.mem[68] reg});
+        res.insert_or_assign("top.scratchpad.mem[69]reg", DumpEntry{top.scratchpad.mem[69] reg});
+        res.insert_or_assign("top.scratchpad.mem[70]reg", DumpEntry{top.scratchpad.mem[70] reg});
+        res.insert_or_assign("top.scratchpad.mem[71]reg", DumpEntry{top.scratchpad.mem[71] reg});
+        res.insert_or_assign("top.scratchpad.mem[72]reg", DumpEntry{top.scratchpad.mem[72] reg});
+        res.insert_or_assign("top.scratchpad.mem[73]reg", DumpEntry{top.scratchpad.mem[73] reg});
+        res.insert_or_assign("top.scratchpad.mem[74]reg", DumpEntry{top.scratchpad.mem[74] reg});
+        res.insert_or_assign("top.scratchpad.mem[75]reg", DumpEntry{top.scratchpad.mem[75] reg});
+        res.insert_or_assign("top.scratchpad.mem[76]reg", DumpEntry{top.scratchpad.mem[76] reg});
+        res.insert_or_assign("top.scratchpad.mem[77]reg", DumpEntry{top.scratchpad.mem[77] reg});
+        res.insert_or_assign("top.scratchpad.mem[78]reg", DumpEntry{top.scratchpad.mem[78] reg});
+        res.insert_or_assign("top.scratchpad.mem[79]reg", DumpEntry{top.scratchpad.mem[79] reg});
+        res.insert_or_assign("top.scratchpad.mem[80]reg", DumpEntry{top.scratchpad.mem[80] reg});
+        res.insert_or_assign("top.scratchpad.mem[81]reg", DumpEntry{top.scratchpad.mem[81] reg});
+        res.insert_or_assign("top.scratchpad.mem[82]reg", DumpEntry{top.scratchpad.mem[82] reg});
+        res.insert_or_assign("top.scratchpad.mem[83]reg", DumpEntry{top.scratchpad.mem[83] reg});
+        res.insert_or_assign("top.scratchpad.mem[84]reg", DumpEntry{top.scratchpad.mem[84] reg});
+        res.insert_or_assign("top.scratchpad.mem[85]reg", DumpEntry{top.scratchpad.mem[85] reg});
+        res.insert_or_assign("top.scratchpad.mem[86]reg", DumpEntry{top.scratchpad.mem[86] reg});
+        res.insert_or_assign("top.scratchpad.mem[87]reg", DumpEntry{top.scratchpad.mem[87] reg});
+        res.insert_or_assign("top.scratchpad.mem[88]reg", DumpEntry{top.scratchpad.mem[88] reg});
+        res.insert_or_assign("top.scratchpad.mem[89]reg", DumpEntry{top.scratchpad.mem[89] reg});
+        res.insert_or_assign("top.scratchpad.mem[90]reg", DumpEntry{top.scratchpad.mem[90] reg});
+        res.insert_or_assign("top.scratchpad.mem[91]reg", DumpEntry{top.scratchpad.mem[91] reg});
+        res.insert_or_assign("top.scratchpad.mem[92]reg", DumpEntry{top.scratchpad.mem[92] reg});
+        res.insert_or_assign("top.scratchpad.mem[93]reg", DumpEntry{top.scratchpad.mem[93] reg});
+        res.insert_or_assign("top.scratchpad.mem[94]reg", DumpEntry{top.scratchpad.mem[94] reg});
+        res.insert_or_assign("top.scratchpad.mem[95]reg", DumpEntry{top.scratchpad.mem[95] reg});
+        res.insert_or_assign("top.scratchpad.mem[96]reg", DumpEntry{top.scratchpad.mem[96] reg});
+        res.insert_or_assign("top.scratchpad.mem[97]reg", DumpEntry{top.scratchpad.mem[97] reg});
+        res.insert_or_assign("top.scratchpad.mem[98]reg", DumpEntry{top.scratchpad.mem[98] reg});
+        res.insert_or_assign("top.scratchpad.mem[99]reg", DumpEntry{top.scratchpad.mem[99] reg});
+        res.insert_or_assign("top.scratchpad.mem[100]reg", DumpEntry{top.scratchpad.mem[100] reg});
+        res.insert_or_assign("top.scratchpad.mem[101]reg", DumpEntry{top.scratchpad.mem[101] reg});
+        res.insert_or_assign("top.scratchpad.mem[102]reg", DumpEntry{top.scratchpad.mem[102] reg});
+        res.insert_or_assign("top.scratchpad.mem[103]reg", DumpEntry{top.scratchpad.mem[103] reg});
+        res.insert_or_assign("top.scratchpad.mem[104]reg", DumpEntry{top.scratchpad.mem[104] reg});
+        res.insert_or_assign("top.scratchpad.mem[105]reg", DumpEntry{top.scratchpad.mem[105] reg});
+        res.insert_or_assign("top.scratchpad.mem[106]reg", DumpEntry{top.scratchpad.mem[106] reg});
+        res.insert_or_assign("top.scratchpad.mem[107]reg", DumpEntry{top.scratchpad.mem[107] reg});
+        res.insert_or_assign("top.scratchpad.mem[108]reg", DumpEntry{top.scratchpad.mem[108] reg});
+        res.insert_or_assign("top.scratchpad.mem[109]reg", DumpEntry{top.scratchpad.mem[109] reg});
+        res.insert_or_assign("top.scratchpad.mem[110]reg", DumpEntry{top.scratchpad.mem[110] reg});
+        res.insert_or_assign("top.scratchpad.mem[111]reg", DumpEntry{top.scratchpad.mem[111] reg});
+        res.insert_or_assign("top.scratchpad.mem[112]reg", DumpEntry{top.scratchpad.mem[112] reg});
+        res.insert_or_assign("top.scratchpad.mem[113]reg", DumpEntry{top.scratchpad.mem[113] reg});
+        res.insert_or_assign("top.scratchpad.mem[114]reg", DumpEntry{top.scratchpad.mem[114] reg});
+        res.insert_or_assign("top.scratchpad.mem[115]reg", DumpEntry{top.scratchpad.mem[115] reg});
+        res.insert_or_assign("top.scratchpad.mem[116]reg", DumpEntry{top.scratchpad.mem[116] reg});
+        res.insert_or_assign("top.scratchpad.mem[117]reg", DumpEntry{top.scratchpad.mem[117] reg});
+        res.insert_or_assign("top.scratchpad.mem[118]reg", DumpEntry{top.scratchpad.mem[118] reg});
+        res.insert_or_assign("top.scratchpad.mem[119]reg", DumpEntry{top.scratchpad.mem[119] reg});
+        res.insert_or_assign("top.scratchpad.mem[120]reg", DumpEntry{top.scratchpad.mem[120] reg});
+        res.insert_or_assign("top.scratchpad.mem[121]reg", DumpEntry{top.scratchpad.mem[121] reg});
+        res.insert_or_assign("top.scratchpad.mem[122]reg", DumpEntry{top.scratchpad.mem[122] reg});
+        res.insert_or_assign("top.scratchpad.mem[123]reg", DumpEntry{top.scratchpad.mem[123] reg});
+        res.insert_or_assign("top.scratchpad.mem[124]reg", DumpEntry{top.scratchpad.mem[124] reg});
+        res.insert_or_assign("top.scratchpad.mem[125]reg", DumpEntry{top.scratchpad.mem[125] reg});
+        res.insert_or_assign("top.scratchpad.mem[126]reg", DumpEntry{top.scratchpad.mem[126] reg});
+        res.insert_or_assign("top.scratchpad.mem[127]reg", DumpEntry{top.scratchpad.mem[127] reg});
+        res.insert_or_assign("top.scratchpad.mem[128]reg", DumpEntry{top.scratchpad.mem[128] reg});
+        res.insert_or_assign("top.scratchpad.mem[129]reg", DumpEntry{top.scratchpad.mem[129] reg});
+        res.insert_or_assign("top.scratchpad.mem[130]reg", DumpEntry{top.scratchpad.mem[130] reg});
+        res.insert_or_assign("top.scratchpad.mem[131]reg", DumpEntry{top.scratchpad.mem[131] reg});
+        res.insert_or_assign("top.scratchpad.mem[132]reg", DumpEntry{top.scratchpad.mem[132] reg});
+        res.insert_or_assign("top.scratchpad.mem[133]reg", DumpEntry{top.scratchpad.mem[133] reg});
+        res.insert_or_assign("top.scratchpad.mem[134]reg", DumpEntry{top.scratchpad.mem[134] reg});
+        res.insert_or_assign("top.scratchpad.mem[135]reg", DumpEntry{top.scratchpad.mem[135] reg});
+        res.insert_or_assign("top.scratchpad.mem[136]reg", DumpEntry{top.scratchpad.mem[136] reg});
+        res.insert_or_assign("top.scratchpad.mem[137]reg", DumpEntry{top.scratchpad.mem[137] reg});
+        res.insert_or_assign("top.scratchpad.mem[138]reg", DumpEntry{top.scratchpad.mem[138] reg});
+        res.insert_or_assign("top.scratchpad.mem[139]reg", DumpEntry{top.scratchpad.mem[139] reg});
+        res.insert_or_assign("top.scratchpad.mem[140]reg", DumpEntry{top.scratchpad.mem[140] reg});
+        res.insert_or_assign("top.scratchpad.mem[141]reg", DumpEntry{top.scratchpad.mem[141] reg});
+        res.insert_or_assign("top.scratchpad.mem[142]reg", DumpEntry{top.scratchpad.mem[142] reg});
+        res.insert_or_assign("top.scratchpad.mem[143]reg", DumpEntry{top.scratchpad.mem[143] reg});
+        res.insert_or_assign("top.scratchpad.mem[144]reg", DumpEntry{top.scratchpad.mem[144] reg});
+        res.insert_or_assign("top.scratchpad.mem[145]reg", DumpEntry{top.scratchpad.mem[145] reg});
+        res.insert_or_assign("top.scratchpad.mem[146]reg", DumpEntry{top.scratchpad.mem[146] reg});
+        res.insert_or_assign("top.scratchpad.mem[147]reg", DumpEntry{top.scratchpad.mem[147] reg});
+        res.insert_or_assign("top.scratchpad.mem[148]reg", DumpEntry{top.scratchpad.mem[148] reg});
+        res.insert_or_assign("top.scratchpad.mem[149]reg", DumpEntry{top.scratchpad.mem[149] reg});
+        res.insert_or_assign("top.scratchpad.mem[150]reg", DumpEntry{top.scratchpad.mem[150] reg});
+        res.insert_or_assign("top.scratchpad.mem[151]reg", DumpEntry{top.scratchpad.mem[151] reg});
+        res.insert_or_assign("top.scratchpad.mem[152]reg", DumpEntry{top.scratchpad.mem[152] reg});
+        res.insert_or_assign("top.scratchpad.mem[153]reg", DumpEntry{top.scratchpad.mem[153] reg});
+        res.insert_or_assign("top.scratchpad.mem[154]reg", DumpEntry{top.scratchpad.mem[154] reg});
+        res.insert_or_assign("top.scratchpad.mem[155]reg", DumpEntry{top.scratchpad.mem[155] reg});
+        res.insert_or_assign("top.scratchpad.mem[156]reg", DumpEntry{top.scratchpad.mem[156] reg});
+        res.insert_or_assign("top.scratchpad.mem[157]reg", DumpEntry{top.scratchpad.mem[157] reg});
+        res.insert_or_assign("top.scratchpad.mem[158]reg", DumpEntry{top.scratchpad.mem[158] reg});
+        res.insert_or_assign("top.scratchpad.mem[159]reg", DumpEntry{top.scratchpad.mem[159] reg});
+        res.insert_or_assign("top.scratchpad.mem[160]reg", DumpEntry{top.scratchpad.mem[160] reg});
+        res.insert_or_assign("top.scratchpad.mem[161]reg", DumpEntry{top.scratchpad.mem[161] reg});
+        res.insert_or_assign("top.scratchpad.mem[162]reg", DumpEntry{top.scratchpad.mem[162] reg});
+        res.insert_or_assign("top.scratchpad.mem[163]reg", DumpEntry{top.scratchpad.mem[163] reg});
+        res.insert_or_assign("top.scratchpad.mem[164]reg", DumpEntry{top.scratchpad.mem[164] reg});
+        res.insert_or_assign("top.scratchpad.mem[165]reg", DumpEntry{top.scratchpad.mem[165] reg});
+        res.insert_or_assign("top.scratchpad.mem[166]reg", DumpEntry{top.scratchpad.mem[166] reg});
+        res.insert_or_assign("top.scratchpad.mem[167]reg", DumpEntry{top.scratchpad.mem[167] reg});
+        res.insert_or_assign("top.scratchpad.mem[168]reg", DumpEntry{top.scratchpad.mem[168] reg});
+        res.insert_or_assign("top.scratchpad.mem[169]reg", DumpEntry{top.scratchpad.mem[169] reg});
+        res.insert_or_assign("top.scratchpad.mem[170]reg", DumpEntry{top.scratchpad.mem[170] reg});
+        res.insert_or_assign("top.scratchpad.mem[171]reg", DumpEntry{top.scratchpad.mem[171] reg});
+        res.insert_or_assign("top.scratchpad.mem[172]reg", DumpEntry{top.scratchpad.mem[172] reg});
+        res.insert_or_assign("top.scratchpad.mem[173]reg", DumpEntry{top.scratchpad.mem[173] reg});
+        res.insert_or_assign("top.scratchpad.mem[174]reg", DumpEntry{top.scratchpad.mem[174] reg});
+        res.insert_or_assign("top.scratchpad.mem[175]reg", DumpEntry{top.scratchpad.mem[175] reg});
+        res.insert_or_assign("top.scratchpad.mem[176]reg", DumpEntry{top.scratchpad.mem[176] reg});
+        res.insert_or_assign("top.scratchpad.mem[177]reg", DumpEntry{top.scratchpad.mem[177] reg});
+        res.insert_or_assign("top.scratchpad.mem[178]reg", DumpEntry{top.scratchpad.mem[178] reg});
+        res.insert_or_assign("top.scratchpad.mem[179]reg", DumpEntry{top.scratchpad.mem[179] reg});
+        res.insert_or_assign("top.scratchpad.mem[180]reg", DumpEntry{top.scratchpad.mem[180] reg});
+        res.insert_or_assign("top.scratchpad.mem[181]reg", DumpEntry{top.scratchpad.mem[181] reg});
+        res.insert_or_assign("top.scratchpad.mem[182]reg", DumpEntry{top.scratchpad.mem[182] reg});
+        res.insert_or_assign("top.scratchpad.mem[183]reg", DumpEntry{top.scratchpad.mem[183] reg});
+        res.insert_or_assign("top.scratchpad.mem[184]reg", DumpEntry{top.scratchpad.mem[184] reg});
+        res.insert_or_assign("top.scratchpad.mem[185]reg", DumpEntry{top.scratchpad.mem[185] reg});
+        res.insert_or_assign("top.scratchpad.mem[186]reg", DumpEntry{top.scratchpad.mem[186] reg});
+        res.insert_or_assign("top.scratchpad.mem[187]reg", DumpEntry{top.scratchpad.mem[187] reg});
+        res.insert_or_assign("top.scratchpad.mem[188]reg", DumpEntry{top.scratchpad.mem[188] reg});
+        res.insert_or_assign("top.scratchpad.mem[189]reg", DumpEntry{top.scratchpad.mem[189] reg});
+        res.insert_or_assign("top.scratchpad.mem[190]reg", DumpEntry{top.scratchpad.mem[190] reg});
+        res.insert_or_assign("top.scratchpad.mem[191]reg", DumpEntry{top.scratchpad.mem[191] reg});
+        res.insert_or_assign("top.scratchpad.mem[192]reg", DumpEntry{top.scratchpad.mem[192] reg});
+        res.insert_or_assign("top.scratchpad.mem[193]reg", DumpEntry{top.scratchpad.mem[193] reg});
+        res.insert_or_assign("top.scratchpad.mem[194]reg", DumpEntry{top.scratchpad.mem[194] reg});
+        res.insert_or_assign("top.scratchpad.mem[195]reg", DumpEntry{top.scratchpad.mem[195] reg});
+        res.insert_or_assign("top.scratchpad.mem[196]reg", DumpEntry{top.scratchpad.mem[196] reg});
+        res.insert_or_assign("top.scratchpad.mem[197]reg", DumpEntry{top.scratchpad.mem[197] reg});
+        res.insert_or_assign("top.scratchpad.mem[198]reg", DumpEntry{top.scratchpad.mem[198] reg});
+        res.insert_or_assign("top.scratchpad.mem[199]reg", DumpEntry{top.scratchpad.mem[199] reg});
+        res.insert_or_assign("top.scratchpad.mem[200]reg", DumpEntry{top.scratchpad.mem[200] reg});
+        res.insert_or_assign("top.scratchpad.mem[201]reg", DumpEntry{top.scratchpad.mem[201] reg});
+        res.insert_or_assign("top.scratchpad.mem[202]reg", DumpEntry{top.scratchpad.mem[202] reg});
+        res.insert_or_assign("top.scratchpad.mem[203]reg", DumpEntry{top.scratchpad.mem[203] reg});
+        res.insert_or_assign("top.scratchpad.mem[204]reg", DumpEntry{top.scratchpad.mem[204] reg});
+        res.insert_or_assign("top.scratchpad.mem[205]reg", DumpEntry{top.scratchpad.mem[205] reg});
+        res.insert_or_assign("top.scratchpad.mem[206]reg", DumpEntry{top.scratchpad.mem[206] reg});
+        res.insert_or_assign("top.scratchpad.mem[207]reg", DumpEntry{top.scratchpad.mem[207] reg});
+        res.insert_or_assign("top.scratchpad.mem[208]reg", DumpEntry{top.scratchpad.mem[208] reg});
+        res.insert_or_assign("top.scratchpad.mem[209]reg", DumpEntry{top.scratchpad.mem[209] reg});
+        res.insert_or_assign("top.scratchpad.mem[210]reg", DumpEntry{top.scratchpad.mem[210] reg});
+        res.insert_or_assign("top.scratchpad.mem[211]reg", DumpEntry{top.scratchpad.mem[211] reg});
+        res.insert_or_assign("top.scratchpad.mem[212]reg", DumpEntry{top.scratchpad.mem[212] reg});
+        res.insert_or_assign("top.scratchpad.mem[213]reg", DumpEntry{top.scratchpad.mem[213] reg});
+        res.insert_or_assign("top.scratchpad.mem[214]reg", DumpEntry{top.scratchpad.mem[214] reg});
+        res.insert_or_assign("top.scratchpad.mem[215]reg", DumpEntry{top.scratchpad.mem[215] reg});
+        res.insert_or_assign("top.scratchpad.mem[216]reg", DumpEntry{top.scratchpad.mem[216] reg});
+        res.insert_or_assign("top.scratchpad.mem[217]reg", DumpEntry{top.scratchpad.mem[217] reg});
+        res.insert_or_assign("top.scratchpad.mem[218]reg", DumpEntry{top.scratchpad.mem[218] reg});
+        res.insert_or_assign("top.scratchpad.mem[219]reg", DumpEntry{top.scratchpad.mem[219] reg});
+        res.insert_or_assign("top.scratchpad.mem[220]reg", DumpEntry{top.scratchpad.mem[220] reg});
+        res.insert_or_assign("top.scratchpad.mem[221]reg", DumpEntry{top.scratchpad.mem[221] reg});
+        res.insert_or_assign("top.scratchpad.mem[222]reg", DumpEntry{top.scratchpad.mem[222] reg});
+        res.insert_or_assign("top.scratchpad.mem[223]reg", DumpEntry{top.scratchpad.mem[223] reg});
+        res.insert_or_assign("top.scratchpad.mem[224]reg", DumpEntry{top.scratchpad.mem[224] reg});
+        res.insert_or_assign("top.scratchpad.mem[225]reg", DumpEntry{top.scratchpad.mem[225] reg});
+        res.insert_or_assign("top.scratchpad.mem[226]reg", DumpEntry{top.scratchpad.mem[226] reg});
+        res.insert_or_assign("top.scratchpad.mem[227]reg", DumpEntry{top.scratchpad.mem[227] reg});
+        res.insert_or_assign("top.scratchpad.mem[228]reg", DumpEntry{top.scratchpad.mem[228] reg});
+        res.insert_or_assign("top.scratchpad.mem[229]reg", DumpEntry{top.scratchpad.mem[229] reg});
+        res.insert_or_assign("top.scratchpad.mem[230]reg", DumpEntry{top.scratchpad.mem[230] reg});
+        res.insert_or_assign("top.scratchpad.mem[231]reg", DumpEntry{top.scratchpad.mem[231] reg});
+        res.insert_or_assign("top.scratchpad.mem[232]reg", DumpEntry{top.scratchpad.mem[232] reg});
+        res.insert_or_assign("top.scratchpad.mem[233]reg", DumpEntry{top.scratchpad.mem[233] reg});
+        res.insert_or_assign("top.scratchpad.mem[234]reg", DumpEntry{top.scratchpad.mem[234] reg});
+        res.insert_or_assign("top.scratchpad.mem[235]reg", DumpEntry{top.scratchpad.mem[235] reg});
+        res.insert_or_assign("top.scratchpad.mem[236]reg", DumpEntry{top.scratchpad.mem[236] reg});
+        res.insert_or_assign("top.scratchpad.mem[237]reg", DumpEntry{top.scratchpad.mem[237] reg});
+        res.insert_or_assign("top.scratchpad.mem[238]reg", DumpEntry{top.scratchpad.mem[238] reg});
+        res.insert_or_assign("top.scratchpad.mem[239]reg", DumpEntry{top.scratchpad.mem[239] reg});
+        res.insert_or_assign("top.scratchpad.mem[240]reg", DumpEntry{top.scratchpad.mem[240] reg});
+        res.insert_or_assign("top.scratchpad.mem[241]reg", DumpEntry{top.scratchpad.mem[241] reg});
+        res.insert_or_assign("top.scratchpad.mem[242]reg", DumpEntry{top.scratchpad.mem[242] reg});
+        res.insert_or_assign("top.scratchpad.mem[243]reg", DumpEntry{top.scratchpad.mem[243] reg});
+        res.insert_or_assign("top.scratchpad.mem[244]reg", DumpEntry{top.scratchpad.mem[244] reg});
+        res.insert_or_assign("top.scratchpad.mem[245]reg", DumpEntry{top.scratchpad.mem[245] reg});
+        res.insert_or_assign("top.scratchpad.mem[246]reg", DumpEntry{top.scratchpad.mem[246] reg});
+        res.insert_or_assign("top.scratchpad.mem[247]reg", DumpEntry{top.scratchpad.mem[247] reg});
+        res.insert_or_assign("top.scratchpad.mem[248]reg", DumpEntry{top.scratchpad.mem[248] reg});
+        res.insert_or_assign("top.scratchpad.mem[249]reg", DumpEntry{top.scratchpad.mem[249] reg});
+        res.insert_or_assign("top.scratchpad.mem[250]reg", DumpEntry{top.scratchpad.mem[250] reg});
+        res.insert_or_assign("top.scratchpad.mem[251]reg", DumpEntry{top.scratchpad.mem[251] reg});
+        res.insert_or_assign("top.scratchpad.mem[252]reg", DumpEntry{top.scratchpad.mem[252] reg});
+        res.insert_or_assign("top.scratchpad.mem[253]reg", DumpEntry{top.scratchpad.mem[253] reg});
+        res.insert_or_assign("top.scratchpad.mem[254]reg", DumpEntry{top.scratchpad.mem[254] reg});
+        res.insert_or_assign("top.scratchpad.mem[255]reg", DumpEntry{top.scratchpad.mem[255] reg});
+        res.insert_or_assign("top.scratchpad.mem[256]reg", DumpEntry{top.scratchpad.mem[256] reg});
+        res.insert_or_assign("top.scratchpad.mem[257]reg", DumpEntry{top.scratchpad.mem[257] reg});
+        res.insert_or_assign("top.scratchpad.mem[258]reg", DumpEntry{top.scratchpad.mem[258] reg});
+        res.insert_or_assign("top.scratchpad.mem[259]reg", DumpEntry{top.scratchpad.mem[259] reg});
+        res.insert_or_assign("top.scratchpad.mem[260]reg", DumpEntry{top.scratchpad.mem[260] reg});
+        res.insert_or_assign("top.scratchpad.mem[261]reg", DumpEntry{top.scratchpad.mem[261] reg});
+        res.insert_or_assign("top.scratchpad.mem[262]reg", DumpEntry{top.scratchpad.mem[262] reg});
+        res.insert_or_assign("top.scratchpad.mem[263]reg", DumpEntry{top.scratchpad.mem[263] reg});
+        res.insert_or_assign("top.scratchpad.mem[264]reg", DumpEntry{top.scratchpad.mem[264] reg});
+        res.insert_or_assign("top.scratchpad.mem[265]reg", DumpEntry{top.scratchpad.mem[265] reg});
+        res.insert_or_assign("top.scratchpad.mem[266]reg", DumpEntry{top.scratchpad.mem[266] reg});
+        res.insert_or_assign("top.scratchpad.mem[267]reg", DumpEntry{top.scratchpad.mem[267] reg});
+        res.insert_or_assign("top.scratchpad.mem[268]reg", DumpEntry{top.scratchpad.mem[268] reg});
+        res.insert_or_assign("top.scratchpad.mem[269]reg", DumpEntry{top.scratchpad.mem[269] reg});
+        res.insert_or_assign("top.scratchpad.mem[270]reg", DumpEntry{top.scratchpad.mem[270] reg});
+        res.insert_or_assign("top.scratchpad.mem[271]reg", DumpEntry{top.scratchpad.mem[271] reg});
+        res.insert_or_assign("top.scratchpad.mem[272]reg", DumpEntry{top.scratchpad.mem[272] reg});
+        res.insert_or_assign("top.scratchpad.mem[273]reg", DumpEntry{top.scratchpad.mem[273] reg});
+        res.insert_or_assign("top.scratchpad.mem[274]reg", DumpEntry{top.scratchpad.mem[274] reg});
+        res.insert_or_assign("top.scratchpad.mem[275]reg", DumpEntry{top.scratchpad.mem[275] reg});
+        res.insert_or_assign("top.scratchpad.mem[276]reg", DumpEntry{top.scratchpad.mem[276] reg});
+        res.insert_or_assign("top.scratchpad.mem[277]reg", DumpEntry{top.scratchpad.mem[277] reg});
+        res.insert_or_assign("top.scratchpad.mem[278]reg", DumpEntry{top.scratchpad.mem[278] reg});
+        res.insert_or_assign("top.scratchpad.mem[279]reg", DumpEntry{top.scratchpad.mem[279] reg});
+        res.insert_or_assign("top.scratchpad.mem[280]reg", DumpEntry{top.scratchpad.mem[280] reg});
+        res.insert_or_assign("top.scratchpad.mem[281]reg", DumpEntry{top.scratchpad.mem[281] reg});
+        res.insert_or_assign("top.scratchpad.mem[282]reg", DumpEntry{top.scratchpad.mem[282] reg});
+        res.insert_or_assign("top.scratchpad.mem[283]reg", DumpEntry{top.scratchpad.mem[283] reg});
+        res.insert_or_assign("top.scratchpad.mem[284]reg", DumpEntry{top.scratchpad.mem[284] reg});
+        res.insert_or_assign("top.scratchpad.mem[285]reg", DumpEntry{top.scratchpad.mem[285] reg});
+        res.insert_or_assign("top.scratchpad.mem[286]reg", DumpEntry{top.scratchpad.mem[286] reg});
+        res.insert_or_assign("top.scratchpad.mem[287]reg", DumpEntry{top.scratchpad.mem[287] reg});
+        res.insert_or_assign("top.scratchpad.mem[288]reg", DumpEntry{top.scratchpad.mem[288] reg});
+        res.insert_or_assign("top.scratchpad.mem[289]reg", DumpEntry{top.scratchpad.mem[289] reg});
+        res.insert_or_assign("top.scratchpad.mem[290]reg", DumpEntry{top.scratchpad.mem[290] reg});
+        res.insert_or_assign("top.scratchpad.mem[291]reg", DumpEntry{top.scratchpad.mem[291] reg});
+        res.insert_or_assign("top.scratchpad.mem[292]reg", DumpEntry{top.scratchpad.mem[292] reg});
+        res.insert_or_assign("top.scratchpad.mem[293]reg", DumpEntry{top.scratchpad.mem[293] reg});
+        res.insert_or_assign("top.scratchpad.mem[294]reg", DumpEntry{top.scratchpad.mem[294] reg});
+        res.insert_or_assign("top.scratchpad.mem[295]reg", DumpEntry{top.scratchpad.mem[295] reg});
+        res.insert_or_assign("top.scratchpad.mem[296]reg", DumpEntry{top.scratchpad.mem[296] reg});
+        res.insert_or_assign("top.scratchpad.mem[297]reg", DumpEntry{top.scratchpad.mem[297] reg});
+        res.insert_or_assign("top.scratchpad.mem[298]reg", DumpEntry{top.scratchpad.mem[298] reg});
+        res.insert_or_assign("top.scratchpad.mem[299]reg", DumpEntry{top.scratchpad.mem[299] reg});
+        res.insert_or_assign("top.scratchpad.mem[300]reg", DumpEntry{top.scratchpad.mem[300] reg});
+        res.insert_or_assign("top.scratchpad.mem[301]reg", DumpEntry{top.scratchpad.mem[301] reg});
+        res.insert_or_assign("top.scratchpad.mem[302]reg", DumpEntry{top.scratchpad.mem[302] reg});
+        res.insert_or_assign("top.scratchpad.mem[303]reg", DumpEntry{top.scratchpad.mem[303] reg});
+        res.insert_or_assign("top.scratchpad.mem[304]reg", DumpEntry{top.scratchpad.mem[304] reg});
+        res.insert_or_assign("top.scratchpad.mem[305]reg", DumpEntry{top.scratchpad.mem[305] reg});
+        res.insert_or_assign("top.scratchpad.mem[306]reg", DumpEntry{top.scratchpad.mem[306] reg});
+        res.insert_or_assign("top.scratchpad.mem[307]reg", DumpEntry{top.scratchpad.mem[307] reg});
+        res.insert_or_assign("top.scratchpad.mem[308]reg", DumpEntry{top.scratchpad.mem[308] reg});
+        res.insert_or_assign("top.scratchpad.mem[309]reg", DumpEntry{top.scratchpad.mem[309] reg});
+        res.insert_or_assign("top.scratchpad.mem[310]reg", DumpEntry{top.scratchpad.mem[310] reg});
+        res.insert_or_assign("top.scratchpad.mem[311]reg", DumpEntry{top.scratchpad.mem[311] reg});
+        res.insert_or_assign("top.scratchpad.mem[312]reg", DumpEntry{top.scratchpad.mem[312] reg});
+        res.insert_or_assign("top.scratchpad.mem[313]reg", DumpEntry{top.scratchpad.mem[313] reg});
+        res.insert_or_assign("top.scratchpad.mem[314]reg", DumpEntry{top.scratchpad.mem[314] reg});
+        res.insert_or_assign("top.scratchpad.mem[315]reg", DumpEntry{top.scratchpad.mem[315] reg});
+        res.insert_or_assign("top.scratchpad.mem[316]reg", DumpEntry{top.scratchpad.mem[316] reg});
+        res.insert_or_assign("top.scratchpad.mem[317]reg", DumpEntry{top.scratchpad.mem[317] reg});
+        res.insert_or_assign("top.scratchpad.mem[318]reg", DumpEntry{top.scratchpad.mem[318] reg});
+        res.insert_or_assign("top.scratchpad.mem[319]reg", DumpEntry{top.scratchpad.mem[319] reg});
+        res.insert_or_assign("top.scratchpad.mem[320]reg", DumpEntry{top.scratchpad.mem[320] reg});
+        res.insert_or_assign("top.scratchpad.mem[321]reg", DumpEntry{top.scratchpad.mem[321] reg});
+        res.insert_or_assign("top.scratchpad.mem[322]reg", DumpEntry{top.scratchpad.mem[322] reg});
+        res.insert_or_assign("top.scratchpad.mem[323]reg", DumpEntry{top.scratchpad.mem[323] reg});
+        res.insert_or_assign("top.scratchpad.mem[324]reg", DumpEntry{top.scratchpad.mem[324] reg});
+        res.insert_or_assign("top.scratchpad.mem[325]reg", DumpEntry{top.scratchpad.mem[325] reg});
+        res.insert_or_assign("top.scratchpad.mem[326]reg", DumpEntry{top.scratchpad.mem[326] reg});
+        res.insert_or_assign("top.scratchpad.mem[327]reg", DumpEntry{top.scratchpad.mem[327] reg});
+        res.insert_or_assign("top.scratchpad.mem[328]reg", DumpEntry{top.scratchpad.mem[328] reg});
+        res.insert_or_assign("top.scratchpad.mem[329]reg", DumpEntry{top.scratchpad.mem[329] reg});
+        res.insert_or_assign("top.scratchpad.mem[330]reg", DumpEntry{top.scratchpad.mem[330] reg});
+        res.insert_or_assign("top.scratchpad.mem[331]reg", DumpEntry{top.scratchpad.mem[331] reg});
+        res.insert_or_assign("top.scratchpad.mem[332]reg", DumpEntry{top.scratchpad.mem[332] reg});
+        res.insert_or_assign("top.scratchpad.mem[333]reg", DumpEntry{top.scratchpad.mem[333] reg});
+        res.insert_or_assign("top.scratchpad.mem[334]reg", DumpEntry{top.scratchpad.mem[334] reg});
+        res.insert_or_assign("top.scratchpad.mem[335]reg", DumpEntry{top.scratchpad.mem[335] reg});
+        res.insert_or_assign("top.scratchpad.mem[336]reg", DumpEntry{top.scratchpad.mem[336] reg});
+        res.insert_or_assign("top.scratchpad.mem[337]reg", DumpEntry{top.scratchpad.mem[337] reg});
+        res.insert_or_assign("top.scratchpad.mem[338]reg", DumpEntry{top.scratchpad.mem[338] reg});
+        res.insert_or_assign("top.scratchpad.mem[339]reg", DumpEntry{top.scratchpad.mem[339] reg});
+        res.insert_or_assign("top.scratchpad.mem[340]reg", DumpEntry{top.scratchpad.mem[340] reg});
+        res.insert_or_assign("top.scratchpad.mem[341]reg", DumpEntry{top.scratchpad.mem[341] reg});
+        res.insert_or_assign("top.scratchpad.mem[342]reg", DumpEntry{top.scratchpad.mem[342] reg});
+        res.insert_or_assign("top.scratchpad.mem[343]reg", DumpEntry{top.scratchpad.mem[343] reg});
+        res.insert_or_assign("top.scratchpad.mem[344]reg", DumpEntry{top.scratchpad.mem[344] reg});
+        res.insert_or_assign("top.scratchpad.mem[345]reg", DumpEntry{top.scratchpad.mem[345] reg});
+        res.insert_or_assign("top.scratchpad.mem[346]reg", DumpEntry{top.scratchpad.mem[346] reg});
+        res.insert_or_assign("top.scratchpad.mem[347]reg", DumpEntry{top.scratchpad.mem[347] reg});
+        res.insert_or_assign("top.scratchpad.mem[348]reg", DumpEntry{top.scratchpad.mem[348] reg});
+        res.insert_or_assign("top.scratchpad.mem[349]reg", DumpEntry{top.scratchpad.mem[349] reg});
+        res.insert_or_assign("top.scratchpad.mem[350]reg", DumpEntry{top.scratchpad.mem[350] reg});
+        res.insert_or_assign("top.scratchpad.mem[351]reg", DumpEntry{top.scratchpad.mem[351] reg});
+        res.insert_or_assign("top.scratchpad.mem[352]reg", DumpEntry{top.scratchpad.mem[352] reg});
+        res.insert_or_assign("top.scratchpad.mem[353]reg", DumpEntry{top.scratchpad.mem[353] reg});
+        res.insert_or_assign("top.scratchpad.mem[354]reg", DumpEntry{top.scratchpad.mem[354] reg});
+        res.insert_or_assign("top.scratchpad.mem[355]reg", DumpEntry{top.scratchpad.mem[355] reg});
+        res.insert_or_assign("top.scratchpad.mem[356]reg", DumpEntry{top.scratchpad.mem[356] reg});
+        res.insert_or_assign("top.scratchpad.mem[357]reg", DumpEntry{top.scratchpad.mem[357] reg});
+        res.insert_or_assign("top.scratchpad.mem[358]reg", DumpEntry{top.scratchpad.mem[358] reg});
+        res.insert_or_assign("top.scratchpad.mem[359]reg", DumpEntry{top.scratchpad.mem[359] reg});
+        res.insert_or_assign("top.scratchpad.mem[360]reg", DumpEntry{top.scratchpad.mem[360] reg});
+        res.insert_or_assign("top.scratchpad.mem[361]reg", DumpEntry{top.scratchpad.mem[361] reg});
+        res.insert_or_assign("top.scratchpad.mem[362]reg", DumpEntry{top.scratchpad.mem[362] reg});
+        res.insert_or_assign("top.scratchpad.mem[363]reg", DumpEntry{top.scratchpad.mem[363] reg});
+        res.insert_or_assign("top.scratchpad.mem[364]reg", DumpEntry{top.scratchpad.mem[364] reg});
+        res.insert_or_assign("top.scratchpad.mem[365]reg", DumpEntry{top.scratchpad.mem[365] reg});
+        res.insert_or_assign("top.scratchpad.mem[366]reg", DumpEntry{top.scratchpad.mem[366] reg});
+        res.insert_or_assign("top.scratchpad.mem[367]reg", DumpEntry{top.scratchpad.mem[367] reg});
+        res.insert_or_assign("top.scratchpad.mem[368]reg", DumpEntry{top.scratchpad.mem[368] reg});
+        res.insert_or_assign("top.scratchpad.mem[369]reg", DumpEntry{top.scratchpad.mem[369] reg});
+        res.insert_or_assign("top.scratchpad.mem[370]reg", DumpEntry{top.scratchpad.mem[370] reg});
+        res.insert_or_assign("top.scratchpad.mem[371]reg", DumpEntry{top.scratchpad.mem[371] reg});
+        res.insert_or_assign("top.scratchpad.mem[372]reg", DumpEntry{top.scratchpad.mem[372] reg});
+        res.insert_or_assign("top.scratchpad.mem[373]reg", DumpEntry{top.scratchpad.mem[373] reg});
+        res.insert_or_assign("top.scratchpad.mem[374]reg", DumpEntry{top.scratchpad.mem[374] reg});
+        res.insert_or_assign("top.scratchpad.mem[375]reg", DumpEntry{top.scratchpad.mem[375] reg});
+        res.insert_or_assign("top.scratchpad.mem[376]reg", DumpEntry{top.scratchpad.mem[376] reg});
+        res.insert_or_assign("top.scratchpad.mem[377]reg", DumpEntry{top.scratchpad.mem[377] reg});
+        res.insert_or_assign("top.scratchpad.mem[378]reg", DumpEntry{top.scratchpad.mem[378] reg});
+        res.insert_or_assign("top.scratchpad.mem[379]reg", DumpEntry{top.scratchpad.mem[379] reg});
+        res.insert_or_assign("top.scratchpad.mem[380]reg", DumpEntry{top.scratchpad.mem[380] reg});
+        res.insert_or_assign("top.scratchpad.mem[381]reg", DumpEntry{top.scratchpad.mem[381] reg});
+        res.insert_or_assign("top.scratchpad.mem[382]reg", DumpEntry{top.scratchpad.mem[382] reg});
+        res.insert_or_assign("top.scratchpad.mem[383]reg", DumpEntry{top.scratchpad.mem[383] reg});
+        res.insert_or_assign("top.scratchpad.mem[384]reg", DumpEntry{top.scratchpad.mem[384] reg});
+        res.insert_or_assign("top.scratchpad.mem[385]reg", DumpEntry{top.scratchpad.mem[385] reg});
+        res.insert_or_assign("top.scratchpad.mem[386]reg", DumpEntry{top.scratchpad.mem[386] reg});
+        res.insert_or_assign("top.scratchpad.mem[387]reg", DumpEntry{top.scratchpad.mem[387] reg});
+        res.insert_or_assign("top.scratchpad.mem[388]reg", DumpEntry{top.scratchpad.mem[388] reg});
+        res.insert_or_assign("top.scratchpad.mem[389]reg", DumpEntry{top.scratchpad.mem[389] reg});
+        res.insert_or_assign("top.scratchpad.mem[390]reg", DumpEntry{top.scratchpad.mem[390] reg});
+        res.insert_or_assign("top.scratchpad.mem[391]reg", DumpEntry{top.scratchpad.mem[391] reg});
+        res.insert_or_assign("top.scratchpad.mem[392]reg", DumpEntry{top.scratchpad.mem[392] reg});
+        res.insert_or_assign("top.scratchpad.mem[393]reg", DumpEntry{top.scratchpad.mem[393] reg});
+        res.insert_or_assign("top.scratchpad.mem[394]reg", DumpEntry{top.scratchpad.mem[394] reg});
+        res.insert_or_assign("top.scratchpad.mem[395]reg", DumpEntry{top.scratchpad.mem[395] reg});
+        res.insert_or_assign("top.scratchpad.mem[396]reg", DumpEntry{top.scratchpad.mem[396] reg});
+        res.insert_or_assign("top.scratchpad.mem[397]reg", DumpEntry{top.scratchpad.mem[397] reg});
+        res.insert_or_assign("top.scratchpad.mem[398]reg", DumpEntry{top.scratchpad.mem[398] reg});
+        res.insert_or_assign("top.scratchpad.mem[399]reg", DumpEntry{top.scratchpad.mem[399] reg});
+        res.insert_or_assign("top.scratchpad.mem[400]reg", DumpEntry{top.scratchpad.mem[400] reg});
+        res.insert_or_assign("top.scratchpad.mem[401]reg", DumpEntry{top.scratchpad.mem[401] reg});
+        res.insert_or_assign("top.scratchpad.mem[402]reg", DumpEntry{top.scratchpad.mem[402] reg});
+        res.insert_or_assign("top.scratchpad.mem[403]reg", DumpEntry{top.scratchpad.mem[403] reg});
+        res.insert_or_assign("top.scratchpad.mem[404]reg", DumpEntry{top.scratchpad.mem[404] reg});
+        res.insert_or_assign("top.scratchpad.mem[405]reg", DumpEntry{top.scratchpad.mem[405] reg});
+        res.insert_or_assign("top.scratchpad.mem[406]reg", DumpEntry{top.scratchpad.mem[406] reg});
+        res.insert_or_assign("top.scratchpad.mem[407]reg", DumpEntry{top.scratchpad.mem[407] reg});
+        res.insert_or_assign("top.scratchpad.mem[408]reg", DumpEntry{top.scratchpad.mem[408] reg});
+        res.insert_or_assign("top.scratchpad.mem[409]reg", DumpEntry{top.scratchpad.mem[409] reg});
+        res.insert_or_assign("top.scratchpad.mem[410]reg", DumpEntry{top.scratchpad.mem[410] reg});
+        res.insert_or_assign("top.scratchpad.mem[411]reg", DumpEntry{top.scratchpad.mem[411] reg});
+        res.insert_or_assign("top.scratchpad.mem[412]reg", DumpEntry{top.scratchpad.mem[412] reg});
+        res.insert_or_assign("top.scratchpad.mem[413]reg", DumpEntry{top.scratchpad.mem[413] reg});
+        res.insert_or_assign("top.scratchpad.mem[414]reg", DumpEntry{top.scratchpad.mem[414] reg});
+        res.insert_or_assign("top.scratchpad.mem[415]reg", DumpEntry{top.scratchpad.mem[415] reg});
+        res.insert_or_assign("top.scratchpad.mem[416]reg", DumpEntry{top.scratchpad.mem[416] reg});
+        res.insert_or_assign("top.scratchpad.mem[417]reg", DumpEntry{top.scratchpad.mem[417] reg});
+        res.insert_or_assign("top.scratchpad.mem[418]reg", DumpEntry{top.scratchpad.mem[418] reg});
+        res.insert_or_assign("top.scratchpad.mem[419]reg", DumpEntry{top.scratchpad.mem[419] reg});
+        res.insert_or_assign("top.scratchpad.mem[420]reg", DumpEntry{top.scratchpad.mem[420] reg});
+        res.insert_or_assign("top.scratchpad.mem[421]reg", DumpEntry{top.scratchpad.mem[421] reg});
+        res.insert_or_assign("top.scratchpad.mem[422]reg", DumpEntry{top.scratchpad.mem[422] reg});
+        res.insert_or_assign("top.scratchpad.mem[423]reg", DumpEntry{top.scratchpad.mem[423] reg});
+        res.insert_or_assign("top.scratchpad.mem[424]reg", DumpEntry{top.scratchpad.mem[424] reg});
+        res.insert_or_assign("top.scratchpad.mem[425]reg", DumpEntry{top.scratchpad.mem[425] reg});
+        res.insert_or_assign("top.scratchpad.mem[426]reg", DumpEntry{top.scratchpad.mem[426] reg});
+        res.insert_or_assign("top.scratchpad.mem[427]reg", DumpEntry{top.scratchpad.mem[427] reg});
+        res.insert_or_assign("top.scratchpad.mem[428]reg", DumpEntry{top.scratchpad.mem[428] reg});
+        res.insert_or_assign("top.scratchpad.mem[429]reg", DumpEntry{top.scratchpad.mem[429] reg});
+        res.insert_or_assign("top.scratchpad.mem[430]reg", DumpEntry{top.scratchpad.mem[430] reg});
+        res.insert_or_assign("top.scratchpad.mem[431]reg", DumpEntry{top.scratchpad.mem[431] reg});
+        res.insert_or_assign("top.scratchpad.mem[432]reg", DumpEntry{top.scratchpad.mem[432] reg});
+        res.insert_or_assign("top.scratchpad.mem[433]reg", DumpEntry{top.scratchpad.mem[433] reg});
+        res.insert_or_assign("top.scratchpad.mem[434]reg", DumpEntry{top.scratchpad.mem[434] reg});
+        res.insert_or_assign("top.scratchpad.mem[435]reg", DumpEntry{top.scratchpad.mem[435] reg});
+        res.insert_or_assign("top.scratchpad.mem[436]reg", DumpEntry{top.scratchpad.mem[436] reg});
+        res.insert_or_assign("top.scratchpad.mem[437]reg", DumpEntry{top.scratchpad.mem[437] reg});
+        res.insert_or_assign("top.scratchpad.mem[438]reg", DumpEntry{top.scratchpad.mem[438] reg});
+        res.insert_or_assign("top.scratchpad.mem[439]reg", DumpEntry{top.scratchpad.mem[439] reg});
+        res.insert_or_assign("top.scratchpad.mem[440]reg", DumpEntry{top.scratchpad.mem[440] reg});
+        res.insert_or_assign("top.scratchpad.mem[441]reg", DumpEntry{top.scratchpad.mem[441] reg});
+        res.insert_or_assign("top.scratchpad.mem[442]reg", DumpEntry{top.scratchpad.mem[442] reg});
+        res.insert_or_assign("top.scratchpad.mem[443]reg", DumpEntry{top.scratchpad.mem[443] reg});
+        res.insert_or_assign("top.scratchpad.mem[444]reg", DumpEntry{top.scratchpad.mem[444] reg});
+        res.insert_or_assign("top.scratchpad.mem[445]reg", DumpEntry{top.scratchpad.mem[445] reg});
+        res.insert_or_assign("top.scratchpad.mem[446]reg", DumpEntry{top.scratchpad.mem[446] reg});
+        res.insert_or_assign("top.scratchpad.mem[447]reg", DumpEntry{top.scratchpad.mem[447] reg});
+        res.insert_or_assign("top.scratchpad.mem[448]reg", DumpEntry{top.scratchpad.mem[448] reg});
+        res.insert_or_assign("top.scratchpad.mem[449]reg", DumpEntry{top.scratchpad.mem[449] reg});
+        res.insert_or_assign("top.scratchpad.mem[450]reg", DumpEntry{top.scratchpad.mem[450] reg});
+        res.insert_or_assign("top.scratchpad.mem[451]reg", DumpEntry{top.scratchpad.mem[451] reg});
+        res.insert_or_assign("top.scratchpad.mem[452]reg", DumpEntry{top.scratchpad.mem[452] reg});
+        res.insert_or_assign("top.scratchpad.mem[453]reg", DumpEntry{top.scratchpad.mem[453] reg});
+        res.insert_or_assign("top.scratchpad.mem[454]reg", DumpEntry{top.scratchpad.mem[454] reg});
+        res.insert_or_assign("top.scratchpad.mem[455]reg", DumpEntry{top.scratchpad.mem[455] reg});
+        res.insert_or_assign("top.scratchpad.mem[456]reg", DumpEntry{top.scratchpad.mem[456] reg});
+        res.insert_or_assign("top.scratchpad.mem[457]reg", DumpEntry{top.scratchpad.mem[457] reg});
+        res.insert_or_assign("top.scratchpad.mem[458]reg", DumpEntry{top.scratchpad.mem[458] reg});
+        res.insert_or_assign("top.scratchpad.mem[459]reg", DumpEntry{top.scratchpad.mem[459] reg});
+        res.insert_or_assign("top.scratchpad.mem[460]reg", DumpEntry{top.scratchpad.mem[460] reg});
+        res.insert_or_assign("top.scratchpad.mem[461]reg", DumpEntry{top.scratchpad.mem[461] reg});
+        res.insert_or_assign("top.scratchpad.mem[462]reg", DumpEntry{top.scratchpad.mem[462] reg});
+        res.insert_or_assign("top.scratchpad.mem[463]reg", DumpEntry{top.scratchpad.mem[463] reg});
+        res.insert_or_assign("top.scratchpad.mem[464]reg", DumpEntry{top.scratchpad.mem[464] reg});
+        res.insert_or_assign("top.scratchpad.mem[465]reg", DumpEntry{top.scratchpad.mem[465] reg});
+        res.insert_or_assign("top.scratchpad.mem[466]reg", DumpEntry{top.scratchpad.mem[466] reg});
+        res.insert_or_assign("top.scratchpad.mem[467]reg", DumpEntry{top.scratchpad.mem[467] reg});
+        res.insert_or_assign("top.scratchpad.mem[468]reg", DumpEntry{top.scratchpad.mem[468] reg});
+        res.insert_or_assign("top.scratchpad.mem[469]reg", DumpEntry{top.scratchpad.mem[469] reg});
+        res.insert_or_assign("top.scratchpad.mem[470]reg", DumpEntry{top.scratchpad.mem[470] reg});
+        res.insert_or_assign("top.scratchpad.mem[471]reg", DumpEntry{top.scratchpad.mem[471] reg});
+        res.insert_or_assign("top.scratchpad.mem[472]reg", DumpEntry{top.scratchpad.mem[472] reg});
+        res.insert_or_assign("top.scratchpad.mem[473]reg", DumpEntry{top.scratchpad.mem[473] reg});
+        res.insert_or_assign("top.scratchpad.mem[474]reg", DumpEntry{top.scratchpad.mem[474] reg});
+        res.insert_or_assign("top.scratchpad.mem[475]reg", DumpEntry{top.scratchpad.mem[475] reg});
+        res.insert_or_assign("top.scratchpad.mem[476]reg", DumpEntry{top.scratchpad.mem[476] reg});
+        res.insert_or_assign("top.scratchpad.mem[477]reg", DumpEntry{top.scratchpad.mem[477] reg});
+        res.insert_or_assign("top.scratchpad.mem[478]reg", DumpEntry{top.scratchpad.mem[478] reg});
+        res.insert_or_assign("top.scratchpad.mem[479]reg", DumpEntry{top.scratchpad.mem[479] reg});
+        res.insert_or_assign("top.scratchpad.mem[480]reg", DumpEntry{top.scratchpad.mem[480] reg});
+        res.insert_or_assign("top.scratchpad.mem[481]reg", DumpEntry{top.scratchpad.mem[481] reg});
+        res.insert_or_assign("top.scratchpad.mem[482]reg", DumpEntry{top.scratchpad.mem[482] reg});
+        res.insert_or_assign("top.scratchpad.mem[483]reg", DumpEntry{top.scratchpad.mem[483] reg});
+        res.insert_or_assign("top.scratchpad.mem[484]reg", DumpEntry{top.scratchpad.mem[484] reg});
+        res.insert_or_assign("top.scratchpad.mem[485]reg", DumpEntry{top.scratchpad.mem[485] reg});
+        res.insert_or_assign("top.scratchpad.mem[486]reg", DumpEntry{top.scratchpad.mem[486] reg});
+        res.insert_or_assign("top.scratchpad.mem[487]reg", DumpEntry{top.scratchpad.mem[487] reg});
+        res.insert_or_assign("top.scratchpad.mem[488]reg", DumpEntry{top.scratchpad.mem[488] reg});
+        res.insert_or_assign("top.scratchpad.mem[489]reg", DumpEntry{top.scratchpad.mem[489] reg});
+        res.insert_or_assign("top.scratchpad.mem[490]reg", DumpEntry{top.scratchpad.mem[490] reg});
+        res.insert_or_assign("top.scratchpad.mem[491]reg", DumpEntry{top.scratchpad.mem[491] reg});
+        res.insert_or_assign("top.scratchpad.mem[492]reg", DumpEntry{top.scratchpad.mem[492] reg});
+        res.insert_or_assign("top.scratchpad.mem[493]reg", DumpEntry{top.scratchpad.mem[493] reg});
+        res.insert_or_assign("top.scratchpad.mem[494]reg", DumpEntry{top.scratchpad.mem[494] reg});
+        res.insert_or_assign("top.scratchpad.mem[495]reg", DumpEntry{top.scratchpad.mem[495] reg});
+        res.insert_or_assign("top.scratchpad.mem[496]reg", DumpEntry{top.scratchpad.mem[496] reg});
+        res.insert_or_assign("top.scratchpad.mem[497]reg", DumpEntry{top.scratchpad.mem[497] reg});
+        res.insert_or_assign("top.scratchpad.mem[498]reg", DumpEntry{top.scratchpad.mem[498] reg});
+        res.insert_or_assign("top.scratchpad.mem[499]reg", DumpEntry{top.scratchpad.mem[499] reg});
+        res.insert_or_assign("top.scratchpad.mem[500]reg", DumpEntry{top.scratchpad.mem[500] reg});
+        res.insert_or_assign("top.scratchpad.mem[501]reg", DumpEntry{top.scratchpad.mem[501] reg});
+        res.insert_or_assign("top.scratchpad.mem[502]reg", DumpEntry{top.scratchpad.mem[502] reg});
+        res.insert_or_assign("top.scratchpad.mem[503]reg", DumpEntry{top.scratchpad.mem[503] reg});
+        res.insert_or_assign("top.scratchpad.mem[504]reg", DumpEntry{top.scratchpad.mem[504] reg});
+        res.insert_or_assign("top.scratchpad.mem[505]reg", DumpEntry{top.scratchpad.mem[505] reg});
+        res.insert_or_assign("top.scratchpad.mem[506]reg", DumpEntry{top.scratchpad.mem[506] reg});
+        res.insert_or_assign("top.scratchpad.mem[507]reg", DumpEntry{top.scratchpad.mem[507] reg});
+        res.insert_or_assign("top.scratchpad.mem[508]reg", DumpEntry{top.scratchpad.mem[508] reg});
+        res.insert_or_assign("top.scratchpad.mem[509]reg", DumpEntry{top.scratchpad.mem[509] reg});
+        res.insert_or_assign("top.scratchpad.mem[510]reg", DumpEntry{top.scratchpad.mem[510] reg});
+        res.insert_or_assign("top.scratchpad.mem[511]reg", DumpEntry{top.scratchpad.mem[511] reg});
+        res.insert_or_assign("top.scratchpad.mem[512]reg", DumpEntry{top.scratchpad.mem[512] reg});
+        res.insert_or_assign("top.scratchpad.mem[513]reg", DumpEntry{top.scratchpad.mem[513] reg});
+        res.insert_or_assign("top.scratchpad.mem[514]reg", DumpEntry{top.scratchpad.mem[514] reg});
+        res.insert_or_assign("top.scratchpad.mem[515]reg", DumpEntry{top.scratchpad.mem[515] reg});
+        res.insert_or_assign("top.scratchpad.mem[516]reg", DumpEntry{top.scratchpad.mem[516] reg});
+        res.insert_or_assign("top.scratchpad.mem[517]reg", DumpEntry{top.scratchpad.mem[517] reg});
+        res.insert_or_assign("top.scratchpad.mem[518]reg", DumpEntry{top.scratchpad.mem[518] reg});
+        res.insert_or_assign("top.scratchpad.mem[519]reg", DumpEntry{top.scratchpad.mem[519] reg});
+        res.insert_or_assign("top.scratchpad.mem[520]reg", DumpEntry{top.scratchpad.mem[520] reg});
+        res.insert_or_assign("top.scratchpad.mem[521]reg", DumpEntry{top.scratchpad.mem[521] reg});
+        res.insert_or_assign("top.scratchpad.mem[522]reg", DumpEntry{top.scratchpad.mem[522] reg});
+        res.insert_or_assign("top.scratchpad.mem[523]reg", DumpEntry{top.scratchpad.mem[523] reg});
+        res.insert_or_assign("top.scratchpad.mem[524]reg", DumpEntry{top.scratchpad.mem[524] reg});
+        res.insert_or_assign("top.scratchpad.mem[525]reg", DumpEntry{top.scratchpad.mem[525] reg});
+        res.insert_or_assign("top.scratchpad.mem[526]reg", DumpEntry{top.scratchpad.mem[526] reg});
+        res.insert_or_assign("top.scratchpad.mem[527]reg", DumpEntry{top.scratchpad.mem[527] reg});
+        res.insert_or_assign("top.scratchpad.mem[528]reg", DumpEntry{top.scratchpad.mem[528] reg});
+        res.insert_or_assign("top.scratchpad.mem[529]reg", DumpEntry{top.scratchpad.mem[529] reg});
+        res.insert_or_assign("top.scratchpad.mem[530]reg", DumpEntry{top.scratchpad.mem[530] reg});
+        res.insert_or_assign("top.scratchpad.mem[531]reg", DumpEntry{top.scratchpad.mem[531] reg});
+        res.insert_or_assign("top.scratchpad.mem[532]reg", DumpEntry{top.scratchpad.mem[532] reg});
+        res.insert_or_assign("top.scratchpad.mem[533]reg", DumpEntry{top.scratchpad.mem[533] reg});
+        res.insert_or_assign("top.scratchpad.mem[534]reg", DumpEntry{top.scratchpad.mem[534] reg});
+        res.insert_or_assign("top.scratchpad.mem[535]reg", DumpEntry{top.scratchpad.mem[535] reg});
+        res.insert_or_assign("top.scratchpad.mem[536]reg", DumpEntry{top.scratchpad.mem[536] reg});
+        res.insert_or_assign("top.scratchpad.mem[537]reg", DumpEntry{top.scratchpad.mem[537] reg});
+        res.insert_or_assign("top.scratchpad.mem[538]reg", DumpEntry{top.scratchpad.mem[538] reg});
+        res.insert_or_assign("top.scratchpad.mem[539]reg", DumpEntry{top.scratchpad.mem[539] reg});
+        res.insert_or_assign("top.scratchpad.mem[540]reg", DumpEntry{top.scratchpad.mem[540] reg});
+        res.insert_or_assign("top.scratchpad.mem[541]reg", DumpEntry{top.scratchpad.mem[541] reg});
+        res.insert_or_assign("top.scratchpad.mem[542]reg", DumpEntry{top.scratchpad.mem[542] reg});
+        res.insert_or_assign("top.scratchpad.mem[543]reg", DumpEntry{top.scratchpad.mem[543] reg});
+        res.insert_or_assign("top.scratchpad.mem[544]reg", DumpEntry{top.scratchpad.mem[544] reg});
+        res.insert_or_assign("top.scratchpad.mem[545]reg", DumpEntry{top.scratchpad.mem[545] reg});
+        res.insert_or_assign("top.scratchpad.mem[546]reg", DumpEntry{top.scratchpad.mem[546] reg});
+        res.insert_or_assign("top.scratchpad.mem[547]reg", DumpEntry{top.scratchpad.mem[547] reg});
+        res.insert_or_assign("top.scratchpad.mem[548]reg", DumpEntry{top.scratchpad.mem[548] reg});
+        res.insert_or_assign("top.scratchpad.mem[549]reg", DumpEntry{top.scratchpad.mem[549] reg});
+        res.insert_or_assign("top.scratchpad.mem[550]reg", DumpEntry{top.scratchpad.mem[550] reg});
+        res.insert_or_assign("top.scratchpad.mem[551]reg", DumpEntry{top.scratchpad.mem[551] reg});
+        res.insert_or_assign("top.scratchpad.mem[552]reg", DumpEntry{top.scratchpad.mem[552] reg});
+        res.insert_or_assign("top.scratchpad.mem[553]reg", DumpEntry{top.scratchpad.mem[553] reg});
+        res.insert_or_assign("top.scratchpad.mem[554]reg", DumpEntry{top.scratchpad.mem[554] reg});
+        res.insert_or_assign("top.scratchpad.mem[555]reg", DumpEntry{top.scratchpad.mem[555] reg});
+        res.insert_or_assign("top.scratchpad.mem[556]reg", DumpEntry{top.scratchpad.mem[556] reg});
+        res.insert_or_assign("top.scratchpad.mem[557]reg", DumpEntry{top.scratchpad.mem[557] reg});
+        res.insert_or_assign("top.scratchpad.mem[558]reg", DumpEntry{top.scratchpad.mem[558] reg});
+        res.insert_or_assign("top.scratchpad.mem[559]reg", DumpEntry{top.scratchpad.mem[559] reg});
+        res.insert_or_assign("top.scratchpad.mem[560]reg", DumpEntry{top.scratchpad.mem[560] reg});
+        res.insert_or_assign("top.scratchpad.mem[561]reg", DumpEntry{top.scratchpad.mem[561] reg});
+        res.insert_or_assign("top.scratchpad.mem[562]reg", DumpEntry{top.scratchpad.mem[562] reg});
+        res.insert_or_assign("top.scratchpad.mem[563]reg", DumpEntry{top.scratchpad.mem[563] reg});
+        res.insert_or_assign("top.scratchpad.mem[564]reg", DumpEntry{top.scratchpad.mem[564] reg});
+        res.insert_or_assign("top.scratchpad.mem[565]reg", DumpEntry{top.scratchpad.mem[565] reg});
+        res.insert_or_assign("top.scratchpad.mem[566]reg", DumpEntry{top.scratchpad.mem[566] reg});
+        res.insert_or_assign("top.scratchpad.mem[567]reg", DumpEntry{top.scratchpad.mem[567] reg});
+        res.insert_or_assign("top.scratchpad.mem[568]reg", DumpEntry{top.scratchpad.mem[568] reg});
+        res.insert_or_assign("top.scratchpad.mem[569]reg", DumpEntry{top.scratchpad.mem[569] reg});
+        res.insert_or_assign("top.scratchpad.mem[570]reg", DumpEntry{top.scratchpad.mem[570] reg});
+        res.insert_or_assign("top.scratchpad.mem[571]reg", DumpEntry{top.scratchpad.mem[571] reg});
+        res.insert_or_assign("top.scratchpad.mem[572]reg", DumpEntry{top.scratchpad.mem[572] reg});
+        res.insert_or_assign("top.scratchpad.mem[573]reg", DumpEntry{top.scratchpad.mem[573] reg});
+        res.insert_or_assign("top.scratchpad.mem[574]reg", DumpEntry{top.scratchpad.mem[574] reg});
+        res.insert_or_assign("top.scratchpad.mem[575]reg", DumpEntry{top.scratchpad.mem[575] reg});
+        res.insert_or_assign("top.scratchpad.mem[576]reg", DumpEntry{top.scratchpad.mem[576] reg});
+        res.insert_or_assign("top.scratchpad.mem[577]reg", DumpEntry{top.scratchpad.mem[577] reg});
+        res.insert_or_assign("top.scratchpad.mem[578]reg", DumpEntry{top.scratchpad.mem[578] reg});
+        res.insert_or_assign("top.scratchpad.mem[579]reg", DumpEntry{top.scratchpad.mem[579] reg});
+        res.insert_or_assign("top.scratchpad.mem[580]reg", DumpEntry{top.scratchpad.mem[580] reg});
+        res.insert_or_assign("top.scratchpad.mem[581]reg", DumpEntry{top.scratchpad.mem[581] reg});
+        res.insert_or_assign("top.scratchpad.mem[582]reg", DumpEntry{top.scratchpad.mem[582] reg});
+        res.insert_or_assign("top.scratchpad.mem[583]reg", DumpEntry{top.scratchpad.mem[583] reg});
+        res.insert_or_assign("top.scratchpad.mem[584]reg", DumpEntry{top.scratchpad.mem[584] reg});
+        res.insert_or_assign("top.scratchpad.mem[585]reg", DumpEntry{top.scratchpad.mem[585] reg});
+        res.insert_or_assign("top.scratchpad.mem[586]reg", DumpEntry{top.scratchpad.mem[586] reg});
+        res.insert_or_assign("top.scratchpad.mem[587]reg", DumpEntry{top.scratchpad.mem[587] reg});
+        res.insert_or_assign("top.scratchpad.mem[588]reg", DumpEntry{top.scratchpad.mem[588] reg});
+        res.insert_or_assign("top.scratchpad.mem[589]reg", DumpEntry{top.scratchpad.mem[589] reg});
+        res.insert_or_assign("top.scratchpad.mem[590]reg", DumpEntry{top.scratchpad.mem[590] reg});
+        res.insert_or_assign("top.scratchpad.mem[591]reg", DumpEntry{top.scratchpad.mem[591] reg});
+        res.insert_or_assign("top.scratchpad.mem[592]reg", DumpEntry{top.scratchpad.mem[592] reg});
+        res.insert_or_assign("top.scratchpad.mem[593]reg", DumpEntry{top.scratchpad.mem[593] reg});
+        res.insert_or_assign("top.scratchpad.mem[594]reg", DumpEntry{top.scratchpad.mem[594] reg});
+        res.insert_or_assign("top.scratchpad.mem[595]reg", DumpEntry{top.scratchpad.mem[595] reg});
+        res.insert_or_assign("top.scratchpad.mem[596]reg", DumpEntry{top.scratchpad.mem[596] reg});
+        res.insert_or_assign("top.scratchpad.mem[597]reg", DumpEntry{top.scratchpad.mem[597] reg});
+        res.insert_or_assign("top.scratchpad.mem[598]reg", DumpEntry{top.scratchpad.mem[598] reg});
+        res.insert_or_assign("top.scratchpad.mem[599]reg", DumpEntry{top.scratchpad.mem[599] reg});
+        res.insert_or_assign("top.scratchpad.mem[600]reg", DumpEntry{top.scratchpad.mem[600] reg});
+        res.insert_or_assign("top.scratchpad.mem[601]reg", DumpEntry{top.scratchpad.mem[601] reg});
+        res.insert_or_assign("top.scratchpad.mem[602]reg", DumpEntry{top.scratchpad.mem[602] reg});
+        res.insert_or_assign("top.scratchpad.mem[603]reg", DumpEntry{top.scratchpad.mem[603] reg});
+        res.insert_or_assign("top.scratchpad.mem[604]reg", DumpEntry{top.scratchpad.mem[604] reg});
+        res.insert_or_assign("top.scratchpad.mem[605]reg", DumpEntry{top.scratchpad.mem[605] reg});
+        res.insert_or_assign("top.scratchpad.mem[606]reg", DumpEntry{top.scratchpad.mem[606] reg});
+        res.insert_or_assign("top.scratchpad.mem[607]reg", DumpEntry{top.scratchpad.mem[607] reg});
+        res.insert_or_assign("top.scratchpad.mem[608]reg", DumpEntry{top.scratchpad.mem[608] reg});
+        res.insert_or_assign("top.scratchpad.mem[609]reg", DumpEntry{top.scratchpad.mem[609] reg});
+        res.insert_or_assign("top.scratchpad.mem[610]reg", DumpEntry{top.scratchpad.mem[610] reg});
+        res.insert_or_assign("top.scratchpad.mem[611]reg", DumpEntry{top.scratchpad.mem[611] reg});
+        res.insert_or_assign("top.scratchpad.mem[612]reg", DumpEntry{top.scratchpad.mem[612] reg});
+        res.insert_or_assign("top.scratchpad.mem[613]reg", DumpEntry{top.scratchpad.mem[613] reg});
+        res.insert_or_assign("top.scratchpad.mem[614]reg", DumpEntry{top.scratchpad.mem[614] reg});
+        res.insert_or_assign("top.scratchpad.mem[615]reg", DumpEntry{top.scratchpad.mem[615] reg});
+        res.insert_or_assign("top.scratchpad.mem[616]reg", DumpEntry{top.scratchpad.mem[616] reg});
+        res.insert_or_assign("top.scratchpad.mem[617]reg", DumpEntry{top.scratchpad.mem[617] reg});
+        res.insert_or_assign("top.scratchpad.mem[618]reg", DumpEntry{top.scratchpad.mem[618] reg});
+        res.insert_or_assign("top.scratchpad.mem[619]reg", DumpEntry{top.scratchpad.mem[619] reg});
+        res.insert_or_assign("top.scratchpad.mem[620]reg", DumpEntry{top.scratchpad.mem[620] reg});
+        res.insert_or_assign("top.scratchpad.mem[621]reg", DumpEntry{top.scratchpad.mem[621] reg});
+        res.insert_or_assign("top.scratchpad.mem[622]reg", DumpEntry{top.scratchpad.mem[622] reg});
+        res.insert_or_assign("top.scratchpad.mem[623]reg", DumpEntry{top.scratchpad.mem[623] reg});
+        res.insert_or_assign("top.scratchpad.mem[624]reg", DumpEntry{top.scratchpad.mem[624] reg});
+        res.insert_or_assign("top.scratchpad.mem[625]reg", DumpEntry{top.scratchpad.mem[625] reg});
+        res.insert_or_assign("top.scratchpad.mem[626]reg", DumpEntry{top.scratchpad.mem[626] reg});
+        res.insert_or_assign("top.scratchpad.mem[627]reg", DumpEntry{top.scratchpad.mem[627] reg});
+        res.insert_or_assign("top.scratchpad.mem[628]reg", DumpEntry{top.scratchpad.mem[628] reg});
+        res.insert_or_assign("top.scratchpad.mem[629]reg", DumpEntry{top.scratchpad.mem[629] reg});
+        res.insert_or_assign("top.scratchpad.mem[630]reg", DumpEntry{top.scratchpad.mem[630] reg});
+        res.insert_or_assign("top.scratchpad.mem[631]reg", DumpEntry{top.scratchpad.mem[631] reg});
+        res.insert_or_assign("top.scratchpad.mem[632]reg", DumpEntry{top.scratchpad.mem[632] reg});
+        res.insert_or_assign("top.scratchpad.mem[633]reg", DumpEntry{top.scratchpad.mem[633] reg});
+        res.insert_or_assign("top.scratchpad.mem[634]reg", DumpEntry{top.scratchpad.mem[634] reg});
+        res.insert_or_assign("top.scratchpad.mem[635]reg", DumpEntry{top.scratchpad.mem[635] reg});
+        res.insert_or_assign("top.scratchpad.mem[636]reg", DumpEntry{top.scratchpad.mem[636] reg});
+        res.insert_or_assign("top.scratchpad.mem[637]reg", DumpEntry{top.scratchpad.mem[637] reg});
+        res.insert_or_assign("top.scratchpad.mem[638]reg", DumpEntry{top.scratchpad.mem[638] reg});
+        res.insert_or_assign("top.scratchpad.mem[639]reg", DumpEntry{top.scratchpad.mem[639] reg});
+        res.insert_or_assign("top.scratchpad.mem[640]reg", DumpEntry{top.scratchpad.mem[640] reg});
+        res.insert_or_assign("top.scratchpad.mem[641]reg", DumpEntry{top.scratchpad.mem[641] reg});
+        res.insert_or_assign("top.scratchpad.mem[642]reg", DumpEntry{top.scratchpad.mem[642] reg});
+        res.insert_or_assign("top.scratchpad.mem[643]reg", DumpEntry{top.scratchpad.mem[643] reg});
+        res.insert_or_assign("top.scratchpad.mem[644]reg", DumpEntry{top.scratchpad.mem[644] reg});
+        res.insert_or_assign("top.scratchpad.mem[645]reg", DumpEntry{top.scratchpad.mem[645] reg});
+        res.insert_or_assign("top.scratchpad.mem[646]reg", DumpEntry{top.scratchpad.mem[646] reg});
+        res.insert_or_assign("top.scratchpad.mem[647]reg", DumpEntry{top.scratchpad.mem[647] reg});
+        res.insert_or_assign("top.scratchpad.mem[648]reg", DumpEntry{top.scratchpad.mem[648] reg});
+        res.insert_or_assign("top.scratchpad.mem[649]reg", DumpEntry{top.scratchpad.mem[649] reg});
+        res.insert_or_assign("top.scratchpad.mem[650]reg", DumpEntry{top.scratchpad.mem[650] reg});
+        res.insert_or_assign("top.scratchpad.mem[651]reg", DumpEntry{top.scratchpad.mem[651] reg});
+        res.insert_or_assign("top.scratchpad.mem[652]reg", DumpEntry{top.scratchpad.mem[652] reg});
+        res.insert_or_assign("top.scratchpad.mem[653]reg", DumpEntry{top.scratchpad.mem[653] reg});
+        res.insert_or_assign("top.scratchpad.mem[654]reg", DumpEntry{top.scratchpad.mem[654] reg});
+        res.insert_or_assign("top.scratchpad.mem[655]reg", DumpEntry{top.scratchpad.mem[655] reg});
+        res.insert_or_assign("top.scratchpad.mem[656]reg", DumpEntry{top.scratchpad.mem[656] reg});
+        res.insert_or_assign("top.scratchpad.mem[657]reg", DumpEntry{top.scratchpad.mem[657] reg});
+        res.insert_or_assign("top.scratchpad.mem[658]reg", DumpEntry{top.scratchpad.mem[658] reg});
+        res.insert_or_assign("top.scratchpad.mem[659]reg", DumpEntry{top.scratchpad.mem[659] reg});
+        res.insert_or_assign("top.scratchpad.mem[660]reg", DumpEntry{top.scratchpad.mem[660] reg});
+        res.insert_or_assign("top.scratchpad.mem[661]reg", DumpEntry{top.scratchpad.mem[661] reg});
+        res.insert_or_assign("top.scratchpad.mem[662]reg", DumpEntry{top.scratchpad.mem[662] reg});
+        res.insert_or_assign("top.scratchpad.mem[663]reg", DumpEntry{top.scratchpad.mem[663] reg});
+        res.insert_or_assign("top.scratchpad.mem[664]reg", DumpEntry{top.scratchpad.mem[664] reg});
+        res.insert_or_assign("top.scratchpad.mem[665]reg", DumpEntry{top.scratchpad.mem[665] reg});
+        res.insert_or_assign("top.scratchpad.mem[666]reg", DumpEntry{top.scratchpad.mem[666] reg});
+        res.insert_or_assign("top.scratchpad.mem[667]reg", DumpEntry{top.scratchpad.mem[667] reg});
+        res.insert_or_assign("top.scratchpad.mem[668]reg", DumpEntry{top.scratchpad.mem[668] reg});
+        res.insert_or_assign("top.scratchpad.mem[669]reg", DumpEntry{top.scratchpad.mem[669] reg});
+        res.insert_or_assign("top.scratchpad.mem[670]reg", DumpEntry{top.scratchpad.mem[670] reg});
+        res.insert_or_assign("top.scratchpad.mem[671]reg", DumpEntry{top.scratchpad.mem[671] reg});
+        res.insert_or_assign("top.scratchpad.mem[672]reg", DumpEntry{top.scratchpad.mem[672] reg});
+        res.insert_or_assign("top.scratchpad.mem[673]reg", DumpEntry{top.scratchpad.mem[673] reg});
+        res.insert_or_assign("top.scratchpad.mem[674]reg", DumpEntry{top.scratchpad.mem[674] reg});
+        res.insert_or_assign("top.scratchpad.mem[675]reg", DumpEntry{top.scratchpad.mem[675] reg});
+        res.insert_or_assign("top.scratchpad.mem[676]reg", DumpEntry{top.scratchpad.mem[676] reg});
+        res.insert_or_assign("top.scratchpad.mem[677]reg", DumpEntry{top.scratchpad.mem[677] reg});
+        res.insert_or_assign("top.scratchpad.mem[678]reg", DumpEntry{top.scratchpad.mem[678] reg});
+        res.insert_or_assign("top.scratchpad.mem[679]reg", DumpEntry{top.scratchpad.mem[679] reg});
+        res.insert_or_assign("top.scratchpad.mem[680]reg", DumpEntry{top.scratchpad.mem[680] reg});
+        res.insert_or_assign("top.scratchpad.mem[681]reg", DumpEntry{top.scratchpad.mem[681] reg});
+        res.insert_or_assign("top.scratchpad.mem[682]reg", DumpEntry{top.scratchpad.mem[682] reg});
+        res.insert_or_assign("top.scratchpad.mem[683]reg", DumpEntry{top.scratchpad.mem[683] reg});
+        res.insert_or_assign("top.scratchpad.mem[684]reg", DumpEntry{top.scratchpad.mem[684] reg});
+        res.insert_or_assign("top.scratchpad.mem[685]reg", DumpEntry{top.scratchpad.mem[685] reg});
+        res.insert_or_assign("top.scratchpad.mem[686]reg", DumpEntry{top.scratchpad.mem[686] reg});
+        res.insert_or_assign("top.scratchpad.mem[687]reg", DumpEntry{top.scratchpad.mem[687] reg});
+        res.insert_or_assign("top.scratchpad.mem[688]reg", DumpEntry{top.scratchpad.mem[688] reg});
+        res.insert_or_assign("top.scratchpad.mem[689]reg", DumpEntry{top.scratchpad.mem[689] reg});
+        res.insert_or_assign("top.scratchpad.mem[690]reg", DumpEntry{top.scratchpad.mem[690] reg});
+        res.insert_or_assign("top.scratchpad.mem[691]reg", DumpEntry{top.scratchpad.mem[691] reg});
+        res.insert_or_assign("top.scratchpad.mem[692]reg", DumpEntry{top.scratchpad.mem[692] reg});
+        res.insert_or_assign("top.scratchpad.mem[693]reg", DumpEntry{top.scratchpad.mem[693] reg});
+        res.insert_or_assign("top.scratchpad.mem[694]reg", DumpEntry{top.scratchpad.mem[694] reg});
+        res.insert_or_assign("top.scratchpad.mem[695]reg", DumpEntry{top.scratchpad.mem[695] reg});
+        res.insert_or_assign("top.scratchpad.mem[696]reg", DumpEntry{top.scratchpad.mem[696] reg});
+        res.insert_or_assign("top.scratchpad.mem[697]reg", DumpEntry{top.scratchpad.mem[697] reg});
+        res.insert_or_assign("top.scratchpad.mem[698]reg", DumpEntry{top.scratchpad.mem[698] reg});
+        res.insert_or_assign("top.scratchpad.mem[699]reg", DumpEntry{top.scratchpad.mem[699] reg});
+        res.insert_or_assign("top.scratchpad.mem[700]reg", DumpEntry{top.scratchpad.mem[700] reg});
+        res.insert_or_assign("top.scratchpad.mem[701]reg", DumpEntry{top.scratchpad.mem[701] reg});
+        res.insert_or_assign("top.scratchpad.mem[702]reg", DumpEntry{top.scratchpad.mem[702] reg});
+        res.insert_or_assign("top.scratchpad.mem[703]reg", DumpEntry{top.scratchpad.mem[703] reg});
+        res.insert_or_assign("top.scratchpad.mem[704]reg", DumpEntry{top.scratchpad.mem[704] reg});
+        res.insert_or_assign("top.scratchpad.mem[705]reg", DumpEntry{top.scratchpad.mem[705] reg});
+        res.insert_or_assign("top.scratchpad.mem[706]reg", DumpEntry{top.scratchpad.mem[706] reg});
+        res.insert_or_assign("top.scratchpad.mem[707]reg", DumpEntry{top.scratchpad.mem[707] reg});
+        res.insert_or_assign("top.scratchpad.mem[708]reg", DumpEntry{top.scratchpad.mem[708] reg});
+        res.insert_or_assign("top.scratchpad.mem[709]reg", DumpEntry{top.scratchpad.mem[709] reg});
+        res.insert_or_assign("top.scratchpad.mem[710]reg", DumpEntry{top.scratchpad.mem[710] reg});
+        res.insert_or_assign("top.scratchpad.mem[711]reg", DumpEntry{top.scratchpad.mem[711] reg});
+        res.insert_or_assign("top.scratchpad.mem[712]reg", DumpEntry{top.scratchpad.mem[712] reg});
+        res.insert_or_assign("top.scratchpad.mem[713]reg", DumpEntry{top.scratchpad.mem[713] reg});
+        res.insert_or_assign("top.scratchpad.mem[714]reg", DumpEntry{top.scratchpad.mem[714] reg});
+        res.insert_or_assign("top.scratchpad.mem[715]reg", DumpEntry{top.scratchpad.mem[715] reg});
+        res.insert_or_assign("top.scratchpad.mem[716]reg", DumpEntry{top.scratchpad.mem[716] reg});
+        res.insert_or_assign("top.scratchpad.mem[717]reg", DumpEntry{top.scratchpad.mem[717] reg});
+        res.insert_or_assign("top.scratchpad.mem[718]reg", DumpEntry{top.scratchpad.mem[718] reg});
+        res.insert_or_assign("top.scratchpad.mem[719]reg", DumpEntry{top.scratchpad.mem[719] reg});
+        res.insert_or_assign("top.scratchpad.mem[720]reg", DumpEntry{top.scratchpad.mem[720] reg});
+        res.insert_or_assign("top.scratchpad.mem[721]reg", DumpEntry{top.scratchpad.mem[721] reg});
+        res.insert_or_assign("top.scratchpad.mem[722]reg", DumpEntry{top.scratchpad.mem[722] reg});
+        res.insert_or_assign("top.scratchpad.mem[723]reg", DumpEntry{top.scratchpad.mem[723] reg});
+        res.insert_or_assign("top.scratchpad.mem[724]reg", DumpEntry{top.scratchpad.mem[724] reg});
+        res.insert_or_assign("top.scratchpad.mem[725]reg", DumpEntry{top.scratchpad.mem[725] reg});
+        res.insert_or_assign("top.scratchpad.mem[726]reg", DumpEntry{top.scratchpad.mem[726] reg});
+        res.insert_or_assign("top.scratchpad.mem[727]reg", DumpEntry{top.scratchpad.mem[727] reg});
+        res.insert_or_assign("top.scratchpad.mem[728]reg", DumpEntry{top.scratchpad.mem[728] reg});
+        res.insert_or_assign("top.scratchpad.mem[729]reg", DumpEntry{top.scratchpad.mem[729] reg});
+        res.insert_or_assign("top.scratchpad.mem[730]reg", DumpEntry{top.scratchpad.mem[730] reg});
+        res.insert_or_assign("top.scratchpad.mem[731]reg", DumpEntry{top.scratchpad.mem[731] reg});
+        res.insert_or_assign("top.scratchpad.mem[732]reg", DumpEntry{top.scratchpad.mem[732] reg});
+        res.insert_or_assign("top.scratchpad.mem[733]reg", DumpEntry{top.scratchpad.mem[733] reg});
+        res.insert_or_assign("top.scratchpad.mem[734]reg", DumpEntry{top.scratchpad.mem[734] reg});
+        res.insert_or_assign("top.scratchpad.mem[735]reg", DumpEntry{top.scratchpad.mem[735] reg});
+        res.insert_or_assign("top.scratchpad.mem[736]reg", DumpEntry{top.scratchpad.mem[736] reg});
+        res.insert_or_assign("top.scratchpad.mem[737]reg", DumpEntry{top.scratchpad.mem[737] reg});
+        res.insert_or_assign("top.scratchpad.mem[738]reg", DumpEntry{top.scratchpad.mem[738] reg});
+        res.insert_or_assign("top.scratchpad.mem[739]reg", DumpEntry{top.scratchpad.mem[739] reg});
+        res.insert_or_assign("top.scratchpad.mem[740]reg", DumpEntry{top.scratchpad.mem[740] reg});
+        res.insert_or_assign("top.scratchpad.mem[741]reg", DumpEntry{top.scratchpad.mem[741] reg});
+        res.insert_or_assign("top.scratchpad.mem[742]reg", DumpEntry{top.scratchpad.mem[742] reg});
+        res.insert_or_assign("top.scratchpad.mem[743]reg", DumpEntry{top.scratchpad.mem[743] reg});
+        res.insert_or_assign("top.scratchpad.mem[744]reg", DumpEntry{top.scratchpad.mem[744] reg});
+        res.insert_or_assign("top.scratchpad.mem[745]reg", DumpEntry{top.scratchpad.mem[745] reg});
+        res.insert_or_assign("top.scratchpad.mem[746]reg", DumpEntry{top.scratchpad.mem[746] reg});
+        res.insert_or_assign("top.scratchpad.mem[747]reg", DumpEntry{top.scratchpad.mem[747] reg});
+        res.insert_or_assign("top.scratchpad.mem[748]reg", DumpEntry{top.scratchpad.mem[748] reg});
+        res.insert_or_assign("top.scratchpad.mem[749]reg", DumpEntry{top.scratchpad.mem[749] reg});
+        res.insert_or_assign("top.scratchpad.mem[750]reg", DumpEntry{top.scratchpad.mem[750] reg});
+        res.insert_or_assign("top.scratchpad.mem[751]reg", DumpEntry{top.scratchpad.mem[751] reg});
+        res.insert_or_assign("top.scratchpad.mem[752]reg", DumpEntry{top.scratchpad.mem[752] reg});
+        res.insert_or_assign("top.scratchpad.mem[753]reg", DumpEntry{top.scratchpad.mem[753] reg});
+        res.insert_or_assign("top.scratchpad.mem[754]reg", DumpEntry{top.scratchpad.mem[754] reg});
+        res.insert_or_assign("top.scratchpad.mem[755]reg", DumpEntry{top.scratchpad.mem[755] reg});
+        res.insert_or_assign("top.scratchpad.mem[756]reg", DumpEntry{top.scratchpad.mem[756] reg});
+        res.insert_or_assign("top.scratchpad.mem[757]reg", DumpEntry{top.scratchpad.mem[757] reg});
+        res.insert_or_assign("top.scratchpad.mem[758]reg", DumpEntry{top.scratchpad.mem[758] reg});
+        res.insert_or_assign("top.scratchpad.mem[759]reg", DumpEntry{top.scratchpad.mem[759] reg});
+        res.insert_or_assign("top.scratchpad.mem[760]reg", DumpEntry{top.scratchpad.mem[760] reg});
+        res.insert_or_assign("top.scratchpad.mem[761]reg", DumpEntry{top.scratchpad.mem[761] reg});
+        res.insert_or_assign("top.scratchpad.mem[762]reg", DumpEntry{top.scratchpad.mem[762] reg});
+        res.insert_or_assign("top.scratchpad.mem[763]reg", DumpEntry{top.scratchpad.mem[763] reg});
+        res.insert_or_assign("top.scratchpad.mem[764]reg", DumpEntry{top.scratchpad.mem[764] reg});
+        res.insert_or_assign("top.scratchpad.mem[765]reg", DumpEntry{top.scratchpad.mem[765] reg});
+        res.insert_or_assign("top.scratchpad.mem[766]reg", DumpEntry{top.scratchpad.mem[766] reg});
+        res.insert_or_assign("top.scratchpad.mem[767]reg", DumpEntry{top.scratchpad.mem[767] reg});
+        res.insert_or_assign("top.scratchpad.mem[768]reg", DumpEntry{top.scratchpad.mem[768] reg});
+        res.insert_or_assign("top.scratchpad.mem[769]reg", DumpEntry{top.scratchpad.mem[769] reg});
+        res.insert_or_assign("top.scratchpad.mem[770]reg", DumpEntry{top.scratchpad.mem[770] reg});
+        res.insert_or_assign("top.scratchpad.mem[771]reg", DumpEntry{top.scratchpad.mem[771] reg});
+        res.insert_or_assign("top.scratchpad.mem[772]reg", DumpEntry{top.scratchpad.mem[772] reg});
+        res.insert_or_assign("top.scratchpad.mem[773]reg", DumpEntry{top.scratchpad.mem[773] reg});
+        res.insert_or_assign("top.scratchpad.mem[774]reg", DumpEntry{top.scratchpad.mem[774] reg});
+        res.insert_or_assign("top.scratchpad.mem[775]reg", DumpEntry{top.scratchpad.mem[775] reg});
+        res.insert_or_assign("top.scratchpad.mem[776]reg", DumpEntry{top.scratchpad.mem[776] reg});
+        res.insert_or_assign("top.scratchpad.mem[777]reg", DumpEntry{top.scratchpad.mem[777] reg});
+        res.insert_or_assign("top.scratchpad.mem[778]reg", DumpEntry{top.scratchpad.mem[778] reg});
+        res.insert_or_assign("top.scratchpad.mem[779]reg", DumpEntry{top.scratchpad.mem[779] reg});
+        res.insert_or_assign("top.scratchpad.mem[780]reg", DumpEntry{top.scratchpad.mem[780] reg});
+        res.insert_or_assign("top.scratchpad.mem[781]reg", DumpEntry{top.scratchpad.mem[781] reg});
+        res.insert_or_assign("top.scratchpad.mem[782]reg", DumpEntry{top.scratchpad.mem[782] reg});
+        res.insert_or_assign("top.scratchpad.mem[783]reg", DumpEntry{top.scratchpad.mem[783] reg});
+        res.insert_or_assign("top.scratchpad.mem[784]reg", DumpEntry{top.scratchpad.mem[784] reg});
+        res.insert_or_assign("top.scratchpad.mem[785]reg", DumpEntry{top.scratchpad.mem[785] reg});
+        res.insert_or_assign("top.scratchpad.mem[786]reg", DumpEntry{top.scratchpad.mem[786] reg});
+        res.insert_or_assign("top.scratchpad.mem[787]reg", DumpEntry{top.scratchpad.mem[787] reg});
+        res.insert_or_assign("top.scratchpad.mem[788]reg", DumpEntry{top.scratchpad.mem[788] reg});
+        res.insert_or_assign("top.scratchpad.mem[789]reg", DumpEntry{top.scratchpad.mem[789] reg});
+        res.insert_or_assign("top.scratchpad.mem[790]reg", DumpEntry{top.scratchpad.mem[790] reg});
+        res.insert_or_assign("top.scratchpad.mem[791]reg", DumpEntry{top.scratchpad.mem[791] reg});
+        res.insert_or_assign("top.scratchpad.mem[792]reg", DumpEntry{top.scratchpad.mem[792] reg});
+        res.insert_or_assign("top.scratchpad.mem[793]reg", DumpEntry{top.scratchpad.mem[793] reg});
+        res.insert_or_assign("top.scratchpad.mem[794]reg", DumpEntry{top.scratchpad.mem[794] reg});
+        res.insert_or_assign("top.scratchpad.mem[795]reg", DumpEntry{top.scratchpad.mem[795] reg});
+        res.insert_or_assign("top.scratchpad.mem[796]reg", DumpEntry{top.scratchpad.mem[796] reg});
+        res.insert_or_assign("top.scratchpad.mem[797]reg", DumpEntry{top.scratchpad.mem[797] reg});
+        res.insert_or_assign("top.scratchpad.mem[798]reg", DumpEntry{top.scratchpad.mem[798] reg});
+        res.insert_or_assign("top.scratchpad.mem[799]reg", DumpEntry{top.scratchpad.mem[799] reg});
+        res.insert_or_assign("top.scratchpad.mem[800]reg", DumpEntry{top.scratchpad.mem[800] reg});
+        res.insert_or_assign("top.scratchpad.mem[801]reg", DumpEntry{top.scratchpad.mem[801] reg});
+        res.insert_or_assign("top.scratchpad.mem[802]reg", DumpEntry{top.scratchpad.mem[802] reg});
+        res.insert_or_assign("top.scratchpad.mem[803]reg", DumpEntry{top.scratchpad.mem[803] reg});
+        res.insert_or_assign("top.scratchpad.mem[804]reg", DumpEntry{top.scratchpad.mem[804] reg});
+        res.insert_or_assign("top.scratchpad.mem[805]reg", DumpEntry{top.scratchpad.mem[805] reg});
+        res.insert_or_assign("top.scratchpad.mem[806]reg", DumpEntry{top.scratchpad.mem[806] reg});
+        res.insert_or_assign("top.scratchpad.mem[807]reg", DumpEntry{top.scratchpad.mem[807] reg});
+        res.insert_or_assign("top.scratchpad.mem[808]reg", DumpEntry{top.scratchpad.mem[808] reg});
+        res.insert_or_assign("top.scratchpad.mem[809]reg", DumpEntry{top.scratchpad.mem[809] reg});
+        res.insert_or_assign("top.scratchpad.mem[810]reg", DumpEntry{top.scratchpad.mem[810] reg});
+        res.insert_or_assign("top.scratchpad.mem[811]reg", DumpEntry{top.scratchpad.mem[811] reg});
+        res.insert_or_assign("top.scratchpad.mem[812]reg", DumpEntry{top.scratchpad.mem[812] reg});
+        res.insert_or_assign("top.scratchpad.mem[813]reg", DumpEntry{top.scratchpad.mem[813] reg});
+        res.insert_or_assign("top.scratchpad.mem[814]reg", DumpEntry{top.scratchpad.mem[814] reg});
+        res.insert_or_assign("top.scratchpad.mem[815]reg", DumpEntry{top.scratchpad.mem[815] reg});
+        res.insert_or_assign("top.scratchpad.mem[816]reg", DumpEntry{top.scratchpad.mem[816] reg});
+        res.insert_or_assign("top.scratchpad.mem[817]reg", DumpEntry{top.scratchpad.mem[817] reg});
+        res.insert_or_assign("top.scratchpad.mem[818]reg", DumpEntry{top.scratchpad.mem[818] reg});
+        res.insert_or_assign("top.scratchpad.mem[819]reg", DumpEntry{top.scratchpad.mem[819] reg});
+        res.insert_or_assign("top.scratchpad.mem[820]reg", DumpEntry{top.scratchpad.mem[820] reg});
+        res.insert_or_assign("top.scratchpad.mem[821]reg", DumpEntry{top.scratchpad.mem[821] reg});
+        res.insert_or_assign("top.scratchpad.mem[822]reg", DumpEntry{top.scratchpad.mem[822] reg});
+        res.insert_or_assign("top.scratchpad.mem[823]reg", DumpEntry{top.scratchpad.mem[823] reg});
+        res.insert_or_assign("top.scratchpad.mem[824]reg", DumpEntry{top.scratchpad.mem[824] reg});
+        res.insert_or_assign("top.scratchpad.mem[825]reg", DumpEntry{top.scratchpad.mem[825] reg});
+        res.insert_or_assign("top.scratchpad.mem[826]reg", DumpEntry{top.scratchpad.mem[826] reg});
+        res.insert_or_assign("top.scratchpad.mem[827]reg", DumpEntry{top.scratchpad.mem[827] reg});
+        res.insert_or_assign("top.scratchpad.mem[828]reg", DumpEntry{top.scratchpad.mem[828] reg});
+        res.insert_or_assign("top.scratchpad.mem[829]reg", DumpEntry{top.scratchpad.mem[829] reg});
+        res.insert_or_assign("top.scratchpad.mem[830]reg", DumpEntry{top.scratchpad.mem[830] reg});
+        res.insert_or_assign("top.scratchpad.mem[831]reg", DumpEntry{top.scratchpad.mem[831] reg});
+        res.insert_or_assign("top.scratchpad.mem[832]reg", DumpEntry{top.scratchpad.mem[832] reg});
+        res.insert_or_assign("top.scratchpad.mem[833]reg", DumpEntry{top.scratchpad.mem[833] reg});
+        res.insert_or_assign("top.scratchpad.mem[834]reg", DumpEntry{top.scratchpad.mem[834] reg});
+        res.insert_or_assign("top.scratchpad.mem[835]reg", DumpEntry{top.scratchpad.mem[835] reg});
+        res.insert_or_assign("top.scratchpad.mem[836]reg", DumpEntry{top.scratchpad.mem[836] reg});
+        res.insert_or_assign("top.scratchpad.mem[837]reg", DumpEntry{top.scratchpad.mem[837] reg});
+        res.insert_or_assign("top.scratchpad.mem[838]reg", DumpEntry{top.scratchpad.mem[838] reg});
+        res.insert_or_assign("top.scratchpad.mem[839]reg", DumpEntry{top.scratchpad.mem[839] reg});
+        res.insert_or_assign("top.scratchpad.mem[840]reg", DumpEntry{top.scratchpad.mem[840] reg});
+        res.insert_or_assign("top.scratchpad.mem[841]reg", DumpEntry{top.scratchpad.mem[841] reg});
+        res.insert_or_assign("top.scratchpad.mem[842]reg", DumpEntry{top.scratchpad.mem[842] reg});
+        res.insert_or_assign("top.scratchpad.mem[843]reg", DumpEntry{top.scratchpad.mem[843] reg});
+        res.insert_or_assign("top.scratchpad.mem[844]reg", DumpEntry{top.scratchpad.mem[844] reg});
+        res.insert_or_assign("top.scratchpad.mem[845]reg", DumpEntry{top.scratchpad.mem[845] reg});
+        res.insert_or_assign("top.scratchpad.mem[846]reg", DumpEntry{top.scratchpad.mem[846] reg});
+        res.insert_or_assign("top.scratchpad.mem[847]reg", DumpEntry{top.scratchpad.mem[847] reg});
+        res.insert_or_assign("top.scratchpad.mem[848]reg", DumpEntry{top.scratchpad.mem[848] reg});
+        res.insert_or_assign("top.scratchpad.mem[849]reg", DumpEntry{top.scratchpad.mem[849] reg});
+        res.insert_or_assign("top.scratchpad.mem[850]reg", DumpEntry{top.scratchpad.mem[850] reg});
+        res.insert_or_assign("top.scratchpad.mem[851]reg", DumpEntry{top.scratchpad.mem[851] reg});
+        res.insert_or_assign("top.scratchpad.mem[852]reg", DumpEntry{top.scratchpad.mem[852] reg});
+        res.insert_or_assign("top.scratchpad.mem[853]reg", DumpEntry{top.scratchpad.mem[853] reg});
+        res.insert_or_assign("top.scratchpad.mem[854]reg", DumpEntry{top.scratchpad.mem[854] reg});
+        res.insert_or_assign("top.scratchpad.mem[855]reg", DumpEntry{top.scratchpad.mem[855] reg});
+        res.insert_or_assign("top.scratchpad.mem[856]reg", DumpEntry{top.scratchpad.mem[856] reg});
+        res.insert_or_assign("top.scratchpad.mem[857]reg", DumpEntry{top.scratchpad.mem[857] reg});
+        res.insert_or_assign("top.scratchpad.mem[858]reg", DumpEntry{top.scratchpad.mem[858] reg});
+        res.insert_or_assign("top.scratchpad.mem[859]reg", DumpEntry{top.scratchpad.mem[859] reg});
+        res.insert_or_assign("top.scratchpad.mem[860]reg", DumpEntry{top.scratchpad.mem[860] reg});
+        res.insert_or_assign("top.scratchpad.mem[861]reg", DumpEntry{top.scratchpad.mem[861] reg});
+        res.insert_or_assign("top.scratchpad.mem[862]reg", DumpEntry{top.scratchpad.mem[862] reg});
+        res.insert_or_assign("top.scratchpad.mem[863]reg", DumpEntry{top.scratchpad.mem[863] reg});
+        res.insert_or_assign("top.scratchpad.mem[864]reg", DumpEntry{top.scratchpad.mem[864] reg});
+        res.insert_or_assign("top.scratchpad.mem[865]reg", DumpEntry{top.scratchpad.mem[865] reg});
+        res.insert_or_assign("top.scratchpad.mem[866]reg", DumpEntry{top.scratchpad.mem[866] reg});
+        res.insert_or_assign("top.scratchpad.mem[867]reg", DumpEntry{top.scratchpad.mem[867] reg});
+        res.insert_or_assign("top.scratchpad.mem[868]reg", DumpEntry{top.scratchpad.mem[868] reg});
+        res.insert_or_assign("top.scratchpad.mem[869]reg", DumpEntry{top.scratchpad.mem[869] reg});
+        res.insert_or_assign("top.scratchpad.mem[870]reg", DumpEntry{top.scratchpad.mem[870] reg});
+        res.insert_or_assign("top.scratchpad.mem[871]reg", DumpEntry{top.scratchpad.mem[871] reg});
+        res.insert_or_assign("top.scratchpad.mem[872]reg", DumpEntry{top.scratchpad.mem[872] reg});
+        res.insert_or_assign("top.scratchpad.mem[873]reg", DumpEntry{top.scratchpad.mem[873] reg});
+        res.insert_or_assign("top.scratchpad.mem[874]reg", DumpEntry{top.scratchpad.mem[874] reg});
+        res.insert_or_assign("top.scratchpad.mem[875]reg", DumpEntry{top.scratchpad.mem[875] reg});
+        res.insert_or_assign("top.scratchpad.mem[876]reg", DumpEntry{top.scratchpad.mem[876] reg});
+        res.insert_or_assign("top.scratchpad.mem[877]reg", DumpEntry{top.scratchpad.mem[877] reg});
+        res.insert_or_assign("top.scratchpad.mem[878]reg", DumpEntry{top.scratchpad.mem[878] reg});
+        res.insert_or_assign("top.scratchpad.mem[879]reg", DumpEntry{top.scratchpad.mem[879] reg});
+        res.insert_or_assign("top.scratchpad.mem[880]reg", DumpEntry{top.scratchpad.mem[880] reg});
+        res.insert_or_assign("top.scratchpad.mem[881]reg", DumpEntry{top.scratchpad.mem[881] reg});
+        res.insert_or_assign("top.scratchpad.mem[882]reg", DumpEntry{top.scratchpad.mem[882] reg});
+        res.insert_or_assign("top.scratchpad.mem[883]reg", DumpEntry{top.scratchpad.mem[883] reg});
+        res.insert_or_assign("top.scratchpad.mem[884]reg", DumpEntry{top.scratchpad.mem[884] reg});
+        res.insert_or_assign("top.scratchpad.mem[885]reg", DumpEntry{top.scratchpad.mem[885] reg});
+        res.insert_or_assign("top.scratchpad.mem[886]reg", DumpEntry{top.scratchpad.mem[886] reg});
+        res.insert_or_assign("top.scratchpad.mem[887]reg", DumpEntry{top.scratchpad.mem[887] reg});
+        res.insert_or_assign("top.scratchpad.mem[888]reg", DumpEntry{top.scratchpad.mem[888] reg});
+        res.insert_or_assign("top.scratchpad.mem[889]reg", DumpEntry{top.scratchpad.mem[889] reg});
+        res.insert_or_assign("top.scratchpad.mem[890]reg", DumpEntry{top.scratchpad.mem[890] reg});
+        res.insert_or_assign("top.scratchpad.mem[891]reg", DumpEntry{top.scratchpad.mem[891] reg});
+        res.insert_or_assign("top.scratchpad.mem[892]reg", DumpEntry{top.scratchpad.mem[892] reg});
+        res.insert_or_assign("top.scratchpad.mem[893]reg", DumpEntry{top.scratchpad.mem[893] reg});
+        res.insert_or_assign("top.scratchpad.mem[894]reg", DumpEntry{top.scratchpad.mem[894] reg});
+        res.insert_or_assign("top.scratchpad.mem[895]reg", DumpEntry{top.scratchpad.mem[895] reg});
+        res.insert_or_assign("top.scratchpad.mem[896]reg", DumpEntry{top.scratchpad.mem[896] reg});
+        res.insert_or_assign("top.scratchpad.mem[897]reg", DumpEntry{top.scratchpad.mem[897] reg});
+        res.insert_or_assign("top.scratchpad.mem[898]reg", DumpEntry{top.scratchpad.mem[898] reg});
+        res.insert_or_assign("top.scratchpad.mem[899]reg", DumpEntry{top.scratchpad.mem[899] reg});
+        res.insert_or_assign("top.scratchpad.mem[900]reg", DumpEntry{top.scratchpad.mem[900] reg});
+        res.insert_or_assign("top.scratchpad.mem[901]reg", DumpEntry{top.scratchpad.mem[901] reg});
+        res.insert_or_assign("top.scratchpad.mem[902]reg", DumpEntry{top.scratchpad.mem[902] reg});
+        res.insert_or_assign("top.scratchpad.mem[903]reg", DumpEntry{top.scratchpad.mem[903] reg});
+        res.insert_or_assign("top.scratchpad.mem[904]reg", DumpEntry{top.scratchpad.mem[904] reg});
+        res.insert_or_assign("top.scratchpad.mem[905]reg", DumpEntry{top.scratchpad.mem[905] reg});
+        res.insert_or_assign("top.scratchpad.mem[906]reg", DumpEntry{top.scratchpad.mem[906] reg});
+        res.insert_or_assign("top.scratchpad.mem[907]reg", DumpEntry{top.scratchpad.mem[907] reg});
+        res.insert_or_assign("top.scratchpad.mem[908]reg", DumpEntry{top.scratchpad.mem[908] reg});
+        res.insert_or_assign("top.scratchpad.mem[909]reg", DumpEntry{top.scratchpad.mem[909] reg});
+        res.insert_or_assign("top.scratchpad.mem[910]reg", DumpEntry{top.scratchpad.mem[910] reg});
+        res.insert_or_assign("top.scratchpad.mem[911]reg", DumpEntry{top.scratchpad.mem[911] reg});
+        res.insert_or_assign("top.scratchpad.mem[912]reg", DumpEntry{top.scratchpad.mem[912] reg});
+        res.insert_or_assign("top.scratchpad.mem[913]reg", DumpEntry{top.scratchpad.mem[913] reg});
+        res.insert_or_assign("top.scratchpad.mem[914]reg", DumpEntry{top.scratchpad.mem[914] reg});
+        res.insert_or_assign("top.scratchpad.mem[915]reg", DumpEntry{top.scratchpad.mem[915] reg});
+        res.insert_or_assign("top.scratchpad.mem[916]reg", DumpEntry{top.scratchpad.mem[916] reg});
+        res.insert_or_assign("top.scratchpad.mem[917]reg", DumpEntry{top.scratchpad.mem[917] reg});
+        res.insert_or_assign("top.scratchpad.mem[918]reg", DumpEntry{top.scratchpad.mem[918] reg});
+        res.insert_or_assign("top.scratchpad.mem[919]reg", DumpEntry{top.scratchpad.mem[919] reg});
+        res.insert_or_assign("top.scratchpad.mem[920]reg", DumpEntry{top.scratchpad.mem[920] reg});
+        res.insert_or_assign("top.scratchpad.mem[921]reg", DumpEntry{top.scratchpad.mem[921] reg});
+        res.insert_or_assign("top.scratchpad.mem[922]reg", DumpEntry{top.scratchpad.mem[922] reg});
+        res.insert_or_assign("top.scratchpad.mem[923]reg", DumpEntry{top.scratchpad.mem[923] reg});
+        res.insert_or_assign("top.scratchpad.mem[924]reg", DumpEntry{top.scratchpad.mem[924] reg});
+        res.insert_or_assign("top.scratchpad.mem[925]reg", DumpEntry{top.scratchpad.mem[925] reg});
+        res.insert_or_assign("top.scratchpad.mem[926]reg", DumpEntry{top.scratchpad.mem[926] reg});
+        res.insert_or_assign("top.scratchpad.mem[927]reg", DumpEntry{top.scratchpad.mem[927] reg});
+        res.insert_or_assign("top.scratchpad.mem[928]reg", DumpEntry{top.scratchpad.mem[928] reg});
+        res.insert_or_assign("top.scratchpad.mem[929]reg", DumpEntry{top.scratchpad.mem[929] reg});
+        res.insert_or_assign("top.scratchpad.mem[930]reg", DumpEntry{top.scratchpad.mem[930] reg});
+        res.insert_or_assign("top.scratchpad.mem[931]reg", DumpEntry{top.scratchpad.mem[931] reg});
+        res.insert_or_assign("top.scratchpad.mem[932]reg", DumpEntry{top.scratchpad.mem[932] reg});
+        res.insert_or_assign("top.scratchpad.mem[933]reg", DumpEntry{top.scratchpad.mem[933] reg});
+        res.insert_or_assign("top.scratchpad.mem[934]reg", DumpEntry{top.scratchpad.mem[934] reg});
+        res.insert_or_assign("top.scratchpad.mem[935]reg", DumpEntry{top.scratchpad.mem[935] reg});
+        res.insert_or_assign("top.scratchpad.mem[936]reg", DumpEntry{top.scratchpad.mem[936] reg});
+        res.insert_or_assign("top.scratchpad.mem[937]reg", DumpEntry{top.scratchpad.mem[937] reg});
+        res.insert_or_assign("top.scratchpad.mem[938]reg", DumpEntry{top.scratchpad.mem[938] reg});
+        res.insert_or_assign("top.scratchpad.mem[939]reg", DumpEntry{top.scratchpad.mem[939] reg});
+        res.insert_or_assign("top.scratchpad.mem[940]reg", DumpEntry{top.scratchpad.mem[940] reg});
+        res.insert_or_assign("top.scratchpad.mem[941]reg", DumpEntry{top.scratchpad.mem[941] reg});
+        res.insert_or_assign("top.scratchpad.mem[942]reg", DumpEntry{top.scratchpad.mem[942] reg});
+        res.insert_or_assign("top.scratchpad.mem[943]reg", DumpEntry{top.scratchpad.mem[943] reg});
+        res.insert_or_assign("top.scratchpad.mem[944]reg", DumpEntry{top.scratchpad.mem[944] reg});
+        res.insert_or_assign("top.scratchpad.mem[945]reg", DumpEntry{top.scratchpad.mem[945] reg});
+        res.insert_or_assign("top.scratchpad.mem[946]reg", DumpEntry{top.scratchpad.mem[946] reg});
+        res.insert_or_assign("top.scratchpad.mem[947]reg", DumpEntry{top.scratchpad.mem[947] reg});
+        res.insert_or_assign("top.scratchpad.mem[948]reg", DumpEntry{top.scratchpad.mem[948] reg});
+        res.insert_or_assign("top.scratchpad.mem[949]reg", DumpEntry{top.scratchpad.mem[949] reg});
+        res.insert_or_assign("top.scratchpad.mem[950]reg", DumpEntry{top.scratchpad.mem[950] reg});
+        res.insert_or_assign("top.scratchpad.mem[951]reg", DumpEntry{top.scratchpad.mem[951] reg});
+        res.insert_or_assign("top.scratchpad.mem[952]reg", DumpEntry{top.scratchpad.mem[952] reg});
+        res.insert_or_assign("top.scratchpad.mem[953]reg", DumpEntry{top.scratchpad.mem[953] reg});
+        res.insert_or_assign("top.scratchpad.mem[954]reg", DumpEntry{top.scratchpad.mem[954] reg});
+        res.insert_or_assign("top.scratchpad.mem[955]reg", DumpEntry{top.scratchpad.mem[955] reg});
+        res.insert_or_assign("top.scratchpad.mem[956]reg", DumpEntry{top.scratchpad.mem[956] reg});
+        res.insert_or_assign("top.scratchpad.mem[957]reg", DumpEntry{top.scratchpad.mem[957] reg});
+        res.insert_or_assign("top.scratchpad.mem[958]reg", DumpEntry{top.scratchpad.mem[958] reg});
+        res.insert_or_assign("top.scratchpad.mem[959]reg", DumpEntry{top.scratchpad.mem[959] reg});
+        res.insert_or_assign("top.scratchpad.mem[960]reg", DumpEntry{top.scratchpad.mem[960] reg});
+        res.insert_or_assign("top.scratchpad.mem[961]reg", DumpEntry{top.scratchpad.mem[961] reg});
+        res.insert_or_assign("top.scratchpad.mem[962]reg", DumpEntry{top.scratchpad.mem[962] reg});
+        res.insert_or_assign("top.scratchpad.mem[963]reg", DumpEntry{top.scratchpad.mem[963] reg});
+        res.insert_or_assign("top.scratchpad.mem[964]reg", DumpEntry{top.scratchpad.mem[964] reg});
+        res.insert_or_assign("top.scratchpad.mem[965]reg", DumpEntry{top.scratchpad.mem[965] reg});
+        res.insert_or_assign("top.scratchpad.mem[966]reg", DumpEntry{top.scratchpad.mem[966] reg});
+        res.insert_or_assign("top.scratchpad.mem[967]reg", DumpEntry{top.scratchpad.mem[967] reg});
+        res.insert_or_assign("top.scratchpad.mem[968]reg", DumpEntry{top.scratchpad.mem[968] reg});
+        res.insert_or_assign("top.scratchpad.mem[969]reg", DumpEntry{top.scratchpad.mem[969] reg});
+        res.insert_or_assign("top.scratchpad.mem[970]reg", DumpEntry{top.scratchpad.mem[970] reg});
+        res.insert_or_assign("top.scratchpad.mem[971]reg", DumpEntry{top.scratchpad.mem[971] reg});
+        res.insert_or_assign("top.scratchpad.mem[972]reg", DumpEntry{top.scratchpad.mem[972] reg});
+        res.insert_or_assign("top.scratchpad.mem[973]reg", DumpEntry{top.scratchpad.mem[973] reg});
+        res.insert_or_assign("top.scratchpad.mem[974]reg", DumpEntry{top.scratchpad.mem[974] reg});
+        res.insert_or_assign("top.scratchpad.mem[975]reg", DumpEntry{top.scratchpad.mem[975] reg});
+        res.insert_or_assign("top.scratchpad.mem[976]reg", DumpEntry{top.scratchpad.mem[976] reg});
+        res.insert_or_assign("top.scratchpad.mem[977]reg", DumpEntry{top.scratchpad.mem[977] reg});
+        res.insert_or_assign("top.scratchpad.mem[978]reg", DumpEntry{top.scratchpad.mem[978] reg});
+        res.insert_or_assign("top.scratchpad.mem[979]reg", DumpEntry{top.scratchpad.mem[979] reg});
+        res.insert_or_assign("top.scratchpad.mem[980]reg", DumpEntry{top.scratchpad.mem[980] reg});
+        res.insert_or_assign("top.scratchpad.mem[981]reg", DumpEntry{top.scratchpad.mem[981] reg});
+        res.insert_or_assign("top.scratchpad.mem[982]reg", DumpEntry{top.scratchpad.mem[982] reg});
+        res.insert_or_assign("top.scratchpad.mem[983]reg", DumpEntry{top.scratchpad.mem[983] reg});
+        res.insert_or_assign("top.scratchpad.mem[984]reg", DumpEntry{top.scratchpad.mem[984] reg});
+        res.insert_or_assign("top.scratchpad.mem[985]reg", DumpEntry{top.scratchpad.mem[985] reg});
+        res.insert_or_assign("top.scratchpad.mem[986]reg", DumpEntry{top.scratchpad.mem[986] reg});
+        res.insert_or_assign("top.scratchpad.mem[987]reg", DumpEntry{top.scratchpad.mem[987] reg});
+        res.insert_or_assign("top.scratchpad.mem[988]reg", DumpEntry{top.scratchpad.mem[988] reg});
+        res.insert_or_assign("top.scratchpad.mem[989]reg", DumpEntry{top.scratchpad.mem[989] reg});
+        res.insert_or_assign("top.scratchpad.mem[990]reg", DumpEntry{top.scratchpad.mem[990] reg});
+        res.insert_or_assign("top.scratchpad.mem[991]reg", DumpEntry{top.scratchpad.mem[991] reg});
+        res.insert_or_assign("top.scratchpad.mem[992]reg", DumpEntry{top.scratchpad.mem[992] reg});
+        res.insert_or_assign("top.scratchpad.mem[993]reg", DumpEntry{top.scratchpad.mem[993] reg});
+        res.insert_or_assign("top.scratchpad.mem[994]reg", DumpEntry{top.scratchpad.mem[994] reg});
+        res.insert_or_assign("top.scratchpad.mem[995]reg", DumpEntry{top.scratchpad.mem[995] reg});
+        res.insert_or_assign("top.scratchpad.mem[996]reg", DumpEntry{top.scratchpad.mem[996] reg});
+        res.insert_or_assign("top.scratchpad.mem[997]reg", DumpEntry{top.scratchpad.mem[997] reg});
+        res.insert_or_assign("top.scratchpad.mem[998]reg", DumpEntry{top.scratchpad.mem[998] reg});
+        res.insert_or_assign("top.scratchpad.mem[999]reg", DumpEntry{top.scratchpad.mem[999] reg});
+        res.insert_or_assign("top.scratchpad.mem[1000]reg", DumpEntry{top.scratchpad.mem[1000] reg});
+        res.insert_or_assign("top.scratchpad.mem[1001]reg", DumpEntry{top.scratchpad.mem[1001] reg});
+        res.insert_or_assign("top.scratchpad.mem[1002]reg", DumpEntry{top.scratchpad.mem[1002] reg});
+        res.insert_or_assign("top.scratchpad.mem[1003]reg", DumpEntry{top.scratchpad.mem[1003] reg});
+        res.insert_or_assign("top.scratchpad.mem[1004]reg", DumpEntry{top.scratchpad.mem[1004] reg});
+        res.insert_or_assign("top.scratchpad.mem[1005]reg", DumpEntry{top.scratchpad.mem[1005] reg});
+        res.insert_or_assign("top.scratchpad.mem[1006]reg", DumpEntry{top.scratchpad.mem[1006] reg});
+        res.insert_or_assign("top.scratchpad.mem[1007]reg", DumpEntry{top.scratchpad.mem[1007] reg});
+        res.insert_or_assign("top.scratchpad.mem[1008]reg", DumpEntry{top.scratchpad.mem[1008] reg});
+        res.insert_or_assign("top.scratchpad.mem[1009]reg", DumpEntry{top.scratchpad.mem[1009] reg});
+        res.insert_or_assign("top.scratchpad.mem[1010]reg", DumpEntry{top.scratchpad.mem[1010] reg});
+        res.insert_or_assign("top.scratchpad.mem[1011]reg", DumpEntry{top.scratchpad.mem[1011] reg});
+        res.insert_or_assign("top.scratchpad.mem[1012]reg", DumpEntry{top.scratchpad.mem[1012] reg});
+        res.insert_or_assign("top.scratchpad.mem[1013]reg", DumpEntry{top.scratchpad.mem[1013] reg});
+        res.insert_or_assign("top.scratchpad.mem[1014]reg", DumpEntry{top.scratchpad.mem[1014] reg});
+        res.insert_or_assign("top.scratchpad.mem[1015]reg", DumpEntry{top.scratchpad.mem[1015] reg});
+        res.insert_or_assign("top.scratchpad.mem[1016]reg", DumpEntry{top.scratchpad.mem[1016] reg});
+        res.insert_or_assign("top.scratchpad.mem[1017]reg", DumpEntry{top.scratchpad.mem[1017] reg});
+        res.insert_or_assign("top.scratchpad.mem[1018]reg", DumpEntry{top.scratchpad.mem[1018] reg});
+        res.insert_or_assign("top.scratchpad.mem[1019]reg", DumpEntry{top.scratchpad.mem[1019] reg});
+        res.insert_or_assign("top.scratchpad.mem[1020]reg", DumpEntry{top.scratchpad.mem[1020] reg});
+        res.insert_or_assign("top.scratchpad.mem[1021]reg", DumpEntry{top.scratchpad.mem[1021] reg});
+        res.insert_or_assign("top.scratchpad.mem[1022]reg", DumpEntry{top.scratchpad.mem[1022] reg});
+        res.insert_or_assign("top.scratchpad.mem[1023]reg", DumpEntry{top.scratchpad.mem[1023] reg});
+        res.insert_or_assign("top.pwmVrefHeater.ctrl", DumpEntry{top.pwmVrefHeater.ctrl});
+        res.insert_or_assign("top.pwmVrefHeater.ctrl.enable", DumpEntry{top.pwmVrefHeater.ctrl.enable});
+        res.insert_or_assign("top.pwmVrefHeater.ctrl.reset", DumpEntry{top.pwmVrefHeater.ctrl.reset});
+        res.insert_or_assign("top.pwmVrefHeater.carrierBits", DumpEntry{top.pwmVrefHeater.carrierBits});
+        res.insert_or_assign("top.pwmVrefHeater.deadtimeBits", DumpEntry{top.pwmVrefHeater.deadtimeBits});
+        res.insert_or_assign("top.pwmVrefHeater.config", DumpEntry{top.pwmVrefHeater.config});
+        res.insert_or_assign("top.pwmVrefHeater.config.updateType", DumpEntry{top.pwmVrefHeater.config.updateType});
+        res.insert_or_assign(
+            "top.pwmVrefHeater.config.enablePwmCheck", DumpEntry{top.pwmVrefHeater.config.enablePwmCheck}
+        );
+        res.insert_or_assign(
+            "top.pwmVrefHeater.config.enableStCheck", DumpEntry{top.pwmVrefHeater.config.enableStCheck}
+        );
+        res.insert_or_assign(
+            "top.pwmVrefHeater.config.enableValueCheck", DumpEntry{top.pwmVrefHeater.config.enableValueCheck}
+        );
+        res.insert_or_assign(
+            "top.pwmVrefHeater.config.bypassDeadtime", DumpEntry{top.pwmVrefHeater.config.bypassDeadtime}
+        );
+        res.insert_or_assign("top.pwmVrefHeater.config.disableA", DumpEntry{top.pwmVrefHeater.config.disableA});
+        res.insert_or_assign("top.pwmVrefHeater.config.disableB", DumpEntry{top.pwmVrefHeater.config.disableB});
+        res.insert_or_assign("top.pwmVrefHeater.config.invert", DumpEntry{top.pwmVrefHeater.config.invert});
+        res.insert_or_assign("top.pwmVrefHeater.config.decoupleCc1", DumpEntry{top.pwmVrefHeater.config.decoupleCc1});
+        res.insert_or_assign("top.pwmVrefHeater.cc0Sc", DumpEntry{top.pwmVrefHeater.cc0Sc});
+        res.insert_or_assign("top.pwmVrefHeater.cc1Sc", DumpEntry{top.pwmVrefHeater.cc1Sc});
+        res.insert_or_assign("top.pwmVrefHeater.ctrhSc", DumpEntry{top.pwmVrefHeater.ctrhSc});
+        res.insert_or_assign("top.pwmVrefHeater.deadtimeSc", DumpEntry{top.pwmVrefHeater.deadtimeSc});
+        res.insert_or_assign("top.pwmVrefHeater.extendedDeadtimeSc", DumpEntry{top.pwmVrefHeater.extendedDeadtimeSc});
+        res.insert_or_assign("top.pwmVrefHeater.minSwitchTimeSc", DumpEntry{top.pwmVrefHeater.minSwitchTimeSc});
+        res.insert_or_assign("top.pwmVrefHeater.minModIdxSc", DumpEntry{top.pwmVrefHeater.minModIdxSc});
+        res.insert_or_assign("top.pwmVrefHeater.maxModIdxSc", DumpEntry{top.pwmVrefHeater.maxModIdxSc});
+        res.insert_or_assign("top.pwmVrefHeater.numberCcErrors", DumpEntry{top.pwmVrefHeater.numberCcErrors});
+        res.insert_or_assign("top.eventLog.status", DumpEntry{top.eventLog.status});
+        res.insert_or_assign("top.eventLog.status.entryLost", DumpEntry{top.eventLog.status.entryLost});
+        res.insert_or_assign("top.eventLog.status.entryValid", DumpEntry{top.eventLog.status.entryValid});
+        res.insert_or_assign("top.eventLog.status.typeIndex", DumpEntry{top.eventLog.status.typeIndex});
+        res.insert_or_assign("top.eventLog.status.bankNumber", DumpEntry{top.eventLog.status.bankNumber});
+        res.insert_or_assign("top.eventLog.timestampS", DumpEntry{top.eventLog.timestampS});
+        res.insert_or_assign("top.eventLog.timestampUs", DumpEntry{top.eventLog.timestampUs});
+        res.insert_or_assign("top.eventLog.data", DumpEntry{top.eventLog.data});
+        res.insert_or_assign("top.eventLog.fifoDataCount", DumpEntry{top.eventLog.fifoDataCount});
+        res.insert_or_assign("top.eventLog.masks[0].re", DumpEntry{top.eventLog.masks[0].re});
+        res.insert_or_assign("top.eventLog.masks[0].fe", DumpEntry{top.eventLog.masks[0].fe});
+        res.insert_or_assign("top.eventLog.masks[1].re", DumpEntry{top.eventLog.masks[1].re});
+        res.insert_or_assign("top.eventLog.masks[1].fe", DumpEntry{top.eventLog.masks[1].fe});
+        res.insert_or_assign("top.eventLog.masks[2].re", DumpEntry{top.eventLog.masks[2].re});
+        res.insert_or_assign("top.eventLog.masks[2].fe", DumpEntry{top.eventLog.masks[2].fe});
+        res.insert_or_assign("top.eventLog.masks[3].re", DumpEntry{top.eventLog.masks[3].re});
+        res.insert_or_assign("top.eventLog.masks[3].fe", DumpEntry{top.eventLog.masks[3].fe});
+        res.insert_or_assign("top.eventLog.masks[4].re", DumpEntry{top.eventLog.masks[4].re});
+        res.insert_or_assign("top.eventLog.masks[4].fe", DumpEntry{top.eventLog.masks[4].fe});
+        res.insert_or_assign("top.eventLog.masks[5].re", DumpEntry{top.eventLog.masks[5].re});
+        res.insert_or_assign("top.eventLog.masks[5].fe", DumpEntry{top.eventLog.masks[5].fe});
+        res.insert_or_assign("top.eventLog.masks[6].re", DumpEntry{top.eventLog.masks[6].re});
+        res.insert_or_assign("top.eventLog.masks[6].fe", DumpEntry{top.eventLog.masks[6].fe});
+        res.insert_or_assign("top.eventLog.masks[7].re", DumpEntry{top.eventLog.masks[7].re});
+        res.insert_or_assign("top.eventLog.masks[7].fe", DumpEntry{top.eventLog.masks[7].fe});
+        res.insert_or_assign("top.eventLog.masks[8].re", DumpEntry{top.eventLog.masks[8].re});
+        res.insert_or_assign("top.eventLog.masks[8].fe", DumpEntry{top.eventLog.masks[8].fe});
+        res.insert_or_assign("top.eventLog.masks[9].re", DumpEntry{top.eventLog.masks[9].re});
+        res.insert_or_assign("top.eventLog.masks[9].fe", DumpEntry{top.eventLog.masks[9].fe});
+        res.insert_or_assign("top.eventLog.masks[10].re", DumpEntry{top.eventLog.masks[10].re});
+        res.insert_or_assign("top.eventLog.masks[10].fe", DumpEntry{top.eventLog.masks[10].fe});
+        res.insert_or_assign("top.eventLog.masks[11].re", DumpEntry{top.eventLog.masks[11].re});
+        res.insert_or_assign("top.eventLog.masks[11].fe", DumpEntry{top.eventLog.masks[11].fe});
+        res.insert_or_assign("top.eventLog.masks[12].re", DumpEntry{top.eventLog.masks[12].re});
+        res.insert_or_assign("top.eventLog.masks[12].fe", DumpEntry{top.eventLog.masks[12].fe});
+        res.insert_or_assign("top.eventLog.masks[13].re", DumpEntry{top.eventLog.masks[13].re});
+        res.insert_or_assign("top.eventLog.masks[13].fe", DumpEntry{top.eventLog.masks[13].fe});
+        res.insert_or_assign("top.eventLog.masks[14].re", DumpEntry{top.eventLog.masks[14].re});
+        res.insert_or_assign("top.eventLog.masks[14].fe", DumpEntry{top.eventLog.masks[14].fe});
+        res.insert_or_assign("top.eventLog.masks[15].re", DumpEntry{top.eventLog.masks[15].re});
+        res.insert_or_assign("top.eventLog.masks[15].fe", DumpEntry{top.eventLog.masks[15].fe});
+        res.insert_or_assign("top.eventLog.masks[16].re", DumpEntry{top.eventLog.masks[16].re});
+        res.insert_or_assign("top.eventLog.masks[16].fe", DumpEntry{top.eventLog.masks[16].fe});
+        res.insert_or_assign("top.eventLog.masks[17].re", DumpEntry{top.eventLog.masks[17].re});
+        res.insert_or_assign("top.eventLog.masks[17].fe", DumpEntry{top.eventLog.masks[17].fe});
+        res.insert_or_assign("top.eventLog.masks[18].re", DumpEntry{top.eventLog.masks[18].re});
+        res.insert_or_assign("top.eventLog.masks[18].fe", DumpEntry{top.eventLog.masks[18].fe});
+        res.insert_or_assign("top.eventLog.masks[19].re", DumpEntry{top.eventLog.masks[19].re});
+        res.insert_or_assign("top.eventLog.masks[19].fe", DumpEntry{top.eventLog.masks[19].fe});
+        res.insert_or_assign("top.eventLog.masks[20].re", DumpEntry{top.eventLog.masks[20].re});
+        res.insert_or_assign("top.eventLog.masks[20].fe", DumpEntry{top.eventLog.masks[20].fe});
+        res.insert_or_assign("top.eventLog.masks[21].re", DumpEntry{top.eventLog.masks[21].re});
+        res.insert_or_assign("top.eventLog.masks[21].fe", DumpEntry{top.eventLog.masks[21].fe});
+        res.insert_or_assign("top.eventLog.masks[22].re", DumpEntry{top.eventLog.masks[22].re});
+        res.insert_or_assign("top.eventLog.masks[22].fe", DumpEntry{top.eventLog.masks[22].fe});
+        res.insert_or_assign("top.eventLog.masks[23].re", DumpEntry{top.eventLog.masks[23].re});
+        res.insert_or_assign("top.eventLog.masks[23].fe", DumpEntry{top.eventLog.masks[23].fe});
+        res.insert_or_assign("top.eventLog.masks[24].re", DumpEntry{top.eventLog.masks[24].re});
+        res.insert_or_assign("top.eventLog.masks[24].fe", DumpEntry{top.eventLog.masks[24].fe});
+        res.insert_or_assign("top.eventLog.masks[25].re", DumpEntry{top.eventLog.masks[25].re});
+        res.insert_or_assign("top.eventLog.masks[25].fe", DumpEntry{top.eventLog.masks[25].fe});
+        res.insert_or_assign("top.eventLog.masks[26].re", DumpEntry{top.eventLog.masks[26].re});
+        res.insert_or_assign("top.eventLog.masks[26].fe", DumpEntry{top.eventLog.masks[26].fe});
+        res.insert_or_assign("top.eventLog.masks[27].re", DumpEntry{top.eventLog.masks[27].re});
+        res.insert_or_assign("top.eventLog.masks[27].fe", DumpEntry{top.eventLog.masks[27].fe});
+        res.insert_or_assign("top.eventLog.masks[28].re", DumpEntry{top.eventLog.masks[28].re});
+        res.insert_or_assign("top.eventLog.masks[28].fe", DumpEntry{top.eventLog.masks[28].fe});
+        res.insert_or_assign("top.eventLog.masks[29].re", DumpEntry{top.eventLog.masks[29].re});
+        res.insert_or_assign("top.eventLog.masks[29].fe", DumpEntry{top.eventLog.masks[29].fe});
+        res.insert_or_assign("top.eventLog.masks[30].re", DumpEntry{top.eventLog.masks[30].re});
+        res.insert_or_assign("top.eventLog.masks[30].fe", DumpEntry{top.eventLog.masks[30].fe});
+        res.insert_or_assign("top.eventLog.masks[31].re", DumpEntry{top.eventLog.masks[31].re});
+        res.insert_or_assign("top.eventLog.masks[31].fe", DumpEntry{top.eventLog.masks[31].fe});
+        res.insert_or_assign("top.freqWatchdog.alive", DumpEntry{top.freqWatchdog.alive});
+        res.insert_or_assign("top.freqWatchdog.minPeriodSc", DumpEntry{top.freqWatchdog.minPeriodSc});
+        res.insert_or_assign("top.freqWatchdog.maxPeriodSc", DumpEntry{top.freqWatchdog.maxPeriodSc});
         return res;
     }
 }
