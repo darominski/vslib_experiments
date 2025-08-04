@@ -6,9 +6,9 @@
 
 #include "component.hpp"
 #include "json/json.hpp"
+#include "mockRoot.hpp"
 #include "parameter.hpp"
 #include "parameterRegistry.hpp"
-#include "rootComponent.hpp"
 
 using namespace vslib;
 
@@ -31,7 +31,7 @@ class ComponentTest : public ::testing::Test
 class DerivedComponent : public Component
 {
   public:
-    DerivedComponent(std::string_view type, std::string_view name, RootComponent& parent)
+    DerivedComponent(std::string_view type, std::string_view name, MockRoot& parent)
         : Component(type, name, parent)
     {
     }
@@ -40,7 +40,7 @@ class DerivedComponent : public Component
 class DerivedComponentIntParameter : public Component
 {
   public:
-    DerivedComponentIntParameter(std::string_view type, std::string_view name, RootComponent& parent)
+    DerivedComponentIntParameter(std::string_view type, std::string_view name, MockRoot& parent)
         : Component(type, name, parent),
           parameter(*this, "int")
     {
@@ -52,7 +52,7 @@ class DerivedComponentIntParameter : public Component
 //! Checks that a basic component of base class can be created, is registered, and can be serialized
 TEST_F(ComponentTest, BasicComponent)
 {
-    RootComponent     root;
+    MockRoot          root;
     const std::string component_type = "type";
     const std::string component_name = "name";
     Component         component(component_type, component_name, root);
@@ -73,7 +73,7 @@ TEST_F(ComponentTest, BasicComponent)
 //! Checks that a basic derived component of base class can be created, and is registered correctly
 TEST_F(ComponentTest, DerivedComponent)
 {
-    RootComponent     root;
+    MockRoot          root;
     const std::string component_type = "type";
     const std::string component_name = "name";
     DerivedComponent  component(component_type, component_name, root);
@@ -95,7 +95,7 @@ TEST_F(ComponentTest, DerivedComponent)
 //! and is correctly registered and serialized
 TEST_F(ComponentTest, HierarchicalComponent)
 {
-    RootComponent     root;
+    MockRoot          root;
     const std::string parent_type = "type";
     const std::string parent_name = "name";
     Component         parent(parent_type, parent_name, root);
@@ -125,7 +125,7 @@ TEST_F(ComponentTest, HierarchicalComponent)
 //! Checks derived component with a single integer parameter
 TEST_F(ComponentTest, DerivedComponentIntParameter)
 {
-    RootComponent                root;
+    MockRoot                     root;
     const std::string            component_type = "type";
     const std::string            component_name = "name";
     DerivedComponentIntParameter component(component_type, component_name, root);
@@ -148,7 +148,7 @@ TEST_F(ComponentTest, DerivedComponentIntParameter)
 //! Checks derived component with many parameters of various types
 TEST_F(ComponentTest, DerivedComponentWithManyParameters)
 {
-    RootComponent                    root;
+    MockRoot                         root;
     const std::string                component_type = "type";
     const std::string                component_name = "name";
     DerivedComponentIntParameter     component(component_type, component_name, root);

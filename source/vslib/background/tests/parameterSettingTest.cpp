@@ -8,6 +8,7 @@
 #include "component.hpp"
 #include "json/json.hpp"
 #include "messageQueue.hpp"
+#include "mockRoot.hpp"
 #include "parameter.hpp"
 #include "parameterSetting.hpp"
 #include "staticJson.hpp"
@@ -58,7 +59,7 @@ class MockComponent : public Component
 //! Checks that a ParameterSetting object can be constructed
 TEST_F(ParameterSettingTest, DefaultConstruction)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -69,7 +70,7 @@ TEST_F(ParameterSettingTest, DefaultConstruction)
 //! Checks that a ParameterSetting correct commadn is properly validated
 TEST_F(ParameterSettingTest, ValidateCorrectCommand)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -83,7 +84,7 @@ TEST_F(ParameterSettingTest, ValidateCorrectCommand)
 //! Checks that a ParameterSetting command validation finds out that the command is missing fields
 TEST_F(ParameterSettingTest, ValidateIncorrectCommand)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 1024;   // 1024 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -148,7 +149,7 @@ TEST_F(ParameterSettingTest, ValidateIncorrectCommand)
 //! Checks that a ParameterSetting can process a single int16 command
 TEST_F(ParameterSettingTest, ProcessSingleIntCommand)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -170,7 +171,7 @@ TEST_F(ParameterSettingTest, ProcessSingleIntCommand)
 //! Checks that a ParameterSetting can process a single uint32 command
 TEST_F(ParameterSettingTest, ProcessSingleUintCommand)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -193,7 +194,7 @@ TEST_F(ParameterSettingTest, ProcessSingleUintCommand)
 //! Checks that a ParameterSetting can process a single command
 TEST_F(ParameterSettingTest, ProcessSingleDoubleCommand)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -217,7 +218,7 @@ TEST_F(ParameterSettingTest, ProcessSingleDoubleCommand)
 //! Checks that a ParameterSetting finds that the type of the provided command value does not match uint32
 TEST_F(ParameterSettingTest, ProcessSingleIncorrectUintCommand)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -254,7 +255,7 @@ TEST_F(ParameterSettingTest, ProcessSingleIncorrectUintCommand)
 //! Checks that a ParameterSetting finds that the type of the provided command value does not match int64
 TEST_F(ParameterSettingTest, ProcessSingleIncorrectIntCommand)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -289,7 +290,7 @@ TEST_F(ParameterSettingTest, ProcessSingleIncorrectIntCommand)
 //! Checks that a ParameterSetting sets correctly a number of commands, with the last one being used in this case
 TEST_F(ParameterSettingTest, ProcessArrayCommand)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -316,7 +317,7 @@ TEST_F(ParameterSettingTest, ProcessArrayCommand)
 //! Checks that a ParameterSetting sets correctly a number of commands, with the last one being used in this case
 TEST_F(ParameterSettingTest, ProcessArrayInvalidCommand)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 1e4;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -347,7 +348,7 @@ TEST_F(ParameterSettingTest, ProcessArrayInvalidCommand)
 //! Checks that a ParameterSetting executes a json command correctly
 TEST_F(ParameterSettingTest, ExecuteCorrectCommand)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -384,7 +385,7 @@ TEST_F(ParameterSettingTest, ExecuteCorrectCommand)
 //! Checks that a ParameterSetting catches an invalid json command correctly
 TEST_F(ParameterSettingTest, ExecuteIncorrectCommand)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -421,7 +422,7 @@ TEST_F(ParameterSettingTest, ExecuteIncorrectCommand)
 //! Checks that a ParameterSetting validates modified components correctly
 TEST_F(ParameterSettingTest, ValidateCorrectlyModifiedComponents)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -459,7 +460,7 @@ TEST_F(ParameterSettingTest, ValidateCorrectlyModifiedComponents)
 //! Checks that a ParameterSetting validates modified hierarchical components correctly
 TEST_F(ParameterSettingTest, ValidateCorrectModifiedHierarchicalComponents)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -501,7 +502,7 @@ TEST_F(ParameterSettingTest, ValidateCorrectModifiedHierarchicalComponents)
 //! if the Parameter has not been previously validated.
 TEST_F(ParameterSettingTest, ValidateIncorrectModifiedComponents)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -544,7 +545,7 @@ TEST_F(ParameterSettingTest, ValidateIncorrectModifiedComponents)
 //! Checks that a ParameterSetting validates modified components correctly
 TEST_F(ParameterSettingTest, CheckRevokeValidation)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};
@@ -604,7 +605,7 @@ TEST_F(ParameterSettingTest, CheckRevokeValidation)
 //! Checks that a ParameterSetting validates modified hierarchical components correctly
 TEST_F(ParameterSettingTest, ValidateIncorrectSettingHierarchicalComponent)
 {
-    RootComponent                   root;
+    MockRoot                        root;
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> read_buffer{};
     std::array<uint8_t, queue_size> write_buffer{};

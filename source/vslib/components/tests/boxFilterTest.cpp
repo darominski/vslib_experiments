@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "boxFilter.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 
 using namespace vslib;
 
@@ -25,8 +25,8 @@ class BoxFilterTest : public ::testing::Test
 //! Checks that a BoxFilter object can be constructed
 TEST_F(BoxFilterTest, FilterDefaultConstruction)
 {
-    RootComponent root;
-    BoxFilter<3>  filter("filter", root);
+    MockRoot     root;
+    BoxFilter<3> filter("filter", root);
 
     EXPECT_EQ(filter.getName(), "filter");
     EXPECT_EQ(filter.getMaxInputValue(), pow(2, std::ceil(log2(1e5))));
@@ -36,7 +36,7 @@ TEST_F(BoxFilterTest, FilterDefaultConstruction)
 //! Checks that a BoxFilter object can be constructed with non-default mantissa template parameter
 TEST_F(BoxFilterTest, FilterNonDefaultConstruction)
 {
-    RootComponent               root;
+    MockRoot                    root;
     constexpr double            maximal_value = 1e4;   // maximal value to be filtered
     BoxFilter<1, maximal_value> filter("filter", root);
 
@@ -47,8 +47,8 @@ TEST_F(BoxFilterTest, FilterNonDefaultConstruction)
 //! Checks that a partial template specialization (1st order) object can filter provided value
 TEST_F(BoxFilterTest, FirstOrderFilterSingleValue)
 {
-    RootComponent root;
-    BoxFilter<1>  filter("filter", root);
+    MockRoot     root;
+    BoxFilter<1> filter("filter", root);
 
     double value = 3.14159;
     EXPECT_NEAR(filter.filter(value), value / 2.0, 1e-6);
@@ -57,7 +57,7 @@ TEST_F(BoxFilterTest, FirstOrderFilterSingleValue)
 //! Checks that a partial template specialization (1st order) object can filter a number of provided values
 TEST_F(BoxFilterTest, FirstOrderFilterMultipleValues)
 {
-    RootComponent root;
+    MockRoot      root;
     constexpr int inputs_length = 10;
     BoxFilter<1>  filter("filter", root);
 
@@ -76,8 +76,8 @@ TEST_F(BoxFilterTest, FirstOrderFilterMultipleValues)
 //! Checks that a partial template specialization (2nd order) object can filter provided value
 TEST_F(BoxFilterTest, SecondOrderFilterSingleValue)
 {
-    RootComponent root;
-    BoxFilter<2>  filter("filter", root);
+    MockRoot     root;
+    BoxFilter<2> filter("filter", root);
 
     double value = 3.14159;
     EXPECT_NEAR(filter.filter(value), value / 3.0, 1e-6);
@@ -86,7 +86,7 @@ TEST_F(BoxFilterTest, SecondOrderFilterSingleValue)
 //! Checks that a partial template specialization (2nd order) object can filter a number of provided values
 TEST_F(BoxFilterTest, SecondOrderFilterMultipleValues)
 {
-    RootComponent root;
+    MockRoot      root;
     constexpr int inputs_length = 10;
     BoxFilter<2>  filter("filter", root);
 
@@ -107,7 +107,7 @@ TEST_F(BoxFilterTest, SecondOrderFilterMultipleValues)
 //! Checks that a BoxFilter object can filter provided value
 TEST_F(BoxFilterTest, FilterSingleValue)
 {
-    RootComponent           root;
+    MockRoot                root;
     constexpr int64_t       filter_order  = 9;
     constexpr int64_t       buffer_length = filter_order + 1;
     BoxFilter<filter_order> filter("filter", root);
@@ -119,7 +119,7 @@ TEST_F(BoxFilterTest, FilterSingleValue)
 //! Checks that a BoxFilter object can filter a number of provided values
 TEST_F(BoxFilterTest, FilterMultipleValues)
 {
-    RootComponent           root;
+    MockRoot                root;
     constexpr int64_t       filter_order  = 9;
     constexpr int64_t       buffer_length = filter_order + 1;
     BoxFilter<filter_order> filter("filter", root);
@@ -139,7 +139,7 @@ TEST_F(BoxFilterTest, FilterMultipleValues)
 //! Checks that a BoxFilter filters correctly when buffer wraps around
 TEST_F(BoxFilterTest, FilterValuesBufferWrapAround)
 {
-    RootComponent           root;
+    MockRoot                root;
     constexpr int64_t       filter_order  = 5;
     constexpr int64_t       buffer_length = filter_order + 1;
     BoxFilter<filter_order> filter("filter", root);

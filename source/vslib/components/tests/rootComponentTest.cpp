@@ -51,7 +51,7 @@ class DerivedComponentIntParameter : public Component
 //! Checks that a RootComponent can be created, and then be serialized
 TEST_F(RootComponentTest, StandAloneRootComponent)
 {
-    RootComponent root;
+    MockRoot root;
 
     EXPECT_EQ(root.getName(), "root");
     EXPECT_EQ(root.getFullName(), "root");
@@ -70,7 +70,7 @@ TEST_F(RootComponentTest, StandAloneRootComponent)
 //! Checks that a RootComponent can be used as a parent of a Component
 TEST_F(RootComponentTest, DerivedComponent)
 {
-    RootComponent     root;
+    MockRoot          root;
     const std::string component_type = "type";
     const std::string component_name = "name";
     DerivedComponent  component(component_type, component_name, root);
@@ -92,7 +92,7 @@ TEST_F(RootComponentTest, DerivedComponent)
 //! and is correctly registered and serialized
 TEST_F(RootComponentTest, HierarchicalComponent)
 {
-    RootComponent     root;
+    MockRoot          root;
     const std::string parent_type = "type";
     const std::string parent_name = "name";
     Component         parent(parent_type, parent_name, root);
@@ -122,7 +122,7 @@ TEST_F(RootComponentTest, HierarchicalComponent)
 //! Checks derived component with a single integer parameter
 TEST_F(RootComponentTest, DerivedComponentIntParameter)
 {
-    RootComponent                root;
+    MockRoot                     root;
     const std::string            component_type = "type";
     const std::string            component_name = "name";
     DerivedComponentIntParameter component(component_type, component_name, root);
@@ -145,7 +145,7 @@ TEST_F(RootComponentTest, DerivedComponentIntParameter)
 //! Checks derived component with many parameters of various types
 TEST_F(RootComponentTest, DerivedComponentWithManyParameters)
 {
-    RootComponent                    root;
+    MockRoot                         root;
     const std::string                component_type = "type";
     const std::string                component_name = "name";
     DerivedComponentIntParameter     component(component_type, component_name, root);

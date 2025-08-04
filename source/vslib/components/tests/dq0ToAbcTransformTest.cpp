@@ -8,7 +8,7 @@
 
 #include "csv.hpp"
 #include "dq0ToAbcTransform.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 
 using namespace vslib;
 using namespace csv;
@@ -28,7 +28,7 @@ class Dq0ToAbcTransformTest : public ::testing::Test
 //! Tests default construction of Dq0ToAbcTransform component
 TEST_F(Dq0ToAbcTransformTest, Construction)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "dq0_to_abc_1";
     Dq0ToAbcTransform dq0_to_abc(name, root);
     ASSERT_EQ(dq0_to_abc.getName(), name);
@@ -52,7 +52,7 @@ TEST_F(Dq0ToAbcTransformTest, Construction)
 //! Tests a basic case of dq0 to abc transformation with arbitrary input
 TEST_F(Dq0ToAbcTransformTest, BasicTest)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "dq0_to_abc_2";
     Dq0ToAbcTransform dq0_to_abc(name, root, 10'000);   // 10k points needed for 1e-6 precision
 
@@ -83,7 +83,7 @@ TEST_F(Dq0ToAbcTransformTest, BasicTest)
 //! Tests interacting with transform when the theta is equal to zero
 TEST_F(Dq0ToAbcTransformTest, ZeroAngleTest)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "dq0_to_abc_3";
     Dq0ToAbcTransform dq0_to_abc(name, root, 10'000);   // 10k points needed for 1e-6 precision
 
@@ -114,7 +114,7 @@ TEST_F(Dq0ToAbcTransformTest, ZeroAngleTest)
 //! Tests interacting with transform when the offset is equal to 90 degrees
 TEST_F(Dq0ToAbcTransformTest, ZeroAngle90degreesOffsetTest)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "dq0_to_abc_4";
     Dq0ToAbcTransform dq0_to_abc(name, root, 10'000);
 
@@ -146,7 +146,7 @@ TEST_F(Dq0ToAbcTransformTest, ZeroAngle90degreesOffsetTest)
 //! Tests interacting with transform when the theta is equal to 90 degrees
 TEST_F(Dq0ToAbcTransformTest, NinetyDegreesTest)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "dq0_to_abc_5";
     Dq0ToAbcTransform dq0_to_abc(name, root, 10'000);
 
@@ -177,7 +177,7 @@ TEST_F(Dq0ToAbcTransformTest, NinetyDegreesTest)
 //! Tests interacting with transform method of Dq0ToAbcTransform component, validation against simulink
 TEST_F(Dq0ToAbcTransformTest, BasicSimulinkConsistency)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "dq0_to_abc_6";
     Dq0ToAbcTransform dq0_to_abc(name, root, 10'000);
 
@@ -225,7 +225,7 @@ TEST_F(Dq0ToAbcTransformTest, BasicSimulinkConsistency)
 //! data
 TEST_F(Dq0ToAbcTransformTest, SVCTransform)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "dq0_to_abc_7";
     Dq0ToAbcTransform dq0_to_abc(name, root);
 

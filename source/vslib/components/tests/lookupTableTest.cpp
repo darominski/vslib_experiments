@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "lookupTable.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 #include "staticJson.hpp"
 
 using namespace vslib;
@@ -27,7 +27,7 @@ class LookupTableTest : public ::testing::Test
 //! Tests default construction of integral type LookupTable component
 TEST_F(LookupTableTest, LookupTableIntDefault)
 {
-    RootComponent                    root;
+    MockRoot                         root;
     std::string                      name = "table";
     std::vector<std::pair<int, int>> values{{0, 0}, {1, 1}, {2, 2}, {3, 3}};
     LookupTable<int32_t>             table(name, root, std::move(values));
@@ -43,7 +43,7 @@ TEST_F(LookupTableTest, LookupTableIntDefault)
 //! Tests default construction of double type LookupTable component
 TEST_F(LookupTableTest, LookupTableDoubleDefault)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0, 0}, {1, 1}, {2, 2}, {3, 3}};
     LookupTable<double>                    table(name, root, std::move(values));
@@ -60,7 +60,7 @@ TEST_F(LookupTableTest, LookupTableDoubleDefault)
 //! hitting the provided points
 TEST_F(LookupTableTest, LookupTableIntInterpolateProvidedData)
 {
-    RootComponent                    root;
+    MockRoot                         root;
     std::string                      name = "table";
     std::vector<std::pair<int, int>> values{{0, 0}, {1, 1}, {2, 2}, {3, 3}};
     LookupTable<int>                 table(name, root, std::move(values));
@@ -78,7 +78,7 @@ TEST_F(LookupTableTest, LookupTableIntInterpolateProvidedData)
 //! hitting the provided points
 TEST_F(LookupTableTest, LookupTableIntInterpolateProvidedDataNegativeAxis)
 {
-    RootComponent                    root;
+    MockRoot                         root;
     std::string                      name = "table";
     std::vector<std::pair<int, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     LookupTable<int>                 table(name, root, std::move(values));
@@ -96,7 +96,7 @@ TEST_F(LookupTableTest, LookupTableIntInterpolateProvidedDataNegativeAxis)
 //! hitting the provided points
 TEST_F(LookupTableTest, LookupTableDoubleProvidedData)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
     LookupTable<double>                    table(name, root, std::move(values));
@@ -113,7 +113,7 @@ TEST_F(LookupTableTest, LookupTableDoubleProvidedData)
 //! Tests LookupTable component with a assuming that the x-axis is constant-binned
 TEST_F(LookupTableTest, LookupTableDoubleConstantBinning)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
     LookupTable<double>                    table(name, root, std::move(values), true);
@@ -130,7 +130,7 @@ TEST_F(LookupTableTest, LookupTableDoubleConstantBinning)
 //! Tests LookupTable's random access operator overload
 TEST_F(LookupTableTest, LookupTableDoubleAccessOperatorOverload)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
     LookupTable<double>                    table(name, root, std::move(values));
@@ -145,7 +145,7 @@ TEST_F(LookupTableTest, LookupTableDoubleAccessOperatorOverload)
 //! hitting the provided points
 TEST_F(LookupTableTest, LookupTableDoubleNegativeAxis)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3.0, 3.3}, {-2.0, 2.3}, {-1.0, 1.3}, {0.0, 0.3}};
     LookupTable<double>                    table(name, root, std::move(values));
@@ -164,7 +164,7 @@ TEST_F(LookupTableTest, LookupTableDoubleNegativeAxis)
 //! interpolation input being somewhere between the data points
 TEST_F(LookupTableTest, LookupTableDoubleInterpolateBetweenPoints)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0.0, 3.3}, {1.0, 2.3}, {2.0, 1.3}, {3.0, 0.3}, {4.0, -0.3}};
     LookupTable<double>                    table(name, root, std::move(values));
@@ -183,7 +183,7 @@ TEST_F(LookupTableTest, LookupTableDoubleInterpolateBetweenPoints)
 //! interpolation input being somewhere between the data points
 TEST_F(LookupTableTest, LookupTableDoubleInterpolateBetweenPointsNegativeAxis)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3.0, 3.3}, {-2.0, 2.3}, {-1.0, 1.3}, {0.0, 0.3}};
     LookupTable<double>                    table(name, root, std::move(values));
@@ -201,7 +201,7 @@ TEST_F(LookupTableTest, LookupTableDoubleInterpolateBetweenPointsNegativeAxis)
 //! Tests LookupTable provides the same answer when repeatedly accessing the exact same point
 TEST_F(LookupTableTest, LookupTableIntRepeatedInput)
 {
-    RootComponent                       root;
+    MockRoot                            root;
     std::string                         name = "table";
     std::vector<std::pair<double, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     LookupTable<double, int>            table(name, root, std::move(values));
@@ -215,7 +215,7 @@ TEST_F(LookupTableTest, LookupTableIntRepeatedInput)
 //! Tests LookupTable provides the same answer when repeatedly accessing the exact same point, with constant binning
 TEST_F(LookupTableTest, LookupTableIntRepeatedInputConstantBinning)
 {
-    RootComponent                       root;
+    MockRoot                            root;
     std::string                         name = "table";
     std::vector<std::pair<double, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     LookupTable<double, int>            table(name, root, std::move(values), true);
@@ -229,7 +229,7 @@ TEST_F(LookupTableTest, LookupTableIntRepeatedInputConstantBinning)
 //! Tests LookupTable provides the same answer when repeatedly accessing the exact same point
 TEST_F(LookupTableTest, LookupTableDoubleRepeatedInput)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
     LookupTable<double, double>            table(name, root, std::move(values));
@@ -243,7 +243,7 @@ TEST_F(LookupTableTest, LookupTableDoubleRepeatedInput)
 //! Tests LookupTable provides the same answer when repeatedly accessing the exact same point, with contant binning
 TEST_F(LookupTableTest, LookupTableDoubleRepeatedInputConstantBinning)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
     LookupTable<double, double>            table(name, root, std::move(values), true);
@@ -257,7 +257,7 @@ TEST_F(LookupTableTest, LookupTableDoubleRepeatedInputConstantBinning)
 //! Tests LookupTable provides the same answer when repeatedly accessing the exact same point, with random access
 TEST_F(LookupTableTest, LookupTableDoubleRepeatedInputRandomAccess)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
     LookupTable<double, double>            table(name, root, std::move(values));
@@ -271,7 +271,7 @@ TEST_F(LookupTableTest, LookupTableDoubleRepeatedInputRandomAccess)
 //! Tests LookupTable provides the same answer when repeatedly accessing the exact same section
 TEST_F(LookupTableTest, LookupTableDoubleRepeatedSectionMonotonicallyIncreasing)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
     LookupTable<double, double>            table(name, root, std::move(values));
@@ -287,7 +287,7 @@ TEST_F(LookupTableTest, LookupTableDoubleRepeatedSectionMonotonicallyIncreasing)
 //! Tests LookupTable provides the same answer when repeatedly accessing the exact same section
 TEST_F(LookupTableTest, LookupTableDoubleRepeatedSectionMonotonicallyDecreasing)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
     LookupTable<double, double>            table(name, root, std::move(values));
@@ -303,7 +303,7 @@ TEST_F(LookupTableTest, LookupTableDoubleRepeatedSectionMonotonicallyDecreasing)
 //! Tests LookupTable provides the expected saturation behaviour the input is below the provided data limits
 TEST_F(LookupTableTest, LookupTableIntInterpolateBelowLimitsConsistency)
 {
-    RootComponent                    root;
+    MockRoot                         root;
     std::string                      name = "table";
     std::vector<std::pair<int, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     LookupTable<int>                 table(name, root, std::move(values));
@@ -316,7 +316,7 @@ TEST_F(LookupTableTest, LookupTableIntInterpolateBelowLimitsConsistency)
 //! Tests LookupTable provides the expected saturation behaviour the input is above the provided data limits
 TEST_F(LookupTableTest, LookupTableIntInterpolateAboveLimits)
 {
-    RootComponent                    root;
+    MockRoot                         root;
     std::string                      name = "table";
     std::vector<std::pair<int, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     LookupTable<int>                 table(name, root, std::move(values));
@@ -327,7 +327,7 @@ TEST_F(LookupTableTest, LookupTableIntInterpolateAboveLimits)
 //! Tests LookupTable provides the expected output regardless whether the switch for random access is true or not
 TEST_F(LookupTableTest, LookupTableIntRandomAccessConsistency)
 {
-    RootComponent                       root;
+    MockRoot                            root;
     std::string                         name = "table";
     std::vector<std::pair<double, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     LookupTable<double, int>            table(name, root, std::move(values));
@@ -345,7 +345,7 @@ TEST_F(LookupTableTest, LookupTableIntRandomAccessConsistency)
 //! Tests LookupTable provides the expected output regardless whether the switch for random access is true or not
 TEST_F(LookupTableTest, LookupTableDoubleRandomAccessConsistency)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     LookupTable<double>                    table(name, root, std::move(values));
@@ -363,7 +363,7 @@ TEST_F(LookupTableTest, LookupTableDoubleRandomAccessConsistency)
 //! Tests LookupTable provides the expected output regardless whether the index-search or linear search is performed
 TEST_F(LookupTableTest, LookupTableIntIndexSearchConsistency)
 {
-    RootComponent                       root;
+    MockRoot                            root;
     std::string                         name = "table";
     std::vector<std::pair<double, int>> data_index{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}, {1, 1}, {2, 2}};
     std::vector<std::pair<double, int>> data_linear(data_index);
@@ -383,7 +383,7 @@ TEST_F(LookupTableTest, LookupTableIntIndexSearchConsistency)
 //! Tests LookupTable provides the expected output regardless whether the index-search or linear search is performed
 TEST_F(LookupTableTest, LookupTableDoubleIndexSearchConsistency)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> data_index{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}, {1, 1}, {2, 2}};
     std::vector<std::pair<double, double>> data_linear(data_index);

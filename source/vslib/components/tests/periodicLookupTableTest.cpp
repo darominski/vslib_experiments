@@ -6,8 +6,8 @@
 #include <gtest/gtest.h>
 
 #include "functionGenerator.hpp"
+#include "mockRoot.hpp"
 #include "periodicLookupTable.hpp"
-#include "rootComponent.hpp"
 #include "staticJson.hpp"
 
 using namespace vslib;
@@ -40,7 +40,7 @@ std::vector<std::pair<double, double>> func()
 //! Tests default construction of integral type PeriodicLookupTable component
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntDefault)
 {
-    RootComponent                    root;
+    MockRoot                         root;
     std::string                      name = "table";
     std::vector<std::pair<int, int>> values{{0, 0}, {1, 1}, {2, 2}, {3, 3}};
     PeriodicLookupTable<int32_t>     table(name, root, std::move(values));
@@ -56,7 +56,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntDefault)
 //! Tests default construction of double type PeriodicLookupTable component
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleDefault)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0, 0}, {1, 1}, {2, 2}, {3, 3}};
     PeriodicLookupTable<double>            table(name, root, std::move(values));
@@ -73,7 +73,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleDefault)
 //! hitting the provided points
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateProvidedData)
 {
-    RootComponent                    root;
+    MockRoot                         root;
     std::string                      name = "table";
     std::vector<std::pair<int, int>> values{{0, 0}, {1, 1}, {2, 2}, {3, 3}};
     PeriodicLookupTable<int>         table(name, root, std::move(values));
@@ -91,7 +91,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateProvidedData)
 //! hitting the provided points
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateProvidedDataNegativeAxis)
 {
-    RootComponent                    root;
+    MockRoot                         root;
     std::string                      name = "table";
     std::vector<std::pair<int, int>> values{{-3.0, 3}, {-2.0, 2}, {-1.0, 1}, {0.0, 0}};
     PeriodicLookupTable<int>         table(name, root, std::move(values));
@@ -109,7 +109,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateProvidedDataNeg
 //! hitting the provided points
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleProvidedData)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
     PeriodicLookupTable<double>            table(name, root, std::move(values));
@@ -126,7 +126,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleProvidedData)
 //! Tests PeriodicLookupTable component with a assuming that the x-axis is constant-binned
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleConstantBinning)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
     PeriodicLookupTable<double>            table(name, root, std::move(values), true);
@@ -143,7 +143,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleConstantBinning)
 //! Tests PeriodicLookupTable's random access operator overload
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleAccessOperatorOverload)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{0.0, 0.3}, {1.0, 1.3}, {2.0, 2.3}, {3.0, 3.3}};
     PeriodicLookupTable<double>            table(name, root, std::move(values));
@@ -158,7 +158,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleAccessOperatorOverload)
 //! hitting the provided points
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleNegativeAxis)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3.0, 3.3}, {-2.0, 2.3}, {-1.0, 1.3}, {0.0, 0.3}};
     PeriodicLookupTable<double>            table(name, root, std::move(values));
@@ -177,7 +177,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleNegativeAxis)
 //! of interpolation input being somewhere between the data points
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleInterpolateBetweenPoints)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3.0, 3.3}, {-2.0, 2.3}, {-1.0, 1.3}, {0.0, 0.3}};
     PeriodicLookupTable<double>            table(name, root, std::move(values));
@@ -195,7 +195,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleInterpolateBetweenPoint
 //! Tests PeriodicLookupTable provides the same answer when repeatedly accessing the exact same point
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRepeatedInput)
 {
-    RootComponent                       root;
+    MockRoot                            root;
     std::string                         name = "table";
     std::vector<std::pair<double, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     PeriodicLookupTable<double, int>    table(name, root, std::move(values));
@@ -210,7 +210,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRepeatedInput)
 //! binning
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRepeatedInputConstantBinning)
 {
-    RootComponent                       root;
+    MockRoot                            root;
     std::string                         name = "table";
     std::vector<std::pair<double, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     PeriodicLookupTable<double, int>    table(name, root, std::move(values), true);
@@ -225,7 +225,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRepeatedInputConstantBinni
 //! Tests PeriodicLookupTable provides the same answer when repeatedly accessing the exact same point
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInput)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
     PeriodicLookupTable<double, double>    table(name, root, std::move(values));
@@ -240,7 +240,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInput)
 //! binning
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInputConstantBinning)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
     PeriodicLookupTable<double, double>    table(name, root, std::move(values));
@@ -255,7 +255,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInputConstantBi
 //! access
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInputRandomAccess)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
     PeriodicLookupTable<double, double>    table(name, root, std::move(values));
@@ -269,7 +269,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedInputRandomAcce
 //! Tests PeriodicLookupTable provides the same answer when repeatedly accessing the exact same section
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedSectionMonotonicallyIncreasing)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
     PeriodicLookupTable<double, double>    table(name, root, std::move(values));
@@ -285,7 +285,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedSectionMonotoni
 //! Tests PeriodicLookupTable provides the same answer when repeatedly accessing the exact same section
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedSectionMonotonicallyDecreasing)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3.3}, {-2, 2.2}, {-1, 1.1}, {0, 0}};
     PeriodicLookupTable<double, double>    table(name, root, std::move(values));
@@ -301,7 +301,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRepeatedSectionMonotoni
 //! Tests PeriodicLookupTable provides the expected modulo behaviour the input is below the provided data limits
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleInterpolateBelowLimitsConsistency)
 {
-    RootComponent               root;
+    MockRoot                    root;
     std::string                 name = "table";
     PeriodicLookupTable<double> table(name, root, func());
 
@@ -316,7 +316,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleInterpolateBelowLimitsC
 //! Tests PeriodicLookupTable provides the expected modulo behaviour the input is above the provided data limits
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateAboveLimits)
 {
-    RootComponent               root;
+    MockRoot                    root;
     std::string                 name = "table";
     PeriodicLookupTable<double> table(name, root, func());
 
@@ -332,7 +332,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntInterpolateAboveLimits)
 //! not
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRandomAccessConsistency)
 {
-    RootComponent                       root;
+    MockRoot                            root;
     std::string                         name = "table";
     std::vector<std::pair<double, int>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     PeriodicLookupTable<double, int>    table(name, root, std::move(values));
@@ -351,7 +351,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableIntRandomAccessConsistency)
 //! not
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRandomAccessConsistency)
 {
-    RootComponent                          root;
+    MockRoot                               root;
     std::string                            name = "table";
     std::vector<std::pair<double, double>> values{{-3, 3}, {-2, 2}, {-1, 1}, {0, 0}};
     PeriodicLookupTable<double>            table(name, root, std::move(values));
@@ -370,7 +370,7 @@ TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleRandomAccessConsistency
 //! function over a wide range
 TEST_F(PeriodicLookupTableTest, PeriodicLookupTableDoubleLargeArraynNegativeRange)
 {
-    RootComponent               root;
+    MockRoot                    root;
     const double                min      = -2 * std::numbers::pi;
     const double                max      = 0;
     const int                   n_points = 10000;

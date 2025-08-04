@@ -7,6 +7,7 @@
 
 #include "csv.hpp"
 #include "firFilter.hpp"
+#include "mockRoot.hpp"
 #include "rootComponent.hpp"
 #include "staticJson.hpp"
 
@@ -40,15 +41,15 @@ class FIRFilterTest : public ::testing::Test
 //! Checks that a FIRFilter object can be constructed
 TEST_F(FIRFilterTest, FilterDefaultConstruction)
 {
-    RootComponent root;
-    FIRFilter<2>  filter("filter", root);
+    MockRoot     root;
+    FIRFilter<2> filter("filter", root);
     EXPECT_EQ(filter.getName(), "filter");
 }
 
 //! Checks that a FIRFilter object can filter provided value
 TEST_F(FIRFilterTest, FilterSingleValue)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 3;
     constexpr int                     filter_length = filter_order + 1;
     FIRFilter<filter_order>           filter("filter", root);
@@ -66,7 +67,7 @@ TEST_F(FIRFilterTest, FilterSingleValue)
 //! Checks that a partial template specialization (1st order) object can filter provided value
 TEST_F(FIRFilterTest, FirstOrderFilterSingleValue)
 {
-    RootComponent         root;
+    MockRoot              root;
     FIRFilter<1>          filter("filter", root);
     std::array<double, 2> coefficient_array{0.2, 0.8};
     setValues<1>(filter, coefficient_array);
@@ -78,7 +79,7 @@ TEST_F(FIRFilterTest, FirstOrderFilterSingleValue)
 //! Checks that a partial template specialization (2nd order) object can filter provided value
 TEST_F(FIRFilterTest, SecondOrderFilterSingleValue)
 {
-    RootComponent         root;
+    MockRoot              root;
     FIRFilter<2>          filter("filter", root);
     std::array<double, 3> coefficient_array{0.05, 0.8, 0.15};
     setValues<2>(filter, coefficient_array);
@@ -90,7 +91,7 @@ TEST_F(FIRFilterTest, SecondOrderFilterSingleValue)
 //! Checks that a FIRFilter object can filter a number of provided values
 TEST_F(FIRFilterTest, FilterMultipleValues)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 7;
     constexpr int                     filter_length = filter_order + 1;
     FIRFilter<filter_order>           filter("filter", root);
@@ -109,7 +110,7 @@ TEST_F(FIRFilterTest, FilterMultipleValues)
 //! Checks that a partial template specialization (1st order) object can filter a number of provided values
 TEST_F(FIRFilterTest, FirstOrderFilterMultipleValues)
 {
-    RootComponent         root;
+    MockRoot              root;
     constexpr int         inputs_length = 3;
     FIRFilter<1>          filter("filter", root);
     std::array<double, 2> coefficient_array{0.2, 0.8};
@@ -124,7 +125,7 @@ TEST_F(FIRFilterTest, FirstOrderFilterMultipleValues)
 //! Checks that a partial template specialization (2nd order) object can filter a number of provided values
 TEST_F(FIRFilterTest, SecondOrderFilterMultipleValues)
 {
-    RootComponent         root;
+    MockRoot              root;
     constexpr int         inputs_length = 3;
     FIRFilter<2>          filter("filter", root);
     std::array<double, 3> coefficient_array{0.15, 0.8, 0.05};
@@ -142,7 +143,7 @@ TEST_F(FIRFilterTest, SecondOrderFilterMultipleValues)
 //! Checks that a FIRFilter object filters correctly a number of provided values larger than the number of coefficients
 TEST_F(FIRFilterTest, FilterMultipleValuesWrapAround)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 1;
     constexpr int                     filter_length = filter_order + 1;
     FIRFilter<filter_order>           filter("filter", root);
@@ -158,7 +159,7 @@ TEST_F(FIRFilterTest, FilterMultipleValuesWrapAround)
 //! Checks that a FIRFilter object can filter an array of inputs at once
 TEST_F(FIRFilterTest, FilterEntireArray)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 3;
     constexpr int                     filter_length = filter_order + 1;
     FIRFilter<filter_order>           filter("filter", root);
@@ -185,7 +186,7 @@ TEST_F(FIRFilterTest, FilterEntireArray)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 3;
     constexpr int                     filter_length = filter_order + 1;
     FIRFilter<filter_order>           filter("filter", root);
@@ -199,7 +200,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_3_0_5.csv";
 
-    csv::CSVFormat format;
+    CSVFormat format;
     format.header_row(-1);   // Disables header handling
 
     CSVReader inputs_file(inputs_path.c_str(), format);
@@ -226,7 +227,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataThirdOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, FilterBMeasDataSeventhOrder)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 7;
     constexpr int                     filter_length = filter_order + 1;
     FIRFilter<filter_order>           filter("filter", root);
@@ -241,7 +242,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataSeventhOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_5_0_5.csv";
 
-    csv::CSVFormat format;
+    CSVFormat format;
     format.header_row(-1);   // Disables header handling
 
     CSVReader inputs_file(inputs_path.c_str(), format);
@@ -268,7 +269,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataSeventhOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 10;
     constexpr int                     filter_length = filter_order + 1;
     FIRFilter<filter_order>           filter("filter", root);
@@ -283,7 +284,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_10_0_5.csv";
 
-    csv::CSVFormat format;
+    CSVFormat format;
     format.header_row(-1);   // Disables header handling
 
     CSVReader inputs_file(inputs_path.c_str(), format);
@@ -318,7 +319,7 @@ TEST_F(FIRFilterTest, FilterBMeasDataTenthOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
 {
-    RootComponent           root;
+    MockRoot                root;
     constexpr int           filter_order  = 4;
     constexpr int           filter_length = filter_order + 1;
     FIRFilter<filter_order> filter("filter", root);
@@ -336,7 +337,7 @@ TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_low-pass_fir_4_0_5.csv";
 
-    csv::CSVFormat format;
+    CSVFormat format;
     format.header_row(-1);   // Disables header handling
 
     CSVReader inputs_file(inputs_path.c_str(), format);
@@ -371,7 +372,7 @@ TEST_F(FIRFilterTest, LowPassFilterBMeasDataFourthOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(FIRFilterTest, FilterBMeasData81stOrder)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 81;
     constexpr int                     filter_length = filter_order + 1;
     FIRFilter<filter_order>           filter("filter", root);
@@ -405,7 +406,7 @@ TEST_F(FIRFilterTest, FilterBMeasData81stOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPACZ.197.YGPS.RDS.3000.B_MEAS_2020-10-08_14-06-11_fir_80_0_5.csv";
 
-    csv::CSVFormat format;
+    CSVFormat format;
     format.header_row(-1);   // Disables header handling
 
     CSVReader inputs_file(inputs_path.c_str(), format);

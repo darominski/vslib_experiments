@@ -4,8 +4,8 @@
 
 #include <gtest/gtest.h>
 
+#include "mockRoot.hpp"
 #include "pidClassic.hpp"
-#include "rootComponent.hpp"
 #include "staticJson.hpp"
 
 using namespace vslib;
@@ -55,9 +55,9 @@ class PIDClassicTest : public ::testing::Test
 //! Checks that a default PID object can be constructed and is correctly added to the registry
 TEST_F(PIDClassicTest, PIDClassicDefaultConstruction)
 {
-    RootComponent root;
-    std::string   name = "pid_1";
-    PIDClassic    pid(name, root);
+    MockRoot    root;
+    std::string name = "pid_1";
+    PIDClassic  pid(name, root);
     EXPECT_EQ(pid.getName(), name);
     EXPECT_EQ(pid.getError(), 0.0);
     EXPECT_EQ(pid.getPreviousError(), 0.0);
@@ -81,10 +81,10 @@ TEST_F(PIDClassicTest, PIDClassicDefaultConstruction)
 //! Checks that a PID object with an anti-windup function defined can be constructed
 TEST_F(PIDClassicTest, PIDClassicAntiWindupConstruction)
 {
-    RootComponent root;
-    std::string   name                 = "pid_2";
-    double const  max_integral         = 1500;
-    auto          anti_windup_function = [&max_integral](double input)
+    MockRoot     root;
+    std::string  name                 = "pid_2";
+    double const max_integral         = 1500;
+    auto         anti_windup_function = [&max_integral](double input)
     {
         return input > max_integral ? max_integral : input;
     };   // clamping anti-windup
@@ -99,9 +99,9 @@ TEST_F(PIDClassicTest, PIDClassicAntiWindupConstruction)
 //! Checks that target setter interact correctly with PID object
 TEST_F(PIDClassicTest, PIDClassicSetters)
 {
-    RootComponent root;
-    std::string   name = "pid_3";
-    PIDClassic    pid(name, root);
+    MockRoot    root;
+    std::string name = "pid_3";
+    PIDClassic  pid(name, root);
 
     const double starting_value = 2 * 3.14159;
     pid.setStartingValue(starting_value);
@@ -111,9 +111,9 @@ TEST_F(PIDClassicTest, PIDClassicSetters)
 //! Checks that reset method correctly sets all internal parameters to zero, and sets new starting value
 TEST_F(PIDClassicTest, PIDClassicReset)
 {
-    RootComponent root;
-    std::string   name = "pid_4";
-    PIDClassic    pid(name, root);
+    MockRoot    root;
+    std::string name = "pid_4";
+    PIDClassic  pid(name, root);
 
     const double starting_value = 2 * 3.14159;
     pid.setStartingValue(starting_value);
@@ -127,15 +127,15 @@ TEST_F(PIDClassicTest, PIDClassicReset)
 //! Checks that single iteration of control method correctly calculates the gain
 TEST_F(PIDClassicTest, PIDClassicSingleIteration)
 {
-    RootComponent root;
-    std::string   name = "pid_5";
-    PIDClassic    pid(name, root);
-    const double  p  = 2.0;
-    const double  i  = 1.0;
-    const double  d  = 1.5;
-    const double  ff = 0.05;
-    const double  b  = 1.2;
-    const double  c  = 0.5;
+    MockRoot     root;
+    std::string  name = "pid_5";
+    PIDClassic   pid(name, root);
+    const double p  = 2.0;
+    const double i  = 1.0;
+    const double d  = 1.5;
+    const double ff = 0.05;
+    const double b  = 1.2;
+    const double c  = 0.5;
     set_pid_parameters(pid, p, i, d, ff, b, c);
 
     const double target_value = 3.14159;
@@ -151,14 +151,14 @@ TEST_F(PIDClassicTest, PIDClassicSingleIteration)
 //! Checks that a couple of iterations of control method correctly calculates gains
 TEST_F(PIDClassicTest, PIDClassicControlIteration)
 {
-    RootComponent root;
-    std::string   name = "pid_6";
-    PIDClassic    pid(name, root);
-    const double  p  = 0.6;
-    const double  i  = 0.3;
-    const double  d  = 0.06;
-    const double  ff = 0.03;
-    const double  b  = 1.11;
+    MockRoot     root;
+    std::string  name = "pid_6";
+    PIDClassic   pid(name, root);
+    const double p  = 0.6;
+    const double i  = 0.3;
+    const double d  = 0.06;
+    const double ff = 0.03;
+    const double b  = 1.11;
     set_pid_parameters(pid, p, i, d, ff, b);
 
     const double target_value = 3.14159;

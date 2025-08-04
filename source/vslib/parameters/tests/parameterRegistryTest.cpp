@@ -6,9 +6,9 @@
 
 #include "component.hpp"
 #include "json/json.hpp"
+#include "mockRoot.hpp"
 #include "parameter.hpp"
 #include "parameterRegistry.hpp"
-#include "rootComponent.hpp"
 
 using namespace vslib;
 
@@ -33,7 +33,7 @@ namespace
     class MockComponent : public Component
     {
       public:
-        MockComponent(RootComponent& parent)
+        MockComponent(MockRoot& parent)
             : Component("MockType", "mock_name", parent)
         {
         }
@@ -51,7 +51,7 @@ TEST_F(ParameterRegistryTest, EmptyInstance)
 //! Checks Parameter is correctly added to the registry when attached to a component
 TEST_F(ParameterRegistryTest, AutomaticParameterRegistration)
 {
-    RootComponent     root;
+    MockRoot          root;
     MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "parameter";
     Parameter<int>    parameter(component, parameter_name);
@@ -64,7 +64,7 @@ TEST_F(ParameterRegistryTest, AutomaticParameterRegistration)
 //! Checks explicit registration of a Parameter
 TEST_F(ParameterRegistryTest, ExplicitAddToRegistry)
 {
-    RootComponent     root;
+    MockRoot          root;
     MockComponent     component(root);   // component to attach parameters to
     const std::string parameter_name = "parameter";
     Parameter<int>    parameter(component, parameter_name);
@@ -85,7 +85,7 @@ TEST_F(ParameterRegistryTest, ExplicitAddToRegistry)
 //! Checks automatic registration of a number of Parameters of different types
 TEST_F(ParameterRegistryTest, AutomaticMultipleParameterRegistration)
 {
-    RootComponent          root;
+    MockRoot               root;
     MockComponent          component(root);   // component to attach parameters to
     const std::string      int_name    = "int";
     const std::string      double_name = "double";
@@ -115,7 +115,7 @@ TEST_F(ParameterRegistryTest, AutomaticMultipleParameterRegistration)
 //! Checks that correct exception is thrown when the name already exists in the registry
 TEST_F(ParameterRegistryTest, NameExistsError)
 {
-    RootComponent  root;
+    MockRoot       root;
     MockComponent  component(root);   // component to attach parameters to
     Parameter<int> parameter(component, "name");
 
@@ -126,7 +126,7 @@ TEST_F(ParameterRegistryTest, NameExistsError)
 //! Checks that correct exception is thrown when the name of a Parameter does not follow the snake_case formatting
 TEST_F(ParameterRegistryTest, NameInvalidError)
 {
-    RootComponent  root;
+    MockRoot       root;
     MockComponent  component(root);   // component to attach parameters to
     Parameter<int> parameter(component, "name");
 

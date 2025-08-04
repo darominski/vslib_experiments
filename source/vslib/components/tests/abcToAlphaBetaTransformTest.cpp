@@ -8,7 +8,7 @@
 
 #include "abcToAlphaBetaTransform.hpp"
 #include "csv.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 
 using namespace vslib;
 using namespace csv;
@@ -28,7 +28,7 @@ class AbcToAlphaBetaTransformTest : public ::testing::Test
 //! Tests default construction of AbcToAlphaBetaTransform component
 TEST_F(AbcToAlphaBetaTransformTest, Construction)
 {
-    RootComponent           root;
+    vslib::MockRoot         root;
     std::string_view        name = "clarke1";
     AbcToAlphaBetaTransform clarke(name, root);
     ASSERT_EQ(clarke.getName(), "clarke1");
@@ -43,7 +43,7 @@ TEST_F(AbcToAlphaBetaTransformTest, Construction)
 //! Tests basic case of AbcToAlphaBetaTransform for a balanced system
 TEST_F(AbcToAlphaBetaTransformTest, BasicTest)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "clarke2";
     AbcToAlphaBetaTransform clarke(name, root);
 
@@ -60,7 +60,7 @@ TEST_F(AbcToAlphaBetaTransformTest, BasicTest)
 //! Tests zero-sequence system (all phases are the same)
 TEST(AbcToAlphaBetaTransformationTest, ZeroSequenceTest)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "clarke3";
     AbcToAlphaBetaTransform clarke(name, root);
 
@@ -77,7 +77,7 @@ TEST(AbcToAlphaBetaTransformationTest, ZeroSequenceTest)
 //! Tests an unbalanced system
 TEST(AbcToAlphaBetaTransformationTest, UnbalancedSystemTest)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "clarke4";
     AbcToAlphaBetaTransform clarke(name, root);
 
@@ -94,7 +94,7 @@ TEST(AbcToAlphaBetaTransformationTest, UnbalancedSystemTest)
 //! Tests interacting with transform method of AbcToAlphaBetaTransform component, validation against simulink
 TEST_F(AbcToAlphaBetaTransformTest, SimulinkConsistency)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "clarke5";
     AbcToAlphaBetaTransform clarke(name, root);
 

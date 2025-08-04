@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "csv.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 #include "srfPll.hpp"
 #include "staticJson.hpp"
 
@@ -90,9 +90,9 @@ class SRFPLLTest : public ::testing::Test
 //! Checks that a SRFPLL object can be constructed and is correctly added to the registry
 TEST_F(SRFPLLTest, SRFPLLDefaultConstruction)
 {
-    RootComponent root;
-    std::string   name = "pll_1";
-    SRFPLL        pll(name, root);
+    MockRoot    root;
+    std::string name = "pll_1";
+    SRFPLL      pll(name, root);
     EXPECT_EQ(pll.getName(), name);
 
     auto serialized = pll.serialize();
@@ -113,9 +113,9 @@ TEST_F(SRFPLLTest, SRFPLLDefaultConstruction)
 //! Checks that a SRFPLL object can calculate a single iteration of balancing
 TEST_F(SRFPLLTest, SRFPLLOneIteration)
 {
-    RootComponent root;
-    std::string   name = "pll_2";
-    SRFPLL        pll(name, root);
+    MockRoot    root;
+    std::string name = "pll_2";
+    SRFPLL      pll(name, root);
     // no need to set parameters, as the first step is always zero due to using
     // forward Euler method
     ASSERT_EQ(pll.synchronise(1.0, 1.0, 1.0), 0.0);
@@ -124,9 +124,9 @@ TEST_F(SRFPLLTest, SRFPLLOneIteration)
 //! Checks that a SRFPLL object can calculate a single iteration of balancing, d-q version
 TEST_F(SRFPLLTest, SRFPLLOneIterationWithDQ)
 {
-    RootComponent root;
-    std::string   name = "pll_3";
-    SRFPLL        pll(name, root);
+    MockRoot    root;
+    std::string name = "pll_3";
+    SRFPLL      pll(name, root);
     // no need to set parameters, as the first step is always zero due to using
     // forward Euler method
     const auto [wt, d, q] = pll.synchroniseWithDQ(1.0, 1.0, 1.0);
@@ -138,9 +138,9 @@ TEST_F(SRFPLLTest, SRFPLLOneIterationWithDQ)
 //! Checks that a SRFPLL object can calculate a couple of iterations of balancing
 TEST_F(SRFPLLTest, SRFPLLCoupleIterations)
 {
-    RootComponent root;
-    std::string   name = "pll_4";
-    SRFPLL        pll(name, root);
+    MockRoot    root;
+    std::string name = "pll_4";
+    SRFPLL      pll(name, root);
 
     const double p            = 2.0;
     const double i            = 15.0;
@@ -168,9 +168,9 @@ TEST_F(SRFPLLTest, SRFPLLCoupleIterations)
 //! Checks that a SRFPLL object can calculate a couple of iterations of balancing
 TEST_F(SRFPLLTest, SRFPLLCoupleIterationsNonZeroOffset)
 {
-    RootComponent root;
-    std::string   name = "pll_5";
-    SRFPLL        pll(name, root);
+    MockRoot    root;
+    std::string name = "pll_5";
+    SRFPLL      pll(name, root);
 
     const double p            = 2.0;
     const double i            = 15.0;
@@ -201,9 +201,9 @@ TEST_F(SRFPLLTest, SRFPLLCoupleIterationsNonZeroOffset)
 //! which includes introduced glitches
 TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistency)
 {
-    RootComponent root;
-    std::string   name = "pll_6";
-    SRFPLL        pll(name, root);
+    MockRoot    root;
+    std::string name = "pll_6";
+    SRFPLL      pll(name, root);
 
     const double p  = 50.0;
     const double i  = 200.0;
@@ -219,7 +219,7 @@ TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistency)
     std::filesystem::path abc_path       = "components/inputs/abc_pll.csv";
     std::filesystem::path matlab_wt_path = "components/inputs/wt_pll_kp=50_ki=200.csv";
 
-    csv::CSVFormat format;
+    CSVFormat format;
     format.header_row(-1);   // Disables header handling
 
     CSVReader abc_file(abc_path.c_str(), format);
@@ -257,9 +257,9 @@ TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistency)
 //! which includes introduced glitches
 TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistencyWithQ)
 {
-    RootComponent root;
-    std::string   name = "pll_6";
-    SRFPLL        pll(name, root);
+    MockRoot    root;
+    std::string name = "pll_6";
+    SRFPLL      pll(name, root);
 
     const double p  = 50.0;
     const double i  = 200.0;
@@ -275,7 +275,7 @@ TEST_F(SRFPLLTest, SRFPLLSimulinkSimpleConsistencyWithQ)
     std::filesystem::path abc_path       = "components/inputs/abc_pll.csv";
     std::filesystem::path matlab_wt_path = "components/inputs/wt_pll_kp=50_ki=200.csv";
 
-    csv::CSVFormat format;
+    CSVFormat format;
     format.header_row(-1);   // Disables header handling
 
     CSVReader abc_file(abc_path.c_str(), format);

@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "limitRms.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 #include "staticJson.hpp"
 
 using namespace vslib;
@@ -45,9 +45,9 @@ class LimitRmsTest : public ::testing::Test
 //! Tests default construction of integral type Limit component
 TEST_F(LimitRmsTest, LimitRmsDefault)
 {
-    RootComponent root;
-    std::string   name = "limit";
-    LimitRms      limit(name, root);
+    MockRoot    root;
+    std::string name = "limit";
+    LimitRms    limit(name, root);
     EXPECT_EQ(limit.getName(), name);
 
     auto serialized = limit.serialize();
@@ -66,10 +66,10 @@ TEST_F(LimitRmsTest, LimitRmsDefault)
 //! Tests catching value with excessive RMS value
 TEST_F(LimitRmsTest, LimitRmsMax)
 {
-    RootComponent root;
-    std::string   name             = "limit";
-    double const  iteration_period = 1.0;
-    LimitRms      limit(name, root, iteration_period);
+    MockRoot     root;
+    std::string  name             = "limit";
+    double const iteration_period = 1.0;
+    LimitRms     limit(name, root, iteration_period);
 
     const double rms_limit_min     = 0;
     const double rms_limit_max     = 5;
@@ -87,10 +87,10 @@ TEST_F(LimitRmsTest, LimitRmsMax)
 //! Tests catching value with too small RMS value
 TEST_F(LimitRmsTest, LimitRmsMin)
 {
-    RootComponent root;
-    std::string   name             = "limit";
-    double const  iteration_period = 1.0;
-    LimitRms      limit(name, root, iteration_period);
+    MockRoot     root;
+    std::string  name             = "limit";
+    double const iteration_period = 1.0;
+    LimitRms     limit(name, root, iteration_period);
 
     const double rms_limit_min     = 2;
     const double rms_limit_max     = 5;
@@ -105,10 +105,10 @@ TEST_F(LimitRmsTest, LimitRmsMin)
 //! Tests catching value with excessive RMS value coming after a number of entries
 TEST_F(LimitRmsTest, LimitRmsMaxLongerRunning)
 {
-    RootComponent root;
-    std::string   name             = "limit";
-    const double  iteration_period = 1.0;
-    LimitRms      limit(name, root, iteration_period);
+    MockRoot     root;
+    std::string  name             = "limit";
+    const double iteration_period = 1.0;
+    LimitRms     limit(name, root, iteration_period);
 
     const double rms_limit_min     = 0;
     const double rms_limit_max     = 5;
@@ -130,10 +130,10 @@ TEST_F(LimitRmsTest, LimitRmsMaxLongerRunning)
 //! Tests catching value with too low RMS value coming after a number of entries
 TEST_F(LimitRmsTest, LimitRmsMinLongerRunning)
 {
-    RootComponent root;
-    std::string   name             = "limit";
-    const double  iteration_period = 1.0;
-    LimitRms      limit(name, root, iteration_period);
+    MockRoot     root;
+    std::string  name             = "limit";
+    const double iteration_period = 1.0;
+    LimitRms     limit(name, root, iteration_period);
 
     const double rms_limit_min     = 2;
     const double rms_limit_max     = 5;
@@ -156,10 +156,10 @@ TEST_F(LimitRmsTest, LimitRmsMinLongerRunning)
 //! Tests catching warning when infinity is provided as input
 TEST_F(LimitRmsTest, LimitRmsInfInput)
 {
-    RootComponent root;
-    std::string   name             = "limit";
-    const double  iteration_period = 1.0;
-    LimitRms      limit(name, root, iteration_period);
+    MockRoot     root;
+    std::string  name             = "limit";
+    const double iteration_period = 1.0;
+    LimitRms     limit(name, root, iteration_period);
 
     const double rms_limit_min     = 0;
     const double rms_limit_max     = 5;
@@ -174,10 +174,10 @@ TEST_F(LimitRmsTest, LimitRmsInfInput)
 //! Tests catching warning when minus infinity is provided as input
 TEST_F(LimitRmsTest, LimitRmsMinusInfInput)
 {
-    RootComponent root;
-    std::string   name             = "limit";
-    const double  iteration_period = 1.0;
-    LimitRms      limit(name, root, iteration_period);
+    MockRoot     root;
+    std::string  name             = "limit";
+    const double iteration_period = 1.0;
+    LimitRms     limit(name, root, iteration_period);
 
     const double rms_limit_min     = 0;
     const double rms_limit_max     = 5;
@@ -192,9 +192,9 @@ TEST_F(LimitRmsTest, LimitRmsMinusInfInput)
 //! Tests catching warning when NaN is provided as input
 TEST_F(LimitRmsTest, LimitRmsNanInput)
 {
-    RootComponent root;
-    std::string   name = "limit";
-    LimitRms      limit(name, root);
+    MockRoot    root;
+    std::string name = "limit";
+    LimitRms    limit(name, root);
 
     const double rms_limit_min     = 0;
     const double rms_limit_max     = 5;

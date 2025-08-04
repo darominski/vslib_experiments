@@ -7,8 +7,8 @@
 #include "component.hpp"
 #include "json/json.hpp"
 #include "messageQueue.hpp"
+#include "mockRoot.hpp"
 #include "parameterMap.hpp"
-#include "rootComponent.hpp"
 
 using namespace vslib;
 
@@ -27,7 +27,7 @@ class ParameterMapTest : public ::testing::Test
 //! Checks that a ParameterMap object can be constructed
 TEST_F(ParameterMapTest, ParameterMapDefaultConstruction)
 {
-    RootComponent                   root_component;
+    MockRoot                        root_component;
     constexpr size_t                queue_size = 100;   // 100 bytes
     std::array<uint8_t, queue_size> buffer{};
     ASSERT_NO_THROW(ParameterMap(buffer.data(), queue_size, root_component));
@@ -36,7 +36,7 @@ TEST_F(ParameterMapTest, ParameterMapDefaultConstruction)
 //! Checks that a ParameterMap can upload a parameter map to the queue for a mock component
 TEST_F(ParameterMapTest, ParameterMapUploadSimpleMap)
 {
-    RootComponent                   root_component;
+    MockRoot                        root_component;
     constexpr size_t                queue_size = 1000;   // 1000 bytes
     std::array<uint8_t, queue_size> buffer{};
     ParameterMap                    parameter_map(buffer.data(), queue_size, root_component);

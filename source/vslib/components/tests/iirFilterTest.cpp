@@ -7,7 +7,7 @@
 
 #include "csv.hpp"
 #include "iirFilter.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 #include "staticJson.hpp"
 
 using namespace vslib;
@@ -52,8 +52,8 @@ class IIRFilterTest : public ::testing::Test
 //! Checks that a IIRFilter object can be constructed
 TEST_F(IIRFilterTest, FilterDefaultConstruction)
 {
-    RootComponent root;
-    IIRFilter<1>  filter("filter", root);
+    MockRoot     root;
+    IIRFilter<1> filter("filter", root);
     EXPECT_EQ(filter.getName(), "filter");
 }
 
@@ -61,7 +61,7 @@ TEST_F(IIRFilterTest, FilterDefaultConstruction)
 //! Without setting denominator values it should behave like an FIR.
 TEST_F(IIRFilterTest, FilterSingleValue)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
     IIRFilter<filter_order>           filter("filter", root);
@@ -76,7 +76,7 @@ TEST_F(IIRFilterTest, FilterSingleValue)
 //! For a single input, the IIR will still behave like an FIR.
 TEST_F(IIRFilterTest, FirstOrderFilterSingleValueSetDenominator)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 1;
     constexpr int                     filter_length = filter_order + 1;
     IIRFilter<filter_order>           filter("filter", root);
@@ -92,7 +92,7 @@ TEST_F(IIRFilterTest, FirstOrderFilterSingleValueSetDenominator)
 //! Checks that a FIRFilter object can filter a number of provided values, without wrapping around the buffers
 TEST_F(IIRFilterTest, FirstOrderFilterMultipleValues)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 1;
     constexpr int                     filter_length = filter_order + 1;
     constexpr int                     input_length  = 3;
@@ -125,7 +125,7 @@ TEST_F(IIRFilterTest, FirstOrderFilterMultipleValues)
 //! the IIR will still behave like an FIR.
 TEST_F(IIRFilterTest, FilterSingleValueSetDenominator)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
     IIRFilter<filter_order>           filter("filter", root);
@@ -141,7 +141,7 @@ TEST_F(IIRFilterTest, FilterSingleValueSetDenominator)
 //! Checks that a IIRFilter object can filter a number of provided values, without wrapping around the buffers
 TEST_F(IIRFilterTest, FilterMultipleValues)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 3;
     constexpr int                     filter_length = filter_order + 1;
     IIRFilter<filter_order>           filter("filter", root);
@@ -174,7 +174,7 @@ TEST_F(IIRFilterTest, FilterMultipleValues)
 //! Checks that a IIRFilter object can filter a number of provided values, with buffer wrap-around
 TEST_F(IIRFilterTest, FilterMultipleValuesBufferWrapAround)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
     IIRFilter<filter_order>           filter("filter", root);
@@ -215,7 +215,7 @@ TEST_F(IIRFilterTest, FilterMultipleValuesBufferWrapAround)
 //! Checks that a IIRFilter object can filter a number of provided values, with buffer wrap-around
 TEST_F(IIRFilterTest, FilterEntireArrayCompareWithMatlab)
 {
-    RootComponent                     root;
+    MockRoot                          root;
     constexpr int                     filter_order  = 2;
     constexpr int                     filter_length = filter_order + 1;
     IIRFilter<filter_order>           filter("filter", root);
@@ -240,7 +240,7 @@ TEST_F(IIRFilterTest, FilterEntireArrayCompareWithMatlab)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
 {
-    RootComponent           root;
+    MockRoot                root;
     constexpr int           filter_order  = 2;
     constexpr int           filter_length = filter_order + 1;
     IIRFilter<filter_order> filter("filter", root);
@@ -258,7 +258,7 @@ TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPOPB.245.BR23.RMPS_B_MEAS_2023-11-17_09-32_iir_butter_2.csv";
 
-    csv::CSVFormat format;
+    CSVFormat format;
     format.header_row(-1);   // Disables header handling
 
     CSVReader inputs_file(inputs_path.c_str(), format);
@@ -285,7 +285,7 @@ TEST_F(IIRFilterTest, ButterIIRFilterBMeasSecondOrder)
 //! GPS power converter, and compared with filtering in Matlab
 TEST_F(IIRFilterTest, ChebyIIRFilterBMeasTenthOrder)
 {
-    RootComponent           root;
+    MockRoot                root;
     constexpr int           filter_order  = 10;
     constexpr int           filter_length = filter_order + 1;
     IIRFilter<filter_order> filter("filter", root);
@@ -307,7 +307,7 @@ TEST_F(IIRFilterTest, ChebyIIRFilterBMeasTenthOrder)
     std::filesystem::path outputs_path
         = "components/inputs/RPOPB.245.BR23.RMPS_B_MEAS_2023-11-17_09-32_iir_butter_10.csv";
 
-    csv::CSVFormat format;
+    CSVFormat format;
     format.header_row(-1);   // Disables header handling
 
     CSVReader inputs_file(inputs_path.c_str(), format);

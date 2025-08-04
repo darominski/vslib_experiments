@@ -8,7 +8,7 @@
 
 #include "alphaBetaToAbcTransform.hpp"
 #include "csv.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 
 using namespace vslib;
 using namespace csv;
@@ -28,7 +28,7 @@ class AlphaBetaToAbcTransformTest : public ::testing::Test
 //! Tests default construction of AbcToAlphaBetaTransform component
 TEST_F(AlphaBetaToAbcTransformTest, Construction)
 {
-    RootComponent           root;
+    vslib::MockRoot         root;
     std::string_view        name = "inv_clarke_1";
     AlphaBetaToAbcTransform inv_clarke(name, root);
     ASSERT_EQ(inv_clarke.getName(), name);
@@ -43,7 +43,7 @@ TEST_F(AlphaBetaToAbcTransformTest, Construction)
 //! Tests basic case of AbcToAlphaBetaTransform
 TEST_F(AlphaBetaToAbcTransformTest, BasicTest)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "inv_clarke_2";
     AlphaBetaToAbcTransform inv_clarke(name, root);
 
@@ -60,7 +60,7 @@ TEST_F(AlphaBetaToAbcTransformTest, BasicTest)
 //! Tests zero-sequence system (all phases are the same)
 TEST_F(AlphaBetaToAbcTransformTest, ZeroSequenceTest)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "inv_clarke_3";
     AlphaBetaToAbcTransform inv_clarke(name, root);
 
@@ -77,7 +77,7 @@ TEST_F(AlphaBetaToAbcTransformTest, ZeroSequenceTest)
 //! Tests an unbalanced system
 TEST_F(AlphaBetaToAbcTransformTest, UnbalancedSystemTest)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "inv_clarke_4";
     AlphaBetaToAbcTransform inv_clarke(name, root);
 
@@ -94,7 +94,7 @@ TEST_F(AlphaBetaToAbcTransformTest, UnbalancedSystemTest)
 //! Tests interacting with transform method of AlphaBetaToAbcTransformTest component, validation against simulink
 TEST_F(AlphaBetaToAbcTransformTest, SimulinkConsistency)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "inv_clarke_5";
     AlphaBetaToAbcTransform inv_clarke(name, root);
 

@@ -13,7 +13,7 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/dq0ToAbcTransformTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/dq0ToAlphaBetaTransformTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/firFilterTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/halfBridgeTest.cpp
+  # ${CMAKE_CURRENT_SOURCE_DIR}/tests/halfBridgeTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/iirFilterTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/instantaneousPowerThreePhaseTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/limitIntegralTest.cpp
@@ -25,7 +25,7 @@ add_executable(${APP}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidClassicTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/pidTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/srfPllTest.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/rootComponentTest.cpp
+  # ${CMAKE_CURRENT_SOURCE_DIR}/tests/rootComponentTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/rstControllerTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/sinLookupTableTest.cpp

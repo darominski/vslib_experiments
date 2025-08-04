@@ -8,7 +8,7 @@
 
 #include "csv.hpp"
 #include "dq0ToAlphaBetaTransform.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 
 using namespace vslib;
 using namespace csv;
@@ -28,7 +28,7 @@ class Dq0ToAlphaBetaTransformTest : public ::testing::Test
 //! Tests default construction of Dq0ToAlphaBetaTransform component
 TEST_F(Dq0ToAlphaBetaTransformTest, Construction)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "dq0_to_alphaBeta_1";
     Dq0ToAlphaBetaTransform transform(name, root);
     ASSERT_EQ(transform.getName(), name);
@@ -49,7 +49,7 @@ TEST_F(Dq0ToAlphaBetaTransformTest, Construction)
 
 TEST_F(Dq0ToAlphaBetaTransformTest, BasicTest)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "dq0_to_alphaBeta_2";
     Dq0ToAlphaBetaTransform transform(name, root, 10'000);
 
@@ -72,7 +72,7 @@ TEST_F(Dq0ToAlphaBetaTransformTest, BasicTest)
 
 TEST_F(Dq0ToAlphaBetaTransformTest, ZeroAngleTest)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "dq0_to_alphaBeta_3";
     Dq0ToAlphaBetaTransform transform(name, root);
 
@@ -95,7 +95,7 @@ TEST_F(Dq0ToAlphaBetaTransformTest, ZeroAngleTest)
 
 TEST_F(Dq0ToAlphaBetaTransformTest, ZeroAngleTestNotAligned)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "dq0_to_alphaBeta_3";
     Dq0ToAlphaBetaTransform transform(name, root);
 
@@ -119,7 +119,7 @@ TEST_F(Dq0ToAlphaBetaTransformTest, ZeroAngleTestNotAligned)
 //! Tests the transformation against the simulink output
 TEST_F(Dq0ToAlphaBetaTransformTest, SimulinkConsistencyAaxisAlignment)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "dq0_to_alphaBeta_5";
     Dq0ToAlphaBetaTransform transform(name, root);
 
@@ -166,7 +166,7 @@ TEST_F(Dq0ToAlphaBetaTransformTest, SimulinkConsistencyAaxisAlignment)
 //! Tests the transformation validation against simulink output
 TEST_F(Dq0ToAlphaBetaTransformTest, SimulinkConsistencyAaxisNotAligned)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string_view        name = "dq0_to_alphaBeta_6";
     Dq0ToAlphaBetaTransform transform(name, root);
 

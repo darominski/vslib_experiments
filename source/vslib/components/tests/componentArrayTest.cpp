@@ -7,7 +7,7 @@
 #include "component.hpp"
 #include "componentArray.hpp"
 #include "json/json.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 
 using namespace vslib;
 
@@ -36,7 +36,7 @@ class Derived : public Component
 //! serialized
 TEST_F(ComponentArrayTest, BasicArray)
 {
-    RootComponent                         root;
+    MockRoot                              root;
     const std::string                     component_name = "array";
     constexpr size_t                      array_length   = 3;
     ComponentArray<Derived, array_length> component(component_name, root);
@@ -59,7 +59,7 @@ TEST_F(ComponentArrayTest, BasicArray)
 //! Checks that a basic component array can be interacted with as if it is an array
 TEST_F(ComponentArrayTest, BasicArrayInteractions)
 {
-    RootComponent                         root;
+    MockRoot                              root;
     const std::string                     component_name = "array";
     constexpr size_t                      array_length   = 4;
     ComponentArray<Derived, array_length> component(component_name, root);
@@ -81,7 +81,7 @@ TEST_F(ComponentArrayTest, BasicArrayInteractions)
 //! Checks that ComponentArray can hold a ComponentArray
 TEST_F(ComponentArrayTest, HierarchicalArrayTest)
 {
-    RootComponent root;
+    MockRoot root;
 
     const std::string                                                               component_name     = "array";
     constexpr size_t                                                                inner_array_length = 4;

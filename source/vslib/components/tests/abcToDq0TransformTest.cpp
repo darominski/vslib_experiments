@@ -8,7 +8,7 @@
 
 #include "abcToDq0Transform.hpp"
 #include "csv.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 
 using namespace vslib;
 using namespace csv;
@@ -28,7 +28,7 @@ class AbcToDq0TransformTest : public ::testing::Test
 //! Tests default construction of AbcToDq0Transform component
 TEST_F(AbcToDq0TransformTest, Construction)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "park1";
     AbcToDq0Transform park(name, root);
     ASSERT_EQ(park.getName(), "park1");
@@ -52,7 +52,7 @@ TEST_F(AbcToDq0TransformTest, Construction)
 
 TEST_F(AbcToDq0TransformTest, BasicTest)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "park2";
     AbcToDq0Transform park(name, root);
 
@@ -82,7 +82,7 @@ TEST_F(AbcToDq0TransformTest, BasicTest)
 
 TEST_F(AbcToDq0TransformTest, ZeroAngleTest)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "park3";
     AbcToDq0Transform park(name, root);
 
@@ -112,7 +112,7 @@ TEST_F(AbcToDq0TransformTest, ZeroAngleTest)
 
 TEST_F(AbcToDq0TransformTest, ZeroAngle90degreesOffsetTest)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "park3";
     AbcToDq0Transform park(name, root, 10'000);
 
@@ -143,7 +143,7 @@ TEST_F(AbcToDq0TransformTest, ZeroAngle90degreesOffsetTest)
 
 TEST_F(AbcToDq0TransformTest, NinetyDegreesTest)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "park4";
     AbcToDq0Transform park(name, root);
 
@@ -174,7 +174,7 @@ TEST_F(AbcToDq0TransformTest, NinetyDegreesTest)
 //! Tests interacting with transform method of AbcToDq0Transform component, validation against simulink
 TEST_F(AbcToDq0TransformTest, BasicSimulinkConsistency)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "park5";
     AbcToDq0Transform park(name, root, 10'000);
 
@@ -223,7 +223,7 @@ TEST_F(AbcToDq0TransformTest, BasicSimulinkConsistency)
 //! data
 TEST_F(AbcToDq0TransformTest, SVCTransform)
 {
-    RootComponent     root;
+    MockRoot          root;
     std::string_view  name = "park5";
     AbcToDq0Transform park(name, root);
 

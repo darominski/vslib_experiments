@@ -6,7 +6,7 @@
 
 #include "csv.hpp"
 #include "instantaneousPowerThreePhase.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 #include "staticJson.hpp"
 
 using namespace vslib;
@@ -43,7 +43,7 @@ class InstantaneousPowerThreePhaseTest : public ::testing::Test
 //! as expected
 TEST_F(InstantaneousPowerThreePhaseTest, DefaultConstruction)
 {
-    RootComponent                root;
+    MockRoot                     root;
     const std::string            name = "power_transform";
     InstantaneousPowerThreePhase power(name, root);
     EXPECT_EQ(power.getName(), "power_transform");
@@ -63,7 +63,7 @@ TEST_F(InstantaneousPowerThreePhaseTest, DefaultConstruction)
 //! Checks that a InstantaneousPowerThreePhase object calculates single value of power as expected
 TEST_F(InstantaneousPowerThreePhaseTest, SingleValue)
 {
-    RootComponent                root;
+    MockRoot                     root;
     const std::string            name = "power_transform";
     InstantaneousPowerThreePhase power(name, root);
     const double                 p_gain = 1.1;
@@ -91,7 +91,7 @@ TEST_F(InstantaneousPowerThreePhaseTest, SingleValue)
 //! and compared to Simulink model.
 TEST_F(InstantaneousPowerThreePhaseTest, SimulinkConsistency)
 {
-    RootComponent                root;
+    MockRoot                     root;
     const std::string            name = "power_transform";
     InstantaneousPowerThreePhase power(name, root);
     const double                 p_gain = 1.0;

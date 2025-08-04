@@ -5,7 +5,7 @@
 #include <array>
 #include <gtest/gtest.h>
 
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 #include "sinLookupTable.hpp"
 #include "staticJson.hpp"
 
@@ -26,7 +26,7 @@ class SinLookupTableTest : public ::testing::Test
 //! Tests default construction of SinLookupTableTest component
 TEST_F(SinLookupTableTest, SinLookupTable)
 {
-    RootComponent  root;
+    MockRoot       root;
     std::string    name = "table";
     SinLookupTable table(name, root, 2);
     EXPECT_EQ(table.getName(), name);
@@ -44,7 +44,7 @@ TEST_F(SinLookupTableTest, SinLookupTable)
 //! Tests SinLookupTableTest component interpolating a couple of points
 TEST_F(SinLookupTableTest, SinLookupTableInterpolation)
 {
-    RootComponent  root;
+    MockRoot       root;
     std::string    name = "table";
     SinLookupTable table(name, root, 10000);
 
@@ -58,7 +58,7 @@ TEST_F(SinLookupTableTest, SinLookupTableInterpolation)
 //! Tests SinLookupTable component interpolating a couple of points that fall out of 0 - 2pi range
 TEST_F(SinLookupTableTest, SinLookupTableInterpolationOutOfBounds)
 {
-    RootComponent  root;
+    MockRoot       root;
     std::string    name = "table";
     SinLookupTable table(name, root, 10000);
 
@@ -80,7 +80,7 @@ TEST_F(SinLookupTableTest, SinLookupTableInterpolationOutOfBounds)
 //! Tests SinLookupTable consistency of interface
 TEST_F(SinLookupTableTest, SinLookupTableConsistency)
 {
-    RootComponent  root;
+    MockRoot       root;
     std::string    name = "table";
     SinLookupTable table(name, root, 10000);
 
@@ -95,7 +95,7 @@ TEST_F(SinLookupTableTest, SinLookupTableConsistency)
 //! range of values for a table of length 100
 TEST_F(SinLookupTableTest, SinLookupTableSize100LongInterpolation)
 {
-    RootComponent  root;
+    MockRoot       root;
     std::string    name = "table";
     SinLookupTable table(name, root, 100);
 
@@ -116,7 +116,7 @@ TEST_F(SinLookupTableTest, SinLookupTableSize100LongInterpolation)
 //! range of values for a table of length 1000
 TEST_F(SinLookupTableTest, SinLookupTableSize1000LongInterpolation)
 {
-    RootComponent  root;
+    MockRoot       root;
     std::string    name = "table";
     SinLookupTable table(name, root, 1000);
 
@@ -138,7 +138,7 @@ TEST_F(SinLookupTableTest, SinLookupTableSize1000LongInterpolation)
 //! range of values for a table of length 10000
 TEST_F(SinLookupTableTest, SinLookupTableSize10000LongInterpolation)
 {
-    RootComponent  root;
+    MockRoot       root;
     std::string    name = "table";
     SinLookupTable table(name, root, 10000);
 

@@ -7,7 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "halfBridge.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 
 using namespace vslib;
 
@@ -26,7 +26,7 @@ class HalfBridgeTest : public ::testing::Test
 //! Tests default construction of HalfBridge component
 TEST_F(HalfBridgeTest, Construction)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
     ASSERT_EQ(pwm.getName(), "pwm_1");
@@ -41,7 +41,7 @@ TEST_F(HalfBridgeTest, Construction)
 //! Tests starting the HalfBridge
 TEST_F(HalfBridgeTest, Start)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -52,7 +52,7 @@ TEST_F(HalfBridgeTest, Start)
 //! Tests starting and then stopping the HalfBridge
 TEST_F(HalfBridgeTest, StartStop)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -64,7 +64,7 @@ TEST_F(HalfBridgeTest, StartStop)
 //! Tests setting the PWMA output to be enabled
 TEST_F(HalfBridgeTest, SetEnabledATrue)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -75,7 +75,7 @@ TEST_F(HalfBridgeTest, SetEnabledATrue)
 //! Tests setting the PWMB output to be enabled
 TEST_F(HalfBridgeTest, SetEnabledBTrue)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -86,7 +86,7 @@ TEST_F(HalfBridgeTest, SetEnabledBTrue)
 //! Tests setting the PWMA output to be disabled
 TEST_F(HalfBridgeTest, SetEnabledAFalse)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -97,7 +97,7 @@ TEST_F(HalfBridgeTest, SetEnabledAFalse)
 //! Tests setting the PWMB output to be disabled
 TEST_F(HalfBridgeTest, SetEnabledBFalse)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -108,7 +108,7 @@ TEST_F(HalfBridgeTest, SetEnabledBFalse)
 //! Tests setting a standard modulation index
 TEST_F(HalfBridgeTest, SetModulationIndex)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -119,7 +119,7 @@ TEST_F(HalfBridgeTest, SetModulationIndex)
 //! Tests setting a modulation index that should be clipped
 TEST_F(HalfBridgeTest, SetModulationIndexUndeflow)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -130,7 +130,7 @@ TEST_F(HalfBridgeTest, SetModulationIndexUndeflow)
 //! Tests setting a modulation index that should be clipped
 TEST_F(HalfBridgeTest, SetModulationIndexUndeflowInf)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -141,7 +141,7 @@ TEST_F(HalfBridgeTest, SetModulationIndexUndeflowInf)
 //! Tests setting a modulation index that should be clipped
 TEST_F(HalfBridgeTest, SetModulationIndexOverflow)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -152,7 +152,7 @@ TEST_F(HalfBridgeTest, SetModulationIndexOverflow)
 //! Tests setting a modulation index that should be clipped
 TEST_F(HalfBridgeTest, SetModulationIndexOverflowInf)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -163,7 +163,7 @@ TEST_F(HalfBridgeTest, SetModulationIndexOverflowInf)
 //! Tests setting a modulation index that should be clipped
 TEST_F(HalfBridgeTest, SetModulationIndexNaN)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -174,7 +174,7 @@ TEST_F(HalfBridgeTest, SetModulationIndexNaN)
 //! Tests setting PWM output to high
 TEST_F(HalfBridgeTest, SetHigh)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -185,7 +185,7 @@ TEST_F(HalfBridgeTest, SetHigh)
 //! Tests setting PWM output to low
 TEST_F(HalfBridgeTest, SetLow)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -196,7 +196,7 @@ TEST_F(HalfBridgeTest, SetLow)
 //! Tests setting additional dead time
 TEST_F(HalfBridgeTest, SetAdditionalDeadTime)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -208,7 +208,7 @@ TEST_F(HalfBridgeTest, SetAdditionalDeadTime)
 //! Tests setting the update type to immediate
 TEST_F(HalfBridgeTest, SetUpdateTypeImmediate)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -219,7 +219,7 @@ TEST_F(HalfBridgeTest, SetUpdateTypeImmediate)
 //! Tests setting PWM update type to bottom (shadow)
 TEST_F(HalfBridgeTest, SetUpdateTypeBottom)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -230,7 +230,7 @@ TEST_F(HalfBridgeTest, SetUpdateTypeBottom)
 //! Tests setting PWM update type to top (shadow)
 TEST_F(HalfBridgeTest, SetUpdateTypeTop)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -241,7 +241,7 @@ TEST_F(HalfBridgeTest, SetUpdateTypeTop)
 //! Tests setting PWM update type to bottom & top (shadow)
 TEST_F(HalfBridgeTest, SetUpdateTypeBottomTop)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -252,7 +252,7 @@ TEST_F(HalfBridgeTest, SetUpdateTypeBottomTop)
 //! Tests setting the PWM A&B output to be inverted
 TEST_F(HalfBridgeTest, SetInverted)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 
@@ -263,7 +263,7 @@ TEST_F(HalfBridgeTest, SetInverted)
 //! Tests setting the PWM A&B output to not be inverted
 TEST_F(HalfBridgeTest, SetInvertedFalse)
 {
-    RootComponent    root;
+    MockRoot         root;
     std::string_view name = "pwm_1";
     HalfBridge<0>    pwm(name, root);
 

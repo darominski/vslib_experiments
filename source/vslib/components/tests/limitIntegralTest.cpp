@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "limitIntegral.hpp"
-#include "rootComponent.hpp"
+#include "mockRoot.hpp"
 #include "staticJson.hpp"
 
 using namespace vslib;
@@ -42,7 +42,7 @@ class LimitIntegralTest : public ::testing::Test
 //! Tests default construction of integral type LimitIntegral component
 TEST_F(LimitIntegralTest, LimitIntegralIntDefault)
 {
-    RootComponent          root;
+    MockRoot               root;
     std::string            name = "int_limit";
     LimitIntegral<int32_t> integral_limit(name, root);
     EXPECT_EQ(integral_limit.getName(), name);
@@ -61,7 +61,7 @@ TEST_F(LimitIntegralTest, LimitIntegralIntDefault)
 //! Tests default construction of unsigned integral type Limit component
 TEST_F(LimitIntegralTest, LimitIntegralUintDefault)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string             name = "uint_limit";
     LimitIntegral<uint32_t> uint_limit(name, root);
 
@@ -79,7 +79,7 @@ TEST_F(LimitIntegralTest, LimitIntegralUintDefault)
 //! Tests default construction of float type Limit component
 TEST_F(LimitIntegralTest, LimitIntegralFloatDefault)
 {
-    RootComponent        root;
+    MockRoot             root;
     std::string          name = "float_limit";
     LimitIntegral<float> float_limit(name, root);
 
@@ -97,7 +97,7 @@ TEST_F(LimitIntegralTest, LimitIntegralFloatDefault)
 //! Tests default construction of integral type Limit component
 TEST_F(LimitIntegralTest, LimitIntegralDoubleDefault)
 {
-    RootComponent         root;
+    MockRoot              root;
     std::string           name = "dbl_limit";
     LimitIntegral<double> double_limit(name, root);
 
@@ -115,7 +115,7 @@ TEST_F(LimitIntegralTest, LimitIntegralDoubleDefault)
 //! Tests catching value with excessive integrated value
 TEST_F(LimitIntegralTest, LimitIntegralInt)
 {
-    RootComponent      root;
+    MockRoot           root;
     std::string        name = "limit";
     LimitIntegral<int> limit(name, root);
 
@@ -134,7 +134,7 @@ TEST_F(LimitIntegralTest, LimitIntegralInt)
 //! Tests catching value with excessive integrated value
 TEST_F(LimitIntegralTest, LimitIntegralUInt)
 {
-    RootComponent           root;
+    MockRoot                root;
     std::string             name = "limit";
     LimitIntegral<uint32_t> limit(name, root);
 
@@ -153,7 +153,7 @@ TEST_F(LimitIntegralTest, LimitIntegralUInt)
 //! Tests catching value with excessive integrated value
 TEST_F(LimitIntegralTest, LimitIntegralFloat)
 {
-    RootComponent        root;
+    MockRoot             root;
     std::string          name = "limit";
     LimitIntegral<float> limit(name, root);
 
@@ -172,7 +172,7 @@ TEST_F(LimitIntegralTest, LimitIntegralFloat)
 //! Tests catching value with excessive integrated value
 TEST_F(LimitIntegralTest, LimitIntegralDouble)
 {
-    RootComponent         root;
+    MockRoot              root;
     std::string           name = "limit";
     LimitIntegral<double> limit(name, root);
 
@@ -191,7 +191,7 @@ TEST_F(LimitIntegralTest, LimitIntegralDouble)
 //! Tests catching value with excessive integrated value
 TEST_F(LimitIntegralTest, LimitIntegralIntWrapAround)
 {
-    RootComponent      root;
+    MockRoot           root;
     std::string        name = "limit";
     LimitIntegral<int> limit(name, root);
 
@@ -213,7 +213,7 @@ TEST_F(LimitIntegralTest, LimitIntegralIntWrapAround)
 //! Tests catching excessive infinite value
 TEST_F(LimitIntegralTest, LimitIntegralInfDouble)
 {
-    RootComponent         root;
+    MockRoot              root;
     std::string           name = "limit";
     LimitIntegral<double> limit(name, root);
 
@@ -229,7 +229,7 @@ TEST_F(LimitIntegralTest, LimitIntegralInfDouble)
 //! Tests catching excessive infinite value
 TEST_F(LimitIntegralTest, LimitIntegralNaNFloat)
 {
-    RootComponent        root;
+    MockRoot             root;
     std::string          name = "limit";
     LimitIntegral<float> limit(name, root);
 
@@ -245,7 +245,7 @@ TEST_F(LimitIntegralTest, LimitIntegralNaNFloat)
 //! Tests catching excessive infinite value
 TEST_F(LimitIntegralTest, LimitIntegralNaNDouble)
 {
-    RootComponent         root;
+    MockRoot              root;
     std::string           name = "limit";
     LimitIntegral<double> limit(name, root);
 
