@@ -30,7 +30,8 @@ include(${BMBOOT_DIR}/cmake/Bmboot.cmake)
 add_subdirectory(../vslib ${CMAKE_CURRENT_BINARY_DIR}/vslib)
 
 add_bmboot_payload(${APP}
-  ../vslib/main.cpp
+    src/user.cpp
+    ../vslib/main.cpp
   )
 
 target_link_options(${APP} PRIVATE

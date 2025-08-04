@@ -8,7 +8,6 @@
 //! Generic Component
 #include "component.hpp"
 #include "componentArray.hpp"
-#include "iconverter.hpp"
 #include "rootComponent.hpp"
 
 //! Transforms

@@ -4,24 +4,17 @@
 #include <string>
 #include <unistd.h>
 
-#include "afe.hpp"
-#include "afe_rst.hpp"
-#include "afe_vdc_bal.hpp"
 #include "cheby_gen/reg_to_stream.hpp"
 #include "cheby_gen/stream_to_reg.hpp"
-// #include "pops_current_balancing.hpp"
-// #include "pops_current_balancing_old.hpp"
-// #include "pops_dispatcher.hpp"
-#include "halfBridge.hpp"
 #include "vslib.hpp"
 
 namespace user
 {
-    class Converter : public vslib::IConverter
+    class Converter : public vslib::RootComponent
     {
       public:
-        Converter(vslib::RootComponent& root) noexcept
-            : vslib::IConverter("example", root),
+        Converter() noexcept
+            : vslib::RootComponent("example"),
               //   interrupt_1("aurora", *this, 121, vslib::InterruptPriority::high, RTTask),
               interrupt_1("aurora", *this, std::chrono::microseconds(10), RTTask),
               pwm("pwm_1", *this),

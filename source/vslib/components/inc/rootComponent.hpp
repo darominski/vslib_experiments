@@ -17,9 +17,17 @@ namespace vslib
     {
       public:
         //! Creates the RootComponent with type, name as the base of the hierarchy for Components.
-        RootComponent() noexcept
-            : Component("Root", "root")
+        RootComponent(std::string_view name) noexcept
+            : Component("Root", name)
         {
         }
+
+        virtual ~RootComponent() = default;
+
+        //! Method to be filled with initialization logic when the binary is fully configured.
+        void virtual init() = 0;
+
+        //! Background task to be executed at each iteration in the spare time, non real-time.
+        void virtual backgroundTask() = 0;
     };
 }   // namespace vslib

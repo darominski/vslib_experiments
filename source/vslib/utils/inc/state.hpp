@@ -6,7 +6,6 @@
 
 #include "constants.hpp"
 #include "fsm.hpp"
-#include "iconverter.hpp"
 #include "parameterMap.hpp"
 #include "parameterRegistry.hpp"
 #include "parameterSetting.hpp"
@@ -43,10 +42,9 @@ namespace vslib::utils
                                                                     + fgc4::utils::constants::string_memory_pool_size;
 
       public:
-        VSMachine(RootComponent& root, IConverter& converter)
+        VSMachine(RootComponent& root)
             : m_fsm(*this, VSStates::initialization),
               m_root(root),
-              m_converter(converter),
               m_parameter_setting_task{
                   (uint8_t*)read_commands_queue_address, (uint8_t*)write_commands_status_queue_address, root},
               m_parameter_map{
@@ -77,10 +75,9 @@ namespace vslib::utils
         StateMachine m_fsm;
 
         bool m_init_done{false};
-        bool m_user_converter_initialized{false};
+        bool m_user_code_initialised{false};
 
         ::vslib::RootComponent&   m_root;
-        ::vslib::IConverter&      m_converter;
         ::vslib::ParameterSetting m_parameter_setting_task;
         ::vslib::ParameterMap     m_parameter_map;
 
@@ -108,10 +105,10 @@ namespace vslib::utils
         {
             // initialize user Converter, including startup of interrupts
 
-            if (!m_user_converter_initialized)
+            if (!m_user_code_initialised)
             {
-                m_converter.init();
-                m_user_converter_initialized = true;
+                m_root.init();
+                m_user_code_initialised = true;
             }
 
             // background task running continuously
@@ -120,7 +117,7 @@ namespace vslib::utils
             //
 
             // user background task:
-            m_converter.backgroundTask();
+            m_root.backgroundTask();
         }
 
         TransResVS toConfiguring()

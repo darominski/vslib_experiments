@@ -38,10 +38,6 @@ namespace vslib
               m_interrupt_id{interrupt_id},
               m_priority{priority}
         {
-            static_assert(
-                std::derived_from<Converter, IConverter>,
-                "The interrupt's template class must be derived from IConverter."
-            );
             translatePriority();
             bmboot::setupInterruptHandling(m_interrupt_id, m_priority_bmboot, this->m_interrupt_handler);
         }

@@ -8,8 +8,8 @@
 #include <string>
 
 #include "histogram.hpp"
-#include "iconverter.hpp"
 #include "pollCpuClock.hpp"
+#include "rootComponent.hpp"
 
 namespace vslib
 {
@@ -30,8 +30,8 @@ namespace vslib
             : m_name(name)
         {
             static_assert(
-                std::derived_from<Converter, IConverter>,
-                "The interrupt's template class must be derived from IConverter."
+                std::derived_from<Converter, RootComponent>,
+                "The interrupt's template class must be derived from RootComponent."
             );
 #ifdef PERFORMANCE_TESTS
             m_measurement_counter = 0;
