@@ -33,24 +33,16 @@ add_link_options(
   -Wl,--gc-sections
 )
 
-set(REMOTE_SOURCES
-    remote.cpp
+set(loader_SOURCES
+    loader.cpp
     ${CMAKE_SOURCE_DIR}/../utils/messageQueue.cpp
     ${CMAKE_SOURCE_DIR}/../vslib/utils/src/vslibMessageQueue.cpp
 )
 
-# set(REMOTE_USER_SOURCES
-#     remote_user.cpp
-# )
-
 # Create executables
-add_executable(remote
-  ${REMOTE_SOURCES}
+add_executable(loader
+  ${loader_SOURCES}
   )
-
-# add_executable(remote_user
-# ${REMOTE_USER_SOURCES}
-# )
 
 # Add external libraries
 include_directories(
@@ -61,15 +53,12 @@ include_directories(
     ${LIBRARIES_HOME}/bmboot/include # all public bmboot includes are stored in this directory
 )
 
-target_compile_features(remote PUBLIC cxx_std_20)
-# target_compile_features(remote_user PUBLIC cxx_std_20)
+target_compile_features(loader PUBLIC cxx_std_20)
 
-target_link_options(remote PRIVATE -static -static-libgcc -static-libstdc++)
-# target_link_options(remote_user PRIVATE -static -static-libgcc -static-libstdc++)
+target_link_options(loader PRIVATE -static -static-libgcc -static-libstdc++)
 
-target_link_libraries(remote
+target_link_libraries(loader
   PRIVATE
   fmt::fmt
   bmboot_manager
 )
-# target_link_libraries(remote_user PRIVATE fmt::fmt)
