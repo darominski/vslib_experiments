@@ -43,14 +43,13 @@ namespace user
         {
             // initialize all your objects that need initializing
 
-            // sync_trig_arr = hal::Top::instance().syncTrig;
-            // sync_time_ip = hal::Top::instance().syncTime;
-
             // configure all STGs
             for (int index = 0; index < 27; index++)
             {
+                // sync_trig_arr[index].stg.periodSc.write(200'000'000);   // 1 Hz
                 sync_trig_arr[index].stg.periodSc.write(2);
                 sync_trig_arr[index].stg.ctrl.resync.set(true);
+                sync_trig_arr[index].stg.ctrl.periodic.set(false);
             }
             // sync_trig_arr[22].stg.delaySc.write(5'000);
             // sync_trig_arr[23].stg.delaySc.write(5'000);
@@ -100,38 +99,24 @@ namespace user
             // m_r2scpp.tkeep.write(0x0000FFFF);
 
             // configure and start SyncTime
-            // std::chrono::time_point currently = std::chrono::time_point_cast<std::chrono::milliseconds>(
-            // std::chrono::system_clock::now()
-            // );
-            // std::chrono::duration miliseconds_since_utc_epoch = currently.time_since_epoch();
 
-            // const auto now = std::chrono::system_clock::now();
-            // const auto now_p_5s = now + std::chrono::seconds(5);
-            // const auto epoch_seconds =
-            // std::chrono::duration_cast<std::chrono::seconds>(now_p_5s.time_since_epoch()).count();
+            const uint32_t current_time          = sync_time_ip.utcS.read();
+            const uint32_t offset                = 2;
+            const uint32_t current_time_w_offset = current_time + offset;
+
+            // this will send an STG trigger 2s in the future
+            sync_time_ip.s.write(current_time_w_offset);
 
             // pwm_0.start();
             // pwm_1.start();
             // pwm_5.start();
-            // pwm_11.start();
             // pwm_6.start();
             // pwm_7.start();
             // pwm_8.start();
+            // pwm_11.start();
 
             // full_bridge_1.start();
-
-            // const uint32_t current_time_w_offset = epoch_seconds; // 5 s in the future
-            // const uint32_t current_time_w_offset    = 0;   // 5 s in the future
-            // // const uint32_t current_time_w_offset = miliseconds_since_utc_epoch.count()*1000 + 5; // 5 s in the
-            // future const uint32_t current_time_w_offset_sc = 0;
-
-            // sync_time_ip.s.write(current_time_w_offset);
-            // sync_time_ip.sc.write(current_time_w_offset_sc);
-
-            // std::cout << "current: " << epoch_seconds  << " " << current_time_w_offset<< std::endl;
-            // std::cout << "set: " << sync_time_ip.s.read() << std::endl;
-
-            adc_1.start();
+            // adc_1.start();
             sleep(1);
             std::cout << "init finished\n";
             interrupt_1.start();
