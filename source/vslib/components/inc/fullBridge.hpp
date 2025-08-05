@@ -12,26 +12,34 @@
 
 namespace vslib
 {
-
+    template<uint32_t first_pwm_id>
     class FullBridge : public Component
     {
       public:
-        FullBridge(std::string_view name, Component& parent, uint8_t* base_address)
+        //! Full Bridge Component constructor.
+        //!
+        //! @param name Name of this FullBridge instance
+        //! @param parent Parent of this FullBridge instance
+        //! @param maximal_counter_value Specifies the maximal counter value of the owned PWMs, impacting their
+        //! frequency. This argument will be removed once the Configurator is available.
+        FullBridge(std::string_view name, Component& parent, uint32_t maximal_counter_value)
             : Component("FullBridge", name, parent),
-              leg_1("leg_1", *this, base_address),
-              leg_2("leg_2", *this, base_address + leg_1.size())
+              leg_1("leg_1", *this, maximal_counter_value),
+              leg_2("leg_2", *this, maximal_counter_value)
         {
         }
 
         // ************************************************************
         // Start and stop methods
 
+        //! Starts the owned PWM counters.
         void start() noexcept
         {
             leg_1.start();
             leg_2.start();
         }
 
+        //! Stops the owned PWM counters.
         void stop() noexcept
         {
             leg_1.stop();
@@ -43,7 +51,7 @@ namespace vslib
 
         //! Sets the modulation index of a two-level unipolar full bridge.
         //!
-        //! @param modulation_index Modulation index, from -1.0 to 1.0, will be set to leg 2
+        //! @param modulation_index Modulation index, from 0.0 to 1.0, will be set to leg 2
         void setModulationIndexPositive(const float modulation_index) noexcept
         {
             if (m_bipolar)
@@ -57,7 +65,7 @@ namespace vslib
 
         //! Sets the modulation index of a two-level unipolar full bridge.
         //!
-        //! @param modulation_index Modulation index, from -1.0 to 1.0, will be set to leg 1
+        //! @param modulation_index Modulation index, from 0.0 to 1.0, will be set to leg 1
         void setModulationIndexNegative(const float modulation_index) noexcept
         {
             if (m_bipolar)
@@ -70,7 +78,7 @@ namespace vslib
 
         //! Sets the modulation index of a two-level bipolar full bridge.
         //!
-        //! @param modulation_index Modulation index, from -1.0 to 1.0, will be set to both leg 1 and 2
+        //! @param modulation_index Modulation index, from 0.0 to 1.0, will be set to both leg 1 and 2
         void setModulationIndex2L1Fsw(const float modulation_index) noexcept
         {
             leg_1.setModulationIndex(modulation_index);
@@ -95,8 +103,12 @@ namespace vslib
                 switchBipolar(false);
             }
 
-            leg_1.setModulationIndex(modulation_index);
-            leg_2.setModulationIndex(-modulation_index);
+            // recalculate modulation index to fit in 0 to 1:
+            const float modulatin_index_leg_1 = 0.5 * (modulation_index + 1);
+            const float modulatin_index_leg_2 = 0.5 * (-modulation_index + 1);
+
+            leg_1.setModulationIndex(modulatin_index_leg_1);
+            leg_2.setModulationIndex(modulatin_index_leg_2);
         }
 
         std::optional<fgc4::utils::Warning> verifyParameters() override
@@ -105,8 +117,8 @@ namespace vslib
         }
 
       private:
-        HalfBridge leg_1;   //!< Leg 1 of the Full Bridge
-        HalfBridge leg_2;   //!< Leg 2 of the FUll Bridge
+        HalfBridge<first_pwm_id>     leg_1;   //!< Leg 1 of the Full Bridge
+        HalfBridge<first_pwm_id + 1> leg_2;   //!< Leg 2 of the Full Bridge
 
         //! Flag informing whether the full bridge is running in bipolar mode
         bool m_bipolar{false};

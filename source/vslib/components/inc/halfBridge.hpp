@@ -8,7 +8,7 @@
 
 #include "component.hpp"
 #include "parameter.hpp"
-#include "peripherals/pwm_hal.hpp"
+#include "peripherals/pwm.hpp"
 
 namespace vslib
 {
@@ -16,12 +16,10 @@ namespace vslib
     class HalfBridge : public Component
     {
       public:
-        HalfBridge(std::string_view name, Component& parent) noexcept
+        HalfBridge(std::string_view name, Component& parent, uint32_t ctrh) noexcept
             : Component("HalfBridge", name, parent),
-              m_pwm()
+              m_pwm(ctrh)
         {
-            // initialize the right PWM IP out of the list of 12, TODO
-            // right now, base_address is needed
         }
 
         // ************************************************************
@@ -64,11 +62,11 @@ namespace vslib
 
         //! Sets the modulation index.
         //!
-        //! @param index Modulation index, -1 to 1
-        void setModulationIndex(const float index) noexcept
+        //! @param index Modulation index, 0 to 1
+        [[maybe_unused]] bool setModulationIndex(const float index) noexcept
         {
-            // force limit of -1.0, 1.0
-            m_pwm.setModulationIndex(index);
+            // force limit of 0.0, 1.0
+            return m_pwm.setModulationIndex(index);
         }
 
         //! Sets the output to high.
@@ -128,7 +126,7 @@ namespace vslib
             return hal::PWM<pwm_id>::size();
         }
 
-      private:
+        //   private:
         hal::PWM<pwm_id> m_pwm;   //!< PWM IP core HAL
     };
 }

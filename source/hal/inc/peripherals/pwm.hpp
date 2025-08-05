@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "cheby_gen/mb_top.hpp"
+#include "cheby_gen/mb_top_singleton.hpp"
 
 namespace hal
 {
@@ -13,15 +13,59 @@ namespace hal
     class PWM
     {
       public:
-        typedef unnamed::Top::PwmArrayItem::Pwm::UpdateType UpdateType;
+        typedef ipCores::Top::PwmArrayItem::Pwm::UpdateType UpdateType;
 
         //! Constructor for PWM HAL object.
-        PWM() noexcept
+        PWM(uint32_t ctrh) noexcept
         {
             static_assert(pwm_id < 12, "The PWM ID must be between 0 and 11.");
-            unnamed::Top top(reinterpret_cast<uint8_t*>(0xa0000000));
-            m_regs = top.pwm[pwm_id].pwm;
+            m_regs = hal::Top::instance().pwm[pwm_id].pwm;
 
+            setConfiguration(ctrh, 2'000, 1'000);
+            configureMinMaxModulation();
+        }
+
+        //! Configures the IP core in absence of the Configurator.
+        //!
+        //! @param max_counter_value Maximum value of the PWM counter (CTRH)
+        //! @param dead_time Dead time between PWMA and PWMB
+        //! @param min_switch_time Mininum switching off time
+        //! @param update_type Update type, one out of immediate or shadowed modes: zero, period, or zero_period
+        //! @param enable_pwm_check Switch to enable PWM minimum off time protection
+        //! @param enable_shoot_through_check Switch to enable shoot-through protection
+        //! @param bypass_dead_time Switch to bypass dead_time
+        //! @param enable_value_check Switch to enable checking whether the input is in the safe range of counter values
+        //! @param invert Switch to invert PWMA and PWMB signals
+        //! @param decouple_cc1 Switch to decouple CC1 from CC0 and steer them independently
+        //! @param disable_a Switch to disable PWMA
+        //! @param disable_b Switch to disable PWMB
+        void setConfiguration(
+            const uint32_t max_counter_value, const uint32_t dead_time, const uint32_t min_switch_time,
+            UpdateType update_type = UpdateType::zero, const bool enable_pwm_check = true,
+            const bool enable_shoot_through_check = true, const bool bypass_dead_time = false,
+            const bool enable_value_check = true, const bool invert = false, const bool decouple_cc1 = false,
+            const bool disable_a = false, const bool disable_b = false
+        )
+        {
+            m_regs.ctrhSc.write(max_counter_value);
+            m_regs.deadtimeSc.write(dead_time);
+            m_regs.minSwitchTimeSc.write(min_switch_time);
+            m_regs.cc0Sc.write(0);
+
+            m_regs.config.updateType.set(update_type);
+            m_regs.config.enablePwmCheck.set(enable_pwm_check);
+            m_regs.config.enableStCheck.set(enable_shoot_through_check);
+            m_regs.config.bypassDeadtime.set(bypass_dead_time);
+            m_regs.config.enableValueCheck.set(enable_value_check);
+            m_regs.config.invert.set(invert);
+            m_regs.config.decoupleCc1.set(decouple_cc1);
+
+            m_regs.config.disableA.set(disable_a);
+            m_regs.config.disableB.set(disable_b);
+        }
+
+        void configureMinMaxModulation()
+        {
             // Assumption is made t hat the configuration does not change at runtime, so configuration can be
             // internalized in memory rather than always read from register
             m_max_counter_value = m_regs.ctrhSc.read();
@@ -29,14 +73,42 @@ namespace hal
             const uint32_t dead_time = m_regs.deadtimeSc.read();   // dead time, in clock cycles
             const uint32_t min_switch_time
                 = m_regs.minSwitchTimeSc.read();   // minimum ON or OFF switch time, in clock cycles
+
             // max counter value serves as period in clock cycles
 
-            m_min_modulation_index
-                = 1.0 - static_cast<float>((m_max_counter_value - min_switch_time - dead_time) / m_max_counter_value);
-            m_max_modulation_index
-                = static_cast<float>(m_max_counter_value - min_switch_time - dead_time) / (m_max_counter_value);
+            // min and max modulation indices, 0-1 (normalised to period)
+            if (min_switch_time == 0)
+            {
+                if (m_regs.config.bypassDeadtime.get())
+                {
+                    m_max_modulation_index = 1.0;
+                }
+                else
+                {
+                    m_max_modulation_index = static_cast<float>(2 * m_max_counter_value - (dead_time + 1))
+                                             / static_cast<float>(2.0 * m_max_counter_value);
+                }
+            }
+            else
+            {
+                if (m_regs.config.bypassDeadtime.get())
+                {
+                    m_max_modulation_index = static_cast<float>(2 * m_max_counter_value - min_switch_time)
+                                             / static_cast<float>(2.0 * m_max_counter_value);
+                }
+                else
+                {
+                    m_max_modulation_index
+                        = static_cast<float>(2 * m_max_counter_value - (min_switch_time + dead_time + 1))
+                          / static_cast<float>(2.0 * m_max_counter_value);
+                }
+            }
+            m_min_modulation_index = 1.0 - m_max_modulation_index;
 
-            // TMP: Configurator will eventually configure this IP core:
+            // TMP: these values will be set by the configurator
+            m_regs.minModIdxSc.write(m_min_modulation_index * 2 * m_max_counter_value);
+            m_regs.maxModIdxSc.write(m_max_modulation_index * 2 * m_max_counter_value);
+            // END OF TMP
         }
 
         //! Sets the desired modulation index.
@@ -46,10 +118,11 @@ namespace hal
         //! CC0 and CC1)
         //! @return Boolean value with information whether the modulation index value set is identical to the one
         //! provided (true), false otherwise
-        bool setModulationIndex(const float modulation_index, bool write_to_cc0 = true) noexcept
+        [[maybe_unused]] bool setModulationIndex(const float modulation_index, bool write_to_cc0 = true) noexcept
         {
             const float index     = forceLimit(modulation_index, m_min_modulation_index, m_max_modulation_index);
             const float threshold = getMaximumCounterValue() * index;
+
             if (isnanf(threshold))
             {
                 // avoid setting NaN to register, return early
@@ -80,7 +153,7 @@ namespace hal
 
         //! Sets the update type.
         //!
-        //! @param type Update type to be set, one of zero, prd, zeroPrd, immediate
+        //! @param type Update type to be set, one of zero, period, zeroPeriod, immediate
         void setUpdateType(const UpdateType type) noexcept
         {
             m_regs.config.updateType.set(type);
@@ -165,11 +238,11 @@ namespace hal
         //! @return Maximum size of the PWM registers
         static auto constexpr size() noexcept
         {
-            return unnamed::Top::PwmArrayItem::size;
+            return ipCores::Top::PwmArrayItem::size;
         }
 
-      private:
-        unnamed::Top::PwmArrayItem::Pwm m_regs;
+        //   private:
+        ipCores::Top::PwmArrayItem::Pwm m_regs;
 
         //! Maximum counter value to which the PWM counter is counting to, a configuration parameter.
         uint32_t m_max_counter_value{0};

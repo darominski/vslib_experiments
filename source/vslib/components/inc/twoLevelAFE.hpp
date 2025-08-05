@@ -12,15 +12,15 @@
 
 namespace vslib
 {
-
+    template<uint32_t first_pwm_id>
     class TwoLevelAFE : public Component
     {
       public:
-        TwoLevelAFE(std::string_view name, Component& parent, uint8_t* base_address)
+        TwoLevelAFE(std::string_view name, Component& parent)
             : Component("TwoLevelActiveFrontEnd", name, parent),
-              leg_1("leg_1", *this, base_address),
-              leg_2("leg_2", *this, base_address + leg_1.size()),
-              leg_3("leg_3", *this, base_address + 2 * leg_1.size())
+              leg_1("leg_1", *this),
+              leg_2("leg_2", *this),
+              leg_3("leg_3", *this)
         {
         }
 
@@ -83,8 +83,8 @@ namespace vslib
         }
 
       private:
-        HalfBridge leg_1;   //!< Leg 1 of the Ftwo-level AFE
-        HalfBridge leg_2;   //!< Leg 2 of the two-level AFE
-        HalfBridge leg_3;   //!< Leg 3 of the FUll Bridge
+        HalfBridge<first_pwm_id>     leg_1;   //!< Leg 1 of the Ftwo-level AFE
+        HalfBridge<first_pwm_id + 1> leg_2;   //!< Leg 2 of the two-level AFE
+        HalfBridge<first_pwm_id + 2> leg_3;   //!< Leg 3 of the FUll Bridge
     };
 }
