@@ -8,7 +8,7 @@ using namespace fgc4;
 
 int main()
 {
-    // bmboot::notifyPayloadStarted();
+    bmboot::notifyPayloadStarted();
     RootComponent& root = getRootComponent();
 
     // VSlib-side initialization:
