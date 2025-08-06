@@ -10,7 +10,7 @@
 #include "json/json.hpp"
 #include "messageQueue.hpp"
 #include "shared_memory.h"
-#include "vslibMessageQueue.h"
+#include "vslibMessageQueue.hpp"
 
 using Json = nlohmann::json;
 using namespace vslib;
