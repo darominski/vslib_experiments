@@ -12,21 +12,29 @@
 
 namespace vslib
 {
-    template<uint32_t first_pwm_id>
     class TwoLevelAFE : public Component
     {
       public:
-        TwoLevelAFE(std::string_view name, Component& parent)
+        //! Constructor for the TwoLevelAFE Component.
+        //!
+        //! @param name Name of this Component
+        //! @param parent Parent of this Component
+        //! @param first_pwm_id ID of the first FPGA-defined PWM associated to this Component
+        //! @param max_counter_value Maximal value of the PWM counter (half-period length)
+        TwoLevelAFE(
+            std::string_view name, Component& parent, const uint32_t first_pwm_id, const uint32_t max_counter_value
+        )
             : Component("TwoLevelActiveFrontEnd", name, parent),
-              leg_1("leg_1", *this),
-              leg_2("leg_2", *this),
-              leg_3("leg_3", *this)
+              leg_1("leg_1", *this, first_pwm_id, max_counter_value),
+              leg_2("leg_2", *this, first_pwm_id + 1, max_counter_value),
+              leg_3("leg_3", *this, first_pwm_id + 2, max_counter_value)
         {
         }
 
         // ************************************************************
         // Start and stop methods
 
+        //! Starts all PWMs.
         void start() noexcept
         {
             leg_1.start();
@@ -34,6 +42,7 @@ namespace vslib
             leg_3.start();
         }
 
+        //! Stops all PWMs
         void stop() noexcept
         {
             leg_1.stop();
@@ -83,8 +92,8 @@ namespace vslib
         }
 
       private:
-        HalfBridge<first_pwm_id>     leg_1;   //!< Leg 1 of the Ftwo-level AFE
-        HalfBridge<first_pwm_id + 1> leg_2;   //!< Leg 2 of the two-level AFE
-        HalfBridge<first_pwm_id + 2> leg_3;   //!< Leg 3 of the FUll Bridge
+        HalfBridge leg_1;   //!< Leg 1 of the Ftwo-level AFE
+        HalfBridge leg_2;   //!< Leg 2 of the two-level AFE
+        HalfBridge leg_3;   //!< Leg 3 of the FUll Bridge
     };
 }

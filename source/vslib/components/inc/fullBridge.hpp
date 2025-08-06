@@ -12,7 +12,6 @@
 
 namespace vslib
 {
-    template<uint32_t first_pwm_id>
     class FullBridge : public Component
     {
       public:
@@ -20,12 +19,15 @@ namespace vslib
         //!
         //! @param name Name of this FullBridge instance
         //! @param parent Parent of this FullBridge instance
-        //! @param maximal_counter_value Specifies the maximal counter value of the owned PWMs, impacting their
+        //! @param pwm_id ID of the first FPGA's PWM that this HalfBridge interacts with
+        //! @param max_counter_value Specifies the maximal counter value of the owned PWMs, impacting their
         //! frequency. This argument will be removed once the Configurator is available.
-        FullBridge(std::string_view name, Component& parent, uint32_t maximal_counter_value)
+        FullBridge(
+            std::string_view name, Component& parent, const uint32_t first_pwm_id, const uint32_t max_counter_value
+        )
             : Component("FullBridge", name, parent),
-              leg_1("leg_1", *this, maximal_counter_value),
-              leg_2("leg_2", *this, maximal_counter_value)
+              leg_1("leg_1", *this, first_pwm_id, max_counter_value),
+              leg_2("leg_2", *this, first_pwm_id + 1, max_counter_value)
         {
         }
 
@@ -117,8 +119,8 @@ namespace vslib
         }
 
       private:
-        HalfBridge<first_pwm_id>     leg_1;   //!< Leg 1 of the Full Bridge
-        HalfBridge<first_pwm_id + 1> leg_2;   //!< Leg 2 of the Full Bridge
+        HalfBridge leg_1;   //!< Leg 1 of the Full Bridge
+        HalfBridge leg_2;   //!< Leg 2 of the Full Bridge
 
         //! Flag informing whether the full bridge is running in bipolar mode
         bool m_bipolar{false};

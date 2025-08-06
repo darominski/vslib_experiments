@@ -12,13 +12,20 @@
 
 namespace vslib
 {
-    template<uint32_t pwm_id>
     class HalfBridge : public Component
     {
       public:
-        HalfBridge(std::string_view name, Component& parent, uint32_t ctrh) noexcept
+        //! Constructor for the HalfBridge Component.
+        //!
+        //! @param name Name of this Component
+        //! @param parent Parent of this Component
+        //! @param pwm_id ID of the FPGA's PWM that this HalfBridge interacts with
+        //! @param max_counter_value Maximal value of the PWM counter (half-period length)
+        HalfBridge(
+            std::string_view name, Component& parent, const uint32_t pwm_id, const uint32_t max_counter_value
+        ) noexcept
             : Component("HalfBridge", name, parent),
-              m_pwm(ctrh)
+              m_pwm(pwm_id, max_counter_value)
         {
         }
 
@@ -92,7 +99,7 @@ namespace vslib
         //! Sets the update type.
         //!
         //! @param update_type Update type to be set, one of zero, prd, zero_prd, and immediate
-        void setUpdateType(hal::PWM<pwm_id>::UpdateType update_type) noexcept
+        void setUpdateType(hal::PWM::UpdateType update_type) noexcept
         {
             m_pwm.setUpdateType(update_type);
         }
@@ -106,14 +113,6 @@ namespace vslib
         }
 
         // ************************************************************
-        // Getters
-
-
-        // ************************************************************
-        // Owned Parameters
-
-
-        // ************************************************************
         // Owned Components
 
         std::optional<fgc4::utils::Warning> verifyParameters() override
@@ -121,12 +120,7 @@ namespace vslib
             return {};
         }
 
-        static auto constexpr size() noexcept
-        {
-            return hal::PWM<pwm_id>::size();
-        }
-
-        //   private:
-        hal::PWM<pwm_id> m_pwm;   //!< PWM IP core HAL
+      private:
+        hal::PWM m_pwm;   //!< PWM IP core HAL
     };
 }

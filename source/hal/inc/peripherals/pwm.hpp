@@ -8,20 +8,19 @@
 
 namespace hal
 {
-
-    template<uint32_t pwm_id>
     class PWM
     {
       public:
         typedef ipCores::Top::PwmArrayItem::Pwm::UpdateType UpdateType;
 
         //! Constructor for PWM HAL object.
-        PWM(uint32_t ctrh) noexcept
+        //!
+        //! @param max_counter_value Maximal value of the PWM counter
+        PWM(const uint32_t pwm_id, const uint32_t max_counter_value) noexcept
         {
-            static_assert(pwm_id < 12, "The PWM ID must be between 0 and 11.");
             m_regs = hal::Top::instance().pwm[pwm_id].pwm;
 
-            setConfiguration(ctrh, 2'000, 1'000);
+            setConfiguration(max_counter_value, 2'000, 1'000);
             configureMinMaxModulation();
         }
 
